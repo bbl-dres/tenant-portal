@@ -163,7 +163,7 @@ mindmap
 <sub><b>IBM TRIRIGA</b><br/><i>[Dashboard]</i> · Space Management Home (now under Maximo RE&amp;F)<br/><a href="https://www.ibm.com/products/tririga">ibm.com/tririga</a></sub>
 </td>
 <td align="center" width="50%" valign="top">
-<a href="https://spacewell.com/workplace-management-software/"><img src="../assets/images/market-screening/spacewell.webp" alt="Spacewell Workplace booking UI" width="280"/></a><br/>
+<a href="https://spacewell.com/workplace-management-software/"><img src="../assets/images/market-screening/spacewell.jpg" alt="Spacewell Workplace booking UI" width="280"/></a><br/>
 <sub><b>Spacewell</b><br/><i>[Screenshot]</i> · Workplace booking UI (laptop + mobile)<br/><a href="https://spacewell.com/">spacewell.com</a></sub>
 </td>
 </tr>
