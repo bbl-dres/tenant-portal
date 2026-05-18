@@ -62,7 +62,7 @@ mindmap
 | I | eSignature & federal identity | Skribble, SwissSign/SwissID, AGOV, planned e-ID, DocuSign, Adobe Sign, Yousign, Scrive. |
 | J | Document vault / e-Akte | BImA Adakta, Acta Nova (Swiss federal GEVER), SharePoint, Aareon DMS, OpenText, ELO ECM. |
 | K | AI tenant copilots | Aareon CRM-Portal KI, casavi smartflows, Allthings AI, Knock, RentDynamics, Famulor, ServiceNow Now Assist. |
-| L | Smart-building IoT / digital twin | Spacewell Cobundu, Siemens Building X, Johnson Controls OpenBlue, Honeywell Forge, Cisco Spaces, Cohesion, View Smart, Disruptive Technologies, ThoughtWire, Comfy/Siemens. |
+| L | Smart-building IoT / digital twin | Spacewell Cobundu, Siemens Building X, Johnson Controls OpenBlue, Honeywell Forge, Cisco Spaces, Cohesion, View Smart, Disruptive Technologies, ThoughtWire, Comfy/Siemens, Schindler Ahead, KONE 24/7, Bosch IoT Suite, BuildingMinds. |
 | M | Lease management & accounting | Visual Lease, LeaseAccelerator, CoStar REM, Nakisa, MRI ProLease, LucernEx. |
 | N | Energy & sub-metering tenant transparency | Techem, ista, Brunata-Metrona, Minol, Aareon EnergieHub, Spacewell Energy (Dexma). |
 | O | Listing & onboarding portals | homegate.ch, ImmoScout24.ch, flatfox.ch, ImmoScout24.de, Immowelt, Wunderflats. |
@@ -71,13 +71,14 @@ mindmap
 | R | Sovereign / Swiss hosting | Swisscom Sovereign Cloud, Exoscale, Infomaniak, AWS eu-central-2 Zurich, Azure CH N/W, Google Cloud Zurich. |
 | S | iPaaS / integration | SAP Integration Suite/BTP, MuleSoft, Workato, Boomi, Frends, Aareon Locoia. |
 | T | Fintech adjacencies | Bilt Rewards, Rentmoola, Flatfair, GoCardless real-estate. |
-| U | Indoor wayfinding | Steerpath, MapsIndoors, Pointr, MazeMap, IndoorAtlas, MappedIn. |
+| U | Indoor wayfinding | Steerpath, MapsIndoors, Pointr, MazeMap, IndoorAtlas, MappedIn, Archilogic (CH). |
 | V | Occupancy analytics | Locatee (Tango), VergeSense, Density, XY Sense, Butlr, Disruptive Technologies. |
 | W | Construction PM & BIM CDE handoff | Pre-occupancy design/build/handover with BIM2FM exchange (Autodesk ACC, Bentley iTwin, Revizto, Solibri, BIMcollab, Procore, Trimble Connect, dRofus, PlanRadar, Buildots, Capmo). |
 | X | Lease abstraction / AI document extraction | SAP RE-FX migration & lease ingestion (Leverton, Prophia, contract.fit, Hyperscience, Rossum, LeaseHawk, docunite). |
 | Y | CAFM (DACH-specific, distinct from IWMS) | German-language facility management with GEFMA 444 heritage (pit-FM, waveware, ConjectFM, FAMOS, KEYLOGIC, Speedikon FM, GEORG). |
-| Z | ESG portfolio-data platforms | Portfolio-level VILB / EPBD / CSRD / GRESB reporting beyond submetering (Deepki, Measurabl, Optera, Carbonsight, ENGIE Impact, Spacewell Energy, Sustain.life, Schneider Resource Advisor, Sweep). |
+| Z | ESG portfolio-data platforms | Portfolio-level VILB / EPBD / CSRD / GRESB reporting beyond submetering (Deepki, Measurabl, Optera, Carbonsight, ENGIE Impact, Spacewell Energy, Sustain.life, Schneider Resource Advisor, Sweep, BuildingMinds). |
 | AA | OSS / civic-tech alternatives | EMBAG-Art.-9-aligned open-source options (Odoo, ERPNext, Tryton, Keycloak, Zammad, Mattermost, GeoNode, BIMserver, Hugging Face document-AI, civic-tech.ch). |
+| BB | Workflow automation & low-code business logic | Generic process-orchestration / form-driven business logic — **build-with-already-licensed-primitives alternative** to vertical tenant-portal SaaS (Power Automate, Power Apps, SAP Build Process Automation, SAP Build Apps, n8n, Camunda, Activepieces, Make, Zapier, Bonita, ProcessMaker, Pega, Appian, OutSystems, Mendix, ServiceNow Flow Designer). |
 
 ## 4. Summary
 
@@ -143,6 +144,31 @@ mindmap
 
 **Maturity.** Mature and consolidating.
 **Swiss-context note.** Planon is the only SAP Endorsed App in this category — structurally important for SAP-RE-FX estates like BBL's. Spacewell (Antwerp, Nemetschek-owned) is the closest DACH-anchored IWMS leader. Swiss data residency must be configured explicitly.
+<sub>**Preview — selected vendors** (product screenshots, dashboards or explainer images from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://planonsoftware.com/us/software/iwms/asset-maintenance-management/"><img src="../assets/images/market-screening/planon.jpg" alt="Planon Asset Management dashboard" width="280"/></a><br/>
+<sub><b>Planon</b><br/><i>[Dashboard]</i> · Connect for Analytics — Asset Management twin-monitor view<br/><a href="https://planonsoftware.com/">planonsoftware.com</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://eptura.com/our-platform/eptura-engage/intelligent-workplace/"><img src="../assets/images/market-screening/eptura.webp" alt="Eptura Engage Utilization heatmap" width="280"/></a><br/>
+<sub><b>Eptura</b><br/><i>[Diagram]</i> · Engage Utilization heatmap on floor plan<br/><a href="https://eptura.com/">eptura.com</a></sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.ibm.com/products/tririga"><img src="../assets/images/market-screening/ibm-tririga.png" alt="IBM TRIRIGA / Maximo Space Management Home" width="280"/></a><br/>
+<sub><b>IBM TRIRIGA</b><br/><i>[Dashboard]</i> · Space Management Home (now under Maximo RE&amp;F)<br/><a href="https://www.ibm.com/products/tririga">ibm.com/tririga</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://spacewell.com/workplace-management-software/"><img src="../assets/images/market-screening/spacewell.webp" alt="Spacewell Workplace booking UI" width="280"/></a><br/>
+<sub><b>Spacewell</b><br/><i>[Screenshot]</i> · Workplace booking UI (laptop + mobile)<br/><a href="https://spacewell.com/">spacewell.com</a></sub>
+</td>
+</tr>
+</table>
+
 **Taxonomy note.** Several vendors here (Eptura, ServiceNow, Tango) also appear in Segment B as the IWMS / Workplace-Experience boundary blurs in 2025–2026 analyst frameworks. Treat A and B as a single converging market when scoring incumbents.
 
 ### B. Workplace experience applications (WEX)
@@ -169,6 +195,31 @@ mindmap
 
 **Maturity.** Transitional → consolidating; first Gartner MQ in 2026.
 **Swiss-context note.** Most US/UK/AU vendors host outside Switzerland; only Microsoft, AWS, Google and Azure have CH regions. AGOV/SAML federation feasibility is product-specific; ServiceNow WSD has documented SAML/OIDC IdP federation.
+<sub>**Preview — selected vendors** (product screenshots from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://robinpowered.com/platform"><img src="../assets/images/market-screening/robin.png" alt="Robin Workplace Dashboard" width="280"/></a><br/>
+<sub><b>Robin</b><br/><i>[Dashboard]</i> · Workplace Dashboard (Gartner WEX Leader 2026)<br/><a href="https://robinpowered.com/">robinpowered.com</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.appspace.com/platform/"><img src="../assets/images/market-screening/appspace.png" alt="Appspace multi-device platform composite" width="280"/></a><br/>
+<sub><b>Appspace</b><br/><i>[Multi-device]</i> · Platform on screens, kiosks, mobile (Gartner WEX Leader 2026)<br/><a href="https://www.appspace.com/">appspace.com</a></sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.hqo.com/"><img src="../assets/images/market-screening/hqo.png" alt="HqO tenant app UI" width="280"/></a><br/>
+<sub><b>HqO</b><br/><i>[Screenshot]</i> · Tenant-facing app UI<br/><a href="https://www.hqo.com/">hqo.com</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://adoption.microsoft.com/en-us/microsoft-places/"><img src="../assets/images/market-screening/microsoft-places.jpg" alt="Microsoft Places header" width="280"/></a><br/>
+<sub><b>Microsoft Places</b><br/><i>[Hero]</i> · Places header (M365-native, federal fit)<br/><a href="https://www.microsoft.com/microsoft-365/places">microsoft.com/places</a></sub>
+</td>
+</tr>
+</table>
+
 **Taxonomy note.** Several vendors here (Eptura, Robin, OfficeSpace, Tango, ServiceNow) overlap with Segment A. Gartner's April 2026 WEX MQ and the Verdantix CPIP/IWMS Quadrant frame this as one converging market — A and B should be read together.
 
 ### C. Desk / room booking specialists
@@ -186,6 +237,21 @@ mindmap
 | [YArooms](https://www.yarooms.com/) | Bucharest, RO | SaaS | Per user | Microsoft 365, Google | EU pricing transparency |
 | [Sharvy](https://www.sharvy.com/) | Montpellier, FR | SaaS | Per user | Microsoft 365 | Parking management strength |
 | [Eptura Engage (Condeco)](https://eptura.com/) | Atlanta, USA | SaaS | Per user | Microsoft 365 | Long-running enterprise scheduler |
+
+<sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.deskbird.com/"><img src="../assets/images/market-screening/deskbird.webp" alt="deskbird mobile booking UI" width="280"/></a><br/>
+<sub><b>deskbird</b><br/><i>[Mobile UI]</i> · Booking confirmation screen — <b>Swiss-domiciled (St. Gallen)</b><br/><a href="https://www.deskbird.com/">deskbird.com</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.skedda.com/"><img src="../assets/images/market-screening/skedda.webp" alt="Skedda floor plan booking UI" width="280"/></a><br/>
+<sub><b>Skedda</b><br/><i>[Screenshot]</i> · Interactive floor-plan booking UI<br/><a href="https://www.skedda.com/">skedda.com</a></sub>
+</td>
+</tr>
+</table>
 
 **Maturity.** Mature. deskbird is the Swiss-domiciled vendor of note.
 
@@ -205,6 +271,25 @@ mindmap
 | [dormakaba exivo](https://www.dormakaba.com/) | Rümlang, CH | Per door | Swiss-HQ; Aareon Connect partner |
 
 **Swiss-context note.** dormakaba is Swiss-HQ and aligns with KBOB/SIA hardware standards.
+<sub>**Preview — selected vendors** (product screenshots / conceptual product photos from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="33%" valign="top">
+<a href="https://envoy.com/visitors/"><img src="../assets/images/market-screening/envoy.png" alt="Envoy visitor approval queue" width="280"/></a><br/>
+<sub><b>Envoy</b><br/><i>[Dashboard]</i> · Visitor invites / approval queue<br/><a href="https://envoy.com/">envoy.com</a></sub>
+</td>
+<td align="center" width="33%" valign="top">
+<a href="https://www.dormakaba.com/ch-en"><img src="../assets/images/market-screening/dormakaba.jpg" alt="dormakaba Mobile Access" width="280"/></a><br/>
+<sub><b>dormakaba</b><br/><i>[Concept]</i> · Mobile Access unlocking — <b>Swiss-HQ</b><br/><a href="https://www.dormakaba.com/">dormakaba.com</a></sub>
+</td>
+<td align="center" width="33%" valign="top">
+<a href="https://www.getkisi.com/features"><img src="../assets/images/market-screening/kisi.png" alt="Kisi tailgate-detection" width="280"/></a><br/>
+<sub><b>Kisi</b><br/><i>[Concept]</i> · Tailgate-detection + phone alert<br/><a href="https://www.getkisi.com/">getkisi.com</a></sub>
+</td>
+</tr>
+</table>
+
 **Taxonomy note.** This segment combines two distinct buyer personas: **visitor management** software (HR/admin decision-makers — Envoy, Proxyclick / Eptura Visitor, SwipedOn, Robin Visitors) and **mobile access / credentials** (facilities/security — Kisi, HID Origo, Salto KS, Verkada Guest, Brivo, dormakaba exivo). Procurement is typically separate and listing them together is editorial convenience.
 
 ### E. Property-management ERP with embedded tenant portal
@@ -288,6 +373,31 @@ mindmap
 | [Bilt Rewards](https://www.biltrewards.com/) | New York, USA | Cloud | Free to tenants; landlord fees | Rent-as-loyalty; US-only |
 | [Livly](https://www.livly.io/) | Chicago, USA | Cloud | Per unit | RealPage / Yardi |
 
+<sub>**Preview — selected vendors** (product screenshots / mobile-app UIs from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.allthings.me/products/portal---das-umfassende-mieterportal"><img src="../assets/images/market-screening/allthings.avif" alt="Allthings Portale tenant portal" width="280"/></a><br/>
+<sub><b>Allthings</b><br/><i>[Product visual]</i> · Mieterportal "Portale" — <b>Swiss-HQ, ETH spin-off</b><br/><a href="https://allthings.me/">allthings.me</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://casavi.com/de/"><img src="../assets/images/market-screening/casavi.png" alt="casavi AI chat panel" width="280"/></a><br/>
+<sub><b>casavi</b><br/><i>[Screenshot]</i> · casavi AI chat panel<br/><a href="https://casavi.com/">casavi.com</a></sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://facilioo.de/"><img src="../assets/images/market-screening/facilioo.png" alt="facilioo CRM dashboard mockup" width="280"/></a><br/>
+<sub><b>facilioo</b><br/><i>[Dashboard]</i> · CRM kanban tiles + AI telephone-assistant<br/><a href="https://www.facilioo.de/">facilioo.de</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.idwell.com/loesungen/mieterapp/"><img src="../assets/images/market-screening/idwell.jpg" alt="iDWELL Mieterapp mobile UI" width="280"/></a><br/>
+<sub><b>iDWELL</b><br/><i>[Mobile UI]</i> · Mieterapp ticket detail with chat thread<br/><a href="https://www.idwell.com/">idwell.com</a></sub>
+</td>
+</tr>
+</table>
+
 **Swiss-context note.** Allthings is Swiss-HQ (Basel, ETH Zurich spin-off 2013). casavi and facilioo are widely deployed in Switzerland through the Aareon channel.
 
 ### G. Schadensmeldung / repair-ticketing / contractor dispatch
@@ -303,6 +413,25 @@ mindmap
 | [UpKeep](https://www.upkeep.com/) | Los Angeles, USA | Per user | Mobile CMMS |
 | [imofix.io](https://imofix.io/) | CH/DE | Per unit | GARAIO REM partner |
 
+<sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="33%" valign="top">
+<a href="https://www.yarowa.com/"><img src="../assets/images/market-screening/yarowa.png" alt="Yarowa marketplace UI" width="280"/></a><br/>
+<sub><b>Yarowa</b><br/><i>[Screenshot]</i> · Claims/repairs marketplace UI — <b>Swiss-domiciled (Zug)</b><br/><a href="https://www.yarowa.com/">yarowa.com</a></sub>
+</td>
+<td align="center" width="33%" valign="top">
+<a href="https://www.fixflo.com/"><img src="../assets/images/market-screening/fixflo.png" alt="Fixflo product UI" width="280"/></a><br/>
+<sub><b>Fixflo</b><br/><i>[Screenshot]</i> · Repairs-reporting product UI<br/><a href="https://www.fixflo.com/">fixflo.com</a></sub>
+</td>
+<td align="center" width="33%" valign="top">
+<a href="https://www.planradar.com/de/produkt/bauen/maengelmanagement/"><img src="../assets/images/market-screening/planradar.png" alt="PlanRadar mobile defect UI" width="280"/></a><br/>
+<sub><b>PlanRadar</b><br/><i>[Mobile UI]</i> · Mängelmanagement on iPhone<br/><a href="https://www.planradar.com/">planradar.com</a></sub>
+</td>
+</tr>
+</table>
+
 ### H. Move-in / move-out / inspection
 
 | Product | HQ | Notable feature |
@@ -313,6 +442,17 @@ mindmap
 | [Inspectify](https://www.inspectify.com/) | Charlotte (NC), USA | Move-in inspections |
 | [Allthings inspection module](https://allthings.me/) | Basel, CH | Native to Allthings tenant app |
 | [HouseView](https://www.houseview.io/) | Various | 3D capture for inspections |
+
+<sub>**Preview — selected vendor** (product screenshot; link goes to source page):</sub>
+
+<table>
+<tr>
+<td align="center" width="100%" valign="top">
+<a href="https://getproperly.com/"><img src="../assets/images/market-screening/properly.png" alt="Properly inspection workflow UI" width="420"/></a><br/>
+<sub><b>Properly</b><br/><i>[Screenshot]</i> · Inspection workflow ("Our solution for owners")<br/><a href="https://getproperly.com/">getproperly.com</a></sub>
+</td>
+</tr>
+</table>
 
 ### I. eSignature & federal identity
 
@@ -337,8 +477,8 @@ mindmap
 <sub><b>Skribble</b><br/><i>[Interface]</i> · QES signing screen (DE landing)<br/><a href="https://www.skribble.com/">skribble.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.swisssign.com/"><img src="../assets/images/market-screening/swisssign.svg" alt="SwissSign" width="280"/></a><br/>
-<sub><b>SwissSign / SwissID</b><br/><i>[Logo]</i> · No public product screenshot found<br/><a href="https://www.swisssign.com/">swisssign.com</a></sub>
+<a href="https://www.swisssign.com/"><img src="../assets/images/market-screening/swisssign.png" alt="SwissSign / SwissID" width="280"/></a><br/>
+<sub><b>SwissSign / SwissID</b><br/><i>[User-supplied]</i> · SwissID product visual<br/><a href="https://www.swisssign.com/">swisssign.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
 <a href="https://www.agov.admin.ch/"><img src="../assets/images/market-screening/agov.png" alt="AGOV access App illustration" width="280"/></a><br/>
@@ -351,8 +491,8 @@ mindmap
 <sub><b>DocuSign</b><br/><i>[Workflow]</i> · IDV identity-verification workflow<br/><a href="https://www.docusign.com/">docusign.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.adobe.com/sign.html"><img src="../assets/images/market-screening/adobe-sign.ico" alt="Adobe Sign favicon" width="280"/></a><br/>
-<sub><b>Adobe Sign</b><br/><i>[Favicon]</i> · Adobe blocks bot fetches; no public screenshot retrievable<br/><a href="https://www.adobe.com/sign.html">adobe.com/sign</a></sub>
+<a href="https://www.adobe.com/sign.html"><img src="../assets/images/market-screening/adobe-sign.png" alt="Adobe Sign" width="280"/></a><br/>
+<sub><b>Adobe Sign</b><br/><i>[User-supplied]</i> · Adobe Acrobat Sign product visual<br/><a href="https://www.adobe.com/sign.html">adobe.com/sign</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
 <a href="https://yousign.com/"><img src="../assets/images/market-screening/yousign.avif" alt="Yousign hero illustration" width="280"/></a><br/>
@@ -388,6 +528,32 @@ Examples: Aareon CRM-Portal KI-Chatbot; casavi smartflows; Allthings AI; Knock; 
 | [Schindler Ahead](https://www.schindler.com/com/internet/en/mobility-solutions/products/schindler-ahead.html) | Ebikon, CH | **Swiss-domiciled** elevator/escalator IoT (ActionBoard, RemoteMonitoring); widespread in federal buildings |
 | [KONE 24/7 Connected Services](https://www.kone.ch/) | Espoo, FI (KONE; CH subsidiary Brüttisellen) | Elevator/escalator predictive-maintenance IoT; deep CH installer presence |
 | [Bosch IoT Suite](https://www.bosch-iotsuite.com/) | Stuttgart, DE | DE-anchored building/asset IoT; FIWARE-compatible |
+| [BuildingMinds](https://buildingminds.com/) | Berlin, DE (Schindler family-backed) | Real-estate data platform / digital twin spanning asset, ESG and tenant data; CRREM, EU Taxonomy and EPBD modules — **cross-listed in Segment Z** |
+
+<sub>**Preview — selected vendors** (product screenshots / explainer images from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.siemens.com/en-us/products/building-x/"><img src="../assets/images/market-screening/siemens-building-x.jpg" alt="Siemens Building X panoramic" width="280"/></a><br/>
+<sub><b>Siemens Building X</b><br/><i>[Hero]</i> · Panoramic smart-city explainer<br/><a href="https://www.siemens.com/buildingx">siemens.com/buildingx</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.johnsoncontrols.com/openblue"><img src="../assets/images/market-screening/johnson-controls-openblue.jpg" alt="Johnson Controls OpenBlue banner" width="280"/></a><br/>
+<sub><b>Johnson Controls OpenBlue</b><br/><i>[Banner]</i> · OpenBlue platform explainer<br/><a href="https://www.johnsoncontrols.com/openblue">johnsoncontrols.com/openblue</a></sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.schindler.com/com/internet/en/mobility-solutions/products.html"><img src="../assets/images/market-screening/schindler-ahead.jpg" alt="Schindler Ahead digital services line-up" width="280"/></a><br/>
+<sub><b>Schindler Ahead</b><br/><i>[Lineup]</i> · Digital-services product line-up — <b>Swiss-HQ</b><br/><a href="https://www.schindler.com/">schindler.com</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.kone.com/en/services/connected-services/"><img src="../assets/images/market-screening/kone-247.jpg" alt="KONE 24/7 demo" width="280"/></a><br/>
+<sub><b>KONE 24/7 Connected Services</b><br/><i>[Fallback — YouTube]</i> · Demo thumbnail (KONE site is JS-rendered, no static imagery)<br/><a href="https://www.kone.ch/">kone.ch</a></sub>
+</td>
+</tr>
+</table>
 
 ### M. Lease management & lease accounting
 
@@ -405,6 +571,21 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | [Spacewell Energy (Dexma)](https://spacewell.com/) | Barcelona, ES | AI energy management |
 | [NeoVac](https://www.neovac.ch/) | Oberriet, CH | **Swiss-domiciled** submetering, heat-cost allocation and tenant cost-reporting; deep CH installer network |
 | [Equa Solutions](https://www.equa-solutions.ch/) | Lausanne, CH | **Swiss-domiciled** HVAC controls + sub-metering optimisation |
+
+<sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.neovac.ch/"><img src="../assets/images/market-screening/neovac.png" alt="NeoVac product UI" width="280"/></a><br/>
+<sub><b>NeoVac</b><br/><i>[Screenshot]</i> · Submetering / tenant cost reporting — <b>Swiss-domiciled (Oberriet)</b><br/><a href="https://www.neovac.ch/">neovac.ch</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.techem.com/"><img src="../assets/images/market-screening/techem.jpg" alt="Techem tenant portal" width="280"/></a><br/>
+<sub><b>Techem</b><br/><i>[Screenshot]</i> · Tenant heating-cost reporting<br/><a href="https://www.techem.com/">techem.com</a></sub>
+</td>
+</tr>
+</table>
 
 **Swiss-context note.** Directly relevant to VILB Art. 9 reporting and EPBD 2024/1275 disclosures. The DE-only submetering majors (Techem, ista, Brunata, Minol) are widely deployed in CH but NeoVac is the closest CH-domiciled alternative — relevant where data-residency is a procurement filter.
 
@@ -428,6 +609,21 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | [CBRE Investment Management](https://www.cbreim.com/) | Los Angeles, USA | Global RE investor; **operator benchmark** for corporate-occupier tenant portals on a proprietary stack |
 | [Defence Infrastructure Organisation (DIO)](https://www.gov.uk/government/organisations/defence-infrastructure-organisation) | Sutton Coldfield, UK | UK MoD estate operator; military-housing benchmark adjacent to CH armasuisse perimeter |
 
+<sub>**Preview — selected federal-portal benchmarks** (login or landing screens from the portals themselves; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.ar.admin.ch/de/immo-portal"><img src="../assets/images/market-screening/armasuisse.jpg" alt="armasuisse Immo-Portal VBS" width="280"/></a><br/>
+<sub><b>armasuisse Immo-Portal VBS</b><br/><i>[Portal image]</i> · CH federal benchmark; closest peer to BBL<br/><a href="https://www.ar.admin.ch/de/immo-portal">ar.admin.ch/immo-portal</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://meine-bima.bundesimmobilien.de/"><img src="../assets/images/market-screening/meine-bima.png" alt="meine BImA portal" width="280"/></a><br/>
+<sub><b>"meine BImA"</b><br/><i>[Portal image]</i> · German federal tenant-portal benchmark<br/><a href="https://meine-bima.bundesimmobilien.de/">meine-bima.bundesimmobilien.de</a></sub>
+</td>
+</tr>
+</table>
+
 **Swiss-context note.** armasuisse Immo-Portal is BBL's closest peer benchmark inside Switzerland.
 
 ### Q. SAP RE-FX integration patterns and add-ons
@@ -440,6 +636,21 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | [Aareon SAP Blue Eagle](https://www.aareon.de/) | Aareon (DE) | Long-standing SAP-side add-on |
 | [Aareon Connect via Locoia](https://connect-docs-de.locoia.com/) | Aareon Locoia (DE) | Low-code/iPaaS connecting Wodis Yuneo, Sigma, SAP Blue Eagle, Karthago, Immomio, casavi, Plentific, EverReal, Spiri.Bo, dormakaba, KIWI |
 | [Custom Fiori on SAP BTP](https://www.sap.com/products/business-technology-platform.html) | SAP BTP | Build-own; respects SAP "clean core" |
+
+<sub>**Preview — selected integration patterns** (product screenshot / placeholder; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://planonsoftware.com/uk/software/iwms/sap/"><img src="../assets/images/market-screening/planon-sap.jpg" alt="Planon for SAP CMS RE-FX lease management" width="280"/></a><br/>
+<sub><b>Planon for SAP S/4HANA</b><br/><i>[Screenshot]</i> · SAP CMS RE-FX lease-management screen<br/><a href="https://planonsoftware.com/uk/software/iwms/sap/">planonsoftware.com/sap</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.aareon.com/"><img src="../assets/images/market-screening/aareon-blue-eagle.png" alt="Aareon ecosystem placeholder" width="280"/></a><br/>
+<sub><b>Aareon "Blue Eagle"</b><br/><i>[Placeholder]</i> · Aareon AI whitepaper visual — <b>verify product status</b>: dedicated Blue Eagle pages return 404 across aareon.com and Wayback; product may have been retired or rebranded post-TPG/CDPQ transition<br/><a href="https://www.aareon.com/">aareon.com</a></sub>
+</td>
+</tr>
+</table>
 
 **Swiss-context note.** Planon for SAP S/4HANA is the SAP-blessed pattern; custom Fiori on BTP is most aligned with EMBAG Art. 9's OSS expectations.
 
@@ -455,39 +666,6 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | Google Cloud `europe-west6` (Zurich) | Zurich | Launched 2019 |
 | AWS European Sovereign Cloud — `aws-eusc` (`eusc-de-east-1`, Brandenburg, DE) | Brandenburg, DE | GA 14 Jan 2026; €7.8 bn investment; EU-resident personnel/operations; NOT in Switzerland |
 
-<sub>**Preview — selected providers** (region maps, architecture diagrams or datacenter imagery from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
-
-<table>
-<tr>
-<td align="center" width="33%" valign="top">
-<a href="https://www.swisscom.ch/en/business/enterprise/offer/cloud.html"><img src="../assets/images/market-screening/swisscom.png" alt="Swisscom cloud architecture" width="280"/></a><br/>
-<sub><b>Swisscom Sovereign Cloud</b><br/><i>[Diagram]</i> · Cloud + datacenter service stack<br/><a href="https://www.swisscom.ch/">swisscom.ch</a></sub>
-</td>
-<td align="center" width="33%" valign="top">
-<a href="https://www.exoscale.com/datacenters/"><img src="../assets/images/market-screening/exoscale.png" alt="Exoscale 2025 datacenter map" width="280"/></a><br/>
-<sub><b>Exoscale</b><br/><i>[Region map]</i> · Datacenters 2025 (CH/AT/DE/BG + partners)<br/><a href="https://www.exoscale.com/">exoscale.com</a></sub>
-</td>
-<td align="center" width="33%" valign="top">
-<a href="https://www.infomaniak.com/en/about"><img src="../assets/images/market-screening/infomaniak.jpg" alt="Infomaniak Geneva datacenter" width="280"/></a><br/>
-<sub><b>Infomaniak</b><br/><i>[Photo]</i> · Geneva datacenter (About page)<br/><a href="https://www.infomaniak.com/">infomaniak.com</a></sub>
-</td>
-</tr>
-<tr>
-<td align="center" width="33%" valign="top">
-<a href="https://aws.amazon.com/local/switzerland/"><img src="../assets/images/market-screening/aws.jpg" alt="AWS in Switzerland hero" width="280"/></a><br/>
-<sub><b>AWS Zurich (eu-central-2)</b><br/><i>[Hero]</i> · AWS in Switzerland landing<br/><a href="https://aws.amazon.com/local/switzerland/">aws.amazon.com</a></sub>
-</td>
-<td align="center" width="33%" valign="top">
-<a href="https://datacenters.microsoft.com/"><img src="../assets/images/market-screening/azure.jpg" alt="Azure Europe DC infrastructure" width="280"/></a><br/>
-<sub><b>Azure Switzerland N/W</b><br/><i>[Infrastructure]</i> · Europe datacenter infrastructure<br/><a href="https://datacenters.microsoft.com/">datacenters.microsoft.com</a></sub>
-</td>
-<td align="center" width="33%" valign="top">
-<a href="https://cloud.google.com/about/locations"><img src="../assets/images/market-screening/google-cloud.svg" alt="Google Cloud global regions" width="280"/></a><br/>
-<sub><b>Google Cloud Zurich</b><br/><i>[Region map]</i> · Global regions (europe-west6 highlighted)<br/><a href="https://cloud.google.com/">cloud.google.com</a></sub>
-</td>
-</tr>
-</table>
-
 **Swiss-context note.** Federal tenant portals must consider both technical region (Switzerland-North / `eu-central-2`) and operational sovereignty layer; AGOV operation itself will move to a mixed federal + private Swiss DC arrangement from 2027.
 
 ### S. iPaaS / integration layer
@@ -500,7 +678,7 @@ Bilt Rewards (US); Rentmoola; Flatfair (UK deposit alternatives); GoCardless rea
 
 ### U. Indoor wayfinding & smart navigation
 
-Steerpath (FI; powers Senaatti's Senate App); MapsIndoors (DK); Pointr (UK); MazeMap (NO); IndoorAtlas (FI); MappedIn (CA; partners with ServiceNow WSD).
+Steerpath (FI; powers Senaatti's Senate App); MapsIndoors (DK); Pointr (UK); MazeMap (NO); IndoorAtlas (FI); MappedIn (CA; partners with ServiceNow WSD); **[Archilogic](https://www.archilogic.com/) (Zürich, CH — Swiss-domiciled; 3D floor plans + Floor Plan Engine + indoor-mapping API; widely embedded as the floor-plan layer inside IWMS and WEX products, so also adjacent to Segments A and B)**.
 
 ### V. Occupancy analytics
 
@@ -527,6 +705,25 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [Capmo](https://www.capmo.com/) | Munich, DE | Cloud | Per user | BIM, defect/snagging | DACH construction-PM SaaS |
 
 **Maturity.** Mature (Autodesk, Bentley, Procore) → emerging in AI/CV (Buildots). Heavy DACH adoption of Solibri, dRofus, Revizto, BIMcollab.
+<sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="33%" valign="top">
+<a href="https://construction.autodesk.com/"><img src="../assets/images/market-screening/autodesk-acc.png" alt="Autodesk Construction Cloud model coordination" width="280"/></a><br/>
+<sub><b>Autodesk Construction Cloud</b><br/><i>[Workflow]</i> · Model-coordination view<br/><a href="https://construction.autodesk.com/">construction.autodesk.com</a></sub>
+</td>
+<td align="center" width="33%" valign="top">
+<a href="https://www.bentley.com/software/itwin/"><img src="../assets/images/market-screening/bentley-itwin.jpg" alt="Bentley iTwin Experience" width="280"/></a><br/>
+<sub><b>Bentley iTwin</b><br/><i>[Screenshot]</i> · iTwin Experience digital-twin viewer<br/><a href="https://www.bentley.com/software/itwin/">bentley.com/itwin</a></sub>
+</td>
+<td align="center" width="33%" valign="top">
+<a href="https://revizto.com/en/"><img src="../assets/images/market-screening/revizto.webp" alt="Revizto collaborative clash automation" width="280"/></a><br/>
+<sub><b>Revizto</b><br/><i>[Screenshot]</i> · Collaborative clash + 3D issue tracker — <b>Swiss-HQ (Lausanne)</b><br/><a href="https://revizto.com/">revizto.com</a></sub>
+</td>
+</tr>
+</table>
+
 **Swiss-context note.** CDE-Bund mandate (Appendix A) and KBOB BIM standards push toward openBIM workflows (IFC, BCF). Revizto and dRofus have specific Swiss federal-project track records. BIM2FM handover into Planon, Spacewell or Aareon is the bridge from this segment to A and E — and is the most-overlooked tenant-portal pre-occupancy step at federal scale.
 
 ### X. Lease abstraction & AI document extraction
@@ -545,6 +742,21 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [LeaseHawk](https://www.leasehawk.com/) | Scottsdale (AZ), USA | AI leasing assistant (multifamily) |
 | [docunite](https://docunite.com/) | Berlin, DE | DACH AI document processing for real estate |
 
+<sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.mrisoftware.com/products/contract-intelligence/"><img src="../assets/images/market-screening/mri-contract-intelligence.png" alt="MRI Contract Intelligence" width="280"/></a><br/>
+<sub><b>MRI Contract Intelligence (ex-Leverton)</b><br/><i>[Hero]</i> · AI contract-intelligence UI<br/><a href="https://www.mrisoftware.com/products/contract-intelligence/">mrisoftware.com/contract-intelligence</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://rossum.ai/"><img src="../assets/images/market-screening/rossum.png" alt="Rossum document extraction" width="280"/></a><br/>
+<sub><b>Rossum</b><br/><i>[Screenshot]</i> · AI document-extraction interface<br/><a href="https://rossum.ai/">rossum.ai</a></sub>
+</td>
+</tr>
+</table>
+
 **Swiss-context note.** Directly relevant to post-SUPERB SAP RE-FX cleanup: BBL inherited legacy lease records that must be normalised into S/4HANA contract objects. EMBAG Art. 9 OSS preference makes open OCR + LLM pipelines (Segment AA) an honest alternative to commercial extraction SaaS.
 
 ### Y. CAFM (DACH-specific) — distinct from IWMS
@@ -559,11 +771,22 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [waveware (Loy & Hutz)](https://www.loy-hutz.de/) | Burgdorf, DE | GEFMA-certified; broad CAFM suite |
 | [ConjectFM (RIB Software)](https://www.rib-software.com/) | Stuttgart, DE (RIB Group) | CAFM + BIM2FM bridge |
 | [FAMOS (Keßler Solutions)](https://www.kesslersolutions.de/) | Chemnitz, DE | DACH CAFM; popular in the mid-tier |
-| [KEYLOGIC](https://www.keylogic.ch/) | Bern, CH | **Swiss-domiciled** CAFM; KBOB-aligned; cantonal RE deployments |
+| [KEYLOGIC](https://www.keylogic.ch/) | Bern, CH | **Swiss-domiciled** CAFM; KBOB-aligned; cantonal RE deployments — ⚠️ `keylogic.ch` served a parked Hetzner page during the 18 May 2026 scan, verify vendor status |
 | [Speedikon FM](https://www.speedikon.com/) | Bensheim, DE | CAFM + ERP integration |
 | [GEORG (VIT)](https://www.vit-group.de/) | Hannover, DE | GIS-led CAFM for industrial / federal estates |
 
-**Swiss-context note.** KEYLOGIC is the canonical Swiss-domiciled CAFM; selected by several cantonal real-estate offices. GEFMA 444 is a DACH-specific procurement filter that excludes most US/UK IWMS vendors at first sift — a frequent source of mismatch between BBL benchmarks and global vendor lists.
+<sub>**Preview — selected vendor** (product diagram from vendor's own page; link goes to source page):</sub>
+
+<table>
+<tr>
+<td align="center" width="100%" valign="top">
+<a href="https://pit.de/pitfm/"><img src="../assets/images/market-screening/pit-fm.png" alt="pit-FM One-for-All module diagram" width="420"/></a><br/>
+<sub><b>pit-FM</b><br/><i>[Diagram]</i> · One-for-All module landscape (CAFM + BIM + Energy + TGA)<br/><a href="https://pit.de/pitfm/">pit.de/pitfm</a></sub>
+</td>
+</tr>
+</table>
+
+**Swiss-context note.** KEYLOGIC is the canonical Swiss-domiciled CAFM; selected by several cantonal real-estate offices. GEFMA 444 is a DACH-specific procurement filter that excludes most US/UK IWMS vendors at first sift — a frequent source of mismatch between BBL benchmarks and global vendor lists. *(KEYLOGIC preview omitted — vendor's website returned a parked Hetzner page during this scan; see ⚠️ note in table row.)*
 
 ### Z. ESG portfolio-data platforms (beyond submetering)
 
@@ -582,6 +805,22 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [Sustain.life](https://www.sustain.life/) | New York, USA | Mid-market sustainability platform |
 | [Schneider Resource Advisor](https://www.se.com/) | Rueil-Malmaison, FR | Energy + sustainability for enterprise portfolios |
 | [Sweep](https://www.sweep.net/) | Paris, FR | Climate-data platform with RE module |
+| [BuildingMinds](https://buildingminds.com/) | Berlin, DE (Schindler family-backed) | Real-estate data platform; CRREM, EU Taxonomy and EPBD modules; **cross-listed in Segment L** for digital-twin capabilities |
+
+<sub>**Preview — selected vendors** (product dashboards from vendors' own pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.deepki.com/solutions/capabilities/"><img src="../assets/images/market-screening/deepki.jpeg" alt="Deepki ESG supervision dashboard" width="280"/></a><br/>
+<sub><b>Deepki</b><br/><i>[Dashboard]</i> · Deepki Ready ESG supervision (EN)<br/><a href="https://www.deepki.com/">deepki.com</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.measurabl.com/platform/"><img src="../assets/images/market-screening/measurabl.png" alt="Measurabl Data Navigator" width="280"/></a><br/>
+<sub><b>Measurabl</b><br/><i>[Screenshot]</i> · Platform — Data Navigator UI<br/><a href="https://www.measurabl.com/">measurabl.com</a></sub>
+</td>
+</tr>
+</table>
 
 **Swiss-context note.** VILB Art. 9 Abs. 1bis (federal real-estate sustainability reporting) and EPBD 2024/1275 (zero-emission-buildings disclosures) push BBL toward portfolio-level ESG aggregation in addition to per-meter consumption data. Deepki and Measurabl are the most-cited investor-facing tools; Carbonsight is the DACH-aligned alternative. Submetering (Segment N) is upstream; this segment is downstream reporting.
 
@@ -604,8 +843,63 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [civic-tech.ch / opendata.swiss tooling](https://civictech.ch/) | various | Switzerland | Swiss civic-tech community; federal-relevant tools surface periodically |
 | [Hugging Face open document-AI](https://huggingface.co/models) | various | France/USA | OSS OCR + LLM models; honest alternative to Segment X commercial lease abstraction |
 
+<sub>**Preview — selected OSS projects** (product screenshots from project pages; links go to source pages):</sub>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<a href="https://www.odoo.com/app/rental"><img src="../assets/images/market-screening/odoo-property.webp" alt="Odoo Rental product UI" width="280"/></a><br/>
+<sub><b>Odoo (Rental / Property)</b><br/><i>[Screenshot]</i> · Rental product configuration UI<br/><a href="https://www.odoo.com/app/rental">odoo.com/rental</a></sub>
+</td>
+<td align="center" width="50%" valign="top">
+<a href="https://www.keycloak.org/"><img src="../assets/images/market-screening/keycloak.png" alt="Keycloak admin console" width="280"/></a><br/>
+<sub><b>Keycloak</b><br/><i>[Screenshot]</i> · Admin console — OSS IdP (Apache 2.0)<br/><a href="https://www.keycloak.org/">keycloak.org</a></sub>
+</td>
+</tr>
+</table>
+
 **Maturity.** Mostly emerging; production-grade for niche use cases (Keycloak, Odoo, Zammad) but no canonical OSS "tenant portal" exists for federal-scale residential operations.
 **Swiss-context note.** EMBAG Art. 9 expects federal software customisations to be publishable as OSS unless third-party rights or security forbid. The proprietary tenant-portal market pre-dates EMBAG; the gap between EMBAG's expectation and what vendors actually license under is the single largest procurement-policy tension in this segment. **Custom Fiori on SAP BTP (Segment Q) is currently the most practical EMBAG-conformant pattern** — pure OSS alternatives are realistic only for non-RE-FX-bound tenant touchpoints (community boards, repair tickets, document download) and as ingestion/extraction tooling for SAP RE-FX (Segment X).
+
+### BB. Workflow automation & low-code business logic
+
+**Definition.** Generic process-orchestration, form-driven business-logic, and low-code application platforms — distinct from vertical tenant-portal SaaS (A–H, F) and from system-to-system integration (Segment S iPaaS). These tools let an organisation **assemble** tenant-portal-shaped workflows from primitives (forms, notifications, approvals, branches, signals, scheduled jobs) rather than buying a packaged product. Spans three sub-categories:
+1. **Low-code / form builders** — Power Apps, OutSystems, Mendix.
+2. **SaaS workflow automation** — Power Automate, Zapier, Make, n8n, Activepieces.
+3. **BPMN / DMN engines (enterprise BPM)** — Camunda, Bonita, ProcessMaker, Pega, Appian, SAP Build Process Automation.
+
+**Persona.** Federal IT planning teams aiming to assemble tenant-portal touchpoints on top of already-licensed primitives (M365, SAP BTP); civic-tech contributors building OSS portal patterns under EMBAG Art. 9; BPM analysts modelling federal back-office workflows that touch tenant lifecycle events.
+
+| Product | HQ | License | Notable feature |
+|---|---|---|---|
+| [Microsoft Power Automate](https://www.microsoft.com/en-us/power-platform/products/power-automate) | Redmond, USA | Commercial (M365 / Power Platform) | M365-native; deep Outlook / Teams / SharePoint hooks; **Azure Switzerland regions** available |
+| [Microsoft Power Apps](https://www.microsoft.com/en-us/power-platform/products/power-apps) | Redmond, USA | Commercial (M365 / Power Platform) | Low-code app builder; pairs with Power Automate for form + flow + UI |
+| [SAP Build Process Automation](https://www.sap.com/products/technology-platform/process-automation.html) | Walldorf, DE | Commercial (BTP) | Successor to SAP Workflow Management; native to SAP BTP; aligned with the custom-Fiori-on-BTP pattern in Segment Q |
+| [SAP Build Apps / SAP Build Work Zone](https://www.sap.com/products/technology-platform/build.html) | Walldorf, DE | Commercial (BTP) | Low-code app builder + work-zone (portal shell) on BTP |
+| [n8n](https://n8n.io/) | Berlin, DE | Fair-code (sustainable-use license); self-hostable | OSS-friendly; deep integrations including SAP, M365, Slack, Telegram; **EMBAG-aligned automation alternative** when self-hosted in CH |
+| [Camunda](https://camunda.com/) | Berlin, DE | Commercial + Community Edition (Apache 2.0) | BPMN 2.0 / DMN 1.3 standards; deep federal/government track record (DE BAMF, BKA, BImA; NL DUO, BZ) |
+| [Activepieces](https://www.activepieces.com/) | Toronto, CA | MIT + commercial cloud | Fully open-source Zapier alternative; self-hostable |
+| [Make (ex-Integromat)](https://www.make.com/) | Prague, CZ | Commercial | Visual workflow automation; EU-hosted; very strong free tier for prototyping |
+| [Zapier](https://zapier.com/) | San Francisco, USA | Commercial | Largest SaaS automation marketplace (~7,000 integrations); US-hosted |
+| [Bonita / Bonitasoft](https://www.bonitasoft.com/) | Grenoble, FR | Open-source Community + commercial | BPMN engine; FR public-sector deployments (CNAM, DGFiP); OSS-by-default friendly |
+| [ProcessMaker](https://www.processmaker.com/) | Durham (NC), USA | Open-source Community + commercial | BPMN; intelligent document processing; multilingual |
+| [Pega Platform](https://www.pega.com/) | Cambridge (MA), USA | Commercial | Enterprise BPM + AI-decisioning; deep insurance / public-sector heritage |
+| [Appian](https://appian.com/) | McLean (VA), USA | Commercial | Enterprise low-code / BPM; FedRAMP-authorized in US federal |
+| [OutSystems](https://www.outsystems.com/) | Linda-a-Velha, PT | Commercial | Enterprise low-code; long-running EU public-sector deployments |
+| [Mendix (Siemens)](https://www.mendix.com/) | Boston, USA (Siemens) | Commercial | Siemens-owned low-code; natural pair to Siemens Building X / Cobundu adjacencies (Segment L) |
+| [ServiceNow Flow Designer](https://www.servicenow.com/) | Santa Clara, USA | Commercial | Native to ServiceNow; bundled with WSD (Segment A/B) and Nuvolo CWP |
+
+**Maturity.** Mature across BPM (Camunda, Pega, Appian) and SaaS automation (Power Automate, Zapier, Make); rapidly growing in OSS (n8n, Activepieces). Power Automate has the **lowest adoption friction** in a federal CH context because M365 is already deployed and Azure Switzerland regions are available; SAP Build Process Automation has the lowest friction inside the SAP estate.
+
+**Swiss-context note.** For BBL specifically: **Power Automate** (M365-licensed; Entra ID / AGOV federation feasible) and **SAP Build Process Automation** (BTP-native; co-engineered with the Q-segment pattern) are the two paths of least resistance. **n8n** is the most EMBAG-Art.-9-aligned (fair-code, self-hostable, custom code publishable as OSS) and is the practical open-source path for tenant-portal automation. **Camunda** is the canonical BPMN/DMN engine across DE federal government — worth benchmarking if BBL has process-modelling-driven workflows that need executable BPMN.
+
+**Taxonomy note — important.** This segment overlaps deliberately with several others and that overlap is the **substantive procurement insight** of the document:
+- **S (iPaaS)**: workflow automation tools also do system-to-system integration, but the focus is *process orchestration with human steps* vs. iPaaS *machine-to-machine data movement*. Aareon Locoia is iPaaS; n8n / Power Automate straddle both.
+- **K (AI tenant copilots)**: modern workflow tools embed LLM nodes (routing, summarisation, drafting, RAG over docs). The "AI tenant copilot" boundary is becoming blurry — many "smart" features in vertical SaaS are LLM-call-from-a-workflow.
+- **Q (SAP RE-FX integration)**: SAP Build Process Automation is the SAP-native expression of this segment and the EMBAG-conformant pattern for BBL-internal automation.
+- **AA (OSS)**: n8n, Activepieces, Bonita Community, Camunda Community Edition are OSS-publishable under EMBAG Art. 9.
+
+**Practical procurement test.** Before buying a vertical tenant-portal "smart ticketing" / "tenant copilot" / "automated approval" feature, ask: *can this be assembled with our existing Power Automate / BTP / n8n primitives plus a form, a notification, and a condition?* In many federal-CH cases the answer is yes, and EMBAG Art. 9 makes the build-on-licensed-primitives pattern the default rather than the exception.
 
 ## 7. Recommendations
 

@@ -22,7 +22,9 @@
       "Bash(curl -sSL -A \"Mozilla/5.0\" -o garaio-rem.png \"https://www.garaio-rem.ch/hubfs/Grafiken/grafik_funktionsplan.png\")",
       "Bash(curl -sSL -A \"Mozilla/5.0\" -o abacus.png \"https://www.abacus.ch/fileadmin/ablage/01_bilder/12_illustrationen/illustrationen_abaimmo_de.png\")",
       "Bash(curl -sSL -A \"Mozilla/5.0\" -o yardi.png \"https://www.yardi.com/wp-content/uploads/sites/93/2025/03/1-MaintenanceIQ_Hero.png\")",
-      "Bash(curl -sSL -A \"Mozilla/5.0\" -o skribble.webp \"https://images.prismic.io/covebe/aaWzbTPJ2QKSVT_h_DE-DE_Home_Einfach.webp?auto=format%2Ccompress&w=1200\")"
+      "Bash(curl -sSL -A \"Mozilla/5.0\" -o skribble.webp \"https://images.prismic.io/covebe/aaWzbTPJ2QKSVT_h_DE-DE_Home_Einfach.webp?auto=format%2Ccompress&w=1200\")",
+      "Read(//tmp/**)",
+      "Bash(sed 's|^|assets/images/market-screening/|' /tmp/files.txt)"
     ]
   }
 }
