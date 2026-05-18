@@ -1,0 +1,237 @@
+/* ==========================================================================
+   DESIGN TOKENS — CD Bund
+   BBL Mieterportal Prototypes
+
+   Aligned with the official Swiss Federal Design System (swiss/designsystem)
+   v1.0.9. Values resolved from the live --color-primary-* tokens and
+   PostCSS sources. Trimmed for portal use; sister-project workspace-management
+   keeps the full token set.
+
+   Reference: https://github.com/swiss/designsystem (MIT)
+   ========================================================================== */
+
+@font-face {
+  font-family: 'NotoSans';
+  src: local('Noto Sans'), local('NotoSans-Regular');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'NotoSans';
+  src: local('Noto Sans Bold'), local('NotoSans-Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ── BRAND (Swiss federal red, official primary palette) ─────────────── */
+  --color-primary-500:         #E53940;
+  --color-primary-600:         #D8232A;  /* primary red — federal CD */
+  --color-primary-700:         #BF1F25;
+  --color-primary:             var(--color-primary-600);
+  --color-primary-hover:       var(--color-primary-700);
+
+  /* ── INTERACTIVE BLUE (links, info-class accents) ────────────────────── */
+  --color-link:                #1F6FAB;
+  --color-link-hover:          #134A77;
+
+  /* ── NEUTRALS ─────────────────────────────────────────────────────────── */
+  --color-white:               #FFFFFF;
+  --color-black:               #000000;
+  --color-gray-50:             #F9FAFB;
+  --color-gray-100:            #F3F4F6;
+  --color-gray-200:            #E5E7EB;
+  --color-gray-300:            #D1D5DB;
+  --color-gray-400:            #9CA3AF;
+  --color-gray-500:            #6B7280;
+  --color-gray-600:            #4B5563;
+  --color-gray-700:            #374151;
+  --color-gray-800:            #1F2937;
+  --color-gray-900:            #111827;
+
+  /* Secondary palette (blue-gray, federal chrome — top bar, footer) */
+  --color-secondary-50:        #F0F4F7;
+  --color-secondary-100:       #DFE4E9;
+  --color-secondary-300:       #828E9A;
+  --color-secondary-500:       #46596B;
+  --color-secondary-600:       #2F4356;
+  --color-secondary-700:       #263645;
+  --color-secondary-800:       #1C2834;
+
+  /* ── SEMANTIC TEXT ─────────────────────────────────────────────────────── */
+  --color-text-primary:        #1F2937;
+  --color-text-secondary:      #6B7280;
+  --color-text-muted:          #9CA3AF;
+  --color-text-inverse:        #FFFFFF;
+
+  /* ── SURFACES ─────────────────────────────────────────────────────────── */
+  --color-bg-default:          #FFFFFF;
+  --color-bg-alt:              #F3F4F6;
+  --color-bg-surface:          #F9FAFB;
+  --color-surface-dark:        #2F4356;     /* top bar, dark sections */
+  --color-surface-darker:      #263645;     /* footer bottom */
+
+  /* ── BORDERS ──────────────────────────────────────────────────────────── */
+  --color-border:              #E5E7EB;
+  --color-border-light:        #F3F4F6;
+  --color-border-input:        #6B7280;
+
+  /* ── FOCUS ────────────────────────────────────────────────────────────── */
+  --color-focus:               #8655F6;
+  --color-focus-dark:          #C4B5FD;
+
+  /* ── SEMANTIC STATUS ──────────────────────────────────────────────────── */
+  --color-success:             #047857;
+  --color-success-light:       #D1FAE5;
+  --color-warning:             #F59E0B;
+  --color-warning-light:       #FEF3C7;
+  --color-danger:              #D8232A;
+  --color-danger-light:        #FEE2E2;
+  --color-info:                #0F6B75;
+  --color-info-light:          #CCFBF1;
+
+  /* ── BADGE PALETTE ────────────────────────────────────────────────────── */
+  --color-badge-green-bg:      #D1FAE5;
+  --color-badge-green-text:    #065F46;
+  --color-badge-blue-bg:       #DBEAFE;
+  --color-badge-blue-text:     #1E40AF;
+  --color-badge-red-bg:        #FAE1E2;
+  --color-badge-red-text:      #99191E;
+  --color-badge-yellow-bg:     #FEF3C7;
+  --color-badge-yellow-text:   #92400E;
+  --color-badge-orange-bg:     #FFEDD5;
+  --color-badge-orange-text:   #9A3412;
+  --color-badge-gray-bg:       #E5E7EB;
+  --color-badge-gray-text:     #374151;
+
+  /* ── PORTAL-SPECIFIC ──────────────────────────────────────────────────── */
+  --color-prototype-notice:    #ff4444;
+  --color-pipeline-active:     var(--color-primary-600);
+  --color-pipeline-done:       var(--color-success);
+  --color-pipeline-rejected:   var(--color-danger);
+
+  /* ── ALPHA / OVERLAY ──────────────────────────────────────────────────── */
+  --color-backdrop:            rgba(0, 0, 0, 0.5);
+  --color-white-20:            rgba(255, 255, 255, 0.2);
+  --color-black-10:            rgba(0, 0, 0, 0.1);
+
+  /* ── TYPOGRAPHY ───────────────────────────────────────────────────────── */
+  --font-family:               'NotoSans', 'Hind', 'Verdana', sans-serif;
+  --font-family-bold:          'NotoSans', 'Hind', 'Verdana', sans-serif;
+  --font-family-mono:          'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* Type scale (mobile-first; scales at lg / xl breakpoints) */
+  --text-display:              2rem;       /* 32px */
+  --text-h1:                   1.625rem;   /* 26px */
+  --text-h2:                   1.375rem;   /* 22px */
+  --text-h3:                   1.25rem;    /* 20px */
+  --text-h4:                   1.125rem;   /* 18px */
+  --text-body:                 1rem;       /* 16px */
+  --text-body-sm:              0.875rem;   /* 14px */
+  --text-body-xs:              0.75rem;    /* 12px */
+  --text-micro:                0.6875rem;  /* 11px */
+
+  --line-height-tight:         1.25;
+  --line-height-snug:          1.375;
+  --line-height-normal:        1.5;
+  --line-height-relaxed:       1.625;
+
+  --font-weight-normal:        400;
+  --font-weight-medium:        500;
+  --font-weight-semibold:      600;
+  --font-weight-bold:          700;
+
+  /* ── SPACING (4px base unit) ──────────────────────────────────────────── */
+  --space-xs:                  4px;
+  --space-sm:                  8px;
+  --space-md:                  16px;
+  --space-lg:                  24px;
+  --space-xl:                  32px;
+  --space-2xl:                 48px;
+  --space-3xl:                 64px;
+  --space-4xl:                 80px;
+
+  /* ── LAYOUT ───────────────────────────────────────────────────────────── */
+  --container-max-width:       1544px;
+  --container-padding:         1rem;
+  --grid-gutter:               1.25rem;
+  --sidebar-width:             280px;
+
+  /* ── COMPONENT DIMENSIONS ─────────────────────────────────────────────── */
+  --btn-min-h:                 44px;
+  --btn-sm-min-h:              34px;
+  --btn-lg-min-h:              48px;
+  --topbar-height:             46px;
+  --nav-height:                56px;
+  --section-py:                3.5rem;
+  --section-py-half:           1.75rem;
+
+  /* ── RADIUS ───────────────────────────────────────────────────────────── */
+  --radius-sm:                 2px;
+  --radius:                    3px;
+  --radius-lg:                 6px;
+  --radius-xl:                 10px;
+  --radius-full:               9999px;
+
+  /* ── SHADOWS ──────────────────────────────────────────────────────────── */
+  --shadow-sm:                 0 1px 2px 0 rgba(0,0,0,0.04);
+  --shadow:                    0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06);
+  --shadow-lg:                 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+
+  /* ── TRANSITIONS ──────────────────────────────────────────────────────── */
+  --transition-fast:           120ms ease;
+  --transition:                200ms ease;
+  --transition-slow:           320ms ease;
+
+  /* ── Z-INDEX SCALE ────────────────────────────────────────────────────── */
+  --z-toast:                   100;
+  --z-modal:                   200;
+  --z-shortcut-overlay:        300;
+}
+
+/* Breakpoint reference (use in @media; CSS variables can't be used in @media):
+     xs:  480px   sm:  640px   md:  768px   lg:  1024px
+     xl:  1280px  2xl: 1544px  3xl: 1920px
+*/
+
+/* Base resets */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--text-body);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background: var(--color-bg-default);
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+a { color: var(--color-link); text-decoration: underline; }
+a:hover { color: var(--color-link-hover); }
+
+/* Focus ring (federal eCH-0059) */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Skip-link (NFA-CD-004) */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  padding: var(--space-md);
+  background: var(--color-text-primary);
+  color: var(--color-text-inverse);
+  text-decoration: none;
+}
+.skip-to-content:focus {
+  left: var(--space-md);
+  top: var(--space-md);
+}

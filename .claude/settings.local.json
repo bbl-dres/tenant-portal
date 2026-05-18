@@ -98,7 +98,14 @@
       "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/bima-de-adakta-egovernment-wettbewerb-2024.pdf --max-time 60 \"https://egovernmentwettbewerb.de/wp-content/uploads/2024/06/BImA_elektronische_Aktenerarbeitung_Kat_3.pdf\")",
       "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/cbre-gws-host-launch-india-2021-press-mirror.html --max-time 60 \"https://indiatechnologynews.in/cbre-launches-host-an-intuitive-platform-for-technology-driven-real-estate/\")",
       "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/epfl-dii-archibus-aremis-case-study.html --max-time 60 \"https://www.aremis.com/en/results/epfl-archibus-asset-management-solution\")",
-      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/armasuisse-organigramm-2025-08.pdf --max-time 60 \"https://www.ar.admin.ch/dam/de/sd-web/9f8gTEdh0vUm/Organigramm%20armasuisse%20August%202025%20Internet.pdf\")"
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/armasuisse-organigramm-2025-08.pdf --max-time 60 \"https://www.ar.admin.ch/dam/de/sd-web/9f8gTEdh0vUm/Organigramm%20armasuisse%20August%202025%20Internet.pdf\")",
+      "Bash(ls \"C:\\\\Users\\\\DavidRasner\\\\.claude\\\\projects\\\\c--Users-DavidRasner-Documents-GitHub-tenant-portal\\\\memory\\\\\")",
+      "Read(//c/Users/DavidRasner/.claude/projects/c--Users-DavidRasner-Documents-GitHub-tenant-portal/**)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)",
+      "Bash(ls -la \"C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub\\\\\" | head -20)",
+      "Read(//c/Users/DavidRasner/Documents/**)",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub' -Directory | Select-Object -ExpandProperty Name\")"
     ]
   }
 }
