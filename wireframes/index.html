@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mieterportal BBL — Typologie-Übersicht (Prototyp)</title>
+<link rel="stylesheet" href="shared/tokens.css">
+<link rel="stylesheet" href="shared/portal.css">
+<style>
+  .chooser-hero {
+    padding: var(--section-py) var(--container-padding);
+    background: linear-gradient(135deg, #fff 0%, var(--color-bg-alt) 100%);
+    text-align: center;
+  }
+  .chooser-hero h1 {
+    font-size: var(--text-display);
+    margin: 0 0 var(--space-sm);
+  }
+  .chooser-hero p {
+    max-width: 720px;
+    margin: 0 auto var(--space-md);
+    font-size: var(--text-h4);
+    color: var(--color-text-secondary);
+  }
+  .chooser-section {
+    padding: var(--section-py-half) var(--container-padding);
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+  }
+  .chooser-section h2 {
+    margin: 0 0 var(--space-lg);
+    font-size: var(--text-h2);
+  }
+  .typology-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+  .typology-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .typology-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .typology-card--available {
+    border-color: var(--color-primary);
+    border-width: 2px;
+  }
+  .typology-card__preview {
+    height: 200px;
+    background: var(--color-bg-alt);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .typology-card__preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .typology-card__preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--color-text-muted);
+    font-size: var(--text-body-sm);
+  }
+  .typology-card__preview-placeholder svg { width: 48px; height: 48px; stroke-width: 1; }
+  .typology-card__body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1;
+  }
+  .typology-card__title {
+    margin: 0;
+    font-size: var(--text-h3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+  .typology-card__id {
+    font-family: var(--font-family-mono);
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-normal);
+  }
+  .typology-card__desc {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-relaxed);
+    flex: 1;
+  }
+  .typology-card__footer {
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--color-border-light);
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: space-between;
+    align-items: center;
+  }
+  .typology-card__status {
+    font-size: var(--text-body-xs);
+    color: var(--color-text-muted);
+  }
+  .doc-links {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-top: var(--space-md);
+  }
+  .doc-links a {
+    text-decoration: none;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius);
+    background: var(--color-bg-alt);
+    font-size: var(--text-body-sm);
+  }
+  .doc-links a:hover { background: var(--color-bg-surface); }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+
+<!-- Minimal header for the chooser page -->
+<header class="top-bar" role="banner">
+  <span><strong>Mieterportal BBL</strong> · Typologie-Übersicht</span>
+  <span class="top-bar__prototype-notice">Prototyp — nur zur Demonstration</span>
+  <div class="top-bar__actions">
+    <span style="font-size: var(--text-body-xs); opacity:0.8;">v0.1 · 2026-05-18</span>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<section class="chooser-hero">
+  <h1>BBL Mieterportal — Typologie-Prototypen</h1>
+  <p>
+    Sieben Design-Typologien aus <a href="../docs/WIREFRAMES.md">WIREFRAMES.md</a>,
+    funktionsfähig als vanilla-JS-Prototypen umgesetzt zur Validierung des User Flows.
+    Vergleichen Sie das gleiche zugrunde liegende Modell (Bedarfs-Workflow,
+    Inbox, Reviewer-Sicht) in unterschiedlichen IA-Mustern.
+  </p>
+  <div class="doc-links">
+    <a href="../docs/REQUIREMENTS.md">📘 REQUIREMENTS.md (v0.5.1)</a>
+    <a href="../docs/WIREFRAMES.md">📐 WIREFRAMES.md (v0.3.1)</a>
+    <a href="../docs/MARKET-SCREENING.md">🔍 Market Screening</a>
+    <a href="README.md">📄 Prototype README</a>
+  </div>
+</section>
+
+<section class="chooser-section">
+  <h2>Verfügbare Prototypen (v0.1)</h2>
+
+  <div class="typology-grid">
+
+    <article class="typology-card typology-card--available">
+      <div class="typology-card__preview" style="background: linear-gradient(135deg, #fff 0%, #FAE1E2 100%);">
+        <div class="typology-card__preview-placeholder" style="color: var(--color-primary);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+          <strong>Hero-CTA Layout</strong>
+          <span>Bedarf anmelden im Mittelpunkt</span>
+        </div>
+      </div>
+      <div class="typology-card__body">
+        <h3 class="typology-card__title">
+          T3-Lite Hero-CTA <span class="typology-card__id">§3.6</span>
+          <span class="badge badge--success">Empfehlung</span>
+        </h3>
+        <p class="typology-card__desc">
+          Reduzierte Service-Catalogue-Variante für Pilot-Scale (1–2 echte Dienste).
+          Lead mit der Hauptaktion, Sekundär-Dienste als Liste. Inkludiert Public Landing,
+          Submitter-Home, 5-Schritte-Wizard, Inbox, Detail-Ansicht, Reviewer-Split-Pane,
+          Rollen-Wechsel (ILBO ↔ GS-Prüfer/in).
+        </p>
+      </div>
+      <div class="typology-card__footer">
+        <span class="typology-card__status">✓ Funktionsfähig · ~6 Sub-Seiten</span>
+        <a href="t3-lite/index.html" class="btn btn--primary btn--sm">Öffnen →</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section class="chooser-section">
+  <h2>Geplante Prototypen (nächste Cuts)</h2>
+
+  <div class="typology-grid">
+
+    <article class="typology-card">
+      <div class="typology-card__preview">
+        <div class="typology-card__preview-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>Karte zuerst</strong>
+          <span>Senaatti / armasuisse</span>
+        </div>
+      </div>
+      <div class="typology-card__body">
+        <h3 class="typology-card__title">T1 Digital-Twin <span class="typology-card__id">§1</span></h3>
+        <p class="typology-card__desc">
+          Karte der Schweiz als Home. Jeder Vorgang beginnt mit einem
+          <em>wo</em>. MapLibre GL + swisstopo. Map-Inbox, Gebäude-Drill-in,
+          Greenfield-Fallback.
+        </p>
+      </div>
+      <div class="typology-card__footer">
+        <span class="typology-card__status">Geplant</span>
+        <a href="#" class="btn btn--outline btn--sm" onclick="alert('Noch nicht implementiert'); return false;">Geplant</a>
+      </div>
+    </article>
+
+    <article class="typology-card">
+      <div class="typology-card__preview" style="background: linear-gradient(135deg, #fff 0%, #DFE4E9 100%);">
+        <div class="typology-card__preview-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <strong>Rollen-Wechsler</strong>
+          <span>armasuisse-Stil</span>
+        </div>
+      </div>
+      <div class="typology-card__body">
+        <h3 class="typology-card__title">T2 Role-Switched <span class="typology-card__id">§2</span></h3>
+        <p class="typology-card__desc">
+          Jede Rolle hat eigenes Home + Vokabular. Mieter / GS-Prüfer/in /
+          PFM-ops. Anker: armasuisse Immo-Portal VBS.
+        </p>
+      </div>
+      <div class="typology-card__footer">
+        <span class="typology-card__status">Geplant</span>
+        <a href="#" class="btn btn--outline btn--sm" onclick="alert('Noch nicht implementiert'); return false;">Geplant</a>
+      </div>
+    </article>
+
+    <article class="typology-card">
+      <div class="typology-card__preview" style="background: linear-gradient(135deg, #fff 0%, #DBEAFE 100%);">
+        <div class="typology-card__preview-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <strong>KPI-Cockpit</strong>
+          <span>Planon / IWMS-Stil</span>
+        </div>
+      </div>
+      <div class="typology-card__body">
+        <h3 class="typology-card__title">T4 IWMS Cockpit <span class="typology-card__id">§4</span></h3>
+        <p class="typology-card__desc">
+          Primärmetrik + einklappbare Sekundär-KPIs. Für BBL-PFM-ops, daily-driver.
+          ePPM-Handover-Panel. Dashboard-Fatigue-Fix per Default-collapsed.
+        </p>
+      </div>
+      <div class="typology-card__footer">
+        <span class="typology-card__status">Geplant</span>
+        <a href="#" class="btn btn--outline btn--sm" onclick="alert('Noch nicht implementiert'); return false;">Geplant</a>
+      </div>
+    </article>
+
+    <article class="typology-card">
+      <div class="typology-card__preview" style="background: linear-gradient(135deg, #fff 0%, #FEF3C7 100%);">
+        <div class="typology-card__preview-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <strong>Service-Catalogue</strong>
+          <span>gov.uk-Stil</span>
+        </div>
+      </div>
+      <div class="typology-card__body">
+        <h3 class="typology-card__title">T3 Full Catalogue <span class="typology-card__id">§3</span></h3>
+        <p class="typology-card__desc">
+          Vollständige Tile-Grid-Variante für mehr Services (Reparatur, Umzug,
+          Spezialreinigung etc.). Roadmap-Ziel, sobald Scope wächst.
+        </p>
+      </div>
+      <div class="typology-card__footer">
+        <span class="typology-card__status">Roadmap</span>
+        <a href="#" class="btn btn--outline btn--sm" onclick="alert('Roadmap-Layout — implementiert sobald T3-Lite skaliert'); return false;">Roadmap</a>
+      </div>
+    </article>
+
+    <article class="typology-card">
+      <div class="typology-card__preview" style="background: linear-gradient(135deg, #fff 0%, #ECFDF5 100%);">
+        <div class="typology-card__preview-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <strong>Hybrid (Produktions-Ziel)</strong>
+          <span>§10.3 v0.3 Empfehlung</span>
+        </div>
+      </div>
+      <div class="typology-card__body">
+        <h3 class="typology-card__title">Empfohlener Hybrid <span class="typology-card__id">§10.3</span></h3>
+        <p class="typology-card__desc">
+          T3-Lite (Submitter) + T2 Role-Routed (Reviewer/PFM) + T6 GEVER-Deep-Link
+          + T4 Cockpit-Widgets. Im T3-Lite-Prototyp bereits zu grossen Teilen verkörpert.
+        </p>
+      </div>
+      <div class="typology-card__footer">
+        <span class="typology-card__status">via T3-Lite verfügbar</span>
+        <a href="t3-lite/index.html" class="btn btn--outline btn--sm">Im T3-Lite öffnen →</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section class="chooser-section" style="background: var(--color-bg-alt); border-radius: var(--radius-lg); padding: var(--space-lg);">
+  <h2 style="font-size: var(--text-h3); margin: 0 0 var(--space-md);">Über diese Prototypen</h2>
+  <p style="font-size: var(--text-body-sm); color: var(--color-text-secondary); margin: 0 0 var(--space-md);">
+    Diese Prototypen sind reine HTML/CSS/JavaScript-Implementierungen ohne Framework oder
+    Build-Step. Mock-Daten als statische JSON-Dateien unter <code>shared/data/</code>.
+    Design-Tokens aus <a href="https://github.com/swiss/designsystem">swiss/designsystem</a>
+    v1.0.9 extrahiert (Noto Sans, Primärrot <code>#d8232a</code>).
+    Persistente Entwürfe via <code>localStorage</code>.
+  </p>
+  <p style="font-size: var(--text-body-sm); color: var(--color-text-secondary); margin: 0;">
+    <strong>Schwesterprojekt:</strong>
+    <a href="https://github.com/bbl-dres/workspace-management">workspace-management</a> —
+    der Pilot teilt das Token- und Routing-Modell. Drücken Sie <kbd>?</kbd> in einem Prototyp für Tastatur-Kurzbefehle.
+  </p>
+</section>
+
+</main>
+
+<footer style="background: var(--color-surface-darker); color: rgba(255,255,255,0.7); padding: var(--space-md); text-align: center; font-size: var(--text-body-xs); margin-top: var(--space-2xl);">
+  © Schweizerische Eidgenossenschaft · BBL Mieterportal-Prototyp · Demonstration · Stand 2026-05-18
+</footer>
+
+</body>
+</html>

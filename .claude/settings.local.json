@@ -105,7 +105,12 @@
       "Bash(Select-Object Name)",
       "Bash(ls -la \"C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub\\\\\" | head -20)",
       "Read(//c/Users/DavidRasner/Documents/**)",
-      "Bash(powershell -Command \"Get-ChildItem -Path 'C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub' -Directory | Select-Object -ExpandProperty Name\")"
+      "Bash(powershell -Command \"Get-ChildItem -Path 'C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub' -Directory | Select-Object -ExpandProperty Name\")",
+      "Bash(xargs grep -l \"hero\\\\|Hero\")",
+      "Bash(cp \"C:/Users/DavidRasner/Documents/GitHub/designsystem/app/assets/logos/BundLogo.svg\" \"wireframes/shared/assets/BundLogo.svg\" && ls wireframes/shared/assets/)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\DavidRasner\\Documents\\GitHub\\designsystem\\app\\assets\\logos"
     ]
   }
 }

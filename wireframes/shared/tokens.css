@@ -78,7 +78,8 @@
   --color-border-light:        #F3F4F6;
   --color-border-input:        #6B7280;
 
-  /* ── FOCUS ────────────────────────────────────────────────────────────── */
+  /* ── FOCUS (CD Bund purple-500 — confirmed in workspace-management
+     and kbob-fdk; both federal sibling prototypes) ─────────────────────── */
   --color-focus:               #8655F6;
   --color-focus-dark:          #C4B5FD;
 
@@ -122,12 +123,14 @@
   --font-family-bold:          'NotoSans', 'Hind', 'Verdana', sans-serif;
   --font-family-mono:          'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
-  /* Type scale (mobile-first; scales at lg / xl breakpoints) */
-  --text-display:              2rem;       /* 32px */
-  --text-h1:                   1.625rem;   /* 26px */
-  --text-h2:                   1.375rem;   /* 22px */
-  --text-h3:                   1.25rem;    /* 20px */
-  --text-h4:                   1.125rem;   /* 18px */
+  /* Type scale (mobile-first base; scales at lg / xl / 3xl breakpoints).
+     CD Bund: text--3xl is 26→32→40→48 across lg/xl/3xl; text--4xl is
+     32→40→48→56. We follow the same step pattern. */
+  --text-display:              2rem;       /* 32px base */
+  --text-h1:                   1.625rem;   /* 26px base */
+  --text-h2:                   1.375rem;   /* 22px base */
+  --text-h3:                   1.25rem;    /* 20px base */
+  --text-h4:                   1.125rem;   /* 18px base */
   --text-body:                 1rem;       /* 16px */
   --text-body-sm:              0.875rem;   /* 14px */
   --text-body-xs:              0.75rem;    /* 12px */
@@ -155,7 +158,7 @@
 
   /* ── LAYOUT ───────────────────────────────────────────────────────────── */
   --container-max-width:       1544px;
-  --container-padding:         1rem;
+  --container-padding:         1rem;       /* 16px base; scales below */
   --grid-gutter:               1.25rem;
   --sidebar-width:             280px;
 
@@ -168,11 +171,11 @@
   --section-py:                3.5rem;
   --section-py-half:           1.75rem;
 
-  /* ── RADIUS ───────────────────────────────────────────────────────────── */
+  /* ── RADIUS (CD Bund: Tailwind rounded-sm = 2px default) ─────────────── */
   --radius-sm:                 2px;
-  --radius:                    3px;
-  --radius-lg:                 6px;
-  --radius-xl:                 10px;
+  --radius:                    2px;     /* default, was 3px */
+  --radius-lg:                 4px;     /* was 6px */
+  --radius-xl:                 8px;     /* was 10px */
   --radius-full:               9999px;
 
   /* ── SHADOWS ──────────────────────────────────────────────────────────── */
@@ -189,7 +192,49 @@
   --z-toast:                   100;
   --z-modal:                   200;
   --z-shortcut-overlay:        300;
+
+  /* ── CARD SHADOW (CD Bund Card uses shadow, not border) ──────────────── */
+  --shadow-card:               0 1px 3px 0 rgba(15, 23, 42, 0.08),
+                               0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --shadow-card-hover:         0 4px 6px -1px rgba(15, 23, 42, 0.08),
+                               0 2px 4px -2px rgba(15, 23, 42, 0.06);
 }
+
+/* ── RESPONSIVE TYPE SCALE — matches CD Bund text--Nxl scaling ───────────
+   CD Bund: tokens scale at lg / xl / 3xl. We follow the same steps so
+   hero titles and headings don't look cramped on desktop. */
+@media (min-width: 1024px) {
+  :root {
+    --text-display: 2.5rem;   /* 40px */
+    --text-h1:      2rem;     /* 32px */
+    --text-h2:      1.625rem; /* 26px */
+    --text-h3:      1.375rem; /* 22px */
+    --text-h4:      1.25rem;  /* 20px */
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --text-display: 3rem;     /* 48px */
+    --text-h1:      2.5rem;   /* 40px */
+    --text-h2:      2rem;     /* 32px */
+    --text-h3:      1.5rem;   /* 24px */
+  }
+}
+@media (min-width: 1920px) {
+  :root {
+    --text-display: 3.5rem;   /* 56px */
+    --text-h1:      3rem;     /* 48px */
+    --text-h2:      2.25rem;  /* 36px */
+  }
+}
+
+/* ── RESPONSIVE CONTAINER PADDING — matches kbob-fdk / CD Bund ──────────
+   Steps: 16 → 28 → 36 → 40 → 48 → 64 px across sm/md/lg/xl/2xl/3xl. */
+@media (min-width: 640px)  { :root { --container-padding: 1.75rem; } }   /* 28 */
+@media (min-width: 768px)  { :root { --container-padding: 2.25rem; } }   /* 36 */
+@media (min-width: 1024px) { :root { --container-padding: 2.5rem; } }    /* 40 */
+@media (min-width: 1280px) { :root { --container-padding: 3rem; } }      /* 48 */
+@media (min-width: 1920px) { :root { --container-padding: 4rem; } }      /* 64 */
 
 /* Breakpoint reference (use in @media; CSS variables can't be used in @media):
      xs:  480px   sm:  640px   md:  768px   lg:  1024px

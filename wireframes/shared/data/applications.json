@@ -1,0 +1,181 @@
+[
+  {
+    "id": "BE-2026-014",
+    "type": "Kleinantrag",
+    "pipelineVariant": "standard",
+    "status": "in_gs_pruefung",
+    "submitterId": "U.123.456",
+    "submitterVe": "UVEK",
+    "submitterDep": "BAFU",
+    "buildingId": "2011",
+    "submittedAt": "2026-05-12T14:07:00",
+    "assignedReviewerId": "U.654.321",
+    "address": "Eichweg 22, 3003 Bern",
+    "sap": { "bk": "1086", "we": "2011", "obj": "AA" },
+    "egid": "100234567",
+    "naw": {
+      "class": "Kollaborativ-Standard",
+      "confidence": 0.84,
+      "answers": {
+        "focus": "Kollaborativ",
+        "remoteShare": 30,
+        "confidentiality": "mittel",
+        "publicContact": "gelegentlich",
+        "specials": []
+      }
+    },
+    "fte": 8,
+    "arbeitsplaetze": 7,
+    "hnf2": 77,
+    "gf": 154,
+    "ukKosten": 462000,
+    "moeblierung": 50050,
+    "attachments": [
+      { "name": "WiBe.pdf", "size": "1.2 MB", "scanStatus": "ok" },
+      { "name": "Rechtsgrundlage.pdf", "size": "220 KB", "scanStatus": "ok" }
+    ],
+    "history": [
+      { "ts": "2026-05-12T14:02:11", "actor": "Andrea Muster", "action": "Antrag erstellt" },
+      { "ts": "2026-05-12T14:07:34", "actor": "Andrea Muster", "action": "Eingereicht" },
+      { "ts": "2026-05-12T14:07:35", "actor": "System", "action": "E-Mail an GS UVEK gesendet" },
+      { "ts": "2026-05-14T09:00:02", "actor": "Jörg Berger",  "action": "Zur Bearbeitung übernommen" }
+    ]
+  },
+  {
+    "id": "SEM-2026-002",
+    "type": "Grossantrag",
+    "pipelineVariant": "standard",
+    "status": "eingereicht",
+    "submitterId": "U.123.456",
+    "submitterVe": "SEM",
+    "submitterDep": "SEM",
+    "buildingId": "2012",
+    "submittedAt": "2026-05-11T10:42:00",
+    "address": "Route Cantonale, 2017 Boudry",
+    "sap": { "bk": "1086", "we": "2012", "obj": "AA" },
+    "egid": "100345678",
+    "naw": null,
+    "berths": 160,
+    "berthsFamily": 40,
+    "berthsSingle": 20,
+    "berthsShared": 100,
+    "betreuungsFte": 14,
+    "sicherheitsFte": 4,
+    "verfahrensraeume": 3,
+    "investitionspauschale": 19200000,
+    "attachments": [
+      { "name": "SEM-Betriebskonzept-2024.pdf", "size": "2.5 MB", "scanStatus": "ok" }
+    ],
+    "history": [
+      { "ts": "2026-05-11T10:30:00", "actor": "Andrea Muster", "action": "Antrag erstellt" },
+      { "ts": "2026-05-11T10:42:00", "actor": "Andrea Muster", "action": "Eingereicht" }
+    ]
+  },
+  {
+    "id": "Z-7-204",
+    "type": "Kleinantrag",
+    "pipelineVariant": "standard",
+    "status": "rueckfrage",
+    "submitterId": "U.123.456",
+    "submitterVe": "UVEK",
+    "buildingId": "2013",
+    "submittedAt": "2026-05-09T11:00:00",
+    "assignedReviewerId": "U.654.321",
+    "address": "Sulgenrain 19, 3007 Bern",
+    "sap": { "bk": "1086", "we": "2013", "obj": "AA" },
+    "egid": "100456789",
+    "naw": {
+      "class": "Kollaborativ-Standard",
+      "confidence": 0.81,
+      "answers": { "focus": "Kollaborativ", "remoteShare": 25, "confidentiality": "mittel", "publicContact": "keiner", "specials": [] }
+    },
+    "fte": 12,
+    "arbeitsplaetze": 10,
+    "hnf2": 115,
+    "gf": 230,
+    "ukKosten": 690000,
+    "moeblierung": 74750,
+    "attachments": [
+      { "name": "WiBe.pdf", "size": "1.1 MB", "scanStatus": "ok" }
+    ],
+    "auflagen": [
+      { "field": "fte", "comment": "FTE-Annahme prüfen — mit HR abgleichen.", "done": false },
+      { "field": "attachments", "comment": "Klimanachweis als zusätzlichen Anhang.", "done": false }
+    ],
+    "reviewerBegruendung": "Genehmigung mit Auflagen. Bitte FTE-Annahme überprüfen und Klimanachweis nachreichen.",
+    "history": [
+      { "ts": "2026-05-09T10:42:00", "actor": "Andrea Muster", "action": "Antrag erstellt" },
+      { "ts": "2026-05-09T11:00:00", "actor": "Andrea Muster", "action": "Eingereicht" },
+      { "ts": "2026-05-14T16:18:42", "actor": "Jörg Berger",  "action": "Auflage gesetzt: FTE-Annahme prüfen" },
+      { "ts": "2026-05-14T16:19:00", "actor": "Jörg Berger",  "action": "Rückfrage an Antragsteller" }
+    ]
+  },
+  {
+    "id": "BE-2026-013",
+    "type": "Kleinantrag",
+    "pipelineVariant": "standard",
+    "status": "in_eppm",
+    "submitterId": "U.123.456",
+    "submitterVe": "UVEK",
+    "buildingId": "2010",
+    "submittedAt": "2026-05-08T09:12:00",
+    "address": "Bundesgasse 3, 3003 Bern",
+    "sap": { "bk": "1086", "we": "2010", "obj": "AA" },
+    "egid": "100123456",
+    "bedarfsmeldungNr": "BM-2026-000713",
+    "naw": {
+      "class": "Kollaborativ-Standard",
+      "confidence": 0.92,
+      "answers": { "focus": "Kollaborativ", "remoteShare": 20, "confidentiality": "niedrig", "publicContact": "regelmaessig", "specials": [] }
+    },
+    "fte": 4,
+    "arbeitsplaetze": 4,
+    "hnf2": 38,
+    "gf": 77,
+    "ukKosten": 231000,
+    "moeblierung": 25000,
+    "attachments": [
+      { "name": "WiBe.pdf", "size": "0.9 MB", "scanStatus": "ok" }
+    ],
+    "history": [
+      { "ts": "2026-05-08T08:50:00", "actor": "Andrea Muster", "action": "Antrag erstellt" },
+      { "ts": "2026-05-08T09:12:00", "actor": "Andrea Muster", "action": "Eingereicht" },
+      { "ts": "2026-05-10T11:33:00", "actor": "Jörg Berger",  "action": "Genehmigt ohne Auflagen" },
+      { "ts": "2026-05-11T09:01:00", "actor": "System", "action": "ePPM-Übergabe erfolgreich (BM-2026-000713)" }
+    ]
+  },
+  {
+    "id": "BK-2026-007",
+    "type": "Kleinantrag",
+    "pipelineVariant": "bk",
+    "status": "in_pfm_pruefung",
+    "submitterId": "U.123.456",
+    "submitterVe": "BK",
+    "submitterDep": "Bundeskanzlei",
+    "buildingId": "2010",
+    "submittedAt": "2026-05-14T13:00:00",
+    "assignedReviewerId": "U.111.222",
+    "address": "Bundeshaus West, Bundesgasse 3, 3003 Bern",
+    "sap": { "bk": "1086", "we": "2010", "obj": "AB" },
+    "egid": "100123456",
+    "naw": {
+      "class": "Kollaborativ-Standard",
+      "confidence": 0.88,
+      "answers": { "focus": "Kollaborativ", "remoteShare": 20, "confidentiality": "mittel", "publicContact": "keiner", "specials": [] }
+    },
+    "fte": 5,
+    "arbeitsplaetze": 4,
+    "hnf2": 48,
+    "gf": 96,
+    "ukKosten": 288000,
+    "moeblierung": 31200,
+    "attachments": [
+      { "name": "WiBe.pdf", "size": "0.8 MB", "scanStatus": "ok" },
+      { "name": "Rechtsgrundlage.pdf", "size": "180 KB", "scanStatus": "ok" }
+    ],
+    "history": [
+      { "ts": "2026-05-14T12:30:00", "actor": "Andrea Muster", "action": "Antrag erstellt (BK-Pfad erkannt)" },
+      { "ts": "2026-05-14T13:00:00", "actor": "Andrea Muster", "action": "Direkt an BBL PFM (kein GS, FUNC-FG-005)" }
+    ]
+  }
+]

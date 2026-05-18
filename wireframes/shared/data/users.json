@@ -1,0 +1,42 @@
+[
+  {
+    "id": "U.123.456",
+    "name": "Andrea Muster",
+    "email": "andrea.muster@uvek.admin.ch",
+    "ve": "UVEK",
+    "dep": "BAFU",
+    "roles": ["ILBO", "GS-Prüfer/in"]
+  },
+  {
+    "id": "U.654.321",
+    "name": "Jörg Berger",
+    "email": "joerg.berger@uvek.admin.ch",
+    "ve": "UVEK",
+    "dep": "GS UVEK",
+    "roles": ["GS-Prüfer/in"]
+  },
+  {
+    "id": "U.111.222",
+    "name": "Holger Ludwig",
+    "email": "holger.ludwig@bbl.admin.ch",
+    "ve": "BBL",
+    "dep": "PFM",
+    "roles": ["BBL-PFM"]
+  },
+  {
+    "id": "U.333.444",
+    "name": "Daniela Imbach",
+    "email": "daniela.imbach@efv.admin.ch",
+    "ve": "EFV",
+    "dep": "Revisionsdienst",
+    "roles": ["Auditor"]
+  },
+  {
+    "id": "U.555.666",
+    "name": "Eveline Frey",
+    "email": "eveline.frey@bbl.admin.ch",
+    "ve": "BBL",
+    "dep": "Campus",
+    "roles": ["BBL-Campus"]
+  }
+]

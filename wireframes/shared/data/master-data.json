@@ -1,0 +1,23 @@
+{
+  "nawClasses": [
+    { "name": "Konzentriert-Einzel",     "hnf2PerFte": 15.0, "gfPerFte": 28.0, "description": "Einzelbüros, hohe Vertraulichkeit" },
+    { "name": "Konzentriert-Gruppe",     "hnf2PerFte": 13.0, "gfPerFte": 25.0, "description": "Kleine Gruppenbüros (2–4 Personen)" },
+    { "name": "Kollaborativ-Standard",   "hnf2PerFte": 12.0, "gfPerFte": 24.0, "description": "Standard-Bundesbüro (Default)" },
+    { "name": "Kollaborativ-Open",       "hnf2PerFte": 10.0, "gfPerFte": 21.0, "description": "Open Space, Publikumsverkehr" },
+    { "name": "Hybrid-Activity-Based",   "hnf2PerFte":  9.0, "gfPerFte": 20.0, "description": "Activity-Based-Working mit ≥40% Remote" },
+    { "name": "Sicherheit-Labor",        "hnf2PerFte": 18.0, "gfPerFte": 34.0, "description": "Sicherheitsbereich, Labor, Spezial-Ausstattung" }
+  ],
+  "deskSharingFactor": 0.8,
+  "moeblierungProM2": 650,
+  "ukKostenObergrenzeProM2Gf": 60,
+  "ukKostenHardBlockMultiplier": 1.2,
+  "semProBettenplatz": 120000,
+  "buchungskreisBbl": "1086",
+  "pfmKategorien": [
+    "Verwaltung Klasse I (Repräsentativ)",
+    "Verwaltung Klasse II (Standard)",
+    "Verwaltung Klasse III (Funktional)",
+    "Empfangszentrum SEM",
+    "Vertretung EDA"
+  ]
+}
