@@ -73,6 +73,11 @@ mindmap
 | T | Fintech adjacencies | Bilt Rewards, Rentmoola, Flatfair, GoCardless real-estate. |
 | U | Indoor wayfinding | Steerpath, MapsIndoors, Pointr, MazeMap, IndoorAtlas, MappedIn. |
 | V | Occupancy analytics | Locatee (Tango), VergeSense, Density, XY Sense, Butlr, Disruptive Technologies. |
+| W | Construction PM & BIM CDE handoff | Pre-occupancy design/build/handover with BIM2FM exchange (Autodesk ACC, Bentley iTwin, Revizto, Solibri, BIMcollab, Procore, Trimble Connect, dRofus, PlanRadar, Buildots, Capmo). |
+| X | Lease abstraction / AI document extraction | SAP RE-FX migration & lease ingestion (Leverton, Prophia, contract.fit, Hyperscience, Rossum, LeaseHawk, docunite). |
+| Y | CAFM (DACH-specific, distinct from IWMS) | German-language facility management with GEFMA 444 heritage (pit-FM, waveware, ConjectFM, FAMOS, KEYLOGIC, Speedikon FM, GEORG). |
+| Z | ESG portfolio-data platforms | Portfolio-level VILB / EPBD / CSRD / GRESB reporting beyond submetering (Deepki, Measurabl, Optera, Carbonsight, ENGIE Impact, Spacewell Energy, Sustain.life, Schneider Resource Advisor, Sweep). |
+| AA | OSS / civic-tech alternatives | EMBAG-Art.-9-aligned open-source options (Odoo, ERPNext, Tryton, Keycloak, Zammad, Mattermost, GeoNode, BIMserver, Hugging Face document-AI, civic-tech.ch). |
 
 ## 4. Summary
 
@@ -138,6 +143,7 @@ mindmap
 
 **Maturity.** Mature and consolidating.
 **Swiss-context note.** Planon is the only SAP Endorsed App in this category — structurally important for SAP-RE-FX estates like BBL's. Spacewell (Antwerp, Nemetschek-owned) is the closest DACH-anchored IWMS leader. Swiss data residency must be configured explicitly.
+**Taxonomy note.** Several vendors here (Eptura, ServiceNow, Tango) also appear in Segment B as the IWMS / Workplace-Experience boundary blurs in 2025–2026 analyst frameworks. Treat A and B as a single converging market when scoring incumbents.
 
 ### B. Workplace experience applications (WEX)
 
@@ -163,6 +169,7 @@ mindmap
 
 **Maturity.** Transitional → consolidating; first Gartner MQ in 2026.
 **Swiss-context note.** Most US/UK/AU vendors host outside Switzerland; only Microsoft, AWS, Google and Azure have CH regions. AGOV/SAML federation feasibility is product-specific; ServiceNow WSD has documented SAML/OIDC IdP federation.
+**Taxonomy note.** Several vendors here (Eptura, Robin, OfficeSpace, Tango, ServiceNow) overlap with Segment A. Gartner's April 2026 WEX MQ and the Verdantix CPIP/IWMS Quadrant frame this as one converging market — A and B should be read together.
 
 ### C. Desk / room booking specialists
 
@@ -198,6 +205,7 @@ mindmap
 | [dormakaba exivo](https://www.dormakaba.com/) | Rümlang, CH | Per door | Swiss-HQ; Aareon Connect partner |
 
 **Swiss-context note.** dormakaba is Swiss-HQ and aligns with KBOB/SIA hardware standards.
+**Taxonomy note.** This segment combines two distinct buyer personas: **visitor management** software (HR/admin decision-makers — Envoy, Proxyclick / Eptura Visitor, SwipedOn, Robin Visitors) and **mobile access / credentials** (facilities/security — Kisi, HID Origo, Salto KS, Verkada Guest, Brivo, dormakaba exivo). Procurement is typically separate and listing them together is editorial convenience.
 
 ### E. Property-management ERP with embedded tenant portal
 
@@ -223,38 +231,39 @@ mindmap
 | [Abacus AbaImmo](https://www.abacus.ch/) | Wittenbach, CH | Hybrid | Per module | Abacus FIBU/CRM | Swiss ERP suite; CHF 1.5 m minority stake in Tayo (since 2021) for tenant portal |
 | [Fairwalter](https://www.fairwalter.com/) | Zurich, CH (W&W subsidiary) | Azure CH | Per unit; transparent | Banking APIs | Hosted on Microsoft Azure in Switzerland |
 | [Immomig](https://www.immomig.ch/) | Sursee/Fribourg, CH (founded 2004 by Patrick Maillard) | Cloud (CH) | Per agent | DigiRENT, dreamo.ch | AI all-in-one real-estate CRM; >6,000 users |
+| [Tayo](https://www.tayo.ch/) | Lausanne, CH | Cloud (CH) | Per unit | Open API; banking | **Swiss-domiciled** tenant-portal SaaS; Abacus CHF 1.5 m minority stake since 2021 (also referenced under Abacus row) |
 | [Arthur Online](https://www.arthuronline.co.uk/) | London, UK (Aareon) | SaaS | Per unit | Aareon ecosystem | UK SMB property |
 | [Momentum (Aareon)](https://www.momentum.se/) | Stockholm, SE (Aareon) | SaaS | Per unit | Nordic banking | Aareon Nordic platform |
 
-<sub>**Preview — selected vendors** (logos via vendors' Open Graph / favicon assets; links to source homepages):</sub>
+<sub>**Preview — selected vendors** (product screenshots, diagrams or illustrations from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
 
 <table>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://www.aareon.de/"><img src="../assets/images/market-screening/aareon.svg" alt="Aareon" height="60"/></a><br/>
-<sub><b>Aareon Wodis Yuneo</b><br/>DACH housing-PM leader<br/><a href="https://www.aareon.de/">aareon.de</a></sub>
+<a href="https://www.aareon.de/"><img src="../assets/images/market-screening/aareon.svg" alt="Aareon" width="280"/></a><br/>
+<sub><b>Aareon Wodis Yuneo</b><br/><i>[Logo]</i> · No public Wodis Yuneo screenshot — product pages gated<br/><a href="https://www.aareon.de/">aareon.de</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.garaio-rem.ch/"><img src="../assets/images/market-screening/garaio-rem.png" alt="GARAIO REM" height="60"/></a><br/>
-<sub><b>GARAIO REM + aroov</b><br/>Swiss PM, 1.6 m units managed<br/><a href="https://www.garaio-rem.ch/">garaio-rem.ch</a></sub>
+<a href="https://www.garaio-rem.ch/de/garaio-rem-entdecken/funktionen"><img src="../assets/images/market-screening/garaio-rem.png" alt="GARAIO REM functional plan diagram" width="280"/></a><br/>
+<sub><b>GARAIO REM + aroov</b><br/><i>[Diagram]</i> · Functional plan (Funktionen page)<br/><a href="https://www.garaio-rem.ch/">garaio-rem.ch</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.wwimmo.ch/"><img src="../assets/images/market-screening/wwimmo.png" alt="W&amp;W ImmoTop2 / Rimo R5" height="60"/></a><br/>
-<sub><b>W&amp;W ImmoTop2 / Rimo R5</b><br/>Swiss leader, &gt;4,000 customers<br/><a href="https://www.wwimmo.ch/">wwimmo.ch</a></sub>
+<a href="https://www.wwimmo.ch/produkte/rimor5/"><img src="../assets/images/market-screening/wwimmo.png" alt="Rimo R5 dashboard screenshot" width="280"/></a><br/>
+<sub><b>W&amp;W Rimo R5 / ImmoTop2</b><br/><i>[Dashboard]</i> · Rimo R5 main view<br/><a href="https://www.wwimmo.ch/produkte/rimor5/">wwimmo.ch/rimor5</a></sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://www.abacus.ch/"><img src="../assets/images/market-screening/abacus.jpg" alt="Abacus AbaImmo" height="60"/></a><br/>
-<sub><b>Abacus AbaImmo</b><br/>Swiss ERP suite (Tayo stake)<br/><a href="https://www.abacus.ch/">abacus.ch</a></sub>
+<a href="https://www.abacus.ch/branchen/immobilienbranche/immobilienbewirtschaftung/uebersicht"><img src="../assets/images/market-screening/abacus.png" alt="Abacus AbaImmo illustration" width="280"/></a><br/>
+<sub><b>Abacus AbaImmo</b><br/><i>[Illustration]</i> · AbaImmo product explainer<br/><a href="https://www.abacus.ch/">abacus.ch</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.yardi.com/"><img src="../assets/images/market-screening/yardi.png" alt="Yardi" height="60"/></a><br/>
-<sub><b>Yardi Voyager + RentCafe</b><br/>US multifamily, EMEA presence<br/><a href="https://www.yardi.com/">yardi.com</a></sub>
+<a href="https://www.yardi.com/suite/voyager-suite/"><img src="../assets/images/market-screening/yardi.png" alt="Yardi MaintenanceIQ dashboard" width="280"/></a><br/>
+<sub><b>Yardi Voyager + RentCafe</b><br/><i>[Dashboard]</i> · MaintenanceIQ hero (Voyager suite)<br/><a href="https://www.yardi.com/">yardi.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.mrisoftware.com/"><img src="../assets/images/market-screening/mri.png" alt="MRI Software" height="60"/></a><br/>
-<sub><b>MRI Software</b><br/>53 acquisitions; global PM<br/><a href="https://www.mrisoftware.com/">mrisoftware.com</a></sub>
+<a href="https://www.mrisoftware.com/"><img src="../assets/images/market-screening/mri.png" alt="MRI Software" width="280"/></a><br/>
+<sub><b>MRI Software</b><br/><i>[Logo]</i> · Public product screenshots gated behind demo<br/><a href="https://www.mrisoftware.com/">mrisoftware.com</a></sub>
 </td>
 </tr>
 </table>
@@ -313,41 +322,41 @@ mindmap
 | [SwissSign / SwissID](https://www.swisssign.com/) | Glattbrugg, CH | Swiss Post-owned identity and trust service |
 | [AGOV](https://www.agov.admin.ch/) | Bundeskanzlei DTI, Bern | Federal login (CH-LOGIN successor) for federal, cantonal, communal authorities; passwordless via AGOV access App or hardware security key; **1.6 m residents with AGOV accounts and 8 m logins in 2025**; SAML/OIDC IdP; operated by FOITT |
 | [Swiss e-ID](https://www.eid.admin.ch/) | EJPD / Bundeskanzlei | State-issued, SSI-based; planned launch **1 December 2026**; usable as login factor in AGOV |
-| [eIAM / sign.eIAM](https://www.eiam.admin.ch/) | FOITT, CH | Federal IdM that AGOV is replacing for federal-admin use |
+| [eIAM / sign.eIAM](https://www.eiam.admin.ch/) | FOITT, CH | Federal IAM for **internal/staff access** to federal-administration systems. **AGOV replaces CH-LOGIN for public users**; eIAM remains in service for federal staff — the two are co-existent, not predecessor/successor |
 | [DocuSign](https://www.docusign.com/) | San Francisco, USA | Largest international e-signature provider |
 | [Adobe Sign / Acrobat Sign](https://www.adobe.com/sign.html) | San José, USA | Tightly integrated to Adobe ID |
 | [Yousign](https://yousign.com/) | Caen, FR | eIDAS-compliant EU vendor |
 | [Scrive](https://www.scrive.com/) | Stockholm, SE | Aareon Connect partner for digital signatures |
 
-<sub>**Preview — selected vendors** (logos via vendors' Open Graph / favicon assets; links to source homepages):</sub>
+<sub>**Preview — selected vendors** (product screenshots, workflow diagrams or illustrations from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
 
 <table>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://www.skribble.com/"><img src="../assets/images/market-screening/skribble.png" alt="Skribble" height="60"/></a><br/>
-<sub><b>Skribble</b><br/>ZertES + eIDAS QES (Zurich)<br/><a href="https://www.skribble.com/">skribble.com</a></sub>
+<a href="https://www.skribble.com/"><img src="../assets/images/market-screening/skribble.webp" alt="Skribble signing interface" width="280"/></a><br/>
+<sub><b>Skribble</b><br/><i>[Interface]</i> · QES signing screen (DE landing)<br/><a href="https://www.skribble.com/">skribble.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.swisssign.com/"><img src="../assets/images/market-screening/swisssign.svg" alt="SwissSign" height="60"/></a><br/>
-<sub><b>SwissSign / SwissID</b><br/>Swiss Post-owned identity<br/><a href="https://www.swisssign.com/">swisssign.com</a></sub>
+<a href="https://www.swisssign.com/"><img src="../assets/images/market-screening/swisssign.svg" alt="SwissSign" width="280"/></a><br/>
+<sub><b>SwissSign / SwissID</b><br/><i>[Logo]</i> · No public product screenshot found<br/><a href="https://www.swisssign.com/">swisssign.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.agov.admin.ch/"><img src="../assets/images/market-screening/agov.png" alt="AGOV" height="60"/></a><br/>
-<sub><b>AGOV</b><br/>Federal CH login, 1.6 m users<br/><a href="https://www.agov.admin.ch/">agov.admin.ch</a></sub>
+<a href="https://www.agov.admin.ch/"><img src="../assets/images/market-screening/agov.png" alt="AGOV access App illustration" width="280"/></a><br/>
+<sub><b>AGOV</b><br/><i>[Illustration]</i> · AGOV access App screen<br/><a href="https://www.agov.admin.ch/">agov.admin.ch</a></sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://www.docusign.com/"><img src="../assets/images/market-screening/docusign.png" alt="DocuSign" height="60"/></a><br/>
-<sub><b>DocuSign</b><br/>Largest international eSig<br/><a href="https://www.docusign.com/">docusign.com</a></sub>
+<a href="https://www.docusign.com/products/electronic-signature"><img src="../assets/images/market-screening/docusign.svg" alt="DocuSign IDV workflow diagram" width="280"/></a><br/>
+<sub><b>DocuSign</b><br/><i>[Workflow]</i> · IDV identity-verification workflow<br/><a href="https://www.docusign.com/">docusign.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.adobe.com/sign.html"><img src="../assets/images/market-screening/adobe-sign.ico" alt="Adobe Sign" height="60"/></a><br/>
-<sub><b>Adobe Sign</b><br/>Adobe-integrated eSig<br/><a href="https://www.adobe.com/sign.html">adobe.com/sign</a></sub>
+<a href="https://www.adobe.com/sign.html"><img src="../assets/images/market-screening/adobe-sign.ico" alt="Adobe Sign favicon" width="280"/></a><br/>
+<sub><b>Adobe Sign</b><br/><i>[Favicon]</i> · Adobe blocks bot fetches; no public screenshot retrievable<br/><a href="https://www.adobe.com/sign.html">adobe.com/sign</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://yousign.com/"><img src="../assets/images/market-screening/yousign.png" alt="Yousign" height="60"/></a><br/>
-<sub><b>Yousign</b><br/>French eIDAS provider<br/><a href="https://yousign.com/">yousign.com</a></sub>
+<a href="https://yousign.com/"><img src="../assets/images/market-screening/yousign.avif" alt="Yousign hero illustration" width="280"/></a><br/>
+<sub><b>Yousign</b><br/><i>[Hero]</i> · Homepage product illustration<br/><a href="https://yousign.com/">yousign.com</a></sub>
 </td>
 </tr>
 </table>
@@ -359,6 +368,8 @@ Examples: BImA Adakta (DE); Acta Nova (Swiss federal GEVER); SharePoint Online; 
 ### K. AI tenant copilots / conversational service
 
 Examples: Aareon CRM-Portal KI-Chatbot; casavi smartflows; Allthings AI; Knock; RentDynamics; Lobby; Famulor (EU-hosted AI voice agent integrating with AppFolio, Yardi, Buildium, Casavi, Domus, Aareon, Wodis). ServiceNow Now Assist embedded in WSD. Emerging category; data-protection posture varies considerably.
+
+**Taxonomy note.** "AI tenant copilots" is a horizontal *layer*, not a standalone vendor category — virtually every Segment B, F, G product is bolting on the same primitives (RAG over tenant docs, LLM-routed ticket triage, voice agents on top of CRMs). Reading this segment in isolation will overstate its standalone vendor depth.
 
 ### L. Smart-building IoT / digital twin
 
@@ -374,6 +385,9 @@ Examples: Aareon CRM-Portal KI-Chatbot; casavi smartflows; Allthings AI; Knock; 
 | [Disruptive Technologies](https://www.disruptive-technologies.com/) | Oslo, NO | Cellular IoT sensors |
 | [ThoughtWire](https://www.thoughtwire.com/) | Toronto, CA | Hospital + smart-building twin |
 | [Comfy (Siemens)](https://www.comfyapp.com/) | Oakland (CA), USA | Siemens Smart Infrastructure |
+| [Schindler Ahead](https://www.schindler.com/com/internet/en/mobility-solutions/products/schindler-ahead.html) | Ebikon, CH | **Swiss-domiciled** elevator/escalator IoT (ActionBoard, RemoteMonitoring); widespread in federal buildings |
+| [KONE 24/7 Connected Services](https://www.kone.ch/) | Espoo, FI (KONE; CH subsidiary Brüttisellen) | Elevator/escalator predictive-maintenance IoT; deep CH installer presence |
+| [Bosch IoT Suite](https://www.bosch-iotsuite.com/) | Stuttgart, DE | DE-anchored building/asset IoT; FIWARE-compatible |
 
 ### M. Lease management & lease accounting
 
@@ -389,8 +403,10 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | [Minol](https://www.minol.com/) | Leinfelden-Echterdingen, DE | Tenant consumption portal |
 | [Aareon EnergieHub](https://www.aareon.com/) | Mainz, DE | Energy data hub for housing operators |
 | [Spacewell Energy (Dexma)](https://spacewell.com/) | Barcelona, ES | AI energy management |
+| [NeoVac](https://www.neovac.ch/) | Oberriet, CH | **Swiss-domiciled** submetering, heat-cost allocation and tenant cost-reporting; deep CH installer network |
+| [Equa Solutions](https://www.equa-solutions.ch/) | Lausanne, CH | **Swiss-domiciled** HVAC controls + sub-metering optimisation |
 
-**Swiss-context note.** Directly relevant to VILB Art. 9 reporting and EPBD 2024/1275 disclosures.
+**Swiss-context note.** Directly relevant to VILB Art. 9 reporting and EPBD 2024/1275 disclosures. The DE-only submetering majors (Techem, ista, Brunata, Minol) are widely deployed in CH but NeoVac is the closest CH-domiciled alternative — relevant where data-residency is a procurement filter.
 
 ### O. Listing & onboarding portals
 
@@ -408,6 +424,9 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | [BIG Wohn- und Mieterservice](https://www.big.at/) | Bundesimmobiliengesellschaft, Vienna | Austrian federal property |
 | [Statsbygg](https://www.statsbygg.no/) | Oslo, NO | Norwegian state property |
 | [armasuisse Immo-Portal VBS](https://www.ar.admin.ch/de/immo-portal) | armasuisse Immobilien, Bern, CH | Re-launched 1 May 2024; role-based (Nutzer/Mieter/Eigentümervertreter/Betreiber/IKT/Departementsebene); ZUVA Weisungen; DE/FR (IT planned); BBL liaison for Bern Verwaltungsbauten codified |
+| [Bouwinvest](https://www.bouwinvest.com/) | Amsterdam, NL | Dutch state-pension-backed RE investor; **operator benchmark** for tenant portals on a proprietary stack (not a vendor sale) |
+| [CBRE Investment Management](https://www.cbreim.com/) | Los Angeles, USA | Global RE investor; **operator benchmark** for corporate-occupier tenant portals on a proprietary stack |
+| [Defence Infrastructure Organisation (DIO)](https://www.gov.uk/government/organisations/defence-infrastructure-organisation) | Sutton Coldfield, UK | UK MoD estate operator; military-housing benchmark adjacent to CH armasuisse perimeter |
 
 **Swiss-context note.** armasuisse Immo-Portal is BBL's closest peer benchmark inside Switzerland.
 
@@ -436,35 +455,35 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | Google Cloud `europe-west6` (Zurich) | Zurich | Launched 2019 |
 | AWS European Sovereign Cloud — `aws-eusc` (`eusc-de-east-1`, Brandenburg, DE) | Brandenburg, DE | GA 14 Jan 2026; €7.8 bn investment; EU-resident personnel/operations; NOT in Switzerland |
 
-<sub>**Preview — selected providers** (logos via vendors' Open Graph / favicon assets; links to source homepages):</sub>
+<sub>**Preview — selected providers** (region maps, architecture diagrams or datacenter imagery from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
 
 <table>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://www.swisscom.ch/de/business.html"><img src="../assets/images/market-screening/swisscom.png" alt="Swisscom" height="60"/></a><br/>
-<sub><b>Swisscom Sovereign Cloud</b><br/>Swiss Tier-4 sovereign DCs<br/><a href="https://www.swisscom.ch/">swisscom.ch</a></sub>
+<a href="https://www.swisscom.ch/en/business/enterprise/offer/cloud.html"><img src="../assets/images/market-screening/swisscom.png" alt="Swisscom cloud architecture" width="280"/></a><br/>
+<sub><b>Swisscom Sovereign Cloud</b><br/><i>[Diagram]</i> · Cloud + datacenter service stack<br/><a href="https://www.swisscom.ch/">swisscom.ch</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.exoscale.com/"><img src="../assets/images/market-screening/exoscale.png" alt="Exoscale" height="60"/></a><br/>
-<sub><b>Exoscale</b><br/>CH-domiciled cloud (ZRH/GVA)<br/><a href="https://www.exoscale.com/">exoscale.com</a></sub>
+<a href="https://www.exoscale.com/datacenters/"><img src="../assets/images/market-screening/exoscale.png" alt="Exoscale 2025 datacenter map" width="280"/></a><br/>
+<sub><b>Exoscale</b><br/><i>[Region map]</i> · Datacenters 2025 (CH/AT/DE/BG + partners)<br/><a href="https://www.exoscale.com/">exoscale.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://www.infomaniak.com/"><img src="../assets/images/market-screening/infomaniak.png" alt="Infomaniak" height="60"/></a><br/>
-<sub><b>Infomaniak</b><br/>Geneva-domiciled provider<br/><a href="https://www.infomaniak.com/">infomaniak.com</a></sub>
+<a href="https://www.infomaniak.com/en/about"><img src="../assets/images/market-screening/infomaniak.jpg" alt="Infomaniak Geneva datacenter" width="280"/></a><br/>
+<sub><b>Infomaniak</b><br/><i>[Photo]</i> · Geneva datacenter (About page)<br/><a href="https://www.infomaniak.com/">infomaniak.com</a></sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://aws.amazon.com/local/switzerland/"><img src="../assets/images/market-screening/aws.png" alt="AWS Zurich" height="60"/></a><br/>
-<sub><b>AWS Zurich (eu-central-2)</b><br/>3 AZs, opened Nov 2022<br/><a href="https://aws.amazon.com/local/switzerland/">aws.amazon.com</a></sub>
+<a href="https://aws.amazon.com/local/switzerland/"><img src="../assets/images/market-screening/aws.jpg" alt="AWS in Switzerland hero" width="280"/></a><br/>
+<sub><b>AWS Zurich (eu-central-2)</b><br/><i>[Hero]</i> · AWS in Switzerland landing<br/><a href="https://aws.amazon.com/local/switzerland/">aws.amazon.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://azure.microsoft.com/"><img src="../assets/images/market-screening/azure.ico" alt="Azure Switzerland" height="60"/></a><br/>
-<sub><b>Azure Switzerland N/W</b><br/>Zürich + Geneva (2019)<br/><a href="https://azure.microsoft.com/">azure.microsoft.com</a></sub>
+<a href="https://datacenters.microsoft.com/"><img src="../assets/images/market-screening/azure.jpg" alt="Azure Europe DC infrastructure" width="280"/></a><br/>
+<sub><b>Azure Switzerland N/W</b><br/><i>[Infrastructure]</i> · Europe datacenter infrastructure<br/><a href="https://datacenters.microsoft.com/">datacenters.microsoft.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://cloud.google.com/about/locations/zurich"><img src="../assets/images/market-screening/google-cloud.png" alt="Google Cloud Zurich" height="60"/></a><br/>
-<sub><b>Google Cloud Zurich</b><br/>europe-west6 (2019)<br/><a href="https://cloud.google.com/about/locations/zurich">cloud.google.com</a></sub>
+<a href="https://cloud.google.com/about/locations"><img src="../assets/images/market-screening/google-cloud.svg" alt="Google Cloud global regions" width="280"/></a><br/>
+<sub><b>Google Cloud Zurich</b><br/><i>[Region map]</i> · Global regions (europe-west6 highlighted)<br/><a href="https://cloud.google.com/">cloud.google.com</a></sub>
 </td>
 </tr>
 </table>
@@ -487,6 +506,107 @@ Steerpath (FI; powers Senaatti's Senate App); MapsIndoors (DK); Pointr (UK); Maz
 
 Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-based; Zurich is Tango's European HQ); VergeSense (US); Density (US); XY Sense (AU); Butlr (US — thermal); Disruptive Technologies (NO).
 
+### W. Construction project management & BIM CDE handoff
+
+**Definition.** Software supporting the design–build–handover lifecycle of buildings, with structured BIM data exchange into FM/IWMS. Distinct from operational segments (A, E): these tools serve the **pre-occupancy** phases — design coordination, clash detection, defect/snagging during construction, and the BIM2FM handover of as-built data to the tenant-portal / FM stack.
+
+**Persona.** BBL Project Management and Bauherrenvertretung; federal construction PMs handing newly built or renovated stock into operational tenancy. CDE-Bund mandate (Appendix A) applies.
+
+| Product | HQ | Hosting | Pricing | Integrations | Notable feature |
+|---|---|---|---|---|---|
+| [Autodesk Construction Cloud (BIM 360 / ACC)](https://construction.autodesk.com/) | San Francisco, USA | Cloud | Per user | Revit, Civil 3D, Navisworks, IFC | De-facto CDE standard; Revit-native |
+| [Bentley iTwin / ProjectWise](https://www.bentley.com/software/itwin/) | Exton (PA), USA | Cloud / hybrid | Per asset / per user | OpenBuildings, IFC, MicroStation | Asset-twin handover into operations |
+| [Revizto](https://revizto.com/) | Lausanne, CH | Cloud | Per user | Revit, Navisworks, IFC | **Swiss-domiciled** issue tracking & clash review |
+| [Solibri](https://www.solibri.com/) | Helsinki, FI (Nemetschek) | Hybrid | Per user | IFC, Revit, ArchiCAD | Model checking / clash detection |
+| [BIMcollab](https://www.bimcollab.com/) | Eindhoven, NL | Cloud | Per user | BCF, Revit, Navisworks | OpenBCF issue management |
+| [Procore](https://www.procore.com/) | Carpinteria (CA), USA | Cloud | Per user | Revit, Sage, Quickbooks | General-contractor PM |
+| [Trimble Connect](https://www.connect.trimble.com/) | Westminster (CO), USA | Cloud | Per user | Tekla, SketchUp, IFC | CDE + viewer; KBOB-aligned workflows |
+| [dRofus](https://www.drofus.com/) | Oslo, NO (Nemetschek) | Cloud | Per user | Revit, IFC, ArchiCAD | Room/equipment data management; track record in CH federal projects |
+| [PlanRadar](https://www.planradar.com/) | Vienna, AT | Cloud | Per user | BIM, IFC | Snagging/defect handover; also listed in Segment G |
+| [Buildots](https://www.buildots.com/) | London, UK | Cloud | Per user | BIM, computer vision | AI construction-progress vs. BIM model |
+| [Capmo](https://www.capmo.com/) | Munich, DE | Cloud | Per user | BIM, defect/snagging | DACH construction-PM SaaS |
+
+**Maturity.** Mature (Autodesk, Bentley, Procore) → emerging in AI/CV (Buildots). Heavy DACH adoption of Solibri, dRofus, Revizto, BIMcollab.
+**Swiss-context note.** CDE-Bund mandate (Appendix A) and KBOB BIM standards push toward openBIM workflows (IFC, BCF). Revizto and dRofus have specific Swiss federal-project track records. BIM2FM handover into Planon, Spacewell or Aareon is the bridge from this segment to A and E — and is the most-overlooked tenant-portal pre-occupancy step at federal scale.
+
+### X. Lease abstraction & AI document extraction
+
+**Definition.** Software that converts unstructured lease contracts (PDFs, scans, faxes) into structured data ready for SAP RE-FX contract objects, IWMS lease modules, or lease-accounting tools. Distinct from M (lease accounting): X is the **migration / ingestion** layer.
+
+**Persona.** SAP RE-FX migration teams, finance teams catching up on IFRS 16 obligations, landlords inheriting legacy paper portfolios.
+
+| Product | HQ | Notable feature |
+|---|---|---|
+| [Leverton (MRI Software)](https://www.mrisoftware.com/) | Berlin, DE (MRI) | Acquired by MRI 2020; AI lease abstraction for IFRS 16 / FASB / RE-FX |
+| [Prophia](https://www.prophia.com/) | San Francisco, USA | Lease intelligence for commercial RE |
+| [contract.fit](https://contract.fit/) | Brussels, BE | AI document extraction; contract abstraction |
+| [Hyperscience](https://www.hyperscience.com/) | New York, USA | General-purpose AI document processing |
+| [Rossum](https://rossum.ai/) | Prague, CZ | AI document understanding; broader than leases |
+| [LeaseHawk](https://www.leasehawk.com/) | Scottsdale (AZ), USA | AI leasing assistant (multifamily) |
+| [docunite](https://docunite.com/) | Berlin, DE | DACH AI document processing for real estate |
+
+**Swiss-context note.** Directly relevant to post-SUPERB SAP RE-FX cleanup: BBL inherited legacy lease records that must be normalised into S/4HANA contract objects. EMBAG Art. 9 OSS preference makes open OCR + LLM pipelines (Segment AA) an honest alternative to commercial extraction SaaS.
+
+### Y. CAFM (DACH-specific) — distinct from IWMS
+
+**Definition.** Operational facility-management software with German-language workflow heritage, distinct from US/EU IWMS suites (Segment A). DACH procurement frequently treats CAFM and IWMS as separate markets due to GEFMA 444 certification and German-language module standards (GEFMA 100/420/430/444/470).
+
+**Persona.** DACH facility-management departments; smaller-than-IWMS deployments; tenants/landlords standardising on GEFMA processes.
+
+| Product | HQ | Notable feature |
+|---|---|---|
+| [pit-FM (pit – cup)](https://www.pit.de/) | Heidelberg, DE | GEFMA-certified; long-standing DACH leader |
+| [waveware (Loy & Hutz)](https://www.loy-hutz.de/) | Burgdorf, DE | GEFMA-certified; broad CAFM suite |
+| [ConjectFM (RIB Software)](https://www.rib-software.com/) | Stuttgart, DE (RIB Group) | CAFM + BIM2FM bridge |
+| [FAMOS (Keßler Solutions)](https://www.kesslersolutions.de/) | Chemnitz, DE | DACH CAFM; popular in the mid-tier |
+| [KEYLOGIC](https://www.keylogic.ch/) | Bern, CH | **Swiss-domiciled** CAFM; KBOB-aligned; cantonal RE deployments |
+| [Speedikon FM](https://www.speedikon.com/) | Bensheim, DE | CAFM + ERP integration |
+| [GEORG (VIT)](https://www.vit-group.de/) | Hannover, DE | GIS-led CAFM for industrial / federal estates |
+
+**Swiss-context note.** KEYLOGIC is the canonical Swiss-domiciled CAFM; selected by several cantonal real-estate offices. GEFMA 444 is a DACH-specific procurement filter that excludes most US/UK IWMS vendors at first sift — a frequent source of mismatch between BBL benchmarks and global vendor lists.
+
+### Z. ESG portfolio-data platforms (beyond submetering)
+
+**Definition.** Portfolio-level environmental/social/governance data collection, calculation and reporting — distinct from tenant-level submetering (Segment N). These feed GRESB, CRREM, CSRD/ESRS, EU Taxonomy and EPBD 2024/1275 disclosures.
+
+**Persona.** ESG / sustainability officers; investor-relations teams for real-estate portfolios; compliance teams driven by VILB Art. 9 Abs. 1bis reporting.
+
+| Product | HQ | Notable feature |
+|---|---|---|
+| [Deepki](https://www.deepki.com/) | Paris, FR | Portfolio ESG SaaS; native CRREM / GRESB integration |
+| [Measurabl](https://www.measurabl.com/) | San Diego, USA | GRESB-aligned; market share leader in public real estate |
+| [Optera](https://www.opteraclimate.com/) | Boulder (CO), USA | Scope 1/2/3 + supplier engagement |
+| [Carbonsight](https://www.carbonsight.de/) | Berlin, DE | DACH ESG SaaS for real estate |
+| [ENGIE Impact](https://www.engieimpact.com/) | New York, USA | ENGIE-group sustainability consulting + data |
+| [Spacewell Energy (Dexma)](https://spacewell.com/) | Barcelona, ES (Nemetschek) | AI energy management; also listed in N |
+| [Sustain.life](https://www.sustain.life/) | New York, USA | Mid-market sustainability platform |
+| [Schneider Resource Advisor](https://www.se.com/) | Rueil-Malmaison, FR | Energy + sustainability for enterprise portfolios |
+| [Sweep](https://www.sweep.net/) | Paris, FR | Climate-data platform with RE module |
+
+**Swiss-context note.** VILB Art. 9 Abs. 1bis (federal real-estate sustainability reporting) and EPBD 2024/1275 (zero-emission-buildings disclosures) push BBL toward portfolio-level ESG aggregation in addition to per-meter consumption data. Deepki and Measurabl are the most-cited investor-facing tools; Carbonsight is the DACH-aligned alternative. Submetering (Segment N) is upstream; this segment is downstream reporting.
+
+### AA. Open-source / civic-tech tenant-portal alternatives
+
+**Definition.** Open-source software relevant to landlord/tenant operations or directly tenant-portal-shaped, listed here to honour **EMBAG Art. 9 ("Public Money — Public Code" by default, in force 1 Jan 2024)**. None of these is a turnkey replacement for the proprietary suites above, but each is a credible starting point for a build-on-open-foundation pattern under EMBAG.
+
+**Persona.** Federal IT planning teams operating under EMBAG; civic-tech contributors; municipalities pursuing OSS-by-default policies.
+
+| Project | License | Origin | Relevance |
+|---|---|---|---|
+| [Odoo (Property modules)](https://www.odoo.com/) | LGPLv3 + commercial | Belgium | ERP with community + enterprise property-management modules |
+| [ERPNext (Real Estate module)](https://erpnext.com/) | GPL v3 | India (Frappe Technologies) | Community-maintained real-estate module within Frappe ERP |
+| [Tryton (rental modules)](https://www.tryton.org/) | GPL v3 | Belgium | Modular ERP with rental/property extensions |
+| [Keycloak](https://www.keycloak.org/) | Apache 2.0 | Red Hat (community) | OSS IdP; AGOV-federation broker alternative; SAML/OIDC native |
+| [Zammad](https://zammad.org/) | AGPL v3 | Germany | OSS service desk; honest OSS analogue to Segment G repair-ticketing front-ends |
+| [Mattermost](https://mattermost.com/) | MIT | USA (community) | OSS team collaboration; civic-tech projects use it for tenant-staff comms |
+| [GeoNode](https://geonode.org/) | GPL v3 | USA (OSGeo) | OSS geospatial publishing; complements BBL GIS IMMO (Appendix A) |
+| [BIMserver](https://bimserver.org/) | AGPL v3 | TU Eindhoven | OSS BIM model server; complements CDE-Bund stack (Segment W) |
+| [civic-tech.ch / opendata.swiss tooling](https://civictech.ch/) | various | Switzerland | Swiss civic-tech community; federal-relevant tools surface periodically |
+| [Hugging Face open document-AI](https://huggingface.co/models) | various | France/USA | OSS OCR + LLM models; honest alternative to Segment X commercial lease abstraction |
+
+**Maturity.** Mostly emerging; production-grade for niche use cases (Keycloak, Odoo, Zammad) but no canonical OSS "tenant portal" exists for federal-scale residential operations.
+**Swiss-context note.** EMBAG Art. 9 expects federal software customisations to be publishable as OSS unless third-party rights or security forbid. The proprietary tenant-portal market pre-dates EMBAG; the gap between EMBAG's expectation and what vendors actually license under is the single largest procurement-policy tension in this segment. **Custom Fiori on SAP BTP (Segment Q) is currently the most practical EMBAG-conformant pattern** — pure OSS alternatives are realistic only for non-RE-FX-bound tenant touchpoints (community boards, repair tickets, document download) and as ingestion/extraction tooling for SAP RE-FX (Segment X).
+
 ## 7. Recommendations
 
 This document is a **descriptive market scan, not a procurement document.** It deliberately does not recommend vendors, phasing, or buy-vs-build. The "recommendations" below are recommendations on **how to read and use this scan**, not on what BBL should procure:
@@ -505,6 +625,9 @@ This document is a **descriptive market scan, not a procurement document.** It d
 - **Unverified Swiss-specific configurations.** AGOV federation, ISG classification mapping, eCH norm conformance, GWR/EGID linkage, and direct SAP RE-FX object-level integration are vendor-specific topics that should be confirmed in writing with each vendor before any conclusion is drawn; defaults are non-Swiss.
 - **Forward-looking statements.** Several items are dated to the future (e-ID 1 Dec 2026; AGOV on private CH DCs "from 2027"; MRI potential 2026 sale at up to USD 10 bn; AWS European Sovereign Cloud GA 14 Jan 2026). Sources and timing language are preserved with their original verbs ("planned", "expected", "estimated", "up to").
 - **Yarowa HQ correction.** The task brief listed Yarowa as Lucerne-based; per Yarowa's own About page and the Swiss commercial register (CHE-470.230.582), Yarowa AG is at Metallstrasse 9, 6300 Zug.
+- **"1.6 million" coincidence flag.** Two unrelated figures in the document round to "1.6 m": GARAIO REM's claim of "more than 1.6 million Mietobjekte managed" (vendor self-claim, Digital Real Estate Summit 2025) and AGOV's "1.6 m residents with accounts in 2025" (Bundeskanzlei). These are coincidence — the GARAIO figure is an unaudited vendor claim, the AGOV figure is federally published. Listed together they read as a pattern; they are not.
+- **eIAM / AGOV scope.** AGOV replaces **CH-LOGIN** (the federal login for *public users* of cantonal/communal/federal services). **eIAM remains in service** for federal staff/internal access. Earlier versions of this document phrased their relationship as "successor"; that wording was incorrect and has been revised in Section 6.I and Appendix A.
+- **Skribble Series A currency.** The Skribble 1 Sept 2022 press release cites "€10 m" in English coverage and "CHF 10 m" in the German release; the figures are roughly at par and refer to the same round. The English-press-release quotation is reproduced verbatim in Section 6.I.
 - **No Forrester Wave for IWMS or Workplace Management Systems** exists for 2024–2026; adjacent Waves (Intranet Platforms Q2 2024; Collaborative Work Management Tools Q2 2025) do not cover the IWMS category.
 
 ## Appendices
@@ -515,7 +638,7 @@ This document is a **descriptive market scan, not a procurement document.** It d
 |---|---|
 | [AGOV](https://www.agov.admin.ch/) | Federal login service for Bund/Kantone/Gemeinden; replaces CH-LOGIN; passwordless via AGOV access App or hardware security key; SAML/OIDC IdP; 1.6 m residents and 8 m logins in 2025; operated by FOITT, managed by Bundeskanzlei DTI |
 | [Swiss e-ID](https://www.eid.admin.ch/) | State-issued, SSI-based; planned launch 1 Dec 2026; usable as login factor in AGOV |
-| [eIAM / sign.eIAM](https://www.eiam.admin.ch/) | Federal IAM operated by FOITT (BIT); successor relationship to AGOV |
+| [eIAM / sign.eIAM](https://www.eiam.admin.ch/) | Federal IAM for **staff/internal access** to federal-administration systems, operated by FOITT (BIT). **AGOV replaces CH-LOGIN for public users**; eIAM remains for federal-staff access. The two co-exist — they are *not* in a predecessor/successor relationship |
 | GWR / EGID | Federal Building & Dwelling Register; EGID is the building identifier used across federal real-estate data |
 | SAP RE-FX | S/4HANA Real-Estate Flexible module; BBL's RE core post-SUPERB |
 | CDE-Bund | Federal Common Data Environment (BIM/CDE) |
@@ -569,6 +692,41 @@ This document is a **descriptive market scan, not a procurement document.** It d
 | Statsbygg (NO) | State property | Norwegian state |
 | armasuisse Immobilien / VBS (CH) | [Immo-Portal VBS](https://www.ar.admin.ch/de/immo-portal) | Re-launched 1 May 2024; role-based; ZUVA Weisungen |
 
+### Appendix E — Glossary of Swiss federal abbreviations
+
+| Term | Meaning |
+|---|---|
+| **BBL** | Bundesamt für Bauten und Logistik — Swiss Federal Office of Buildings and Logistics |
+| **DRES** | Direction des ressources et services — French-language naming of BBL's "Bauten" / real-estate division |
+| **EMBAG** | Bundesgesetz über den Einsatz elektronischer Mittel zur Erfüllung von Behördenaufgaben — Federal Act on the use of electronic means in government tasks (in force 1 Jan 2024); Art. 9 mandates OSS-by-default |
+| **DigiV** | Verordnung über die digitale Verwaltung — Digital Administration Ordinance (SR 172.019.1) |
+| **ISG** | Informationssicherheitsgesetz — Federal Information Security Act; classification levels INTERN / VERTRAULICH / GEHEIM |
+| **VILB** | Verordnung über das Immobilienmanagement und die Logistik des Bundes — Federal Real-Estate & Logistics Ordinance; Art. 9 Abs. 1bis is the sustainability-reporting obligation |
+| **BöB / VöB** | Bundesgesetz / Verordnung über das öffentliche Beschaffungswesen — Federal Public Procurement Act / Ordinance (revised 1 Jan 2021) |
+| **AGOV** | Federal login service for **public users** of cantonal / federal / communal authorities (replaces CH-LOGIN); operated by FOITT, programme-managed by Bundeskanzlei DTI |
+| **CH-LOGIN** | Predecessor to AGOV; the federal login for public users; now retired |
+| **eIAM** | Federal IAM for **federal-staff / internal access** to administration systems (operated by FOITT). Co-exists with AGOV — **not** replaced by AGOV |
+| **FOITT (BIT)** | Bundesamt für Informatik und Telekommunikation — federal IT operator |
+| **Bundeskanzlei DTI** | Bereich Digitale Transformation und IKT-Lenkung at the Federal Chancellery; AGOV programme owner |
+| **e-ID** | Swiss state-issued electronic identity (SSI-based); planned launch 1 December 2026; usable as login factor in AGOV |
+| **SAP RE-FX** | SAP Real Estate Flexible (the module replacing SAP IS-RE); BBL's RE core in S/4HANA post-SUPERB |
+| **SUPERB** | BBL's SAP S/4HANA cut-over programme (completed September 2023) |
+| **GEVER** | Geschäftsverwaltung — Swiss federal records / case-management system family |
+| **Acta Nova** | The dominant Swiss federal GEVER product (Trivadis/Accenture lineage) |
+| **eCH** | Swiss e-government standards body (eCH-0046 contact, eCH-0058 message frame, eCH-0098 product catalogue, …) |
+| **eBKP-H** | Element-based cost classification for Hochbau (building construction) |
+| **KBOB** | Koordinationskonferenz der Bau- und Liegenschaftsorgane der öffentlichen Bauherren — federal building-procurement coordination office |
+| **SIA** | Schweizerischer Ingenieur- und Architektenverein — Swiss engineers' & architects' professional body and norm-setter |
+| **EGID / GWR** | Federal Building & Dwelling Register; EGID is the building identifier used across federal real-estate data |
+| **CDE-Bund** | Federal Common Data Environment (BIM / CDE) — see Segment W |
+| **I14Y** | Federal interoperability platform (data sharing across federal agencies) |
+| **DCAT-AP CH** | Swiss DCAT profile for open data (opendata.swiss) |
+| **WEX** | Workplace Experience (analyst term used in Segment B) |
+| **CAFM** | Computer-Aided Facility Management — see Segment Y |
+| **IWMS** | Integrated Workplace Management System — see Segment A |
+| **CDE** | Common Data Environment (BIM) — see Segment W |
+| **GEFMA 444** | German FM certification standard frequently used as a CAFM procurement filter |
+
 ---
 
-*Document prepared 18 May 2026. Information drawn from vendor sources, regulatory pages of the Swiss Confederation, Aareal Bank and TPG transaction disclosures, Gartner WEX MQ (6 April 2026), Verdantix Green Quadrant CPIP/IWMS (Jan 2025), IDC MarketScape (Doc # US52038324), and public M&A announcements. Forward-looking dates are marked with "planned"/"expected"/"estimated" where appropriate.*
+*Document prepared 18 May 2026. Information drawn from vendor sources, regulatory pages of the Swiss Confederation, Aareal Bank and TPG transaction disclosures, Gartner WEX MQ (6 April 2026), Verdantix Green Quadrant CPIP/IWMS (Jan 2025), IDC MarketScape (Doc # US52038324), and public M&A announcements. Forward-looking dates are marked with "planned"/"expected"/"estimated" where appropriate. Revised 18 May 2026 (this revision): added Segments W–AA, added Tayo / Schindler Ahead / KONE 24/7 / NeoVac / Equa / Bouwinvest / CBRE / DIO; corrected eIAM-vs-AGOV scope; flagged "1.6 m" coincidence and Skribble Series A currency in caveats.*
