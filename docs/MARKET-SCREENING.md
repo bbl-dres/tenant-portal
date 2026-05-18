@@ -198,21 +198,21 @@ mindmap
 
 **Persona.** Corporate occupier; in BBL's context, federal agencies that are tenants of BBL buildings.
 
-| Product | HQ / country | Hosting | Pricing | Integrations | Notable feature |
-|---|---|---|---|---|---|
-| [Eptura Engage (ex-Condeco) / Workplace](https://eptura.com/) | Atlanta, USA | SaaS | Per user / per resource | Microsoft 365, Teams, BMS | Gartner WEX Leader 2026 |
-| [Robin](https://robinpowered.com/) | Boston, USA | SaaS | Per user; transparent tiers | Microsoft 365, Google, Slack, SCIM | Inaugural Gartner WEX Leader 2026 |
-| [Appspace](https://www.appspace.com/) | Tampa, USA | SaaS | Per user / per device | Microsoft 365, ServiceNow | Signage + comms + workplace; Gartner WEX Leader 2026 |
-| [HqO](https://www.hqo.com/) (Office App) | Boston, USA / Amsterdam | SaaS | Per building / per sq ft | BMS | Acquired Office App Oct 2021 |
-| [Equiem](https://www.getequiem.com/) | Melbourne, AU | SaaS | Per building | Office365, payment APIs | Landlord-side WEX |
-| [Spaceflow](https://spaceflow.io/) | Prague, CZ | SaaS | Per building | Microsoft 365, BMS | European tenant-experience focus |
-| [Chainels](https://www.chainels.com/) | Rotterdam, NL | SaaS | Per building | Microsoft 365, payments | Community-led |
-| [OfficeSpace Software](https://www.officespacesoftware.com/) | Atlanta, USA | SaaS | Per user | Microsoft 365, Google | Gartner WEX 2026 |
-| [Modo Labs](https://www.modolabs.com/) | Cambridge (MA), USA | SaaS | Per user | Microsoft 365 | MIT-spinout campus app |
-| [CXApp / CXAI](https://www.cxapp.com/) | San Francisco, USA | SaaS | Per user | Cisco Spaces, BMS | Gartner WEX 2026 |
-| [Microsoft Places](https://www.microsoft.com/microsoft-365/places) | Redmond, USA | M365 cloud | Bundled in M365 / EMS | Teams, Outlook, Viva | Tight M365 binding |
-| [Zoom Workplace](https://www.zoom.com/en/products/workspace-reservation/) | San Jose, USA | Zoom cloud | Per host / per room | Zoom Rooms, Microsoft 365 | Booking + UC |
-| [Cohesion](https://cohesionib.com/) | Chicago, USA | SaaS | Per square foot | BMS, BACnet, IoT | Smart-building-native |
+| Product | HQ / country | Hosting | Pricing | Integrations | Notable feature | BBL fit |
+|---|---|---|---|---|---|---|
+| [Eptura Engage (ex-Condeco) / Workplace](https://eptura.com/) | Atlanta, USA | SaaS | Per user / per resource | Microsoft 365, Teams, BMS | Gartner WEX Leader 2026 | 🟡 Workplace leader; not federal-residential pilot |
+| [Robin](https://robinpowered.com/) | Boston, USA | SaaS | Per user; transparent tiers | Microsoft 365, Google, Slack, SCIM | Inaugural Gartner WEX Leader 2026 | 🟡 Workplace leader; not pilot |
+| [Appspace](https://www.appspace.com/) | Tampa, USA | SaaS | Per user / per device | Microsoft 365, ServiceNow | Signage + comms + workplace; Gartner WEX Leader 2026 | 🟡 Workplace leader; comms-focused |
+| [HqO](https://www.hqo.com/) (Office App) | Boston, USA / Amsterdam | SaaS | Per building / per sq ft | BMS | Acquired Office App Oct 2021 | 🟡 Landlord-side workplace; not federal |
+| [Equiem](https://www.getequiem.com/) | Melbourne, AU | SaaS | Per building | Office365, payment APIs | Landlord-side WEX | 🔴 AU landlord-side |
+| [Spaceflow](https://spaceflow.io/) | Prague, CZ | SaaS | Per building | Microsoft 365, BMS | European tenant-experience focus | 🟡 EU workplace; relevant for future Buy |
+| [Chainels](https://www.chainels.com/) | Rotterdam, NL | SaaS | Per building | Microsoft 365, payments | Community-led | 🔴 Community-portal; off-target |
+| [OfficeSpace Software](https://www.officespacesoftware.com/) | Atlanta, USA | SaaS | Per user | Microsoft 365, Google | Gartner WEX 2026 | 🔴 US workplace |
+| [Modo Labs](https://www.modolabs.com/) | Cambridge (MA), USA | SaaS | Per user | Microsoft 365 | MIT-spinout campus app | 🔴 US campus app |
+| [CXApp / CXAI](https://www.cxapp.com/) | San Francisco, USA | SaaS | Per user | Cisco Spaces, BMS | Gartner WEX 2026 | 🔴 US workplace |
+| [Microsoft Places](https://www.microsoft.com/microsoft-365/places) | Redmond, USA | M365 cloud | Bundled in M365 / EMS | Teams, Outlook, Viva | Tight M365 binding | 🟡 M365-native; federal already has M365 |
+| [Zoom Workplace](https://www.zoom.com/en/products/workspace-reservation/) | San Jose, USA | Zoom cloud | Per host / per room | Zoom Rooms, Microsoft 365 | Booking + UC | 🔴 UC-bound |
+| [Cohesion](https://cohesionib.com/) | Chicago, USA | SaaS | Per square foot | BMS, BACnet, IoT | Smart-building-native | 🔴 US smart-building |
 
 **Maturity.** Transitional → consolidating; first Gartner MQ in 2026.
 **Swiss-context note.** Most US/UK/AU vendors host outside Switzerland; only Microsoft, AWS, Google and Azure have CH regions. AGOV/SAML federation feasibility is product-specific; ServiceNow WSD has documented SAML/OIDC IdP federation.
@@ -249,19 +249,19 @@ mindmap
 
 **Persona.** Workplace / IT teams of organisations adopting hybrid work; tenant departments inside federal buildings who need desk reservations without a full IWMS commitment.
 
-| Product | HQ / country | Hosting | Pricing | Integrations | Notable feature |
-|---|---|---|---|---|---|
-| [Robin](https://robinpowered.com/) | Boston, USA | SaaS | Public tiers | Microsoft 365, Google, Slack | Workplace + booking |
-| [Skedda](https://www.skedda.com/) | Sydney, AU | SaaS | Per space; transparent | Microsoft 365, Google, SSO | Sports / coworking heritage |
-| [OfficeRnD Hybrid](https://www.officernd.com/) | Sofia, BG | SaaS | Per user | Microsoft 365 | Coworking + hybrid |
-| [deskbird](https://www.deskbird.com/) | St. Gallen, CH | SaaS | Per user | Microsoft 365, Slack | DACH/CH-domiciled |
-| [Tactic](https://gettactic.com/) | New York, USA | SaaS | Per user | Microsoft 365 | Lightweight booking |
-| [Joan (Visionect)](https://getjoan.com/) | Ljubljana, SI | SaaS + ePaper | Per device / user | Microsoft 365, Google | ePaper meeting-room displays |
-| [Matrix Booking](https://matrixbooking.com/) | Reading, UK | SaaS | Per user | Microsoft 365 | UK public-sector heritage |
-| [Tribeloo](https://www.tribeloo.com/) | Brussels, BE | SaaS | Per user | Microsoft 365 | EU-anchored |
-| [YArooms](https://www.yarooms.com/) | Bucharest, RO | SaaS | Per user | Microsoft 365, Google | EU pricing transparency |
-| [Sharvy](https://www.sharvy.com/) | Montpellier, FR | SaaS | Per user | Microsoft 365 | Parking management strength |
-| [Eptura Engage (Condeco)](https://eptura.com/) | Atlanta, USA | SaaS | Per user | Microsoft 365 | Long-running enterprise scheduler |
+| Product | HQ / country | Hosting | Pricing | Integrations | Notable feature | BBL fit |
+|---|---|---|---|---|---|---|
+| [Robin](https://robinpowered.com/) | Boston, USA | SaaS | Public tiers | Microsoft 365, Google, Slack | Workplace + booking | 🟡 Workplace booking; not pilot |
+| [Skedda](https://www.skedda.com/) | Sydney, AU | SaaS | Per space; transparent | Microsoft 365, Google, SSO | Sports / coworking heritage | 🔴 Workplace booking; SMB heritage |
+| [OfficeRnD Hybrid](https://www.officernd.com/) | Sofia, BG | SaaS | Per user | Microsoft 365 | Coworking + hybrid | 🔴 Coworking |
+| [deskbird](https://www.deskbird.com/) | St. Gallen, CH | SaaS | Per user | Microsoft 365, Slack | DACH/CH-domiciled | 🟡 Swiss-domiciled but workplace, not pilot fit |
+| [Tactic](https://gettactic.com/) | New York, USA | SaaS | Per user | Microsoft 365 | Lightweight booking | 🔴 US lightweight |
+| [Joan (Visionect)](https://getjoan.com/) | Ljubljana, SI | SaaS + ePaper | Per device / user | Microsoft 365, Google | ePaper meeting-room displays | 🔴 ePaper niche |
+| [Matrix Booking](https://matrixbooking.com/) | Reading, UK | SaaS | Per user | Microsoft 365 | UK public-sector heritage | 🟡 UK public-sector precedent |
+| [Tribeloo](https://www.tribeloo.com/) | Brussels, BE | SaaS | Per user | Microsoft 365 | EU-anchored | 🔴 EU workplace |
+| [YArooms](https://www.yarooms.com/) | Bucharest, RO | SaaS | Per user | Microsoft 365, Google | EU pricing transparency | 🔴 EU workplace |
+| [Sharvy](https://www.sharvy.com/) | Montpellier, FR | SaaS | Per user | Microsoft 365 | Parking management strength | 🔴 Parking focus |
+| [Eptura Engage (Condeco)](https://eptura.com/) | Atlanta, USA | SaaS | Per user | Microsoft 365 | Long-running enterprise scheduler | 🟡 Enterprise scheduler; workplace |
 
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links to source pages):</sub>
 
@@ -286,18 +286,18 @@ mindmap
 
 **Persona.** HR / admin (visitor side) plus facilities / security (access control); for BBL, tenant agencies running their own visitor flows on top of a federal building's access infrastructure.
 
-| Product | HQ | Pricing | Notable feature |
-|---|---|---|---|
-| [Envoy](https://envoy.com/) | San Francisco, USA | Per location | Visitor + desks + deliveries |
-| [Proxyclick / Eptura Visitor](https://eptura.com/) | Brussels, BE / Atlanta | Per location | GDPR-native; folded into Eptura |
-| [SwipedOn](https://www.swipedon.com/) | Tauranga, NZ | Per location | Tablet check-in |
-| [Robin Visitors](https://robinpowered.com/) | Boston, USA | Per location | Integrated with Robin |
-| [Kisi](https://www.getkisi.com/) | Brooklyn (NY), USA / Stockholm | Per door | Mobile access |
-| [Verkada Guest](https://www.verkada.com/) | San Mateo, USA | Per location | Camera + access |
-| [HID Origo](https://www.hidglobal.com/origo) | Austin, USA | Per credential | Mobile credentials |
-| [Salto KS](https://saltoks.com/) | Oiartzun, ES | Per door | DACH installer network |
-| [Brivo](https://www.brivo.com/) | Bethesda, USA | Per door | Cloud access control |
-| [dormakaba exivo](https://www.dormakaba.com/) | Rümlang, CH | Per door | Swiss-HQ; Aareon Connect partner |
+| Product | HQ | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|
+| [Envoy](https://envoy.com/) | San Francisco, USA | Per location | Visitor + desks + deliveries | 🔴 US workplace visitor mgmt |
+| [Proxyclick / Eptura Visitor](https://eptura.com/) | Brussels, BE / Atlanta | Per location | GDPR-native; folded into Eptura | 🔴 Workplace; GDPR-native |
+| [SwipedOn](https://www.swipedon.com/) | Tauranga, NZ | Per location | Tablet check-in | 🔴 NZ tablet check-in |
+| [Robin Visitors](https://robinpowered.com/) | Boston, USA | Per location | Integrated with Robin | 🔴 Workplace add-on |
+| [Kisi](https://www.getkisi.com/) | Brooklyn (NY), USA / Stockholm | Per door | Mobile access | 🔴 Mobile access; workplace |
+| [Verkada Guest](https://www.verkada.com/) | San Mateo, USA | Per location | Camera + access | 🔴 US camera + access |
+| [HID Origo](https://www.hidglobal.com/origo) | Austin, USA | Per credential | Mobile credentials | 🟡 Federal-grade credentials; OT-adjacent |
+| [Salto KS](https://saltoks.com/) | Oiartzun, ES | Per door | DACH installer network | 🟡 DACH installer network |
+| [Brivo](https://www.brivo.com/) | Bethesda, USA | Per door | Cloud access control | 🔴 US cloud access |
+| [dormakaba exivo](https://www.dormakaba.com/) | Rümlang, CH | Per door | Swiss-HQ; Aareon Connect partner | 🟢 Swiss-HQ; KBOB-aligned; likely already in BBL buildings |
 
 **Swiss-context note.** dormakaba is Swiss-HQ and aligns with KBOB/SIA hardware standards.
 <sub>**Preview — selected vendors** (product screenshots / conceptual product photos from vendors' own pages; links go to source pages):</sub>
@@ -400,26 +400,26 @@ mindmap
 
 **Persona.** Hausverwaltungen and large landlords wanting a tenant-facing modern UX without changing their underlying ERP; tenants needing a single app for damage reports, document downloads and communication.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [casavi](https://casavi.com/) | Munich, DE | Cloud SaaS (GDPR) | Per unit; modular | >1,600 customers in DACH; Aareon Connect (Sigma, Yuneo), DOMUS, ImPower |
-| [facilioo](https://www.facilioo.de/) | Berlin, DE | Cloud SaaS | Per unit | Aareon Connect; ista partnership |
-| [Allthings](https://allthings.me/) | Basel, CH (ETH Zurich spin-off 2013) | Cloud | Per unit; modular | "App store for buildings"; >200 European RE clients; open API/SDK; ERPs incl. Wodis/Yuneo, SAP |
-| [wohnungshelden](https://www.wohnungshelden.de/) | Munich, DE (Aareon) | Cloud | Per unit | Rental application + matching |
-| [Immomio](https://immomio.com/) | Hamburg, DE | Cloud | Per unit | Aareon Connect (Sigma/Yuneo/Immotion); digital rental |
-| [iDWELL](https://www.idwell.com/) | Vienna, AT | Cloud | Per unit | Aareon Connect; AT tenant app |
-| [Spiri.Bo](https://www.spiribo.com/) | DE | Cloud | Per unit | Aareon Connect partner |
-| [etg24](https://www.etg24.de/) | Hamburg, DE | Cloud | Per unit | Aareon Connect; WEG focus |
-| [EverReal](https://everreal.co/) | Munich, DE | Cloud | Per unit | Aareon Connect; lettings + tenant lifecycle |
-| [Yardi RentCafe Resident](https://www.yardi.com/) | Santa Barbara, USA | Cloud | Per unit | Voyager-integrated |
-| [Bilt Rewards](https://www.biltrewards.com/) | New York, USA | Cloud | Free to tenants; landlord fees | Rent-as-loyalty; US-only |
-| [Livly](https://www.livly.io/) | Chicago, USA | Cloud | Per unit | RealPage / Yardi |
-| [emonitor](https://www.emonitor.ch) | Zurich, CH | Cloud (CH) | Per unit | **Swiss-domiciled** residential leasing process platform; popular with CH institutional landlords |
-| [HoldOn](https://www.holdon.ch) | CH | Cloud (CH) | Per unit | Tenant document handover and onboarding |
-| [Liobit](https://www.liobit.de) | DE | Cloud (DE) | Per unit | Tenant-side mobile app |
-| [KIWI.KI](https://kiwi.ki) | Berlin, DE | Cloud + hardware | Per unit + hardware | Keyless access for residential building common doors; widely deployed in DE multifamily |
-| [propster](https://www.propster.com) | Vienna, AT | Cloud | Per unit | Buyer self-customisation portal during construction; bridges to Segment W (BIM/CDE) |
-| [swarm.it](https://swarm.it) | AT | Cloud | Per unit | Resident community + service-marketplace |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [casavi](https://casavi.com/) | Munich, DE | Cloud SaaS (GDPR) | Per unit; modular | >1,600 customers in DACH; Aareon Connect (Sigma, Yuneo), DOMUS, ImPower | 🟢 DACH leader; Aareon ecosystem; many CH refs |
+| [facilioo](https://www.facilioo.de/) | Berlin, DE | Cloud SaaS | Per unit | Aareon Connect; ista partnership | 🟢 DACH tenant app; Aareon Connect |
+| [Allthings](https://allthings.me/) | Basel, CH (ETH Zurich spin-off 2013) | Cloud | Per unit; modular | "App store for buildings"; >200 European RE clients; open API/SDK; ERPs incl. Wodis/Yuneo, SAP | 🟢 Swiss-HQ (ETH); open SDK; SAP integration |
+| [wohnungshelden](https://www.wohnungshelden.de/) | Munich, DE (Aareon) | Cloud | Per unit | Rental application + matching | 🟡 Rental matching; Aareon |
+| [Immomio](https://immomio.com/) | Hamburg, DE | Cloud | Per unit | Aareon Connect (Sigma/Yuneo/Immotion); digital rental | 🟡 DE digital-rental focus |
+| [iDWELL](https://www.idwell.com/) | Vienna, AT | Cloud | Per unit | Aareon Connect; AT tenant app | 🟡 AT tenant app |
+| [Spiri.Bo](https://www.spiribo.com/) | DE | Cloud | Per unit | Aareon Connect partner | 🟡 DE; smaller scale |
+| [etg24](https://www.etg24.de/) | Hamburg, DE | Cloud | Per unit | Aareon Connect; WEG focus | 🔴 WEG-focus (DE condo law) — not federal-CH |
+| [EverReal](https://everreal.co/) | Munich, DE | Cloud | Per unit | Aareon Connect; lettings + tenant lifecycle | 🟡 DE lettings |
+| [Yardi RentCafe Resident](https://www.yardi.com/) | Santa Barbara, USA | Cloud | Per unit | Voyager-integrated | 🔴 US multifamily |
+| [Bilt Rewards](https://www.biltrewards.com/) | New York, USA | Cloud | Free to tenants; landlord fees | Rent-as-loyalty; US-only | ⚪ US consumer loyalty |
+| [Livly](https://www.livly.io/) | Chicago, USA | Cloud | Per unit | RealPage / Yardi | 🔴 US multifamily |
+| [emonitor](https://www.emonitor.ch) | Zurich, CH | Cloud (CH) | Per unit | **Swiss-domiciled** residential leasing process platform; popular with CH institutional landlords | 🟢 Swiss-domiciled; CH institutional refs |
+| [HoldOn](https://www.holdon.ch) | CH | Cloud (CH) | Per unit | Tenant document handover and onboarding | 🟡 Swiss; document-handover specialist |
+| [Liobit](https://www.liobit.de) | DE | Cloud (DE) | Per unit | Tenant-side mobile app | 🔴 DE small scale |
+| [KIWI.KI](https://kiwi.ki) | Berlin, DE | Cloud + hardware | Per unit + hardware | Keyless access for residential building common doors; widely deployed in DE multifamily | 🟡 Common-door access — adjacent |
+| [propster](https://www.propster.com) | Vienna, AT | Cloud | Per unit | Buyer self-customisation portal during construction; bridges to Segment W (BIM/CDE) | 🟡 Pre-occupancy / buyer customisation |
+| [swarm.it](https://swarm.it) | AT | Cloud | Per unit | Resident community + service-marketplace | 🔴 Community/marketplace — out of scope |
 
 <sub>**Preview — selected vendors** (product screenshots / mobile-app UIs from vendors' own pages; links go to source pages):</sub>
 
@@ -454,20 +454,20 @@ mindmap
 
 **Persona.** Hausverwaltungen handling tenant-reported damage; contractor coordinators in large portfolios; tenants reporting issues via app or web.
 
-| Product | HQ | Pricing | Notable feature |
-|---|---|---|---|
-| [Fixflo](https://www.fixflo.com/) | London, UK (Aareon) | Per unit | UK repairs reporting standard |
-| [Plentific](https://www.plentific.com/) | London, UK | Per unit + per work-order | UK social housing dispatch; Aareon Connect partner |
-| [Yarowa](https://www.yarowa.com/) | Zug, CH (Metallstrasse 9, 6300 Zug — not Lucerne) | Per transaction | Founded May 2017 (Akeret, Kagi); CHF 12.4 m Series A Jul 2022 led by Eos Venture; subsidiaries Munich, London, Milan |
-| [Aareon Mareon](https://www.aareon.de/) | Mainz, DE | Per unit | Embedded in Aareon |
-| [PlanRadar](https://www.planradar.com/) | Vienna, AT | Per user | Defect / snagging / inspections; widely used in CH |
-| [MaintainX](https://www.getmaintainx.com/) | Raleigh (NC), USA | Per user | Mobile-first CMMS |
-| [UpKeep](https://www.upkeep.com/) | Los Angeles, USA | Per user | Mobile CMMS |
-| [imofix.io](https://imofix.io/) | CH/DE | Per unit | GARAIO REM partner |
-| [Aareon Service Cloud / casavi Mareon-Connect](https://www.aareon.com) | Mainz / Munich, DE | Per unit | Damage workflow inside Aareon ecosystem |
-| [Repairnet](https://www.repairnet.de) | DE | Per unit | DE damage marketplace |
-| [comgest](https://www.comgest.de) | DE | Per unit | Specialist Schadensmanagement |
-| [Kayoom](https://www.kayoom.com) | DE | Per unit | Damage-ticket orchestration |
+| Product | HQ | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|
+| [Fixflo](https://www.fixflo.com/) | London, UK (Aareon) | Per unit | UK repairs reporting standard | 🟡 UK repairs standard; Roadmap Case A relevant |
+| [Plentific](https://www.plentific.com/) | London, UK | Per unit + per work-order | UK social housing dispatch; Aareon Connect partner | 🟡 UK social housing; Aareon Connect |
+| [Yarowa](https://www.yarowa.com/) | Zug, CH (Metallstrasse 9, 6300 Zug — not Lucerne) | Per transaction | Founded May 2017 (Akeret, Kagi); CHF 12.4 m Series A Jul 2022 led by Eos Venture; subsidiaries Munich, London, Milan | 🟢 Swiss-domiciled; relevant for Roadmap Case A |
+| [Aareon Mareon](https://www.aareon.de/) | Mainz, DE | Per unit | Embedded in Aareon | 🟢 Embedded in Aareon ecosystem |
+| [PlanRadar](https://www.planradar.com/) | Vienna, AT | Per user | Defect / snagging / inspections; widely used in CH | 🟢 Widely used in CH for defect management |
+| [MaintainX](https://www.getmaintainx.com/) | Raleigh (NC), USA | Per user | Mobile-first CMMS | 🔴 US mobile CMMS |
+| [UpKeep](https://www.upkeep.com/) | Los Angeles, USA | Per user | Mobile CMMS | 🔴 US mobile CMMS |
+| [imofix.io](https://imofix.io/) | CH/DE | Per unit | GARAIO REM partner | 🟡 GARAIO REM partner; CH/DE |
+| [Aareon Service Cloud / casavi Mareon-Connect](https://www.aareon.com) | Mainz / Munich, DE | Per unit | Damage workflow inside Aareon ecosystem | 🟡 Aareon ecosystem damage workflow |
+| [Repairnet](https://www.repairnet.de) | DE | Per unit | DE damage marketplace | 🔴 DE damage marketplace |
+| [comgest](https://www.comgest.de) | DE | Per unit | Specialist Schadensmanagement | 🔴 DE specialist |
+| [Kayoom](https://www.kayoom.com) | DE | Per unit | Damage-ticket orchestration | 🔴 DE niche |
 
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
 
@@ -494,16 +494,16 @@ mindmap
 
 **Persona.** Property managers conducting Abnahme / Übergabe protocols; tenants signing handover; insurance claims teams relying on prior-state evidence.
 
-| Product | HQ | Notable feature |
-|---|---|---|
-| [W&W Abnahme-App](https://www.wwimmo.ch/) | Affoltern am Albis, CH | Integrated to Rimo R5 / ImmoTop2 |
-| [GARAIO REM Digitales Abnahmeprotokoll (DAP)](https://www.garaio-rem.ch/) | Bern, CH | Mobile handovers; integrated to REM |
-| [Properly](https://getproperly.com/) | Vancouver, CA | Inspection workflows |
-| [Inspectify](https://www.inspectify.com/) | Charlotte (NC), USA | Move-in inspections |
-| [Allthings inspection module](https://allthings.me/) | Basel, CH | Native to Allthings tenant app |
-| [HouseView](https://www.houseview.io/) | Various | 3D capture for inspections |
-| [handover.de](https://www.handover.de) | DE | Mobile-first apartment-handover protocols |
-| [Inspizio](https://www.inspizio.ch) | CH | **Swiss-domiciled** handover protocols with photographic evidence |
+| Product | HQ | Notable feature | BBL fit |
+|---|---|---|---|
+| [W&W Abnahme-App](https://www.wwimmo.ch/) | Affoltern am Albis, CH | Integrated to Rimo R5 / ImmoTop2 | 🟢 Swiss; integrated to CH leader Rimo R5 |
+| [GARAIO REM Digitales Abnahmeprotokoll (DAP)](https://www.garaio-rem.ch/) | Bern, CH | Mobile handovers; integrated to REM | 🟢 Swiss; integrated to GARAIO REM |
+| [Properly](https://getproperly.com/) | Vancouver, CA | Inspection workflows | 🔴 CA inspection workflow |
+| [Inspectify](https://www.inspectify.com/) | Charlotte (NC), USA | Move-in inspections | 🔴 US move-in inspections |
+| [Allthings inspection module](https://allthings.me/) | Basel, CH | Native to Allthings tenant app | 🟢 Swiss-HQ (Basel); part of Allthings |
+| [HouseView](https://www.houseview.io/) | Various | 3D capture for inspections | 🔴 3D capture; niche |
+| [handover.de](https://www.handover.de) | DE | Mobile-first apartment-handover protocols | 🔴 DE small scale |
+| [Inspizio](https://www.inspizio.ch) | CH | **Swiss-domiciled** handover protocols with photographic evidence | 🟢 Swiss-domiciled; photo-evidence handovers |
 
 <sub>**Preview — selected vendor** (product screenshot; link goes to source page):</sub>
 
@@ -522,17 +522,17 @@ mindmap
 
 **Persona.** Legal / IT teams signing leases, contracts and NDAs at federal / cantonal level; tenant-side users accepting QES-signed contracts; federal / cantonal authorities federating login via AGOV.
 
-| Product | HQ | Notable feature |
-|---|---|---|
-| [Skribble](https://www.skribble.com/) | Zurich, CH (Förrlibuckstrasse 190); office in Karlsruhe, DE | QES compliant with Swiss ZertES and EU eIDAS; partner of Swisscom Trust Services and ELCA trustID; per Skribble press release (skribble.com, 1 Sep 2022): the €10 m Series A was "led by Acton Capital Partners GmbH from Munich… VI Partners AG, from Altendorf, Switzerland, is on board as co-lead"; ISO 27001 |
-| [SwissSign / SwissID](https://www.swisssign.com/) | Glattbrugg, CH | Swiss Post-owned identity and trust service |
-| [AGOV](https://www.agov.admin.ch/) | Bundeskanzlei DTI, Bern | Federal login (CH-LOGIN successor) for federal, cantonal, communal authorities; passwordless via AGOV access App or hardware security key; **1.6 m residents with AGOV accounts and 8 m logins in 2025**; SAML/OIDC IdP; operated by FOITT |
-| [Swiss e-ID](https://www.eid.admin.ch/) | EJPD / Bundeskanzlei | State-issued, SSI-based; planned launch **1 December 2026**; usable as login factor in AGOV |
-| [eIAM / sign.eIAM](https://www.eiam.admin.ch/) | FOITT, CH | Federal IAM for **internal/staff access** to federal-administration systems. **AGOV replaces CH-LOGIN for public users**; eIAM remains in service for federal staff — the two are co-existent, not predecessor/successor |
-| [DocuSign](https://www.docusign.com/) | San Francisco, USA | Largest international e-signature provider |
-| [Adobe Sign / Acrobat Sign](https://www.adobe.com/sign.html) | San José, USA | Tightly integrated to Adobe ID |
-| [Yousign](https://yousign.com/) | Caen, FR | eIDAS-compliant EU vendor |
-| [Scrive](https://www.scrive.com/) | Stockholm, SE | Aareon Connect partner for digital signatures |
+| Product | HQ | Notable feature | BBL fit |
+|---|---|---|---|
+| [Skribble](https://www.skribble.com/) | Zurich, CH (Förrlibuckstrasse 190); office in Karlsruhe, DE | QES compliant with Swiss ZertES and EU eIDAS; partner of Swisscom Trust Services and ELCA trustID; per Skribble press release (skribble.com, 1 Sep 2022): the €10 m Series A was "led by Acton Capital Partners GmbH from Munich… VI Partners AG, from Altendorf, Switzerland, is on board as co-lead"; ISO 27001 | 🟢 Swiss QES leader; ZertES + eIDAS |
+| [SwissSign / SwissID](https://www.swisssign.com/) | Glattbrugg, CH | Swiss Post-owned identity and trust service | 🟢 Swiss Post identity / trust service |
+| [AGOV](https://www.agov.admin.ch/) | Bundeskanzlei DTI, Bern | Federal login (CH-LOGIN successor) for federal, cantonal, communal authorities; passwordless via AGOV access App or hardware security key; **1.6 m residents with AGOV accounts and 8 m logins in 2025**; SAML/OIDC IdP; operated by FOITT | 🟢 Target login for public tenants (OP-3) |
+| [Swiss e-ID](https://www.eid.admin.ch/) | EJPD / Bundeskanzlei | State-issued, SSI-based; planned launch **1 December 2026**; usable as login factor in AGOV | 🟢 Federal e-ID — future state from Dec 2026 |
+| [eIAM / sign.eIAM](https://www.eiam.admin.ch/) | FOITT, CH | Federal IAM for **internal/staff access** to federal-administration systems. **AGOV replaces CH-LOGIN for public users**; eIAM remains in service for federal staff — the two are co-existent, not predecessor/successor | 🟢 Pilot login provider (NFA-IAM-001 Must) |
+| [DocuSign](https://www.docusign.com/) | San Francisco, USA | Largest international e-signature provider | 🟡 International alt; not on Swiss federal trust list |
+| [Adobe Sign / Acrobat Sign](https://www.adobe.com/sign.html) | San José, USA | Tightly integrated to Adobe ID | 🟡 International alt; Adobe-ID-bound |
+| [Yousign](https://yousign.com/) | Caen, FR | eIDAS-compliant EU vendor | 🟡 EU eIDAS alternative |
+| [Scrive](https://www.scrive.com/) | Stockholm, SE | Aareon Connect partner for digital signatures | 🟡 Nordic; Aareon Connect partner |
 
 <sub>**Preview — selected vendors** (product screenshots, workflow diagrams or illustrations from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
 
@@ -573,22 +573,22 @@ mindmap
 
 **Persona.** Federal/cantonal/communal administrative units; in the BBL context, the dossier and contract repository for Bundesimmobilien, including lease contracts, building dossiers, and procurement files.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [Acta Nova (RUBICON IT)](https://www.rubicon.eu/en/products/acta-nova/) | Vienna, AT (CH-Vertrieb via RUBICON CH) | On-prem + Swiss federal data centre (ISCeco operated) | Per-seat licence + ops | **Dominant CH federal GEVER**: 26,000+ federal employees since August 2021; integrator Atos Switzerland; GENOVA programme investment CHF 142 m per SFAO audit. Also at SBB, VBZ, 900+ Swiss municipalities |
-| [Fabasoft eGov-Suite](https://www.fabasoft.com/en/on-egov/egov-suite) | Linz, AT | Fabasoft PROCECO Cloud (CH/DE/AT regions) | Per-seat | DE "E-Akte Bund" rollout in 200+ federal authorities since 2017 contract; AT ELAK since 2004; CH variant supports GEVER; ISO 27001, BSI C5, first-global EU Cloud Code of Conduct Level 3 (2021) |
-| [OneGov GEVER (Fabasoft 4teamwork)](https://www.fabasoft.com/en/on-proceco/onegov-gever) | Bern, CH (4teamwork — part of Fabasoft Group since 2022) | Fabasoft PROCECO Cloud (Swiss data location) | Per-seat | "swiss made software"; deployed in Cantons Aargau, St. Gallen, Zug + many municipalities; cloud-native rebuild on PROCECO ecosystem launched 2024 |
-| [CMI Konsul](https://www.cmiag.ch) | Zug, CH (CMI AG) | On-prem + CH cloud | Per-seat | Swiss-cantonal GEVER + Schul-CMI; predecessor to Acta Nova in some federal offices |
-| [Axioma (Glaux Soft)](https://www.glauxsoft.com) | Bern, CH | On-prem / CH cloud | Per-seat | Swiss-domiciled records & workflow product line |
-| [iLM (KS-Software / Kanzleisoft)](https://www.ks-software.ch) | CH | On-prem / cloud | Per-seat | Swiss municipal/Kanton dossier mgmt |
-| [d.velop documents (d.3ecm)](https://www.d-velop.com) | Gescher, DE | On-prem + d.velop cloud | Per-user | DE ECM mid-market leader |
-| [DocuWare](https://www.docuware.com) | Germering, DE (acq. by Ricoh 2019) | Cloud + on-prem | Per-user / per-document | DACH-strong DMS in SME/Hausverwaltung |
-| [ELO ECM](https://www.elo.com) | Stuttgart, DE | On-prem + ELO Business Cloud | Per-user | DACH ECM; KGSt and IVV references |
-| [OpenText Content Suite / Extended ECM](https://www.opentext.com) | Waterloo, CA | On-prem + OpenText Cloud | Per-user | Enterprise ECM; SAP-integrated archive |
-| [M-Files](https://www.m-files.com) | Tampere, FI | Cloud + on-prem | Per-user | Metadata-driven DMS |
-| [nscale (Ceyoniq → Kyocera)](https://www.kyocera.com/de) | Bielefeld, DE | On-prem | Per-user | German public-sector ECM |
-| [Aareon Archiv kompakt / DMS](https://www.aareon.com) | Mainz, DE | Cloud | Bundled with Aareon ERP | DMS bundled with Aareon RELion/Wodis |
-| [SharePoint Online (Microsoft 365)](https://www.microsoft.com/microsoft-365) | Redmond, US (CH residency available via Swiss DCs) | Microsoft Cloud (CH/EU) | Per-user M365 | Federal alignment depends on tenant-residency configuration |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [Acta Nova (RUBICON IT)](https://www.rubicon.eu/en/products/acta-nova/) | Vienna, AT (CH-Vertrieb via RUBICON CH) | On-prem + Swiss federal data centre (ISCeco operated) | Per-seat licence + ops | **Dominant CH federal GEVER**: 26,000+ federal employees since August 2021; integrator Atos Switzerland; GENOVA programme investment CHF 142 m per SFAO audit. Also at SBB, VBZ, 900+ Swiss municipalities | 🟢 Federal-CH standard GEVER; relevant for archive (NFA-DATA-002) |
+| [Fabasoft eGov-Suite](https://www.fabasoft.com/en/on-egov/egov-suite) | Linz, AT | Fabasoft PROCECO Cloud (CH/DE/AT regions) | Per-seat | DE "E-Akte Bund" rollout in 200+ federal authorities since 2017 contract; AT ELAK since 2004; CH variant supports GEVER; ISO 27001, BSI C5, first-global EU Cloud Code of Conduct Level 3 (2021) | 🟡 Strong federal-DE track; AT-HQ |
+| [OneGov GEVER (Fabasoft 4teamwork)](https://www.fabasoft.com/en/on-proceco/onegov-gever) | Bern, CH (4teamwork — part of Fabasoft Group since 2022) | Fabasoft PROCECO Cloud (Swiss data location) | Per-seat | "swiss made software"; deployed in Cantons Aargau, St. Gallen, Zug + many municipalities; cloud-native rebuild on PROCECO ecosystem launched 2024 | 🟢 Swiss-domiciled; cantonal GEVER references |
+| [CMI Konsul](https://www.cmiag.ch) | Zug, CH (CMI AG) | On-prem + CH cloud | Per-seat | Swiss-cantonal GEVER + Schul-CMI; predecessor to Acta Nova in some federal offices | 🟡 Swiss-HQ; cantonal focus |
+| [Axioma (Glaux Soft)](https://www.glauxsoft.com) | Bern, CH | On-prem / CH cloud | Per-seat | Swiss-domiciled records & workflow product line | 🟡 Swiss-domiciled records/workflow |
+| [iLM (KS-Software / Kanzleisoft)](https://www.ks-software.ch) | CH | On-prem / cloud | Per-seat | Swiss municipal/Kanton dossier mgmt | 🟡 Swiss municipal dossier mgmt |
+| [d.velop documents (d.3ecm)](https://www.d-velop.com) | Gescher, DE | On-prem + d.velop cloud | Per-user | DE ECM mid-market leader | 🔴 DE mid-market ECM |
+| [DocuWare](https://www.docuware.com) | Germering, DE (acq. by Ricoh 2019) | Cloud + on-prem | Per-user / per-document | DACH-strong DMS in SME/Hausverwaltung | 🔴 DACH SME DMS |
+| [ELO ECM](https://www.elo.com) | Stuttgart, DE | On-prem + ELO Business Cloud | Per-user | DACH ECM; KGSt and IVV references | 🔴 DACH ECM |
+| [OpenText Content Suite / Extended ECM](https://www.opentext.com) | Waterloo, CA | On-prem + OpenText Cloud | Per-user | Enterprise ECM; SAP-integrated archive | 🟡 Enterprise ECM with SAP archive |
+| [M-Files](https://www.m-files.com) | Tampere, FI | Cloud + on-prem | Per-user | Metadata-driven DMS | 🔴 FI metadata DMS |
+| [nscale (Ceyoniq → Kyocera)](https://www.kyocera.com/de) | Bielefeld, DE | On-prem | Per-user | German public-sector ECM | 🟡 DE federal track |
+| [Aareon Archiv kompakt / DMS](https://www.aareon.com) | Mainz, DE | Cloud | Bundled with Aareon ERP | DMS bundled with Aareon RELion/Wodis | 🟡 Bundled with Aareon ERP |
+| [SharePoint Online (Microsoft 365)](https://www.microsoft.com/microsoft-365) | Redmond, US (CH residency available via Swiss DCs) | Microsoft Cloud (CH/EU) | Per-user M365 | Federal alignment depends on tenant-residency configuration | 🟡 M365-native; CH residency configurable |
 
 **Maturity.** Mature in CH at federal level (Acta Nova is the standard since August 2021, operated by ISCeco); consolidating in cantons (Fabasoft OneGov GEVER displacing legacy CMI and home-grown solutions); mature in DE at federal level (E-Akte Bund on Fabasoft eGov-Suite).
 
@@ -602,30 +602,30 @@ mindmap
 
 **Persona.** Tenant-service contact centres of large landlords; Hausverwaltungen automating Tier-1 inbound. For BBL, the relevant use is multilingual (DE/FR/IT/EN/RM) federal-quality tenant service over a sovereign LLM stack.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [Parloa](https://www.parloa.com) | Berlin, DE (offices Munich, NY, San Francisco) | Cloud (DE/EU) | Enterprise quote | "Agent Management Platform"; €310 m Series D January 2026 at $3 b valuation (EU-Startups); employing **more than 380 people at time of Series D close (January 2026)** per Silicon Republic, with publicly stated plan to grow headcount to 600 by end of 2026; ISO 27001 / SOC 2 / GDPR / HIPAA / DORA; customers incl. Swiss Life, Allianz, SAP, Booking.com, TeamViewer |
-| [Cognigy](https://www.cognigy.com) | Düsseldorf, DE | Cloud (DE/EU) | Enterprise quote | **Acquired by NICE end of 2025** per Startup-in-Europe (Jan 2026); enterprise conversational AI; agentic-AI platform |
-| [PolyAI](https://poly.ai) | London, UK | Cloud (UK/EU/US) | Per-minute | Voice-first enterprise; €73.2 m Series D 2025 |
-| [moin AI](https://www.moin.ai) | Hamburg, DE | Cloud (DE) | Subscription | DE customer-service chatbot |
-| [Synthflow](https://synthflow.ai) | Berlin, DE | Cloud | Per-minute | Voice agent platform |
-| [Vapi](https://vapi.ai) | San Francisco, US (Y Combinator) | Cloud | Per-minute | Developer voice-agent infra |
-| [Bland](https://www.bland.ai) | San Francisco, US | Cloud | Per-minute | Voice agent infra |
-| [Aareon CRM-Portal AI / Allthings AI](https://www.aareon.com) | Mainz, DE | Cloud | Bundled with Aareon ERP | Tenant CRM with embedded chat; Aareon's TPG-CDPQ ownership since closing in H2 2024 (transaction enterprise value €3.9 b per TPG press release of 24 June 2024) |
-| [casavi smartflows](https://casavi.com/en) | Munich, DE (Aareon subsidiary) | Cloud (DE) | Add-on subscription | Workflow automation with LLM triage; integrated with Hausverwalter-Software |
-| [Knock](https://www.knockcrm.com) | Seattle, US | Cloud (US) | Per-unit | US multifamily lead-management AI |
-| [RentDynamics](https://rentdynamics.com) | Lehi, US | Cloud (US) | Per-unit | US multifamily contact-centre AI |
-| [Lobby](https://www.lobby.io) | UK | Cloud | Subscription | UK BTR resident assistant |
-| [Famulor](https://famulor.io) | EU | Cloud | Per-minute | EU voice-agent for property/SME |
-| [AskHive.ai](https://www.askhive.ai) | UK | Cloud | Subscription | UK property voice agents |
-| [Renty](https://renty.ai) | DE | Cloud (DE) | Subscription | German Hausverwaltung AI |
-| [Lassie](https://lassie.com) | Stockholm, SE | Cloud (EU) | Per-property | Nordic property assistant |
-| [Microsoft Copilot for M365](https://www.microsoft.com/microsoft-365/copilot) | Redmond, US (Swiss region available) | Microsoft Cloud (CH/EU) | M365 add-on per-user | Federal-relevant if M365 tenant is in CH regions |
-| [Anthropic Claude via Swisscom Sovereign Cloud](https://trustservices.swisscom.com) | San Francisco, US (Anthropic) hosted in Swisscom CH DCs | Swisscom Sovereign Swiss AI Platform (CH) | Per-token; Swisscom packaging | Swiss-hosted enterprise LLM access |
-| [Apertus (Swiss AI Initiative)](https://www.swiss-ai.org/apertus) | EPFL Lausanne + ETH Zurich + CSCS Lugano | CSCS "Alps" supercomputer + Swisscom Sovereign Swiss AI Platform | Open-source (Apache 2.0); compute paid | **Switzerland's first large-scale, open, multilingual LLM, released 2 September 2025; 8 B and 70 B parameters; trained on 15 trillion tokens covering 1,000+ languages incl. Swiss German and Romansh; ~40 % non-English data (ETH Zurich press release)** |
-| [BärnBot (Stadt Bern Chatbot)](https://www.bern.ch) | Bern, CH (city admin) | Cloud (CH) | City budget | Reference e-gov chatbot in CH |
-| [Lina (Stadt Zürich Chatbot)](https://www.stadt-zuerich.ch) | Zurich, CH | Cloud (CH) | City budget | Zurich city chatbot reference |
-| [Swisscom Conversational AI](https://www.swisscom.ch) | Bern, CH | Swisscom Cloud (CH) | Enterprise quote | Genesys-integrated voice AI |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [Parloa](https://www.parloa.com) | Berlin, DE (offices Munich, NY, San Francisco) | Cloud (DE/EU) | Enterprise quote | "Agent Management Platform"; €310 m Series D January 2026 at $3 b valuation (EU-Startups); employing **more than 380 people at time of Series D close (January 2026)** per Silicon Republic, with publicly stated plan to grow headcount to 600 by end of 2026; ISO 27001 / SOC 2 / GDPR / HIPAA / DORA; customers incl. Swiss Life, Allianz, SAP, Booking.com, TeamViewer | 🟡 European leader; CH refs via Swiss Life |
+| [Cognigy](https://www.cognigy.com) | Düsseldorf, DE | Cloud (DE/EU) | Enterprise quote | **Acquired by NICE end of 2025** per Startup-in-Europe (Jan 2026); enterprise conversational AI; agentic-AI platform | 🟡 EU enterprise conversational AI |
+| [PolyAI](https://poly.ai) | London, UK | Cloud (UK/EU/US) | Per-minute | Voice-first enterprise; €73.2 m Series D 2025 | 🔴 UK voice-first enterprise |
+| [moin AI](https://www.moin.ai) | Hamburg, DE | Cloud (DE) | Subscription | DE customer-service chatbot | 🔴 DE chatbot |
+| [Synthflow](https://synthflow.ai) | Berlin, DE | Cloud | Per-minute | Voice agent platform | 🔴 DE voice agent |
+| [Vapi](https://vapi.ai) | San Francisco, US (Y Combinator) | Cloud | Per-minute | Developer voice-agent infra | 🔴 US dev infra |
+| [Bland](https://www.bland.ai) | San Francisco, US | Cloud | Per-minute | Voice agent infra | 🔴 US voice infra |
+| [Aareon CRM-Portal AI / Allthings AI](https://www.aareon.com) | Mainz, DE | Cloud | Bundled with Aareon ERP | Tenant CRM with embedded chat; Aareon's TPG-CDPQ ownership since closing in H2 2024 (transaction enterprise value €3.9 b per TPG press release of 24 June 2024) | 🟡 Aareon-bundled; DACH residential |
+| [casavi smartflows](https://casavi.com/en) | Munich, DE (Aareon subsidiary) | Cloud (DE) | Add-on subscription | Workflow automation with LLM triage; integrated with Hausverwalter-Software | 🟡 Aareon ecosystem; LLM-triage |
+| [Knock](https://www.knockcrm.com) | Seattle, US | Cloud (US) | Per-unit | US multifamily lead-management AI | 🔴 US multifamily |
+| [RentDynamics](https://rentdynamics.com) | Lehi, US | Cloud (US) | Per-unit | US multifamily contact-centre AI | 🔴 US multifamily |
+| [Lobby](https://www.lobby.io) | UK | Cloud | Subscription | UK BTR resident assistant | 🔴 UK BTR |
+| [Famulor](https://famulor.io) | EU | Cloud | Per-minute | EU voice-agent for property/SME | 🔴 EU SME voice agent |
+| [AskHive.ai](https://www.askhive.ai) | UK | Cloud | Subscription | UK property voice agents | 🔴 UK property |
+| [Renty](https://renty.ai) | DE | Cloud (DE) | Subscription | German Hausverwaltung AI | 🔴 DE Hausverwaltung AI |
+| [Lassie](https://lassie.com) | Stockholm, SE | Cloud (EU) | Per-property | Nordic property assistant | 🔴 Nordic property |
+| [Microsoft Copilot for M365](https://www.microsoft.com/microsoft-365/copilot) | Redmond, US (Swiss region available) | Microsoft Cloud (CH/EU) | M365 add-on per-user | Federal-relevant if M365 tenant is in CH regions | 🟡 M365-native; federal already has M365 |
+| [Anthropic Claude via Swisscom Sovereign Cloud](https://trustservices.swisscom.com) | San Francisco, US (Anthropic) hosted in Swisscom CH DCs | Swisscom Sovereign Swiss AI Platform (CH) | Per-token; Swisscom packaging | Swiss-hosted enterprise LLM access | 🟢 Swiss-hosted enterprise LLM |
+| [Apertus (Swiss AI Initiative)](https://www.swiss-ai.org/apertus) | EPFL Lausanne + ETH Zurich + CSCS Lugano | CSCS "Alps" supercomputer + Swisscom Sovereign Swiss AI Platform | Open-source (Apache 2.0); compute paid | **Switzerland's first large-scale, open, multilingual LLM, released 2 September 2025; 8 B and 70 B parameters; trained on 15 trillion tokens covering 1,000+ languages incl. Swiss German and Romansh; ~40 % non-English data (ETH Zurich press release)** | 🟢 Swiss sovereign LLM; CH-multilingual; EMBAG-aligned |
+| [BärnBot (Stadt Bern Chatbot)](https://www.bern.ch) | Bern, CH (city admin) | Cloud (CH) | City budget | Reference e-gov chatbot in CH | 🟡 CH e-gov reference; municipal scale |
+| [Lina (Stadt Zürich Chatbot)](https://www.stadt-zuerich.ch) | Zurich, CH | Cloud (CH) | City budget | Zurich city chatbot reference | 🟡 CH e-gov reference; municipal scale |
+| [Swisscom Conversational AI](https://www.swisscom.ch) | Bern, CH | Swisscom Cloud (CH) | Enterprise quote | Genesys-integrated voice AI | 🟢 Swisscom CH; sovereign hosting |
 
 **Maturity.** Emerging-to-consolidating. The Parloa Series D (€310 m, January 2026) and Cognigy/NICE acquisition (end 2025) are the structural consolidation events on the European enterprise voice-agent side. Apertus (Sept 2025) is structurally significant for federal/sovereign use: it is the first open-weight LLM trained on Swiss German and Romansh.
 
@@ -639,26 +639,26 @@ mindmap
 
 **Persona.** Asset-management directorates; tenant-experience teams in commercial portfolios; ESG / sustainability officers consuming twin data for reporting (cross-listed with Segment Z).
 
-| Product | HQ | Notable feature |
-|---|---|---|
-| [Spacewell Cobundu](https://spacewell.com/) | Antwerp, BE | Smart-building IoT in Nemetschek group |
-| [Siemens Building X](https://www.siemens.com/buildingx) | Munich, DE | Buildings + grid + sustainability |
-| [Johnson Controls OpenBlue](https://www.johnsoncontrols.com/openblue) | Cork, IE | Enterprise OT + AI |
-| [Honeywell Forge](https://www.honeywell.com/) | Charlotte (NC), USA | Industrial / buildings |
-| [Cisco Spaces](https://spaces.cisco.com/) | San Jose, USA | Wi-Fi-based location intelligence |
-| [Cohesion](https://cohesionib.com/) | Chicago, USA | Smart-building + WEX |
-| [View Smart](https://view.com/) | Milpitas (CA), USA | Smart glass + analytics |
-| [Disruptive Technologies](https://www.disruptive-technologies.com/) | Oslo, NO | Cellular IoT sensors |
-| [ThoughtWire](https://www.thoughtwire.com/) | Toronto, CA | Hospital + smart-building twin |
-| [Comfy (Siemens)](https://www.comfyapp.com/) | Oakland (CA), USA | Siemens Smart Infrastructure |
-| [Schindler Ahead](https://www.schindler.com/com/internet/en/mobility-solutions/products/schindler-ahead.html) | Ebikon, CH | **Swiss-domiciled** elevator/escalator IoT (ActionBoard, RemoteMonitoring); widespread in federal buildings |
-| [KONE 24/7 Connected Services](https://www.kone.ch/) | Espoo, FI (KONE; CH subsidiary Brüttisellen) | Elevator/escalator predictive-maintenance IoT; deep CH installer presence |
-| [Bosch IoT Suite](https://www.bosch-iotsuite.com/) | Stuttgart, DE | DE-anchored building/asset IoT; FIWARE-compatible |
-| [BuildingMinds](https://buildingminds.com/) | Berlin, DE (Schindler family-backed) | Real-estate data platform / digital twin spanning asset, ESG and tenant data; CRREM, EU Taxonomy and EPBD modules — **cross-listed in Segment Z** |
-| [Akenza](https://akenza.io) | Zurich, CH | **Swiss IoT platform**; LoRaWAN-friendly low-code; sits between Segment AG (OT) and Segment L (twin) for non-HVAC smart-building telemetry |
-| [Locatee → Tango](https://www.tangoanalytics.com) | Zurich, CH (acquired by Tango Analytics 2024) | Workplace-utilisation analytics; CH presence retained; cross-listed in Segment V |
-| [Pricer](https://www.pricer.com) | Stockholm, SE | Electronic shelf labels in workplace contexts |
-| [Smartvatten](https://www.smartvatten.com) | Helsinki, FI | Water-leak monitoring with API to BMS |
+| Product | HQ | Notable feature | BBL fit |
+|---|---|---|---|
+| [Spacewell Cobundu](https://spacewell.com/) | Antwerp, BE | Smart-building IoT in Nemetschek group | 🟡 EU IoT; Roadmap Case B |
+| [Siemens Building X](https://www.siemens.com/buildingx) | Munich, DE | Buildings + grid + sustainability | 🟡 DE BMS leader; Roadmap |
+| [Johnson Controls OpenBlue](https://www.johnsoncontrols.com/openblue) | Cork, IE | Enterprise OT + AI | 🔴 Enterprise OT |
+| [Honeywell Forge](https://www.honeywell.com/) | Charlotte (NC), USA | Industrial / buildings | 🔴 US industrial |
+| [Cisco Spaces](https://spaces.cisco.com/) | San Jose, USA | Wi-Fi-based location intelligence | 🔴 Wi-Fi location |
+| [Cohesion](https://cohesionib.com/) | Chicago, USA | Smart-building + WEX | 🔴 US smart-building |
+| [View Smart](https://view.com/) | Milpitas (CA), USA | Smart glass + analytics | 🔴 Smart-glass niche |
+| [Disruptive Technologies](https://www.disruptive-technologies.com/) | Oslo, NO | Cellular IoT sensors | 🔴 NO IoT sensors |
+| [ThoughtWire](https://www.thoughtwire.com/) | Toronto, CA | Hospital + smart-building twin | 🔴 CA hospital-focused |
+| [Comfy (Siemens)](https://www.comfyapp.com/) | Oakland (CA), USA | Siemens Smart Infrastructure | 🟡 Siemens-bound; workplace |
+| [Schindler Ahead](https://www.schindler.com/com/internet/en/mobility-solutions/products/schindler-ahead.html) | Ebikon, CH | **Swiss-domiciled** elevator/escalator IoT (ActionBoard, RemoteMonitoring); widespread in federal buildings | 🟢 Swiss-domiciled; likely already in federal buildings |
+| [KONE 24/7 Connected Services](https://www.kone.ch/) | Espoo, FI (KONE; CH subsidiary Brüttisellen) | Elevator/escalator predictive-maintenance IoT; deep CH installer presence | 🟢 Strong CH installer base |
+| [Bosch IoT Suite](https://www.bosch-iotsuite.com/) | Stuttgart, DE | DE-anchored building/asset IoT; FIWARE-compatible | 🟡 DE IoT; FIWARE-compatible |
+| [BuildingMinds](https://buildingminds.com/) | Berlin, DE (Schindler family-backed) | Real-estate data platform / digital twin spanning asset, ESG and tenant data; CRREM, EU Taxonomy and EPBD modules — **cross-listed in Segment Z** | 🟡 Schindler-backed; ESG + twin |
+| [Akenza](https://akenza.io) | Zurich, CH | **Swiss IoT platform**; LoRaWAN-friendly low-code; sits between Segment AG (OT) and Segment L (twin) for non-HVAC smart-building telemetry | 🟢 Swiss-domiciled IoT platform |
+| [Locatee → Tango](https://www.tangoanalytics.com) | Zurich, CH (acquired by Tango Analytics 2024) | Workplace-utilisation analytics; CH presence retained; cross-listed in Segment V | 🟡 CH-anchored despite Tango parent |
+| [Pricer](https://www.pricer.com) | Stockholm, SE | Electronic shelf labels in workplace contexts | 🔴 Shelf labels — off-topic |
+| [Smartvatten](https://www.smartvatten.com) | Helsinki, FI | Water-leak monitoring with API to BMS | 🔴 Water-leak niche |
 
 <sub>**Preview — selected vendors** (product screenshots / explainer images from vendors' own pages; links go to source pages):</sub>
 
@@ -691,17 +691,17 @@ mindmap
 
 **Persona.** Finance / treasury / FP&A teams under IFRS 16 obligations; corporate occupiers and large landlords reconciling lease obligations into ledger; auditors requesting structured lease abstractions (cross-listed with Segment X).
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [Visual Lease](https://visuallease.com/) | Woodbridge (NJ), US | Cloud | Per lease | IFRS 16 / ASC 842 / GASB 87 lease accounting |
-| [LeaseAccelerator](https://leaseaccelerator.com/) | Reston (VA), US | Cloud | Per lease | Enterprise lease accounting + workflow |
-| [CoStar Real Estate Manager](https://www.costargroup.com/realestatemanager) | Washington, US | Cloud | Quote | CoStar-integrated portfolio + lease accounting |
-| [Nakisa Lease Administration](https://www.nakisa.com/) | Montréal, CA | Cloud | Per lease | SAP-certified IFRS 16 / ASC 842 |
-| [MRI ProLease](https://www.mrisoftware.com/products/prolease/) | Solon (OH), US (MRI) | Cloud | Per lease | Within MRI ecosystem; IFRS 16 / ASC 842 |
-| [LucernEx (Accruent)](https://www.accruent.com/products/lucernex) | Austin, US (Accruent) | Cloud | Per lease | Lease admin + accounting; common in US retail / corporate |
-| [UPK Online](https://www.upk-online.ch) | CH | Cloud (CH) | Subscription | Niche Swiss lease-accounting |
-| [SwissProperty](https://www.swissproperty.ch) | CH | Cloud (CH) | Subscription | **Swiss-domiciled** lease / portfolio accounting |
-| [RealFusio](https://www.realfusio.com) | CH / EU | Cloud | Subscription | Real-estate fund accounting |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [Visual Lease](https://visuallease.com/) | Woodbridge (NJ), US | Cloud | Per lease | IFRS 16 / ASC 842 / GASB 87 lease accounting | 🔴 US lease accounting |
+| [LeaseAccelerator](https://leaseaccelerator.com/) | Reston (VA), US | Cloud | Per lease | Enterprise lease accounting + workflow | 🔴 US enterprise |
+| [CoStar Real Estate Manager](https://www.costargroup.com/realestatemanager) | Washington, US | Cloud | Quote | CoStar-integrated portfolio + lease accounting | 🔴 US portfolio |
+| [Nakisa Lease Administration](https://www.nakisa.com/) | Montréal, CA | Cloud | Per lease | SAP-certified IFRS 16 / ASC 842 | 🟡 SAP-certified |
+| [MRI ProLease](https://www.mrisoftware.com/products/prolease/) | Solon (OH), US (MRI) | Cloud | Per lease | Within MRI ecosystem; IFRS 16 / ASC 842 | 🔴 MRI ecosystem |
+| [LucernEx (Accruent)](https://www.accruent.com/products/lucernex) | Austin, US (Accruent) | Cloud | Per lease | Lease admin + accounting; common in US retail / corporate | 🔴 US retail/corporate |
+| [UPK Online](https://www.upk-online.ch) | CH | Cloud (CH) | Subscription | Niche Swiss lease-accounting | 🟡 Swiss niche |
+| [SwissProperty](https://www.swissproperty.ch) | CH | Cloud (CH) | Subscription | **Swiss-domiciled** lease / portfolio accounting | 🟢 Swiss-domiciled portfolio accounting |
+| [RealFusio](https://www.realfusio.com) | CH / EU | Cloud | Subscription | Real-estate fund accounting | 🟡 CH/EU fund accounting |
 
 **Maturity.** Mature; market shaped heavily by IFRS 16 / ASC 842 adoption from 2019 onward.
 
@@ -715,18 +715,18 @@ mindmap
 
 **Persona.** Property managers preparing Nebenkostenabrechnung; tenants viewing their own consumption; ESG / sustainability teams aggregating portfolio data; federal landlords reporting under VILB.
 
-| Product | HQ | Notable feature |
-|---|---|---|
-| [Techem](https://www.techem.com/) | Eschborn, DE | Submetering + tenant heating bills |
-| [ista](https://www.ista.com/) | Essen, DE | Submetering + Mieter API |
-| [Brunata-Metrona](https://www.brunata-metrona.de/) | Hürth, DE | Submetering DACH |
-| [Minol](https://www.minol.com/) | Leinfelden-Echterdingen, DE | Tenant consumption portal |
-| [Aareon EnergieHub](https://www.aareon.com/) | Mainz, DE | Energy data hub for housing operators |
-| [Spacewell Energy (Dexma)](https://spacewell.com/) | Barcelona, ES | AI energy management |
-| [NeoVac](https://www.neovac.ch/) | Oberriet, CH | **Swiss-domiciled** submetering, heat-cost allocation and tenant cost-reporting; deep CH installer network |
-| [Equa Solutions](https://www.equa-solutions.ch/) | Lausanne, CH | **Swiss-domiciled** HVAC controls + sub-metering optimisation |
-| [CSEM Smart Energy](https://www.csem.ch) | Neuchâtel, CH | Research-driven CH smart-grid solutions |
-| [BKW Power Grid](https://www.bkw.ch) | Bern, CH | Utility-grade grid + smart-meter offering relevant to large-portfolio landlords |
+| Product | HQ | Notable feature | BBL fit |
+|---|---|---|---|
+| [Techem](https://www.techem.com/) | Eschborn, DE | Submetering + tenant heating bills | 🟡 DE major, widely deployed in CH |
+| [ista](https://www.ista.com/) | Essen, DE | Submetering + Mieter API | 🟡 DE major, widely deployed in CH |
+| [Brunata-Metrona](https://www.brunata-metrona.de/) | Hürth, DE | Submetering DACH | 🟡 DACH submetering |
+| [Minol](https://www.minol.com/) | Leinfelden-Echterdingen, DE | Tenant consumption portal | 🟡 DACH tenant portal |
+| [Aareon EnergieHub](https://www.aareon.com/) | Mainz, DE | Energy data hub for housing operators | 🟡 Aareon energy hub |
+| [Spacewell Energy (Dexma)](https://spacewell.com/) | Barcelona, ES | AI energy management | 🟡 EU energy AI |
+| [NeoVac](https://www.neovac.ch/) | Oberriet, CH | **Swiss-domiciled** submetering, heat-cost allocation and tenant cost-reporting; deep CH installer network | 🟢 Swiss-domiciled; closest CH submetering choice |
+| [Equa Solutions](https://www.equa-solutions.ch/) | Lausanne, CH | **Swiss-domiciled** HVAC controls + sub-metering optimisation | 🟢 Swiss-domiciled HVAC+submetering |
+| [CSEM Smart Energy](https://www.csem.ch) | Neuchâtel, CH | Research-driven CH smart-grid solutions | 🟡 CH research-driven |
+| [BKW Power Grid](https://www.bkw.ch) | Bern, CH | Utility-grade grid + smart-meter offering relevant to large-portfolio landlords | 🟢 CH utility; relevant for large federal portfolios |
 
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
 
@@ -751,36 +751,36 @@ mindmap
 
 **Persona.** Property managers and landlords listing inventory; tenants and buyers searching; federal authorities (BBL, BImA) listing surplus or fürsorge-allocated stock.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [ImmoScout24.ch](https://www.immoscout24.ch) | Zurich, CH (SMG Swiss Marketplace Group) | Cloud (CH) | Per-listing + premium options | CH market leader by traffic: 3.27 m monthly visits (SemRush, March 2026) |
-| [Homegate.ch](https://www.homegate.ch) | Zurich, CH (SMG) | Cloud (CH) | Per-listing | 2.6 m monthly visits Mar 2026; controversy over MieterPlus subscription (CHF 39.95 with 3-month minimum, per OnlineMarketplaces Mar 2024) |
-| [Flatfox.ch](https://www.flatfox.ch) | Zurich, CH (SMG) | Cloud (CH) | Free listing + paid add-ons | 1.65 m monthly visits; chat-first UX; popular for free landlord listing |
-| [Comparis Immobilien](https://en.comparis.ch) | Zurich, CH | Cloud (CH) | Aggregator | 2.79 m monthly visits; aggregates other portals |
-| [Newhome.ch](https://www.newhome.ch) | Zurich, CH (cantonal-bank consortium) | Cloud (CH) | Per-listing | 1.23 m monthly visits; cantonal-bank-owned |
-| [RealAdvisor](https://realadvisor.ch) | Zurich/Geneva, CH | Cloud (CH) | Lead-gen for agents | AVM-driven valuation + agent matching |
-| [ImmoStreet.ch / Acheter-Louer.ch / Anibis.ch / Pomona.ch](https://swissmarketplace.group/portfolio/real-estate/) | CH (SMG portfolio) | Cloud (CH) | Per-listing | SMG-portfolio long-tail CH portals |
-| [ImmoScout24.de](https://www.immobilienscout24.de) | Berlin, DE (Scout24 SE) | Cloud (DE) | Per-listing + premium | DE market leader |
-| [Immowelt](https://www.immowelt.de) | Nuremberg, DE (Axel Springer / Aviv) | Cloud (DE) | Per-listing | DE #2 |
-| [Immonet](https://www.immonet.de) | Hamburg, DE (Axel Springer) | Cloud (DE) | Per-listing | DE #3, merged ops with Immowelt |
-| [Wunderflats](https://wunderflats.com) | Berlin, DE | Cloud (DE) | Commission | Mid-term/corporate furnished housing |
-| [Homelike](https://www.thehomelike.com) | Cologne, DE | Cloud (DE) | Commission | Corporate-housing platform |
-| [Spotahome](https://www.spotahome.com) | Madrid, ES | Cloud (EU) | Commission | Mid-term rentals, video-verified |
-| [willhaben Immobilien](https://www.willhaben.at) | Vienna, AT | Cloud (AT) | Per-listing | AT classifieds market leader |
-| [ImmoScout24.at](https://www.immobilienscout24.at) | Vienna, AT | Cloud (AT) | Per-listing | AT real-estate leader |
-| [Zillow](https://www.zillow.com) | Seattle, US | Cloud (US) | Premier Agent / lead | US market leader |
-| [Rightmove](https://www.rightmove.co.uk) | London, UK | Cloud (UK) | Agent subscription | UK leader |
-| [Zoopla](https://www.zoopla.co.uk) | London, UK | Cloud (UK) | Agent subscription | UK #2 |
-| [Idealista](https://www.idealista.com) | Madrid, ES | Cloud (EU) | Per-listing | ES/PT/IT leader |
-| [CBRE Deal Flow](https://www.cbre.com) | Dallas, US | Cloud | Bundled with CBRE services | Commercial transaction platform |
-| [JLL OfficeFinder](https://www.us.jll.com) | Chicago, US | Cloud | Bundled | Commercial leasing |
-| [LoopNet (CoStar)](https://www.loopnet.com) | Washington, US | Cloud (US) | Subscription | US commercial leader |
-| [Crexi](https://www.crexi.com) | Los Angeles, US | Cloud (US) | Subscription | US commercial #2 |
-| [Realla (CoStar UK)](https://www.realla.co.uk) | London, UK | Cloud | Subscription | UK commercial |
-| [savills.com](https://www.savills.com) | London, UK | Cloud | Free property search | Global broker portal |
-| [simap.ch](https://www.simap.ch) | Bern, CH (federal/cantonal) | Federal cloud (CH) | Free public access | **Swiss federal/cantonal procurement portal where BBL itself publishes tender notices** |
-| [meine BImA](https://meine-bima.bundesimmobilien.de) | Bonn, DE (BImA) | Federal DE infrastructure | Free | **BImA Geschäftsbereich Wohnen tenant-facing self-service portal — relaunched 13 March 2024 with simplified login**; covers Wohnungsfürsorge des Bundes |
-| [Immobilienportal der BImA](https://immobilienportal.bundesimmobilien.de) | Bonn, DE (BImA) | Federal DE | Free public | BImA's full portfolio: Wohn-, Gewerbe-, Land- & Forst-, Wohnungsfürsorge |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [ImmoScout24.ch](https://www.immoscout24.ch) | Zurich, CH (SMG Swiss Marketplace Group) | Cloud (CH) | Per-listing + premium options | CH market leader by traffic: 3.27 m monthly visits (SemRush, March 2026) | 🟡 CH leader; BBL is not a listing actor |
+| [Homegate.ch](https://www.homegate.ch) | Zurich, CH (SMG) | Cloud (CH) | Per-listing | 2.6 m monthly visits Mar 2026; controversy over MieterPlus subscription (CHF 39.95 with 3-month minimum, per OnlineMarketplaces Mar 2024) | 🟡 CH leader; BBL is not a listing actor |
+| [Flatfox.ch](https://www.flatfox.ch) | Zurich, CH (SMG) | Cloud (CH) | Free listing + paid add-ons | 1.65 m monthly visits; chat-first UX; popular for free landlord listing | 🟡 CH portal; not BBL use case |
+| [Comparis Immobilien](https://en.comparis.ch) | Zurich, CH | Cloud (CH) | Aggregator | 2.79 m monthly visits; aggregates other portals | 🟡 CH aggregator |
+| [Newhome.ch](https://www.newhome.ch) | Zurich, CH (cantonal-bank consortium) | Cloud (CH) | Per-listing | 1.23 m monthly visits; cantonal-bank-owned | 🟡 CH cantonal-bank portal |
+| [RealAdvisor](https://realadvisor.ch) | Zurich/Geneva, CH | Cloud (CH) | Lead-gen for agents | AVM-driven valuation + agent matching | 🔴 Agent lead-gen |
+| [ImmoStreet.ch / Acheter-Louer.ch / Anibis.ch / Pomona.ch](https://swissmarketplace.group/portfolio/real-estate/) | CH (SMG portfolio) | Cloud (CH) | Per-listing | SMG-portfolio long-tail CH portals | 🔴 Long-tail CH portals |
+| [ImmoScout24.de](https://www.immobilienscout24.de) | Berlin, DE (Scout24 SE) | Cloud (DE) | Per-listing + premium | DE market leader | 🔴 DE consumer |
+| [Immowelt](https://www.immowelt.de) | Nuremberg, DE (Axel Springer / Aviv) | Cloud (DE) | Per-listing | DE #2 | 🔴 DE consumer |
+| [Immonet](https://www.immonet.de) | Hamburg, DE (Axel Springer) | Cloud (DE) | Per-listing | DE #3, merged ops with Immowelt | 🔴 DE consumer |
+| [Wunderflats](https://wunderflats.com) | Berlin, DE | Cloud (DE) | Commission | Mid-term/corporate furnished housing | 🔴 DE corporate housing |
+| [Homelike](https://www.thehomelike.com) | Cologne, DE | Cloud (DE) | Commission | Corporate-housing platform | 🔴 DE corporate |
+| [Spotahome](https://www.spotahome.com) | Madrid, ES | Cloud (EU) | Commission | Mid-term rentals, video-verified | ⚪ ES consumer |
+| [willhaben Immobilien](https://www.willhaben.at) | Vienna, AT | Cloud (AT) | Per-listing | AT classifieds market leader | ⚪ AT consumer |
+| [ImmoScout24.at](https://www.immobilienscout24.at) | Vienna, AT | Cloud (AT) | Per-listing | AT real-estate leader | ⚪ AT consumer |
+| [Zillow](https://www.zillow.com) | Seattle, US | Cloud (US) | Premier Agent / lead | US market leader | ⚪ US consumer |
+| [Rightmove](https://www.rightmove.co.uk) | London, UK | Cloud (UK) | Agent subscription | UK leader | ⚪ UK consumer |
+| [Zoopla](https://www.zoopla.co.uk) | London, UK | Cloud (UK) | Agent subscription | UK #2 | ⚪ UK consumer |
+| [Idealista](https://www.idealista.com) | Madrid, ES | Cloud (EU) | Per-listing | ES/PT/IT leader | ⚪ EU consumer |
+| [CBRE Deal Flow](https://www.cbre.com) | Dallas, US | Cloud | Bundled with CBRE services | Commercial transaction platform | 🔴 US commercial |
+| [JLL OfficeFinder](https://www.us.jll.com) | Chicago, US | Cloud | Bundled | Commercial leasing | 🔴 US commercial |
+| [LoopNet (CoStar)](https://www.loopnet.com) | Washington, US | Cloud (US) | Subscription | US commercial leader | 🔴 US commercial |
+| [Crexi](https://www.crexi.com) | Los Angeles, US | Cloud (US) | Subscription | US commercial #2 | 🔴 US commercial |
+| [Realla (CoStar UK)](https://www.realla.co.uk) | London, UK | Cloud | Subscription | UK commercial | 🔴 UK commercial |
+| [savills.com](https://www.savills.com) | London, UK | Cloud | Free property search | Global broker portal | 🔴 Global broker portal |
+| [simap.ch](https://www.simap.ch) | Bern, CH (federal/cantonal) | Federal cloud (CH) | Free public access | **Swiss federal/cantonal procurement portal where BBL itself publishes tender notices** | 🟢 Federal procurement portal — BBL already publishes here |
+| [meine BImA](https://meine-bima.bundesimmobilien.de) | Bonn, DE (BImA) | Federal DE infrastructure | Free | **BImA Geschäftsbereich Wohnen tenant-facing self-service portal — relaunched 13 March 2024 with simplified login**; covers Wohnungsfürsorge des Bundes | 🟢 Direct federal benchmark (DE peer to BBL pilot) |
+| [Immobilienportal der BImA](https://immobilienportal.bundesimmobilien.de) | Bonn, DE (BImA) | Federal DE | Free public | BImA's full portfolio: Wohn-, Gewerbe-, Land- & Forst-, Wohnungsfürsorge | 🟢 BImA full-portfolio benchmark |
 
 **Maturity.** Mature/consolidating: SMG Swiss Marketplace Group (Ringier + TX Group + La Mobilière + General Atlantic) operates ImmoScout24.ch + Homegate + Flatfox + ImmoStreet + Acheter-Louer + Anibis + Tutti + others, giving SMG approximately 75 % combined CH real-estate listings market share (per OnlineMarketplaces analysis); SMG IPO on SIX Swiss Exchange is publicly planned; SMG also acquired Swiss operations of immoverkauf24 in 2025. Scout24 SE dominates DE; Axel Springer's Aviv group consolidates Immowelt+Immonet+CASA in EU.
 
@@ -794,19 +794,19 @@ mindmap
 
 **Persona.** Federal IT planning / portfolio strategists benchmarking BBL's tenant portal against peer states' implementations; procurement officers checking what "federal tenant portal" looks like in practice.
 
-| System | Operator / country | Description |
-|---|---|---|
-| ["Mein BImA"](https://meine-bima.bundesimmobilien.de/) | BImA, Bonn, DE | Migrated 13 Mar 2024 from legacy username/password into single "meine BImA" account; Wohnungsfürsorge access, Reparaturservice (365×24×7), Immobilienportal, GESA |
-| [GSA PBS Customer Dashboard / OASIS](https://www.gsa.gov/) | US GSA, Washington DC | Federal tenant dashboard |
-| [GPA Workplace Services Toolkit](https://www.gov.uk/government/organisations/government-property-agency) | London, UK | Government Hubs |
-| [Senaatti "Senate App"](https://steerpath.com/case-study-senaatti) | Senaatti-kiinteistöt, Helsinki, FI | Built by Steerpath; indoor maps + booking; Virtu ID / email login via asiointi.senaatti.fi |
-| [Rijksvastgoedbedrijf](https://www.rijksvastgoedbedrijf.nl/) | Dutch Central Government RE Agency, The Hague | Tenant relations in development |
-| [BIG Wohn- und Mieterservice](https://www.big.at/) | Bundesimmobiliengesellschaft, Vienna | Austrian federal property |
-| [Statsbygg](https://www.statsbygg.no/) | Oslo, NO | Norwegian state property |
-| [armasuisse Immo-Portal VBS](https://www.ar.admin.ch/de/immo-portal) | armasuisse Immobilien, Bern, CH | Re-launched 1 May 2024; role-based (Nutzer/Mieter/Eigentümervertreter/Betreiber/IKT/Departementsebene); ZUVA Weisungen; DE/FR (IT planned); BBL liaison for Bern Verwaltungsbauten codified |
-| [Bouwinvest](https://www.bouwinvest.com/) | Amsterdam, NL | Dutch state-pension-backed RE investor; **operator benchmark** for tenant portals on a proprietary stack (not a vendor sale) |
-| [CBRE Investment Management](https://www.cbreim.com/) | Los Angeles, USA | Global RE investor; **operator benchmark** for corporate-occupier tenant portals on a proprietary stack |
-| [Defence Infrastructure Organisation (DIO)](https://www.gov.uk/government/organisations/defence-infrastructure-organisation) | Sutton Coldfield, UK | UK MoD estate operator; military-housing benchmark adjacent to CH armasuisse perimeter |
+| System | Operator / country | Description | BBL fit |
+|---|---|---|---|
+| ["Mein BImA"](https://meine-bima.bundesimmobilien.de/) | BImA, Bonn, DE | Migrated 13 Mar 2024 from legacy username/password into single "meine BImA" account; Wohnungsfürsorge access, Reparaturservice (365×24×7), Immobilienportal, GESA | 🟢 DE federal benchmark — direct BBL peer |
+| [GSA PBS Customer Dashboard / OASIS](https://www.gsa.gov/) | US GSA, Washington DC | Federal tenant dashboard | 🟡 US federal reference |
+| [GPA Workplace Services Toolkit](https://www.gov.uk/government/organisations/government-property-agency) | London, UK | Government Hubs | 🟡 UK federal reference |
+| [Senaatti "Senate App"](https://steerpath.com/case-study-senaatti) | Senaatti-kiinteistöt, Helsinki, FI | Built by Steerpath; indoor maps + booking; Virtu ID / email login via asiointi.senaatti.fi | 🟡 FI federal reference |
+| [Rijksvastgoedbedrijf](https://www.rijksvastgoedbedrijf.nl/) | Dutch Central Government RE Agency, The Hague | Tenant relations in development | 🟡 NL federal reference |
+| [BIG Wohn- und Mieterservice](https://www.big.at/) | Bundesimmobiliengesellschaft, Vienna | Austrian federal property | 🟡 AT federal reference |
+| [Statsbygg](https://www.statsbygg.no/) | Oslo, NO | Norwegian state property | 🟡 NO federal reference |
+| [armasuisse Immo-Portal VBS](https://www.ar.admin.ch/de/immo-portal) | armasuisse Immobilien, Bern, CH | Re-launched 1 May 2024; role-based (Nutzer/Mieter/Eigentümervertreter/Betreiber/IKT/Departementsebene); ZUVA Weisungen; DE/FR (IT planned); BBL liaison for Bern Verwaltungsbauten codified | 🟢 Closest CH federal peer — directly comparable |
+| [Bouwinvest](https://www.bouwinvest.com/) | Amsterdam, NL | Dutch state-pension-backed RE investor; **operator benchmark** for tenant portals on a proprietary stack (not a vendor sale) | 🟡 NL investor reference |
+| [CBRE Investment Management](https://www.cbreim.com/) | Los Angeles, USA | Global RE investor; **operator benchmark** for corporate-occupier tenant portals on a proprietary stack | 🔴 US investor reference |
+| [Defence Infrastructure Organisation (DIO)](https://www.gov.uk/government/organisations/defence-infrastructure-organisation) | Sutton Coldfield, UK | UK MoD estate operator; military-housing benchmark adjacent to CH armasuisse perimeter | 🟡 UK MoD; military-housing |
 
 <sub>**Preview — selected federal-portal benchmarks** (login or landing screens from the portals themselves; links go to source pages):</sub>
 
@@ -831,14 +831,14 @@ mindmap
 
 **Persona.** SAP CoE inside BBL post-SUPERB; partner teams integrating Wodis / RELion / casavi / Immomio / Plentific into SAP RE-FX; architects deciding "buy ISV add-on vs. build on BTP".
 
-| Pattern / product | Vendor | Notes |
-|---|---|---|
-| [Planon RE Management for SAP S/4HANA](https://planonsoftware.com/) | Planon (NL) — SAP-endorsed | Co-engineered on SAP One Domain Model and BTP; Finance/Contract/Lease accounting on S/4HANA; RE management + Space + Workplace + Asset/Maintenance + Energy on Planon |
-| [Goldinmotion Simple Property Management](https://www.goldinmotion.com/) | Goldinmotion (DE) | Lightweight SAP-side add-on |
-| [Promos.GT](https://www.promos-consult.de/) | Promos (DE) | SAP IS-RE specialist for housing |
-| [Aareon SAP Blue Eagle](https://www.aareon.de/) | Aareon (DE) | Long-standing SAP-side add-on |
-| [Aareon Connect via Locoia](https://connect-docs-de.locoia.com/) | Aareon Locoia (DE) | Low-code/iPaaS connecting Wodis Yuneo, Sigma, SAP Blue Eagle, Karthago, Immomio, casavi, Plentific, EverReal, Spiri.Bo, dormakaba, KIWI |
-| [Custom Fiori on SAP BTP](https://www.sap.com/products/business-technology-platform.html) | SAP BTP | Build-own; respects SAP "clean core" |
+| Pattern / product | Vendor | Notes | BBL fit |
+|---|---|---|---|
+| [Planon RE Management for SAP S/4HANA](https://planonsoftware.com/) | Planon (NL) — SAP-endorsed | Co-engineered on SAP One Domain Model and BTP; Finance/Contract/Lease accounting on S/4HANA; RE management + Space + Workplace + Asset/Maintenance + Energy on Planon | 🟢 Only SAP-endorsed RE/FM pattern |
+| [Goldinmotion Simple Property Management](https://www.goldinmotion.com/) | Goldinmotion (DE) | Lightweight SAP-side add-on | 🟡 Lightweight SAP add-on |
+| [Promos.GT](https://www.promos-consult.de/) | Promos (DE) | SAP IS-RE specialist for housing | 🟡 SAP IS-RE specialist (DE housing) |
+| [Aareon SAP Blue Eagle](https://www.aareon.de/) | Aareon (DE) | Long-standing SAP-side add-on | 🟢 Long-standing SAP RE-FX add-on |
+| [Aareon Connect via Locoia](https://connect-docs-de.locoia.com/) | Aareon Locoia (DE) | Low-code/iPaaS connecting Wodis Yuneo, Sigma, SAP Blue Eagle, Karthago, Immomio, casavi, Plentific, EverReal, Spiri.Bo, dormakaba, KIWI | 🟡 Aareon ecosystem glue |
+| [Custom Fiori on SAP BTP](https://www.sap.com/products/business-technology-platform.html) | SAP BTP | Build-own; respects SAP "clean core" | 🟢 EMBAG-aligned; respects SAP "clean core" |
 
 <sub>**Preview — selected integration patterns** (product screenshot / placeholder; links go to source pages):</sub>
 
@@ -863,26 +863,26 @@ mindmap
 
 **Persona.** Federal / cantonal procurement teams running sovereignty assessments; CISOs validating ISG-compatible hosting; tenant-portal architects placing PII and contract data under Schweizer Datenresidenz.
 
-| Region / vendor | Location | Notes |
-|---|---|---|
-| [Swisscom Sovereign Cloud / Enterprise Cloud](https://www.swisscom.ch/) | CH Tier-4 DCs | SAP-on-demand; Cloud Access to Azure/AWS/Google/Oracle |
-| [Exoscale](https://www.exoscale.com/) | Zurich, Geneva, Vienna, Frankfurt, Munich, Sofia | CH-domiciled |
-| [Infomaniak](https://www.infomaniak.com/) | Geneva, CH | CH-domiciled |
-| AWS Europe (Zurich) — `eu-central-2` | Zurich, CH | Opened Nov 2022; 3 AZs. Per AWS press release (BusinessWire, 8 Nov 2022): "AWS is planning to invest an estimated $5.9 billion (approx. 5.9 billion Swiss francs) in Switzerland during the next 15 years." |
-| Azure Switzerland North / Switzerland West | Zürich / Geneva | Launched 2019 |
-| Google Cloud `europe-west6` (Zurich) | Zurich | Launched 2019 |
-| AWS European Sovereign Cloud — `aws-eusc` (`eusc-de-east-1`, Brandenburg, DE) | Brandenburg, DE | GA 14 Jan 2026; €7.8 bn investment; EU-resident personnel/operations; NOT in Switzerland |
-| [Green.ch](https://www.green.ch) | Lupfig, CH | Largest Swiss data-centre operator; FINMA-grade |
-| [Equinix Zurich (ZH4 / ZH5)](https://www.equinix.com) | Zurich, CH | Major Swiss colocation campuses |
-| [Aspectra](https://www.aspectra.ch) | Zurich, CH | Swiss managed-hosting and managed-cloud specialist; FINMA-grade |
-| [Hetzner](https://www.hetzner.com) | Gunzenhausen, DE (Falkenstein + Helsinki DCs) | Low-cost EU hyperscaler-alternative |
-| [OVHcloud](https://www.ovhcloud.com) | Roubaix, FR (Strasbourg DC) | FR sovereign-cloud option |
-| [Scaleway](https://www.scaleway.com) | Paris, FR (Iliad) | FR sovereign cloud |
-| [T-Systems Open Telekom Cloud](https://www.t-systems.com) | Bonn, DE | DE sovereign cloud; BSI C5 |
-| [STACKIT](https://www.stackit.de) | Heilbronn, DE (Schwarz Gruppe / Lidl) | DE sovereign-cloud emerging player |
-| [IONOS Cloud](https://cloud.ionos.com) | Karlsruhe, DE | DE sovereign-cloud |
-| [GleSYS](https://glesys.com) | Falkenberg, SE | Nordic sovereign-cloud |
-| [Cleura](https://cleura.com) | Karlskrona, SE | Nordic sovereign-cloud |
+| Region / vendor | Location | Notes | BBL fit |
+|---|---|---|---|
+| [Swisscom Sovereign Cloud / Enterprise Cloud](https://www.swisscom.ch/) | CH Tier-4 DCs | SAP-on-demand; Cloud Access to Azure/AWS/Google/Oracle | 🟢 CH Tier-4 sovereign; SAP-on-demand |
+| [Exoscale](https://www.exoscale.com/) | Zurich, Geneva, Vienna, Frankfurt, Munich, Sofia | CH-domiciled | 🟢 CH-domiciled |
+| [Infomaniak](https://www.infomaniak.com/) | Geneva, CH | CH-domiciled | 🟢 CH-domiciled |
+| AWS Europe (Zurich) — `eu-central-2` | Zurich, CH | Opened Nov 2022; 3 AZs. Per AWS press release (BusinessWire, 8 Nov 2022): "AWS is planning to invest an estimated $5.9 billion (approx. 5.9 billion Swiss francs) in Switzerland during the next 15 years." | 🟢 CH region; hyperscaler data residency |
+| Azure Switzerland North / Switzerland West | Zürich / Geneva | Launched 2019 | 🟢 CH regions; M365-aligned |
+| Google Cloud `europe-west6` (Zurich) | Zurich | Launched 2019 | 🟢 CH region |
+| AWS European Sovereign Cloud — `aws-eusc` (`eusc-de-east-1`, Brandenburg, DE) | Brandenburg, DE | GA 14 Jan 2026; €7.8 bn investment; EU-resident personnel/operations; NOT in Switzerland | 🟡 EU sovereign — not CH |
+| [Green.ch](https://www.green.ch) | Lupfig, CH | Largest Swiss data-centre operator; FINMA-grade | 🟢 CH DC operator; FINMA-grade |
+| [Equinix Zurich (ZH4 / ZH5)](https://www.equinix.com) | Zurich, CH | Major Swiss colocation campuses | 🟢 CH colocation |
+| [Aspectra](https://www.aspectra.ch) | Zurich, CH | Swiss managed-hosting and managed-cloud specialist; FINMA-grade | 🟢 CH managed hosting |
+| [Hetzner](https://www.hetzner.com) | Gunzenhausen, DE (Falkenstein + Helsinki DCs) | Low-cost EU hyperscaler-alternative | 🔴 DE low-cost; no CH residency |
+| [OVHcloud](https://www.ovhcloud.com) | Roubaix, FR (Strasbourg DC) | FR sovereign-cloud option | 🟡 FR sovereign |
+| [Scaleway](https://www.scaleway.com) | Paris, FR (Iliad) | FR sovereign cloud | 🟡 FR sovereign |
+| [T-Systems Open Telekom Cloud](https://www.t-systems.com) | Bonn, DE | DE sovereign cloud; BSI C5 | 🟡 DE sovereign |
+| [STACKIT](https://www.stackit.de) | Heilbronn, DE (Schwarz Gruppe / Lidl) | DE sovereign-cloud emerging player | 🟡 DE sovereign |
+| [IONOS Cloud](https://cloud.ionos.com) | Karlsruhe, DE | DE sovereign-cloud | 🟡 DE sovereign |
+| [GleSYS](https://glesys.com) | Falkenberg, SE | Nordic sovereign-cloud | 🔴 Nordic |
+| [Cleura](https://cleura.com) | Karlskrona, SE | Nordic sovereign-cloud | 🔴 Nordic |
 
 **Swiss-context note.** Federal tenant portals must consider both technical region (Switzerland-North / `eu-central-2`) and operational sovereignty layer; AGOV operation itself will move to a mixed federal + private Swiss DC arrangement from 2027.
 
@@ -892,14 +892,14 @@ mindmap
 
 **Persona.** SAP CoE / BTP architects; integration architects in tenant-portal projects; SI partners delivering Aareon, casavi, iX-Haus and SAP RE-FX wire-ups.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [SAP Integration Suite (BTP)](https://www.sap.com/products/business-technology-platform.html) | Walldorf, DE | SAP BTP (regional, incl. CH where licensed) | Per message | SAP-native; co-deployable with Custom Fiori on BTP (Segment Q) |
-| [MuleSoft (Salesforce)](https://www.mulesoft.com) | San Francisco, US (Salesforce) | Cloud | Per connector + capacity | Anypoint platform; widely used in DACH enterprise |
-| [Workato](https://www.workato.com) | Mountain View, US | Cloud | Per workspace | Enterprise iPaaS (cross-listed in Segment BB) |
-| [Boomi](https://boomi.com) | Conshohocken (PA), US | Cloud | Per connector | iPaaS leader; large connector library |
-| [Frends](https://frends.com) | Tampere, FI | Cloud + on-prem | Per environment | Nordic iPaaS; OSS-friendly options |
-| [Aareon Locoia](https://connect-docs-de.locoia.com/) | Mainz, DE (Aareon) | Cloud (DE) | Per workflow | Glue between Aareon Connect ecosystem: Wodis Yuneo, Sigma, SAP Blue Eagle, Karthago, Immomio, casavi, Plentific, EverReal, Spiri.Bo, dormakaba, KIWI |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [SAP Integration Suite (BTP)](https://www.sap.com/products/business-technology-platform.html) | Walldorf, DE | SAP BTP (regional, incl. CH where licensed) | Per message | SAP-native; co-deployable with Custom Fiori on BTP (Segment Q) | 🟢 SAP-native; aligns with Q-segment pattern |
+| [MuleSoft (Salesforce)](https://www.mulesoft.com) | San Francisco, US (Salesforce) | Cloud | Per connector + capacity | Anypoint platform; widely used in DACH enterprise | 🟡 Enterprise iPaaS |
+| [Workato](https://www.workato.com) | Mountain View, US | Cloud | Per workspace | Enterprise iPaaS (cross-listed in Segment BB) | 🟡 Enterprise iPaaS |
+| [Boomi](https://boomi.com) | Conshohocken (PA), US | Cloud | Per connector | iPaaS leader; large connector library | 🟡 iPaaS leader |
+| [Frends](https://frends.com) | Tampere, FI | Cloud + on-prem | Per environment | Nordic iPaaS; OSS-friendly options | 🟢 OSS-friendly; EMBAG-aligned |
+| [Aareon Locoia](https://connect-docs-de.locoia.com/) | Mainz, DE (Aareon) | Cloud (DE) | Per workflow | Glue between Aareon Connect ecosystem: Wodis Yuneo, Sigma, SAP Blue Eagle, Karthago, Immomio, casavi, Plentific, EverReal, Spiri.Bo, dormakaba, KIWI | 🟡 Aareon ecosystem glue |
 
 **Maturity.** Mature. Strategic role in any post-SUPERB BBL tenant-portal: the question is *whether the SAP-native Integration Suite is sufficient* (for SAP-blessed flows) or whether a third-party iPaaS is needed for non-SAP edges.
 
@@ -913,29 +913,29 @@ mindmap
 
 **Persona.** Treasury/finance teams of large landlords; Hausverwaltungen running Mahnstufen; tenants seeking flexible-payment or loyalty mechanics.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [Bexio](https://www.bexio.com) | Rapperswil-Jona, CH (Swisscom subsidiary) | Cloud (CH) | CHF 45/mo Basic to CHF 129/mo Ultimate (Magic Heidi 2026) | **100,000 customers as of 19 February 2026** per bexio AG press release (CEO Markus Naef: "Today we celebrate 100,000 entrepreneurs who are advancing the digitalisation of Switzerland with us") |
-| [Klara](https://www.klara.ch) | Bern, CH (Swisscom-backed) | Cloud (CH) | From CHF 49/mo Business Starter | 30,000+ SMEs; AI receipt scanning; KLARA Buchhaltung integrated |
-| [Banana Buchhaltung](https://www.banana.ch) | Lugano, CH (Banana.ch SA, since 1988) | On-prem + iPad app | CHF 0 Free / CHF 69 Professional / CHF 149 Advanced annual | One-time purchase model; Excel-like UX; 120+ countries |
-| [Abacus AbaNinja / Abacus](https://www.abacus.ch) | Wittenbach-St. Gallen, CH | On-prem + Abacus Cloud | Per-user | CH mid-market ERP+accounting standard |
-| [Intrum AG (Inkasso-Schweiz)](https://www.intrum.ch) | Schwerzenbach, CH | Cloud | Success-fee + per-case | DACH Mahnwesen + Inkasso leader |
-| [CRIF AG Mahnwesen](https://www.crif.ch) | Zurich, CH | Cloud | Per-case | Bonität + Inkasso bundle |
-| [Creditreform Schweiz Inkasso](https://www.creditreform.ch) | St. Gallen, CH | Cloud | Success-fee | Membership-based Inkasso |
-| [EOS Schweiz](https://ch.eos-solutions.com) | Volketswil, CH (Otto Group) | Cloud | Success-fee | DACH-wide Inkasso |
-| [Inkasso Service AG](https://www.inkasso.ch) | Lucerne, CH | Cloud | Success-fee | Swiss Inkasso |
-| [GoCardless](https://gocardless.com) | London, UK | Cloud (EU) | ~1 % + £/€ 0.20 per tx | Direct-debit (SEPA, BACS) for recurring rent |
-| [Stripe Billing / Stripe Connect](https://stripe.com) | Dublin, IE / San Francisco, US | Cloud (EU residency) | ~2.9 % + €0.25 | Embedded payments for property managers |
-| [TrueLayer](https://truelayer.com) | London, UK | Cloud (EU) | Per-API call | Open-Banking PIS for rent payments |
-| [Yapily](https://www.yapily.com) | London, UK | Cloud (EU) | Per-API call | API-first Open Banking |
-| [Bilt Rewards](https://www.biltrewards.com) | New York, US | Cloud (US) | Free to tenants; cobranded card revenue | US rent-as-loyalty card; partnered Wells Fargo; no DACH presence |
-| [Rentmoola](https://rentmoola.com) | Vancouver, CA | Cloud (NA/UK) | Per-transaction | Rent-as-credit-card-tx |
-| [Klarna for rent (pilots)](https://www.klarna.com) | Stockholm, SE | Cloud (EU) | Tx fee | BNPL adapted to rent in select pilots |
-| [Tipalti](https://tipalti.com) | San Mateo, US | Cloud | Subscription + per-tx | AP automation; relevant for large landlords' supplier-pay |
-| [GetMyInvoices](https://www.getmyinvoices.com) | Hannover, DE | Cloud (EU) | Per-user | Invoice retrieval + DATEV export |
-| [Lexware](https://www.lexware.de) | Freiburg, DE (Haufe Group) | On-prem + cloud | Per-user | DE SME accounting |
-| [Sage 50 / Sage Business Cloud](https://www.sage.com) | Newcastle, UK | Cloud + on-prem | Per-user | Cross-DACH accounting |
-| [Infoniqa (formerly Sage CH)](https://www.infoniqa.com) | Stans, CH | On-prem + cloud | Per-user | Swiss payroll-and-accounting |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [Bexio](https://www.bexio.com) | Rapperswil-Jona, CH (Swisscom subsidiary) | Cloud (CH) | CHF 45/mo Basic to CHF 129/mo Ultimate (Magic Heidi 2026) | **100,000 customers as of 19 February 2026** per bexio AG press release (CEO Markus Naef: "Today we celebrate 100,000 entrepreneurs who are advancing the digitalisation of Switzerland with us") | 🟡 Swiss SME accounting; BBL is on SAP |
+| [Klara](https://www.klara.ch) | Bern, CH (Swisscom-backed) | Cloud (CH) | From CHF 49/mo Business Starter | 30,000+ SMEs; AI receipt scanning; KLARA Buchhaltung integrated | 🟡 Swiss SME accounting; BBL is on SAP |
+| [Banana Buchhaltung](https://www.banana.ch) | Lugano, CH (Banana.ch SA, since 1988) | On-prem + iPad app | CHF 0 Free / CHF 69 Professional / CHF 149 Advanced annual | One-time purchase model; Excel-like UX; 120+ countries | 🔴 SME desktop accounting |
+| [Abacus AbaNinja / Abacus](https://www.abacus.ch) | Wittenbach-St. Gallen, CH | On-prem + Abacus Cloud | Per-user | CH mid-market ERP+accounting standard | 🟡 CH mid-market standard |
+| [Intrum AG (Inkasso-Schweiz)](https://www.intrum.ch) | Schwerzenbach, CH | Cloud | Success-fee + per-case | DACH Mahnwesen + Inkasso leader | 🟡 CH Inkasso leader; federal use unlikely |
+| [CRIF AG Mahnwesen](https://www.crif.ch) | Zurich, CH | Cloud | Per-case | Bonität + Inkasso bundle | 🟡 CH Bonität + Inkasso |
+| [Creditreform Schweiz Inkasso](https://www.creditreform.ch) | St. Gallen, CH | Cloud | Success-fee | Membership-based Inkasso | 🟡 CH Inkasso |
+| [EOS Schweiz](https://ch.eos-solutions.com) | Volketswil, CH (Otto Group) | Cloud | Success-fee | DACH-wide Inkasso | 🔴 DACH Inkasso |
+| [Inkasso Service AG](https://www.inkasso.ch) | Lucerne, CH | Cloud | Success-fee | Swiss Inkasso | 🔴 Swiss Inkasso |
+| [GoCardless](https://gocardless.com) | London, UK | Cloud (EU) | ~1 % + £/€ 0.20 per tx | Direct-debit (SEPA, BACS) for recurring rent | 🔴 EU direct debit; not federal-CH |
+| [Stripe Billing / Stripe Connect](https://stripe.com) | Dublin, IE / San Francisco, US | Cloud (EU residency) | ~2.9 % + €0.25 | Embedded payments for property managers | 🔴 Embedded payments |
+| [TrueLayer](https://truelayer.com) | London, UK | Cloud (EU) | Per-API call | Open-Banking PIS for rent payments | 🔴 Open Banking PIS |
+| [Yapily](https://www.yapily.com) | London, UK | Cloud (EU) | Per-API call | API-first Open Banking | 🔴 Open Banking API |
+| [Bilt Rewards](https://www.biltrewards.com) | New York, US | Cloud (US) | Free to tenants; cobranded card revenue | US rent-as-loyalty card; partnered Wells Fargo; no DACH presence | ⚪ US consumer loyalty |
+| [Rentmoola](https://rentmoola.com) | Vancouver, CA | Cloud (NA/UK) | Per-transaction | Rent-as-credit-card-tx | ⚪ NA/UK consumer payments |
+| [Klarna for rent (pilots)](https://www.klarna.com) | Stockholm, SE | Cloud (EU) | Tx fee | BNPL adapted to rent in select pilots | ⚪ BNPL — not federal |
+| [Tipalti](https://tipalti.com) | San Mateo, US | Cloud | Subscription + per-tx | AP automation; relevant for large landlords' supplier-pay | 🔴 US AP automation |
+| [GetMyInvoices](https://www.getmyinvoices.com) | Hannover, DE | Cloud (EU) | Per-user | Invoice retrieval + DATEV export | 🔴 DE invoice retrieval |
+| [Lexware](https://www.lexware.de) | Freiburg, DE (Haufe Group) | On-prem + cloud | Per-user | DE SME accounting | 🔴 DE SME |
+| [Sage 50 / Sage Business Cloud](https://www.sage.com) | Newcastle, UK | Cloud + on-prem | Per-user | Cross-DACH accounting | 🔴 Cross-DACH |
+| [Infoniqa (formerly Sage CH)](https://www.infoniqa.com) | Stans, CH | On-prem + cloud | Per-user | Swiss payroll-and-accounting | 🔴 Swiss payroll niche |
 
 **Maturity.** Mature accounting (Bexio, Klara, Banana, Abacus); mature Inkasso (Intrum, CRIF, Creditreform, EOS); consolidating Open Banking (TrueLayer, GoCardless, Yapily competing with Stripe Connect). Tenant-loyalty (Bilt) and rent-BNPL (Klarna pilots) remain emerging in DACH; Bilt Rewards has no DACH presence as of May 2026.
 
@@ -949,16 +949,16 @@ mindmap
 
 **Persona.** Workplace-experience teams adding navigation to large campuses; FM teams; tenant-facing apps wanting interactive floor plans. For BBL, the relevance is multi-building federal campuses (Bern, Zurich, Geneva sites).
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [Archilogic](https://www.archilogic.com/) | Zurich, CH | Cloud (CH / EU) | Per building | **Swiss-domiciled** 3D floor plans + Floor Plan Engine + indoor-mapping API; widely embedded as the floor-plan layer inside IWMS and WEX products (adjacent to Segments A, B) |
-| [Steerpath](https://steerpath.com) | Helsinki, FI | Cloud | Per building | Powers Senaatti's Senate App (federal benchmark — Segment P) |
-| [MapsIndoors](https://www.mapsindoors.com) | Copenhagen, DK | Cloud | Per building | Google Maps-style indoor mapping |
-| [Pointr](https://www.pointr.tech) | London, UK | Cloud | Per building | Indoor positioning + wayfinding |
-| [MazeMap](https://www.mazemap.com) | Trondheim, NO | Cloud | Per building | Nordic indoor mapping |
-| [IndoorAtlas](https://www.indooratlas.com) | Oulu, FI | Cloud | Per building | Magnetic-field indoor positioning |
-| [MappedIn](https://www.mappedin.com) | Waterloo, CA | Cloud | Per building | Partners with ServiceNow WSD |
-| [Esri ArcGIS Indoors](https://www.esri.com) | Redlands, US | Cloud + on-prem | Per user | Enterprise indoor GIS |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [Archilogic](https://www.archilogic.com/) | Zurich, CH | Cloud (CH / EU) | Per building | **Swiss-domiciled** 3D floor plans + Floor Plan Engine + indoor-mapping API; widely embedded as the floor-plan layer inside IWMS and WEX products (adjacent to Segments A, B) | 🟢 Swiss-domiciled; floor-plan API |
+| [Steerpath](https://steerpath.com) | Helsinki, FI | Cloud | Per building | Powers Senaatti's Senate App (federal benchmark — Segment P) | 🟡 FI federal-benchmark provider |
+| [MapsIndoors](https://www.mapsindoors.com) | Copenhagen, DK | Cloud | Per building | Google Maps-style indoor mapping | 🔴 DK indoor mapping |
+| [Pointr](https://www.pointr.tech) | London, UK | Cloud | Per building | Indoor positioning + wayfinding | 🔴 UK indoor positioning |
+| [MazeMap](https://www.mazemap.com) | Trondheim, NO | Cloud | Per building | Nordic indoor mapping | 🔴 NO indoor mapping |
+| [IndoorAtlas](https://www.indooratlas.com) | Oulu, FI | Cloud | Per building | Magnetic-field indoor positioning | 🔴 FI positioning |
+| [MappedIn](https://www.mappedin.com) | Waterloo, CA | Cloud | Per building | Partners with ServiceNow WSD | 🔴 CA; ServiceNow-bound |
+| [Esri ArcGIS Indoors](https://www.esri.com) | Redlands, US | Cloud + on-prem | Per user | Enterprise indoor GIS | 🟡 Enterprise indoor GIS |
 
 **Maturity.** Mature core; consolidating with Esri's enterprise push and embedded use in WSD / Eptura / Spacewell.
 
@@ -972,19 +972,19 @@ mindmap
 
 **Persona.** Workplace / portfolio strategists optimising desk-to-employee ratios; tenant-of-tenant assessments inside federal buildings; ESG teams quantifying space efficiency.
 
-| Product | HQ | Hosting | Pricing | Notable feature |
-|---|---|---|---|---|
-| [Locatee (Tango)](https://www.tangoanalytics.com) | Zurich, CH (Tango) | Cloud | Per building | **Swiss-domiciled engineering presence**; sensor-free Wi-Fi-based; acquired by Tango Analytics Mar 2024; Zurich is Tango's European HQ |
-| [VergeSense](https://vergesense.com) | San Francisco, US | Cloud | Per sensor | Computer-vision occupancy sensors |
-| [Density](https://www.density.io) | New York, US | Cloud | Per sensor | Depth-camera occupancy |
-| [XY Sense](https://xysense.com) | Melbourne, AU | Cloud | Per sensor | AI-vision occupancy |
-| [Butlr](https://butlr.com) | San Francisco, US | Cloud | Per sensor | Thermal-vision occupancy |
-| [Disruptive Technologies](https://www.disruptive-technologies.com) | Oslo, NO | Cloud | Per sensor | Cellular IoT sensors (cross-listed in Segment L) |
-| [Akenza](https://akenza.io) | Zurich, CH | Cloud | Per device | **Swiss-domiciled IoT platform**; cross-listed in Segment L for sensor-platform overlap |
-| [enlighted (Siemens)](https://www.enlightedinc.com) | Sunnyvale, US (Siemens) | Cloud | Per fixture | Sensor-rich occupancy + lighting |
-| [Steelcase Workplace Advisor](https://www.steelcase.com) | Grand Rapids, US | Cloud | Per workspace | Furniture-vendor analytics overlay |
-| [Microshare](https://www.microshare.io) | Philadelphia, US | Cloud | Per sensor | LoRaWAN-based occupancy |
-| [Spica Technologies](https://www.spicatech.co.uk) | UK | Cloud | Per building | Workplace-experience analytics |
+| Product | HQ | Hosting | Pricing | Notable feature | BBL fit |
+|---|---|---|---|---|---|
+| [Locatee (Tango)](https://www.tangoanalytics.com) | Zurich, CH (Tango) | Cloud | Per building | **Swiss-domiciled engineering presence**; sensor-free Wi-Fi-based; acquired by Tango Analytics Mar 2024; Zurich is Tango's European HQ | 🟡 CH engineering presence; workplace |
+| [VergeSense](https://vergesense.com) | San Francisco, US | Cloud | Per sensor | Computer-vision occupancy sensors | 🔴 US CV occupancy |
+| [Density](https://www.density.io) | New York, US | Cloud | Per sensor | Depth-camera occupancy | 🔴 US occupancy |
+| [XY Sense](https://xysense.com) | Melbourne, AU | Cloud | Per sensor | AI-vision occupancy | 🔴 AU occupancy |
+| [Butlr](https://butlr.com) | San Francisco, US | Cloud | Per sensor | Thermal-vision occupancy | 🔴 US thermal occupancy |
+| [Disruptive Technologies](https://www.disruptive-technologies.com) | Oslo, NO | Cloud | Per sensor | Cellular IoT sensors (cross-listed in Segment L) | 🔴 NO IoT sensors |
+| [Akenza](https://akenza.io) | Zurich, CH | Cloud | Per device | **Swiss-domiciled IoT platform**; cross-listed in Segment L for sensor-platform overlap | 🟢 Swiss-domiciled IoT platform |
+| [enlighted (Siemens)](https://www.enlightedinc.com) | Sunnyvale, US (Siemens) | Cloud | Per fixture | Sensor-rich occupancy + lighting | 🔴 US Siemens-bound |
+| [Steelcase Workplace Advisor](https://www.steelcase.com) | Grand Rapids, US | Cloud | Per workspace | Furniture-vendor analytics overlay | 🔴 Furniture-vendor overlay |
+| [Microshare](https://www.microshare.io) | Philadelphia, US | Cloud | Per sensor | LoRaWAN-based occupancy | 🔴 US LoRaWAN occupancy |
+| [Spica Technologies](https://www.spicatech.co.uk) | UK | Cloud | Per building | Workplace-experience analytics | 🔴 UK workplace analytics |
 
 **Maturity.** Mature; consolidation visible (Tango / Locatee 2024, Siemens / enlighted earlier).
 
@@ -998,29 +998,29 @@ mindmap
 
 **Persona.** BBL Project Management and Bauherrenvertretung; federal construction PMs handing newly built or renovated stock into operational tenancy. CDE-Bund mandate (Appendix A) applies.
 
-| Product | HQ | Hosting | Pricing | Integrations | Notable feature |
-|---|---|---|---|---|---|
-| [Autodesk Construction Cloud (BIM 360 / ACC)](https://construction.autodesk.com/) | San Francisco, USA | Cloud | Per user | Revit, Civil 3D, Navisworks, IFC | De-facto CDE standard; Revit-native |
-| [Bentley iTwin / ProjectWise](https://www.bentley.com/software/itwin/) | Exton (PA), USA | Cloud / hybrid | Per asset / per user | OpenBuildings, IFC, MicroStation | Asset-twin handover into operations |
-| [Revizto](https://revizto.com/) | Lausanne, CH | Cloud | Per user | Revit, Navisworks, IFC | **Swiss-domiciled** issue tracking & clash review |
-| [Solibri](https://www.solibri.com/) | Helsinki, FI (Nemetschek) | Hybrid | Per user | IFC, Revit, ArchiCAD | Model checking / clash detection |
-| [BIMcollab](https://www.bimcollab.com/) | Eindhoven, NL | Cloud | Per user | BCF, Revit, Navisworks | OpenBCF issue management |
-| [Procore](https://www.procore.com/) | Carpinteria (CA), USA | Cloud | Per user | Revit, Sage, Quickbooks | General-contractor PM |
-| [Trimble Connect](https://www.connect.trimble.com/) | Westminster (CO), USA | Cloud | Per user | Tekla, SketchUp, IFC | CDE + viewer; KBOB-aligned workflows |
-| [dRofus](https://www.drofus.com/) | Oslo, NO (Nemetschek) | Cloud | Per user | Revit, IFC, ArchiCAD | Room/equipment data management; track record in CH federal projects |
-| [PlanRadar](https://www.planradar.com/) | Vienna, AT | Cloud | Per user | BIM, IFC | Snagging/defect handover; also listed in Segment G |
-| [Buildots](https://www.buildots.com/) | London, UK | Cloud | Per user | BIM, computer vision | AI construction-progress vs. BIM model |
-| [Capmo](https://www.capmo.com/) | Munich, DE | Cloud | Per user | BIM, defect/snagging | DACH construction-PM SaaS |
-| [Allplan](https://www.allplan.com) | Munich, DE (Nemetschek) | Cloud + on-prem | Per user | IFC, Revit | German-engineered BIM authoring |
-| [Graphisoft ArchiCAD](https://graphisoft.com) | Budapest, HU (Nemetschek) | Cloud + on-prem | Per user | IFC, BCF | BIM authoring |
-| [Vectorworks](https://www.vectorworks.net) | Columbia, US (Nemetschek) | Cloud + on-prem | Per user | IFC, DWG | BIM/CAD |
-| [Catenda Hub](https://catenda.com) | Oslo, NO | Cloud | Per user | IFC native, BCF | openBIM CDE; IFC-native |
-| [Plannerly](https://plannerly.com) | US / UK | Cloud | Per user | IFC, Revit | BIM execution planning |
-| [Speckle](https://speckle.systems) | London, UK | Cloud + self-host | Open-source | Multi-CAD | Open-source BIM interoperability / data hub |
-| [BIMobject](https://www.bimobject.com) | Malmö, SE | Cloud | Free + subscription | IFC, Revit | Product library |
-| [BIM&CO](https://www.bimandco.com) | Bordeaux, FR | Cloud | Subscription | IFC | Product library |
-| [BIM Track / Newforma Konekt](https://newforma.com) | Quebec, CA / Manchester NH, US | Cloud | Per user | BCF | Issue management; merged into Newforma |
-| [DesignBuilder](https://designbuilder.co.uk) | Stroud, UK | Desktop | Per user | IFC | IFC-driven simulation |
+| Product | HQ | Hosting | Pricing | Integrations | Notable feature | BBL fit |
+|---|---|---|---|---|---|---|
+| [Autodesk Construction Cloud (BIM 360 / ACC)](https://construction.autodesk.com/) | San Francisco, USA | Cloud | Per user | Revit, Civil 3D, Navisworks, IFC | De-facto CDE standard; Revit-native | 🟡 De-facto CDE; pre-occupancy |
+| [Bentley iTwin / ProjectWise](https://www.bentley.com/software/itwin/) | Exton (PA), USA | Cloud / hybrid | Per asset / per user | OpenBuildings, IFC, MicroStation | Asset-twin handover into operations | 🟡 BIM2FM handover relevant |
+| [Revizto](https://revizto.com/) | Lausanne, CH | Cloud | Per user | Revit, Navisworks, IFC | **Swiss-domiciled** issue tracking & clash review | 🟢 Swiss-domiciled (Lausanne); CH federal track |
+| [Solibri](https://www.solibri.com/) | Helsinki, FI (Nemetschek) | Hybrid | Per user | IFC, Revit, ArchiCAD | Model checking / clash detection | 🟡 FI Nemetschek; clash detection |
+| [BIMcollab](https://www.bimcollab.com/) | Eindhoven, NL | Cloud | Per user | BCF, Revit, Navisworks | OpenBCF issue management | 🟡 OpenBCF |
+| [Procore](https://www.procore.com/) | Carpinteria (CA), USA | Cloud | Per user | Revit, Sage, Quickbooks | General-contractor PM | 🔴 US GC PM |
+| [Trimble Connect](https://www.connect.trimble.com/) | Westminster (CO), USA | Cloud | Per user | Tekla, SketchUp, IFC | CDE + viewer; KBOB-aligned workflows | 🟡 KBOB-aligned CDE |
+| [dRofus](https://www.drofus.com/) | Oslo, NO (Nemetschek) | Cloud | Per user | Revit, IFC, ArchiCAD | Room/equipment data management; track record in CH federal projects | 🟢 CH federal-project track record |
+| [PlanRadar](https://www.planradar.com/) | Vienna, AT | Cloud | Per user | BIM, IFC | Snagging/defect handover; also listed in Segment G | 🟢 Widely used in CH (also Segment G) |
+| [Buildots](https://www.buildots.com/) | London, UK | Cloud | Per user | BIM, computer vision | AI construction-progress vs. BIM model | 🔴 UK CV |
+| [Capmo](https://www.capmo.com/) | Munich, DE | Cloud | Per user | BIM, defect/snagging | DACH construction-PM SaaS | 🟡 DACH construction PM |
+| [Allplan](https://www.allplan.com) | Munich, DE (Nemetschek) | Cloud + on-prem | Per user | IFC, Revit | German-engineered BIM authoring | 🟡 DE Nemetschek |
+| [Graphisoft ArchiCAD](https://graphisoft.com) | Budapest, HU (Nemetschek) | Cloud + on-prem | Per user | IFC, BCF | BIM authoring | 🔴 BIM authoring |
+| [Vectorworks](https://www.vectorworks.net) | Columbia, US (Nemetschek) | Cloud + on-prem | Per user | IFC, DWG | BIM/CAD | 🔴 BIM/CAD |
+| [Catenda Hub](https://catenda.com) | Oslo, NO | Cloud | Per user | IFC native, BCF | openBIM CDE; IFC-native | 🟡 openBIM CDE |
+| [Plannerly](https://plannerly.com) | US / UK | Cloud | Per user | IFC, Revit | BIM execution planning | 🔴 BIM planning |
+| [Speckle](https://speckle.systems) | London, UK | Cloud + self-host | Open-source | Multi-CAD | Open-source BIM interoperability / data hub | 🟢 OSS BIM; EMBAG-aligned |
+| [BIMobject](https://www.bimobject.com) | Malmö, SE | Cloud | Free + subscription | IFC, Revit | Product library | 🔴 product library |
+| [BIM&CO](https://www.bimandco.com) | Bordeaux, FR | Cloud | Subscription | IFC | Product library | 🔴 product library |
+| [BIM Track / Newforma Konekt](https://newforma.com) | Quebec, CA / Manchester NH, US | Cloud | Per user | BCF | Issue management; merged into Newforma | 🔴 issue mgmt |
+| [DesignBuilder](https://designbuilder.co.uk) | Stroud, UK | Desktop | Per user | IFC | IFC-driven simulation | 🔴 IFC simulation |
 
 **Maturity.** Mature (Autodesk, Bentley, Procore) → emerging in AI/CV (Buildots). Heavy DACH adoption of Solibri, dRofus, Revizto, BIMcollab.
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
@@ -1050,15 +1050,15 @@ mindmap
 
 **Persona.** SAP RE-FX migration teams, finance teams catching up on IFRS 16 obligations, landlords inheriting legacy paper portfolios.
 
-| Product | HQ | Notable feature |
-|---|---|---|
-| [Leverton (MRI Software)](https://www.mrisoftware.com/) | Berlin, DE (MRI) | Acquired by MRI 2020; AI lease abstraction for IFRS 16 / FASB / RE-FX |
-| [Prophia](https://www.prophia.com/) | San Francisco, USA | Lease intelligence for commercial RE |
-| [contract.fit](https://contract.fit/) | Brussels, BE | AI document extraction; contract abstraction |
-| [Hyperscience](https://www.hyperscience.com/) | New York, USA | General-purpose AI document processing |
-| [Rossum](https://rossum.ai/) | Prague, CZ | AI document understanding; broader than leases |
-| [LeaseHawk](https://www.leasehawk.com/) | Scottsdale (AZ), USA | AI leasing assistant (multifamily) |
-| [docunite](https://docunite.com/) | Berlin, DE | DACH AI document processing for real estate |
+| Product | HQ | Notable feature | BBL fit |
+|---|---|---|---|
+| [Leverton (MRI Software)](https://www.mrisoftware.com/) | Berlin, DE (MRI) | Acquired by MRI 2020; AI lease abstraction for IFRS 16 / FASB / RE-FX | 🟡 SAP RE-FX abstraction; post-SUPERB cleanup |
+| [Prophia](https://www.prophia.com/) | San Francisco, USA | Lease intelligence for commercial RE | 🔴 US commercial RE |
+| [contract.fit](https://contract.fit/) | Brussels, BE | AI document extraction; contract abstraction | 🟡 EU AI extraction |
+| [Hyperscience](https://www.hyperscience.com/) | New York, USA | General-purpose AI document processing | 🔴 US AI doc |
+| [Rossum](https://rossum.ai/) | Prague, CZ | AI document understanding; broader than leases | 🟡 CZ AI doc understanding |
+| [LeaseHawk](https://www.leasehawk.com/) | Scottsdale (AZ), USA | AI leasing assistant (multifamily) | 🔴 US multifamily |
+| [docunite](https://docunite.com/) | Berlin, DE | DACH AI document processing for real estate | 🟡 DACH AI doc |
 
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
 
