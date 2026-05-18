@@ -4,11 +4,11 @@
 
 ## Purpose
 
-This document lists actual real-estate **operators** (federal / cantonal / communal landlords, transport and utility operators, listed property managers, FM service providers, corporate occupiers) and the tenant-portal systems they operate. It is distinct from [MARKET-SCREENING.md](MARKET-SCREENING.md), which lists software **products / vendors**. An operator is an organisation that runs a real-estate portfolio; a product is the software it uses to do so. The same product (e.g. Planon, SAP RE-FX, GARAIO REM) typically appears in multiple operator rows below — when you want to look up which products are used in which segment, jump to [MARKET-SCREENING.md "Details by Segment"](MARKET-SCREENING.md#6-details-by-segment).
+This document lists actual real-estate **operators** (federal / cantonal / communal landlords, transport and utility operators, listed property managers, FM service providers, corporate occupiers) and the tenant-portal systems they operate. It is distinct from [MARKET-SCREENING.md](MARKET-SCREENING.md), which lists software **products / vendors**. An operator is an organisation that runs a real-estate portfolio; a product is the software it uses to do so. The same product (e.g. Planon, SAP RE-FX, GARAIO REM) typically appears in multiple operator rows below — when you want to look up which products are used in which segment, jump to [MARKET-SCREENING.md "Details by Segment"](MARKET-SCREENING.md#5-details-by-segment).
 
 **Methodology.** Sources include official websites, annual reports, public-procurement notices (simap.ch, TED, contracts-finder), vendor press releases naming customers, trade press, and LinkedIn job adverts treated as indicators. Entries marked *[indicative]* rely on indicators only, not official confirmations. URLs to operators' official real-estate / property-management landing pages have been verified live (May 2026); rows without a link either point to the operator's corporate marketing site already cited inline, or no separately findable RE-division page was identified.
 
-**BBL fit scoring** *(0–10, where 10 = perfect fit; identical scale and bands as in [MARKET-SCREENING.md §6](MARKET-SCREENING.md#6-details-by-segment))*. Typical bands: **8–10** = closest peer pattern (federal landlord with comparable scale, SAP-centric stack, AGOV-equivalent identity, mandatory tenant portal); **4–7** = adjacent / partially comparable (cantonal, municipal, transport, or corporate-occupier with overlapping but not identical pattern); **1–3** = weakly comparable (supplier / non-property / geographically remote); **0** = outside the federal property-management context. The score is a descriptive observation about the operator's structural similarity to BBL's situation — it is **not** a vendor recommendation.
+**BBL fit scoring** *(0–10, where 10 = perfect fit; identical scale and bands as in [MARKET-SCREENING.md §5](MARKET-SCREENING.md#5-details-by-segment))*. Typical bands: **8–10** = closest peer pattern (federal landlord with comparable scale, SAP-centric stack, AGOV-equivalent identity, mandatory tenant portal); **4–7** = adjacent / partially comparable (cantonal, municipal, transport, or corporate-occupier with overlapping but not identical pattern); **1–3** = weakly comparable (supplier / non-property / geographically remote); **0** = outside the federal property-management context. The score is a descriptive observation about the operator's structural similarity to BBL's situation — it is **not** a vendor recommendation.
 
 ## Table of contents
 
@@ -27,6 +27,7 @@ This document lists actual real-estate **operators** (federal / cantonal / commu
 - [13. International Transport & Infrastructure](#13-international-transport--infrastructure)
 - [14. Major FM Operators](#14-major-fm-operators)
 - [15. International Corporate-Occupier Benchmarks](#15-international-corporate-occupier-benchmarks)
+- [Evidence Index — downloaded validation artifacts](#evidence-index--downloaded-validation-artifacts)
 
 ## 1. Swiss Confederation peers
 
@@ -171,6 +172,60 @@ This document lists actual real-estate **operators** (federal / cantonal / commu
 | **JPMorgan Chase / HSBC / BNP Paribas Immobilier** | not publicly detailed | – | – | **5** — Global-bank corporate RE (limited public detail) |
 | **Pfizer, Bayer, Merck, BMW, Mercedes-Benz, Volkswagen Immobilien** | typically SAP RE-FX + local CAFM *[indicative]* | – | – | **5** — DACH-industrial SAP RE-FX pattern |
 | **Novartis Real Estate / Nestlé Corporate RE** | not publicly detailed | – | – | **5** — CH-headquartered corporate RE (limited public detail) |
+
+## Evidence Index — downloaded validation artifacts
+
+Public-domain validation artifacts for the top peer operators (BBL fit ≥ 8), downloaded May 2026 and stored in [`assets/operators/`](../assets/operators/) so claims in the tables above can be checked against primary sources without a live internet connection. Where no row appears below, the operator's row in the tables above cites either a live portal URL (its own primary evidence) or an *[indicative]* note (no public artifact identified).
+
+### §1 — Swiss Confederation peers
+
+- **armasuisse Immobilien (VBS)** — [Nachhaltigkeitsbericht 2022 (PDF, 5.2 MB)](../assets/operators/armasuisse-immobilien-nachhaltigkeitsbericht-2022.pdf); [armasuisse Organigramm August 2025 (PDF, 285 KB)](../assets/operators/armasuisse-organigramm-2025-08.pdf).
+- **SBB Immobilien / CFF** — no downloadable artifact; `company.sbb.ch` and `portal.sbb-immobilien.ch` are the live primary evidence (publisher's CDN refuses direct PDF download).
+
+### §2 — Swiss Cantons
+
+- **Canton Zürich, Immobilienamt** — [Portfoliostrategie für die Liegenschaften des allgemeinen Finanzvermögens, 2022 (PDF, 4.0 MB)](../assets/operators/kanton-zh-immobilienamt-portfoliostrategie-2022.pdf).
+
+### §3 — Swiss Cities
+
+- **City of Berne — Project DOMUM** — [Vortrag des Gemeinderats an den Stadtrat (PDF, 390 KB)](../assets/operators/stadt-bern-domum-vortrag-gemeinderat-2019.pdf) — the investment-credit submission (CHF 3,980,000) that anchors the DOMUM scope and timeline cited in the table.
+
+### §4 — Swiss Universities / Academic
+
+- **EPFL — Domaine Immobilier & Infrastructures (DII)** — [AREMIS Archibus case study (HTML, 67 KB)](../assets/operators/epfl-dii-archibus-aremis-case-study.html) — AREMIS's own write-up of the 2020 EPFL selection.
+
+### §7 — DACH peers
+
+- **BImA (DE)** — [BImA corporate brochure, English (PDF, 4.2 MB)](../assets/operators/bima-de-corporate-brochure-en.pdf); [Adakta — eGovernment-Wettbewerb 2024 submission (PDF, 22 KB)](../assets/operators/bima-de-adakta-egovernment-wettbewerb-2024.pdf).
+
+### §8 — Nordic peers
+
+- **Senate Properties / Senaatti (FI)** — [Tilinpäätös 2024 (annual financial report, Finnish, PDF, 850 KB)](../assets/operators/senaatti-fi-tilinpaatos-2024.pdf); [Vastuullisuusraportti 2024 (sustainability / annual report, Finnish, PDF, 33 MB)](../assets/operators/senaatti-fi-vastuullisuusraportti-2024.pdf).
+- **Statsbygg (NO)** — [BIM Manual 1.2.1, English, 2013 (PDF, 2.7 MB)](../assets/operators/statsbygg-bim-manual-1-2-1-en-2013.pdf); [BIM Manual 2.0, English, 2019 (PDF, 3.1 MB)](../assets/operators/statsbygg-bim-manual-2-0-en-2019.pdf).
+
+### §9 — UK / Ireland
+
+- **GPA — Government Property Agency (UK)** — [GPA Annual Report and Accounts 2024-25, large-print version (PDF, 1.0 MB)](../assets/operators/gpa-uk-annual-report-2024-25.pdf).
+
+### §10 — Benelux
+
+- **Rijksvastgoedbedrijf (NL)** — [Planon press release on the 13.11.2025 RVB Asset & Maintenance Management go-live (HTML, 130 KB)](../assets/operators/rvb-nl-planon-go-live-press-release-2025-11-13.html); [Auditrapport 2024 Rijksvastgoedbedrijf, Auditdienst Rijk (PDF, 780 KB)](../assets/operators/rvb-nl-auditrapport-2024.pdf).
+
+### §11 — France / Southern Europe
+
+- **Agenzia del Demanio (IT)** — [Piano Strategico Industriale 2024-2027, aggiornamento (PDF, 13.4 MB, Italian)](../assets/operators/agenzia-demanio-piano-strategico-industriale-2024-2027.pdf); [Bilancio 2024 (PDF, 2.6 MB, Italian)](../assets/operators/agenzia-demanio-bilancio-2024.pdf).
+
+### §12 — US peers
+
+- **GSA Public Buildings Service** — [GSA FY2024 Annual Performance Report (PDF, 1.6 MB)](../assets/operators/gsa-pbs-annual-performance-report-fy2024.pdf).
+
+### §14 — Major FM Operators
+
+- **CBRE Global Workplace Solutions** — [Host launch (Singapore / India), press release mirror at indiatechnologynews.in, 14.07.2021 (HTML, 175 KB)](../assets/operators/cbre-gws-host-launch-india-2021-press-mirror.html) — the original CBRE.com.sg page is behind Cloudflare bot protection; the India-mirror copy preserves the same announcement text.
+
+### §15 — International Corporate-Occupier Benchmarks
+
+- **Siemens Real Estate (DE)** — [Planon press release 11.10.2016 — Siemens Real Estate Deploys Planon Real Estate Management Software Worldwide (HTML, 128 KB)](../assets/operators/siemens-re-de-planon-one-global-press-release-2016-10-11.html) — the announcement of Siemens RE's "ONE Global" selection of Planon that the table cites as Dr. Stephan Jakoby's quote.
 
 ---
 

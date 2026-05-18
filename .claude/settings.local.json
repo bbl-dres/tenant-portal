@@ -76,7 +76,29 @@
       "WebFetch(domain:lbre.stanford.edu)",
       "WebFetch(domain:www.siemens.com)",
       "WebFetch(domain:www.immobilien-basel-stadt.ch)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/gpa-uk-annual-report-2024-25.pdf --max-time 60 \"https://assets.publishing.service.gov.uk/media/68c7d9d5995dfd01bff0be7b/GPA_Annual_Report_and_Accounts_2024-25_-_20_point_print_version.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/gsa-pbs-annual-performance-report-fy2024.pdf --max-time 60 \"https://www.gsa.gov/system/files?file=GSA-FY2024-Annual-Performance-Report-Final-508-Jan-2025.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/bima-de-corporate-brochure-en.pdf --max-time 60 \"https://cdn0.scrvt.com/1f9e599af5d26bd9a064fd3c6c6d6d3b/9420bbd9c994a94d/90aa6f89eb33/Unternehmensbroschuere_englisch.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/rvb-nl-planon-go-live-press-release-2025-11-13.html --max-time 60 \"https://planonsoftware.com/us/news/rvb-goes-live-with-planon-amm/\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/siemens-re-de-planon-one-global-press-release-2016-10-11.html --max-time 60 \"https://planonsoftware.com/us/news/siemens-real-estate-deploys-planon-real-estate-management-software-worldwide/\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/sbb-immobilien-finanzbericht-2024.pdf --max-time 90 \"https://company.sbb.ch/content/dam/internet/corporate/downloads/de/ueber-die-sbb/profil/publikationen/SBB-Finanzbericht-2024.pdf.sbbdownload.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/stadt-bern-domum-vortrag-gemeinderat-2019.pdf --max-time 60 \"https://www.bern.ch/mediencenter/medienmitteilungen/aktuell_ptk/investitionskredite-fuer-vier-informatikvorhaben/dokument/vortrag-an-den-stadtrat-it-projekt-domum.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/statsbygg-bim-manual-1-2-1-en-2013.pdf --max-time 60 \"https://dok.statsbygg.no/wp-content/uploads/2020/06/statsbyggs-bim-manual-1-2-1_en_20131217.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/armasuisse-immobilien-nachhaltigkeitsbericht-2022.pdf --max-time 60 \"https://www.ar.admin.ch/dam/de/sd-web/fxQB3mArHjEz/de-nhb22.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/agenzia-demanio-piano-strategico-industriale-2024-2027.pdf --max-time 60 \"https://www.agenziademanio.it/export/sites/demanio/download/schedeapprofondimento/PSI_Aggiornamento-2024_2027.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/agenzia-demanio-bilancio-2024.pdf --max-time 60 \"https://www.agenziademanio.it/export/sites/demanio/download/Trasparenza/Trasparenza_11/Bilancio-2024.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/cbre-gws-host-launch-singapore-press-release-2021-07-14.html --max-time 60 \"https://www.cbre.com.sg/press-releases/cbre-launches-host-an-intuitive-platform-for-technology-driven-real-estate\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/sbb-geschaeftsbericht-2024.pdf --max-time 90 \"https://company.sbb.ch/content/dam/internet/corporate/downloads/de/ueber-die-sbb/profil/publikationen/SBB-Geschaeftsbericht-2024.pdf.sbbdownload.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/kanton-zh-immobilienamt-portfoliostrategie-2022.pdf --max-time 60 \"https://www.zh.ch/content/dam/zhweb/bilder-dokumente/organisation/baudirektion/ima/ima_portfoliostrategie_booklet_220321_web.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/senaatti-fi-tilinpaatos-2024.pdf --max-time 60 \"https://www.senaatti.fi/app/uploads/2025/02/Tilinpaatos-Senaatti-kiinteistot-2024.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/senaatti-fi-vastuullisuusraportti-2024.pdf --max-time 60 \"https://www.senaatti.fi/app/uploads/2025/04/Senaatti-konsernin-vastuullisuusraportti-2024-1.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/rvb-nl-auditrapport-2024.pdf --max-time 60 \"https://open.overheid.nl/documenten/d667b38b-306d-434c-9c91-c3536e1aeb77/file\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/statsbygg-bim-manual-2-0-en-2019.pdf --max-time 60 \"https://www.eubim.eu/wp-content/uploads/2019/08/2019-08-28_EU_BIM_Task_Group_Statsbygg_BIM_Manual_20_v101.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/bima-de-adakta-egovernment-wettbewerb-2024.pdf --max-time 60 \"https://egovernmentwettbewerb.de/wp-content/uploads/2024/06/BImA_elektronische_Aktenerarbeitung_Kat_3.pdf\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/cbre-gws-host-launch-india-2021-press-mirror.html --max-time 60 \"https://indiatechnologynews.in/cbre-launches-host-an-intuitive-platform-for-technology-driven-real-estate/\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/epfl-dii-archibus-aremis-case-study.html --max-time 60 \"https://www.aremis.com/en/results/epfl-archibus-asset-management-solution\")",
+      "Bash(curl -L -A \"Mozilla/5.0\" -o assets/operators/armasuisse-organigramm-2025-08.pdf --max-time 60 \"https://www.ar.admin.ch/dam/de/sd-web/9f8gTEdh0vUm/Organigramm%20armasuisse%20August%202025%20Internet.pdf\")"
     ]
   }
 }

@@ -1,0 +1,266 @@
+
+<!doctype html>
+<html lang="de-DE" data-thousands-separator="." data-decimal-separator=",">
+<head>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    <meta charset="utf-8">
+
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    
+    
+            <link href="/build/egovernment/main.8c708252.css" rel="stylesheet" />
+    
+    
+    <!-- Start Google Site Verification -->
+    <meta name="google-site-verification" content="OYyimhYKXyYEdPJYbGxynNUY68bYSzDGKJQury0fHxM" />
+    <!-- End Google Site Verification -->
+
+    
+        
+    
+    <!-- OneTrust Cookie Consent Notice -->
+    <script
+        data-cookie-consent
+        data-privacy-url="https://www.bearingpoint.com/de-de/datenschutzhinweis/"
+        data-text-placeholder="Content Zugriff ist eingeschränkt. Um diesen Inhalt zu sehen, akzeptieren Sie bitte die &lt;button data-cookie-preference-center&gt;Cookies&lt;/button&gt;"
+        data-document-language="true"
+        type="text/javascript"
+        src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+        data-domain-script="019c7b41-82f2-766f-bfd2-1b5deadccea9"
+        async
+    ></script>
+    <!-- End OneTrust Cookie Consent Notice -->
+
+            <script src="/build/egovernment/runtime.d9ab3e66.js" defer></script>
+        <script src="/build/egovernment/main.ba4ca281.js" defer></script>
+        <script src="/build/egovernment/vendor.f9e09826.js" defer></script>
+    
+    
+    
+    <!-- Google Tag Manager -->
+            <script
+            data-tag-manager="google"
+            src="/build/egovernment/cookieConsentTagManager.facac4b7.js"
+            id="GTM-WTQJ9GBC"
+        ></script>
+        <!-- End Google Tag Manager -->
+
+</head>
+<body>
+    <header class="page-header">
+    <div class="wrapper">
+                                            <a href="/" class="logo">
+                <svg id="Ebene_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 800 351">  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <path d="M800,270.83v1.02l-16.22,21.92c-25.09,33.9-63.87,59.13-107.49,55.87-56.88-4.24-110.5-47.46-149.64-86.05l6.51-6.77c50.15,49.32,131.55,113.3,203.11,68.36,25.58-16.06,39.37-35.38,56.13-59.44l7.6,5.08h0Z" />
+  <path d="M549.47,152l-.66-43.57-14.28,43.21-9.78.25-13.53-43.36c-1.02,15.24-.56,28.23-.69,43.2l-10.78.1v-53.73h18.94l11.13,37.69,12.18-37.66,18.36-.06.06,53.52-10.95.41h0Z" />
+  <path d="M397.52,34.28c-70.86-47.15-129.57-19.61-180.19,39.36l-7.13-6c52.53-62.19,117.32-91.22,192.19-41.4l-4.87,8.04Z" />
+  <path d="M476.92 151.8L460.48 152L439.67 108.73L439.16 151.85L428.47 151.82L428.4 98.23L445.49 97.98L465.67 139.22L466.04 98.12L476.9 98.18L476.92 151.8z" />
+  <path d="M692.11 151.84L675.48 151.82L654.7 108.46L654.26 151.87L643.57 151.86L643.58 98.08L660.78 98.16L680.9 139.39L681.14 98.12L692.09 98.18L692.11 151.84z" />
+  <path d="M130.03,143.51l.05-11-10.17-.36v-8.91h22.06v26.95c-7.88,2.13-15.69,2.81-23.97,2.9-12.87.14-23.29-8.3-25.23-21.07-2.52-16.52,3.74-33.01,21.52-34.81,5.83-.59,12.2.11,17.71,1.84,6.92,2.18,11.09,8.18,10.48,15.55l-12.28.23c.19-5.59-3.18-8.52-8.13-9.13-7.47-.93-14.13,2.55-16.16,10.21-1.51,5.7-1.54,12.38.02,18.18,3.07,11.42,13.83,11.33,24.11,9.4v.02h-.01Z" />
+  <path d="M394.69,151.94l-2.02-15.49c-.21-1.6-1.66-5.83-3.24-5.87l-12.99-.37-.33,21.67-11.66-.07.02-53.72c13.32.94,39.09-4.52,41.37,11.51.99,6.97-2.17,12.7-9.26,15.38,4.66,1.85,6.6,4.71,7.34,9.08l3.01,17.8-12.24.07h0ZM387.09,121.04c3.55-.05,6.22-3.39,6.42-6.49s-1.97-7.02-5.73-7.1l-11.53-.24.14,13.97,10.71-.14s-.01,0-.01,0Z" />
+  <path d="M189.57,153.03c-11.33-.05-20.31-5.88-23.52-16.14-2.49-7.98-2.45-16.61.26-24.48,3.29-9.57,11.7-14.89,21.73-15.36,8.85-.42,18.08,1.96,23.02,9.83,6.65,10.59,6.72,24.88.4,35.64-4.46,7.6-12.83,10.55-21.9,10.51h.01ZM202.31,134.8c1.65-6.75,1.54-13.69-.13-19.93s-6.7-9.48-12.68-9.26c-13.9.5-13.75,18.37-11.77,28.52,1.24,6.36,6.08,10.15,11.9,10.39,5.7.24,11.07-3.12,12.68-9.72Z" />
+  <path d="M618.09 128.84L595.18 128.9L595.26 142.69L620.26 142.83L620.12 151.94L583.48 151.91L583.48 98.07L619.63 98.07L619.47 107.21L595.26 107.31L595.29 119.57L618.05 119.73L618.09 128.84z" />
+  <path d="M339.19 128.85L316.68 128.89L316.72 142.72L341.8 142.84L341.63 151.91L304.99 151.95L304.89 98.09L340.8 98.06L340.81 107.18L316.81 107.27L316.61 119.56L339.1 119.72L339.19 128.85z" />
+  <path d="M118.65,258.82c-9.25,6.95-17.14,13.07-26.7,18.33-25.56,14.05-51.7,14.35-73.43-6.58-7.05-6.79-12.3-14.15-17.81-22.63l7.64-5.21c5.41,7.64,10.1,14.72,16.79,21.13,29.35,28.13,61.13,8.39,87.78-12.4l5.73,7.36h0Z" />
+  <path d="M199.27,186.36c2.27-.46,5.7-.37,8.37.09l-9.99,39.66-9.9.19-7.15-29.06-7.77,28.85-10.21.02-9.71-39.87,9.08-.2,6.32,28.4,7.58-28.26,9.96-.12,6.96,28.17,6.46-27.87h0Z" />
+  <path d="M491.97 186.2L500.43 186.14L490.35 226.09L480.59 226.37L473.2 197.18L465.52 226.13L455.31 226.1L445.67 186.4L454.78 186.04L461.05 214.47L468.61 186.18L478.64 186.03L485.55 214.5L491.97 186.2z" />
+  <path d="M274.26 98.23L285.95 98.2L266.34 151.67L253.34 151.72L233.76 98.37L246.48 98.25L260.37 139.7L274.26 98.23z" />
+  <path d="M51.89,144.51c9.2,5.02,6.32-7.48,20.06-3.43-.36,7.09-6.16,11.17-13.06,11.71-5.85.46-13.05.49-17.16-4.68-6.43-8.09-6.37-21.52.69-29.49,6.23-7.03,18.27-6.94,25.06-1.22,5.51,4.64,6.14,11.78,5.61,18.91l-23.94.19c-.43,2.79.61,6.87,2.74,8.03v-.02h0ZM61.45,128.5c.42-5.47-3.06-7.77-6.98-7.45-3.58.29-6.02,3.6-5.12,7.54,0,0,12.1-.09,12.1-.09Z" />
+  <path d="M739.03 151.79L727.37 151.93L727.24 107.35L711.4 107.13L711.43 98.07L754.9 98.06L754.99 107.13L739.04 107.34L739.03 151.79z" />
+  <path d="M380.17,205.32c4.89,1.73,7.9,5.48,7.94,10.26.13,13.62-21.4,10.61-31.63,10.73l-.07-40.22c9.15.47,27.03-3.32,29.51,7.53,1.15,5.03-.61,8.85-5.76,11.71h.01ZM373.29,202.01c1.86-.03,4.19-2.62,4.19-4.51s-2.29-4.54-4.16-4.55l-7.96-.05.07,9.24,7.85-.13h0ZM376.73,218.24c3.42-1.81,2.13-8.18-.94-8.67-3.54-.57-6.65-.54-10.34-.44l-.1,10.04c3.65.39,8.14.79,11.39-.93h-.01Z" />
+  <path d="M631.65,205.17c5.12,2.53,8.01,6.12,7.61,11.35-.97,12.75-21.74,9.55-31.77,9.8l-.05-40.21c8.97.42,27.33-3.36,29.7,7.56.94,4.34-.32,8.67-5.49,11.51h0ZM624.28,202.09c2.03.02,4.42-2.54,4.47-4.56.04-1.5-2.09-4.32-3.59-4.47-3.13-.31-6-.1-8.71-.13l-.03,9.06,7.86.09h0ZM627.82,218.41c3.25-1.38,2.46-7.86-.32-8.6-3.63-.96-7.11-.83-11.04-.58l.09,10.16c4.19.11,7.96.42,11.26-.98h0Z" />
+  <path d="M582.36,226.33l-2.55-15.5c-3.75-.58-7.69-.76-11.49-.77l-.18,16.24-8.86-.22.08-40.21,21.41.35c5.29.09,9.21,4.25,9.83,8.45.73,4.95-1.5,9.22-6.49,11.41,3.16,1.72,4.64,4.18,5.2,7.49l2.11,12.59-9.06.16h0ZM578.84,202.29c3.52-1.32,3.1-8.09-.13-8.71-3.51-.67-6.73-.72-10.4-.78v10.35c3.5.21,7.23.38,10.54-.86h0Z" />
+  <path d="M247.97,208.97l-16.99.12-.02,10.24,18.32.18c.28,1.48.45,4,.54,6.8l-27.79.08-.06-40.41,26.57-.06.51,6.91-18.07.1.02,9.1,16.86.09.1,6.84h0Z" />
+  <path d="M540.67,208.95l-16.92.12-.06,10.27,18.19.21c.75,1.63.65,5.62-.64,6.81l-26.54-.03-.08-40.25,26.82-.19.23,6.87-17.96.19.06,9.11,16.46.07.45,6.81h-.01Z" />
+  <path d="M429.78,208.88l-17.33.3.08,10.21,18.73.11.02,6.88-27.57-.07.04-40.36h27.05l.02,6.84-18.43.21.24,9.04,16.54.11c.33,1.25.54,4,.6,6.72h.01Z" />
+  <path d="M284.91,226.07l-8.94.02-.02-33.13-11.91-.14.16-6.87h32.35c.14,1.79.19,5.3.1,6.87l-11.74.15v33.1h0Z" />
+  <path d="M329.54,226.1l-8.92.12-.03-33.18-11.74-.28.17-6.79h32.09c.23,2.21.29,4.7.22,6.85l-11.74.13-.06,33.16h0Z" />
+</svg>
+            </a>
+        
+        <nav id="nav-main" class="mega-menu" data-mega-menu aria-label="Main">
+    <button type="button" class="toggle icon-menuHamburger icon-burger icon-only" aria-expanded="false" aria-controls="nav-main" data-mega-menu-toggle>
+        <span class="visually-hidden">Hauptnavigation anzeigen</span>
+    </button>
+    <div class="level-wrapper" inert>
+        <ul>
+                            <li >
+                                            <a href="/de/ausrichter">Ausrichter</a>
+                                    </li>
+                            <li >
+                                            <a href="/de/kategorien">Kategorien</a>
+                                    </li>
+                            <li >
+                                            <a href="/de/jury">Jury</a>
+                                    </li>
+                            <li >
+                                            <a href="/de/gewinner">Gewinner</a>
+                                    </li>
+                            <li >
+                                            <a href="/de/bewerbung">Bewerbung</a>
+                                    </li>
+                    </ul>
+    </div>
+</nav>
+
+
+        
+    </div>
+</header>
+
+    <main>
+        
+            <section class="error-page richtext">
+        <div class="wrapper">
+            <div class="block-richtext">
+                <h1 class="headline h1">
+                    Seite wurde nicht gefunden (404)
+                </h1>
+
+                <p>
+                    Unter dieser Adresse konnte leider keine Seite gefunden werden. Vielleicht haben Sie einen alten Link oder ein altes Bookmark verwendet.
+                </p>
+
+                <p>
+                    <a class="button" href="/">
+                        Zurück
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    
+<footer>
+    <div class="footer-top">
+        <div class="wrapper">
+                            <a href="/" class="logo">
+                    <svg id="Ebene_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 800 351">  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <path d="M800,270.83v1.02l-16.22,21.92c-25.09,33.9-63.87,59.13-107.49,55.87-56.88-4.24-110.5-47.46-149.64-86.05l6.51-6.77c50.15,49.32,131.55,113.3,203.11,68.36,25.58-16.06,39.37-35.38,56.13-59.44l7.6,5.08h0Z" />
+  <path d="M549.47,152l-.66-43.57-14.28,43.21-9.78.25-13.53-43.36c-1.02,15.24-.56,28.23-.69,43.2l-10.78.1v-53.73h18.94l11.13,37.69,12.18-37.66,18.36-.06.06,53.52-10.95.41h0Z" />
+  <path d="M397.52,34.28c-70.86-47.15-129.57-19.61-180.19,39.36l-7.13-6c52.53-62.19,117.32-91.22,192.19-41.4l-4.87,8.04Z" />
+  <path d="M476.92 151.8L460.48 152L439.67 108.73L439.16 151.85L428.47 151.82L428.4 98.23L445.49 97.98L465.67 139.22L466.04 98.12L476.9 98.18L476.92 151.8z" />
+  <path d="M692.11 151.84L675.48 151.82L654.7 108.46L654.26 151.87L643.57 151.86L643.58 98.08L660.78 98.16L680.9 139.39L681.14 98.12L692.09 98.18L692.11 151.84z" />
+  <path d="M130.03,143.51l.05-11-10.17-.36v-8.91h22.06v26.95c-7.88,2.13-15.69,2.81-23.97,2.9-12.87.14-23.29-8.3-25.23-21.07-2.52-16.52,3.74-33.01,21.52-34.81,5.83-.59,12.2.11,17.71,1.84,6.92,2.18,11.09,8.18,10.48,15.55l-12.28.23c.19-5.59-3.18-8.52-8.13-9.13-7.47-.93-14.13,2.55-16.16,10.21-1.51,5.7-1.54,12.38.02,18.18,3.07,11.42,13.83,11.33,24.11,9.4v.02h-.01Z" />
+  <path d="M394.69,151.94l-2.02-15.49c-.21-1.6-1.66-5.83-3.24-5.87l-12.99-.37-.33,21.67-11.66-.07.02-53.72c13.32.94,39.09-4.52,41.37,11.51.99,6.97-2.17,12.7-9.26,15.38,4.66,1.85,6.6,4.71,7.34,9.08l3.01,17.8-12.24.07h0ZM387.09,121.04c3.55-.05,6.22-3.39,6.42-6.49s-1.97-7.02-5.73-7.1l-11.53-.24.14,13.97,10.71-.14s-.01,0-.01,0Z" />
+  <path d="M189.57,153.03c-11.33-.05-20.31-5.88-23.52-16.14-2.49-7.98-2.45-16.61.26-24.48,3.29-9.57,11.7-14.89,21.73-15.36,8.85-.42,18.08,1.96,23.02,9.83,6.65,10.59,6.72,24.88.4,35.64-4.46,7.6-12.83,10.55-21.9,10.51h.01ZM202.31,134.8c1.65-6.75,1.54-13.69-.13-19.93s-6.7-9.48-12.68-9.26c-13.9.5-13.75,18.37-11.77,28.52,1.24,6.36,6.08,10.15,11.9,10.39,5.7.24,11.07-3.12,12.68-9.72Z" />
+  <path d="M618.09 128.84L595.18 128.9L595.26 142.69L620.26 142.83L620.12 151.94L583.48 151.91L583.48 98.07L619.63 98.07L619.47 107.21L595.26 107.31L595.29 119.57L618.05 119.73L618.09 128.84z" />
+  <path d="M339.19 128.85L316.68 128.89L316.72 142.72L341.8 142.84L341.63 151.91L304.99 151.95L304.89 98.09L340.8 98.06L340.81 107.18L316.81 107.27L316.61 119.56L339.1 119.72L339.19 128.85z" />
+  <path d="M118.65,258.82c-9.25,6.95-17.14,13.07-26.7,18.33-25.56,14.05-51.7,14.35-73.43-6.58-7.05-6.79-12.3-14.15-17.81-22.63l7.64-5.21c5.41,7.64,10.1,14.72,16.79,21.13,29.35,28.13,61.13,8.39,87.78-12.4l5.73,7.36h0Z" />
+  <path d="M199.27,186.36c2.27-.46,5.7-.37,8.37.09l-9.99,39.66-9.9.19-7.15-29.06-7.77,28.85-10.21.02-9.71-39.87,9.08-.2,6.32,28.4,7.58-28.26,9.96-.12,6.96,28.17,6.46-27.87h0Z" />
+  <path d="M491.97 186.2L500.43 186.14L490.35 226.09L480.59 226.37L473.2 197.18L465.52 226.13L455.31 226.1L445.67 186.4L454.78 186.04L461.05 214.47L468.61 186.18L478.64 186.03L485.55 214.5L491.97 186.2z" />
+  <path d="M274.26 98.23L285.95 98.2L266.34 151.67L253.34 151.72L233.76 98.37L246.48 98.25L260.37 139.7L274.26 98.23z" />
+  <path d="M51.89,144.51c9.2,5.02,6.32-7.48,20.06-3.43-.36,7.09-6.16,11.17-13.06,11.71-5.85.46-13.05.49-17.16-4.68-6.43-8.09-6.37-21.52.69-29.49,6.23-7.03,18.27-6.94,25.06-1.22,5.51,4.64,6.14,11.78,5.61,18.91l-23.94.19c-.43,2.79.61,6.87,2.74,8.03v-.02h0ZM61.45,128.5c.42-5.47-3.06-7.77-6.98-7.45-3.58.29-6.02,3.6-5.12,7.54,0,0,12.1-.09,12.1-.09Z" />
+  <path d="M739.03 151.79L727.37 151.93L727.24 107.35L711.4 107.13L711.43 98.07L754.9 98.06L754.99 107.13L739.04 107.34L739.03 151.79z" />
+  <path d="M380.17,205.32c4.89,1.73,7.9,5.48,7.94,10.26.13,13.62-21.4,10.61-31.63,10.73l-.07-40.22c9.15.47,27.03-3.32,29.51,7.53,1.15,5.03-.61,8.85-5.76,11.71h.01ZM373.29,202.01c1.86-.03,4.19-2.62,4.19-4.51s-2.29-4.54-4.16-4.55l-7.96-.05.07,9.24,7.85-.13h0ZM376.73,218.24c3.42-1.81,2.13-8.18-.94-8.67-3.54-.57-6.65-.54-10.34-.44l-.1,10.04c3.65.39,8.14.79,11.39-.93h-.01Z" />
+  <path d="M631.65,205.17c5.12,2.53,8.01,6.12,7.61,11.35-.97,12.75-21.74,9.55-31.77,9.8l-.05-40.21c8.97.42,27.33-3.36,29.7,7.56.94,4.34-.32,8.67-5.49,11.51h0ZM624.28,202.09c2.03.02,4.42-2.54,4.47-4.56.04-1.5-2.09-4.32-3.59-4.47-3.13-.31-6-.1-8.71-.13l-.03,9.06,7.86.09h0ZM627.82,218.41c3.25-1.38,2.46-7.86-.32-8.6-3.63-.96-7.11-.83-11.04-.58l.09,10.16c4.19.11,7.96.42,11.26-.98h0Z" />
+  <path d="M582.36,226.33l-2.55-15.5c-3.75-.58-7.69-.76-11.49-.77l-.18,16.24-8.86-.22.08-40.21,21.41.35c5.29.09,9.21,4.25,9.83,8.45.73,4.95-1.5,9.22-6.49,11.41,3.16,1.72,4.64,4.18,5.2,7.49l2.11,12.59-9.06.16h0ZM578.84,202.29c3.52-1.32,3.1-8.09-.13-8.71-3.51-.67-6.73-.72-10.4-.78v10.35c3.5.21,7.23.38,10.54-.86h0Z" />
+  <path d="M247.97,208.97l-16.99.12-.02,10.24,18.32.18c.28,1.48.45,4,.54,6.8l-27.79.08-.06-40.41,26.57-.06.51,6.91-18.07.1.02,9.1,16.86.09.1,6.84h0Z" />
+  <path d="M540.67,208.95l-16.92.12-.06,10.27,18.19.21c.75,1.63.65,5.62-.64,6.81l-26.54-.03-.08-40.25,26.82-.19.23,6.87-17.96.19.06,9.11,16.46.07.45,6.81h-.01Z" />
+  <path d="M429.78,208.88l-17.33.3.08,10.21,18.73.11.02,6.88-27.57-.07.04-40.36h27.05l.02,6.84-18.43.21.24,9.04,16.54.11c.33,1.25.54,4,.6,6.72h.01Z" />
+  <path d="M284.91,226.07l-8.94.02-.02-33.13-11.91-.14.16-6.87h32.35c.14,1.79.19,5.3.1,6.87l-11.74.15v33.1h0Z" />
+  <path d="M329.54,226.1l-8.92.12-.03-33.18-11.74-.28.17-6.79h32.09c.23,2.21.29,4.7.22,6.85l-11.74.13-.06,33.16h0Z" />
+</svg>
+                </a>
+            
+            <div class="links">
+                                    <div class="footer-text">
+                        <p><strong>Wettbewerbsb&uuml;ro</strong></p><p>BearingPoint<br>Marketing &amp; Communications<br>Telefon: +49 30 880041330<br>Email: <a href="mailto:events@bearingpoint.com">events@bearingpoint.com</a></p>
+
+                    </div>
+                
+                                    <div class="footer-text">
+                        <p><strong>Ausrichter</strong></p>        
+<div  class=" ibexa-embed-type-image">
+    
+    
+        
+
+    
+    
+
+                <img src="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/221/5_97/5_97/200/33/3_3/3/1/1/6/6113-1-eng-GB/9a8d6836e49e-logo-br.avif" class="" data-aspect-ratio="" sizes="(min-width: 1200px) 1320px, (min-width: 1024px) 1200px, (min-width: 700px) 1024px, (min-width: 400px) 700px, 100vw" srcset="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/400/67/5_97/5_97/200/33/1/3/1/1/6/6113-1-eng-GB/9a8d6836e49e-logo-br.avif 400w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/700/117/5_97/5_97/200/33/1_75/3/1/1/6/6113-1-eng-GB/9a8d6836e49e-logo-br.avif 700w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1024/171/5_97/5_97/200/33/2_56/3/1/1/6/6113-1-eng-GB/9a8d6836e49e-logo-br.avif 1024w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1200/201/5_97/5_97/200/33/3/3/1/1/6/6113-1-eng-GB/9a8d6836e49e-logo-br.avif 1200w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/221/5_97/5_97/200/33/3_3/3/1/1/6/6113-1-eng-GB/9a8d6836e49e-logo-br.avif 1320w" alt="logo-br.png" loading="lazy">
+
+
+
+</div>
+        
+<div  class=" ibexa-embed-type-image">
+    
+    
+        
+
+    
+    
+
+                <img src="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/694/1_9/1_9/150/79/4_4/9/0/1/6/6109-1-eng-GB/9e4bda9d1a56-logo-cisco.avif" class="" data-aspect-ratio="" sizes="(min-width: 1200px) 1320px, (min-width: 1024px) 1200px, (min-width: 700px) 1024px, (min-width: 400px) 700px, 100vw" srcset="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/400/210/1_9/1_9/150/79/1_3333333333333/9/0/1/6/6109-1-eng-GB/9e4bda9d1a56-logo-cisco.avif 400w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/700/368/1_9/1_9/150/79/2_3333333333333/9/0/1/6/6109-1-eng-GB/9e4bda9d1a56-logo-cisco.avif 700w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1023/538/1_9/1_9/150/79/3_4133333333333/9/0/1/6/6109-1-eng-GB/9e4bda9d1a56-logo-cisco.avif 1023w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1200/631/1_9/1_9/150/79/4/9/0/1/6/6109-1-eng-GB/9e4bda9d1a56-logo-cisco.avif 1200w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/694/1_9/1_9/150/79/4_4/9/0/1/6/6109-1-eng-GB/9e4bda9d1a56-logo-cisco.avif 1320w" alt="logo-cisco.png" loading="lazy">
+
+
+
+</div>
+
+
+                    </div>
+                
+                                    <div class="footer-text">
+                        <p><strong>Medienpartner</strong></p>        
+<div  class=" ibexa-embed-type-image">
+    
+    
+        
+
+    
+    
+
+                <img src="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/250/5_28/5_28/396/75/1_6666666666667/3/7/3/6/6373-2-eng-GB/0c9fc1306c96-Logo_sz_dossier_weiss.avif" class="" data-aspect-ratio="" sizes="(min-width: 1200px) 1320px, (min-width: 1024px) 1200px, (min-width: 700px) 1024px, (min-width: 400px) 700px, 100vw" srcset="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/400/75/5_28/5_28/396/75/0_50505050505051/3/7/3/6/6373-2-eng-GB/0c9fc1306c96-Logo_sz_dossier_weiss.avif 400w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/700/132/5_28/5_28/396/75/0_88383838383838/3/7/3/6/6373-2-eng-GB/0c9fc1306c96-Logo_sz_dossier_weiss.avif 700w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1024/193/5_28/5_28/396/75/1_2929292929293/3/7/3/6/6373-2-eng-GB/0c9fc1306c96-Logo_sz_dossier_weiss.avif 1024w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1200/227/5_28/5_28/396/75/1_5151515151515/3/7/3/6/6373-2-eng-GB/0c9fc1306c96-Logo_sz_dossier_weiss.avif 1200w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/250/5_28/5_28/396/75/1_6666666666667/3/7/3/6/6373-2-eng-GB/0c9fc1306c96-Logo_sz_dossier_weiss.avif 1320w" alt="" loading="lazy">
+
+
+
+</div>
+        
+<div  class=" ibexa-embed-type-image">
+    
+    
+        
+
+    
+    
+
+                <img src="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/233/5_66/5_66/150/26/4_4/7/7/3/6/6377-1-eng-GB/288cfd0ee815-EGovernment_Computing_Logo_weiss-300x53.avif" class="" data-aspect-ratio="" sizes="(min-width: 1200px) 1320px, (min-width: 1024px) 1200px, (min-width: 700px) 1024px, (min-width: 400px) 700px, 100vw" srcset="https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/400/70/5_66/5_66/150/26/1_3333333333333/7/7/3/6/6377-1-eng-GB/288cfd0ee815-EGovernment_Computing_Logo_weiss-300x53.avif 400w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/700/123/5_66/5_66/150/26/2_3333333333333/7/7/3/6/6377-1-eng-GB/288cfd0ee815-EGovernment_Computing_Logo_weiss-300x53.avif 700w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1024/180/5_66/5_66/150/26/3_4133333333333/7/7/3/6/6377-1-eng-GB/288cfd0ee815-EGovernment_Computing_Logo_weiss-300x53.avif 1024w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1200/212/5_66/5_66/150/26/4/7/7/3/6/6377-1-eng-GB/288cfd0ee815-EGovernment_Computing_Logo_weiss-300x53.avif 1200w, https://www.egovernment-wettbewerb.de/var/site/storage/images/_aliases/avif/1320/233/5_66/5_66/150/26/4_4/7/7/3/6/6377-1-eng-GB/288cfd0ee815-EGovernment_Computing_Logo_weiss-300x53.avif 1320w" alt="" loading="lazy">
+
+
+
+</div>
+
+
+                    </div>
+                
+                    <nav>
+        <ul>
+                            <li>
+                    <a href="/de/teilnahmebedingungen" >
+                        Teilnahmebedingungen
+                    </a>
+                </li>
+                            <li>
+                    <a href="https://www.bearingpoint.com/de-de/datenschutzhinweis/"  rel="noopener noreferrer nofollow" target="_blank">
+                        Datenschutzhinweis
+                    </a>
+                </li>
+                            <li>
+                    <a href="https://www.bearingpoint.com/de-de/terms-and-conditions/"  rel="noopener noreferrer nofollow" target="_blank">
+                        Impressum
+                    </a>
+                </li>
+                    </ul>
+    </nav>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

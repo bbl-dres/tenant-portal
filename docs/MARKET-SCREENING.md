@@ -1,10 +1,27 @@
 # Tenant-Portal / Mieterportal Market Screening — Descriptive Landscape Scan (BBL / DRES context)
 
-## 1. Goal
+> **Companion to** [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md). State of data: 18 May 2026.
 
-A **descriptive market screening** of "tenant portal" / "Mieterportal" software for the Swiss Federal Office of Buildings and Logistics (BBL, Bereich Bauten / DRES), which operates SAP S/4HANA with RE-FX after the SUPERB cut-over of September 2023. This document maps the **software market** — segments, leaders, vendors per segment — anchored in Swiss federal regulation (EMBAG, DigiV, ISG, VILB, BöB), Swiss identity infrastructure (AGOV, planned federal e-ID launch 1 December 2026), and Swiss data-residency preferences. For the companion list of actual **real-estate operators** (federal / cantonal / communal landlords, transport and utility operators, listed property managers, FM service providers, corporate occupiers) and the tenant-portal systems they run, see [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md). **It is not a procurement recommendation, does not propose a buy-vs-build or phasing approach, and endorses no vendor.**
+## Purpose
 
-## 2. Market Map
+This document is a **descriptive market screening** of "tenant portal" / "Mieterportal" software **products and vendors** for the Swiss Federal Office of Buildings and Logistics (BBL, Bereich Bauten / DRES), which operates SAP S/4HANA with RE-FX after the SUPERB cut-over of September 2023. It maps the software market — segments, leaders, vendors per segment — anchored in Swiss federal regulation (EMBAG, DigiV, ISG, VILB, BöB), Swiss identity infrastructure (AGOV, planned federal e-ID launch 1 December 2026), and Swiss data-residency preferences. It is distinct from [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md), which lists actual real-estate **operators** (federal / cantonal / communal landlords, transport and utility operators, listed property managers, FM service providers, corporate occupiers) and the tenant-portal systems they run.
+
+**Methodology.** Information drawn from vendor sources, regulatory pages of the Swiss Confederation, Aareal Bank and TPG transaction disclosures, Gartner WEX MQ (6 April 2026), Verdantix Green Quadrant CPIP/IWMS (Jan 2025), IDC MarketScape (Doc # US52038324), and public M&A announcements. Forward-looking dates are marked with "planned" / "expected" / "estimated" where appropriate. **This is not a procurement recommendation, does not propose a buy-vs-build or phasing approach, and endorses no vendor.**
+
+**BBL fit scoring** *(0–10, where 10 = perfect fit; same scale as in [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md))*. Typical bands: **8–10** = directly fits the pilot (Landing Page + Bedarf Unterbringung) or strong Swiss-federal precedent (SAP RE-FX-compatible, Swiss-domiciled, federal references); **4–7** = fits the roadmap (Case A/B/C) or adjacent / relevant later; **1–3** = out of pilot scope, weak federal fit; **0** = outside the federal property-management context (e.g. US multifamily, consumer fintech). Earlier dot-scheme mapping for reference: green/high → 9, yellow/medium → 5, red/low → 2, white/N-A → 0.
+
+## Table of contents
+
+- [1. Market Map](#1-market-map)
+- [2. Segments at a Glance](#2-segments-at-a-glance)
+- [3. Summary](#3-summary)
+- [4. Recent Consolidations & Shifts (chronological)](#4-recent-consolidations--shifts-chronological)
+- [5. Details by Segment](#5-details-by-segment)
+- [6. Recommendations](#6-recommendations)
+- [7. Caveats & Critical Assumptions](#7-caveats--critical-assumptions)
+- [Appendices A–E](#appendices)
+
+## 1. Market Map
 
 ```mermaid
 mindmap
@@ -47,7 +64,7 @@ mindmap
       Standards (ISO 41001/19650, GEFMA, RICS, eBKP-H, KBOB)
 ```
 
-## 3. Segments at a Glance
+## 2. Segments at a Glance
 
 | # | Segment | One-line description |
 |---|---|---|
@@ -85,7 +102,7 @@ mindmap
 | AF | Mobility & EV-charging tenant services | CH CPO/EMSP networks (Energie 360°/Swisscharge/GOFAST/Move group, Shell Recharge/evpass, Juice Technology, Park-it); DACH CPO OS (chargecloud, reev, has·to·be/ChargePoint, GP JOULE Connect, &Charge); pan-EU & US (ChargePoint, eMabler, ENGIE Vianeo, Allego, Mer, EVgo, Wallbox, Pod Point, Driivz, GreenFlux); parking (Parquery, ParkingPay). |
 | AG | Building automation / GA-Leitsystem (OT layer beneath L) | DACH BMS supervisors (Sauter, Saia-Burgess Controls/Honeywell, Siemens Desigo CC, Honeywell EBI / Niagara Tridium, Schneider EcoStruxure Building, Beckhoff TwinCAT, Wago, Kieback&Peter, Caverion); global (Johnson Controls Metasys, Trane Tracer SC+, ABB Cylon, Distech, Iconics); Belimo Cloud. |
 
-## 4. Summary
+## 3. Summary
 
 - **Heavy consolidation, bifurcated market.** The workplace-side (Eptura, Spacewell, Planon, Nuvolo, MRI, Tango, ServiceNow WSD) converges on AI-enabled "WEX + IWMS" suites: Gartner published its first-ever Magic Quadrant for Workplace Experience Applications on 6 April 2026 (analysts Sohail Majumdar and Christopher Trueman), evaluating Accruent, Appspace, CXAI, Envoy, Eptura, Microsoft, Modo Labs, OfficeSpace Software, Robin Powered, ServiceNow, Tango and Zoom; Eptura, Robin and Appspace publicly claimed Leader positions. Verdantix's January 2025 Green Quadrant for Connected Portfolio Intelligence Platforms (CPIP) / IWMS named Planon (highest performer), IBM, Eptura, MRI, Tango, Johnson Controls, Spacewell and Nuvolo as the 8 Leaders. The residential/housing side (Aareon, Haufe, DOMUS, casavi, facilioo, immoware24, Allthings, W&W, GARAIO REM, Abacus) remains a deeply DACH-vertical market.
 - **Three buyer personas drive segmentation:** (1) corporate-occupier/workplace persona (federal tenant agencies VBS, EFD, EJPD, EDA, fedpol, NDB); (2) landlord-as-asset-manager persona (BBL-class portfolios); (3) residential tenant persona (caretaker housing, embassies, social/military housing). Few vendors serve all three convincingly — cross-persona suites are typically IWMS leaders (Planon, MRI, Eptura) or vertical ERP+portal combinations (Aareon, GARAIO REM).
@@ -93,9 +110,9 @@ mindmap
 - **Regulatory and standards context is decisive in Switzerland:** EMBAG (in force 1 Jan 2024, "Public Money — Public Code" by default per Art. 9 unless third-party rights or security preclude); DigiV (SR 172.019.1); Strategie Digitale Bundesverwaltung; ISG (information security classification INTERN, VERTRAULICH, GEHEIM); VILB Art. 9 Abs. 1bis; revised BöB/VöB (1 Jan 2021); AGOV as the federal login standard; the federal e-ID expected to launch on 1 December 2026. These collectively force a preference for Swiss data residency, OSS-publishable customisations, and AGOV federation over proprietary identity stacks.
 - **Recent M&A has compressed the vendor map:** Eptura (Oct 2022 merger of Condeco + iOFFICE/SpaceIQ); Aareon TPG/CDPQ-owned at €3.9 bn EV since June 2024; HqO + Office App (Oct 2021); VTS + Lane (Oct 2021); Tango + Locatee (Mar 2024); MRI Software's 53-acquisition trajectory (Tracxn, Feb 2026, with an average acquisition amount of $68.4 m and a peak of nine acquisitions in 2020); the SAP–Planon strategic partnership (16 May 2023).
 
-## 5. Recent Consolidations & Shifts (chronological)
+## 4. Recent Consolidations & Shifts (chronological)
 
-*Showing 2024+ events only. Earlier structural events that still shape the current vendor map — Eptura formation (Oct 2022, merger of Condeco + iOFFICE + SpaceIQ), SAP–Planon strategic partnership (16 May 2023), Planon RE for SAP S/4HANA achieving SAP Endorsed App status (2 Oct 2023), BBL's own SUPERB cut-over to SAP S/4HANA / RE-FX (Sep 2023), AWS opening `eu-central-2` Zurich (Nov 2022), and Aareon's casavi / Momentum / Karthago / Arthur Online roll-up (2022–2023) — are retained in the relevant Segment narrative in §6 below, but no longer listed as separate rows here. See earlier revisions in git history for the full pre-2024 timeline.*
+*Showing 2024+ events only. Earlier structural events that still shape the current vendor map — Eptura formation (Oct 2022, merger of Condeco + iOFFICE + SpaceIQ), SAP–Planon strategic partnership (16 May 2023), Planon RE for SAP S/4HANA achieving SAP Endorsed App status (2 Oct 2023), BBL's own SUPERB cut-over to SAP S/4HANA / RE-FX (Sep 2023), AWS opening `eu-central-2` Zurich (Nov 2022), and Aareon's casavi / Momentum / Karthago / Arthur Online roll-up (2022–2023) — are retained in the relevant Segment narrative in §5 below, but no longer listed as separate rows here. See earlier revisions in git history for the full pre-2024 timeline.*
 
 | Date | Event | Implication |
 |---|---|---|
@@ -122,10 +139,9 @@ mindmap
 | 6 Apr 2026 | **Inaugural Gartner Magic Quadrant for Workplace Experience Applications** (analysts Sohail Majumdar, Christopher Trueman). 12 vendors. Eptura, Robin and Appspace publicly positioned as Leaders. | First Gartner MQ defining "WEX". |
 | 1 Dec 2026 (planned) | Swiss federal e-ID launches; usable as login factor in AGOV. | Will shape Swiss tenant-portal identity from 2027. |
 
-## 6. Details by Segment
+## 5. Details by Segment
 
-> **BBL fit score** *(0–10, where 10 = perfect fit; scored against [REQUIREMENTS.md](REQUIREMENTS.md))*. Typical bands: **8–10** = directly fits the pilot (Landing Page + Bedarf Unterbringung) or strong Swiss-federal precedent (SAP RE-FX-compatible, Swiss-domiciled, federal references); **4–7** = fits the roadmap (Case A/B/C) or adjacent / relevant later; **1–3** = out of pilot scope, weak federal fit; **0** = outside the federal property-management context (e.g. US multifamily, consumer fintech). Earlier dot-scheme mapping for reference: green/high → 9, yellow/medium → 5, red/low → 2, white/N-A → 0.
-> The pilot was decided as **Create on RHOS** (in-house on Red Hat OpenShift, operated by BIT), so commercial IWMS / portal suites are by definition not the pilot path — they are scored for a possible later "Buy" iteration.
+> **BBL fit scoring** — see [Purpose](#purpose) for the 0–10 scale and bands. Scored against [REQUIREMENTS.md](REQUIREMENTS.md). The pilot was decided as **Create on RHOS** (in-house on Red Hat OpenShift, operated by BIT), so commercial IWMS / portal suites are by definition not the pilot path — they are scored for a possible later "Buy" iteration.
 
 ### A. IWMS with tenant module
 
@@ -1396,7 +1412,7 @@ mindmap
 
 **Taxonomy note.** Segment L (smart-building twin/app) consumes Segment AG output; the explicit boundary is at the API gateway (BACnet → REST/MQTT). Standards alignment: BACnet/IP (ISO 16484-5), KNX (ISO/IEC 14543-3), Modbus (IEC 61158), LoRaWAN (LoRa Alliance), Matter (CSA), and FIWARE Smart Data Models for the smart-city/portfolio-level data layer above L.
 
-## 7. Recommendations
+## 6. Recommendations
 
 This document is a **descriptive market scan, not a procurement document.** It deliberately does not recommend vendors, phasing, or buy-vs-build. The "recommendations" below are recommendations on **how to read and use this scan**, not on what BBL should procure:
 
@@ -1405,7 +1421,7 @@ This document is a **descriptive market scan, not a procurement document.** It d
 - **Use the SAP-endorsement test as a procurement-readiness signal but not as a sole basis for selection.** Planon's endorsement is real and unique in the IWMS category; alternatives (Goldinmotion, Promos, Aareon Blue Eagle, custom Fiori on BTP) are legitimate patterns documented above and must be benchmarked on their own merits against EMBAG / ISG / AGOV criteria.
 - **Update the document at the following triggers (benchmarks/thresholds):** (a) the next Gartner WEX MQ refresh (expected ~April 2027); (b) the next Verdantix Green Quadrant CPIP/IWMS (expected ~Jan 2026 successor); (c) any change in Aareon ownership beyond TPG/CDPQ; (d) any MRI sale or IPO event (Sept 2025 reports indicate a possible 2026 transaction at up to USD 10 bn); (e) Swiss e-ID launch (1 December 2026) and full AGOV deployment to private CH data centres (2027); (f) any new Federal Council decision under EMBAG / DigiV affecting tenant-facing services.
 
-## 8. Caveats & Critical Assumptions
+## 7. Caveats & Critical Assumptions
 
 - **This is a descriptive scan, not a procurement document.** No buy-vs-build, phasing, or vendor endorsement is intended.
 - **Marketing claims vs. analyst validation.** Vendor self-descriptions come from vendor sites/press releases. Where independent analyst views exist (Gartner MQ for WEX 6 Apr 2026; Verdantix CPIP/IWMS Jan 2025; IDC MarketScape SaaS FM 2024–2025 Doc # US52038324), they are cited as objective reference. Verdantix and IDC reports are paywalled; only Leaders publicly disclosed by vendor PRs are named here. Gartner does not endorse vendors; positioning is point-in-time.
@@ -1415,8 +1431,8 @@ This document is a **descriptive market scan, not a procurement document.** It d
 - **Forward-looking statements.** Several items are dated to the future (e-ID 1 Dec 2026; AGOV on private CH DCs "from 2027"; MRI potential 2026 sale at up to USD 10 bn; AWS European Sovereign Cloud GA 14 Jan 2026). Sources and timing language are preserved with their original verbs ("planned", "expected", "estimated", "up to").
 - **Yarowa HQ correction.** The task brief listed Yarowa as Lucerne-based; per Yarowa's own About page and the Swiss commercial register (CHE-470.230.582), Yarowa AG is at Metallstrasse 9, 6300 Zug.
 - **"1.6 million" coincidence flag.** Two unrelated figures in the document round to "1.6 m": GARAIO REM's claim of "more than 1.6 million Mietobjekte managed" (vendor self-claim, Digital Real Estate Summit 2025) and AGOV's "1.6 m residents with accounts in 2025" (Bundeskanzlei). These are coincidence — the GARAIO figure is an unaudited vendor claim, the AGOV figure is federally published. Listed together they read as a pattern; they are not.
-- **eIAM / AGOV scope.** AGOV replaces **CH-LOGIN** (the federal login for *public users* of cantonal/communal/federal services). **eIAM remains in service** for federal staff/internal access. Earlier versions of this document phrased their relationship as "successor"; that wording was incorrect and has been revised in Section 6.I and Appendix A.
-- **Skribble Series A currency.** The Skribble 1 Sept 2022 press release cites "€10 m" in English coverage and "CHF 10 m" in the German release; the figures are roughly at par and refer to the same round. The English-press-release quotation is reproduced verbatim in Section 6.I.
+- **eIAM / AGOV scope.** AGOV replaces **CH-LOGIN** (the federal login for *public users* of cantonal/communal/federal services). **eIAM remains in service** for federal staff/internal access. Earlier versions of this document phrased their relationship as "successor"; that wording was incorrect and has been revised in Section 5.I and Appendix A.
+- **Skribble Series A currency.** The Skribble 1 Sept 2022 press release cites "€10 m" in English coverage and "CHF 10 m" in the German release; the figures are roughly at par and refer to the same round. The English-press-release quotation is reproduced verbatim in Section 5.I.
 - **No Forrester Wave for IWMS or Workplace Management Systems** exists for 2024–2026; adjacent Waves (Intranet Platforms Q2 2024; Collaborative Work Management Tools Q2 2025) do not cover the IWMS category.
 
 ## Appendices
