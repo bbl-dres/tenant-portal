@@ -24,7 +24,16 @@
       "Bash(curl -sSL -A \"Mozilla/5.0\" -o yardi.png \"https://www.yardi.com/wp-content/uploads/sites/93/2025/03/1-MaintenanceIQ_Hero.png\")",
       "Bash(curl -sSL -A \"Mozilla/5.0\" -o skribble.webp \"https://images.prismic.io/covebe/aaWzbTPJ2QKSVT_h_DE-DE_Home_Einfach.webp?auto=format%2Ccompress&w=1200\")",
       "Read(//tmp/**)",
-      "Bash(sed 's|^|assets/images/market-screening/|' /tmp/files.txt)"
+      "Bash(sed 's|^|assets/images/market-screening/|' /tmp/files.txt)",
+      "Bash(git check-ignore *)",
+      "Bash(docling --version)",
+      "Bash(docling --help)",
+      "Bash(awk '{printf \"%8s  %s\\\\n\", $5, $NF}')",
+      "Bash(time docling --output \"intermediate\" \"1194947842_560265c927b84f3ca6f5b066acd04c5d-180526-1341-294.pdf\")",
+      "Bash(time docling --output \"intermediate\" --ocr-lang \"de,en\" \"1164859510_06b6ffbf731d4379a7b0db1872d005ad-180526-1341-290.pdf\" \"1312982137_dd49a634fc1949ed8d6a299096c88529-180526-1340-288.pdf\" \"Mieterportal Gesamtkonzept_963a8ca8d08742b5b59bac69b8f46461-180526-1340-284.pdf\")",
+      "Bash(docling --output intermediate --image-export-mode placeholder --ocr-lang de,en --no-abort-on-error 'Lösungsarchitektur Pilot Antrag Unterbringung.pdf' 'Mieterportal Gesamtkonzept.pdf' 'Mieterportal Benchmark Fachabstimmung.pdf' 'Mieterportal Fachkonzept Bedarf.pdf' 'Mieterportal_ WS Erwartungshaltung Mieter.pdf' 'SBFOLIO-1110 IMMO Mieterportal.pdf' 'Umfrage Mitwirkung Mieterportal_16102025.pdf' 'Umfrage Mitwirkung Mieterportal_20092025.pdf' 'WS 1 Mieterportal Erwartungshaltung.pdf' IMMO_Mieterportal_Systemkonzept.docx 'Mieterportal Gesamt V2.1.docx' 'SUPERB_Fachkonzept_ERP_IMMO_Mieterportal 201023.docx' 'SUPERB_Fachkonzept_ERP_IMMO_Mieterportal NEW V05.docx' 'SUPERB_Fachkonzept_ERP_IMMO_Work Zone_V06.docx' 'Use Case Bedarf Unterbringung V2.1.docx' 'Use Case Landing Page V2.0.docx' 'Info 170124.pptx' 'LBC Mieterportal_ Draft.pptx' 'Mieterportal_ Vision.pptx' Superb_QuickHelp_FLM_INFO.pptx 'MP_ Gesamtübersicht_sefr20250919.xlsx')",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(docling --output intermediate --image-export-mode placeholder --ocr-lang de,en --force-ocr --no-abort-on-error '20251104 Anforderungen Mieterportal PFM \\(1\\).pdf')"
     ]
   }
 }
