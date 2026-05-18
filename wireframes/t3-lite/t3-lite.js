@@ -1040,6 +1040,8 @@
       const k = t.getAttribute('data-tab');
       document.getElementById('detailTab').innerHTML = renderDetailTab(a, k);
     }));
+    // Clear "fresh submission" flag after first paint so reload doesn't re-show banner.
+    if (a._isNew) setTimeout(() => { delete a._isNew; }, 500);
   }
 
   function tabBtn(key, label, active) {
