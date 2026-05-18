@@ -327,36 +327,36 @@ mindmap
 
 **Persona.** Hausverwaltungen, institutional landlords (federal / cantonal / communal / cooperative), residential property-management firms. For BBL, the tenant portal embedded in an ERP is the alternative to building a custom Fiori frontend on SAP RE-FX (Segment Q).
 
-| Product | HQ | Hosting | Pricing | SAP / AGOV | Notable feature |
-|---|---|---|---|---|---|
-| [Aareon Wodis Yuneo](https://www.aareon.de/Wodis-Yuneo.970622.html) | Mainz, DE | Cloud SaaS | Per administered unit | Aareon Connect; Blue Eagle for SAP customers | DE housing market leader |
-| [Aareon RELion](https://www.aareon.de/) | Mainz, DE | Cloud / hybrid | Per unit | Aareon Connect | Commercial/mixed portfolios |
-| [Aareon Smart World / Mareon](https://www.aareon.de/) | Mainz, DE | Cloud | Per unit | Aareon Connect | Embedded CRM-Mieterportal |
-| [Aareon Blue Eagle (SAP IS-RE add-on)](https://www.aareon.de/) | Mainz, DE | SAP-hosted / hybrid | Quote | Native SAP IS-RE / RE-FX add-on | Direct SAP-side integration |
-| [Karthago (UTS)](https://www.aareon.de/KARTHAGO.970673.html) | DE | Hybrid | Per unit | Aareon Connect | WEG + Miet |
-| [immoware24](https://www.immoware24.de/) | Halle, DE | Cloud SaaS | Per unit | API | Cloud-native German PM; FCR Immobilien shareholder since 26 Mar 2025 |
-| [Haufe axera](https://www.haufe.com/) | Freiburg, DE | Cloud SaaS | Per unit | GoBD-certified | German cloud PM |
-| [DOMUS Software](https://www.domus-software.de/) | Aschheim, DE | Hybrid | Per unit | Open API | Long-standing DACH PM |
-| [CREM SOLUTIONS iX-Haus](https://www.crem-solutions.de/) | Ratingen, DE | On-prem / hybrid | Per user | SAP, BMS | Commercial RE strength |
-| [Yardi Voyager + RentCafe](https://www.yardi.com/) | Santa Barbara, USA | Cloud / private | Per unit | Open APIs | US multifamily with strong EMEA |
-| [MRI Software](https://www.mrisoftware.com/) | Solon (OH), USA | Cloud | Per unit | SAP, Workday | Capita One UK; Anacle APAC; Proptech Labs ANZ |
-| [AppFolio](https://www.appfolio.com/) | Santa Barbara, USA | Cloud | Per unit + base | API | US SMB multifamily |
-| [Buildium (RealPage)](https://www.buildium.com/) | Boston, USA | Cloud | Tiered + per unit | RealPage suite | SMB multifamily |
-| [RealPage](https://www.realpage.com/) | Richardson (TX), USA | Cloud | Per unit | Open API | Multifamily |
-| [Entrata](https://www.entrata.com/) | Lehi (UT), USA | Cloud | Per unit | Open API | US multifamily |
-| [GARAIO REM + aroov](https://www.garaio-rem.ch/) | Bern, CH | Cloud (CH) | Per unit | Abacus, Navision, Odoo, SAP, SAP S/4HANA | Per Digital Real Estate Summit 2025 (digitalrealestate.ch): "Heute werden mit den Lösungen des PropTech Unternehmens mehr als 1.6 Millionen Mietobjekte verwaltet"; aroov is a JV with Swiss Mobiliar |
-| [W&W ImmoTop2 / Rimo R5](https://www.wwimmo.ch/) | Affoltern am Albis, CH | Cloud / on-prem | Per user | Open interfaces | CH leader for property managers (>4,000 customers); Rimo R5 supports DE/FR/IT |
-| [Abacus AbaImmo](https://www.abacus.ch/) | Wittenbach, CH | Hybrid | Per module | Abacus FIBU/CRM | Swiss ERP suite; CHF 1.5 m minority stake in Tayo (since 2021) for tenant portal |
-| [Fairwalter](https://www.fairwalter.com/) | Zurich, CH (W&W subsidiary) | Azure CH | Per unit; transparent | Banking APIs | Hosted on Microsoft Azure in Switzerland |
-| [Immomig](https://www.immomig.ch/) | Sursee/Fribourg, CH (founded 2004 by Patrick Maillard) | Cloud (CH) | Per agent | DigiRENT, dreamo.ch | AI all-in-one real-estate CRM; >6,000 users |
-| [Tayo](https://www.tayo.ch/) | Lausanne, CH | Cloud (CH) | Per unit | Open API; banking | **Swiss-domiciled** tenant-portal SaaS; Abacus CHF 1.5 m minority stake since 2021 (also referenced under Abacus row) |
-| [Arthur Online](https://www.arthuronline.co.uk/) | London, UK (Aareon) | SaaS | Per unit | Aareon ecosystem | UK SMB property |
-| [Momentum (Aareon)](https://www.momentum.se/) | Stockholm, SE (Aareon) | SaaS | Per unit | Nordic banking | Aareon Nordic platform |
-| [iX-Haus plus](https://www.crem-solutions.de) | Ratingen, DE (CREM Solutions) | Cloud (browser front-end) | Per user | iX-Haus core | Browser front-end above iX-Haus; AI-OCR |
-| [Haufe Real Estate Cloud](https://www.haufe.com) | Freiburg, DE (Haufe Group) | Cloud | Per unit | Open API | SaaS evolution of Haufe-Lexware Real Estate |
-| [Real4M](https://www.real4m.com) | DACH | Cloud | Per unit | Open API | PM SaaS for institutional residential |
-| [Solyp](https://www.solyp.com) | DACH | Cloud | Per unit | Open API | ERP for portfolio property managers |
-| [connectedcare](https://www.connectedcare.de) | DE | Cloud | Per unit | Open API | Specialist for healthcare / senior-housing |
+| Product | HQ | Hosting | Pricing | SAP / AGOV | Notable feature | BBL fit |
+|---|---|---|---|---|---|---|
+| [Aareon Wodis Yuneo](https://www.aareon.de/Wodis-Yuneo.970622.html) | Mainz, DE | Cloud SaaS | Per administered unit | Aareon Connect; Blue Eagle for SAP customers | DE housing market leader | 🟢 DACH leader; Blue Eagle SAP RE-FX bridge |
+| [Aareon RELion](https://www.aareon.de/) | Mainz, DE | Cloud / hybrid | Per unit | Aareon Connect | Commercial/mixed portfolios | 🟢 Commercial RE leader; relevant for federal portfolio |
+| [Aareon Smart World / Mareon](https://www.aareon.de/) | Mainz, DE | Cloud | Per unit | Aareon Connect | Embedded CRM-Mieterportal | 🟢 Embedded Mieterportal pattern; Aareon ecosystem |
+| [Aareon Blue Eagle (SAP IS-RE add-on)](https://www.aareon.de/) | Mainz, DE | SAP-hosted / hybrid | Quote | Native SAP IS-RE / RE-FX add-on | Direct SAP-side integration | 🟢 Direct SAP RE-FX add-on; closest fit to BBL's SAP core |
+| [Karthago (UTS)](https://www.aareon.de/KARTHAGO.970673.html) | DE | Hybrid | Per unit | Aareon Connect | WEG + Miet | 🟡 DACH residential; WEG-focused |
+| [immoware24](https://www.immoware24.de/) | Halle, DE | Cloud SaaS | Per unit | API | Cloud-native German PM; FCR Immobilien shareholder since 26 Mar 2025 | 🟡 German cloud PM; no federal-CH track |
+| [Haufe axera](https://www.haufe.com/) | Freiburg, DE | Cloud SaaS | Per unit | GoBD-certified | German cloud PM | 🟡 German cloud PM; no federal-CH track |
+| [DOMUS Software](https://www.domus-software.de/) | Aschheim, DE | Hybrid | Per unit | Open API | Long-standing DACH PM | 🟡 DACH PM; some CH reach |
+| [CREM SOLUTIONS iX-Haus](https://www.crem-solutions.de/) | Ratingen, DE | On-prem / hybrid | Per user | SAP, BMS | Commercial RE strength | 🟡 Commercial RE; SAP integration |
+| [Yardi Voyager + RentCafe](https://www.yardi.com/) | Santa Barbara, USA | Cloud / private | Per unit | Open APIs | US multifamily with strong EMEA | 🟡 Multifamily; some CH presence |
+| [MRI Software](https://www.mrisoftware.com/) | Solon (OH), USA | Cloud | Per unit | SAP, Workday | Capita One UK; Anacle APAC; Proptech Labs ANZ | 🟡 Multifamily; weak federal-CH fit |
+| [AppFolio](https://www.appfolio.com/) | Santa Barbara, USA | Cloud | Per unit + base | API | US SMB multifamily | 🔴 US SMB multifamily |
+| [Buildium (RealPage)](https://www.buildium.com/) | Boston, USA | Cloud | Tiered + per unit | RealPage suite | SMB multifamily | 🔴 US SMB multifamily |
+| [RealPage](https://www.realpage.com/) | Richardson (TX), USA | Cloud | Per unit | Open API | Multifamily | 🔴 US multifamily |
+| [Entrata](https://www.entrata.com/) | Lehi (UT), USA | Cloud | Per unit | Open API | US multifamily | 🔴 US multifamily |
+| [GARAIO REM + aroov](https://www.garaio-rem.ch/) | Bern, CH | Cloud (CH) | Per unit | Abacus, Navision, Odoo, SAP, SAP S/4HANA | Per Digital Real Estate Summit 2025 (digitalrealestate.ch): "Heute werden mit den Lösungen des PropTech Unternehmens mehr als 1.6 Millionen Mietobjekte verwaltet"; aroov is a JV with Swiss Mobiliar | 🟢 Swiss-domiciled; SAP S/4HANA; CH market leader |
+| [W&W ImmoTop2 / Rimo R5](https://www.wwimmo.ch/) | Affoltern am Albis, CH | Cloud / on-prem | Per user | Open interfaces | CH leader for property managers (>4,000 customers); Rimo R5 supports DE/FR/IT | 🟢 Swiss-domiciled CH leader; DE/FR/IT support |
+| [Abacus AbaImmo](https://www.abacus.ch/) | Wittenbach, CH | Hybrid | Per module | Abacus FIBU/CRM | Swiss ERP suite; CHF 1.5 m minority stake in Tayo (since 2021) for tenant portal | 🟢 Swiss ERP; wide federal/cantonal presence |
+| [Fairwalter](https://www.fairwalter.com/) | Zurich, CH (W&W subsidiary) | Azure CH | Per unit; transparent | Banking APIs | Hosted on Microsoft Azure in Switzerland | 🟢 Swiss-domiciled; Azure CH residency |
+| [Immomig](https://www.immomig.ch/) | Sursee/Fribourg, CH (founded 2004 by Patrick Maillard) | Cloud (CH) | Per agent | DigiRENT, dreamo.ch | AI all-in-one real-estate CRM; >6,000 users | 🟡 Swiss CRM-leaning; not tenant-portal-shaped |
+| [Tayo](https://www.tayo.ch/) | Lausanne, CH | Cloud (CH) | Per unit | Open API; banking | **Swiss-domiciled** tenant-portal SaaS; Abacus CHF 1.5 m minority stake since 2021 (also referenced under Abacus row) | 🟢 Swiss-domiciled native tenant-portal SaaS |
+| [Arthur Online](https://www.arthuronline.co.uk/) | London, UK (Aareon) | SaaS | Per unit | Aareon ecosystem | UK SMB property | 🔴 UK SMB |
+| [Momentum (Aareon)](https://www.momentum.se/) | Stockholm, SE (Aareon) | SaaS | Per unit | Nordic banking | Aareon Nordic platform | 🔴 Nordic; weak federal-CH fit |
+| [iX-Haus plus](https://www.crem-solutions.de) | Ratingen, DE (CREM Solutions) | Cloud (browser front-end) | Per user | iX-Haus core | Browser front-end above iX-Haus; AI-OCR | 🟡 Commercial RE; browser front-end |
+| [Haufe Real Estate Cloud](https://www.haufe.com) | Freiburg, DE (Haufe Group) | Cloud | Per unit | Open API | SaaS evolution of Haufe-Lexware Real Estate | 🟡 SaaS PM; German |
+| [Real4M](https://www.real4m.com) | DACH | Cloud | Per unit | Open API | PM SaaS for institutional residential | 🟡 DACH institutional |
+| [Solyp](https://www.solyp.com) | DACH | Cloud | Per unit | Open API | ERP for portfolio property managers | 🟡 DACH portfolio managers |
+| [connectedcare](https://www.connectedcare.de) | DE | Cloud | Per unit | Open API | Specialist for healthcare / senior-housing | 🔴 Niche (healthcare/senior housing) |
 
 <sub>**Preview — selected vendors** (product screenshots, diagrams or illustrations from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
 
