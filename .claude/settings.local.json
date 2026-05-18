@@ -56,7 +56,27 @@
       "Bash(mv spacewell.JPG _spacewell.tmp)",
       "Bash(mv _spacewell.tmp spacewell.jpg)",
       "Bash(grep -i -E \"\\\\.\\(png|svg|jpeg|jpg\\)$\")",
-      "Bash(grep -i -v -E \"\\\\.jpg$\")"
+      "Bash(grep -i -v -E \"\\\\.jpg$\")",
+      "WebFetch(domain:www.ar.admin.ch)",
+      "WebFetch(domain:www.bundesimmobilien.de)",
+      "WebFetch(domain:www.rijksvastgoedbedrijf.nl)",
+      "WebFetch(domain:www.senaatti.fi)",
+      "WebFetch(domain:www.statsbygg.no)",
+      "WebFetch(domain:www.agenziademanio.it)",
+      "WebFetch(domain:www.wincasa.ch)",
+      "WebFetch(domain:www.livit.ch)",
+      "WebFetch(domain:www.privera.ch)",
+      "WebFetch(domain:www.zh.ch)",
+      "WebFetch(domain:www.epfl.ch)",
+      "WebFetch(domain:ethz.ch)",
+      "WebFetch(domain:www.bern.ch)",
+      "WebFetch(domain:www.gpa.gov.uk)",
+      "WebFetch(domain:www.deutschebahn.com)",
+      "WebFetch(domain:www.oebb-immobilien.at)",
+      "WebFetch(domain:lbre.stanford.edu)",
+      "WebFetch(domain:www.siemens.com)",
+      "WebFetch(domain:www.immobilien-basel-stadt.ch)",
+      "WebSearch"
     ]
   }
 }

@@ -2,162 +2,9 @@
 
 ## 1. Goal
 
-A **descriptive market screening** of "tenant portal" / "Mieterportal" software for the Swiss Federal Office of Buildings and Logistics (BBL, Bereich Bauten / DRES), which operates SAP S/4HANA with RE-FX after the SUPERB cut-over of September 2023. The document is split into two parts: **[Section 2 — Real-Estate Operators](#2-real-estate-operators--reference-library)** lists actual operators (federal landlords, cities, universities, transport / utility operators, listed RE, FM service providers, corporate occupiers) and the tenant-portal systems they run; **[Sections 3–7](#3-market-map)** map the software market — segments, leaders, vendors per segment — anchored in Swiss federal regulation (EMBAG, DigiV, ISG, VILB, BöB), Swiss identity infrastructure (AGOV, planned federal e-ID launch 1 December 2026), and Swiss data-residency preferences. **It is not a procurement recommendation, does not propose a buy-vs-build or phasing approach, and endorses no vendor.**
+A **descriptive market screening** of "tenant portal" / "Mieterportal" software for the Swiss Federal Office of Buildings and Logistics (BBL, Bereich Bauten / DRES), which operates SAP S/4HANA with RE-FX after the SUPERB cut-over of September 2023. This document maps the **software market** — segments, leaders, vendors per segment — anchored in Swiss federal regulation (EMBAG, DigiV, ISG, VILB, BöB), Swiss identity infrastructure (AGOV, planned federal e-ID launch 1 December 2026), and Swiss data-residency preferences. For the companion list of actual **real-estate operators** (federal / cantonal / communal landlords, transport and utility operators, listed property managers, FM service providers, corporate occupiers) and the tenant-portal systems they run, see [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md). **It is not a procurement recommendation, does not propose a buy-vs-build or phasing approach, and endorses no vendor.**
 
-## 2. Real-Estate Operators — Reference Library
-
-**Definition.** This section lists actual real-estate **operators** (federal / cantonal / communal landlords, transport and utility operators, listed property managers, FM service providers, corporate occupiers) and the tenant-portal systems they operate. It is distinct from [Section 7 "Details by Segment"](#7-details-by-segment), which lists software **products / vendors**. An operator is an organisation that runs a real-estate portfolio; a product is the software it uses to do so. The same product (e.g. Planon, SAP RE-FX, GARAIO REM) typically appears in multiple operator rows below.
-
-**Methodology note.** Sources include official websites, annual reports, public-procurement notices (simap.ch, TED, contracts-finder), vendor press releases naming customers, trade press, and LinkedIn job adverts treated as indicators. Entries marked *[indicative]* rely on indicators only, not official confirmations. The "Comparability to BBL pattern" column is a descriptive observation about how closely the operator's structure / stack matches BBL's situation — it is **not** a vendor recommendation. State of data: 18 May 2026.
-
-### 2.1 Swiss Confederation
-
-| Organisation | Function / scale | Portal / system | Vendor / stack | Identity | Recent news (date) | Scope | Comparability to BBL pattern |
-|---|---|---|---|---|---|---|---|
-| **BBL** | Civilian federal; >2,700 properties in Switzerland and abroad; ~26,000 of the ~33,000 federal office workplaces | (no consolidated tenant portal yet); SAP basis | SAP ERP today → **SAP S/4HANA** by end of 2027 | AGOV planned | "UK 2024" consolidation ongoing; Immobilienbotschaft 2026 adopted by Federal Council 13.03.2026 | Internal demand offices | **Self-reference** |
-| **armasuisse Immobilien (VBS)** | Military real estate CH | **SAP stack**: EAM (order management), PS (projects), IM (investments), BW (reporting); Adobe LiveCycle e-signature | **SAP S/4HANA Defense & Security** live since 06.01.2025 (programme ERPSYSVAR) | Azure AD / Bund | RE6 "stabilisation / reporting" delivered on time 31.12.2025; RE7 "optimisation / automation" on track (VBS report 20.08.2025) | ~10,000 internal staff | **Very high — same SAP path** |
-| **SBB Immobilien / CFF** | Second-largest Swiss real-estate company after Swiss Life, with 3,500 properties of which ~800 train stations, ~20,000 lease contracts (Alexis Leuthold, Head Property Management SBB Immobilien, Immobilia April 2023) | [**portal.sbb-immobilien.ch**](https://portal.sbb-immobilien.ch/) (fault reporting, invoices, documents, reservations); **Sales Reporting Portal** for commercial tenants via SAP IAS / OpenID Connect | **SBB ERP = SAP**; **Microsoft Dynamics Customer Insights (Journeys)** for mailings; SAP Ariba for procurement | Own login verification; OpenID Connect | Rental-deposit insurance integrated | External residential / commercial tenants + internal service providers | **Very high — reference architecture for an SAP-centric B2C/B2B portal** |
-| **Schweizerische Post / Post Immobilien Management & Services AG** | ~2,200 properties; book value >CHF 3 bn (>1,000 owned + >1,300 leased-in) | [**immobilien.post.ch**](https://immobilien.post.ch/) as marketing site; integrated tenant self-service not publicly advertised *[indicative]* | SAP stack of Post Group | SwissID / Azure AD | HQ Wankdorfallee 4, 3030 Berne | Group-internal + third-party tenants | **Med–High** |
-| **Swisscom Immobilien AG** | ~13,000 properties (>1 m m²) | [**immobilien.swisscom.ch**](https://immobilien.swisscom.ch/) (residential / commercial) | Group IT, high SAP share | Swisscom Login / SwissID | – | Group + third-party tenants | Medium |
-
-### 2.2 Swiss Cantons
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **Canton Zürich, Immobilienamt (Baudirektion)** — ~2,300 buildings, 12,000 undeveloped plots; own FacilityServices for building automation / access; ~200 staff | **GARAIO REM** (public reference Samira Good, Team Lead Property Management Canton ZH) | GARAIO REM | ZH-Login | FM submission Nov 2020 with 12 bids | **Very high — largest cantonal operator, GARAIO anchor** |
-| **Canton Berne (AGG)** | unclear *[indicative]* | – | BE-Login | – | Medium |
-| **Canton Aargau (Immobilien AG)** | unclear *[indicative]* | – | – | – | Medium |
-| **Canton Vaud (DGIP)** | unclear *[indicative]* | – | VD-Login | – | Medium |
-
-### 2.3 Swiss Cities
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **City of Zürich — LSZ + IMMO** | **Mietendenportal** ([stadt-zuerich.ch/de/lebenslagen/wohnen/mietendenportal](https://www.stadt-zuerich.ch/de/lebenslagen/wohnen/mietendenportal.html)) — "online platform for exchange between tenants, suppliers and property management" | Municipal industry solution (details not public) | **"Mein Konto"** (City-of-Zürich SSO) | Established as a dialogue platform | **Very high — best Swiss municipal reference** |
-| **City of Berne — ISB + HSB** | **Project DOMUM**: replacement of **Microsoft Dynamics NAV 2009 R2** | Tender 2020 (simap 1140191); industry-solution award for real estate Nov 2022; planned go-live summer 2022 | BE-Login | Investment credit CHF 3,980,000 + commitment credit CHF 1,094,800 (2023–2027) | **Very high — direct public-sector replacement case** |
-| **City of Basel (Immobilien Basel-Stadt)** | unclear *[indicative]* | – | BS-Login | – | High (to be verified) |
-| **City of Geneva / Lausanne** | unclear *[indicative]* | – | – | – | Medium |
-
-### 2.4 Swiss Universities / Academic
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **ETH Zürich — Real Estate Department** | Real-estate portfolio of ~CHF 5 bn book value (ETH Zürich Real Estate Management page); tenants internal (departments) + external; **wohnen.ethz.ch** with Housing Office UZH / ETH | SAP standard; consolidated external tenant-portal solution not publicly published | **eduID / ETH AAI** | Immobilien ETHZF AG + Hohenlinden AG as gemeinnützige foundation subsidiaries | Med–High |
-| **EPFL — Domaine Immobilier & Infrastructures (DII)** | Campus 540,000 m², 11,000 people, budget ~CHF 75 m / year | **ARCHIBUS (Eptura) via AREMIS** — tender 2020; modules maintenance, projects, inventory, security; interface to IS-Academia | **EPFL Tequila / eduID** | LEX 7.1.0.1 (federal real-estate management); LEX 7.1.0.2 (EPF domain) | **High — directly comparable EPF domain** |
-| **University of Zürich (UZH)** | Shared Housing Office with ETH | – | eduID | – | Medium |
-| **University of Berne** | IAM tender simap 1117279 (03.02.2020) | – | eduID | – | Medium |
-| **ZHAW, FHNW, HSG, USI, Universities of Basel / Geneva / Lausanne** | mostly Archibus / Planon *[indicative]* | – | eduID | – | Medium |
-
-### 2.5 Swiss Transport & Utilities
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **SBB Immobilien** | see [2.1](#21-swiss-confederation) | SAP ERP + MS Dynamics CI | OIDC | – | High |
-| **Post Immobilien** | see [2.1](#21-swiss-confederation) | SAP-centric | – | – | Med–High |
-| **Swisscom Immobilien** | see [2.1](#21-swiss-confederation) | – | – | – | Medium |
-| **BKW / Axpo** | not publicly detailed | – | – | – | Low |
-| **Flughafen Zürich** | Referenced at SAP Real Estate Congress 2024 | SAP stack *[indicative]* | – | – | Medium |
-
-### 2.6 Swiss Listed RE / Corporates / Large Asset Managers
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **Wincasa AG** | **Wincasa Home** (tenants), **Supplier**, **Client** | **Aareon RELion** in **Microsoft Azure CH cloud** (first-ever for CH bank-secrecy-analogue tenant-data requirements); portal via **streamnow ag**; IT-provider list: GARAIO REM, Jarowa, IDnow, Microsoft, Pidas, UMB, Elca, Inacta, Arcplace, Tilbago | SwissID-capable | Contract signed 2019; Home rollout from Aug 2021, 38,000 tenants in the first wave (~55%); Telli property visible in IT-provider list | **Very high — largest Swiss private benchmark** |
-| **Livit** | **Mylivit** | historically IG REM (Garaio) | SwissID | Master of Swiss Apps 2020 | High |
-| **Privera** | – | **GARAIO REM** (public testimonial) | – | – | Med–High |
-| **Swiss Prime Site / PSP / Allreal / Mobimo** | mostly commercial; own portals limited | mostly SAP / GARAIO REM | SwissID | – | Medium |
-| **Migros / Coop / UBS / Zurich Insurance / Swiss Re / ABB / Sulzer / Roche / Novartis / Nestlé** | Corporate occupiers with internal focus; **Roche on the SAP S/4HANA journey since 2019** (SAP News Aug 2023, Anderson Accioli) | SAP / Azure AD | – | – | Medium |
-| **Implenia, Hochtief, STRABAG (CH)** | more relevant as FM suppliers | – | – | – | Low (supplier) |
-
-### 2.7 DACH peers
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **BImA (DE)** | Per BImA corporate page ([bundesimmobilien.de/unternehmen](https://www.bundesimmobilien.de/unternehmen)): more than 38,400 dwellings and ~453,000 hectares of land; ~7,400 staff (Wikipedia, Bundesanstalt für Immobilienaufgaben); 19,000 properties; **bundesimmobilien.de** with 24/7 repair service, real-estate portal, Wohnungsfürsorge search | **BALIMA** — proprietary management system on a **SAP basis** (BImA job ad: "Solid user knowledge of SAP ERP 6.0") | **"meine BImA"** (own account platform) | Digitalisation business unit reports directly to the Vorstand; Adakta programme (eGovernment competition 2024) | **Very high — closest German peer** |
-| **BIG Austria / ARE Austria** | not publicly detailed | SAP standard *[indicative]* | ID Austria | – | High |
-| **Berlin BIM, Munich Kommunalreferat, TU München, RWTH Aachen** | mostly SAP RE-FX *[indicative]* | – | – | – | Medium |
-
-### 2.8 Nordic peers
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **Senate Properties / Senaatti (FI)** | **Senate eService**, **BEM** (project doc management), **Hilma** (procurement); **Granlund Manager** as the central maintenance ERP for service providers (iOS / Android app) | Granlund Oy | Suomi.fi / Senate eService | ISO 14001; Defence Properties Finland separate ("most extensive property-maintenance system in Finland") | **Very high — analogous to a possible BBL spin-off** |
-| **Statsbygg (NO)** | Per Wikipedia (Norwegian Directorate of Public Construction and Property): "2.7 million square metres in 2,350 buildings, of which 115 are located abroad … about 200 construction projects under way, completing about 10–20 new structures each year. Statsbygg has 860 employees." | **dRofus + TIDA** since 2008; **SIMBA** BIM validator; BIM mandate since 2011 | ID-porten | – | **Very high — BIM pioneer** |
-| **Akademiska Hus (SE)** | not publicly detailed *[indicative]* | – | Sambi / Swedish eID | – | High |
-| **Statens Fastighetsverk (SFV, SE)** | not publicly detailed *[indicative]* | – | BankID | – | Medium |
-| **Vasakronan (SE)** | not publicly detailed | – | BankID | – | Medium |
-| **Bygningsstyrelsen (DK)** | not publicly detailed *[indicative]* | – | MitID | – | High |
-
-### 2.9 UK / Ireland
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **GPA — Government Property Agency (UK)** | Per GPA's "Transforming the Civil Service" page: **GovPass** — single access pass — used by more than 166,000 civil servants; Smarter Working Programme covering 225,000 civil servants ([gpa.gov.uk/about-us/public-service-transformation](https://www.gpa.gov.uk/about-us/public-service-transformation/)); **Customer Portal** + **Workplace Digital Platform**; **GovPrint** | In-house build + Strategic Partners (up to 7 years) | One Login (gov.uk) | Quay House Peterborough (Mar 2023, 1,200 civil servants); Birmingham Hub (Jul 2022, 1,700 civil servants, Leesman+ certified); Manchester Campus approved 2024; Darlington Hub planned | **Very high — directly comparable central-government RE function** |
-| **NHS Property Services** | Tenant portal for NHS trusts | not publicly detailed | NHS Identity | – | High |
-| **Network Rail / Crown Estate / GLA** | not publicly detailed | – | – | – | Medium |
-| **Oxford / Cambridge / Imperial Estates** | mostly Archibus / Planon *[indicative]* | – | – | – | Medium |
-
-### 2.10 Benelux
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **Rijksvastgoedbedrijf (RVB, NL)** | Dutch State real estate | **Planon Asset & Maintenance Management (AMM)** — **go-live 13.11.2025** (Planon press release: "800 internal employees and 800 external suppliers will now work with Planon"); replaces six maintenance systems following a European tender | DigiD / eHerkenning | "an important milestone in a large-scale digitalisation programme that began in 2021" (Luciën Kamps, GM Planon EMEA West) | **Very high — freshest EU public-sector go-live** |
-| **Régie des Bâtiments (BE)** | SAP stack *[indicative]* | – | itsme | – | High |
-| **Luxembourg State Property** | – | – | LuxTrust | – | Medium |
-
-### 2.11 France / Southern Europe
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **Agenzia del Demanio (IT)** | Italian state patrimony | **PA-Suite portals**: RATIO, SIM, PTIM, IPER, **EnTer**, **upDATe** (BIM, since July 2020), **Portale della Riscossione**; all developed / operated by **Sogei S.p.A.** | SPID / CIE | "EnTer è la piattaforma informatica che l'Agenzia del Demanio mette a disposizione delle PA per raccogliere e mettere in rete i dati sugli immobili pubblici" (agenziademanio.it) | **Very high — alternative architecture: state-owned SI rather than COTS** |
-| **DIE — Direction de l'Immobilier de l'État (FR)** | – | not publicly detailed | FranceConnect+ | – | High |
-| **SNCF Immobilier (FR)** | Railway real estate | **ePublimmo** (public commercial / storage / office / station-retail / land marketing); internal via **S2FIT** | FranceConnect | – | High |
-| **RATP / EDF / APIJ** | not publicly detailed | – | – | – | Medium |
-| **Patrimonio del Estado / Patrimonio Nacional (ES)** | not publicly detailed | – | Cl@ve | – | Medium |
-
-### 2.12 US peers
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **GSA Public Buildings Service** | 345 m sq ft, 1 m federal employees, 1,600 owned buildings | **eRETA** (External RWA Entry & Tracking) at [extportal.pbs.gsa.gov](https://extportal.pbs.gsa.gov/); **OASIS** (Occupancy Agreement Space Inventory); **EUAS** (Energy Usage); **Space Match** | **Login.gov** (mandatory since 21.10.2024) | eRETA 9.18 (Nov 2024); eRETA 9.17 (Jul 2024); RWA-submission requirement for all federal agencies | **Very high — RWA model comparable to BBL UK 2024** |
-| **DoD Installations** | SAP / proprietary | – | DoD CAC / Login.gov | – | Medium |
-| **Stanford University LBRE** | **Archibus by Eptura** (cit. Zig Wu, Stanford Health Care, TrustRadius: "Archibus is used to document the assigned department cost centers and employee location information") | – | Stanford SUNet ID | – | High |
-| **MIT / Harvard / Yale** | typically Archibus / Planon *[indicative]* | – | – | – | Medium |
-
-### 2.13 International Transport & Infrastructure
-
-| Organisation | Portal / system | Vendor | Identity | Recent news | Comparability to BBL pattern |
-|---|---|---|---|---|---|
-| **Deutsche Bahn — DB InfraGO / DB Station&Service** | ~17 m boarding / alighting per day; >230 staff in leasing | **Infraportal** + **Stationsportal** (B2B EVUs); **APN — Anlagenportal-Netz** since 01.07.2017; **DB Wohnen** (housing search for employees) | DB ID | DB Wohnen Scanner as a newsletter feature | **High — large-tenant operator pattern, comparable to SBB** |
-| **ÖBB Immobilien (AT)** | not publicly detailed *[indicative]* | – | ID Austria | – | Medium |
-| **SNCF Gares & Connexions** | see [2.11](#211-france--southern-europe) | – | – | – | High |
-| **JR East (JP)** | not publicly detailed | – | – | – | Low |
-
-### 2.14 Major FM Operators
-
-| Operator | Platform / app | Vendor / stack | Evidence | Comparability to BBL pattern |
-|---|---|---|---|---|
-| **CBRE Global Workplace Solutions** | **Host** (CBRE Singapore launch 14.07.2021); **fmPilot** (CMMS); **CBRE 360**; **ServiceInsight** | **Microsoft Azure Digital Twins + IoT** (Host); **MS Dynamics 365 Field Service** (fmPilot); MS Viva (employee engagement) | Sandeep Dave, CDO CBRE GWS, MWC 2019: "We have partnered with Microsoft in this journey and leveraged their Azure Digital Twin foundation to manage sensors and leverage analytics"; Facility Executive: "fmPilot built on Microsoft Dynamics 365 will become the core operating platform" | **Very high — Microsoft-centric pattern as a Planon alternative** |
-| **JLL Work Dynamics** | **HqO** (strategic partnership + acquisition of JLL Jet 12.07.2022); **FM:Systems / FMS:Employee** | HqO, FM:Systems | GlobeNewswire 12.07.2022: "JLL Selects HqO as its Preferred Global Solution for Tenants and Employees, and HqO Acquires JLL Jet" (Yishai Lerner, Co-CEO JLL Technologies) | **Very high — workplace-experience best practice** |
-| **ISS World A/S** | In-house development under **OneISS** (launch 16.12.2020); ISS Tech Portugal (Aug 2022) | proprietary | Markus Sontheimer, Group CIO/CDO ISS, 11.08.2022: "we are not only investing in state-of-the-art technologies but are also ramping up our inhouse capabilities at a global scale" | High |
-| **Sodexo "Vital Spaces"** | Services framework + partner stack (Circles Concierge, AskFM, Wando) | – | Sodexo Ireland case study | Medium |
-| **Apleona (DE)** | **CAFM transformation to Planon** in progress (job ad 2024–25: "Active participation and technical guidance of the CAFM transformation to Planon as the central contact point") | Planon (in-progress) | jobs.apleona.com | High |
-| **Vinci Facilities / Engie Solutions / SPIE / Compass / Cushman & Wakefield GOS** | mixed models, often Planon / IBM TRIRIGA / MS stack | – | – | Medium |
-
-### 2.15 International Corporate-Occupier Benchmarks
-
-| Organisation | Platform | Vendor | Evidence | Comparability to BBL pattern |
-|---|---|---|---|---|
-| **Siemens Real Estate (DE)** | **Planon "ONE Global"** (Cloud, Planon Accelerator) + **SAP RE-FX** in parallel | Planon (Oct 2016) | Planon press release 11.10.2016 with Dr. Stephan Jakoby, CFO Siemens RE: "Die von Planon angebotene Lösung erlaubt uns, unsere Immobiliengeschäftsprozesse über den gesamten Lebenszyklus auf der Basis eines global einheitlichen Systems zu unterstützen" (>50 m sq ft / 2,400 sites) | **Very high — SAP RE-FX + Planon coexistence, exactly the BBL co-existence pattern** |
-| **Roche (Basel)** | **SAP S/4HANA journey** since 2019 incl. Asset Strategy & Performance Mgmt and Service & Asset Manager | SAP | SAP News Aug 2023, Anderson Accioli, Roche: "harmonize business processes on all sites and divisions around the world" | High |
-| **Microsoft Global RE / Google REWS / Apple Park / Meta Workplace** | not publicly detailed | – | – | Medium |
-| **JPMorgan Chase / HSBC / BNP Paribas Immobilier** | not publicly detailed | – | – | Medium |
-| **Pfizer, Bayer, Merck, BMW, Mercedes-Benz, Volkswagen Immobilien** | typically SAP RE-FX + local CAFM *[indicative]* | – | – | Medium |
-| **Novartis Real Estate / Nestlé Corporate RE** | not publicly detailed | – | – | Medium |
-
----
-
-## 3. Market Map
+## 2. Market Map
 
 ```mermaid
 mindmap
@@ -200,7 +47,7 @@ mindmap
       Standards (ISO 41001/19650, GEFMA, RICS, eBKP-H, KBOB)
 ```
 
-## 4. Segments at a Glance
+## 3. Segments at a Glance
 
 | # | Segment | One-line description |
 |---|---|---|
@@ -238,7 +85,7 @@ mindmap
 | AF | Mobility & EV-charging tenant services | CH CPO/EMSP networks (Energie 360°/Swisscharge/GOFAST/Move group, Shell Recharge/evpass, Juice Technology, Park-it); DACH CPO OS (chargecloud, reev, has·to·be/ChargePoint, GP JOULE Connect, &Charge); pan-EU & US (ChargePoint, eMabler, ENGIE Vianeo, Allego, Mer, EVgo, Wallbox, Pod Point, Driivz, GreenFlux); parking (Parquery, ParkingPay). |
 | AG | Building automation / GA-Leitsystem (OT layer beneath L) | DACH BMS supervisors (Sauter, Saia-Burgess Controls/Honeywell, Siemens Desigo CC, Honeywell EBI / Niagara Tridium, Schneider EcoStruxure Building, Beckhoff TwinCAT, Wago, Kieback&Peter, Caverion); global (Johnson Controls Metasys, Trane Tracer SC+, ABB Cylon, Distech, Iconics); Belimo Cloud. |
 
-## 5. Summary
+## 4. Summary
 
 - **Heavy consolidation, bifurcated market.** The workplace-side (Eptura, Spacewell, Planon, Nuvolo, MRI, Tango, ServiceNow WSD) converges on AI-enabled "WEX + IWMS" suites: Gartner published its first-ever Magic Quadrant for Workplace Experience Applications on 6 April 2026 (analysts Sohail Majumdar and Christopher Trueman), evaluating Accruent, Appspace, CXAI, Envoy, Eptura, Microsoft, Modo Labs, OfficeSpace Software, Robin Powered, ServiceNow, Tango and Zoom; Eptura, Robin and Appspace publicly claimed Leader positions. Verdantix's January 2025 Green Quadrant for Connected Portfolio Intelligence Platforms (CPIP) / IWMS named Planon (highest performer), IBM, Eptura, MRI, Tango, Johnson Controls, Spacewell and Nuvolo as the 8 Leaders. The residential/housing side (Aareon, Haufe, DOMUS, casavi, facilioo, immoware24, Allthings, W&W, GARAIO REM, Abacus) remains a deeply DACH-vertical market.
 - **Three buyer personas drive segmentation:** (1) corporate-occupier/workplace persona (federal tenant agencies VBS, EFD, EJPD, EDA, fedpol, NDB); (2) landlord-as-asset-manager persona (BBL-class portfolios); (3) residential tenant persona (caretaker housing, embassies, social/military housing). Few vendors serve all three convincingly — cross-persona suites are typically IWMS leaders (Planon, MRI, Eptura) or vertical ERP+portal combinations (Aareon, GARAIO REM).
@@ -246,28 +93,12 @@ mindmap
 - **Regulatory and standards context is decisive in Switzerland:** EMBAG (in force 1 Jan 2024, "Public Money — Public Code" by default per Art. 9 unless third-party rights or security preclude); DigiV (SR 172.019.1); Strategie Digitale Bundesverwaltung; ISG (information security classification INTERN, VERTRAULICH, GEHEIM); VILB Art. 9 Abs. 1bis; revised BöB/VöB (1 Jan 2021); AGOV as the federal login standard; the federal e-ID expected to launch on 1 December 2026. These collectively force a preference for Swiss data residency, OSS-publishable customisations, and AGOV federation over proprietary identity stacks.
 - **Recent M&A has compressed the vendor map:** Eptura (Oct 2022 merger of Condeco + iOFFICE/SpaceIQ); Aareon TPG/CDPQ-owned at €3.9 bn EV since June 2024; HqO + Office App (Oct 2021); VTS + Lane (Oct 2021); Tango + Locatee (Mar 2024); MRI Software's 53-acquisition trajectory (Tracxn, Feb 2026, with an average acquisition amount of $68.4 m and a peak of nine acquisitions in 2020); the SAP–Planon strategic partnership (16 May 2023).
 
-## 6. Recent Consolidations & Shifts (chronological)
+## 5. Recent Consolidations & Shifts (chronological)
+
+*Showing 2024+ events only. Earlier structural events that still shape the current vendor map — Eptura formation (Oct 2022, merger of Condeco + iOFFICE + SpaceIQ), SAP–Planon strategic partnership (16 May 2023), Planon RE for SAP S/4HANA achieving SAP Endorsed App status (2 Oct 2023), BBL's own SUPERB cut-over to SAP S/4HANA / RE-FX (Sep 2023), AWS opening `eu-central-2` Zurich (Nov 2022), and Aareon's casavi / Momentum / Karthago / Arthur Online roll-up (2022–2023) — are retained in the relevant Segment narrative in §6 below, but no longer listed as separate rows here. See earlier revisions in git history for the full pre-2024 timeline.*
 
 | Date | Event | Implication |
 |---|---|---|
-| Jan 2013 | **Honeywell acquires Saia-Burgess Controls** (Murten, CH) from Johnson Electric for $130 m. | Consolidates a Swiss-domiciled GA-Leitsystem leader (Segment AG) under a US BMS major; SBC widely deployed in CH infrastructure (SBB, VBZ). |
-| 2018 | **CRIF + Intrum launch CreditTrust JV** (Zurich, CH); blockchain-anchored Bonitätszertifikat. | Establishes the dominant digital alternative to the paper Betreibungsregister-Auszug in Swiss residential applications; embedded into homegate.ch / ImmoScout24.ch flows (Segment AC). |
-| Feb 2019 | **Aareal Bank Group acquires plusForta GmbH** (kautionsfrei.de / heysafe.de / kautionsfuchs.de). | Direct corporate-family link between the DE deposit-substitution market and PM-software giant Aareon (Segment AD). |
-| 2021 | **ChargePoint acquires has·to·be** (Klagenfurt, AT) for ~$295 m. | Consolidates DACH flagship CPO software (be.ENERGISED) into ChargePoint Platform (Segment AF). |
-| Aug 2021 | iOFFICE + SpaceIQ merge under Thoma Bravo / JMI Equity / Waud Capital. | Pre-Eptura step. |
-| Oct 2021 | HqO acquires Office App (NL). Per HqO press release (GlobeNewswire, 19 Oct 2021): "The new combined entity is valued at over half a billion dollars, making it one of the most significant proptech companies in the world." | European expansion of US tenant-experience leader. |
-| Oct 2021 | VTS acquires Lane. | VTS gains workplace footprint. |
-| Jan 2022 | Condeco acquires Proxyclick. | Visitor management folded into Condeco. |
-| Jan 2022 | Aareon acquires 100% of Arthur Online (UK). | Entry into UK SMB property-management. |
-| 2022 | **Aareon acquires casavi** (Munich, DE). | Brings WEG/STWEG voting module, smartflows and tenant portal under Aareon (Segments AE, F, K). |
-| Jun 2022 | Aareon (via Mary BidCo AB) acquires approximately 93% (later 100%) of Momentum Software Group (Sweden). Per Aareon/Goldcup press release (Cision, 20 Jun 2022): "approximately 93 per cent of the shares and votes in Momentum, at a price of SEK 108 per share, valuing Momentum… at approximately SEK 1,797 million." | Nordic property-management consolidation. |
-| Oct 2022 | Condeco + iOFFICE + SpaceIQ merge to form **Eptura** (Atlanta HQ; CEO Brandon Holden; Paul Statham joins the board). Investors: Thoma Bravo, JMI Equity. | Portfolio: Archibus, Condeco, Hippo CMMS, iOffice, ManagerPlus, Proxyclick, Serraview, SpaceIQ, Teem. |
-| Nov 2022 | AWS opens `eu-central-2` (Zurich) with 3 AZs. Per AWS press release (BusinessWire, 8 Nov 2022): "AWS is planning to invest an estimated $5.9 billion (approx. 5.9 billion Swiss francs) in Switzerland during the next 15 years." | Swiss data-residency option for portals. |
-| Apr 2023 | Aareon acquires Embrace — The Human Cloud (NL omnichannel contact-centre). | AI / contact-centre capabilities. |
-| 16 May 2023 | **SAP and Planon strategic partnership** announced at SAP Sapphire. "Planon Real Estate Management for SAP S/4HANA" becomes an SAP Endorsed App; SAP retains RE-FX. | SAP positions Planon as preferred RE/FM partner co-engineered on BTP and S/4HANA. |
-| Q2 2023 | Aareon acquires Karthago (UTS). | DACH WEG/Miet-software consolidation. |
-| Sep 2023 | BBL SUPERB cut-over to SAP S/4HANA / RE-FX. | BBL on current SAP core. |
-| 2 Oct 2023 | "Planon Real Estate Management for SAP S/4HANA" achieves SAP Endorsed App status. | Premium-certified via SAP Store. |
 | Mar 2024 | Tango Analytics acquires **Locatee** (Zurich); Zurich becomes Tango's European HQ. | Sensor-free occupancy analytics joins IWMS suite. |
 | 13 Mar 2024 | BImA migrates Wohnungsfürsorge access into **"meine BImA"** portal. | Federal German tenant-portal modernisation reference. |
 | Apr 2024 | **Entrust acquires Onfido** (London). | Most material 2024–2026 structural event in the IDV/KYC market; reshapes Segment AC consolidation. |
@@ -291,7 +122,7 @@ mindmap
 | 6 Apr 2026 | **Inaugural Gartner Magic Quadrant for Workplace Experience Applications** (analysts Sohail Majumdar, Christopher Trueman). 12 vendors. Eptura, Robin and Appspace publicly positioned as Leaders. | First Gartner MQ defining "WEX". |
 | 1 Dec 2026 (planned) | Swiss federal e-ID launches; usable as login factor in AGOV. | Will shape Swiss tenant-portal identity from 2027. |
 
-## 7. Details by Segment
+## 6. Details by Segment
 
 > **BBL fit score** *(0–10, where 10 = perfect fit; scored against [REQUIREMENTS.md](REQUIREMENTS.md))*. Typical bands: **8–10** = directly fits the pilot (Landing Page + Bedarf Unterbringung) or strong Swiss-federal precedent (SAP RE-FX-compatible, Swiss-domiciled, federal references); **4–7** = fits the roadmap (Case A/B/C) or adjacent / relevant later; **1–3** = out of pilot scope, weak federal fit; **0** = outside the federal property-management context (e.g. US multifamily, consumer fintech). Earlier dot-scheme mapping for reference: green/high → 9, yellow/medium → 5, red/low → 2, white/N-A → 0.
 > The pilot was decided as **Create on RHOS** (in-house on Red Hat OpenShift, operated by BIT), so commercial IWMS / portal suites are by definition not the pilot path — they are scored for a possible later "Buy" iteration.
@@ -1565,7 +1396,7 @@ mindmap
 
 **Taxonomy note.** Segment L (smart-building twin/app) consumes Segment AG output; the explicit boundary is at the API gateway (BACnet → REST/MQTT). Standards alignment: BACnet/IP (ISO 16484-5), KNX (ISO/IEC 14543-3), Modbus (IEC 61158), LoRaWAN (LoRa Alliance), Matter (CSA), and FIWARE Smart Data Models for the smart-city/portfolio-level data layer above L.
 
-## 8. Recommendations
+## 7. Recommendations
 
 This document is a **descriptive market scan, not a procurement document.** It deliberately does not recommend vendors, phasing, or buy-vs-build. The "recommendations" below are recommendations on **how to read and use this scan**, not on what BBL should procure:
 
@@ -1574,7 +1405,7 @@ This document is a **descriptive market scan, not a procurement document.** It d
 - **Use the SAP-endorsement test as a procurement-readiness signal but not as a sole basis for selection.** Planon's endorsement is real and unique in the IWMS category; alternatives (Goldinmotion, Promos, Aareon Blue Eagle, custom Fiori on BTP) are legitimate patterns documented above and must be benchmarked on their own merits against EMBAG / ISG / AGOV criteria.
 - **Update the document at the following triggers (benchmarks/thresholds):** (a) the next Gartner WEX MQ refresh (expected ~April 2027); (b) the next Verdantix Green Quadrant CPIP/IWMS (expected ~Jan 2026 successor); (c) any change in Aareon ownership beyond TPG/CDPQ; (d) any MRI sale or IPO event (Sept 2025 reports indicate a possible 2026 transaction at up to USD 10 bn); (e) Swiss e-ID launch (1 December 2026) and full AGOV deployment to private CH data centres (2027); (f) any new Federal Council decision under EMBAG / DigiV affecting tenant-facing services.
 
-## 9. Caveats & Critical Assumptions
+## 8. Caveats & Critical Assumptions
 
 - **This is a descriptive scan, not a procurement document.** No buy-vs-build, phasing, or vendor endorsement is intended.
 - **Marketing claims vs. analyst validation.** Vendor self-descriptions come from vendor sites/press releases. Where independent analyst views exist (Gartner MQ for WEX 6 Apr 2026; Verdantix CPIP/IWMS Jan 2025; IDC MarketScape SaaS FM 2024–2025 Doc # US52038324), they are cited as objective reference. Verdantix and IDC reports are paywalled; only Leaders publicly disclosed by vendor PRs are named here. Gartner does not endorse vendors; positioning is point-in-time.
@@ -1584,8 +1415,8 @@ This document is a **descriptive market scan, not a procurement document.** It d
 - **Forward-looking statements.** Several items are dated to the future (e-ID 1 Dec 2026; AGOV on private CH DCs "from 2027"; MRI potential 2026 sale at up to USD 10 bn; AWS European Sovereign Cloud GA 14 Jan 2026). Sources and timing language are preserved with their original verbs ("planned", "expected", "estimated", "up to").
 - **Yarowa HQ correction.** The task brief listed Yarowa as Lucerne-based; per Yarowa's own About page and the Swiss commercial register (CHE-470.230.582), Yarowa AG is at Metallstrasse 9, 6300 Zug.
 - **"1.6 million" coincidence flag.** Two unrelated figures in the document round to "1.6 m": GARAIO REM's claim of "more than 1.6 million Mietobjekte managed" (vendor self-claim, Digital Real Estate Summit 2025) and AGOV's "1.6 m residents with accounts in 2025" (Bundeskanzlei). These are coincidence — the GARAIO figure is an unaudited vendor claim, the AGOV figure is federally published. Listed together they read as a pattern; they are not.
-- **eIAM / AGOV scope.** AGOV replaces **CH-LOGIN** (the federal login for *public users* of cantonal/communal/federal services). **eIAM remains in service** for federal staff/internal access. Earlier versions of this document phrased their relationship as "successor"; that wording was incorrect and has been revised in Section 7.I and Appendix A.
-- **Skribble Series A currency.** The Skribble 1 Sept 2022 press release cites "€10 m" in English coverage and "CHF 10 m" in the German release; the figures are roughly at par and refer to the same round. The English-press-release quotation is reproduced verbatim in Section 7.I.
+- **eIAM / AGOV scope.** AGOV replaces **CH-LOGIN** (the federal login for *public users* of cantonal/communal/federal services). **eIAM remains in service** for federal staff/internal access. Earlier versions of this document phrased their relationship as "successor"; that wording was incorrect and has been revised in Section 6.I and Appendix A.
+- **Skribble Series A currency.** The Skribble 1 Sept 2022 press release cites "€10 m" in English coverage and "CHF 10 m" in the German release; the figures are roughly at par and refer to the same round. The English-press-release quotation is reproduced verbatim in Section 6.I.
 - **No Forrester Wave for IWMS or Workplace Management Systems** exists for 2024–2026; adjacent Waves (Intranet Platforms Q2 2024; Collaborative Work Management Tools Q2 2025) do not cover the IWMS category.
 
 ## Appendices
@@ -1639,7 +1470,7 @@ This document is a **descriptive market scan, not a procurement document.** It d
 
 ### Appendix D — Public-sector tenant / real-estate benchmarks
 
-*Superseded — see [Section 2 "Real-Estate Operators — Reference Library"](#2-real-estate-operators--reference-library) at the top of this document, which covers these eight benchmarks (and 50+ more) in expanded form (vendor stack, identity layer, dates, scope). Two notes from the previous Appendix D table that are not yet otherwise captured: BImA's "meine BImA" consolidates Reparaturservice + Immobilienportal access since 13 Mar 2024; Senaatti's "Senate App" is built by Steerpath, alongside [asiointi.senaatti.fi](https://asiointi.senaatti.fi/) (Virtu ID); armasuisse [Immo-Portal VBS](https://www.ar.admin.ch/de/immo-portal) was re-launched 1 May 2024 with role-based structure (Nutzer / Mieter / Eigentümervertreter / Betreiber / IKT / Departementsebene) and ZUVA Weisungen.*
+*Superseded — see the companion document [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md), which covers these eight benchmarks (and 50+ more) in expanded form (vendor stack, identity layer, dates, scope). Two notes from the previous Appendix D table that are not yet otherwise captured: BImA's "meine BImA" consolidates Reparaturservice + Immobilienportal access since 13 Mar 2024; Senaatti's "Senate App" is built by Steerpath, alongside [asiointi.senaatti.fi](https://asiointi.senaatti.fi/) (Virtu ID); armasuisse [Immo-Portal VBS](https://www.ar.admin.ch/de/immo-portal) was re-launched 1 May 2024 with role-based structure (Nutzer / Mieter / Eigentümervertreter / Betreiber / IKT / Departementsebene) and ZUVA Weisungen.*
 
 ### Appendix E — Glossary of Swiss federal abbreviations
 
@@ -1678,4 +1509,4 @@ This document is a **descriptive market scan, not a procurement document.** It d
 
 ---
 
-*Document prepared 18 May 2026. Information drawn from vendor sources, regulatory pages of the Swiss Confederation, Aareal Bank and TPG transaction disclosures, Gartner WEX MQ (6 April 2026), Verdantix Green Quadrant CPIP/IWMS (Jan 2025), IDC MarketScape (Doc # US52038324), and public M&A announcements. Forward-looking dates are marked with "planned"/"expected"/"estimated" where appropriate. Revised 18 May 2026 (this revision): split the document into **operators (Section 2)** and **products (Sections 3–7)**, with a new top-of-document Operator Reference Library covering 60+ real-estate operators across 15 categories (Swiss Confederation, cantons, cities, universities, transport / utilities, listed RE, DACH / Nordic / UK-IE / Benelux / FR-S.Europe / US peers, international transport, major FM operators, corporate-occupier benchmarks); replaced the per-row coloured-dot BBL-fit indicator with a numeric 0–10 score in every Segment table; superseded the former Appendix D (8-row public-sector benchmark table). Earlier revision (same day): added Segments W–AA, added Tayo / Schindler Ahead / KONE 24/7 / NeoVac / Equa / Bouwinvest / CBRE / DIO; corrected eIAM-vs-AGOV scope; flagged "1.6 m" coincidence and Skribble Series A currency in caveats.*
+*Document prepared 18 May 2026. Information drawn from vendor sources, regulatory pages of the Swiss Confederation, Aareal Bank and TPG transaction disclosures, Gartner WEX MQ (6 April 2026), Verdantix Green Quadrant CPIP/IWMS (Jan 2025), IDC MarketScape (Doc # US52038324), and public M&A announcements. Forward-looking dates are marked with "planned"/"expected"/"estimated" where appropriate. Revised 18 May 2026 (this revision): split the operator reference library into a separate companion document [OPERATOR-REFERENCE.md](OPERATOR-REFERENCE.md) covering 60+ real-estate operators across 15 categories (Swiss Confederation, cantons, cities, universities, transport / utilities, listed RE, DACH / Nordic / UK-IE / Benelux / FR-S.Europe / US peers, international transport, major FM operators, corporate-occupier benchmarks); replaced the per-row coloured-dot BBL-fit indicator with a numeric 0–10 score in every Segment table; superseded the former Appendix D (8-row public-sector benchmark table). Earlier revision (same day): added Segments W–AA, added Tayo / Schindler Ahead / KONE 24/7 / NeoVac / Equa / Bouwinvest / CBRE / DIO; corrected eIAM-vs-AGOV scope; flagged "1.6 m" coincidence and Skribble Series A currency in caveats.*
