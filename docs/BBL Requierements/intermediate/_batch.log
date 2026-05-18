@@ -1,0 +1,24 @@
+2026-05-18 15:36:00,254	ERROR	docling.backend.docling_parse_backend: Inconsistent number of pages: 2!=-1
+2026-05-18 15:36:00,255	WARNING	docling.document_converter: Input document C:\Users\DAVIDR~1\AppData\Local\Temp\tmpejogff3g\Lösungsarchitektur Pilot Antrag Unterbringung.pdf is not valid.
+2026-05-18 15:36:00,255	WARNING	docling.cli.main: Document C:\Users\DAVIDR~1\AppData\Local\Temp\tmpejogff3g\Lösungsarchitektur Pilot Antrag Unterbringung.pdf failed to convert.
+[32m[INFO] 2026-05-18 15:36:05,368 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-05-18 15:36:05,388 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_det_infer.onnx[0m
+[32m[INFO] 2026-05-18 15:36:05,390 [RapidOCR] main.py:53: Using C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_det_infer.onnx[0m
+[32m[INFO] 2026-05-18 15:36:05,675 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-05-18 15:36:05,678 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_ppocr_mobile_v2.0_cls_infer.onnx[0m
+[32m[INFO] 2026-05-18 15:36:05,678 [RapidOCR] main.py:53: Using C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_ppocr_mobile_v2.0_cls_infer.onnx[0m
+[32m[INFO] 2026-05-18 15:36:05,787 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-05-18 15:36:05,819 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_rec_infer.onnx[0m
+[32m[INFO] 2026-05-18 15:36:05,819 [RapidOCR] main.py:53: Using C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_rec_infer.onnx[0m
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  69%|######8   | 528/770 [00:00<00:00, 5187.47it/s]Loading weights: 100%|##########| 770/770 [00:00<00:00, 5065.31it/s]
+2026-05-18 15:37:46,352	WARNING	docling.models.stages.ocr.rapid_ocr_model: RapidOCR returned empty result!
+2026-05-18 15:39:21,384	WARNING	docling.models.stages.ocr.rapid_ocr_model: RapidOCR returned empty result!
+2026-05-18 15:39:31,721	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:31,738	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:31,760	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:35,894	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:35,908	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:35,923	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:37,757	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:37,770	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow
+2026-05-18 15:39:37,783	WARNING	docling.backend.msword_backend: Warning: image cannot be loaded by Pillow

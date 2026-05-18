@@ -501,15 +501,71 @@ mindmap
 </tr>
 </table>
 
-### J. Document vault / e-Akte
+### J. Document Vault / e-Akte / GEVER
 
-Examples: BImA Adakta (DE); Acta Nova (Swiss federal GEVER); SharePoint Online; Aareon DMS (Archiv kompakt); OpenText; ELO ECM; OnBase. Infrastructure layers, not tenant-portal products, but often co-deployed when tenant portals serve federal occupants subject to records-retention obligations.
+**Definition.** Electronic records and process management — Geschäftsverwaltung (GEVER) in CH, E-Akte in DE, ELAK in AT — sitting at the intersection of DMS, ECM, BPMN workflow and dossier/records management. The Swiss federal market is highly concentrated, driven by the WTO-tendered GENOVA programme.
 
-### K. AI tenant copilots / conversational service
+**Persona.** Federal/cantonal/communal administrative units; in the BBL context, the dossier and contract repository for Bundesimmobilien, including lease contracts, building dossiers, and procurement files.
 
-Examples: Aareon CRM-Portal KI-Chatbot; casavi smartflows; Allthings AI; Knock; RentDynamics; Lobby; Famulor (EU-hosted AI voice agent integrating with AppFolio, Yardi, Buildium, Casavi, Domus, Aareon, Wodis). ServiceNow Now Assist embedded in WSD. Emerging category; data-protection posture varies considerably.
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Acta Nova (RUBICON IT)](https://www.rubicon.eu/en/products/acta-nova/) | Vienna, AT (CH-Vertrieb via RUBICON CH) | On-prem + Swiss federal data centre (ISCeco operated) | Per-seat licence + ops | **Dominant CH federal GEVER**: 26,000+ federal employees since August 2021; integrator Atos Switzerland; GENOVA programme investment CHF 142 m per SFAO audit. Also at SBB, VBZ, 900+ Swiss municipalities |
+| [Fabasoft eGov-Suite](https://www.fabasoft.com/en/on-egov/egov-suite) | Linz, AT | Fabasoft PROCECO Cloud (CH/DE/AT regions) | Per-seat | DE "E-Akte Bund" rollout in 200+ federal authorities since 2017 contract; AT ELAK since 2004; CH variant supports GEVER; ISO 27001, BSI C5, first-global EU Cloud Code of Conduct Level 3 (2021) |
+| [OneGov GEVER (Fabasoft 4teamwork)](https://www.fabasoft.com/en/on-proceco/onegov-gever) | Bern, CH (4teamwork — part of Fabasoft Group since 2022) | Fabasoft PROCECO Cloud (Swiss data location) | Per-seat | "swiss made software"; deployed in Cantons Aargau, St. Gallen, Zug + many municipalities; cloud-native rebuild on PROCECO ecosystem launched 2024 |
+| [CMI Konsul](https://www.cmiag.ch) | Zug, CH (CMI AG) | On-prem + CH cloud | Per-seat | Swiss-cantonal GEVER + Schul-CMI; predecessor to Acta Nova in some federal offices |
+| [Axioma (Glaux Soft)](https://www.glauxsoft.com) | Bern, CH | On-prem / CH cloud | Per-seat | Swiss-domiciled records & workflow product line |
+| [iLM (KS-Software / Kanzleisoft)](https://www.ks-software.ch) | CH | On-prem / cloud | Per-seat | Swiss municipal/Kanton dossier mgmt |
+| [d.velop documents (d.3ecm)](https://www.d-velop.com) | Gescher, DE | On-prem + d.velop cloud | Per-user | DE ECM mid-market leader |
+| [DocuWare](https://www.docuware.com) | Germering, DE (acq. by Ricoh 2019) | Cloud + on-prem | Per-user / per-document | DACH-strong DMS in SME/Hausverwaltung |
+| [ELO ECM](https://www.elo.com) | Stuttgart, DE | On-prem + ELO Business Cloud | Per-user | DACH ECM; KGSt and IVV references |
+| [OpenText Content Suite / Extended ECM](https://www.opentext.com) | Waterloo, CA | On-prem + OpenText Cloud | Per-user | Enterprise ECM; SAP-integrated archive |
+| [M-Files](https://www.m-files.com) | Tampere, FI | Cloud + on-prem | Per-user | Metadata-driven DMS |
+| [nscale (Ceyoniq → Kyocera)](https://www.kyocera.com/de) | Bielefeld, DE | On-prem | Per-user | German public-sector ECM |
+| [Aareon Archiv kompakt / DMS](https://www.aareon.com) | Mainz, DE | Cloud | Bundled with Aareon ERP | DMS bundled with Aareon RELion/Wodis |
+| [SharePoint Online (Microsoft 365)](https://www.microsoft.com/microsoft-365) | Redmond, US (CH residency available via Swiss DCs) | Microsoft Cloud (CH/EU) | Per-user M365 | Federal alignment depends on tenant-residency configuration |
 
-**Taxonomy note.** "AI tenant copilots" is a horizontal *layer*, not a standalone vendor category — virtually every Segment B, F, G product is bolting on the same primitives (RAG over tenant docs, LLM-routed ticket triage, voice agents on top of CRMs). Reading this segment in isolation will overstate its standalone vendor depth.
+**Maturity.** Mature in CH at federal level (Acta Nova is the standard since August 2021, operated by ISCeco); consolidating in cantons (Fabasoft OneGov GEVER displacing legacy CMI and home-grown solutions); mature in DE at federal level (E-Akte Bund on Fabasoft eGov-Suite).
+
+**Swiss-context note.** The CH federal GEVER market is effectively a single-product standard: **Acta Nova / RUBICON IT** operated by Atos Switzerland and the federal ISCeco operations centre. Any BBL-internal documentation should consistently cite RUBICON IT GmbH (Vienna) as the manufacturer, with Atos as integrator, and ISCeco as operator — and should correct any prior attribution to "Glaux Soft", which produces the unrelated Axioma line. Cantonal GEVER is more fragmented but dominated by Fabasoft OneGov GEVER (4teamwork) and CMI Konsul.
+
+**Taxonomy note.** Overlaps with Segment R (sovereign hosting) — Acta Nova on ISCeco federal-internal infrastructure; Fabasoft PROCECO Cloud has Swiss-hosted instances. Overlaps with Segment BB (workflow automation) at the BPMN engine layer.
+
+### K. AI Tenant Copilots / Conversational Service
+
+**Definition.** AI-powered conversational interfaces (voice and chat agents, RAG-based knowledge assistants) deployed in tenant-service flows: Schadensmeldung triage, FAQ on lease terms, payment-question handling, appointment booking for technicians, and Versammlung-summary generation. Distinct from generic LLMs by their PM-vertical training data and PM-ERP/CAFM integration.
+
+**Persona.** Tenant-service contact centres of large landlords; Hausverwaltungen automating Tier-1 inbound. For BBL, the relevant use is multilingual (DE/FR/IT/EN/RM) federal-quality tenant service over a sovereign LLM stack.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Parloa](https://www.parloa.com) | Berlin, DE (offices Munich, NY, San Francisco) | Cloud (DE/EU) | Enterprise quote | "Agent Management Platform"; €310 m Series D January 2026 at $3 b valuation (EU-Startups); employing **more than 380 people at time of Series D close (January 2026)** per Silicon Republic, with publicly stated plan to grow headcount to 600 by end of 2026; ISO 27001 / SOC 2 / GDPR / HIPAA / DORA; customers incl. Swiss Life, Allianz, SAP, Booking.com, TeamViewer |
+| [Cognigy](https://www.cognigy.com) | Düsseldorf, DE | Cloud (DE/EU) | Enterprise quote | **Acquired by NICE end of 2025** per Startup-in-Europe (Jan 2026); enterprise conversational AI; agentic-AI platform |
+| [PolyAI](https://poly.ai) | London, UK | Cloud (UK/EU/US) | Per-minute | Voice-first enterprise; €73.2 m Series D 2025 |
+| [moin AI](https://www.moin.ai) | Hamburg, DE | Cloud (DE) | Subscription | DE customer-service chatbot |
+| [Synthflow](https://synthflow.ai) | Berlin, DE | Cloud | Per-minute | Voice agent platform |
+| [Vapi](https://vapi.ai) | San Francisco, US (Y Combinator) | Cloud | Per-minute | Developer voice-agent infra |
+| [Bland](https://www.bland.ai) | San Francisco, US | Cloud | Per-minute | Voice agent infra |
+| [Aareon CRM-Portal AI / Allthings AI](https://www.aareon.com) | Mainz, DE | Cloud | Bundled with Aareon ERP | Tenant CRM with embedded chat; Aareon's TPG-CDPQ ownership since closing in H2 2024 (transaction enterprise value €3.9 b per TPG press release of 24 June 2024) |
+| [casavi smartflows](https://casavi.com/en) | Munich, DE (Aareon subsidiary) | Cloud (DE) | Add-on subscription | Workflow automation with LLM triage; integrated with Hausverwalter-Software |
+| [Knock](https://www.knockcrm.com) | Seattle, US | Cloud (US) | Per-unit | US multifamily lead-management AI |
+| [RentDynamics](https://rentdynamics.com) | Lehi, US | Cloud (US) | Per-unit | US multifamily contact-centre AI |
+| [Lobby](https://www.lobby.io) | UK | Cloud | Subscription | UK BTR resident assistant |
+| [Famulor](https://famulor.io) | EU | Cloud | Per-minute | EU voice-agent for property/SME |
+| [AskHive.ai](https://www.askhive.ai) | UK | Cloud | Subscription | UK property voice agents |
+| [Renty](https://renty.ai) | DE | Cloud (DE) | Subscription | German Hausverwaltung AI |
+| [Lassie](https://lassie.com) | Stockholm, SE | Cloud (EU) | Per-property | Nordic property assistant |
+| [Microsoft Copilot for M365](https://www.microsoft.com/microsoft-365/copilot) | Redmond, US (Swiss region available) | Microsoft Cloud (CH/EU) | M365 add-on per-user | Federal-relevant if M365 tenant is in CH regions |
+| [Anthropic Claude via Swisscom Sovereign Cloud](https://trustservices.swisscom.com) | San Francisco, US (Anthropic) hosted in Swisscom CH DCs | Swisscom Sovereign Swiss AI Platform (CH) | Per-token; Swisscom packaging | Swiss-hosted enterprise LLM access |
+| [Apertus (Swiss AI Initiative)](https://www.swiss-ai.org/apertus) | EPFL Lausanne + ETH Zurich + CSCS Lugano | CSCS "Alps" supercomputer + Swisscom Sovereign Swiss AI Platform | Open-source (Apache 2.0); compute paid | **Switzerland's first large-scale, open, multilingual LLM, released 2 September 2025; 8 B and 70 B parameters; trained on 15 trillion tokens covering 1,000+ languages incl. Swiss German and Romansh; ~40 % non-English data (ETH Zurich press release)** |
+| [BärnBot (Stadt Bern Chatbot)](https://www.bern.ch) | Bern, CH (city admin) | Cloud (CH) | City budget | Reference e-gov chatbot in CH |
+| [Lina (Stadt Zürich Chatbot)](https://www.stadt-zuerich.ch) | Zurich, CH | Cloud (CH) | City budget | Zurich city chatbot reference |
+| [Swisscom Conversational AI](https://www.swisscom.ch) | Bern, CH | Swisscom Cloud (CH) | Enterprise quote | Genesys-integrated voice AI |
+
+**Maturity.** Emerging-to-consolidating. The Parloa Series D (€310 m, January 2026) and Cognigy/NICE acquisition (end 2025) are the structural consolidation events on the European enterprise voice-agent side. Apertus (Sept 2025) is structurally significant for federal/sovereign use: it is the first open-weight LLM trained on Swiss German and Romansh.
+
+**Swiss-context note.** A federal tenant copilot in CH faces three stacked data-protection regimes: GDPR (revFADP-aligned), the revised Swiss FADP itself (in force 1 September 2023), and the federal ISG / IG-Klassifizierung up to VERTRAULICH. The deployable options that satisfy all three are: (a) Apertus on Swisscom Sovereign Swiss AI Platform, (b) Apertus self-hosted on CH-region IaaS (Aspectra, Green.ch), or (c) Claude/GPT-4 under Microsoft Azure Switzerland or Swisscom data-residency contracts with explicit DPA. Joshua Tan (Lead Maintainer, Public AI Inference Utility, September 2025) described Apertus as "currently the leading public AI model: a model built by public institutions, for the public interest."
+
+**Taxonomy note.** Overlaps with Segment G (Schadensmeldung) at the inbound-triage step, with Segment F (tenant experience) at the embedded chat layer, and with Segment AA (OSS) at the Apertus model layer. "AI tenant copilots" is also a horizontal *layer*, not a standalone vendor category — virtually every Segment B, F, G product is bolting on the same primitives (RAG over tenant docs, LLM-routed ticket triage, voice agents on top of CRMs), so reading this segment in isolation will overstate its standalone vendor depth.
 
 ### L. Smart-building IoT / digital twin
 
@@ -589,9 +645,48 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 
 **Swiss-context note.** Directly relevant to VILB Art. 9 reporting and EPBD 2024/1275 disclosures. The DE-only submetering majors (Techem, ista, Brunata, Minol) are widely deployed in CH but NeoVac is the closest CH-domiciled alternative — relevant where data-residency is a procurement filter.
 
-### O. Listing & onboarding portals
+### O. Listing & Onboarding Portals
 
-[homegate.ch](https://www.homegate.ch/), [ImmoScout24.ch](https://www.immoscout24.ch/), [flatfox.ch](https://flatfox.ch/), [ImmoScout24.de](https://www.immoscout24.de/), [Immowelt](https://www.immowelt.de/), [Wunderflats](https://wunderflats.com/). Typically feed PM ERPs via standardised feeds.
+**Definition.** Public-facing real-estate listing marketplaces (Mietangebote, Verkaufsobjekte, gewerbliche Flächen) where lease/sale relationships originate, plus federal/cantonal public listing platforms. Distinct from Segment AC (KYC) which begins after the contact request, and from Segment F (resident portal) which serves the post-signature tenant.
+
+**Persona.** Property managers and landlords listing inventory; tenants and buyers searching; federal authorities (BBL, BImA) listing surplus or fürsorge-allocated stock.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [ImmoScout24.ch](https://www.immoscout24.ch) | Zurich, CH (SMG Swiss Marketplace Group) | Cloud (CH) | Per-listing + premium options | CH market leader by traffic: 3.27 m monthly visits (SemRush, March 2026) |
+| [Homegate.ch](https://www.homegate.ch) | Zurich, CH (SMG) | Cloud (CH) | Per-listing | 2.6 m monthly visits Mar 2026; controversy over MieterPlus subscription (CHF 39.95 with 3-month minimum, per OnlineMarketplaces Mar 2024) |
+| [Flatfox.ch](https://www.flatfox.ch) | Zurich, CH (SMG) | Cloud (CH) | Free listing + paid add-ons | 1.65 m monthly visits; chat-first UX; popular for free landlord listing |
+| [Comparis Immobilien](https://en.comparis.ch) | Zurich, CH | Cloud (CH) | Aggregator | 2.79 m monthly visits; aggregates other portals |
+| [Newhome.ch](https://www.newhome.ch) | Zurich, CH (cantonal-bank consortium) | Cloud (CH) | Per-listing | 1.23 m monthly visits; cantonal-bank-owned |
+| [RealAdvisor](https://realadvisor.ch) | Zurich/Geneva, CH | Cloud (CH) | Lead-gen for agents | AVM-driven valuation + agent matching |
+| [ImmoStreet.ch / Acheter-Louer.ch / Anibis.ch / Pomona.ch](https://swissmarketplace.group/portfolio/real-estate/) | CH (SMG portfolio) | Cloud (CH) | Per-listing | SMG-portfolio long-tail CH portals |
+| [ImmoScout24.de](https://www.immobilienscout24.de) | Berlin, DE (Scout24 SE) | Cloud (DE) | Per-listing + premium | DE market leader |
+| [Immowelt](https://www.immowelt.de) | Nuremberg, DE (Axel Springer / Aviv) | Cloud (DE) | Per-listing | DE #2 |
+| [Immonet](https://www.immonet.de) | Hamburg, DE (Axel Springer) | Cloud (DE) | Per-listing | DE #3, merged ops with Immowelt |
+| [Wunderflats](https://wunderflats.com) | Berlin, DE | Cloud (DE) | Commission | Mid-term/corporate furnished housing |
+| [Homelike](https://www.thehomelike.com) | Cologne, DE | Cloud (DE) | Commission | Corporate-housing platform |
+| [Spotahome](https://www.spotahome.com) | Madrid, ES | Cloud (EU) | Commission | Mid-term rentals, video-verified |
+| [willhaben Immobilien](https://www.willhaben.at) | Vienna, AT | Cloud (AT) | Per-listing | AT classifieds market leader |
+| [ImmoScout24.at](https://www.immobilienscout24.at) | Vienna, AT | Cloud (AT) | Per-listing | AT real-estate leader |
+| [Zillow](https://www.zillow.com) | Seattle, US | Cloud (US) | Premier Agent / lead | US market leader |
+| [Rightmove](https://www.rightmove.co.uk) | London, UK | Cloud (UK) | Agent subscription | UK leader |
+| [Zoopla](https://www.zoopla.co.uk) | London, UK | Cloud (UK) | Agent subscription | UK #2 |
+| [Idealista](https://www.idealista.com) | Madrid, ES | Cloud (EU) | Per-listing | ES/PT/IT leader |
+| [CBRE Deal Flow](https://www.cbre.com) | Dallas, US | Cloud | Bundled with CBRE services | Commercial transaction platform |
+| [JLL OfficeFinder](https://www.us.jll.com) | Chicago, US | Cloud | Bundled | Commercial leasing |
+| [LoopNet (CoStar)](https://www.loopnet.com) | Washington, US | Cloud (US) | Subscription | US commercial leader |
+| [Crexi](https://www.crexi.com) | Los Angeles, US | Cloud (US) | Subscription | US commercial #2 |
+| [Realla (CoStar UK)](https://www.realla.co.uk) | London, UK | Cloud | Subscription | UK commercial |
+| [savills.com](https://www.savills.com) | London, UK | Cloud | Free property search | Global broker portal |
+| [simap.ch](https://www.simap.ch) | Bern, CH (federal/cantonal) | Federal cloud (CH) | Free public access | **Swiss federal/cantonal procurement portal where BBL itself publishes tender notices** |
+| [meine BImA](https://meine-bima.bundesimmobilien.de) | Bonn, DE (BImA) | Federal DE infrastructure | Free | **BImA Geschäftsbereich Wohnen tenant-facing self-service portal — relaunched 13 March 2024 with simplified login**; covers Wohnungsfürsorge des Bundes |
+| [Immobilienportal der BImA](https://immobilienportal.bundesimmobilien.de) | Bonn, DE (BImA) | Federal DE | Free public | BImA's full portfolio: Wohn-, Gewerbe-, Land- & Forst-, Wohnungsfürsorge |
+
+**Maturity.** Mature/consolidating: SMG Swiss Marketplace Group (Ringier + TX Group + La Mobilière + General Atlantic) operates ImmoScout24.ch + Homegate + Flatfox + ImmoStreet + Acheter-Louer + Anibis + Tutti + others, giving SMG approximately 75 % combined CH real-estate listings market share (per OnlineMarketplaces analysis); SMG IPO on SIX Swiss Exchange is publicly planned; SMG also acquired Swiss operations of immoverkauf24 in 2025. Scout24 SE dominates DE; Axel Springer's Aviv group consolidates Immowelt+Immonet+CASA in EU.
+
+**Swiss-context note.** Federal-listing reality is split: BBL surplus disposals run via Bundesimmobilien-Auktionen and tender notices on simap.ch; civilian residential transactions of federal interest typically still go to homegate.ch / ImmoScout24.ch. The federal BImA portal in Germany — meine BImA — sets a useful reference for what a "federal tenant self-service portal" looks like in DACH practice. Switzerland has no direct equivalent; the closest is the Swiss Federal Housing Office (BWO) infrastructure and individual bundeseigene-Liegenschaften pages.
+
+**Taxonomy note.** Upstream of Segment AC (KYC/Bonität triggers at first contact request) and of Segment F (tenant experience, where contract life starts). Overlaps with Segment AD at the Mietkaution-marketplace level (homegate.ch's integration of CreditTrust certificates and of SwissCaution Provisional Certificate).
 
 ### P. Public-sector / federal tenant systems (benchmarks)
 
