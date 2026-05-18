@@ -41,7 +41,13 @@
       "Bash(docling --output \"docs/BBL Requierements/intermediate\" --image-export-mode placeholder --no-abort-on-error \"docs/BBL Requierements/W010 Architekturprinzipien.pdf\")",
       "Bash(wc -l \"c:\\\\Users\\\\DavidRasner\\\\Downloads\\\\compass_artifact_wf-4476871e-8225-4134-96ff-aefcaddb39a0_text_markdown.md\")",
       "Read(//c/Users/DavidRasner/Downloads/**)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(cd \"C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub\\\\workspace-management\" && ls -la)",
+      "Read(//c/Users/DavidRasner/Documents/GitHub/workspace-management/**)",
+      "Bash(cd \"C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub\\\\property-inventory\" && ls -la)",
+      "Read(//c/Users/DavidRasner/Documents/GitHub/property-inventory/**)",
+      "Bash(grep -E \"^\\\\.\\\\w+.*\\\\{|^\\\\..*--\" css/style.css)",
+      "Bash(xargs basename -a)"
     ]
   }
 }
