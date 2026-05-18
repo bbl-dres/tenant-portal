@@ -40,7 +40,8 @@
       "Bash(cp \"C:/Users/DavidRasner/.claude/projects/c--Users-DavidRasner-Documents-GitHub-tenant-portal/677da628-02a3-4078-9a07-c28d76e67c09/tool-results/webfetch-1779112665053-m1932y.pdf\" \"docs/BBL Requierements/W010 Architekturprinzipien.pdf\")",
       "Bash(docling --output \"docs/BBL Requierements/intermediate\" --image-export-mode placeholder --no-abort-on-error \"docs/BBL Requierements/W010 Architekturprinzipien.pdf\")",
       "Bash(wc -l \"c:\\\\Users\\\\DavidRasner\\\\Downloads\\\\compass_artifact_wf-4476871e-8225-4134-96ff-aefcaddb39a0_text_markdown.md\")",
-      "Read(//c/Users/DavidRasner/Downloads/**)"
+      "Read(//c/Users/DavidRasner/Downloads/**)",
+      "Bash(git rm *)"
     ]
   }
 }

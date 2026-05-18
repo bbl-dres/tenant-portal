@@ -79,6 +79,11 @@ mindmap
 | Z | ESG portfolio-data platforms | Portfolio-level VILB / EPBD / CSRD / GRESB reporting beyond submetering (Deepki, Measurabl, Optera, Carbonsight, ENGIE Impact, Spacewell Energy, Sustain.life, Schneider Resource Advisor, Sweep, BuildingMinds). |
 | AA | OSS / civic-tech alternatives | EMBAG-Art.-9-aligned open-source options (Odoo, ERPNext, Tryton, Keycloak, Zammad, Mattermost, GeoNode, BIMserver, Hugging Face document-AI, civic-tech.ch). |
 | BB | Workflow automation & low-code business logic | Generic process-orchestration / form-driven business logic — **build-with-already-licensed-primitives alternative** to vertical tenant-portal SaaS (Power Automate, Power Apps, SAP Build Process Automation, SAP Build Apps, n8n, Camunda, Activepieces, Make, Zapier, Bonita, ProcessMaker, Pega, Appian, OutSystems, Mendix, ServiceNow Flow Designer). |
+| AC | Tenant onboarding, KYC, credit-screening & Bonität | Swiss bureaus (CRIF, Intrum, CreditTrust JV, moneyhouse, Bisnode), DE/AT bureaus (SCHUFA, KSV1870, Creditreform), IDV (PXL Vision, KYC Spider, IDnow, WebID, Onfido/Entrust, Veriff, Sumsub, Klippa), tenant screening (Goodlord, HomeLet, Canopy, Experian RentBureau, RentSpree, TransUnion SmartMove, Naborly). |
+| AD | Deposit, rental-guarantee & tenant insurance tech | CH duopoly+ (SwissCaution, Firstcaution, goCaution, SmartCaution; insurer arms Helvetia/AXA/Zurich); DE (Eurokaution, Deutsche Kautionskasse, plusForta/Aareal, Cosmos Direkt); UK (Flatfair, Reposit, Zero Deposit, Insurami); app-native tenant insurtech (Getsafe, Friday/Allianz Direct, Adam Riese, Canopy). |
+| AE | Tenant communication, resident voting & WEG-Versammlung tech | BSI-certified voting (POLYAS); WEG/STWEG Versammlung (vote.io, OASIS Voting, Vote@Home, casavi WEG-Modul, etg24, iDWELL); resident comms (Civey, ImmoSocial, Wohnglück, Quartier Schweiz); US HOA/voting (Building Engines, HOA Express, AppFolio voting, RentCafe Resident). |
+| AF | Mobility & EV-charging tenant services | CH CPO/EMSP networks (Energie 360°/Swisscharge/GOFAST/Move group, Shell Recharge/evpass, Juice Technology, Park-it); DACH CPO OS (chargecloud, reev, has·to·be/ChargePoint, GP JOULE Connect, &Charge); pan-EU & US (ChargePoint, eMabler, ENGIE Vianeo, Allego, Mer, EVgo, Wallbox, Pod Point, Driivz, GreenFlux); parking (Parquery, ParkingPay). |
+| AG | Building automation / GA-Leitsystem (OT layer beneath L) | DACH BMS supervisors (Sauter, Saia-Burgess Controls/Honeywell, Siemens Desigo CC, Honeywell EBI / Niagara Tridium, Schneider EcoStruxure Building, Beckhoff TwinCAT, Wago, Kieback&Peter, Caverion); global (Johnson Controls Metasys, Trane Tracer SC+, ABB Cylon, Distech, Iconics); Belimo Cloud. |
 
 ## 4. Summary
 
@@ -92,11 +97,16 @@ mindmap
 
 | Date | Event | Implication |
 |---|---|---|
+| Jan 2013 | **Honeywell acquires Saia-Burgess Controls** (Murten, CH) from Johnson Electric for $130 m. | Consolidates a Swiss-domiciled GA-Leitsystem leader (Segment AG) under a US BMS major; SBC widely deployed in CH infrastructure (SBB, VBZ). |
+| 2018 | **CRIF + Intrum launch CreditTrust JV** (Zurich, CH); blockchain-anchored Bonitätszertifikat. | Establishes the dominant digital alternative to the paper Betreibungsregister-Auszug in Swiss residential applications; embedded into homegate.ch / ImmoScout24.ch flows (Segment AC). |
+| Feb 2019 | **Aareal Bank Group acquires plusForta GmbH** (kautionsfrei.de / heysafe.de / kautionsfuchs.de). | Direct corporate-family link between the DE deposit-substitution market and PM-software giant Aareon (Segment AD). |
+| 2021 | **ChargePoint acquires has·to·be** (Klagenfurt, AT) for ~$295 m. | Consolidates DACH flagship CPO software (be.ENERGISED) into ChargePoint Platform (Segment AF). |
 | Aug 2021 | iOFFICE + SpaceIQ merge under Thoma Bravo / JMI Equity / Waud Capital. | Pre-Eptura step. |
 | Oct 2021 | HqO acquires Office App (NL). Per HqO press release (GlobeNewswire, 19 Oct 2021): "The new combined entity is valued at over half a billion dollars, making it one of the most significant proptech companies in the world." | European expansion of US tenant-experience leader. |
 | Oct 2021 | VTS acquires Lane. | VTS gains workplace footprint. |
 | Jan 2022 | Condeco acquires Proxyclick. | Visitor management folded into Condeco. |
 | Jan 2022 | Aareon acquires 100% of Arthur Online (UK). | Entry into UK SMB property-management. |
+| 2022 | **Aareon acquires casavi** (Munich, DE). | Brings WEG/STWEG voting module, smartflows and tenant portal under Aareon (Segments AE, F, K). |
 | Jun 2022 | Aareon (via Mary BidCo AB) acquires approximately 93% (later 100%) of Momentum Software Group (Sweden). Per Aareon/Goldcup press release (Cision, 20 Jun 2022): "approximately 93 per cent of the shares and votes in Momentum, at a price of SEK 108 per share, valuing Momentum… at approximately SEK 1,797 million." | Nordic property-management consolidation. |
 | Oct 2022 | Condeco + iOFFICE + SpaceIQ merge to form **Eptura** (Atlanta HQ; CEO Brandon Holden; Paul Statham joins the board). Investors: Thoma Bravo, JMI Equity. | Portfolio: Archibus, Condeco, Hippo CMMS, iOffice, ManagerPlus, Proxyclick, Serraview, SpaceIQ, Teem. |
 | Nov 2022 | AWS opens `eu-central-2` (Zurich) with 3 AZs. Per AWS press release (BusinessWire, 8 Nov 2022): "AWS is planning to invest an estimated $5.9 billion (approx. 5.9 billion Swiss francs) in Switzerland during the next 15 years." | Swiss data-residency option for portals. |
@@ -107,16 +117,24 @@ mindmap
 | 2 Oct 2023 | "Planon Real Estate Management for SAP S/4HANA" achieves SAP Endorsed App status. | Premium-certified via SAP Store. |
 | Mar 2024 | Tango Analytics acquires **Locatee** (Zurich); Zurich becomes Tango's European HQ. | Sensor-free occupancy analytics joins IWMS suite. |
 | 13 Mar 2024 | BImA migrates Wohnungsfürsorge access into **"meine BImA"** portal. | Federal German tenant-portal modernisation reference. |
+| Apr 2024 | **Entrust acquires Onfido** (London). | Most material 2024–2026 structural event in the IDV/KYC market; reshapes Segment AC consolidation. |
 | 1 May 2024 | armasuisse re-launches Immo-Portal VBS; role-based structure (Nutzer / Mieter / Eigentümervertreter / Betreiber / IKT / Departementsebene). | Swiss federal peer benchmark codified. |
 | 24 Jun 2024 | Aareal Bank + Advent International sign agreement to sell **Aareon to TPG (majority) and CDPQ (minority co-investor)** at EV ~€3.9 bn; closing H2 2024; Advent retains minority. | Aareon becomes independent. |
+| Oct 2024 | **Allianz Direct acquires Friday's portfolio from Baloise** (Handelsblatt, Oct 2024); Friday brand wound down. | Consolidates DACH digital-Hausrat tenant-insurance market (Segment AD). |
 | Jan 2025 | Verdantix Green Quadrant CPIP/IWMS 2025: 8 Leaders — Planon (highest performer), IBM, Eptura, MRI, Tango, Johnson Controls, Spacewell, Nuvolo. | Reference benchmark. |
 | Feb 2025 | IDC MarketScape: Worldwide SaaS and Cloud-Enabled Facility Management Applications 2024–2025 (Doc # US52038324, Brian O'Rourke). Publicly disclosed Leaders include Planon, ServiceNow, Eptura. | Public-domain confirmation of leadership. |
 | 26 Mar 2025 | FCR Immobilien acquires Immoware24 (Halle, DE). | DACH residential PM, independent of Aareon, changes hands. |
 | Jun 2025 | MRI Software acquires **Anacle** (Singapore). | APAC expansion. |
+| Jul 2025 | **Energie 360° acquires Move** (CH); group combines Swisscharge + GOFAST + Move into the largest CH charging network (24,000+ points, 250,000 users; zero roaming from 1 Nov 2025; CHF 200 m investment programme to 2030). | Consolidates CH CPO market to 3–4 dominant groups (Segment AF). |
+| 2 Sep 2025 | **Apertus released** by Swiss AI Initiative (EPFL + ETH Zurich + CSCS Lugano): 8 B and 70 B parameter open-source LLM, 15 T tokens across 1,000+ languages incl. Swiss German and Romansh, ~40 % non-English data. | Switzerland's first large-scale open multilingual LLM — structurally enables sovereign AI tenant copilots (Segment K). |
 | Sep 2025 | Reuters reports MRI's PE owners (TA Associates, GI Partners, Harvest Partners) exploring sale/IPO at up to USD 10 bn valuation. | Speculative; not yet executed. |
 | Oct 2025 | MRI Software acquires **Proptech Labs** (Melbourne). | ANZ consolidation. |
+| 13 Nov 2025 | ChargePoint launches AI optimisation engine across its Platform. | Cross-vendor charging-network AI primitive (Segment AF). |
 | Nov 2025 | Aareon acquires **Apsiyon** (Turkey). | Eastern Europe / Turkey expansion. |
+| end 2025 | **NICE acquires Cognigy** (Düsseldorf, DE) per Startup-in-Europe (Jan 2026). | European enterprise voice-agent consolidation (Segment K). |
 | 14 Jan 2026 | AWS European Sovereign Cloud (`aws-eusc`, first region `eusc-de-east-1` Brandenburg, DE) GA. €7.8 bn investment; EU-resident personnel and operations. | Sovereign-cloud reference for EU public sector; not in Switzerland. |
+| Jan 2026 | **Parloa €310 m Series D** at $3 b valuation (Berlin, DE); plan to grow from 380 to 600 staff by end of 2026. | Largest European enterprise-voice-AI raise to date; structural consolidation event for Segment K. |
+| 11 Feb 2026 | ChargePoint announces ~1.275 M total ports accessible (~900,000 roaming + ~375,000 directly managed). | Scale benchmark for global CPO platforms (Segment AF). |
 | 6 Apr 2026 | **Inaugural Gartner Magic Quadrant for Workplace Experience Applications** (analysts Sohail Majumdar, Christopher Trueman). 12 vendors. Eptura, Robin and Appspace publicly positioned as Leaders. | First Gartner MQ defining "WEX". |
 | 1 Dec 2026 (planned) | Swiss federal e-ID launches; usable as login factor in AGOV. | Will shape Swiss tenant-portal identity from 2027. |
 
@@ -224,6 +242,10 @@ mindmap
 
 ### C. Desk / room booking specialists
 
+**Definition.** Pure-play desk, room, parking and resource scheduling tools — narrower in scope than IWMS (Segment A) and Workplace Experience (Segment B), but often integrated into them. Differentiator: ease of M365 / Google calendar integration, mobile-first UX, transparent self-serve pricing.
+
+**Persona.** Workplace / IT teams of organisations adopting hybrid work; tenant departments inside federal buildings who need desk reservations without a full IWMS commitment.
+
 | Product | HQ / country | Hosting | Pricing | Integrations | Notable feature |
 |---|---|---|---|---|---|
 | [Robin](https://robinpowered.com/) | Boston, USA | SaaS | Public tiers | Microsoft 365, Google, Slack | Workplace + booking |
@@ -256,6 +278,10 @@ mindmap
 **Maturity.** Mature. deskbird is the Swiss-domiciled vendor of note.
 
 ### D. Visitor management & mobile access
+
+**Definition.** Front-desk visitor pre-registration and physical access-control software, often deployed in workplace settings. Combines two distinct buyer personas (visitor management vs. mobile credentials / smart locks) — separated by procurement reality, listed together by deployment proximity.
+
+**Persona.** HR / admin (visitor side) plus facilities / security (access control); for BBL, tenant agencies running their own visitor flows on top of a federal building's access infrastructure.
 
 | Product | HQ | Pricing | Notable feature |
 |---|---|---|---|
@@ -294,6 +320,10 @@ mindmap
 
 ### E. Property-management ERP with embedded tenant portal
 
+**Definition.** Vertical ERP suites for residential and mixed-use property management (rent ledgers, lease lifecycle, service-charge billing, contractor dispatch) with a tenant self-service portal as a first-class module — distinct from horizontal CAFM (Y) and global IWMS (A) by their DACH-housing-statute (Mietrecht, WEG, BetrKV) accounting and DE/CH banking integration.
+
+**Persona.** Hausverwaltungen, institutional landlords (federal / cantonal / communal / cooperative), residential property-management firms. For BBL, the tenant portal embedded in an ERP is the alternative to building a custom Fiori frontend on SAP RE-FX (Segment Q).
+
 | Product | HQ | Hosting | Pricing | SAP / AGOV | Notable feature |
 |---|---|---|---|---|---|
 | [Aareon Wodis Yuneo](https://www.aareon.de/Wodis-Yuneo.970622.html) | Mainz, DE | Cloud SaaS | Per administered unit | Aareon Connect; Blue Eagle for SAP customers | DE housing market leader |
@@ -319,6 +349,11 @@ mindmap
 | [Tayo](https://www.tayo.ch/) | Lausanne, CH | Cloud (CH) | Per unit | Open API; banking | **Swiss-domiciled** tenant-portal SaaS; Abacus CHF 1.5 m minority stake since 2021 (also referenced under Abacus row) |
 | [Arthur Online](https://www.arthuronline.co.uk/) | London, UK (Aareon) | SaaS | Per unit | Aareon ecosystem | UK SMB property |
 | [Momentum (Aareon)](https://www.momentum.se/) | Stockholm, SE (Aareon) | SaaS | Per unit | Nordic banking | Aareon Nordic platform |
+| [iX-Haus plus](https://www.crem-solutions.de) | Ratingen, DE (CREM Solutions) | Cloud (browser front-end) | Per user | iX-Haus core | Browser front-end above iX-Haus; AI-OCR |
+| [Haufe Real Estate Cloud](https://www.haufe.com) | Freiburg, DE (Haufe Group) | Cloud | Per unit | Open API | SaaS evolution of Haufe-Lexware Real Estate |
+| [Real4M](https://www.real4m.com) | DACH | Cloud | Per unit | Open API | PM SaaS for institutional residential |
+| [Solyp](https://www.solyp.com) | DACH | Cloud | Per unit | Open API | ERP for portfolio property managers |
+| [connectedcare](https://www.connectedcare.de) | DE | Cloud | Per unit | Open API | Specialist for healthcare / senior-housing |
 
 <sub>**Preview — selected vendors** (product screenshots, diagrams or illustrations from vendors' own pages; image-type tag in italics; links go to source pages):</sub>
 
@@ -358,6 +393,10 @@ mindmap
 
 ### F. Residential tenant-experience platforms
 
+**Definition.** Tenant-facing apps and portals deployed *on top of* a PM ERP (Segment E) — usually with their own communication, ticketing and document-vault modules but no rent-accounting core. Distinct from Segment B (WEX) by residential focus and from Segment E by absence of an ERP-grade accounting engine.
+
+**Persona.** Hausverwaltungen and large landlords wanting a tenant-facing modern UX without changing their underlying ERP; tenants needing a single app for damage reports, document downloads and communication.
+
 | Product | HQ | Hosting | Pricing | Notable feature |
 |---|---|---|---|---|
 | [casavi](https://casavi.com/) | Munich, DE | Cloud SaaS (GDPR) | Per unit; modular | >1,600 customers in DACH; Aareon Connect (Sigma, Yuneo), DOMUS, ImPower |
@@ -372,6 +411,12 @@ mindmap
 | [Yardi RentCafe Resident](https://www.yardi.com/) | Santa Barbara, USA | Cloud | Per unit | Voyager-integrated |
 | [Bilt Rewards](https://www.biltrewards.com/) | New York, USA | Cloud | Free to tenants; landlord fees | Rent-as-loyalty; US-only |
 | [Livly](https://www.livly.io/) | Chicago, USA | Cloud | Per unit | RealPage / Yardi |
+| [emonitor](https://www.emonitor.ch) | Zurich, CH | Cloud (CH) | Per unit | **Swiss-domiciled** residential leasing process platform; popular with CH institutional landlords |
+| [HoldOn](https://www.holdon.ch) | CH | Cloud (CH) | Per unit | Tenant document handover and onboarding |
+| [Liobit](https://www.liobit.de) | DE | Cloud (DE) | Per unit | Tenant-side mobile app |
+| [KIWI.KI](https://kiwi.ki) | Berlin, DE | Cloud + hardware | Per unit + hardware | Keyless access for residential building common doors; widely deployed in DE multifamily |
+| [propster](https://www.propster.com) | Vienna, AT | Cloud | Per unit | Buyer self-customisation portal during construction; bridges to Segment W (BIM/CDE) |
+| [swarm.it](https://swarm.it) | AT | Cloud | Per unit | Resident community + service-marketplace |
 
 <sub>**Preview — selected vendors** (product screenshots / mobile-app UIs from vendors' own pages; links go to source pages):</sub>
 
@@ -402,6 +447,10 @@ mindmap
 
 ### G. Schadensmeldung / repair-ticketing / contractor dispatch
 
+**Definition.** Damage-reporting / repair-ticketing / contractor-dispatch software — distinct from FM CMMS (Y) by tenant-facing intake and from PM ERPs (E) by specialised tradesperson marketplaces. Boundary with Segment K (AI tenant copilots) is increasingly blurry as triage moves to LLM-driven routing.
+
+**Persona.** Hausverwaltungen handling tenant-reported damage; contractor coordinators in large portfolios; tenants reporting issues via app or web.
+
 | Product | HQ | Pricing | Notable feature |
 |---|---|---|---|
 | [Fixflo](https://www.fixflo.com/) | London, UK (Aareon) | Per unit | UK repairs reporting standard |
@@ -412,6 +461,10 @@ mindmap
 | [MaintainX](https://www.getmaintainx.com/) | Raleigh (NC), USA | Per user | Mobile-first CMMS |
 | [UpKeep](https://www.upkeep.com/) | Los Angeles, USA | Per user | Mobile CMMS |
 | [imofix.io](https://imofix.io/) | CH/DE | Per unit | GARAIO REM partner |
+| [Aareon Service Cloud / casavi Mareon-Connect](https://www.aareon.com) | Mainz / Munich, DE | Per unit | Damage workflow inside Aareon ecosystem |
+| [Repairnet](https://www.repairnet.de) | DE | Per unit | DE damage marketplace |
+| [comgest](https://www.comgest.de) | DE | Per unit | Specialist Schadensmanagement |
+| [Kayoom](https://www.kayoom.com) | DE | Per unit | Damage-ticket orchestration |
 
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
 
@@ -434,6 +487,10 @@ mindmap
 
 ### H. Move-in / move-out / inspection
 
+**Definition.** Mobile / tablet apps that capture lease-handover state — photo/video evidence, meter readings, defect lists, signatures — distinct from ongoing facility maintenance (Y) and damage reporting (G).
+
+**Persona.** Property managers conducting Abnahme / Übergabe protocols; tenants signing handover; insurance claims teams relying on prior-state evidence.
+
 | Product | HQ | Notable feature |
 |---|---|---|
 | [W&W Abnahme-App](https://www.wwimmo.ch/) | Affoltern am Albis, CH | Integrated to Rimo R5 / ImmoTop2 |
@@ -442,6 +499,8 @@ mindmap
 | [Inspectify](https://www.inspectify.com/) | Charlotte (NC), USA | Move-in inspections |
 | [Allthings inspection module](https://allthings.me/) | Basel, CH | Native to Allthings tenant app |
 | [HouseView](https://www.houseview.io/) | Various | 3D capture for inspections |
+| [handover.de](https://www.handover.de) | DE | Mobile-first apartment-handover protocols |
+| [Inspizio](https://www.inspizio.ch) | CH | **Swiss-domiciled** handover protocols with photographic evidence |
 
 <sub>**Preview — selected vendor** (product screenshot; link goes to source page):</sub>
 
@@ -455,6 +514,10 @@ mindmap
 </table>
 
 ### I. eSignature & federal identity
+
+**Definition.** QES / AES-compliant electronic-signature platforms and federal identity providers covering ZertES (CH), eIDAS (EU), and AGOV / SwissID / e-ID for the public sector. Distinct from generic e-signature (DocuSign, Adobe Sign) by Swiss federal trust-list eligibility.
+
+**Persona.** Legal / IT teams signing leases, contracts and NDAs at federal / cantonal level; tenant-side users accepting QES-signed contracts; federal / cantonal authorities federating login via AGOV.
 
 | Product | HQ | Notable feature |
 |---|---|---|
@@ -569,6 +632,10 @@ mindmap
 
 ### L. Smart-building IoT / digital twin
 
+**Definition.** Platform layer that aggregates building telemetry (OT data from Segment AG) into a single tenant-facing or owner-facing data product — often a digital twin. Distinct from Segment AG by API-driven REST/MQTT consumption above the BACnet/IP gateway; distinct from Segment N by HVAC / lighting / space focus rather than billing.
+
+**Persona.** Asset-management directorates; tenant-experience teams in commercial portfolios; ESG / sustainability officers consuming twin data for reporting (cross-listed with Segment Z).
+
 | Product | HQ | Notable feature |
 |---|---|---|
 | [Spacewell Cobundu](https://spacewell.com/) | Antwerp, BE | Smart-building IoT in Nemetschek group |
@@ -585,6 +652,10 @@ mindmap
 | [KONE 24/7 Connected Services](https://www.kone.ch/) | Espoo, FI (KONE; CH subsidiary Brüttisellen) | Elevator/escalator predictive-maintenance IoT; deep CH installer presence |
 | [Bosch IoT Suite](https://www.bosch-iotsuite.com/) | Stuttgart, DE | DE-anchored building/asset IoT; FIWARE-compatible |
 | [BuildingMinds](https://buildingminds.com/) | Berlin, DE (Schindler family-backed) | Real-estate data platform / digital twin spanning asset, ESG and tenant data; CRREM, EU Taxonomy and EPBD modules — **cross-listed in Segment Z** |
+| [Akenza](https://akenza.io) | Zurich, CH | **Swiss IoT platform**; LoRaWAN-friendly low-code; sits between Segment AG (OT) and Segment L (twin) for non-HVAC smart-building telemetry |
+| [Locatee → Tango](https://www.tangoanalytics.com) | Zurich, CH (acquired by Tango Analytics 2024) | Workplace-utilisation analytics; CH presence retained; cross-listed in Segment V |
+| [Pricer](https://www.pricer.com) | Stockholm, SE | Electronic shelf labels in workplace contexts |
+| [Smartvatten](https://www.smartvatten.com) | Helsinki, FI | Water-leak monitoring with API to BMS |
 
 <sub>**Preview — selected vendors** (product screenshots / explainer images from vendors' own pages; links go to source pages):</sub>
 
@@ -613,9 +684,33 @@ mindmap
 
 ### M. Lease management & lease accounting
 
-Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://leaseaccelerator.com/); [CoStar Real Estate Manager](https://www.costargroup.com/realestatemanager); [Nakisa](https://www.nakisa.com/); [MRI ProLease](https://www.mrisoftware.com/products/prolease/); [LucernEx (Accruent)](https://www.accruent.com/products/lucernex). Generally finance-facing, distinct from tenant-facing portals; relevant in IFRS 16 contexts. SAP RE-FX (S/4HANA) plus Planon delivers lease accounting plus operational tenant management.
+**Definition.** Finance-facing lease management and accounting software focused on IFRS 16 / ASC 842 / GASB 87 contract objects, lease-liability and right-of-use-asset bookkeeping, and portfolio reporting. Distinct from operational tenant portals (Segments E, F) by its ledger-grade accounting core and from PM ERPs (E) by absence of operational rent-collection / contractor-dispatch modules.
+
+**Persona.** Finance / treasury / FP&A teams under IFRS 16 obligations; corporate occupiers and large landlords reconciling lease obligations into ledger; auditors requesting structured lease abstractions (cross-listed with Segment X).
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Visual Lease](https://visuallease.com/) | Woodbridge (NJ), US | Cloud | Per lease | IFRS 16 / ASC 842 / GASB 87 lease accounting |
+| [LeaseAccelerator](https://leaseaccelerator.com/) | Reston (VA), US | Cloud | Per lease | Enterprise lease accounting + workflow |
+| [CoStar Real Estate Manager](https://www.costargroup.com/realestatemanager) | Washington, US | Cloud | Quote | CoStar-integrated portfolio + lease accounting |
+| [Nakisa Lease Administration](https://www.nakisa.com/) | Montréal, CA | Cloud | Per lease | SAP-certified IFRS 16 / ASC 842 |
+| [MRI ProLease](https://www.mrisoftware.com/products/prolease/) | Solon (OH), US (MRI) | Cloud | Per lease | Within MRI ecosystem; IFRS 16 / ASC 842 |
+| [LucernEx (Accruent)](https://www.accruent.com/products/lucernex) | Austin, US (Accruent) | Cloud | Per lease | Lease admin + accounting; common in US retail / corporate |
+| [UPK Online](https://www.upk-online.ch) | CH | Cloud (CH) | Subscription | Niche Swiss lease-accounting |
+| [SwissProperty](https://www.swissproperty.ch) | CH | Cloud (CH) | Subscription | **Swiss-domiciled** lease / portfolio accounting |
+| [RealFusio](https://www.realfusio.com) | CH / EU | Cloud | Subscription | Real-estate fund accounting |
+
+**Maturity.** Mature; market shaped heavily by IFRS 16 / ASC 842 adoption from 2019 onward.
+
+**Swiss-context note.** Generally finance-facing, distinct from tenant-facing portals; relevant in IFRS 16 / Swiss GAAP FER contexts. SAP RE-FX (S/4HANA) plus Planon delivers lease accounting alongside operational tenant management — for BBL this is the canonical SAP-aligned pattern. UPK Online, SwissProperty and RealFusio are the Swiss-domiciled alternatives.
+
+**Taxonomy note.** Upstream of Segment X (lease abstraction / ingestion) which feeds clean contract data into M; downstream of Segment E for operational rent ledgers; overlaps with Segment Q where Planon RE for SAP S/4HANA bundles lease accounting on S/4HANA.
 
 ### N. Energy & sub-metering tenant transparency
+
+**Definition.** Heat / water / electricity sub-metering and tenant cost-allocation, plus the data infrastructure for VILB Art. 9 Abs. 1bis disclosures and EPBD 2024/1275 zero-emission-buildings reporting. Distinct from Segment AF (EV-charging) by Nebenkosten-accounting focus and from Segment Z by per-meter tenant detail.
+
+**Persona.** Property managers preparing Nebenkostenabrechnung; tenants viewing their own consumption; ESG / sustainability teams aggregating portfolio data; federal landlords reporting under VILB.
 
 | Product | HQ | Notable feature |
 |---|---|---|
@@ -627,6 +722,8 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | [Spacewell Energy (Dexma)](https://spacewell.com/) | Barcelona, ES | AI energy management |
 | [NeoVac](https://www.neovac.ch/) | Oberriet, CH | **Swiss-domiciled** submetering, heat-cost allocation and tenant cost-reporting; deep CH installer network |
 | [Equa Solutions](https://www.equa-solutions.ch/) | Lausanne, CH | **Swiss-domiciled** HVAC controls + sub-metering optimisation |
+| [CSEM Smart Energy](https://www.csem.ch) | Neuchâtel, CH | Research-driven CH smart-grid solutions |
+| [BKW Power Grid](https://www.bkw.ch) | Bern, CH | Utility-grade grid + smart-meter offering relevant to large-portfolio landlords |
 
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
 
@@ -690,6 +787,10 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 
 ### P. Public-sector / federal tenant systems (benchmarks)
 
+**Definition.** Operating-tenant-portal benchmarks at federal / cantonal scale — public-sector reference implementations rather than commercial vendors. Useful for procurement teams wanting to compare BBL's intended scope against DACH peers (BImA, BIG, armasuisse) and international peers (GSA, GPA, Senaatti, Rijksvastgoed, Statsbygg).
+
+**Persona.** Federal IT planning / portfolio strategists benchmarking BBL's tenant portal against peer states' implementations; procurement officers checking what "federal tenant portal" looks like in practice.
+
 | System | Operator / country | Description |
 |---|---|---|
 | ["Mein BImA"](https://meine-bima.bundesimmobilien.de/) | BImA, Bonn, DE | Migrated 13 Mar 2024 from legacy username/password into single "meine BImA" account; Wohnungsfürsorge access, Reparaturservice (365×24×7), Immobilienportal, GESA |
@@ -723,6 +824,10 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 
 ### Q. SAP RE-FX integration patterns and add-ons
 
+**Definition.** SAP-side products, partners and architecture patterns sitting alongside or on top of S/4HANA RE-FX — covering both packaged add-ons (Aareon Blue Eagle, Promos.GT, Goldinmotion) and BTP-native build patterns (custom Fiori on SAP BTP). Distinct from generic iPaaS (Segment S) by SAP-blessed integration patterns and from generic ERP (Segment E) by RE-FX-specific data models.
+
+**Persona.** SAP CoE inside BBL post-SUPERB; partner teams integrating Wodis / RELion / casavi / Immomio / Plentific into SAP RE-FX; architects deciding "buy ISV add-on vs. build on BTP".
+
 | Pattern / product | Vendor | Notes |
 |---|---|---|
 | [Planon RE Management for SAP S/4HANA](https://planonsoftware.com/) | Planon (NL) — SAP-endorsed | Co-engineered on SAP One Domain Model and BTP; Finance/Contract/Lease accounting on S/4HANA; RE management + Space + Workplace + Asset/Maintenance + Energy on Planon |
@@ -751,6 +856,10 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 
 ### R. Sovereign / Swiss-domiciled cloud hosting
 
+**Definition.** Cloud regions and hosting providers offering Swiss or EU data residency, FINMA-grade controls, BSI C5 attestations, or formal sovereign-cloud constructs. Distinct from hyperscaler default regions by their operational sovereignty layer (jurisdictional indemnity, personnel residency, key-management isolation).
+
+**Persona.** Federal / cantonal procurement teams running sovereignty assessments; CISOs validating ISG-compatible hosting; tenant-portal architects placing PII and contract data under Schweizer Datenresidenz.
+
 | Region / vendor | Location | Notes |
 |---|---|---|
 | [Swisscom Sovereign Cloud / Enterprise Cloud](https://www.swisscom.ch/) | CH Tier-4 DCs | SAP-on-demand; Cloud Access to Azure/AWS/Google/Oracle |
@@ -760,24 +869,125 @@ Examples: [Visual Lease](https://visuallease.com/); [LeaseAccelerator](https://l
 | Azure Switzerland North / Switzerland West | Zürich / Geneva | Launched 2019 |
 | Google Cloud `europe-west6` (Zurich) | Zurich | Launched 2019 |
 | AWS European Sovereign Cloud — `aws-eusc` (`eusc-de-east-1`, Brandenburg, DE) | Brandenburg, DE | GA 14 Jan 2026; €7.8 bn investment; EU-resident personnel/operations; NOT in Switzerland |
+| [Green.ch](https://www.green.ch) | Lupfig, CH | Largest Swiss data-centre operator; FINMA-grade |
+| [Equinix Zurich (ZH4 / ZH5)](https://www.equinix.com) | Zurich, CH | Major Swiss colocation campuses |
+| [Aspectra](https://www.aspectra.ch) | Zurich, CH | Swiss managed-hosting and managed-cloud specialist; FINMA-grade |
+| [Hetzner](https://www.hetzner.com) | Gunzenhausen, DE (Falkenstein + Helsinki DCs) | Low-cost EU hyperscaler-alternative |
+| [OVHcloud](https://www.ovhcloud.com) | Roubaix, FR (Strasbourg DC) | FR sovereign-cloud option |
+| [Scaleway](https://www.scaleway.com) | Paris, FR (Iliad) | FR sovereign cloud |
+| [T-Systems Open Telekom Cloud](https://www.t-systems.com) | Bonn, DE | DE sovereign cloud; BSI C5 |
+| [STACKIT](https://www.stackit.de) | Heilbronn, DE (Schwarz Gruppe / Lidl) | DE sovereign-cloud emerging player |
+| [IONOS Cloud](https://cloud.ionos.com) | Karlsruhe, DE | DE sovereign-cloud |
+| [GleSYS](https://glesys.com) | Falkenberg, SE | Nordic sovereign-cloud |
+| [Cleura](https://cleura.com) | Karlskrona, SE | Nordic sovereign-cloud |
 
 **Swiss-context note.** Federal tenant portals must consider both technical region (Switzerland-North / `eu-central-2`) and operational sovereignty layer; AGOV operation itself will move to a mixed federal + private Swiss DC arrangement from 2027.
 
 ### S. iPaaS / integration layer
 
-SAP Integration Suite on BTP; MuleSoft; Workato; Boomi; Frends (FI); Aareon Locoia (DE) — glue between tenant portals, ERPs and SAP S/4HANA RE-FX.
+**Definition.** Integration-Platform-as-a-Service for machine-to-machine data movement between PM ERPs (E), tenant portals (F), SAP RE-FX (Q), identity (I), accounting (T) and CAFM (Y). Distinct from BPM / workflow (Segment BB) by emphasis on data sync rather than human-step orchestration; distinct from custom code by visual flow design and connector marketplaces.
 
-### T. Fintech adjacencies
+**Persona.** SAP CoE / BTP architects; integration architects in tenant-portal projects; SI partners delivering Aareon, casavi, iX-Haus and SAP RE-FX wire-ups.
 
-Bilt Rewards (US); Rentmoola; Flatfair (UK deposit alternatives); GoCardless real-estate (UK; Dec 2025 MRI partnership). Limited DACH relevance for federal-tenant use cases.
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [SAP Integration Suite (BTP)](https://www.sap.com/products/business-technology-platform.html) | Walldorf, DE | SAP BTP (regional, incl. CH where licensed) | Per message | SAP-native; co-deployable with Custom Fiori on BTP (Segment Q) |
+| [MuleSoft (Salesforce)](https://www.mulesoft.com) | San Francisco, US (Salesforce) | Cloud | Per connector + capacity | Anypoint platform; widely used in DACH enterprise |
+| [Workato](https://www.workato.com) | Mountain View, US | Cloud | Per workspace | Enterprise iPaaS (cross-listed in Segment BB) |
+| [Boomi](https://boomi.com) | Conshohocken (PA), US | Cloud | Per connector | iPaaS leader; large connector library |
+| [Frends](https://frends.com) | Tampere, FI | Cloud + on-prem | Per environment | Nordic iPaaS; OSS-friendly options |
+| [Aareon Locoia](https://connect-docs-de.locoia.com/) | Mainz, DE (Aareon) | Cloud (DE) | Per workflow | Glue between Aareon Connect ecosystem: Wodis Yuneo, Sigma, SAP Blue Eagle, Karthago, Immomio, casavi, Plentific, EverReal, Spiri.Bo, dormakaba, KIWI |
+
+**Maturity.** Mature. Strategic role in any post-SUPERB BBL tenant-portal: the question is *whether the SAP-native Integration Suite is sufficient* (for SAP-blessed flows) or whether a third-party iPaaS is needed for non-SAP edges.
+
+**Swiss-context note.** SAP Integration Suite on BTP is the SAP-blessed pattern; Aareon Locoia is the Aareon-blessed pattern within the Aareon Connect ecosystem (relevant if BBL ever federates with Aareon-powered landlords). EMBAG Art. 9 OSS expectations are met more naturally by Frends or by self-hosted n8n (Segment BB) than by commercial iPaaS.
+
+**Taxonomy note.** Overlaps with Segment BB on tooling (workflow automation tools straddle iPaaS); overlaps with Segment Q on patterns (SAP Integration Suite is the SAP expression of S).
+
+### T. Fintech Adjacencies
+
+**Definition.** Rent collection, Mahnwesen, Open-Banking affordability, tenant payment-as-loyalty, and embedded-finance rails layered on top of (or between) PM ERPs and bank accounts. Distinct from Segment AD (deposit insurance) and Segment E (PM ERP-internal accounting).
+
+**Persona.** Treasury/finance teams of large landlords; Hausverwaltungen running Mahnstufen; tenants seeking flexible-payment or loyalty mechanics.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Bexio](https://www.bexio.com) | Rapperswil-Jona, CH (Swisscom subsidiary) | Cloud (CH) | CHF 45/mo Basic to CHF 129/mo Ultimate (Magic Heidi 2026) | **100,000 customers as of 19 February 2026** per bexio AG press release (CEO Markus Naef: "Today we celebrate 100,000 entrepreneurs who are advancing the digitalisation of Switzerland with us") |
+| [Klara](https://www.klara.ch) | Bern, CH (Swisscom-backed) | Cloud (CH) | From CHF 49/mo Business Starter | 30,000+ SMEs; AI receipt scanning; KLARA Buchhaltung integrated |
+| [Banana Buchhaltung](https://www.banana.ch) | Lugano, CH (Banana.ch SA, since 1988) | On-prem + iPad app | CHF 0 Free / CHF 69 Professional / CHF 149 Advanced annual | One-time purchase model; Excel-like UX; 120+ countries |
+| [Abacus AbaNinja / Abacus](https://www.abacus.ch) | Wittenbach-St. Gallen, CH | On-prem + Abacus Cloud | Per-user | CH mid-market ERP+accounting standard |
+| [Intrum AG (Inkasso-Schweiz)](https://www.intrum.ch) | Schwerzenbach, CH | Cloud | Success-fee + per-case | DACH Mahnwesen + Inkasso leader |
+| [CRIF AG Mahnwesen](https://www.crif.ch) | Zurich, CH | Cloud | Per-case | Bonität + Inkasso bundle |
+| [Creditreform Schweiz Inkasso](https://www.creditreform.ch) | St. Gallen, CH | Cloud | Success-fee | Membership-based Inkasso |
+| [EOS Schweiz](https://ch.eos-solutions.com) | Volketswil, CH (Otto Group) | Cloud | Success-fee | DACH-wide Inkasso |
+| [Inkasso Service AG](https://www.inkasso.ch) | Lucerne, CH | Cloud | Success-fee | Swiss Inkasso |
+| [GoCardless](https://gocardless.com) | London, UK | Cloud (EU) | ~1 % + £/€ 0.20 per tx | Direct-debit (SEPA, BACS) for recurring rent |
+| [Stripe Billing / Stripe Connect](https://stripe.com) | Dublin, IE / San Francisco, US | Cloud (EU residency) | ~2.9 % + €0.25 | Embedded payments for property managers |
+| [TrueLayer](https://truelayer.com) | London, UK | Cloud (EU) | Per-API call | Open-Banking PIS for rent payments |
+| [Yapily](https://www.yapily.com) | London, UK | Cloud (EU) | Per-API call | API-first Open Banking |
+| [Bilt Rewards](https://www.biltrewards.com) | New York, US | Cloud (US) | Free to tenants; cobranded card revenue | US rent-as-loyalty card; partnered Wells Fargo; no DACH presence |
+| [Rentmoola](https://rentmoola.com) | Vancouver, CA | Cloud (NA/UK) | Per-transaction | Rent-as-credit-card-tx |
+| [Klarna for rent (pilots)](https://www.klarna.com) | Stockholm, SE | Cloud (EU) | Tx fee | BNPL adapted to rent in select pilots |
+| [Tipalti](https://tipalti.com) | San Mateo, US | Cloud | Subscription + per-tx | AP automation; relevant for large landlords' supplier-pay |
+| [GetMyInvoices](https://www.getmyinvoices.com) | Hannover, DE | Cloud (EU) | Per-user | Invoice retrieval + DATEV export |
+| [Lexware](https://www.lexware.de) | Freiburg, DE (Haufe Group) | On-prem + cloud | Per-user | DE SME accounting |
+| [Sage 50 / Sage Business Cloud](https://www.sage.com) | Newcastle, UK | Cloud + on-prem | Per-user | Cross-DACH accounting |
+| [Infoniqa (formerly Sage CH)](https://www.infoniqa.com) | Stans, CH | On-prem + cloud | Per-user | Swiss payroll-and-accounting |
+
+**Maturity.** Mature accounting (Bexio, Klara, Banana, Abacus); mature Inkasso (Intrum, CRIF, Creditreform, EOS); consolidating Open Banking (TrueLayer, GoCardless, Yapily competing with Stripe Connect). Tenant-loyalty (Bilt) and rent-BNPL (Klarna pilots) remain emerging in DACH; Bilt Rewards has no DACH presence as of May 2026.
+
+**Swiss-context note.** Swiss rent-collection rails are dominated by ISO 20022 QR-Bill + Direct Debit (LSV/CH-DD), all integrated into Bexio, Klara, Banana, Abacus. The September 2026 deadline for structured QR-Bill addresses (per Magic Heidi reference) is the active near-term compliance item. For a federal landlord, AGOV + QR-Bill is the de facto invoicing rail.
+
+**Taxonomy note.** Overlaps with Segment AC at the Bonität-check step (Intrum, CRIF) — same vendors, different use case. Distinct from Segment E (PM ERP) but typically integrated via APIs to Wodis, RELion, casavi, iX-Haus.
 
 ### U. Indoor wayfinding & smart navigation
 
-Steerpath (FI; powers Senaatti's Senate App); MapsIndoors (DK); Pointr (UK); MazeMap (NO); IndoorAtlas (FI); MappedIn (CA; partners with ServiceNow WSD); **[Archilogic](https://www.archilogic.com/) (Zürich, CH — Swiss-domiciled; 3D floor plans + Floor Plan Engine + indoor-mapping API; widely embedded as the floor-plan layer inside IWMS and WEX products, so also adjacent to Segments A and B)**.
+**Definition.** Indoor mapping, navigation and floor-plan APIs for buildings — distinct from outdoor GIS (Esri ArcGIS, OpenStreetMap) and from CAD / BIM authoring (Segment W). Often embedded inside IWMS / WEX (Segments A, B) as the floor-plan layer.
+
+**Persona.** Workplace-experience teams adding navigation to large campuses; FM teams; tenant-facing apps wanting interactive floor plans. For BBL, the relevance is multi-building federal campuses (Bern, Zurich, Geneva sites).
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Archilogic](https://www.archilogic.com/) | Zurich, CH | Cloud (CH / EU) | Per building | **Swiss-domiciled** 3D floor plans + Floor Plan Engine + indoor-mapping API; widely embedded as the floor-plan layer inside IWMS and WEX products (adjacent to Segments A, B) |
+| [Steerpath](https://steerpath.com) | Helsinki, FI | Cloud | Per building | Powers Senaatti's Senate App (federal benchmark — Segment P) |
+| [MapsIndoors](https://www.mapsindoors.com) | Copenhagen, DK | Cloud | Per building | Google Maps-style indoor mapping |
+| [Pointr](https://www.pointr.tech) | London, UK | Cloud | Per building | Indoor positioning + wayfinding |
+| [MazeMap](https://www.mazemap.com) | Trondheim, NO | Cloud | Per building | Nordic indoor mapping |
+| [IndoorAtlas](https://www.indooratlas.com) | Oulu, FI | Cloud | Per building | Magnetic-field indoor positioning |
+| [MappedIn](https://www.mappedin.com) | Waterloo, CA | Cloud | Per building | Partners with ServiceNow WSD |
+| [Esri ArcGIS Indoors](https://www.esri.com) | Redlands, US | Cloud + on-prem | Per user | Enterprise indoor GIS |
+
+**Maturity.** Mature core; consolidating with Esri's enterprise push and embedded use in WSD / Eptura / Spacewell.
+
+**Swiss-context note.** Archilogic is the Swiss-domiciled reference, widely embedded inside IWMS / WEX products — relevant when BBL evaluates the floor-plan layer separately from the IWMS choice.
+
+**Taxonomy note.** Adjacent to Segment A (IWMS) and Segment B (WEX) where wayfinding is bundled; standalone vendors typically sell to IWMS / WEX OEMs as well as direct enterprises.
 
 ### V. Occupancy analytics
 
-Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-based; Zurich is Tango's European HQ); VergeSense (US); Density (US); XY Sense (AU); Butlr (US — thermal); Disruptive Technologies (NO).
+**Definition.** Sensor-based or Wi-Fi-based occupancy measurement for workplace-utilisation analytics — distinct from physical access control (Segment D) and from environmental sensing (Segment AG). Often pre-purchased by IWMS suites (Segment A) as a data source.
+
+**Persona.** Workplace / portfolio strategists optimising desk-to-employee ratios; tenant-of-tenant assessments inside federal buildings; ESG teams quantifying space efficiency.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Locatee (Tango)](https://www.tangoanalytics.com) | Zurich, CH (Tango) | Cloud | Per building | **Swiss-domiciled engineering presence**; sensor-free Wi-Fi-based; acquired by Tango Analytics Mar 2024; Zurich is Tango's European HQ |
+| [VergeSense](https://vergesense.com) | San Francisco, US | Cloud | Per sensor | Computer-vision occupancy sensors |
+| [Density](https://www.density.io) | New York, US | Cloud | Per sensor | Depth-camera occupancy |
+| [XY Sense](https://xysense.com) | Melbourne, AU | Cloud | Per sensor | AI-vision occupancy |
+| [Butlr](https://butlr.com) | San Francisco, US | Cloud | Per sensor | Thermal-vision occupancy |
+| [Disruptive Technologies](https://www.disruptive-technologies.com) | Oslo, NO | Cloud | Per sensor | Cellular IoT sensors (cross-listed in Segment L) |
+| [Akenza](https://akenza.io) | Zurich, CH | Cloud | Per device | **Swiss-domiciled IoT platform**; cross-listed in Segment L for sensor-platform overlap |
+| [enlighted (Siemens)](https://www.enlightedinc.com) | Sunnyvale, US (Siemens) | Cloud | Per fixture | Sensor-rich occupancy + lighting |
+| [Steelcase Workplace Advisor](https://www.steelcase.com) | Grand Rapids, US | Cloud | Per workspace | Furniture-vendor analytics overlay |
+| [Microshare](https://www.microshare.io) | Philadelphia, US | Cloud | Per sensor | LoRaWAN-based occupancy |
+| [Spica Technologies](https://www.spicatech.co.uk) | UK | Cloud | Per building | Workplace-experience analytics |
+
+**Maturity.** Mature; consolidation visible (Tango / Locatee 2024, Siemens / enlighted earlier).
+
+**Swiss-context note.** Locatee → Tango retains its Zurich engineering presence as Tango's European HQ. Akenza is the Swiss-domiciled sensor-platform alternative.
+
+**Taxonomy note.** Cross-listed with Segment L (Disruptive Technologies, Akenza) and Segment A (occupancy data consumed by IWMS).
 
 ### W. Construction project management & BIM CDE handoff
 
@@ -798,6 +1008,16 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [PlanRadar](https://www.planradar.com/) | Vienna, AT | Cloud | Per user | BIM, IFC | Snagging/defect handover; also listed in Segment G |
 | [Buildots](https://www.buildots.com/) | London, UK | Cloud | Per user | BIM, computer vision | AI construction-progress vs. BIM model |
 | [Capmo](https://www.capmo.com/) | Munich, DE | Cloud | Per user | BIM, defect/snagging | DACH construction-PM SaaS |
+| [Allplan](https://www.allplan.com) | Munich, DE (Nemetschek) | Cloud + on-prem | Per user | IFC, Revit | German-engineered BIM authoring |
+| [Graphisoft ArchiCAD](https://graphisoft.com) | Budapest, HU (Nemetschek) | Cloud + on-prem | Per user | IFC, BCF | BIM authoring |
+| [Vectorworks](https://www.vectorworks.net) | Columbia, US (Nemetschek) | Cloud + on-prem | Per user | IFC, DWG | BIM/CAD |
+| [Catenda Hub](https://catenda.com) | Oslo, NO | Cloud | Per user | IFC native, BCF | openBIM CDE; IFC-native |
+| [Plannerly](https://plannerly.com) | US / UK | Cloud | Per user | IFC, Revit | BIM execution planning |
+| [Speckle](https://speckle.systems) | London, UK | Cloud + self-host | Open-source | Multi-CAD | Open-source BIM interoperability / data hub |
+| [BIMobject](https://www.bimobject.com) | Malmö, SE | Cloud | Free + subscription | IFC, Revit | Product library |
+| [BIM&CO](https://www.bimandco.com) | Bordeaux, FR | Cloud | Subscription | IFC | Product library |
+| [BIM Track / Newforma Konekt](https://newforma.com) | Quebec, CA / Manchester NH, US | Cloud | Per user | BCF | Issue management; merged into Newforma |
+| [DesignBuilder](https://designbuilder.co.uk) | Stroud, UK | Desktop | Per user | IFC | IFC-driven simulation |
 
 **Maturity.** Mature (Autodesk, Bentley, Procore) → emerging in AI/CV (Buildots). Heavy DACH adoption of Solibri, dRofus, Revizto, BIMcollab.
 <sub>**Preview — selected vendors** (product screenshots from vendors' own pages; links go to source pages):</sub>
@@ -869,6 +1089,8 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [KEYLOGIC](https://www.keylogic.ch/) | Bern, CH | **Swiss-domiciled** CAFM; KBOB-aligned; cantonal RE deployments — ⚠️ `keylogic.ch` served a parked Hetzner page during the 18 May 2026 scan, verify vendor status |
 | [Speedikon FM](https://www.speedikon.com/) | Bensheim, DE | CAFM + ERP integration |
 | [GEORG (VIT)](https://www.vit-group.de/) | Hannover, DE | GIS-led CAFM for industrial / federal estates |
+| [TOL (Total Office Solutions)](https://tol.ch) | Lausanne, CH | **Swiss-domiciled** FM / workplace |
+| [Caverion CAFM](https://www.caverion.com) | Helsinki, FI | FM-integrator with bundled CAFM analytics; cross-listed in Segment AG |
 
 <sub>**Preview — selected vendor** (product diagram from vendor's own page; link goes to source page):</sub>
 
@@ -901,6 +1123,14 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [Schneider Resource Advisor](https://www.se.com/) | Rueil-Malmaison, FR | Energy + sustainability for enterprise portfolios |
 | [Sweep](https://www.sweep.net/) | Paris, FR | Climate-data platform with RE module |
 | [BuildingMinds](https://buildingminds.com/) | Berlin, DE (Schindler family-backed) | Real-estate data platform; CRREM, EU Taxonomy and EPBD modules; **cross-listed in Segment L** for digital-twin capabilities |
+| [Sphera](https://sphera.com) | Chicago, US | EHS + ESG platform |
+| [Spheria](https://spheria.com) | Paris, FR | ESG data-platform |
+| [Persefoni](https://persefoni.com) | Tempe, US | Carbon accounting |
+| [Watershed](https://watershed.com) | San Francisco, US | Enterprise carbon |
+| [Climatiq](https://www.climatiq.io) | Berlin, DE | Carbon-data API |
+| [Greenly](https://greenly.earth) | Paris, FR | SME-friendly carbon |
+| [Plan A](https://plana.earth) | Berlin, DE | Enterprise carbon-accounting + decarbonisation |
+| [GRESB](https://www.gresb.com) | Amsterdam, NL | Real-estate ESG benchmark |
 
 <sub>**Preview — selected vendors** (product dashboards from vendors' own pages; links go to source pages):</sub>
 
@@ -937,6 +1167,11 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [BIMserver](https://bimserver.org/) | AGPL v3 | TU Eindhoven | OSS BIM model server; complements CDE-Bund stack (Segment W) |
 | [civic-tech.ch / opendata.swiss tooling](https://civictech.ch/) | various | Switzerland | Swiss civic-tech community; federal-relevant tools surface periodically |
 | [Hugging Face open document-AI](https://huggingface.co/models) | various | France/USA | OSS OCR + LLM models; honest alternative to Segment X commercial lease abstraction |
+| [Plone](https://plone.org) | BSD-like | global community | CMS in CH/AT/DE federal use; security-hardened |
+| [Drupal](https://www.drupal.org) | GPL v2 | global community | Used in Swiss federal websites and many DACH cantons / cities |
+| [TYPO3](https://typo3.org) | GPL v2 | Düsseldorf-based association | Dominant in DACH public-sector CMS |
+| [Strapi](https://strapi.io) | MIT + Enterprise | Paris, FR | Open-source headless CMS |
+| [Directus](https://directus.io) | BSL → MIT | Brooklyn, US | Headless CMS / data platform |
 
 <sub>**Preview — selected OSS projects** (product screenshots from project pages; links go to source pages):</sub>
 
@@ -983,6 +1218,15 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 | [OutSystems](https://www.outsystems.com/) | Linda-a-Velha, PT | Commercial | Enterprise low-code; long-running EU public-sector deployments |
 | [Mendix (Siemens)](https://www.mendix.com/) | Boston, USA (Siemens) | Commercial | Siemens-owned low-code; natural pair to Siemens Building X / Cobundu adjacencies (Segment L) |
 | [ServiceNow Flow Designer](https://www.servicenow.com/) | Santa Clara, USA | Commercial | Native to ServiceNow; bundled with WSD (Segment A/B) and Nuvolo CWP |
+| [Microsoft Logic Apps](https://azure.microsoft.com/en-us/products/logic-apps) | Redmond, US | Commercial (Azure) | iPaaS within Azure |
+| [Tray.io](https://tray.io) | San Francisco, US | Commercial | iPaaS |
+| [Workato](https://www.workato.com) | Mountain View, US | Commercial | Enterprise iPaaS |
+| [Pipefy](https://www.pipefy.com) | San Francisco, US | Commercial | BPM no-code |
+| [Kissflow](https://kissflow.com) | Chennai, IN | Commercial | BPM no-code |
+| [Flowable](https://www.flowable.com) | Zurich, CH (with NL roots) | Open-source + commercial | **Swiss-domiciled open-source BPMN engine** — direct relevance to federal CH workflows |
+| [Trisotech](https://www.trisotech.com) | Quebec, CA | Commercial | BPMN / CMMN / DMN authoring |
+| [Decisions](https://decisions.com) | Chesapeake, US | Commercial | Process automation |
+| [Twigg](https://twigg.io) | UK | Commercial | Workflow automation |
 
 **Maturity.** Mature across BPM (Camunda, Pega, Appian) and SaaS automation (Power Automate, Zapier, Make); rapidly growing in OSS (n8n, Activepieces). Power Automate has the **lowest adoption friction** in a federal CH context because M365 is already deployed and Azure Switzerland regions are available; SAP Build Process Automation has the lowest friction inside the SAP estate.
 
@@ -995,6 +1239,175 @@ Locatee (Zurich; **acquired by Tango Analytics Mar 2024** — sensor-free Wi-Fi-
 - **AA (OSS)**: n8n, Activepieces, Bonita Community, Camunda Community Edition are OSS-publishable under EMBAG Art. 9.
 
 **Practical procurement test.** Before buying a vertical tenant-portal "smart ticketing" / "tenant copilot" / "automated approval" feature, ask: *can this be assembled with our existing Power Automate / BTP / n8n primitives plus a form, a notification, and a condition?* In many federal-CH cases the answer is yes, and EMBAG Art. 9 makes the build-on-licensed-primitives pattern the default rather than the exception.
+
+### AC. Tenant Onboarding, KYC, Credit-Screening & Bonität
+
+**Definition.** The "front of the funnel" before a lease exists — identity verification (IDV), creditworthiness/Bonität scoring, debt-register checks, and applicant background screening. Scope ends at lease signature: eSignature sits in Segment I, deposit substitution in Segment AD, and listing portals upstream in Segment O. Switzerland's three orthogonal data sources — (a) Betreibungsregister-Auszug from the cantonal/Gemeinde debt office, (b) private-bureau score from CRIF or Intrum, and (c) IDV / eID / SwissID assertion — distinguish the CH stack from the SCHUFA-dominant DE market and the KSV1870-dominant AT market.
+
+**Persona.** Federal landlord onboarding teams (BBL Bereich Bauten, BImA Geschäftsbereich Wohnen), large institutional landlords (Livit, Wincasa, Vonovia), and PropTech tenant-experience apps that embed credit checks in the lease-application flow. For BBL specifically, the active question is which bureau or certificate format the federal Mieterportal accepts: paper Betreibungsauszug, digital CreditTrust certificate, or SwissID/AGOV-linked identity assertion.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [CRIF AG](https://www.crif.ch) | Zurich, CH (parent Bologna, IT) | Cloud (CH region) | B2B API per-query; free self-disclosure once a year | National creditworthiness DB; CRIF score 1–600; co-issuer of CreditTrust |
+| [Intrum AG](https://www.intrum.ch) | Schwerzenbach, CH (parent Stockholm, SE) | Cloud (CH/EEA) | B2B API per-query; free self-disclosure once a year | National creditworthiness DB; co-issuer of CreditTrust |
+| [CreditTrust](https://credittrust.ch) | Zurich, CH (JV of CRIF + Intrum, 2018) | Cloud (CH) + Ethereum-anchored hash | Free for accepting businesses; ~CHF 25 to applicant | Blockchain-anchored Bonitätszertifikat; aggregates both major Swiss bureaus; embedded into homegate.ch / ImmoScout24.ch flow per SMG Real Estate |
+| [Creditreform Schweiz](https://www.creditreform.ch) | St. Gallen, CH | Cloud | B2B subscription / per-query | DACH-wide commercial credit; cantonal coverage |
+| [moneyhouse.ch](https://www.moneyhouse.ch) | Zurich, CH (Ringier) | Cloud (CH) | Freemium; Premium ~CHF 7/month | Trade-register + Bonität aggregator; popular tenant background check |
+| [SCHUFA Holding](https://www.schufa.de) | Wiesbaden, DE (founded 1927) | Cloud (DE) | B2B per-query; consumer Bonitätscheck ~€29.95 | Dominant DE consumer bureau; "SCHUFA-BonitätsAuskunft" is the de-facto German rental document |
+| [KSV1870](https://www.ksv.at) | Vienna, AT | Cloud (AT) | B2B subscription | Dominant AT bureau |
+| [Bisnode D&B Switzerland](https://www.bisnode.ch) | Urdorf, CH (Dun & Bradstreet) | Cloud | B2B subscription | Commercial Bonität; D&B D-U-N-S |
+| [Acrevis CreditCheck / Onlineprüfung](https://www.acrevis.ch) | St. Gallen, CH | Cloud | Per-check | Bank-grade Bonitätscheck used by some Swiss agencies |
+| [PXL Vision](https://www.pxl-vision.com) | Zurich, CH (Mühlebachstrasse 164, 8008; founded 2017 as Dacuda spin-off) | SaaS + on-prem | Quote-based; volume tiers | Swiss-made browser-based AutoID in <30 s; ISO 27001; ZertES + eIDAS-compliant via Swisscom Trust |
+| [KYC Spider](https://www.kyc-spider.com) | Aarau, CH | Cloud (CH) | Per-check / subscription | Swiss-domiciled AML/KYC tooling |
+| [IDnow](https://idnow.io) | Munich, DE (founded 2014) | Cloud (DE/EU) | Per-verification; quote | BaFin-anerkannt VideoIdent + AutoIdent; EUDI Wallet ready |
+| [WebID Solutions](https://www.webid-solutions.de) | Berlin / Solingen, DE | Cloud (DE) | Per-verification | First BaFin-licensed VideoIdent (2014); QES-capable |
+| [Onfido (Entrust Identity Verification)](https://onfido.com) | London, UK — acquired by Entrust April 2024 | Cloud (EU/UK residency available) | Quote-based; volume tiers; per-Finexer's industry data, median annual spend ~$60,475, range $6,156–$945,900 | "Atlas AI" liveness + ~2,500 documents; data-processor by default per April 2025 Product Privacy Notice |
+| [Veriff](https://www.veriff.com) | Tallinn, EE | Cloud | Self-serve tiers + Enterprise quote | Supports 12,500+ identity documents across 230+ countries (Veriff marketing, Sept 2025) |
+| [Sumsub](https://sumsub.com) | London, UK / Berlin DE office | Cloud | Per-successful-verification | All-in-one KYC/AML/KYB + fraud |
+| [Klippa](https://www.klippa.com) | Groningen, NL | Cloud (EU) | Per-document / subscription | OCR + IDV for property and finance |
+| [Goodlord](https://www.goodlord.co) | London, UK | Cloud | Per-tenancy fee | UK letting platform with embedded referencing |
+| [HomeLet](https://homelet.co.uk) | Lincoln, UK (Barbon Insurance Group) | Cloud | Per-reference | Largest UK tenant-referencing volume |
+| [Canopy](https://www.canopy.rent) | London, UK | Cloud | Free for tenants; lettings-agent subs | "RentPassport" — Open-Banking-based rent-affordability + Experian-fed score |
+| [Experian RentBureau](https://www.experian.com/rentbureau) | Costa Mesa, US (Dublin EMEA HQ) | Cloud | Per-record | US rent payment reporting; feeds FICO 9/10 |
+| [RentSpree](https://www.rentspree.com) | Los Angeles, US | Cloud (US) | Per-application $39.99 | US tenant screening incl. TransUnion data |
+| [TransUnion SmartMove](https://www.mysmartmove.com) | Chicago, US | Cloud (US) | Per-screening $25–$40 | US tenant screening |
+| [Naborly](https://naborly.com) | Toronto, CA | Cloud | Per-application | AI-based tenant scoring, CA/US focus |
+
+**Maturity.** Mature on the bureau side (SCHUFA founded 1927, CRIF 1988, Intrum-Justitia heritage from 1923); consolidating on the IDV/KYC side — the Entrust acquisition of Onfido (April 2024) is the most material 2024–2026 structural event in the segment. Tenant-scoring specialists with no bureau access remain emerging.
+
+**Swiss-context note.** CreditTrust (Intrum + CRIF JV, 2018) has become the dominant digital alternative to the paper Betreibungsregister-Auszug in Swiss residential applications, embedded directly in homegate.ch and ImmoScout24.ch flows; SMG Real Estate testimonial: "CreditTrust is the best choice here: ordered digitally within a few minutes." PXL Vision is the Swiss-domiciled IDV reference; its PXL Ident for QES is the first identity service provider integrated on the Swisscom Trust Services platform for ZertES/eIDAS QES. For a federal landlord, the AGOV/SwissID identity layer is the obvious upstream anchor for an authenticated tenant.
+
+**Taxonomy note.** Overlaps with Segment I (eSignature) at the QES identity-proofing step (PXL Ident, IDnow AutoIdent, WebID), with Segment R (sovereign hosting) at the Schweizer Datenresidenz line, and with Segment T (fintech adjacencies) where Bonität checks shade into Open-Banking affordability checks (Canopy RentPassport, Yapily, TrueLayer).
+
+### AD. Deposit, Rental-Guarantee & Tenant Insurance Tech
+
+**Definition.** Products that substitute or insure the cash deposit (Kaution / Mietkaution / security deposit), plus the tenant-side contents/liability insurance commonly sold at lease start. Boundary: distinct from generic insurtech (general P&C) and from Segment T (rent-payment fintech). The German legal cap (§ 551 BGB: three monthly cold rents max, separate interest-bearing Mietkautionskonto) and the Swiss CO Art. 257e (three months max, blocked savings account) define the product shape.
+
+**Persona.** Property managers seeking to reduce administrative friction of cash-deposit handling; tenants needing capital-efficient alternatives; institutional landlords (federal, cantonal, large-listed) evaluating bulk acceptance frameworks. BBL's relevant question is which guarantee providers a federal landlord can accept by policy.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [SwissCaution](https://www.swisscaution.ch) | Bussigny / Lausanne, CH (La Mobilière subsidiary) | Cloud | 5 % of guarantee p.a. + CHF 20 admin + 5 % stamp duty | "No. 1 most widely accepted" rental guarantee CH; Post-branch distribution since 2009; loyalty programme up to 30 % discount |
+| [Firstcaution](https://www.firstcaution.ch) | Nyon, CH (Zurich + Bellinzona offices; family-owned, 65 staff) | Cloud | Monthly or annual premium; flexible deposit hybrid | FINMA-approved; only CH provider offering true monthly billing; >100,000 customers |
+| [goCaution](https://www.gocaution.ch) | Zurich, CH (Generali subsidiary) | Cloud | Annual premium | Generali-backed |
+| [SmartCaution](https://www.smartcaution.ch) | CH | Cloud | Annual premium | Niche CH provider |
+| [Helvetia Kautionsversicherung](https://www.helvetia.com/ch) | St. Gallen, CH | Cloud | Annual premium | Traditional insurer arm |
+| [AXA Mietkaution](https://www.axa.ch) | Winterthur, CH | Cloud | Annual premium | Direct insurer offering |
+| [Zurich Kautionsversicherung](https://www.zurich.ch) | Zurich, CH | Cloud | Annual premium | Direct insurer offering |
+| [Eurokaution (EuroKaution Service EKS)](https://www.eurokaution.de) | Baden-Baden, DE (founded 2008) | Cloud (DE) | 4.7 % of deposit p.a., min. €50/yr | "Deutschlands ältester Mietkautionsgesellschaft seit 2008"; bond issued by R+V Versicherung |
+| [Deutsche Kautionskasse AG (Moneyfix®)](https://www.kautionskasse.de) | Starnberg, DE (founded 2008) | Cloud (DE) | ~4.7 % p.a. (Assekuradeur model) | Bürgschaftsurkunde issued by Allianz (private) / ERGO (gewerbe) |
+| [plusForta GmbH](https://plusforta.de) — operating kautionsfrei.de, heysafe.de, kautionsfuchs.de | Düsseldorf, DE (Talstraße 24) | Cloud (DE) | ~4.99 % p.a. (private) | Multi-brand operator; **Aareal Bank Group-owned since Feb 2019** — direct corporate-family link to PM-software giant Aareon |
+| [Cosmos Direkt Mietkaution](https://www.cosmosdirekt.de) | Saarbrücken, DE (Generali) | Cloud | ~5.2 % p.a. | Direct insurer |
+| [Flatfair](https://www.flatfair.co.uk) | London, UK (founded 2016) | Cloud (UK) | Non-refundable check-in fee = 28 % of one month's rent + VAT, min £120 | "Deposit-free renting"; 850+ agents & BTR operators; Index Ventures-backed |
+| [Reposit](https://reposit.co.uk) | London, UK (128 City Road; founded 2015) | Cloud | ~1 week's rent + VAT | 8 weeks' protection |
+| [Zero Deposit](https://www.zerodeposit.com) | UK | Cloud | 1 week's rent + £59.99 set-up + £17.50/yr | **Underwritten by Aviva; FCA-regulated; TDS-adjudicated**; works with 79 % of top UK estate agents that have chosen a deposit-replacement option (per ZeroDeposit.com) |
+| [Insurami](https://insurami.com) | London, UK | Cloud | Commission-based | Commercial-lease deposit substitution |
+| [Getsafe](https://www.hellogetsafe.com/de-de) | Heidelberg, DE (founded 2015) | Cloud (DE) | Monthly micro-pricing in-app | App-native insurtech; Hausrat + Haftpflicht + Rechtsschutz; **over 500,000 customers in Germany, Austria and France**, supported by more than €120 m in venture capital from Earlybird, CommerzVentures, Swiss Re (Getsafe press release 2025) |
+| [Friday → Allianz Direct](https://www.friday.de) | Berlin, DE (founded 2017) | Cloud | Monthly Kfz/Hausrat | **Allianz Direct announced acquisition of Friday's portfolio from Baloise in Oct 2024; Friday brand being wound down (Handelsblatt, Oct 2024)** |
+| [Adam Riese](https://www.adam-riese.de) | Stuttgart, DE (Württembergische / W&W Group) | Cloud | Monthly Hausrat/Haftpflicht | Digital brand of W&W |
+| [Canopy Rent Insurance](https://www.canopy.rent) | London, UK | Cloud | Per-tenancy | Rent guarantee + contents bundle |
+
+**Maturity.** Mature in CH (SwissCaution founded 1991; FINMA-supervised duopoly+); consolidating in DE (plusForta–Aareal acquisition 2019 a major structural event linking the deposit-substitution market to the PM-software market; Allianz Direct's Oct 2024 acquisition of Friday from Baloise consolidating the digital-Hausrat market); emerging in UK on tenancy-fee-ban-driven deposit-replacement; emerging in DACH on app-native tenant contents (Getsafe, Adam Riese).
+
+**Swiss-context note.** Swiss Kautionsversicherung is structurally a duopoly+ between SwissCaution (Mobilière) and Firstcaution, with goCaution (Generali) third — Firstcaution's own product copy is explicit: "Swisscaution and Gocaution are both subsidiaries of major insurance companies: La Mobilière and Generali. Firstcaution is a family business." All three are FINMA-supervised. Acceptance by federal/cantonal landlords typically requires the certificate to be issued by a FINMA-approved insurer; BBL would need its own list. CO Art. 257e three-months cap is binding on residential; commercial may exceed.
+
+**Taxonomy note.** Overlaps with Segment T (fintech adjacencies) on premium-collection rails and with Segment AC (KYC) because issuers run their own Bonität check before issuing the guarantee. Distinct from Segment R because most issuers host with mainstream insurers' own datacentres rather than sovereign clouds.
+
+### AE. Tenant Communication, Resident Voting & WEG-Versammlung Tech
+
+**Definition.** Digital tools for Eigentümerversammlung, WEG-Beschluss, Stockwerkeigentümer-Versammlung (STWEG in CH), tenant consultation, and general resident-association voting. Distinct from generic survey tools by their legal-quality voting (BSI- or Common Criteria-certified ballots, ZertES-compliant minutes) and their integration with property-management ERPs (Aareon, casavi). The STWEG specifics in Swiss law (ZGB Art. 712a ff., quorum and Schriftform rules of each Reglement) differ from the German WEG-Reform-G 2020.
+
+**Persona.** Hausverwaltungen running WEG/STWEG Versammlungen; large landlords running tenant consultations; cooperative housing societies (Genossenschaften — large in CH); federal/cantonal estate managers running collegial board votes. For BBL specifically, this segment is relevant only where federal property has a Stockwerkeigentum component or where tenant-council consultation processes need legal traceability.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [POLYAS](https://www.polyas.com) | Kassel / Berlin, DE (first online election 1996) | Cloud (DE) | Per-election; quote | BSI Common Criteria-certified core (POLYAS CORE 2.5.0, recertified June 2025); customers incl. CDU party convention, EBRD, Diocese of Freiburg |
+| [vote.io](https://vote.io) | DE | Cloud (DE) | Per-event | WEG/Vereins-focused live voting |
+| [OASIS Voting](https://www.oasis-voting.com) | DE/EU | Cloud (DE) | Per-event | Hybrid Versammlung |
+| [Vote@Home](https://www.vote-at-home.de) | DE | Cloud (DE, GDPR) | Per-event | Open-source-based; integrated Jitsi for video; weighted/named/secret votes; proxy & Weisung management aimed at WEG-Verwalter |
+| [casavi WEG-Versammlung module](https://casavi.com/en) | Munich, DE (Aareon-owned since 2022) | Cloud | Add-on to casavi suite | WEG hybrid/online meetings; integration with Win-CASA, iX-Haus, DOMUS |
+| [etg24](https://www.etg24.de) | DE | Cloud (DE) | Subscription per unit | WEG portal incl. proxies, circular resolutions, hybrid Versammlung; on Aareon Marketplace |
+| [iDWELL](https://www.idwell.com) | Vienna, AT | Cloud (EU) | Per-unit subscription | Mieter/Eigentümer-CRM + Versammlung; Win-CASA integration; idwell finance for invoice automation |
+| [Civey](https://civey.com) | Berlin, DE | Cloud (DE) | Subscription | Opinion polling — not BSI-certified for legal Versammlungen, useful for non-binding tenant consultations |
+| [ImmoSocial](https://www.immosocial.com) | DE | Cloud | Quote | Resident social platform |
+| [Wohnglück](https://www.wohnglueck.de) | DE | Cloud | Subscription | Resident communication |
+| [Quartier Schweiz](https://www.quartier-schweiz.ch) | CH | Cloud (CH) | Subscription | Swiss neighbourhood/Quartier platform |
+| [Building Engines (JLL Technologies)](https://www.buildingengines.com) | Boston, US | Cloud | Quote | US commercial-property tenant experience incl. voting |
+| [HOA Express](https://hoa-express.com) | US | Cloud | Per-HOA | US HOA / condo board management |
+| [AppFolio voting](https://www.appfolio.com) | Goleta, US | Cloud | Bundled with PM Plus | US residential PM with community voting |
+| [RentCafe Resident Services](https://www.rentcafe.com) | Yardi | Cloud | Bundled with Voyager | US Yardi tenant portal incl. event/vote modules |
+
+**Maturity.** Consolidating: the WEG-Reform-G of December 2020 in Germany expressly enables hybrid and online Versammlungen, which triggered substantial product investment; casavi's acquisition by Aareon (2022) and the iDWELL/Win-CASA integration deepening through 2024–2026 are the visible consolidation signals. STWEG-specific Swiss product offering remains thin — most CH Verwalter still rely on paper or generic videoconference plus a vote.io / POLYAS bolt-on.
+
+**Swiss-context note.** STWEG in CH does not have the same legal recognition of online Versammlungen as the post-2020 German WEG; binding votes generally still require physical attendance or written proxy in the strict form prescribed by the Reglement of each Stockwerkeigentümer-Gemeinschaft. Tools like POLYAS Live Voting are used at physical assemblies for speed-of-tabulation rather than as a remote-vote substitute. For a federal landlord without STWEG-Anteil, this segment functions mainly as a tenant-consultation overlay rather than a legal-quality voting platform.
+
+**Taxonomy note.** Overlaps with Segment F (residential tenant experience) where the Versammlung module is bundled into a broader resident portal (casavi, iDWELL, etg24), and with Segment I (eSignature) where the resulting Protokoll/Beschluss is QES-signed.
+
+### AF. Mobility & EV-Charging Tenant Services
+
+**Definition.** EV-charging operator (CPO/EMSP) software exposed at tenant level — wallbox provisioning in residential parking, billing per kWh against rent or service charge, OCPP-back-end management, and roaming. Distinct from Segment N (energy/submetering) by its operational-mobility focus, and from Segment L (smart-building) by its dedicated billing/roaming stack. Parking-management (Parquery, ParkingPay) sits adjacent.
+
+**Persona.** Large landlords integrating EV charging into rental parking — federal estate (BBL fleet + tenant parking), institutional residential portfolios (Mobimo, SPS, PSP, Vonovia), workplace operators. The integration question is OCPP 2.0.1 + ISO 15118-2 (Plug & Charge) into the existing FM stack, and the billing question is whether kWh costs are passed through as Nebenkosten or invoiced separately by a CPO partner.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Swisscharge / Energie 360° / GOFAST / Move](https://swisscharge.ch) | Zurich, CH (Energie 360° group) | Cloud (CH/EU) | App-free pay-as-you-charge; CHF ~0.59/kWh fast-charge typical | **Largest CH network: over 24,000 charging points and 250,000 users post-Move acquisition (July 2025); zero roaming inside group from 1 Nov 2025; CHF 200 m investment programme to 2030** |
+| [evpass (Shell Recharge Solutions)](https://www.evpass.ch) | CH (now Shell Recharge Solutions; former Groupe E) | Cloud | Up to ~CHF 0.79/kWh public fast-charging — ~CHF 46 for 50 kWh per TCS data cited by Carify, Mar 2026 | One of densest CH public networks; under Shell brand |
+| [Juice Technology AG](https://juice-world.com) | Cham, CH | Cloud + hardware | Hardware + Juice World portal subscription | Swiss-made Juice Booster mobile charger; integrated Juice World OCPP portal |
+| [Park-it](https://park-it.ch) | Zug, CH | Cloud (CH) | Per-space subscription | CH parking-management with EV-charging integration |
+| [chargecloud GmbH](https://www.chargecloud.com/en) | Cologne, DE | Cloud (DE) | Subscription per charge point + transaction fee | Modular CPO OS; white-label frontends; AI energy-management partner marketplace |
+| [reev](https://reev.com) | Munich, DE | Cloud (DE) | Subscription per wallbox | Specialises in commercial fleet + multi-tenant residential |
+| [has·to·be → ChargePoint Europe](https://www.chargepoint.com) | Vienna / Klagenfurt, AT — **acquired by ChargePoint for ~$295 m in 2021** | Cloud | Subscription per CP | be.ENERGISED platform; AT/DE flagship CPO software; consolidated into ChargePoint Platform |
+| [ChargePoint Platform](https://www.chargepoint.com) | Campbell, US (NYSE: CHPT) | Cloud (regional EU residency) | Subscription | Per ChargePoint press release of 11 Feb 2026: gives EV drivers access to **more than 900,000 roaming ports** in addition to **approximately 375,000 public and private ports that ChargePoint directly manages** (~1.275 M total); AI optimisation engine launched 13 Nov 2025 |
+| [eMabler](https://www.emabler.com) | Helsinki, FI | Cloud (EU) | API-first per-CP | Headless CPO API |
+| [GP JOULE Connect](https://www.gp-joule.com) | Reußenköge, DE | Cloud | Subscription + per kWh | German vertically-integrated CPO |
+| [&Charge](https://www.andcharge.com) | Munich, DE (Mer Group) | Cloud | App; cashback model | Consumer-side rewards |
+| [ENGIE Vianeo](https://www.vianeo.com) | Paris, FR | Cloud | Per-session / subscription | ENGIE's CPO arm |
+| [Allego](https://www.allego.eu) | Arnhem, NL | Cloud | Per-session | Pan-EU CPO; listed |
+| [Mer (Statkraft)](https://uk.mer.eco) | Oslo, NO | Cloud | Per-session | Statkraft-owned CPO |
+| [EVgo](https://www.evgo.com) | Los Angeles, US | Cloud (US) | Per-session | US fast-charging |
+| [Wallbox](https://wallbox.com) | Barcelona, ES (NYSE: WBX) | Cloud | Hardware + myWallbox app subscription | Pulsar/Quasar bi-directional |
+| [Pod Point](https://pod-point.com) | London, UK (EDF) | Cloud (UK) | Subscription | UK home + workplace |
+| [Driivz (Vontier)](https://driivz.com) | Kfar Saba, IL | Cloud | Subscription | Enterprise CPO OS |
+| [GreenFlux (DKV Mobility)](https://www.greenflux.com) | Amsterdam, NL | Cloud (EU) | Per-CP / per-transaction | Roaming-heavy CPO |
+| [Parquery](https://parquery.com) | Zurich, CH (ETH spin-off) | Cloud (CH) | Per-camera subscription | Computer-vision parking occupancy |
+| [ParkingPay](https://www.parkingpay.ch) | Mendrisio, CH | Cloud (CH) | Per-transaction | Swiss municipal parking-payment app |
+
+**Maturity.** Consolidating: ChargePoint/has·to·be (2021), Energie 360° acquisition of Move (July 2025), and Shell's earlier acquisition of evpass mark a clear consolidation toward 3–4 dominant CH-regional CPO groups. Software (CPO OS) is mature; tenant-portal billing integration with PM ERPs (Aareon, casavi) is emerging.
+
+**Swiss-context note.** Switzerland's CPO market post-July 2025 is dominated by the Energie 360°/Gofast/Swisscharge/Move group plus Shell-Recharge (evpass) and AMAG. The FEDRO/ASTRA tender for ~40 motorway-service-area HPC hubs (won in part by Energie 360°) is the visible federal procurement vector. For BBL parking exposed to tenants, the procurement question is whether to remain hardware-agnostic (OCPP 2.0.1) and pick a CPO OS, or to subcontract to a CH CPO operator. Pricing visibility is poor: TCS data cited by Carify (March 2026) shows the gap between cheapest (GoFast Viamala CHF 23 for 50 kWh) and most expensive (evpass Kölliken CHF 46 for 50 kWh) at ~100 %.
+
+**Taxonomy note.** Distinct from Segment N (energy/sub-metering: heat, water, electricity for accounting Nebenkosten) and from Segment L (smart-building IoT: BMS, occupancy). Overlaps with Segment T at the rent-as-payment / cashback rails (&Charge, Bilt-style models) and with Segment Y (CAFM) where charging-station maintenance is bundled into FM.
+
+### AG. Building Automation / GA-Leitsystem (OT layer beneath L)
+
+**Definition.** The operational-technology layer of building controls (Gebäudeautomation, GA-Leitsystem) — HVAC, lighting, shading, room automation, BMS/BACS supervisors — that sits *below* the digital-twin/smart-building portal layer (Segment L). Standards: BACnet/IP, BACnet MS/TP, KNX, Modbus RTU/TCP, LonWorks, M-Bus, EnOcean, DALI, increasingly LoRaWAN for retrofit metering and Matter for some commercial deployments. Swiss alignment: SIA 386.110, SIA 384/1, KBOB AS-Standard Lifecycle BIM/CAFM/GA integration.
+
+**Persona.** Building owners' technical-FM directorates (BBL Fachbereich Gebäudetechnik), GA-Planer, system integrators, and the smart-building platform layer above (Segment L) that consumes BACnet/IP data via REST/MQTT brokers. For BBL, this is the OT substrate that produces the data ingested by the tenant-experience and energy-reporting layer.
+
+| Product | HQ | Hosting | Pricing | Notable feature |
+|---|---|---|---|---|
+| [Sauter Building Control (Sauter moduWeb / Vision)](https://www.sauter-controls.com) | Basel, CH | On-prem + edge + cloud | Project-based licence | Swiss-domiciled BACnet/IP, KNX, Modbus; SIA-aligned; cantonal/federal GA-Leitsystem reference |
+| [Saia-Burgess Controls (SBC) / Saia PCD](https://www.saia-pcd.com) | Murten, CH — **Honeywell subsidiary since January 2013, acquired for $130 m from Johnson Electric** | On-prem PLC + Saia PCD Supervisor cloud | Hardware + licence | Saia PCD3 to ~10,000 I/O distributed; BACnet, LON, MS/TP; widely deployed in CH infrastructure/transport (SBB, VBZ) |
+| [Belimo Cloud](https://www.belimo.com) | Hinwil, CH | Hardware + cloud (BelimoCloud) | Hardware + connectivity sub | Valves & actuators with Energy-Valve + cloud telemetry |
+| [Siemens Desigo CC](https://www.siemens.com) | Zug, CH (Smart Infrastructure HQ) / Munich, DE | On-prem + Building X (cloud) | Per-data-point licence | Dominant DACH BMS supervisor; OEM-agnostic via BACnet, OPC UA |
+| [Honeywell EBI / Niagara Tridium](https://buildings.honeywell.com) | Atlanta, US (Tridium: Richmond, US) | On-prem + cloud | Per-supervisor | Niagara framework de-facto integration layer; SBC, Trend, Optimizer, CentraLine all Niagara-compatible |
+| [Schneider Electric EcoStruxure Building](https://www.se.com) | Rueil-Malmaison, FR | On-prem + EcoStruxure Cloud | Per-controller | Building Operation supervisor + SmartX controllers |
+| [Beckhoff TwinCAT BACnet](https://www.beckhoff.com) | Verl, DE | On-prem (TwinCAT runtime) | Per-runtime | PC-based control; software PLC |
+| [Wago I/O System / Building Management](https://www.wago.com) | Minden, DE | On-prem | Per-controller | Modular I/O; BACnet, KNX, LoRaWAN |
+| [Kieback&Peter](https://www.kieback-peter.com) | Berlin, DE | On-prem + Neutrino-EM cloud | Per-project | DACH-strong GA-Spezialist; family-owned |
+| [Caverion Building Performance](https://www.caverion.com) | Helsinki, FI | On-prem + cloud | FM-contract bundled | Nordic+DACH FM-integrator with proprietary BMS analytics |
+| [Johnson Controls Metasys](https://www.johnsoncontrols.com) | Cork, IE / Milwaukee, US | On-prem + OpenBlue cloud | Per-controller | Largest installed BMS base globally |
+| [Trane Tracer SC+](https://www.trane.com) | Davidson, US | On-prem + Trane Connect | Per-controller | HVAC OEM supervisor |
+| [ABB Cylon](https://global.abb/group/en) | Dublin, IE (now ABB) | On-prem | Per-controller | BACnet supervisor |
+| [Distech Controls (Acuity Brands)](https://www.distech-controls.com) | Brossard, CA | On-prem + cloud | Per-controller | Niagara-based |
+| [Iconics (Mitsubishi Electric)](https://www.iconics.com) | Foxborough, US | On-prem + Genesis cloud | Per-tag | OPC UA-native SCADA/BMS |
+
+**Maturity.** Mature. Most DACH new-build commercial uses Siemens Desigo CC or Honeywell EBI as supervisor with mixed-vendor BACnet field-level, often integrating Sauter or SBC at the room/plant level. Acquisitions are slow but structural: Honeywell/Saia-Burgess (2013), Acuity/Distech (2015), Siemens' continuous expansion of Building X cloud (2022–2026).
+
+**Swiss-context note.** Sauter, Saia-Burgess (Murten) and Siemens Schweiz Smart Infrastructure (Zug) form the dominant Swiss-domiciled GA stack; KBOB MS-Bund and SIA 386.110 are the relevant Bundes-aligned procurement frameworks. For BBL, the boundary with Segment L is best drawn at the BACnet/IP-to-MQTT/REST gateway: everything below is OT and runs on its own VLAN; everything above is the tenant-experience/twin layer and can sit in Swiss sovereign cloud. Sauter's BACnet-everywhere stance — "BACnet is used in all equipment systems and in SAUTER room automation – to allow continuous, standardised communication" (sauter-controls.com) — is the canonical interoperability posture.
+
+**Taxonomy note.** Segment L (smart-building twin/app) consumes Segment AG output; the explicit boundary is at the API gateway (BACnet → REST/MQTT). Standards alignment: BACnet/IP (ISO 16484-5), KNX (ISO/IEC 14543-3), Modbus (IEC 61158), LoRaWAN (LoRa Alliance), Matter (CSA), and FIWARE Smart Data Models for the smart-city/portfolio-level data layer above L.
 
 ## 7. Recommendations
 

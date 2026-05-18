@@ -1,10 +1,0 @@
-[32m[INFO] 2026-05-18 15:36:07,356 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
-[32m[INFO] 2026-05-18 15:36:07,375 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_det_infer.onnx[0m
-[32m[INFO] 2026-05-18 15:36:07,376 [RapidOCR] main.py:53: Using C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_det_infer.onnx[0m
-[32m[INFO] 2026-05-18 15:36:07,888 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
-[32m[INFO] 2026-05-18 15:36:07,892 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_ppocr_mobile_v2.0_cls_infer.onnx[0m
-[32m[INFO] 2026-05-18 15:36:07,893 [RapidOCR] main.py:53: Using C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_ppocr_mobile_v2.0_cls_infer.onnx[0m
-[32m[INFO] 2026-05-18 15:36:08,046 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
-[32m[INFO] 2026-05-18 15:36:08,092 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_rec_infer.onnx[0m
-[32m[INFO] 2026-05-18 15:36:08,093 [RapidOCR] main.py:53: Using C:\Users\DavidRasner\AppData\Local\Programs\Python\Python311\Lib\site-packages\rapidocr\models\ch_PP-OCRv4_rec_infer.onnx[0m
-Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  61%|######1   | 470/770 [00:00<00:00, 4653.58it/s]Loading weights: 100%|##########| 770/770 [00:00<00:00, 4895.18it/s]

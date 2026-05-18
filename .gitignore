@@ -1,8 +1,5 @@
-# Internal BBL source documents — messy originals, kept locally only.
-# Cleaned intermediate Markdown (intermediate/) and the consolidated
-# REQUIREMENTS.md remain tracked.
-docs/BBL Requierements/*.pdf
-docs/BBL Requierements/*.docx
-docs/BBL Requierements/*.pptx
-docs/BBL Requierements/*.xlsx
-docs/BBL Requierements/*.vsdx
+# Internal BBL source documents and their derived working files
+# (cleaned intermediate Markdown, indexes, conversion logs). Kept locally
+# only — REQUIREMENTS.md references their content but the files themselves
+# are not published.
+docs/BBL Requierements/
