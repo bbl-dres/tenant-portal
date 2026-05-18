@@ -1083,17 +1083,17 @@ mindmap
 
 **Persona.** DACH facility-management departments; smaller-than-IWMS deployments; tenants/landlords standardising on GEFMA processes.
 
-| Product | HQ | Notable feature |
-|---|---|---|
-| [pit-FM (pit – cup)](https://www.pit.de/) | Heidelberg, DE | GEFMA-certified; long-standing DACH leader |
-| [waveware (Loy & Hutz)](https://www.loy-hutz.de/) | Burgdorf, DE | GEFMA-certified; broad CAFM suite |
-| [ConjectFM (RIB Software)](https://www.rib-software.com/) | Stuttgart, DE (RIB Group) | CAFM + BIM2FM bridge |
-| [FAMOS (Keßler Solutions)](https://www.kesslersolutions.de/) | Chemnitz, DE | DACH CAFM; popular in the mid-tier |
-| [KEYLOGIC](https://www.keylogic.ch/) | Bern, CH | **Swiss-domiciled** CAFM; KBOB-aligned; cantonal RE deployments — ⚠️ `keylogic.ch` served a parked Hetzner page during the 18 May 2026 scan, verify vendor status |
-| [Speedikon FM](https://www.speedikon.com/) | Bensheim, DE | CAFM + ERP integration |
-| [GEORG (VIT)](https://www.vit-group.de/) | Hannover, DE | GIS-led CAFM for industrial / federal estates |
-| [TOL (Total Office Solutions)](https://tol.ch) | Lausanne, CH | **Swiss-domiciled** FM / workplace |
-| [Caverion CAFM](https://www.caverion.com) | Helsinki, FI | FM-integrator with bundled CAFM analytics; cross-listed in Segment AG |
+| Product | HQ | Notable feature | BBL fit |
+|---|---|---|---|
+| [pit-FM (pit – cup)](https://www.pit.de/) | Heidelberg, DE | GEFMA-certified; long-standing DACH leader | 🟡 GEFMA-certified DACH leader |
+| [waveware (Loy & Hutz)](https://www.loy-hutz.de/) | Burgdorf, DE | GEFMA-certified; broad CAFM suite | 🟡 GEFMA-certified |
+| [ConjectFM (RIB Software)](https://www.rib-software.com/) | Stuttgart, DE (RIB Group) | CAFM + BIM2FM bridge | 🟡 RIB Group CAFM |
+| [FAMOS (Keßler Solutions)](https://www.kesslersolutions.de/) | Chemnitz, DE | DACH CAFM; popular in the mid-tier | 🟡 DACH mid-tier |
+| [KEYLOGIC](https://www.keylogic.ch/) | Bern, CH | **Swiss-domiciled** CAFM; KBOB-aligned; cantonal RE deployments — ⚠️ `keylogic.ch` served a parked Hetzner page during the 18 May 2026 scan, verify vendor status | 🟢 Swiss-domiciled CAFM (verify status) |
+| [Speedikon FM](https://www.speedikon.com/) | Bensheim, DE | CAFM + ERP integration | 🟡 DE CAFM + ERP |
+| [GEORG (VIT)](https://www.vit-group.de/) | Hannover, DE | GIS-led CAFM for industrial / federal estates | 🟡 DE federal-estate GIS-CAFM |
+| [TOL (Total Office Solutions)](https://tol.ch) | Lausanne, CH | **Swiss-domiciled** FM / workplace | 🟢 Swiss-domiciled FM |
+| [Caverion CAFM](https://www.caverion.com) | Helsinki, FI | FM-integrator with bundled CAFM analytics; cross-listed in Segment AG | 🟡 FI FM integrator |
 
 <sub>**Preview — selected vendor** (product diagram from vendor's own page; link goes to source page):</sub>
 
