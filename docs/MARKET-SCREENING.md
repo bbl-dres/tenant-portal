@@ -140,25 +140,28 @@ mindmap
 
 ## 6. Details by Segment
 
+> **BBL fit legend** *(scored against [REQUIREMENTS.md](REQUIREMENTS.md))* — 🟢 **High** = directly fits the pilot (Landing Page + Bedarf Unterbringung) or strong Swiss-federal precedent (SAP RE-FX-compatible, Swiss-domiciled, federal references) · 🟡 **Medium** = fits the roadmap (Case A/B/C) or is adjacent / relevant later · 🔴 **Low** = out of pilot scope, weak federal fit; included for context · ⚪ **N/A** = outside the federal property-management context (e.g. US multifamily, consumer fintech).
+> The pilot was decided as **Create on RHOS** (in-house on Red Hat OpenShift, operated by BIT), so commercial IWMS / portal suites are by definition not the pilot path — they are scored for a possible later "Buy" iteration.
+
 ### A. IWMS with tenant module
 
 **Definition.** Suites combining real-estate portfolio, lease admin, space/floor planning, maintenance, projects and increasingly workplace experience into one platform with a tenant/occupant layer. Differentiator vs. ERP: workplace + CAD/BIM + IoT lifecycle.
 
 **Persona.** Corporate real-estate / facility-management functions of large enterprises and government landlords.
 
-| Product | HQ / country | Hosting | Pricing | Key integrations | Notable feature |
-|---|---|---|---|---|---|
-| [Planon Universe + RE Mgmt for SAP S/4HANA](https://planonsoftware.com/) | Nijmegen, NL (Schneider Electric majority) | Cloud / private | Per module + named user; quote-based | SAP S/4HANA Endorsed App; BTP; IFC/BIM | Only SAP-endorsed RE/FM partner since May 2023 |
-| [Eptura Workplace / Archibus / Serraview](https://eptura.com/) | Atlanta, USA | Cloud | Quote-based | Microsoft 365, Google, Slack, SAP | Leader in Gartner WEX MQ 2026 and Verdantix Green Quadrant 2025 |
-| [IBM TRIRIGA](https://www.ibm.com/products/tririga) | Armonk, USA | Cloud / on-prem | Per authorized/concurrent user | Maximo, Watson, Envizi (ESG) | Verdantix Leader 2025 |
-| [MRI Software](https://www.mrisoftware.com/) | Solon (Ohio), USA | Cloud | Per door / per unit | SAP, AppFolio Connect, GoCardless | 53 acquisitions; ANZ via Proptech Labs |
-| [Nuvolo Connected Workplace](https://www.nuvolo.com/) | Paramus (NJ), USA | ServiceNow Now Platform | Named user + per asset | ServiceNow, SAP | Native ServiceNow; life-sciences strength |
-| [Spacewell Workplace](https://spacewell.com/) (Dexma, MCS) | Antwerp, BE (Nemetschek) | Cloud | Concurrent user + IoT sensor count | BIM, IFC, Nemetschek | BIM-native IWMS; WiredScore accredited; Verdantix Leader 2025 |
-| [Tango](https://tangoanalytics.com/) (incl. Locatee) | Dallas, USA | Cloud | Quote-based | SAP, Yardi, Workday | Acquired Locatee Mar 2024 |
-| [FM:Systems](https://fmsystems.com/) (Johnson Controls) | Raleigh (NC), USA | Cloud | Per building / per m² | OpenBlue, BIM | Johnson Controls integration for OT/IT |
-| [Accruent (Lucernex, Famis)](https://www.accruent.com/) | Austin, USA | Cloud / hybrid | Per user + per asset | SAP, Oracle | Strong on lease admin |
-| [Trimble Manhattan ONE](https://manhattanone.trimble.com/) | Westminster (CO), USA | Cloud / on-prem | Per concurrent user | Trimble AEC | Long-standing IWMS |
-| [ServiceNow WSD](https://www.servicenow.com/products/workplace-service-delivery.html) | Santa Clara, USA | ServiceNow cloud | Pro / Enterprise tiers | Now Platform, Microsoft 365, MappedIn, BMS | Visitor, case, reservation, indoor mapping, AI via Now Assist |
+| Product | HQ / country | Hosting | Pricing | Key integrations | Notable feature | BBL fit |
+|---|---|---|---|---|---|---|
+| [Planon Universe + RE Mgmt for SAP S/4HANA](https://planonsoftware.com/) | Nijmegen, NL (Schneider Electric majority) | Cloud / private | Per module + named user; quote-based | SAP S/4HANA Endorsed App; BTP; IFC/BIM | Only SAP-endorsed RE/FM partner since May 2023 | 🟢 Only SAP RE-FX-endorsed option; natural Buy candidate |
+| [Eptura Workplace / Archibus / Serraview](https://eptura.com/) | Atlanta, USA | Cloud | Quote-based | Microsoft 365, Google, Slack, SAP | Leader in Gartner WEX MQ 2026 and Verdantix Green Quadrant 2025 | 🟡 Workplace leader, no SAP RE-FX, US-hosted |
+| [IBM TRIRIGA](https://www.ibm.com/products/tririga) | Armonk, USA | Cloud / on-prem | Per authorized/concurrent user | Maximo, Watson, Envizi (ESG) | Verdantix Leader 2025 | 🟡 Enterprise IWMS; no SAP RE-FX path |
+| [MRI Software](https://www.mrisoftware.com/) | Solon (Ohio), USA | Cloud | Per door / per unit | SAP, AppFolio Connect, GoCardless | 53 acquisitions; ANZ via Proptech Labs | 🟡 Multifamily-heavy; weak federal-CH fit |
+| [Nuvolo Connected Workplace](https://www.nuvolo.com/) | Paramus (NJ), USA | ServiceNow Now Platform | Named user + per asset | ServiceNow, SAP | Native ServiceNow; life-sciences strength | 🔴 ServiceNow-bound; outside BBL/BIT stack |
+| [Spacewell Workplace](https://spacewell.com/) (Dexma, MCS) | Antwerp, BE (Nemetschek) | Cloud | Concurrent user + IoT sensor count | BIM, IFC, Nemetschek | BIM-native IWMS; WiredScore accredited; Verdantix Leader 2025 | 🟡 EU/DACH-anchored; BIM-native; no SAP RE-FX endorsement |
+| [Tango](https://tangoanalytics.com/) (incl. Locatee) | Dallas, USA | Cloud | Quote-based | SAP, Yardi, Workday | Acquired Locatee Mar 2024 | 🔴 US-anchored despite Locatee/Zurich |
+| [FM:Systems](https://fmsystems.com/) (Johnson Controls) | Raleigh (NC), USA | Cloud | Per building / per m² | OpenBlue, BIM | Johnson Controls integration for OT/IT | 🔴 US, OT-heavy; tangential to pilot |
+| [Accruent (Lucernex, Famis)](https://www.accruent.com/) | Austin, USA | Cloud / hybrid | Per user + per asset | SAP, Oracle | Strong on lease admin | 🔴 Lease-admin focus; not tenant-portal-shaped |
+| [Trimble Manhattan ONE](https://manhattanone.trimble.com/) | Westminster (CO), USA | Cloud / on-prem | Per concurrent user | Trimble AEC | Long-standing IWMS | 🔴 US generic IWMS; no federal-CH track |
+| [ServiceNow WSD](https://www.servicenow.com/products/workplace-service-delivery.html) | Santa Clara, USA | ServiceNow cloud | Pro / Enterprise tiers | Now Platform, Microsoft 365, MappedIn, BMS | Visitor, case, reservation, indoor mapping, AI via Now Assist | 🟡 Strong workflow/case engine; ServiceNow-bound |
 
 **Maturity.** Mature and consolidating.
 **Swiss-context note.** Planon is the only SAP Endorsed App in this category — structurally important for SAP-RE-FX estates like BBL's. Spacewell (Antwerp, Nemetschek-owned) is the closest DACH-anchored IWMS leader. Swiss data residency must be configured explicitly.
