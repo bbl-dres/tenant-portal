@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.aareon.de)",
+      "WebFetch(domain:www.garaio-rem.ch)",
+      "WebFetch(domain:www.wwimmo.ch)",
+      "WebFetch(domain:www.abacus.ch)",
+      "WebFetch(domain:www.yardi.com)",
+      "WebFetch(domain:www.skribble.com)",
+      "WebFetch(domain:www.mrisoftware.com)",
+      "WebFetch(domain:www.swisssign.com)",
+      "WebFetch(domain:www.agov.admin.ch)",
+      "WebFetch(domain:www.docusign.com)",
+      "WebFetch(domain:www.adobe.com)",
+      "WebFetch(domain:yousign.com)",
+      "WebFetch(domain:www.swisscom.ch)",
+      "WebFetch(domain:www.exoscale.com)",
+      "WebFetch(domain:www.infomaniak.com)",
+      "WebFetch(domain:aws.amazon.com)",
+      "WebFetch(domain:azure.microsoft.com)"
+    ]
+  }
+}
