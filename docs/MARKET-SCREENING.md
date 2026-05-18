@@ -171,7 +171,7 @@ mindmap
 <sub><b>Planon</b><br/><i>[Dashboard]</i> · Connect for Analytics — Asset Management twin-monitor view<br/><a href="https://planonsoftware.com/">planonsoftware.com</a></sub>
 </td>
 <td align="center" width="50%" valign="top">
-<a href="https://eptura.com/our-platform/eptura-engage/intelligent-workplace/"><img src="../assets/images/market-screening/eptura.webp" alt="Eptura Engage Utilization heatmap" width="280"/></a><br/>
+<a href="https://eptura.com/our-platform/eptura-engage/intelligent-workplace/"><img src="../assets/images/market-screening/eptura.jpg" alt="Eptura Engage Utilization heatmap" width="280"/></a><br/>
 <sub><b>Eptura</b><br/><i>[Diagram]</i> · Engage Utilization heatmap on floor plan<br/><a href="https://eptura.com/">eptura.com</a></sub>
 </td>
 </tr>
@@ -265,11 +265,11 @@ mindmap
 <table>
 <tr>
 <td align="center" width="50%" valign="top">
-<a href="https://www.deskbird.com/"><img src="../assets/images/market-screening/deskbird.webp" alt="deskbird mobile booking UI" width="280"/></a><br/>
+<a href="https://www.deskbird.com/"><img src="../assets/images/market-screening/deskbird.jpg" alt="deskbird mobile booking UI" width="280"/></a><br/>
 <sub><b>deskbird</b><br/><i>[Mobile UI]</i> · Booking confirmation screen — <b>Swiss-domiciled (St. Gallen)</b><br/><a href="https://www.deskbird.com/">deskbird.com</a></sub>
 </td>
 <td align="center" width="50%" valign="top">
-<a href="https://www.skedda.com/"><img src="../assets/images/market-screening/skedda.webp" alt="Skedda floor plan booking UI" width="280"/></a><br/>
+<a href="https://www.skedda.com/"><img src="../assets/images/market-screening/skedda.jpg" alt="Skedda floor plan booking UI" width="280"/></a><br/>
 <sub><b>Skedda</b><br/><i>[Screenshot]</i> · Interactive floor-plan booking UI<br/><a href="https://www.skedda.com/">skedda.com</a></sub>
 </td>
 </tr>
@@ -423,7 +423,7 @@ mindmap
 <table>
 <tr>
 <td align="center" width="50%" valign="top">
-<a href="https://www.allthings.me/products/portal---das-umfassende-mieterportal"><img src="../assets/images/market-screening/allthings.avif" alt="Allthings Portale tenant portal" width="280"/></a><br/>
+<a href="https://www.allthings.me/products/portal---das-umfassende-mieterportal"><img src="../assets/images/market-screening/allthings.jpg" alt="Allthings Portale tenant portal" width="280"/></a><br/>
 <sub><b>Allthings</b><br/><i>[Product visual]</i> · Mieterportal "Portale" — <b>Swiss-HQ, ETH spin-off</b><br/><a href="https://allthings.me/">allthings.me</a></sub>
 </td>
 <td align="center" width="50%" valign="top">
@@ -536,7 +536,7 @@ mindmap
 <table>
 <tr>
 <td align="center" width="33%" valign="top">
-<a href="https://www.skribble.com/"><img src="../assets/images/market-screening/skribble.webp" alt="Skribble signing interface" width="280"/></a><br/>
+<a href="https://www.skribble.com/"><img src="../assets/images/market-screening/skribble.jpg" alt="Skribble signing interface" width="280"/></a><br/>
 <sub><b>Skribble</b><br/><i>[Interface]</i> · QES signing screen (DE landing)<br/><a href="https://www.skribble.com/">skribble.com</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
@@ -558,7 +558,7 @@ mindmap
 <sub><b>Adobe Sign</b><br/><i>[User-supplied]</i> · Adobe Acrobat Sign product visual<br/><a href="https://www.adobe.com/sign.html">adobe.com/sign</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://yousign.com/"><img src="../assets/images/market-screening/yousign.avif" alt="Yousign hero illustration" width="280"/></a><br/>
+<a href="https://yousign.com/"><img src="../assets/images/market-screening/yousign.jpg" alt="Yousign hero illustration" width="280"/></a><br/>
 <sub><b>Yousign</b><br/><i>[Hero]</i> · Homepage product illustration<br/><a href="https://yousign.com/">yousign.com</a></sub>
 </td>
 </tr>
@@ -1033,7 +1033,7 @@ mindmap
 <sub><b>Bentley iTwin</b><br/><i>[Screenshot]</i> · iTwin Experience digital-twin viewer<br/><a href="https://www.bentley.com/software/itwin/">bentley.com/itwin</a></sub>
 </td>
 <td align="center" width="33%" valign="top">
-<a href="https://revizto.com/en/"><img src="../assets/images/market-screening/revizto.webp" alt="Revizto collaborative clash automation" width="280"/></a><br/>
+<a href="https://revizto.com/en/"><img src="../assets/images/market-screening/revizto.jpg" alt="Revizto collaborative clash automation" width="280"/></a><br/>
 <sub><b>Revizto</b><br/><i>[Screenshot]</i> · Collaborative clash + 3D issue tracker — <b>Swiss-HQ (Lausanne)</b><br/><a href="https://revizto.com/">revizto.com</a></sub>
 </td>
 </tr>
@@ -1137,7 +1137,7 @@ mindmap
 <table>
 <tr>
 <td align="center" width="50%" valign="top">
-<a href="https://www.deepki.com/solutions/capabilities/"><img src="../assets/images/market-screening/deepki.jpeg" alt="Deepki ESG supervision dashboard" width="280"/></a><br/>
+<a href="https://www.deepki.com/solutions/capabilities/"><img src="../assets/images/market-screening/deepki.jpg" alt="Deepki ESG supervision dashboard" width="280"/></a><br/>
 <sub><b>Deepki</b><br/><i>[Dashboard]</i> · Deepki Ready ESG supervision (EN)<br/><a href="https://www.deepki.com/">deepki.com</a></sub>
 </td>
 <td align="center" width="50%" valign="top">
@@ -1178,7 +1178,7 @@ mindmap
 <table>
 <tr>
 <td align="center" width="50%" valign="top">
-<a href="https://www.odoo.com/app/rental"><img src="../assets/images/market-screening/odoo-property.webp" alt="Odoo Rental product UI" width="280"/></a><br/>
+<a href="https://www.odoo.com/app/rental"><img src="../assets/images/market-screening/odoo-property.jpg" alt="Odoo Rental product UI" width="280"/></a><br/>
 <sub><b>Odoo (Rental / Property)</b><br/><i>[Screenshot]</i> · Rental product configuration UI<br/><a href="https://www.odoo.com/app/rental">odoo.com/rental</a></sub>
 </td>
 <td align="center" width="50%" valign="top">

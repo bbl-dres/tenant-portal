@@ -47,7 +47,16 @@
       "Bash(cd \"C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub\\\\property-inventory\" && ls -la)",
       "Read(//c/Users/DavidRasner/Documents/GitHub/property-inventory/**)",
       "Bash(grep -E \"^\\\\.\\\\w+.*\\\\{|^\\\\..*--\" css/style.css)",
-      "Bash(xargs basename -a)"
+      "Bash(xargs basename -a)",
+      "Bash(xargs grep -l \"wcag\\\\|a11y\\\\|accessibility\\\\|ech\\\\|internationali\" -i)",
+      "Bash(awk -F. '{print $NF}')",
+      "Bash(rm -f eptura.webp eptura.jpg)",
+      "Bash(mv epturea.JPG eptura.jpg)",
+      "Bash(rm -f spacewell.webp spacewell.jpg)",
+      "Bash(mv spacewell.JPG _spacewell.tmp)",
+      "Bash(mv _spacewell.tmp spacewell.jpg)",
+      "Bash(grep -i -E \"\\\\.\\(png|svg|jpeg|jpg\\)$\")",
+      "Bash(grep -i -v -E \"\\\\.jpg$\")"
     ]
   }
 }
