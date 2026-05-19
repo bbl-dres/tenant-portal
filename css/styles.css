@@ -560,22 +560,23 @@
 .breadcrumb__sep { margin: 0 var(--space-xs); color: var(--color-text-muted); }
 
 /* ── HERO ───────────────────────────────────────────────────────────────── */
-/* CD Bund hero is layout-driven, white background, no gradient. The eyebrow
-   sits above a large heading and a lead paragraph; CTA row underneath.
-   Variant .hero--surface adds a subtle alt-bg for hero sections that need
-   to separate from page content. */
+/* CD Bund hero is layout-driven, white background, no gradient. Large
+   heading, a lead paragraph, then a CTA row. Variants:
+     .hero--wide  — widens the title max-width to 26ch (vs. default 18ch)
+     .hero--split — two-column hero with .hero__figure on the right
+   Title size comes from the .h1 utility (compose: `class="h1 hero__title"`). */
 .hero {
   padding: var(--section-py) var(--container-padding);
   background: var(--color-bg-default);
 }
-.hero--surface { background: var(--color-bg-surface); }
 .hero__inner { max-width: var(--container-max-width); margin: 0 auto; }
+/* Hero title — layout-only. Combine with `.h1` for the responsive size
+   (DS pattern: `class="h1 hero__title"`). Sets break behaviour + max-width
+   so titles wrap at ~3 lines max, mirroring kbob/bbl hero proportions. */
 .hero__title {
-  font-size: var(--text-display);
-  line-height: var(--line-height-tight);
-  margin: 0 0 var(--space-md);
   color: var(--color-text-primary);
-  max-width: 18ch;       /* CD Bund hero titles wrap at ~3 lines max */
+  max-width: 18ch;
+  overflow-wrap: break-word;
 }
 .hero--wide .hero__title { max-width: 26ch; }
 .hero__lead {
@@ -609,27 +610,22 @@
 @media (min-width: 1920px) { .btn { min-height: 52px; } }
 /* CD Bund: filled action button = navy (secondary-600). Red is reserved
    for danger and brand-accent surfaces (active nav underline, card rails). */
-.btn--primary {
+.btn--filled {
   background: var(--color-secondary-600);
   color: var(--color-white);
 }
-.btn--primary:hover { background: var(--color-secondary-700); }
+.btn--filled:hover { background: var(--color-secondary-700); }
 .btn--outline {
   background: transparent;
   color: var(--color-text-primary);
   border-color: var(--color-border-input);
 }
 .btn--outline:hover { background: var(--color-bg-alt); }
-.btn--ghost {
+.btn--bare {
   background: transparent;
   color: var(--color-text-primary);
 }
-.btn--ghost:hover { background: var(--color-bg-alt); }
-.btn--danger {
-  background: var(--color-danger);
-  color: var(--color-white);
-}
-.btn--danger:hover { background: #B91C1C; }
+.btn--bare:hover { background: var(--color-bg-alt); }
 .btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-xs); }
 .btn--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-xl); font-size: var(--text-body); }
 .btn[disabled], .btn--disabled {
@@ -851,12 +847,32 @@
 .card--quick:hover .arrow-btn { background: var(--color-primary); }
 .card--quick:hover .arrow-btn svg { color: var(--color-white); stroke: var(--color-white); }
 
-/* Section heading used above card--quick grids */
+/* DS heading utility classes — mirror designsystem css/foundations/typography.postcss
+   (.h1 → .h5). Combine with layout-specific block classes (e.g.
+   `class="h1 hero__title"`) so each block contributes only its own
+   responsibility (size/weight vs. spacing/max-width). */
+.h1 { font-size: var(--text-h1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); letter-spacing: -0.01em; }
+.h2 { font-size: var(--text-h2); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); letter-spacing: -0.01em; }
+.h3 { font-size: var(--text-h3); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
+.h4 { font-size: var(--text-h4); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
+.h5 { font-size: var(--text-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
+
+/* Caption — DS .legend / figcaption pattern (typography.postcss:131-137).
+   Light grey, body-xs sized, slight top padding to separate from the image. */
+.legend,
+figcaption {
+  font-size: var(--text-body-xs);
+  padding-top: var(--space-sm);
+  color: var(--color-text-secondary);  /* gray-500 — matches DS text-text-500 */
+  line-height: var(--line-height-snug);
+}
+
+/* Section heading — layout-only. Combine with .h2 (or .h1) for size:
+   `<h2 class="h2 section-heading">…</h2>`. Adds extra bottom space below
+   the heading vs. the default --space-md from .h2. Mirrors the DS pattern
+   of composing a typography utility (.h1..h5) with a layout block class. */
 .section-heading {
-  font-size: var(--text-h2);
-  margin: 0 0 var(--space-lg);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.01em;
+  margin-bottom: var(--space-lg);
 }
 
 /* Card-internal heading — used as the only title inside a plain .card.
@@ -1059,11 +1075,17 @@
 }
 .form-field__required { color: var(--color-danger); }
 .form-field__hint { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+/* Standalone input — mirrors DS .input from css/components/input.postcss.
+   Used as the base for any text-like control (input/textarea/select),
+   reusable outside .form-field (e.g. header search, inline filters).
+   .form-field__input/__textarea/__select inherit the same visuals via the
+   shared selector list below — markup that says `class="input"` or
+   `class="form-field__input"` renders identically. */
+.input,
 .form-field__input,
 .form-field__textarea,
 .form-field__select {
   padding: var(--space-sm) var(--space-md);
-  /* CD Bund: subtle shadow + thin border, focus elevates the shadow */
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-white);
@@ -1073,21 +1095,29 @@
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
+.input:hover,
 .form-field__input:hover,
 .form-field__textarea:hover,
 .form-field__select:hover {
   border-color: var(--color-border-input);
 }
+.input:focus,
 .form-field__input:focus,
 .form-field__textarea:focus,
 .form-field__select:focus {
   outline: none;
   border-color: var(--color-text-primary);
-  box-shadow: 0 0 0 3px rgba(134, 85, 246, 0.25), var(--shadow-card);
+  box-shadow: 0 0 0 3px var(--color-focus-tint), var(--shadow-card);
 }
+.input--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
+.input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-body); }
+.input--error { border-color: var(--color-danger); }
+.input--disabled,
+.input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--color-bg-alt); }
 .form-field__textarea { min-height: 90px; resize: vertical; }
 .form-field--invalid .form-field__input,
-.form-field--invalid .form-field__textarea {
+.form-field--invalid .form-field__textarea,
+.form-field--invalid .input {
   border-color: var(--color-danger);
 }
 .form-field__error {
@@ -1165,6 +1195,9 @@
   z-index: var(--z-modal);
   padding: var(--space-md);
 }
+/* Modal — base + DS-aligned size modifiers (.modal--sm/md/lg/auto).
+   Default (.modal alone) is medium 600 px; combine with --sm/--lg/--auto for
+   narrower forms, wider bulk-approve views, or fit-content sizing. */
 .modal {
   background: var(--color-white);
   border-radius: var(--radius-lg);
@@ -1174,6 +1207,11 @@
   overflow: auto;
   box-shadow: var(--shadow-lg);
 }
+.modal--sm   { max-width: 420px; }
+.modal--md   { max-width: 600px; }    /* default — explicit for clarity */
+.modal--lg   { max-width: 900px; }
+.modal--xl   { max-width: 1100px; }
+.modal--auto { max-width: min(90vw, 1100px); width: auto; }
 .modal__header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; }
 .modal__title { margin: 0; font-size: var(--text-h3); }
 .modal__close {
@@ -1545,7 +1583,6 @@
 }
 @media (max-width: 480px) {
   .hero { padding: var(--section-py-half) var(--container-padding); }
-  .hero__title { font-size: var(--text-h1); }
   .hero__lead { font-size: var(--text-body); }
   .pipeline { font-size: var(--text-body-xs); }
 }
@@ -2407,6 +2444,209 @@
 }
 
 /* Property grid (Meine Immobilien) */
+/* ── PROPERTIES VIEW (gallery / list / map) ─────────────────────────────────
+   Multi-view portfolio browser. Toolbar (search + view toggle + count) sits
+   above the active view; pagination at the bottom for gallery + list.
+   Mirrors patterns from sibling prototypes (transaction-immo, property-inventory). */
+.property-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "search toggle" "count count";
+  gap: var(--space-md);
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+@media (min-width: 1024px) {
+  .property-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "search toggle count";
+    column-gap: var(--space-md);
+  }
+}
+.property-toolbar__search {
+  grid-area: search;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.property-toolbar__search .inline-icon {
+  position: absolute;
+  left: var(--space-sm);
+  width: 18px; height: 18px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+.property-toolbar__input {
+  width: 100%;
+  padding-left: 38px;
+  padding-right: 38px;
+}
+.property-toolbar__clear {
+  position: absolute;
+  right: var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  padding: 4px;
+  display: inline-flex;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.property-toolbar__clear:hover { color: var(--color-text-primary); background: var(--color-bg-alt); }
+.property-toolbar__count {
+  grid-area: count;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* View toggle — segmented control, DS-aligned pill group. */
+.view-toggle {
+  grid-area: toggle;
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--color-border);
+  font: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  min-height: var(--btn-min-h);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.view-toggle__btn:last-child { border-right: none; }
+.view-toggle__btn:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
+.view-toggle__btn--active {
+  background: var(--color-secondary-600);
+  color: var(--color-white);
+}
+.view-toggle__btn--active:hover { background: var(--color-secondary-700); color: var(--color-white); }
+.view-toggle__btn .inline-icon { margin-right: 0; }
+@media (max-width: 640px) {
+  .view-toggle__label { display: none; }
+  .view-toggle__btn { padding: var(--space-sm) var(--space-md); }
+}
+
+/* Property list (table view) */
+.property-list-wrap { overflow-x: auto; }
+.property-list {
+  width: 100%;
+  font-size: var(--text-body-sm);
+}
+.property-list th.numeric, .property-list td.numeric { text-align: right; }
+.property-list tbody tr { cursor: pointer; }
+.property-list tbody tr:hover { background: var(--color-bg-alt); }
+.property-list code {
+  font-family: var(--font-family-mono);
+  font-size: 0.95em;
+  color: var(--color-text-secondary);
+}
+
+/* Map view — full-width canvas; markers carry the affordance, no anchored list. */
+.property-map {
+  height: clamp(480px, 75vh, 820px);
+}
+.property-map__canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-card);
+}
+.property-map__error {
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+/* Marker — federal red teardrop pin. Standalone button so it's tabbable. */
+.property-marker {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  width: 24px; height: 30px;
+  align-items: center;
+  justify-content: center;
+}
+.property-marker__pin {
+  display: block;
+  width: 18px; height: 18px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-white);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  transition: transform var(--transition-fast);
+}
+.property-marker:hover .property-marker__pin,
+.property-marker--active .property-marker__pin {
+  background: var(--color-primary-700);
+  transform: rotate(-45deg) scale(1.15);
+}
+.property-popup__title { margin: 0 0 4px; font-weight: var(--font-weight-bold); font-size: var(--text-body); }
+.property-popup__meta  { margin: 0 0 2px; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+.property-popup__link  { display: inline-block; margin-top: 6px; font-size: var(--text-body-sm); color: var(--color-primary); font-weight: var(--font-weight-bold); text-decoration: none; }
+.property-popup__link:hover { text-decoration: underline; }
+
+/* Pagination — DS-aligned simple list pattern. Used by gallery + list. */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin: var(--space-xl) 0 0;
+  flex-wrap: wrap;
+}
+.pagination__list {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-body-sm);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  transition: background var(--transition-fast);
+}
+.pagination__btn:hover { background: var(--color-bg-alt); }
+.pagination__btn--active {
+  background: var(--color-secondary-600);
+  color: var(--color-white);
+  border-color: var(--color-secondary-600);
+  font-weight: var(--font-weight-bold);
+}
+.pagination__btn--active:hover { background: var(--color-secondary-700); color: var(--color-white); }
+.pagination__btn--disabled { opacity: 0.4; pointer-events: none; }
+.pagination__ellipsis { padding: 0 var(--space-xs); color: var(--color-text-muted); }
+
+/* Existing card grid (gallery view) */
 .property-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

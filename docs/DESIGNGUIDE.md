@@ -103,19 +103,27 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 
 | BEM block            | Matches DS                                | Notes                                                                |
 | -------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
-| `.btn`, `.btn--*`    | `btn.postcss`                             | variants: primary / outline / ghost / danger; sm/lg sizes            |
+| `.btn`, `.btn--*`    | `btn.postcss`                             | variants: filled / outline / bare; sizes: sm/lg                      |
 | `.badge`, `.badge--*`| `badge.postcss`                           | colors only — **no leading icons** (status badges are textual)       |
-| `.card`, `.card--*`  | `card.postcss`                            | variants: quick, profile, application, property, content, highlight  |
-| `.modal`             | `modal.postcss`                           | naming collides with DS — display logic differs                      |
-| `.toast-host` / `.toast` | `toast-message.postcss`                | naming differs from DS `.toast__message.active`                     |
+| `.card`, `.card--*`  | `card.postcss`                            | variants: quick, profile, application, property, content, highlight, flat |
+| `.modal`, `.modal--{sm,md,lg,xl,auto}` | `modal.postcss`               | naming collides with DS — display logic differs (see §5a)            |
+| `.toast-host` / `.toast` | `toast-message.postcss`               | naming differs from DS `.toast__message.active` (see §5a)            |
 | `.accordion__*`      | `accordion.postcss`                       | max-height animation                                                 |
 | `.step-indicator`    | `step-indicator.postcss`                  | 36 px circles, gray-400 outline → confirmed green / active gray fill |
 | `.pipeline`          | (no DS equivalent)                        | portal-specific status sequence                                      |
-| `.form-field`        | `form.postcss` + `input.postcss`          | shallower nesting than DS `.form__group__input`                      |
+| `.form-field`        | `form.postcss`                            | layout shell for label / input / hint / error                        |
+| `.input`, `.input--{sm,lg,error,disabled}` | `input.postcss`             | standalone input visuals — reusable outside `.form-field`            |
 | `.table`             | `table.postcss`                           | basic — DS variants (compact/zebra/uppercase-headers) deferred       |
-| `.share-bar`         | `share-bar.postcss`                       | portal-specific                                                      |
+| `.share-bar`         | `share-bar.postcss`                       | portal-specific layout                                               |
 | `.download-list`     | derived from kbob/armasuisse              | red down-arrow + title + subtitle + format \| size \| date           |
-| `.alert-banner`      | (deferred — see §5)                       | red top-bar `Prototyp …` notice used instead                         |
+| `.contact-block`     | derived from armasuisse Immo-Portal       | two-column address + phone/email/web with red icon affordances       |
+| `.link`, `.link--external` | `link.postcss`                      | external-link arrow icon via mask + DS `--icon-external-link` SVG     |
+| `.h1`, `.h2`, `.h3`, `.h4`, `.h5` | `typography.postcss`           | heading-size utility classes; compose with layout (`h2 section-heading`) |
+| `.legend`, `figcaption` | `typography.postcss`                   | image caption — body-xs, gray-500, top padding                       |
+| `.meta-info`         | (semantic analogue)                       | small secondary text above page headings; replaces uppercase eyebrow |
+| `.card__title`       | `card.postcss`                            | bold body-size heading for card-internal sub-titles                  |
+| `.alert-banner`      | `alert-banner.postcss`                    | CSS shipped; **not used** — see §5 (prototype notice stays inline)   |
+| `.section-heading`   | (layout-only modifier)                    | adds extra bottom margin; compose with `.h1`/`.h2` for size          |
 
 ### 3.1 Icons
 
@@ -182,10 +190,41 @@ size | date` metadata strip. Whole row is one clickable link.
    `css/skins/default.postcss`. When DS changes, [`css/tokens.css`](../css/tokens.css) must be
    reviewed.
 
-5. **Modal / Toast** — class names overlap with DS but our display/dismissal
-   logic differs (no `[open='true']` attribute binding, no `.toast__message
-   .active` wrapping pattern). Copy-paste from DS markup will not work
-   one-to-one.
+5. **`.tag-item` not adopted** — at first glance our `.badge--info` for
+   categorical labels (SEM/EDA/BK) looked like a `.tag-item` candidate, but
+   DS `.tag-item` is a 44 px-min-height **filter chip** (clickable, pill-shaped,
+   active/hover states). For small inline categorical labels, our `.badge--info`
+   is the correct fit. Adopt `.tag-item` when we add actual filter UIs (e.g.
+   tag-based search refinement).
+
+## 5a. Naming-collision register
+
+Class names that exist in both codebases but with **divergent behaviour**.
+Document them here so copy-paste from `swiss/designsystem` doesn't surprise.
+
+| Class | Our behaviour | DS behaviour | Risk if mixed |
+| --- | --- | --- | --- |
+| `.modal` | Toggled by JS removing the surrounding `.modal-backdrop` wrapper. | Toggled via `[open='true']` attribute (Vue binding). | DS markup won't show/hide in our app. |
+| `.toast` | Animated message inside a `.toast-host` region. | Wrapped as `.toast__message.active`. No `.toast-host` concept. | Markup shapes differ. |
+| `.card--flat` | Borderless, no shadow. | Bottom-bordered list-item variant. | Two visually different looks under the same name. |
+| `.card--highlight` | (Modifier defined but currently unused after recent edit.) | Secondary-300 backplate behind the card. | Low — we no longer apply it. |
+| `.notification-banner` | Only the `--danger/--warning/--success` colour variants live in our CSS. | Full DS includes `__wrapper` + header/body grid. | Subset usage — not a collision per se. |
+
+## 5b. Pattern-composition rules (DS-aligned)
+
+These compose typography utility classes with layout block classes so each
+contributes a single responsibility — mirrors the DS pattern in
+`css/foundations/typography.postcss` (.h1..h5) + `css/sections/hero.postcss`
+(`.hero__title`).
+
+- **Headings** use `<hN class="hN block__title">` form. E.g.
+  `<h1 class="h1 hero__title">` or `<h2 class="h2 section-heading">`.
+  - `.hN` (h1..h5) sets size/weight/line-height/margin via tokens.
+  - The block class (`hero__title`, `section-heading`) contributes only
+    layout (max-width, extra margin, break-words).
+- **Inline icons** use `<svg class="inline-icon">` produced by `P.icon('name')`.
+- **External links** use `<a class="link link--external">` for the trailing
+  arrow icon affordance (mirrors DS `link.postcss` `.link--external`).
 
 ## 6. Authoring rules
 
