@@ -39,6 +39,114 @@
     P.registerRoute('#/queue',       renderQueue);
     P.registerRoute('#/review/:id',  renderReviewerSplit);
     P.registerRoute('#/help',        renderHelp);
+    P.registerRoute('#/properties',  renderProperties);
+    P.registerRoute('#/properties/:id', renderPropertyDetail);
+    P.registerRoute('#/downloads',   renderDownloads);
+    P.registerRoute('#/repair',      renderRepairQuickForm);
+    P.registerRoute('#/profile',     renderProfile);
+    P.registerRoute('#/news',        renderNewsList);
+    P.registerRoute('#/news/:id',    renderNewsDetail);
+    P.registerRoute('#/services',    renderServicesOverview);
+    P.registerRoute('#/moves',       () => renderServiceStub('Umzug & Sonderreinigung', 'REQ-FA-006', 'Transport, Umzug innerhalb einer Liegenschaft und Sonderreinigungsanfragen werden in einer der nächsten Iterationen des Mieterportals freigeschaltet.'));
+    P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
+    P.registerRoute('#/training',    () => renderServiceStub('Schulungen', 'FUNC-LP-007', 'Aktuelle Schulungen wie „Mieterportal kompakt" (60 Min.) und Aufbaukurse sind hier verlinkt — Termin-Buchung folgt in v0.4.'));
+  }
+
+  // ── NEWS SECTION (swisstopo "Aktuell" carousel pattern) ─────────────────
+  function renderNewsSection(items = P.state.news, max = 3) {
+    const visible = items.slice(0, max);
+    return `
+      <section class="news-section section section--alt section--lg" aria-labelledby="newsSectionTitle">
+        <div class="container">
+          <h2 class="section-heading" id="newsSectionTitle">Aktuell</h2>
+          <div class="news-section__viewport">
+            <button class="news-section__nav news-section__nav--prev" type="button" aria-label="Vorherige Nachrichten" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="news-section__track">
+              ${visible.map(newsCard).join('')}
+            </div>
+            <button class="news-section__nav news-section__nav--next" type="button" aria-label="Nächste Nachrichten">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <div class="news-section__footer">
+            <div class="news-section__dots" role="tablist" aria-label="Seiten">
+              <button class="news-section__dot news-section__dot--active" aria-label="Seite 1, aktiv" aria-current="true"></button>
+              <button class="news-section__dot" aria-label="Seite 2"></button>
+            </div>
+            <a class="news-section__more" href="#/news">Weitere News <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function newsCard(n) {
+    return `
+      <a class="profile-card news-card" href="#/news/${n.id}">
+        <div class="profile-card__image" style="background-image:url('${n.image}');"></div>
+        <div class="profile-card__body">
+          <p class="profile-card__date"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
+          <h3 class="profile-card__title">${P.escapeHtml(n.title)}</h3>
+          <p class="profile-card__desc">${P.escapeHtml(n.lead.length > 160 ? n.lead.slice(0, 157) + '…' : n.lead)}</p>
+        </div>
+        ${arrowBtn('profile-card__arrow')}
+      </a>
+    `;
+  }
+
+  // ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
+  function renderNewsList() {
+    shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'News-Übersicht' }] });
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container" style="max-width: 1024px;">
+          <div style="text-align:center;margin-bottom: var(--space-2xl);">
+            <p style="margin:0 0 var(--space-xs); color: var(--color-text-secondary); font-size: var(--text-body-sm);">Veröffentlicht am ${P.formatDate(new Date().toISOString())}</p>
+            <h1 style="margin:0;font-size: var(--text-display);font-weight: var(--font-weight-bold); letter-spacing: -0.02em;">News-Übersicht</h1>
+          </div>
+          <ul class="news-list">
+            ${P.state.news.map(newsListRow).join('')}
+          </ul>
+        </div>
+      </section>
+    `;
+  }
+
+  function newsListRow(n) {
+    return `
+      <li class="news-list__item">
+        <a class="news-list__link" href="#/news/${n.id}">
+          <div class="news-list__body">
+            <p class="news-list__meta"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
+            <h2 class="news-list__title">${P.escapeHtml(n.title)}</h2>
+            <p class="news-list__lead">${P.escapeHtml(n.lead)}</p>
+          </div>
+          <div class="news-list__image" style="background-image:url('${n.image}');"></div>
+        </a>
+      </li>
+    `;
+  }
+
+  function renderNewsDetail({ id }) {
+    const n = P.state.news.find(x => x.id === id);
+    if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
+    shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/news', label: 'News-Übersicht' }, { label: n.title }] });
+    document.getElementById('page-body').innerHTML = `
+      <article class="section">
+        <div class="container" style="max-width: 780px;">
+          <p style="color: var(--color-text-secondary); font-size: var(--text-body-sm); margin: 0 0 var(--space-sm);"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
+          <h1 style="margin: 0 0 var(--space-lg); font-size: var(--text-display); letter-spacing: -0.02em;">${P.escapeHtml(n.title)}</h1>
+          <img src="${n.image}" alt="" style="width:100%; aspect-ratio: 16/9; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: var(--space-xl);">
+          <p style="font-size: var(--text-h4); color: var(--color-text-primary); line-height: var(--line-height-relaxed); margin: 0 0 var(--space-lg);">${P.escapeHtml(n.lead)}</p>
+          <p style="color: var(--color-text-secondary); font-size: var(--text-body-sm); margin: 0; padding-top: var(--space-md); border-top: 1px solid var(--color-border);">
+            Quelle: ${P.escapeHtml(n.source)} · Verantwortlich: ${P.escapeHtml(n.responsible)} · Stand: ${P.formatDate(n.date)} · DE
+          </p>
+          <p style="margin-top: var(--space-xl);"><a href="#/news" class="btn btn--outline">← Zur News-Übersicht</a></p>
+        </div>
+      </article>
+    `;
   }
 
   function renderRoot() {
@@ -59,32 +167,52 @@
     return document.getElementById('main');
   }
 
+  // Canonical service catalogue — all BBL services tenants can request.
+  // Surface: the "Dienstleistungen" nav-menu dropdown.
+  // Source: REQUIREMENTS.md §1.3 pilot + §4.1 Case A roadmap (REQ-FA-*) +
+  // FUNC-LP-007 self-service downloads / training.
+  const SERVICES_MENU = {
+    id: 'services',
+    label: 'Dienstleistungen',
+    type: 'dropdown',
+    items: [
+      { href: '#/services',  label: 'Übersicht aller Dienstleistungen' },
+      { href: '#/wizard/1',  label: 'Bedarf anmelden — Unterbringung, Büro, Auslandvertretung' },
+      { href: '#/repair',    label: 'Schaden melden — Reparaturen, Sanitär, Schliesssystem' },
+      { href: '#/moves',     label: 'Umzug & Sonderreinigung — Transport- und Reinigungsanfragen' },
+      { href: '#/mobiliar',  label: 'Möbel bestellen — Standard- und Spezialmobiliar' },
+      { href: '#/downloads', label: 'Pläne & Dokumente — Grundrisse, Merkblätter, Schulungen' },
+      { href: '#/training',  label: 'Schulungen — „Mieterportal kompakt" und weitere' },
+    ]
+  };
+
   function publicNavItems() {
     return [
-      { id: 'start',    href: '#/',     label: 'Start' },
-      { id: 'help',     href: '#/help', label: 'Häufige Fragen' },
+      { id: 'start', href: '#/', label: 'Start' },
+      SERVICES_MENU,
     ];
   }
+
   function authNavItems() {
     const role = P.state.user.activeRole;
     if (role === 'GS-Prüfer/in') {
       return [
         { id: 'queue', href: '#/queue', label: 'Pendenzen' },
         { id: 'inbox', href: '#/inbox', label: 'Anträge der VE' },
-        { id: 'help',  href: '#/help',  label: 'Hilfe' },
+        SERVICES_MENU,
       ];
     }
     if (role === 'ILBO' || !role) {
       return [
-        { id: 'home',   href: '#/home',     label: 'Start' },
-        { id: 'wizard', href: '#/wizard/1', label: 'Bedarf anmelden' },
-        { id: 'inbox',  href: '#/inbox',    label: 'Meine Anträge' },
-        { id: 'help',   href: '#/help',     label: 'Hilfe' },
+        { id: 'home',       href: '#/home',       label: 'Start' },
+        SERVICES_MENU,
+        { id: 'properties', href: '#/properties', label: 'Liegenschaften' },
+        { id: 'inbox',      href: '#/inbox',      label: 'Meine Anträge' },
       ];
     }
     return [
       { id: 'home', href: '#/home', label: 'Start' },
-      { id: 'help', href: '#/help', label: 'Hilfe' },
+      SERVICES_MENU,
     ];
   }
 
@@ -92,55 +220,80 @@
   function renderLanding() {
     const main = shell({ activeNav: 'start' });
     document.getElementById('page-body').innerHTML = `
-      <section class="hero">
-        <div class="hero__inner">
-          <div class="hero__eyebrow">Mieterportal des BBL</div>
-          <h1 class="hero__title">Bedarf anmelden — der schnelle Weg zu Bürofläche, Unterbringung und Auslandvertretung.</h1>
-          <p class="hero__lead">
-            Zentrale Anlaufstelle für Bundes-Mietende: Bedarfsmeldung, Statusverfolgung,
-            Pläne und Dokumente. Nicht angemeldet? In ~5 Schritten zu Ihrer Bedarfsmeldung.
-          </p>
-          <div class="hero__cta">
-            <a href="#/login" class="btn btn--primary btn--lg">↗ Anmelden mit eIAM</a>
-            <a href="#/help" class="btn btn--outline btn--lg">Wie funktioniert das Portal?</a>
+      <section class="hero hero--wide hero--split">
+        <div class="hero__inner hero__inner--split">
+          <div>
+            <div class="hero__eyebrow">Mieterportal BBL</div>
+            <h1 class="hero__title">Bedarf anmelden, Status verfolgen, Dokumente herunterladen.</h1>
+            <p class="hero__lead">
+              Die zentrale Anlaufstelle für Bundes-Mietende — Bürofläche, Empfangs­zentren, Auslandvertretungen.
+              Geführter Ablauf in fünf Schritten; Übergabe an SAP ePPM ohne Medienbruch.
+            </p>
+            <div class="hero__cta">
+              <button class="btn btn--primary btn--lg" onclick="window.portal.login()">↗ Anmelden mit eIAM</button>
+              <a href="#/help" class="btn btn--outline btn--lg">Wie funktioniert das Portal?</a>
+            </div>
           </div>
+          <figure class="hero__figure">
+            <img src="https://images.unsplash.com/photo-1568667256549-094345857637?w=1200&q=80"
+                 alt="Bundeshaus West in Bern, beispielhaft für die durch BBL bewirtschafteten Bundesimmobilien.">
+            <figcaption>Bundesimmobilien — Bundeshaus West, Bern. Foto Unsplash, Platzhalter für die Produktiv­version.</figcaption>
+          </figure>
         </div>
       </section>
 
-      <section class="section">
+      <section class="portfolio-stats">
         <div class="container">
-          <div class="card-grid">
-            <div class="card content-card">
-              <h3 class="card__title">Weitere Dienste</h3>
-              <ul class="service-list">
-                <li><a href="#/inbox">Status & Inbox <span class="service-list__hint">nach Login</span></a></li>
-                <li><a href="#/help">Pläne & Dokumente <span class="service-list__hint">nach Login</span></a></li>
-                <li><a href="#/help">Häufige Fragen <span class="service-list__hint">öffentlich</span></a></li>
-                <li><a href="https://www.bbl.admin.ch/de/kontakt">Kontakt zur BBL ↗ <span class="service-list__hint">öffentlich</span></a></li>
-              </ul>
-            </div>
-
-            <div class="card content-card">
-              <h3 class="card__title">Aktuelles</h3>
-              <div>
-                <p style="margin:0 0 var(--space-xs);"><strong>Wartungsfenster ePPM</strong></p>
-                <p style="margin:0;font-size:var(--text-body-sm);color:var(--color-text-secondary);">
-                  25.05. 18:00–22:00 — Einreichungen werden gepuffert und nach Abschluss automatisch übergeben.
-                </p>
-              </div>
-              <div class="content-card__meta">
-                Quelle: BIT Betrieb · Verantwortlich: E. Frey (BBL Campus) · Stand: 17.05.2026 · DE
-              </div>
-            </div>
-
-            <div class="card">
-              <h3 class="card__title">Erstmals hier?</h3>
-              <p class="card__lead">In 5 Schritten ist Ihr Bedarfs­antrag eingereicht: Basisangaben → Flächenbedarf → Anhänge → ggf. Detail-Felder → Prüfen & Senden.</p>
-              <a href="#/help" class="btn btn--outline btn--sm">Anleitung ansehen</a>
-            </div>
+          <div class="portfolio-stats__grid">
+            <div><strong>~2'700</strong><span>Immobilien im Portfolio</span></div>
+            <div><strong>~6'500</strong><span>Mietverhältnisse</span></div>
+            <div><strong>~38'000</strong><span>Arbeitsplätze Bundes­verwaltung</span></div>
+            <div><strong>26</strong><span>Verwaltungs­einheiten</span></div>
           </div>
         </div>
       </section>
+
+      <section class="section section--dark section--lg" aria-labelledby="profileChooserTitle">
+        <div class="container">
+          <p class="section-eyebrow">Demo-Personas</p>
+          <h2 class="section-heading" id="profileChooserTitle">Wählen Sie Ihr Profil</h2>
+          <p style="max-width:60ch;margin: 0 0 var(--space-2xl); color: rgba(255,255,255,0.85); font-size: var(--text-body);">
+            Der Mieterportal-Prototyp zeigt vier reale Personas der föderalen Immobilien-Workflow. Wählen Sie ein Profil, um die jeweilige Sicht aus erster Hand zu erleben — Wizard, Inbox, Reviewer-Sicht oder Audit-Sicht.
+          </p>
+          <div class="profile-grid">
+            ${profileCard({
+              image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=720&q=80',
+              title: 'Logistikbeauftragte',
+              date: 'ILBO — Verwaltungs­einheit',
+              desc: 'Sie sind Logistikbeauftragte einer Bundes-VE und melden Bedarf an. Drei laufende Anträge, ein Rückfrage-Fall.',
+              cta: 'demoRole', role: 'ILBO'
+            })}
+            ${profileCard({
+              image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=720&q=80',
+              title: 'GS-Prüfer/in',
+              date: 'Generalsekretariat',
+              desc: 'Sie prüfen Anträge des UVEK. Pendenzen-Queue, Feld-für-Feld-Markierungen, mandatorische Begründung.',
+              cta: 'demoRole', role: 'GS-Prüfer/in'
+            })}
+            ${profileCard({
+              image: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=720&q=80',
+              title: 'BBL Portfolio-Management',
+              date: 'PFM-Operations',
+              desc: 'Sie übergeben genehmigte Anträge als Bedarfsmeldung an SAP ePPM. KPI-Cockpit, ePPM-Handover, Master-Daten.',
+              cta: 'demoRole', role: 'BBL-PFM'
+            })}
+            ${profileCard({
+              image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=720&q=80',
+              title: 'EFD Auditor',
+              date: 'Revisionsdienst',
+              desc: 'Sie haben Lesezugriff über alle VE. Vollständige Audit-Spur, Diff je Feld, Korrelations-ID, Hash-Integrität.',
+              cta: 'demoRole', role: 'Auditor'
+            })}
+          </div>
+        </div>
+      </section>
+
+      ${renderNewsSection()}
     `;
   }
 
@@ -149,21 +302,32 @@
     const main = shell();
     document.getElementById('page-body').innerHTML = `
       <section class="section">
-        <div class="container" style="max-width:600px;">
-          <div class="card">
-            <h2 class="card__title">Anmeldung über eIAM</h2>
-            <p class="card__lead">Sie werden weitergeleitet zu <code>login.eiam.admin.ch</code>. Für diesen Prototyp wird die Anmeldung simuliert.</p>
-            <div class="notification-banner notification-banner--success" style="margin: var(--space-md) 0;">
-              <div class="notification-banner__wrapper">
-                <p class="notification-banner__text">
-                  <strong>Demo-Konto:</strong> Andrea Muster (UVEK / BAFU) — mit zwei Rollen: <em>Logistikbeauftragte</em> und <em>GS-Prüfer/in</em>.
-                </p>
-              </div>
+        <div class="container" style="max-width:640px;">
+          <div class="notification-banner notification-banner--warning" style="margin-bottom: var(--space-lg);">
+            <div class="notification-banner__wrapper">
+              <p class="notification-banner__text">
+                <strong>Prototyp-Anmeldung — kein echtes eIAM.</strong> Diese Seite simuliert den Login. Es wird keine Verbindung zu <code>login.eiam.admin.ch</code> hergestellt.
+              </p>
             </div>
-            <button class="btn btn--primary btn--lg" onclick="window.portal.login()">↗ Mit eIAM anmelden (Simulation)</button>
+          </div>
+          <div class="card">
+            <h1 class="card__title" style="font-size: var(--text-h2);">Demo-Anmeldung</h1>
+            <p class="card__lead">In der Produktivversion würden Sie zu <code>login.eiam.admin.ch</code> umgeleitet. Im Prototyp melden Sie sich mit einem voreingestellten Demo-Konto an.</p>
+
+            <h2 style="font-size: var(--text-h4); margin: var(--space-md) 0 var(--space-sm);">Demo-Konto</h2>
+            <dl style="margin: 0; display: grid; grid-template-columns: 140px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm);">
+              <dt style="color: var(--color-text-secondary);">Name</dt><dd style="margin: 0;">Andrea Muster</dd>
+              <dt style="color: var(--color-text-secondary);">Verwaltung</dt><dd style="margin: 0;">UVEK / BAFU</dd>
+              <dt style="color: var(--color-text-secondary);">Rollen</dt><dd style="margin: 0;">Logistikbeauftragte (ILBO) · GS-Prüfer/in</dd>
+            </dl>
+
+            <button class="btn btn--primary btn--lg" style="margin-top: var(--space-lg);" onclick="window.portal.login()">Als Demo-Nutzerin anmelden</button>
+
             <p style="font-size: var(--text-body-xs); color: var(--color-text-secondary); margin-top: var(--space-md);">
-              Kein eIAM-Konto? → <a href="#/help">Hilfe / IT-Support</a><br>
-              Hinweis: Ab Dezember 2026 wird der Zugang für externe Mietende schrittweise auf AGOV / E-ID umgestellt (Roadmap OP-3).
+              Für den Test der GS-Prüfer-Sicht: nach Login die URL <code>#/queue</code> aufrufen, oder direkt <a href="#/queue" onclick="window.t3lite.demoRole('GS-Prüfer/in'); return false;">hier die GS-Rolle aktivieren</a>.
+            </p>
+            <p style="font-size: var(--text-body-xs); color: var(--color-text-muted); margin-top: var(--space-sm);">
+              Hinweis: Die Produktivversion plant ab Dezember 2026 den schrittweisen Übergang von eIAM auf AGOV / E-ID (REQUIREMENTS.md OP-3).
             </p>
           </div>
         </div>
@@ -206,45 +370,54 @@
             </div>
           ` : ''}
 
-          <div class="hero-cta" style="margin-top: var(--space-lg);">
-            <div class="hero-cta__primary">
-              <div style="font-size:var(--text-body-xs); text-transform:uppercase; letter-spacing:0.6px; color:var(--color-text-secondary); margin-bottom:var(--space-sm);">Hauptaktion</div>
-              <h2>Neuen Bedarf anmelden</h2>
-              <p>Unterbringung, Möbel oder Bauanforderung erfassen — geführter Ablauf in 5 Schritten.</p>
-              <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+          <section class="auth-hero" style="margin-top: var(--space-xl);">
+            <div class="auth-hero__copy">
+              <p class="section-eyebrow">Hauptaktion</p>
+              <h2 class="auth-hero__title">Neuen Bedarf anmelden</h2>
+              <p class="auth-hero__lead">
+                Unterbringung, Bürofläche oder Auslandvertretung erfassen — geführter Ablauf in fünf Schritten,
+                inklusive NAW-Klassifizierung, Kostenrechnung und Übergabe an SAP ePPM.
+              </p>
+              <div class="auth-hero__cta">
                 <a href="#/wizard/1" class="btn btn--primary btn--lg">+ Bedarf starten →</a>
                 ${draft ? `
-                  <button class="btn btn--outline btn--lg" onclick="window.t3lite.continueDraft()">📝 Entwurf fortsetzen</button>
-                ` : ''}
+                  <button class="btn btn--outline btn--lg" onclick="window.t3lite.continueDraft()">Entwurf fortsetzen</button>
+                ` : `
+                  <button class="btn btn--outline btn--lg" onclick="window.portal.toggleNavMenu('services')">Alle Dienstleistungen</button>
+                `}
               </div>
             </div>
+            <figure class="auth-hero__figure" aria-hidden="true">
+              <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=720&q=80" alt="">
+            </figure>
+          </section>
 
-            <div class="hero-cta__secondary">
-              <h3>Weitere Dienste — Rolle: ${P.roleLabel(P.state.user.activeRole)}</h3>
-              <ul class="service-list">
-                <li><a href="#/inbox">Status & Inbox <span class="service-list__hint">${userApps.length} offen</span></a></li>
-                <li><a href="#" onclick="window.portal.toast('Downloads: 23 Dateien für UVEK'); return false;">Pläne & Dokumente <span class="service-list__hint">23 Dateien</span></a></li>
-                <li><a href="#/help">Häufige Fragen</a></li>
-                <li><a href="https://www.bbl.admin.ch/de/kontakt">Kontakt zur BBL ↗</a></li>
-              </ul>
-              ${P.state.user.roles.length > 1 ? `
-                <hr style="margin: var(--space-md) 0; border:none; border-top:1px solid var(--color-border);">
-                <p style="font-size: var(--text-body-sm); margin: 0; color: var(--color-text-secondary);">
-                  Sie haben weitere Rollen (z.B. <em>${P.roleLabel(P.state.user.roles.find(r => r !== P.state.user.activeRole))}</em>). Diese werden nach Anmeldung automatisch erkannt.
-                </p>
-              ` : ''}
-            </div>
-          </div>
-
-          <div class="card content-card" style="margin-top: var(--space-lg);">
-            <h3 class="card__title">Aktuelles</h3>
-            <p style="margin:0;"><strong>Neue Vorlage für SEM-Anträge verfügbar.</strong> Empfangszentrum-Bedarfe werden ab sofort über die SEM-Variante erfasst.</p>
-            <div class="content-card__meta">
-              Quelle: BBL PFM · Verantwortlich: H. Ludwig · Stand: 17.05.2026 · DE / FR / IT
-            </div>
-          </div>
         </div>
       </section>
+
+      ${renderNewsSection()}
+    `;
+  }
+
+  function arrowBtn(extraClass = 'quick-card__arrow-btn') {
+    return `
+      <span class="arrow-btn ${extraClass}" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    `;
+  }
+
+  function profileCard({ image, title, date, desc, role }) {
+    return `
+      <a href="#" class="profile-card" onclick="event.preventDefault(); window.t3lite.demoRole('${role}');">
+        <div class="profile-card__image" style="background-image:url('${image}');"></div>
+        <div class="profile-card__body">
+          <p class="profile-card__date">${P.escapeHtml(date)}</p>
+          <h3 class="profile-card__title">${P.escapeHtml(title)}</h3>
+          <p class="profile-card__desc">${P.escapeHtml(desc)}</p>
+        </div>
+        ${arrowBtn('profile-card__arrow')}
+      </a>
     `;
   }
 
@@ -1316,7 +1489,421 @@
     });
   }
 
-  // ── 9. HELP STUB ─────────────────────────────────────────────────────────
+  // ── 9. LIEGENSCHAFTEN — Meine Immobilien (list) ──────────────────────────
+  function renderProperties() {
+    if (!P.state.user) { P.navigate('#/'); return; }
+    shell({ activeNav: 'properties', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Liegenschaften' }] });
+    const ve = P.state.user.ve;
+    // Show all tenancies for this VE (or all if user has BBL roles)
+    const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
+    const tenancies = isBblView
+      ? P.state.tenancies
+      : P.state.tenancies.filter(t => t.ve === ve || t.dep === ve);
+
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container">
+          <p class="section-eyebrow">Übersicht</p>
+          <h1 class="section-heading">Liegenschaften ${isBblView ? '(BBL-Sicht)' : 'Ihrer Verwaltungs­einheit'}</h1>
+          <p style="color:var(--color-text-secondary);max-width: 60ch;margin: 0 0 var(--space-xl);">
+            ${isBblView
+              ? 'Sie sehen alle vom BBL verwalteten Mietverhältnisse. Klicken Sie eine Liegenschaft für Mieter, Vertragslaufzeit, Anliegen und Dokumente.'
+              : `Mietverhältnisse Ihrer Verwaltungs­einheit <strong>${P.escapeHtml(ve)}</strong> bei der BBL. Pro Objekt sehen Sie Ansprech­personen, Vertragsdaten und offene Anliegen.`
+            }
+          </p>
+
+          ${tenancies.length === 0 ? `
+            <div class="empty-state">
+              <div class="empty-state__glyph">🏛</div>
+              <h2 class="empty-state__title">Keine Mietverhältnisse erfasst</h2>
+              <p class="empty-state__lead">Für Ihre Verwaltungs­einheit ist im BBL-Portfolio derzeit kein Mietverhältnis hinterlegt. Wenn das ein Fehler ist, kontaktieren Sie BBL-PFM.</p>
+              <div class="empty-state__cta">
+                <a href="#/wizard/1" class="btn btn--primary">+ Bedarf anmelden</a>
+                <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" class="btn btn--ghost">Kontakt BBL ↗</a>
+              </div>
+            </div>
+          ` : `
+            <div class="property-grid">
+              ${tenancies.map(propertyCard).join('')}
+            </div>
+          `}
+        </div>
+      </section>
+    `;
+  }
+
+  function propertyCard(t) {
+    const issuesBadge = t.openIssues > 0
+      ? `<span class="badge badge--warning">${t.openIssues} offen</span>`
+      : `<span class="badge badge--success">keine offenen Anliegen</span>`;
+    return `
+      <a href="#/properties/${t.id}" class="property-card">
+        <div class="property-card__image" style="background-image:url('${t.image}');"></div>
+        <div class="property-card__body">
+          <p class="property-card__sap">${t.sap} · EGID ${t.egid}</p>
+          <h3 class="property-card__title">${P.escapeHtml(t.buildingName)}</h3>
+          <p class="property-card__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
+          <div class="property-card__meta">
+            <span>${t.hnf2} m² HNF2</span>
+            <span>${t.arbeitsplaetze} AP</span>
+            <span>${P.formatChf(t.yearlyCost)} / Jahr</span>
+          </div>
+          <div class="property-card__footer">
+            ${issuesBadge}
+            <span style="font-size:var(--text-body-xs);color:var(--color-text-muted);">${P.escapeHtml(t.pfmKategorie)}</span>
+          </div>
+        </div>
+      </a>
+    `;
+  }
+
+  // ── 10. LIEGENSCHAFTS-DETAIL ─────────────────────────────────────────────
+  function renderPropertyDetail({ id }) {
+    if (!P.state.user) { P.navigate('#/'); return; }
+    const t = P.state.tenancies.find(x => x.id === id);
+    if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
+    shell({ activeNav: 'properties', breadcrumb: [
+      { href: '#/home', label: 'Start' },
+      { href: '#/properties', label: 'Liegenschaften' },
+      { label: t.buildingName }
+    ]});
+
+    const related = P.state.applications.filter(a => a.buildingId === t.buildingId);
+    const today = new Date();
+    const leaseEnd = new Date(t.leaseEnd);
+    const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
+
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container">
+          <header style="display:grid;grid-template-columns:1fr;gap:var(--space-lg);margin-bottom:var(--space-xl);">
+            <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;height:280px;background:url('${t.image}') center/cover;">
+              <div style="position:absolute;inset:auto 0 0 0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:var(--space-lg);color:#fff;">
+                <p style="margin:0 0 var(--space-xs);font-size:var(--text-body-xs);text-transform:uppercase;letter-spacing:1px;opacity:0.85;">${t.sap} · EGID ${t.egid}</p>
+                <h1 style="margin:0;font-size:var(--text-h1);color:#fff;">${P.escapeHtml(t.buildingName)}</h1>
+                <p style="margin:var(--space-xs) 0 0;opacity:0.9;">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
+              </div>
+            </div>
+          </header>
+
+          <div class="property-layout">
+            <div>
+              <section style="margin-bottom: var(--space-2xl);">
+                <p class="section-eyebrow">Mietverhältnis</p>
+                <h2 class="section-heading">Vertrag & Mengengerüst</h2>
+                <table class="table" style="margin-top:var(--space-md);">
+                  <tr><th>Mietende VE</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
+                  <tr><th>PFM-Kategorie</th><td>${P.escapeHtml(t.pfmKategorie)}</td></tr>
+                  <tr><th>HNF2 / GF</th><td>${t.hnf2} m² / ${t.gf} m²</td></tr>
+                  <tr><th>Arbeitsplätze</th><td>${t.arbeitsplaetze}</td></tr>
+                  <tr><th>Mietkosten</th><td>${P.formatChf(t.yearlyCost)} / Jahr</td></tr>
+                  <tr><th>Vertragslaufzeit</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)} ${t.leaseAuto ? '<span class="badge badge--success">automatisch verlängernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
+                  <tr><th>Restlaufzeit</th><td>~${monthsToEnd} Monate</td></tr>
+                </table>
+              </section>
+
+              <section style="margin-bottom: var(--space-2xl);">
+                <p class="section-eyebrow">Anliegen</p>
+                <h2 class="section-heading">Anträge zu dieser Liegenschaft (${related.length})</h2>
+                ${related.length === 0
+                  ? `<p style="color:var(--color-text-secondary);">Keine offenen oder vergangenen Anträge zu dieser Liegenschaft.</p>`
+                  : `<table class="table"><thead><tr><th>Antrag</th><th>Typ</th><th>Eingereicht</th><th>Status</th></tr></thead><tbody>
+                       ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><strong>${a.id}</strong></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
+                     </tbody></table>`}
+              </section>
+
+              <section style="margin-bottom: var(--space-2xl);">
+                <p class="section-eyebrow">Dokumente</p>
+                <h2 class="section-heading">Pläne & Belege zu dieser Liegenschaft</h2>
+                <ul class="attachment-list">
+                  <li>📐 Grundriss ${P.escapeHtml(t.floor)} · PDF · 4.2 MB · Stand 15.03.2026 <span class="meta"><a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                  <li>📄 Mietvertrag (Auszug) · PDF · 1.1 MB · Stand 01.07.2024 <span class="meta"><a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                  <li>🛡 Sicherheits- & Brandschutzkonzept · PDF · 2.4 MB · Stand 22.11.2025 <span class="meta"><a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                </ul>
+              </section>
+            </div>
+
+            <aside class="property-aside">
+              <div class="card" style="margin-bottom: var(--space-lg);">
+                <p class="section-eyebrow" style="margin:0 0 var(--space-sm);">Aktionen</p>
+                <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+                  <a href="#/repair?building=${t.buildingId}" class="btn btn--primary">🛠 Schaden / Reparatur melden</a>
+                  <a href="#/wizard/1" class="btn btn--outline">+ Bedarf zu dieser Liegenschaft</a>
+                  <button class="btn btn--ghost" onclick="window.portal.toast('Umzug-Workflow noch nicht implementiert')">🚚 Umzug anmelden</button>
+                  <button class="btn btn--ghost" onclick="window.portal.toast('Sonderreinigung noch nicht implementiert')">🧹 Sonderreinigung anfragen</button>
+                </div>
+              </div>
+              <div class="card">
+                <p class="section-eyebrow" style="margin:0 0 var(--space-sm);">Ansprechpersonen BBL</p>
+                <dl style="margin:0;display:grid;grid-template-columns:1fr;gap:var(--space-sm);">
+                  <div>
+                    <dt style="font-size:var(--text-body-xs);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.4px;">Portfolio-Management</dt>
+                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblPfm)}</dd>
+                  </div>
+                  <div>
+                    <dt style="font-size:var(--text-body-xs);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.4px;">Immobilien-Management</dt>
+                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblIm)}</dd>
+                  </div>
+                  <div>
+                    <dt style="font-size:var(--text-body-xs);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.4px;">Flächenmanagement (FLM)</dt>
+                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblFlm)}</dd>
+                  </div>
+                </dl>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // ── 11. DOWNLOADS ────────────────────────────────────────────────────────
+  function renderDownloads() {
+    if (!P.state.user) { P.navigate('#/'); return; }
+    shell({ activeNav: 'downloads', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Pläne & Dokumente' }] });
+    const docs = sampleDocuments();
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container">
+          <p class="section-eyebrow">Bibliothek</p>
+          <h1 class="section-heading">Pläne & Dokumente</h1>
+          <p style="color:var(--color-text-secondary);max-width:60ch;margin: 0 0 var(--space-lg);">
+            Sie sehen: alle für <strong>${P.state.user.ve}</strong> freigegebenen Dateien plus öffentliche Merkblätter. Pro Datei sind Quelle, verantwortliche Person und Stand sichtbar (FUNC-LP-009).
+          </p>
+          <div style="display:flex;gap:var(--space-md);flex-wrap:wrap;margin-bottom:var(--space-lg);">
+            <select class="form-field__select" id="filterDocType" style="min-height:auto;">
+              <option value="">Alle Typen</option>
+              <option value="Grundriss">Grundriss</option>
+              <option value="Merkblatt">Merkblatt</option>
+              <option value="Schulung">Schulung</option>
+              <option value="Vorlage">Vorlage</option>
+              <option value="Vertrag">Vertrag (intern)</option>
+            </select>
+            <input class="form-field__input" type="search" id="filterDocText" placeholder="🔍 Suchen …" style="flex:1;min-width:200px;min-height:auto;">
+          </div>
+          <div class="card-grid" id="docGrid">
+            ${docs.map(documentCard).join('')}
+          </div>
+        </div>
+      </section>
+    `;
+    const applyDocFilter = () => {
+      const ty = document.getElementById('filterDocType').value;
+      const tx = document.getElementById('filterDocText').value.toLowerCase();
+      const filtered = docs.filter(d => (!ty || d.type === ty) && (!tx || d.title.toLowerCase().includes(tx) || (d.source || '').toLowerCase().includes(tx)));
+      document.getElementById('docGrid').innerHTML = filtered.map(documentCard).join('') || `<p style="color:var(--color-text-muted);">Keine Treffer.</p>`;
+    };
+    document.getElementById('filterDocType').addEventListener('change', applyDocFilter);
+    document.getElementById('filterDocText').addEventListener('input', applyDocFilter);
+  }
+
+  function sampleDocuments() {
+    return [
+      { title: 'Merkblatt: Antrag richtig stellen', type: 'Merkblatt', format: 'PDF', size: '320 KB', languages: 'DE · FR · IT', source: 'BBL Campus', responsible: 'E. Frey', stand: '11.05.2026', scope: 'Alle' },
+      { title: 'Grundriss Bundeshaus West, 3. OG', type: 'Grundriss', format: 'PDF', size: '4.2 MB', languages: 'DE', source: 'BBL-IM', responsible: 'A. Wirz', stand: '15.03.2026', scope: 'UVEK' },
+      { title: 'Schulung „Mieterportal kompakt" (60 Min.)', type: 'Schulung', format: 'MP4', size: '245 MB', languages: 'DE', source: 'BBL Campus', responsible: 'M. Diener', stand: '13.05.2026', scope: 'Alle' },
+      { title: 'Vorlage: SEM-Bedarfsmeldung', type: 'Vorlage', format: 'DOCX', size: '180 KB', languages: 'DE · FR', source: 'BBL PFM', responsible: 'H. Ludwig', stand: '17.05.2026', scope: 'SEM' },
+      { title: 'Sicherheits- & Brandschutzkonzept BBL', type: 'Merkblatt', format: 'PDF', size: '2.4 MB', languages: 'DE · FR · IT', source: 'BBL Campus', responsible: 'E. Frey', stand: '22.11.2025', scope: 'Alle' },
+      { title: 'NAW-Klassen Übersicht (Bürowelten)', type: 'Merkblatt', format: 'PDF', size: '410 KB', languages: 'DE', source: 'BBL PFM', responsible: 'H. Ludwig', stand: '10.01.2026', scope: 'Alle' },
+      { title: 'Grundriss Sulgenrain 19, EG', type: 'Grundriss', format: 'PDF', size: '3.8 MB', languages: 'DE', source: 'BBL-IM', responsible: 'H. Studer', stand: '02.04.2026', scope: 'BAFU' },
+      { title: 'Vertragsvorlage Mieterportal (Bsp.)', type: 'Vertrag', format: 'PDF', size: '780 KB', languages: 'DE', source: 'BBL PFM', responsible: 'H. Ludwig', stand: '20.02.2026', scope: 'Intern' },
+    ];
+  }
+
+  function documentCard(d) {
+    const icon = ({ PDF: '📄', MP4: '🎥', DOCX: '📝' })[d.format] || '📎';
+    return `
+      <a href="#" onclick="window.portal.toast('Download simuliert: ${P.escapeHtml(d.title)}'); return false;" class="quick-card" style="min-height:auto;">
+        <p class="quick-card__title">${icon} ${P.escapeHtml(d.title)}</p>
+        <p class="quick-card__desc">${d.format} · ${d.size} · ${d.languages}</p>
+        <p class="quick-card__meta">
+          <span>Quelle: ${P.escapeHtml(d.source)}</span>
+          <span>${P.escapeHtml(d.responsible)}</span>
+          <span>Stand ${d.stand}</span>
+          <span class="badge ${d.scope === 'Alle' ? 'badge--success' : 'badge--info'}">${d.scope}</span>
+        </p>
+        ${arrowBtn()}
+      </a>
+    `;
+  }
+
+  // ── 12. SCHADENSMELDUNG (REQ-FA-005 stub) ────────────────────────────────
+  function renderRepairQuickForm() {
+    if (!P.state.user) { P.navigate('#/'); return; }
+    shell({ activeNav: 'home', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Schadensmeldung' }] });
+
+    const params = new URLSearchParams((location.hash.split('?')[1] || ''));
+    const presetBuildingId = params.get('building');
+    const presetTenancy = P.state.tenancies.find(t => t.buildingId === presetBuildingId);
+
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container" style="max-width: 720px;">
+          <p class="section-eyebrow">Schnellmeldung</p>
+          <h1 class="section-heading">Schaden oder Störung melden</h1>
+          <p style="color:var(--color-text-secondary);margin: 0 0 var(--space-lg);">
+            Defekte Heizung, Wasserschaden, Beleuchtung, Schliesssystem: kurze Meldung — BBL-IM nimmt Kontakt auf und koordiniert die Behebung. Roadmap REQ-FA-005.
+          </p>
+          <form class="card stack" onsubmit="event.preventDefault(); window.t3lite.submitRepair(this);">
+            <div class="form-field">
+              <label class="form-field__label">Liegenschaft <span class="form-field__required">*</span></label>
+              <select class="form-field__select" name="building">
+                ${P.state.tenancies.map(t => `<option value="${t.id}" ${presetTenancy && presetTenancy.id === t.id ? 'selected' : ''}>${P.escapeHtml(t.buildingName)} — ${P.escapeHtml(t.address)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">Kategorie <span class="form-field__required">*</span></label>
+              <select class="form-field__select" name="category">
+                <option>Sanitär (Wasser, WC, Heizung)</option>
+                <option>Elektrik & Beleuchtung</option>
+                <option>Schliesssystem / Zutritt</option>
+                <option>Aufzug</option>
+                <option>Klima & Lüftung</option>
+                <option>Sonstiges</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">Dringlichkeit <span class="form-field__required">*</span></label>
+              <div class="radio-group">
+                <label><input type="radio" name="urgency" value="low" checked> Niedrig (Termin in 1–2 Wochen)</label>
+                <label><input type="radio" name="urgency" value="med"> Mittel (innerhalb 48 h)</label>
+                <label><input type="radio" name="urgency" value="high"> Hoch (gleicher Tag)</label>
+                <label><input type="radio" name="urgency" value="emergency"> Notfall (sofort, mit Telefon)</label>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">Beschreibung <span class="form-field__required">*</span></label>
+              <textarea class="form-field__textarea" name="desc" placeholder="Wo genau (Raum, Etage), seit wann, Auswirkungen …" required></textarea>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">Foto (optional)</label>
+              <input class="form-field__input" type="file" name="photo">
+              <p class="form-field__hint">Hilfreich bei sichtbaren Schäden. Wird wie alle Anhänge auf Schadsoftware geprüft (NFA-SEC-003).</p>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label">Kontakt für Rückfragen</label>
+              <input class="form-field__input" type="tel" name="phone" placeholder="+41 …" value="">
+              <p class="form-field__hint">Nur ausfüllen, wenn ein anderer Kontakt als Ihr eIAM-Profil zuständig ist.</p>
+            </div>
+            <div class="wizard__sticky-footer">
+              <a class="btn btn--outline" href="#/home">Abbrechen</a>
+              <button type="submit" class="btn btn--primary">Schadensmeldung senden</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    `;
+  }
+
+  // ── 13. PROFILE / EINSTELLUNGEN ──────────────────────────────────────────
+  function renderProfile() {
+    if (!P.state.user) { P.navigate('#/'); return; }
+    shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Profil' }] });
+    const u = P.state.user;
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container" style="max-width: 720px;">
+          <p class="section-eyebrow">Konto & Einstellungen</p>
+          <h1 class="section-heading">Mein Profil</h1>
+
+          <div class="card" style="margin-bottom: var(--space-lg);">
+            <h2 class="card__title">Identität (über eIAM)</h2>
+            <dl style="margin:0;display:grid;grid-template-columns:160px 1fr;gap:var(--space-sm);">
+              <dt style="color:var(--color-text-secondary);">Name</dt><dd>${P.escapeHtml(u.name)}</dd>
+              <dt style="color:var(--color-text-secondary);">E-Mail</dt><dd>${P.escapeHtml(u.email)}</dd>
+              <dt style="color:var(--color-text-secondary);">eIAM-Subjekt-ID</dt><dd><code>${u.id}</code></dd>
+              <dt style="color:var(--color-text-secondary;">Verwaltungs­einheit</dt><dd>${P.escapeHtml(u.ve)}${u.dep ? ' / ' + P.escapeHtml(u.dep) : ''}</dd>
+              <dt style="color:var(--color-text-secondary);">Aktive Rolle</dt><dd><strong>${P.roleLabel(u.activeRole)}</strong></dd>
+              <dt style="color:var(--color-text-secondary);">Weitere Rollen</dt><dd>${u.roles.filter(r => r !== u.activeRole).map(P.roleLabel).join(' · ') || '—'}</dd>
+            </dl>
+            <p style="font-size:var(--text-body-xs);color:var(--color-text-muted);margin: var(--space-md) 0 0;">
+              Diese Daten kommen aus dem föderalen eIAM-Verzeichnis und können hier nicht geändert werden. Änderungen über Ihre VE-Administration.
+            </p>
+          </div>
+
+          <div class="card" style="margin-bottom: var(--space-lg);">
+            <h2 class="card__title">Benachrichtigungen</h2>
+            <p class="card__lead">Per E-Mail, sobald sich der Status Ihrer Anträge ändert (FUNC-FG-004).</p>
+            <div class="stack">
+              <label><input type="checkbox" checked> Statuswechsel meiner Anträge</label>
+              <label><input type="checkbox" checked> Rückfragen / Auflagen vom GS</label>
+              <label><input type="checkbox" checked> Wartungsfenster & Systemmeldungen</label>
+              <label><input type="checkbox"> Tägliche Zusammenfassung statt Einzel-E-Mails</label>
+            </div>
+            <button class="btn btn--outline btn--sm" style="margin-top:var(--space-md);" onclick="window.portal.toast('Einstellungen gespeichert', 'success')">Einstellungen speichern</button>
+          </div>
+
+          <div class="card" style="margin-bottom: var(--space-lg);">
+            <h2 class="card__title">Sprache</h2>
+            <p class="card__lead">Wird in Inhalten und Benachrichtigungen verwendet, wo verfügbar (NFA-CD-003: DE/FR/IT Pflicht).</p>
+            <div class="radio-group">
+              <label><input type="radio" name="lang" checked> Deutsch</label>
+              <label><input type="radio" name="lang" disabled> Français (Demo)</label>
+              <label><input type="radio" name="lang" disabled> Italiano (Demo)</label>
+            </div>
+          </div>
+
+          <div class="card card--highlight" style="margin-bottom: var(--space-lg);">
+            <h2 class="card__title">AGOV / E-ID — geplante Migration</h2>
+            <p class="card__lead">Ab Dezember 2026 wird der Zugang für externe Mietende schrittweise von eIAM auf die föderale AGOV-Plattform und das E-ID umgestellt. Sie werden rechtzeitig informiert und müssen nichts vorab unternehmen. Roadmap-Eintrag <code>OP-3</code>.</p>
+          </div>
+
+          <button class="btn btn--ghost" onclick="window.portal.logout()">Abmelden</button>
+        </div>
+      </section>
+    `;
+  }
+
+  // ── SERVICES OVERVIEW (linked from the nav dropdown "Übersicht") ────────
+  function renderServicesOverview() {
+    shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'Dienstleistungen' }] });
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container">
+          <p class="section-eyebrow">Übersicht</p>
+          <h1 class="section-heading">Dienstleistungen des Mieterportals</h1>
+          <p style="max-width:60ch;color:var(--color-text-secondary);margin: 0 0 var(--space-2xl);">
+            BBL bewirtschaftet die Immobilien der Bundesverwaltung. Über das Mieterportal stellen Bundes-Mietende
+            die folgenden Anfragen direkt — geführt, dokumentiert, übergabefähig an SAP ePPM.
+          </p>
+          <div class="card-grid">
+            ${SERVICES_MENU.items.slice(1).map(svc => `
+              <a href="${svc.href}" class="quick-card">
+                <p class="quick-card__title">${P.escapeHtml(svc.label.split(' — ')[0])}</p>
+                <p class="quick-card__desc">${P.escapeHtml(svc.label.split(' — ')[1] || '')}</p>
+                ${arrowBtn()}
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // ── GENERIC SERVICE STUB (for roadmap services not yet implemented) ─────
+  function renderServiceStub(title, reqId, lead, externalUrl) {
+    shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: title }] });
+    document.getElementById('page-body').innerHTML = `
+      <section class="section">
+        <div class="container" style="max-width: 720px;">
+          <p class="section-eyebrow">${reqId}</p>
+          <h1 class="section-heading">${P.escapeHtml(title)}</h1>
+          <p style="color:var(--color-text-secondary);font-size: var(--text-h4);line-height: var(--line-height-relaxed);margin: 0 0 var(--space-lg);">
+            ${P.escapeHtml(lead)}
+          </p>
+          <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
+            ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noopener" class="btn btn--primary">Zum Schwesterprojekt ↗</a>` : ''}
+            <a href="#/services" class="btn btn--outline">← Zurück zur Übersicht</a>
+          </div>
+          <p style="margin-top: var(--space-2xl);font-size: var(--text-body-xs);color: var(--color-text-muted);">
+            Roadmap-Eintrag <code>${reqId}</code> — siehe <a href="../../docs/REQUIREMENTS.md">REQUIREMENTS.md</a> §4. Diese Funktion wird in einer der nächsten Iterationen freigeschaltet.
+          </p>
+        </div>
+      </section>
+    `;
+  }
+
+  // ── 14. HELP STUB ────────────────────────────────────────────────────────
   function renderHelp() {
     const main = shell({ activeNav: 'help', breadcrumb: [{ label: 'Hilfe' }] });
     document.getElementById('page-body').innerHTML = `
@@ -1365,6 +1952,32 @@
 
   // ── EXTERNAL API (used by inline event handlers) ─────────────────────────
   window.t3lite = {
+    submitRepair(form) {
+      const data = new FormData(form);
+      const building = P.state.tenancies.find(t => t.id === data.get('building'));
+      if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
+      const ticketId = 'R-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
+      P.toast(`Schadensmeldung ${ticketId} an BBL-IM gesendet (${P.escapeHtml(building.contacts.bblIm)}).`, 'success');
+      setTimeout(() => P.navigate('#/properties/' + building.id), 800);
+    },
+    demoRole(role) {
+      // Convenience: log in as a demo user whose roles include the requested
+      // role. Different profile cards demo different personas (ILBO, GS,
+      // BBL-PFM, Auditor) — pick the matching user from users.json.
+      const candidate = P.state.users.find(u => u.roles.includes(role));
+      if (!candidate) { P.toast('Demo-Profil für ' + role + ' nicht vorhanden.'); return; }
+      P.state.user = { ...candidate, activeRole: role };
+      P.persistRole(role);
+      P.toast(`Angemeldet als ${candidate.name} — Rolle ${P.roleLabel(role)}`, 'success');
+      const landing = {
+        'ILBO':           '#/home',
+        'GS-Prüfer/in':   '#/queue',
+        'BBL-PFM':        '#/home',
+        'BBL-Campus':     '#/home',
+        'Auditor':        '#/inbox',
+      };
+      P.navigate(landing[role] || '#/home');
+    },
     continueDraft() {
       const d = P.loadDraft();
       if (d) { P.state.draft = d; P.navigate('#/wizard/1'); }

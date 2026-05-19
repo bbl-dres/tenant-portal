@@ -33,16 +33,20 @@
 
   // ── DATA LOADING ────────────────────────────────────────────────────────
   async function loadData(basePath = '../shared/data/') {
-    const [apps, master, users, buildings] = await Promise.all([
+    const [apps, master, users, buildings, tenancies, news] = await Promise.all([
       fetch(basePath + 'applications.json').then(r => r.json()),
       fetch(basePath + 'master-data.json').then(r => r.json()),
       fetch(basePath + 'users.json').then(r => r.json()),
       fetch(basePath + 'buildings.json').then(r => r.json()),
+      fetch(basePath + 'tenancies.json').then(r => r.json()).catch(() => []),
+      fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
     ]);
     state.applications = apps;
     state.masterData = master;
     state.users = users;
     state.buildings = buildings;
+    state.tenancies = tenancies;
+    state.news = news;
   }
 
   // ── PERSISTENCE (localStorage) ──────────────────────────────────────────
@@ -100,14 +104,54 @@
   // ── FEDERAL SHELL ────────────────────────────────────────────────────────
   function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcrumb = [], navItems = [] } = {}) {
     const userPill = state.user
-      ? `<span class="top-header__action" aria-label="Angemeldet als ${state.user.name}, Rolle ${roleLabel(state.user.activeRole)}">
-           ${state.user.name} · ${roleLabel(state.user.activeRole)}
-         </span>`
+      ? `<a class="top-header__action" href="#/profile" aria-label="Profil von ${state.user.name} — Einstellungen">
+           ${state.user.name}
+         </a>`
       : `<button class="top-header__action top-header__action--primary" onclick="window.portal.login()">↗ Anmelden mit eIAM</button>`;
 
-    const navHtml = navItems.map(item => `
-      <a class="main-navigation__link ${item.id === activeNav ? 'main-navigation__link--active' : ''}"
-         href="${item.href}">${item.label}</a>
+    const navHtml = navItems.map((item, i) => {
+      const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
+      if (item.type === 'dropdown') {
+        return `
+          <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
+                  type="button"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-controls="navMenu-${item.id}"
+                  data-menu="${item.id}"
+                  onclick="window.portal.toggleNavMenu('${item.id}')">
+            ${item.label}
+            <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" style="margin-left:6px;"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+          </button>
+        `;
+      }
+      return `<a class="main-navigation__link ${activeCls}" href="${item.href}">${item.label}</a>`;
+    }).join('');
+
+    // Dropdown panels for any items of type 'dropdown'
+    const navMenus = navItems.filter(i => i.type === 'dropdown').map(item => `
+      <div class="nav-menu" id="navMenu-${item.id}" role="region" aria-label="${item.label}" hidden>
+        <div class="nav-menu__inner">
+          <button class="nav-menu__close" type="button"
+                  onclick="window.portal.toggleNavMenu('${item.id}', false)">
+            Schliessen <span aria-hidden="true">×</span>
+          </button>
+          <h2 class="nav-menu__heading">${item.label}</h2>
+          <ul class="nav-menu__list">
+            ${(item.items || []).map((sub, i) => {
+              const isFirst = i === 0;
+              return `
+                <li class="nav-menu__item ${isFirst ? 'nav-menu__item--first' : ''}">
+                  <a class="nav-menu__link" href="${sub.href}">
+                    ${sub.label}
+                    ${isFirst ? '' : '<span class="nav-menu__arrow" aria-hidden="true">→</span>'}
+                  </a>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        </div>
+      </div>
     `).join('');
 
     const breadcrumbHtml = breadcrumb.length
@@ -123,63 +167,80 @@
 
       <header class="site-header" role="banner">
         <div class="top-bar">
-          <button class="top-bar__authorities" aria-expanded="false">
-            <span>Alle Schweizer Bundesbehörden</span>
-            <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
-          </button>
-          <span class="top-bar__prototype-notice">Prototyp — nur zur Demonstration</span>
-          <div class="top-bar__actions">
-            <div class="language-switcher" id="langSwitch">
-              <button class="top-bar__lang" aria-label="Sprache wählen" aria-haspopup="true"
-                      onclick="document.getElementById('langSwitch').classList.toggle('open')">
-                DE
-                <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
-              </button>
-              <div class="language-switcher__dropdown" role="listbox">
-                <button class="language-switcher__option language-switcher__option--active" role="option">Deutsch</button>
-                <button class="language-switcher__option" role="option" onclick="window.portal.toast('FR-Lokalisation noch nicht implementiert')">Français</button>
-                <button class="language-switcher__option" role="option" onclick="window.portal.toast('IT-Lokalisation noch nicht implementiert')">Italiano</button>
+          <div class="top-bar__inner">
+            <button class="top-bar__authorities" aria-expanded="false">
+              <span>Alle Schweizer Bundesbehörden</span>
+              <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+            </button>
+            <span class="top-bar__prototype-notice">Prototyp — nur zur Demonstration</span>
+            <div class="top-bar__actions">
+              <a class="top-bar__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
+              <a class="top-bar__link" href="#/help">Hilfe</a>
+              <span class="top-bar__sep" aria-hidden="true"></span>
+              <div class="language-switcher" id="langSwitch">
+                <button class="top-bar__lang" aria-label="Sprache wählen" aria-haspopup="true"
+                        onclick="document.getElementById('langSwitch').classList.toggle('open')">
+                  DE
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+                </button>
+                <div class="language-switcher__dropdown" role="listbox">
+                  <button class="language-switcher__option language-switcher__option--active" role="option">Deutsch</button>
+                  <button class="language-switcher__option" role="option" onclick="window.portal.toast('FR-Lokalisation noch nicht implementiert')">Français</button>
+                  <button class="language-switcher__option" role="option" onclick="window.portal.toast('IT-Lokalisation noch nicht implementiert')">Italiano</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="top-header">
-          <div class="top-header__left" onclick="window.portal.navigate('#/')" role="link" tabindex="0">
-            <img class="top-header__bundmark" src="../shared/assets/BundLogo.svg"
-                 alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra"
-                 width="259" height="64">
-            <div class="top-header__divider" aria-hidden="true"></div>
-            <div class="top-header__dept">
-              <strong>Bundesamt für Bauten und Logistik BBL</strong><br>
-              <span class="top-header__dept-sub">${deptSub}</span>
-            </div>
-          </div>
-          <div class="top-header__right">
-            <div class="top-header__meta-nav">
-              <a href="https://www.bbl.admin.ch/de/kontakt" class="top-header__meta-link" target="_blank" rel="noopener">Kontakt</a>
-              <a href="#/help" class="top-header__meta-link">Hilfe</a>
-            </div>
-            <div class="top-header__actions">
-              <div class="header-search">
-                <form class="header-search__form" role="search" onsubmit="event.preventDefault(); window.portal.toast('Suche noch nicht implementiert');">
-                  <input class="header-search__input" type="search" placeholder="Suchbegriff eingeben" aria-label="Suchbegriff eingeben">
-                  <button class="header-search__btn" type="submit" aria-label="Suche">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-                  </button>
-                </form>
+          <div class="top-header__inner">
+            <div class="top-header__left" onclick="window.portal.navigate('#/')" role="link" tabindex="0">
+              <img class="top-header__bundmark" src="../shared/assets/BundLogo.svg"
+                   alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra"
+                   width="259" height="64">
+              <div class="top-header__divider" aria-hidden="true"></div>
+              <div class="top-header__dept">
+                <strong>Bundesamt für Bauten und Logistik BBL</strong><br>
+                <span class="top-header__dept-sub">${deptSub}</span>
               </div>
-              ${userPill}
+            </div>
+            <div class="top-header__right">
+              <div class="top-header__actions">
+                <div class="header-search" id="headerSearch">
+                  <button class="header-search__toggle" type="button"
+                          aria-expanded="false" aria-controls="headerSearchForm"
+                          onclick="window.portal.toggleSearch(true)">
+                    <span>Suche</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                  </button>
+                  <form class="header-search__form" id="headerSearchForm" role="search" aria-label="Portal durchsuchen"
+                        onsubmit="event.preventDefault(); window.portal.toast('Suche noch nicht implementiert');">
+                    <input class="header-search__input" id="headerSearchInput" type="search"
+                           placeholder="Suchbegriff eingeben" aria-label="Suchbegriff eingeben"
+                           autocomplete="off"
+                           onblur="setTimeout(() => window.portal.toggleSearch(false), 120);"
+                           onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
+                    <button class="header-search__submit" type="submit" aria-label="Suchen">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                    </button>
+                  </form>
+                </div>
+                ${userPill}
+              </div>
             </div>
           </div>
         </div>
 
         <nav class="navbar" aria-label="Hauptnavigation">
-          <button class="burger" aria-label="Menü öffnen"
-                  onclick="document.querySelector('.main-navigation').classList.toggle('open')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <div class="main-navigation">${navHtml}</div>
+          <div class="navbar__inner">
+            <button class="burger" aria-label="Menü öffnen"
+                    onclick="document.querySelector('.main-navigation').classList.toggle('open')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="main-navigation">${navHtml}</div>
+          </div>
+          ${navMenus}
         </nav>
       </header>
 
@@ -190,35 +251,43 @@
   }
 
   function renderFooter() {
+    // Content + structure matches bbl.admin.ch/de footer pattern:
+    // brand column (motto), Weitere Informationen (link list with arrows),
+    // Zugang zu amtlichen Dokumenten (single prominent link), then a
+    // narrow darker strip with Allgemeine Geschäftsbedingungen / Rechtliches /
+    // Barrierefreiheit, plus a back-to-top button anchored top-right.
     return `
       <footer class="app-footer" role="contentinfo">
+        <button class="app-footer__top-btn" type="button" aria-label="Zum Seitenanfang"
+                onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg>
+        </button>
         <div class="footer-information">
           <div class="footer-information__inner">
-            <div class="footer-information__col">
-              <h3 class="footer-information__heading">Über uns</h3>
-              <p class="footer-information__text">Das Mieterportal des BBL ist die zentrale Anlaufstelle für Bundes­mieter — Bedarfsanmeldung, Statusverfolgung, Pläne und Dokumente.</p>
-              <p class="footer-information__prototype-notice">Diese Anwendung ist ein Prototyp. Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration.</p>
+            <div class="footer-information__col footer-information__col--brand">
+              <h3 class="footer-information__brand">BBL</h3>
+              <p class="footer-information__motto">Nachhaltig, partnerschaftlich und vorbildlich</p>
             </div>
-            <div class="footer-information__col">
-              <h3 class="footer-information__heading">Rechtliches</h3>
+
+            <div class="footer-information__col footer-information__col--links">
+              <h3 class="footer-information__heading">Weitere Informationen</h3>
               <ul class="footer-information__list">
-                <li><a href="#" onclick="window.portal.toast('Impressum-Seite noch nicht implementiert')">Impressum</a></li>
-                <li><a href="#" onclick="window.portal.toast('Datenschutz-Seite noch nicht implementiert')">Datenschutz</a></li>
-                <li><a href="#" onclick="window.portal.toast('Barrierefreiheit-Seite noch nicht implementiert')">Barrierefreiheit</a></li>
-                <li><a href="https://www.fedlex.admin.ch/eli/cc/2009/821/de" target="_blank" rel="noopener">Sprachengesetz ↗</a></li>
+                <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
               </ul>
             </div>
-            <div class="footer-information__col">
-              <h3 class="footer-information__heading">Kontakt BBL</h3>
-              <p class="footer-information__text">
-                Fellerstrasse 21<br>
-                3003 Bern<br>
-                <a href="https://www.bbl.admin.ch/de/kontakt" style="color:#fff;" target="_blank" rel="noopener">www.bbl.admin.ch ↗</a>
-              </p>
-            </div>
+
           </div>
         </div>
-        <div class="app-footer__bottom">© Schweizerische Eidgenossenschaft · Mieterportal BBL · v0.3 Prototyp</div>
+
+        <div class="app-footer__bottom">
+          <div class="app-footer__bottom-inner">
+            <a class="app-footer__bottom-link" href="https://www.bkb.admin.ch/bkb/de/home/themen/agb.html" target="_blank" rel="noopener">Allgemeine Geschäftsbedingungen des Bundes</a>
+            <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">Rechtliches</a>
+            <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">Barrierefreiheit in der Bundesverwaltung</a>
+          </div>
+        </div>
       </footer>
     `;
   }
@@ -560,6 +629,56 @@
     return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   }
 
+  function toggleNavMenu(id, force) {
+    const panel = document.getElementById('navMenu-' + id);
+    const trigger = document.querySelector(`[data-menu="${id}"]`);
+    if (!panel) return;
+    const isOpen = !panel.hasAttribute('hidden');
+    const next = (typeof force === 'boolean') ? force : !isOpen;
+    // Close any other open nav menus
+    document.querySelectorAll('.nav-menu').forEach(m => {
+      m.setAttribute('hidden', '');
+      m.classList.remove('open');
+    });
+    document.querySelectorAll('.main-navigation__link--has-menu').forEach(t => t.setAttribute('aria-expanded', 'false'));
+    if (next) {
+      panel.removeAttribute('hidden');
+      panel.classList.add('open');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  // Click-outside / Esc to close nav menus
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.nav-menu, .main-navigation__link--has-menu')) return;
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      toggleNavMenu(id, false);
+    });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      toggleNavMenu(id, false);
+    });
+  });
+
+  function toggleSearch(open) {
+    const el = document.getElementById('headerSearch');
+    const toggle = document.querySelector('.header-search__toggle');
+    const input = document.getElementById('headerSearchInput');
+    if (!el) return;
+    if (open) {
+      el.classList.add('open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'true');
+      if (input) setTimeout(() => input.focus(), 50);
+    } else {
+      el.classList.remove('open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
+  }
+
   // ── EXPORT ───────────────────────────────────────────────────────────────
   global.portal = {
     state, loadData,
@@ -568,7 +687,7 @@
     renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
     renderPipeline, renderStepIndicator,
     calcWizard, deriveNawClass,
-    toast, modal,
+    toast, modal, toggleSearch, toggleNavMenu,
     openRoleMenu, login, logout,
     statusBadge, statusKey,
     formatChf, formatDate, escapeHtml, roleLabel,

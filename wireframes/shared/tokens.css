@@ -114,7 +114,7 @@
   --color-pipeline-rejected:   var(--color-danger);
 
   /* ── ALPHA / OVERLAY ──────────────────────────────────────────────────── */
-  --color-backdrop:            rgba(0, 0, 0, 0.5);
+  --color-backdrop:            rgba(17, 24, 39, 0.7);   /* gray-900 @ 70% — matches CD Bund bg-text-900/70 */
   --color-white-20:            rgba(255, 255, 255, 0.2);
   --color-black-10:            rgba(0, 0, 0, 0.1);
 
@@ -168,8 +168,8 @@
   --btn-lg-min-h:              48px;
   --topbar-height:             46px;
   --nav-height:                56px;
-  --section-py:                3.5rem;
-  --section-py-half:           1.75rem;
+  --section-py:                3.5rem;          /* 56px base — scales below */
+  --section-py-half:           1.75rem;         /* 28px base */
 
   /* ── RADIUS (CD Bund: Tailwind rounded-sm = 2px default) ─────────────── */
   --radius-sm:                 2px;
@@ -235,6 +235,12 @@
 @media (min-width: 1024px) { :root { --container-padding: 2.5rem; } }    /* 40 */
 @media (min-width: 1280px) { :root { --container-padding: 3rem; } }      /* 48 */
 @media (min-width: 1920px) { :root { --container-padding: 4rem; } }      /* 64 */
+
+/* ── RESPONSIVE SECTION PADDING — CD Bund .container--py scales aggressively
+   3.5rem (56) base → 5rem (80) lg → 6rem (96) 2xl → 8rem (128) 3xl. */
+@media (min-width: 1024px) { :root { --section-py: 5rem;   --section-py-half: 2.5rem; } }
+@media (min-width: 1544px) { :root { --section-py: 6rem;   --section-py-half: 3rem;   } }
+@media (min-width: 1920px) { :root { --section-py: 8rem;   --section-py-half: 4rem;   } }
 
 /* Breakpoint reference (use in @media; CSS variables can't be used in @media):
      xs:  480px   sm:  640px   md:  768px   lg:  1024px

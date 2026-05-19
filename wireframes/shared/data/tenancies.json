@@ -1,0 +1,80 @@
+[
+  {
+    "id": "T-2010-AA-01",
+    "ve": "UVEK",
+    "dep": "BAFU",
+    "buildingId": "2011",
+    "sap": "1086/2011/AA",
+    "egid": "100234567",
+    "address": "Eichweg 22, 3003 Bern",
+    "buildingName": "Eichweg 22",
+    "pfmKategorie": "Verwaltung Klasse II (Standard)",
+    "floor": "3. OG",
+    "hnf2": 420,
+    "gf": 890,
+    "arbeitsplaetze": 35,
+    "leaseStart": "2019-01-01",
+    "leaseEnd": "2029-12-31",
+    "leaseAuto": true,
+    "yearlyCost": 420000,
+    "contacts": {
+      "bblPfm": "Holger Ludwig",
+      "bblIm": "Anna Wirz",
+      "bblFlm": "Markus Diener"
+    },
+    "openIssues": 1,
+    "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600"
+  },
+  {
+    "id": "T-2013-AA-01",
+    "ve": "BAFU",
+    "dep": "BAFU",
+    "buildingId": "2013",
+    "sap": "1086/2013/AA",
+    "egid": "100456789",
+    "address": "Sulgenrain 19, 3007 Bern",
+    "buildingName": "Sulgenrain 19",
+    "pfmKategorie": "Verwaltung Klasse III (Funktional)",
+    "floor": "EG + 1. OG",
+    "hnf2": 280,
+    "gf": 560,
+    "arbeitsplaetze": 22,
+    "leaseStart": "2021-04-01",
+    "leaseEnd": "2031-03-31",
+    "leaseAuto": true,
+    "yearlyCost": 252000,
+    "contacts": {
+      "bblPfm": "Holger Ludwig",
+      "bblIm": "Hans Studer",
+      "bblFlm": "Markus Diener"
+    },
+    "openIssues": 0,
+    "image": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600"
+  },
+  {
+    "id": "T-2012-AA-01",
+    "ve": "SEM",
+    "dep": "SEM",
+    "buildingId": "2012",
+    "sap": "1086/2012/AA",
+    "egid": "100345678",
+    "address": "Route Cantonale, 2017 Boudry",
+    "buildingName": "Empfangszentrum Boudry",
+    "pfmKategorie": "Empfangszentrum SEM",
+    "floor": "Gesamtkomplex",
+    "hnf2": 1637,
+    "gf": 2890,
+    "arbeitsplaetze": 18,
+    "leaseStart": "2017-11-01",
+    "leaseEnd": "2037-10-31",
+    "leaseAuto": false,
+    "yearlyCost": 980000,
+    "contacts": {
+      "bblPfm": "Holger Ludwig",
+      "bblIm": "Anna Wirz",
+      "bblFlm": "Markus Diener"
+    },
+    "openIssues": 2,
+    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600"
+  }
+]

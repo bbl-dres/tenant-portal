@@ -107,7 +107,11 @@
       "Read(//c/Users/DavidRasner/Documents/**)",
       "Bash(powershell -Command \"Get-ChildItem -Path 'C:\\\\Users\\\\DavidRasner\\\\Documents\\\\GitHub' -Directory | Select-Object -ExpandProperty Name\")",
       "Bash(xargs grep -l \"hero\\\\|Hero\")",
-      "Bash(cp \"C:/Users/DavidRasner/Documents/GitHub/designsystem/app/assets/logos/BundLogo.svg\" \"wireframes/shared/assets/BundLogo.svg\" && ls wireframes/shared/assets/)"
+      "Bash(cp \"C:/Users/DavidRasner/Documents/GitHub/designsystem/app/assets/logos/BundLogo.svg\" \"wireframes/shared/assets/BundLogo.svg\" && ls wireframes/shared/assets/)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\); new Function\\(s\\); console.log\\('t3-lite.js parses OK'\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\); new Function\\(s\\); console.log\\('portal.js parses OK'\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\); console.log\\('Both JS files parse OK'\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\); console.log\\('OK'\\)\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\DavidRasner\\Documents\\GitHub\\designsystem\\app\\assets\\logos"

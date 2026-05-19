@@ -1,0 +1,102 @@
+[
+  {
+    "id": "nachhaltigkeitsbericht-2025",
+    "type": "Medienmitteilung",
+    "date": "2026-05-18",
+    "title": "Nachhaltigkeitsbericht 2025 der Bundesimmobilien veröffentlicht",
+    "lead": "Das BBL legt für die von ihm bewirtschafteten Bundesimmobilien einen weiteren Schritt in Richtung Netto-Null vor. Der CO₂-Ausstoss des Portfolios sank gegenüber dem Vorjahr um 4.8 %; gleichzeitig wurden 23 Sanierungsprojekte abgeschlossen.",
+    "source": "BBL Campus",
+    "responsible": "E. Frey",
+    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=720&q=80"
+  },
+  {
+    "id": "wartungsfenster-eppm-mai-2026",
+    "type": "Mitteilung",
+    "date": "2026-05-17",
+    "title": "Wartungsfenster ePPM 25. Mai 2026",
+    "lead": "Am 25.05. 18:00–22:00 Uhr findet das geplante Wartungsfenster im SAP ePPM statt. Einreichungen aus dem Mieterportal werden während dieser Zeit gepuffert und nach Abschluss automatisch übergeben. Es ist keine Aktion seitens der Antragstellenden erforderlich.",
+    "source": "BIT Betrieb",
+    "responsible": "E. Frey (BBL Campus)",
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=720&q=80"
+  },
+  {
+    "id": "sem-antrag-vorlage-2026",
+    "type": "Medienmitteilung",
+    "date": "2026-05-15",
+    "title": "Neue Vorlage für SEM-Anträge ab sofort verfügbar",
+    "lead": "Empfangszentrum-Bedarfe werden ab sofort über die spezialisierte SEM-Variante erfasst. Sie umfasst Bettenplatz-Pauschalen, Betreuungs- und Sicherheits-FTE sowie Verfahrensräume gemäss SEM-Betriebskonzept 2024.",
+    "source": "BBL PFM",
+    "responsible": "H. Ludwig",
+    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=720&q=80"
+  },
+  {
+    "id": "agov-migration-2026",
+    "type": "Mitteilung",
+    "date": "2026-05-12",
+    "title": "AGOV / E-ID — Vorbereitungen für die Migration ab Dezember 2026",
+    "lead": "Ab Dezember 2026 wird der Zugang für externe Mietende der Bundesverwaltung schrittweise von eIAM auf die föderale AGOV-Plattform und das schweizerische E-ID umgestellt. Bestehende eIAM-Konten bleiben in der Übergangsphase aktiv.",
+    "source": "BIT / DTI",
+    "responsible": "BBL Campus",
+    "image": "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=720&q=80"
+  },
+  {
+    "id": "vbs-portfolio-2026",
+    "type": "Medienmitteilung",
+    "date": "2026-05-08",
+    "title": "BBL übernimmt zwölf weitere Liegenschaften aus dem VBS-Portfolio",
+    "lead": "Per 1. Juli 2026 gehen zwölf Verwaltungsbauten in Bern, Thun und Zürich von armasuisse in die Bewirtschaftung des BBL über. Die betroffenen Mieter werden im Mieterportal über die neuen Ansprechpersonen informiert.",
+    "source": "BBL PFM",
+    "responsible": "H. Ludwig",
+    "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=720&q=80"
+  },
+  {
+    "id": "naw-update-2026",
+    "type": "Mitteilung",
+    "date": "2026-04-22",
+    "title": "NAW-Klassen 2.0 — Aktualisierung der Bürowelten-Faktoren",
+    "lead": "Die Klasse „Hybrid-Activity-Based" wurde auf Basis der Pilotergebnisse 03/2026 von 10 auf 9 m²/FTE HNF2 angepasst. Bestehende Entwürfe behalten ihre erfasste Klasse, neue Anträge nutzen den aktualisierten Wert.",
+    "source": "BBL PFM",
+    "responsible": "M. Diener",
+    "image": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=720&q=80"
+  },
+  {
+    "id": "schlussel-pilot-bern-2026",
+    "type": "Mitteilung",
+    "date": "2026-04-15",
+    "title": "Pilot abgeschlossen: digitale Schliessanlage Bundeshaus West",
+    "lead": "Der Pilot zur digitalen Schliessanlage im Bundeshaus West ist erfolgreich abgeschlossen. Ab Juni 2026 erhalten Mitarbeitende der pilotierten Verwaltungseinheiten Zugang über das eIAM-gebundene Mobilgerät — physische Schlüssel werden parallel weiterhin ausgegeben.",
+    "source": "BBL-IM",
+    "responsible": "A. Wirz",
+    "image": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=720&q=80"
+  },
+  {
+    "id": "neuer-pfm-romandie-2026",
+    "type": "Mitteilung",
+    "date": "2026-04-08",
+    "title": "Neue Ansprechperson PFM Region Romandie",
+    "lead": "Ab dem 1. Mai 2026 übernimmt Sandrine Roulin die Funktion PFM-Verantwortliche Region Romandie. Ihre Kontaktdaten sind im Mieterportal unter „Liegenschaften" automatisch aktualisiert; die bisherigen Eskalationspfade bleiben unverändert.",
+    "source": "BBL PFM",
+    "responsible": "H. Ludwig",
+    "image": "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=720&q=80"
+  },
+  {
+    "id": "schulungen-q2-2026",
+    "type": "Mitteilung",
+    "date": "2026-03-30",
+    "title": "Schulungen Q2 2026 — Anmeldung offen",
+    "lead": "Drei neue Termine für „Mieterportal kompakt" (60 Min., DE/FR), zwei Aufbau-Workshops „Bedarf richtig erfassen" und ein Spezialtermin für SEM-Anwender stehen ab heute zur Anmeldung bereit. Hybrid-Format mit Aufzeichnung.",
+    "source": "BBL Campus",
+    "responsible": "M. Diener",
+    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=720&q=80"
+  },
+  {
+    "id": "geschaftsbericht-2025",
+    "type": "Medienmitteilung",
+    "date": "2026-03-20",
+    "title": "BBL-Geschäftsbericht 2025: Bundesimmobilien in Zahlen",
+    "lead": "Im vergangenen Jahr hat das BBL über 2'700 Bundesimmobilien bewirtschaftet, davon 26 % im Eigentum und 74 % im Mietverhältnis. Investitionsvolumen: CHF 412 Mio., davon 31 % für energetische Sanierungen. Der vollständige Bericht steht ab sofort öffentlich zur Verfügung.",
+    "source": "BBL Direktion",
+    "responsible": "Kommunikation BBL",
+    "image": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=720&q=80"
+  }
+]
