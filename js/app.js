@@ -1,3 +1,798 @@
+/* ==========================================================================
+   PORTAL.JS — BBL Mieterportal prototype shared module
+
+   Shared between all typology SPAs. Exports:
+   - state: global state object
+   - bootstrap(): load mock data + wire global listeners
+   - router: hash-based routing (per-typology routes registered separately)
+   - renderShell(): federal CD-Bund chrome (top bar, brand bar, navbar, footer)
+   - renderPipeline(application): status pipeline with three variants
+   - renderStepIndicator(currentStep, steps): wizard StepIndicator
+   - toast(): toast notifications
+   - modal(): modal helper
+   - shortcutOverlay(): "?" key overlay
+   - calcWizard(): NAW × desk-sharing × FTE → HNF2/GF/UK
+   - utility renderers: badge, card, application card, attachments list
+   ========================================================================== */
+
+(function (global) {
+  'use strict';
+
+  // ── STATE ────────────────────────────────────────────────────────────────
+  const state = {
+    user: null,                  // { id, name, ve, roles, activeRole }
+    applications: [],            // loaded from data/applications.json
+    masterData: null,            // loaded from data/master-data.json
+    buildings: [],               // loaded from data/buildings.json
+    users: [],                   // loaded from data/users.json
+    page: 'home',                // current route id
+    params: {},                  // route params
+    draft: null,                 // current wizard draft
+    pendingNotice: null,         // queued notification banner text
+  };
+
+  // ── DATA LOADING ────────────────────────────────────────────────────────
+  async function loadData(basePath = 'data/') {
+    const [apps, master, users, buildings, tenancies, news] = await Promise.all([
+      fetch(basePath + 'applications.json').then(r => r.json()),
+      fetch(basePath + 'master-data.json').then(r => r.json()),
+      fetch(basePath + 'users.json').then(r => r.json()),
+      fetch(basePath + 'buildings.json').then(r => r.json()),
+      fetch(basePath + 'tenancies.json').then(r => r.json()).catch(() => []),
+      fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
+    ]);
+    state.applications = apps;
+    state.masterData = master;
+    state.users = users;
+    state.buildings = buildings;
+    state.tenancies = tenancies;
+    state.news = news;
+  }
+
+  // ── PERSISTENCE (localStorage) ──────────────────────────────────────────
+  function persistDraft(draft) {
+    if (!state.user) return;
+    localStorage.setItem('mp-draft-' + state.user.id, JSON.stringify(draft));
+  }
+  function loadDraft() {
+    if (!state.user) return null;
+    const raw = localStorage.getItem('mp-draft-' + state.user.id);
+    return raw ? JSON.parse(raw) : null;
+  }
+  function clearDraft() {
+    if (!state.user) return;
+    localStorage.removeItem('mp-draft-' + state.user.id);
+  }
+  function persistRole(role) {
+    if (!state.user) return;
+    localStorage.setItem('mp-active-role-' + state.user.id, role);
+  }
+  function loadRole() {
+    if (!state.user) return null;
+    return localStorage.getItem('mp-active-role-' + state.user.id);
+  }
+
+  // ── ROUTER (hash-based) ──────────────────────────────────────────────────
+  const routes = [];
+  function registerRoute(pattern, handler) {
+    // pattern: '#/wizard/:step' → regex
+    const re = new RegExp('^' + pattern.replace(/:(\w+)/g, '(?<$1>[^/]+)') + '$');
+    routes.push({ re, handler });
+  }
+  function navigate(hash) {
+    if (location.hash === hash) {
+      handleHash();
+    } else {
+      location.hash = hash;
+    }
+  }
+  function handleHash() {
+    const h = location.hash || '#/';
+    for (const { re, handler } of routes) {
+      const m = h.match(re);
+      if (m) {
+        state.params = m.groups || {};
+        handler(state.params);
+        return;
+      }
+    }
+    // No match: render 404
+    const app = document.getElementById('app');
+    if (app) app.innerHTML = `<div class="container section"><h1>Seite nicht gefunden</h1><p><a href="#/">Zurück zur Startseite</a></p></div>`;
+  }
+
+  // ── FEDERAL SHELL ────────────────────────────────────────────────────────
+  function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcrumb = [], navItems = [] } = {}) {
+    // Anmelden lives in the top-bar (dark utility bar), not the brand bar.
+    // Plain white text per CD pattern — not a red filled button.
+    const authPill = state.user
+      ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="Profil von ${state.user.name}">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+           ${state.user.name}
+         </a>`
+      : `<button class="top-bar__link top-bar__link--user" type="button" onclick="window.portal.login()">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+           Anmelden
+         </button>`;
+
+    const navHtml = navItems.map((item, i) => {
+      const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
+      if (item.type === 'dropdown') {
+        return `
+          <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
+                  type="button"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-controls="navMenu-${item.id}"
+                  data-menu="${item.id}"
+                  onclick="window.portal.toggleNavMenu('${item.id}')">
+            ${item.label}
+            <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" style="margin-left:6px;"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+          </button>
+        `;
+      }
+      return `<a class="main-navigation__link ${activeCls}" href="${item.href}">${item.label}</a>`;
+    }).join('');
+
+    // Dropdown panels (CD Bund pattern: constrained card under the trigger,
+    // single-line label rows, red left-bar on the active route).
+    const currentHash = location.hash || '#/';
+    const isActiveSub = (href) => {
+      if (href === '#/services')  return currentHash === '#/services';
+      if (href === '#/wizard/1')  return currentHash.startsWith('#/wizard');
+      if (href === '#/downloads') return currentHash.startsWith('#/downloads');
+      return currentHash === href || currentHash.startsWith(href + '/');
+    };
+    const navMenus = navItems.filter(i => i.type === 'dropdown').map(item => `
+      <div class="nav-menu" id="navMenu-${item.id}" role="region" aria-label="${item.label}" hidden>
+        <div class="nav-menu__inner">
+          <button class="nav-menu__close" type="button"
+                  onclick="window.portal.toggleNavMenu('${item.id}', false)">
+            Schliessen <span aria-hidden="true">×</span>
+          </button>
+          <h2 class="nav-menu__heading">${item.label}</h2>
+          <ul class="nav-menu__list">
+            ${(item.items || []).map(sub => `
+              <li class="nav-menu__item ${isActiveSub(sub.href) ? 'nav-menu__item--active' : ''}">
+                <a class="nav-menu__link" href="${sub.href}"
+                   onclick="window.portal.toggleNavMenu('${item.id}', false)">
+                  ${sub.label}
+                </a>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+    `).join('');
+
+    const breadcrumbHtml = breadcrumb.length
+      ? `<nav class="breadcrumb" aria-label="Brotkrumen">${breadcrumb.map((b, i, a) =>
+          i === a.length - 1
+            ? `<span aria-current="page">${b.label}</span>`
+            : `<a href="${b.href}">${b.label}</a><span class="breadcrumb__sep">›</span>`
+        ).join('')}</nav>`
+      : '';
+
+    return `
+      <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+
+      <header class="site-header" role="banner">
+        <div class="top-bar">
+          <div class="top-bar__inner">
+            <button class="top-bar__authorities" aria-expanded="false">
+              <span>Alle Schweizer Bundesbehörden</span>
+              <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+            </button>
+            <span class="top-bar__prototype-notice">Prototyp — nur zur Demonstration</span>
+            <div class="top-bar__actions">
+              ${authPill}
+              <div class="language-switcher" id="langSwitch">
+                <button class="top-bar__lang" aria-label="Sprache wählen" aria-haspopup="listbox" aria-expanded="false"
+                        onclick="window.portal.toggleLang()">
+                  <span id="langCurrent">DE</span>
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+                </button>
+                <ul class="language-switcher__dropdown" role="listbox">
+                  <li><button class="language-switcher__option language-switcher__option--active" role="option" aria-selected="true" data-lang="DE" onclick="window.portal.pickLang('DE')">DE</button></li>
+                  <li><button class="language-switcher__option" role="option" aria-selected="false" data-lang="FR" onclick="window.portal.pickLang('FR')">FR</button></li>
+                  <li><button class="language-switcher__option" role="option" aria-selected="false" data-lang="IT" onclick="window.portal.pickLang('IT')">IT</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="top-header">
+          <div class="top-header__inner">
+            <div class="top-header__left" onclick="window.portal.navigate('#/')" role="link" tabindex="0">
+              <img class="top-header__bundmark" src="assets/BundLogo.svg"
+                   alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra"
+                   width="259" height="64">
+              <div class="top-header__divider" aria-hidden="true"></div>
+              <div class="top-header__dept">
+                <strong>Bundesamt für Bauten und Logistik BBL</strong><br>
+                <span class="top-header__dept-sub">${deptSub}</span>
+              </div>
+            </div>
+            <div class="top-header__right">
+              <nav class="top-header__meta" aria-label="Meta-Navigation">
+                <a class="top-header__meta-link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
+                <a class="top-header__meta-link" href="#/help">Hilfe</a>
+              </nav>
+              <div class="top-header__actions">
+                <div class="header-search" id="headerSearch">
+                  <button class="header-search__toggle" type="button"
+                          aria-expanded="false" aria-controls="headerSearchForm"
+                          onclick="window.portal.toggleSearch(true)">
+                    <span>Suche</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                  </button>
+                  <form class="header-search__form" id="headerSearchForm" role="search" aria-label="Portal durchsuchen"
+                        onsubmit="event.preventDefault(); window.portal.submitSearch(this);">
+                    <input class="header-search__input" id="headerSearchInput" type="search"
+                           name="q"
+                           placeholder="Suchbegriff eingeben" aria-label="Suchbegriff eingeben"
+                           autocomplete="off"
+                           onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
+                    <button class="header-search__submit" type="submit" aria-label="Suchen">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="navbar" aria-label="Hauptnavigation">
+          <div class="navbar__inner">
+            <button class="burger" aria-label="Menü öffnen"
+                    onclick="document.querySelector('.main-navigation').classList.toggle('open')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="main-navigation">${navHtml}</div>
+          </div>
+          ${navMenus}
+        </nav>
+      </header>
+
+      ${breadcrumbHtml}
+
+      <main id="main" tabindex="-1"></main>
+    `;
+  }
+
+  function renderFooter() {
+    // Content + structure matches bbl.admin.ch/de footer pattern:
+    // brand column (motto), Weitere Informationen (link list with arrows),
+    // Zugang zu amtlichen Dokumenten (single prominent link), then a
+    // narrow darker strip with Allgemeine Geschäftsbedingungen / Rechtliches /
+    // Barrierefreiheit, plus a back-to-top button anchored top-right.
+    return `
+      <footer class="app-footer" role="contentinfo">
+        <button class="app-footer__top-btn" type="button" aria-label="Zum Seitenanfang"
+                onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg>
+        </button>
+        <div class="footer-information">
+          <div class="footer-information__inner">
+            <div class="footer-information__col footer-information__col--brand">
+              <h3 class="footer-information__brand">BBL</h3>
+              <p class="footer-information__motto">Nachhaltig, partnerschaftlich und vorbildlich</p>
+              <p class="footer-information__prototype-warning" role="note">
+                Diese Anwendung ist ein Prototyp. Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration.
+              </p>
+            </div>
+
+            <div class="footer-information__col footer-information__col--links">
+              <h3 class="footer-information__heading">Weitere Informationen</h3>
+              <ul class="footer-information__list">
+                <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="app-footer__bottom">
+          <div class="app-footer__bottom-inner">
+            <a class="app-footer__bottom-link" href="https://www.bkb.admin.ch/bkb/de/home/themen/agb.html" target="_blank" rel="noopener">Allgemeine Geschäftsbedingungen des Bundes</a>
+            <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">Rechtliches</a>
+            <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">Barrierefreiheit in der Bundesverwaltung</a>
+          </div>
+        </div>
+      </footer>
+    `;
+  }
+
+  function roleLabel(role) {
+    return ({
+      'ILBO': 'Logistikbeauftragte',
+      'GS-Prüfer/in': 'GS-Prüfer/in',
+      'BBL-PFM': 'BBL Portfolio-Management',
+      'BBL-Campus': 'BBL Campus',
+      'Auditor': 'EFD Auditor',
+    })[role] || role;
+  }
+
+  // ── STATUS PIPELINE ──────────────────────────────────────────────────────
+  // Maps to §0.3 (three variants). Each step describes one transition state.
+  const PIPELINE_STANDARD = ['Entwurf', 'Eingereicht', 'in GS-Prüfung', 'genehmigt', 'in ePPM', 'abgeschlossen'];
+  const PIPELINE_BK       = ['Entwurf', 'Eingereicht', 'in PFM-Prüfung', 'genehmigt', 'in ePPM', 'abgeschlossen'];
+  const PIPELINE_GREENFIELD = ['Entwurf', 'Eingereicht', 'in GS-Prüfung', 'genehmigt', 'WE-Anlage', 'in ePPM', 'abgeschlossen'];
+
+  function statusKey(label) {
+    return label.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  }
+
+  function renderPipeline(application) {
+    let steps;
+    if (application.pipelineVariant === 'bk') steps = PIPELINE_BK;
+    else if (application.pipelineVariant === 'greenfield') steps = PIPELINE_GREENFIELD;
+    else steps = PIPELINE_STANDARD;
+
+    const currentIdx = steps.findIndex(s => statusKey(s) === application.status);
+    const isRejected = application.status === 'abgelehnt';
+    const isRueckfrage = application.status === 'rueckfrage';
+
+    if (isRueckfrage) {
+      // Show pipeline up to "in GS-Prüfung" then a "Rückfrage" bubble
+      return `
+        <div class="pipeline" role="list" aria-label="Statusverlauf">
+          ${steps.slice(0, 3).map((s, i) => `
+            <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rueckfrage'}" role="listitem">↻ ${s === 'in GS-Prüfung' ? 'Rückfrage' : s}</div>
+          `).join('')}
+          <div class="pipeline__step" role="listitem" style="opacity:0.5">… genehmigt</div>
+        </div>
+        <p class="form-field__hint">Rückfrage offen — bitte Auflagen erfüllen und erneut einreichen.</p>
+      `;
+    }
+    if (isRejected) {
+      return `
+        <div class="pipeline" role="list" aria-label="Statusverlauf">
+          ${steps.slice(0, 3).map((s, i) => `
+            <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rejected'}" role="listitem">${i < 2 ? '✓' : '✕'} ${s}</div>
+          `).join('')}
+          <div class="pipeline__step pipeline__step--rejected" role="listitem">abgelehnt</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="pipeline" role="list" aria-label="Statusverlauf">
+        ${steps.map((s, i) => {
+          const cls = i < currentIdx ? 'pipeline__step--done' :
+                      i === currentIdx ? 'pipeline__step--active' : '';
+          const glyph = i < currentIdx ? '✓ ' : i === currentIdx ? '◐ ' : '';
+          return `<div class="pipeline__step ${cls}" role="listitem">${glyph}${s}</div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  function renderStepIndicator(currentStep, steps) {
+    return `
+      <ol class="step-indicator" aria-label="Schritt-Anzeige">
+        ${steps.map((label, i) => {
+          const n = i + 1;
+          const cls = n < currentStep ? 'step-indicator__item--done' :
+                      n === currentStep ? 'step-indicator__item--active' : '';
+          const glyph = n < currentStep ? '✓' : '';
+          return `<li class="step-indicator__item ${cls}">${glyph} ${n}. ${label}</li>`;
+        }).join('')}
+      </ol>
+    `;
+  }
+
+  // ── WIZARD CALCULATION (FUNC-AU-014/-015 — see WIREFRAMES.md §8.1) ─────
+  function calcWizard(fields) {
+    if (!state.masterData) return null;
+    const naw = state.masterData.nawClasses.find(n => n.name === fields.nawClass)
+              || state.masterData.nawClasses.find(n => n.name === 'Kollaborativ-Standard');
+    const ds  = state.masterData.deskSharingFactor;       // fixed 0.8
+    const fte = Number(fields.fte) || 0;
+
+    const arbeitsplaetze = Math.ceil(fte * ds);            // FTE × 0.8
+    const hnf2 = Math.round(naw.hnf2PerFte * fte * ds);
+    const gf   = Math.round(naw.gfPerFte * fte * ds);
+
+    // UK-Kosten: master data has CHF per m² GF; placeholder calculation
+    const ukKosten = Math.round(gf * 3000);                // illustrative
+    const moeblierung = Math.round(hnf2 * state.masterData.moeblierungProM2);
+    const betriebskostenProM2Gf = state.masterData.ukKostenObergrenzeProM2Gf;
+    const hardBlockMultiplier   = state.masterData.ukKostenHardBlockMultiplier;
+    const ukProM2Gf = gf > 0 ? Math.round(ukKosten / gf / 12) : 0; // monthly
+
+    return {
+      nawClassName: naw.name,
+      nawHnf2: naw.hnf2PerFte,
+      nawGf:   naw.gfPerFte,
+      deskSharingFactor: ds,
+      fte, arbeitsplaetze,
+      hnf2, gf, ukKosten, moeblierung,
+      ukProM2Gf, betriebskostenProM2Gf, hardBlockMultiplier,
+      overBudget: ukProM2Gf > betriebskostenProM2Gf,
+      overBudgetPercent: ukProM2Gf > 0 ? Math.round((ukProM2Gf / betriebskostenProM2Gf - 1) * 100) : 0,
+      hardBlocked: ukProM2Gf > betriebskostenProM2Gf * hardBlockMultiplier,
+    };
+  }
+
+  // ── NAW QUESTIONNAIRE → CLASS ────────────────────────────────────────────
+  function deriveNawClass(answers) {
+    // Simplistic mapping for prototype:
+    // - "Labor" specialEquipment → Sicherheit-Labor
+    // - High concentration → Konzentriert-Einzel/Gruppe
+    // - Open/collab → Kollaborativ-Standard / Open
+    // - High remote share → Hybrid-Activity-Based
+    const specials = answers.specials || [];
+    if (specials.includes('Labor') || specials.includes('Sicherheitsbereich')) {
+      return { name: 'Sicherheit-Labor', confidence: 0.85, alternative: null };
+    }
+    if (answers.focus === 'Konzentriert') {
+      const variant = answers.confidentiality === 'hoch' ? 'Konzentriert-Einzel' : 'Konzentriert-Gruppe';
+      return { name: variant, confidence: 0.78, alternative: { name: 'Kollaborativ-Standard', confidence: 0.15 } };
+    }
+    if (Number(answers.remoteShare) >= 40) {
+      return { name: 'Hybrid-Activity-Based', confidence: 0.72, alternative: { name: 'Kollaborativ-Open', confidence: 0.20 } };
+    }
+    if (answers.publicContact === 'regelmaessig') {
+      return { name: 'Kollaborativ-Open', confidence: 0.68, alternative: { name: 'Kollaborativ-Standard', confidence: 0.25 } };
+    }
+    return { name: 'Kollaborativ-Standard', confidence: 0.84, alternative: { name: 'Hybrid-Activity-Based', confidence: 0.12 } };
+  }
+
+  // ── TOAST ────────────────────────────────────────────────────────────────
+  function ensureToastHost() {
+    let host = document.getElementById('toast-host');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'toast-host';
+      host.className = 'toast-host';
+      host.setAttribute('role', 'region');
+      host.setAttribute('aria-label', 'Benachrichtigungen');
+      host.setAttribute('aria-live', 'polite');
+      host.setAttribute('aria-atomic', 'false');
+      document.body.appendChild(host);
+    }
+    return host;
+  }
+  function toast(message, variant = '') {
+    const host = ensureToastHost();
+    const el = document.createElement('div');
+    el.className = 'toast' + (variant ? ' toast--' + variant : '');
+    el.textContent = message;
+    el.setAttribute('role', 'status');
+    host.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 200ms'; }, 3500);
+    setTimeout(() => el.remove(), 3800);
+  }
+
+  // ── MODAL ────────────────────────────────────────────────────────────────
+  function modal({ title, body, actions = [], onClose = null }) {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const close = () => { backdrop.remove(); if (onClose) onClose(); };
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) close(); });
+    backdrop.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modalTitle">${title}</h2>
+          <button class="modal__close" aria-label="Schliessen">×</button>
+        </div>
+        <div class="modal__body">${body}</div>
+        <div class="modal__footer">
+          ${actions.map((a, i) => `<button class="btn ${a.variant || 'btn--outline'}" data-action="${i}">${a.label}</button>`).join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    backdrop.querySelector('.modal__close').addEventListener('click', close);
+    actions.forEach((a, i) => {
+      backdrop.querySelector(`[data-action="${i}"]`).addEventListener('click', () => {
+        const r = a.onClick ? a.onClick() : true;
+        if (r !== false) close();
+      });
+    });
+    return { close };
+  }
+
+  // ── SHORTCUT OVERLAY (§11.13) ────────────────────────────────────────────
+  function renderShortcutOverlay() {
+    return `
+      <div class="shortcut-overlay" id="shortcutOverlay" role="dialog" aria-modal="true" aria-label="Tastatur-Kurzbefehle"
+           onclick="if(event.target===this)this.classList.remove('open')">
+        <div class="shortcut-overlay__inner">
+          <h2 class="shortcut-overlay__title">Tastatur-Kurzbefehle</h2>
+          <div class="shortcut-overlay__grid">
+            <div class="shortcut-overlay__group">
+              <h4>Navigation</h4>
+              <dl>
+                <dt>?</dt><dd>Dieses Overlay öffnen/schliessen</dd>
+                <dt>g g</dt><dd>Zur Startseite</dd>
+                <dt>g i</dt><dd>Zur Inbox</dd>
+                <dt>g q</dt><dd>Zur Pendenzen-Queue (GS)</dd>
+                <dt>Esc</dt><dd>Modal / Overlay schliessen</dd>
+              </dl>
+            </div>
+            <div class="shortcut-overlay__group">
+              <h4>Wizard</h4>
+              <dl>
+                <dt>Tab</dt><dd>Nächstes Feld</dd>
+                <dt>Ctrl+S</dt><dd>Entwurf speichern</dd>
+                <dt>Ctrl+Enter</dt><dd>Weiter / Senden</dd>
+              </dl>
+            </div>
+            <div class="shortcut-overlay__group">
+              <h4>Queue (GS-Prüfer/in)</h4>
+              <dl>
+                <dt>j / ↓</dt><dd>Nächste Zeile</dd>
+                <dt>k / ↑</dt><dd>Vorherige Zeile</dd>
+                <dt>Enter</dt><dd>Öffnen</dd>
+                <dt>x</dt><dd>Markieren</dd>
+              </dl>
+            </div>
+            <div class="shortcut-overlay__group">
+              <h4>Detail</h4>
+              <dl>
+                <dt>a</dt><dd>OK markieren</dd>
+                <dt>n</dt><dd>NoK markieren</dd>
+                <dt>k</dt><dd>OK mit Kommentar</dd>
+                <dt>s</dt><dd>Entscheid speichern</dd>
+              </dl>
+            </div>
+          </div>
+          <p style="margin-top:var(--space-md); font-size: var(--text-body-sm); color: var(--color-text-secondary);">
+            Drücken Sie <kbd>?</kbd> erneut zum Schliessen oder klicken Sie ausserhalb.
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  function wireGlobalShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      if (e.target.matches('input, textarea, select')) return;
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        document.getElementById('shortcutOverlay')?.classList.toggle('open');
+      } else if (e.key === 'Escape') {
+        document.getElementById('shortcutOverlay')?.classList.remove('open');
+      }
+    });
+  }
+
+  // ── ROLE CHOOSER (§2.1) ──────────────────────────────────────────────────
+  function openRoleMenu() {
+    if (!state.user || state.user.roles.length < 2) {
+      toast('Sie haben nur eine Rolle in diesem Profil.');
+      return;
+    }
+    const body = `
+      <p>Wechseln Sie zwischen Ihren Rollen. Die Inhaltsbereiche und Standard-Startseite passen sich an.</p>
+      <div class="stack">
+        ${state.user.roles.map(r => `
+          <button class="btn btn--outline btn--lg" data-role="${r}" style="width:100%;justify-content:flex-start;">
+            ${r === state.user.activeRole ? '✓ ' : ''}<strong>${roleLabel(r)}</strong>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    const m = modal({
+      title: 'Rolle wechseln',
+      body,
+      actions: [{ label: 'Abbrechen', variant: 'btn--outline' }]
+    });
+    document.querySelectorAll('[data-role]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const role = btn.getAttribute('data-role');
+        state.user.activeRole = role;
+        persistRole(role);
+        m.close();
+        toast('Rolle gewechselt: ' + roleLabel(role), 'success');
+        // Re-render current page
+        handleHash();
+      });
+    });
+  }
+
+  // ── LOGIN STUB ───────────────────────────────────────────────────────────
+  function login() {
+    // For the prototype, log in as the first user with multiple roles (Andrea Muster).
+    const user = state.users.find(u => u.roles.length > 1) || state.users[0];
+    if (!user) return;
+    state.user = { ...user };
+    const persistedRole = loadRole();
+    state.user.activeRole = persistedRole || user.roles[0];
+    toast('Angemeldet als ' + user.name, 'success');
+    navigate('#/home');
+  }
+  function logout() {
+    state.user = null;
+    clearDraft();
+    toast('Abgemeldet.');
+    navigate('#/');
+  }
+
+  // ── BADGE / CARD UTILITIES ───────────────────────────────────────────────
+  function statusBadge(status) {
+    const map = {
+      'entwurf': { cls: 'badge', label: '◯ Entwurf' },
+      'eingereicht': { cls: 'badge badge--info', label: '● Eingereicht' },
+      'in_gs_pruefung': { cls: 'badge badge--warning', label: '◐ in GS-Prüfung' },
+      'in_pfm_pruefung': { cls: 'badge badge--warning', label: '◐ in PFM-Prüfung' },
+      'genehmigt': { cls: 'badge badge--success', label: '✓ genehmigt' },
+      'in_eppm': { cls: 'badge badge--info', label: '→ in ePPM' },
+      'abgeschlossen': { cls: 'badge badge--success', label: '✓ abgeschlossen' },
+      'rueckfrage': { cls: 'badge badge--orange', label: '↻ Rückfrage' },
+      'abgelehnt': { cls: 'badge badge--danger', label: '✕ abgelehnt' },
+    };
+    const b = map[status] || { cls: 'badge', label: status };
+    return `<span class="${b.cls}">${b.label}</span>`;
+  }
+
+  function formatChf(n) {
+    return 'CHF ' + n.toLocaleString('de-CH');
+  }
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function toggleNavMenu(id, force) {
+    const panel = document.getElementById('navMenu-' + id);
+    const trigger = document.querySelector(`[data-menu="${id}"]`);
+    if (!panel) return;
+    const isOpen = !panel.hasAttribute('hidden');
+    const next = (typeof force === 'boolean') ? force : !isOpen;
+    // Close any other open nav menus
+    document.querySelectorAll('.nav-menu').forEach(m => {
+      m.setAttribute('hidden', '');
+      m.classList.remove('open');
+    });
+    document.querySelectorAll('.main-navigation__link--has-menu').forEach(t => t.setAttribute('aria-expanded', 'false'));
+    if (next) {
+      panel.removeAttribute('hidden');
+      panel.classList.add('open');
+      if (trigger) {
+        trigger.setAttribute('aria-expanded', 'true');
+        // Anchor the dropdown panel under the trigger word, like swisstopo.
+        // The .navbar is position:relative, so we offset from its left edge.
+        const navbar = trigger.closest('.navbar');
+        if (navbar) {
+          const navRect = navbar.getBoundingClientRect();
+          const tRect = trigger.getBoundingClientRect();
+          const panelW = panel.offsetWidth;
+          let leftPx = tRect.left - navRect.left;
+          // Clamp so the panel never goes past the navbar right edge
+          if (leftPx + panelW > navRect.width - 12) {
+            leftPx = Math.max(12, navRect.width - panelW - 12);
+          }
+          panel.style.left = leftPx + 'px';
+          panel.style.right = 'auto';
+        }
+      }
+    }
+  }
+
+  // Click-outside / Esc to close nav menus
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.nav-menu, .main-navigation__link--has-menu')) return;
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      toggleNavMenu(id, false);
+    });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      toggleNavMenu(id, false);
+    });
+  });
+
+  // ── SHARE-BAR (detail pages) ─────────────────────────────────────────────
+  function renderShareBar() {
+    return `
+      <div class="share-bar" role="toolbar" aria-label="Seite teilen oder drucken">
+        <button class="share-bar__btn" type="button" aria-label="Link kopieren"
+                onclick="window.portal.copyShareLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>Teilen</span>
+        </button>
+        <button class="share-bar__btn" type="button" aria-label="Seite drucken"
+                onclick="window.print()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span>Drucken</span>
+        </button>
+      </div>
+    `;
+  }
+
+  function copyShareLink() {
+    const url = location.href;
+    if (navigator.share) {
+      navigator.share({ title: document.title, url }).catch(() => fallbackCopy(url));
+    } else {
+      fallbackCopy(url);
+    }
+  }
+  function fallbackCopy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        () => toast('Link kopiert: ' + text, 'success'),
+        () => toast('Kopieren nicht möglich — bitte Adresse manuell aus dem Browser kopieren.')
+      );
+    } else {
+      toast('Link: ' + text);
+    }
+  }
+
+  function toggleLang() {
+    const el = document.getElementById('langSwitch');
+    const btn = el && el.querySelector('.top-bar__lang');
+    if (!el) return;
+    const isOpen = el.classList.toggle('open');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+  function pickLang(code) {
+    document.querySelectorAll('.language-switcher__option').forEach(o => {
+      const isActive = o.getAttribute('data-lang') === code;
+      o.classList.toggle('language-switcher__option--active', isActive);
+      o.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    const current = document.getElementById('langCurrent');
+    if (current) current.textContent = code;
+    toggleLang();
+    if (code !== 'DE') {
+      toast(`${code}-Lokalisation noch nicht implementiert — Anzeige bleibt auf DE.`, '');
+    }
+  }
+
+  function submitSearch(form) {
+    const q = (form.querySelector('input[name="q"]').value || '').trim();
+    if (!q) return;
+    toggleSearch(false);
+    navigate('#/search?q=' + encodeURIComponent(q));
+  }
+
+  function toggleSearch(open) {
+    const el = document.getElementById('headerSearch');
+    const toggle = document.querySelector('.header-search__toggle');
+    const input = document.getElementById('headerSearchInput');
+    if (!el) return;
+    if (open) {
+      el.classList.add('open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'true');
+      if (input) setTimeout(() => input.focus(), 50);
+    } else {
+      el.classList.remove('open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  // ── EXPORT ───────────────────────────────────────────────────────────────
+  global.portal = {
+    state, loadData,
+    persistDraft, loadDraft, clearDraft, persistRole, loadRole,
+    registerRoute, navigate, handleHash,
+    renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
+    renderPipeline, renderStepIndicator,
+    calcWizard, deriveNawClass,
+    toast, modal, toggleSearch, toggleNavMenu, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
+    openRoleMenu, login, logout,
+    statusBadge, statusKey,
+    formatChf, formatDate, escapeHtml, roleLabel,
+    PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
+  };
+
+})(window);
 /* ============================================================================
    T3-LITE Hero-CTA prototype — single-page app, hash router.
    Routes:
@@ -21,7 +816,7 @@
   init();
 
   async function init() {
-    await P.loadData('../shared/data/');
+    await P.loadData('data/');
     P.wireGlobalShortcuts();
     registerRoutes();
     window.addEventListener('hashchange', P.handleHash);
@@ -50,30 +845,351 @@
     P.registerRoute('#/moves',       () => renderServiceStub('Umzug & Sonderreinigung', 'REQ-FA-006', 'Transport, Umzug innerhalb einer Liegenschaft und Sonderreinigungsanfragen werden in einer der nächsten Iterationen des Mieterportals freigeschaltet.'));
     P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
     P.registerRoute('#/training',    () => renderServiceStub('Schulungen', 'FUNC-LP-007', 'Aktuelle Schulungen wie „Mieterportal kompakt" (60 Min.) und Aufbaukurse sind hier verlinkt — Termin-Buchung folgt in v0.4.'));
+    // Arbeitsinstrumente und Informationen — single long-scroll page (public)
+    P.registerRoute('#/info',                renderInfoPage);
+    P.registerRoute('#/search',              renderSearchResults);
+  }
+
+  // ── GLOBAL SEARCH RESULTS ────────────────────────────────────────────────
+  function renderSearchResults() {
+    shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'Suchergebnisse' }] });
+    const q = (location.hash.split('?q=')[1] || '').replace(/^=/, '');
+    const query = decodeURIComponent(q || '').toLowerCase().trim();
+
+    const matches = {
+      news:        [],
+      applications: [],
+      properties:  [],
+      info:        [],
+    };
+
+    if (query) {
+      matches.news = (P.state.news || []).filter(n =>
+        n.title.toLowerCase().includes(query) || n.lead.toLowerCase().includes(query));
+      matches.applications = (P.state.applications || []).filter(a => {
+        if (!P.state.user) return false;
+        const mine = a.submitterId === P.state.user.id || a.submitterVe === P.state.user.ve;
+        if (!mine) return false;
+        return a.id.toLowerCase().includes(query) || (a.address || '').toLowerCase().includes(query);
+      });
+      matches.properties = (P.state.tenancies || []).filter(t =>
+        t.buildingName.toLowerCase().includes(query) || t.address.toLowerCase().includes(query));
+      // Search the info-page section headings as a simple proxy
+      matches.info = INFO_TOC.filter(it => it.label.toLowerCase().includes(query) || query.includes(it.id));
+    }
+
+    const total = matches.news.length + matches.applications.length + matches.properties.length + matches.info.length;
+
+    document.getElementById('page-body').innerHTML = `
+      ${P.renderShareBar()}
+      <section class="section">
+        <div class="container" style="max-width: 960px;">
+          <p class="section-eyebrow">Suche</p>
+          <h1 class="section-heading">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
+          ${!query ? `
+            <p style="color: var(--color-text-secondary);">Bitte geben Sie einen Suchbegriff in der Suchleiste oben ein.</p>
+          ` : total === 0 ? `
+            <div class="empty-state">
+              <div class="empty-state__glyph">🔍</div>
+              <h2 class="empty-state__title">Keine Treffer</h2>
+              <p class="empty-state__lead">Versuchen Sie es mit anderen Schlüsselwörtern oder durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</p>
+            </div>
+          ` : `
+            <p style="color: var(--color-text-secondary); margin: 0 0 var(--space-2xl);">${total} Treffer in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>
+
+            ${matches.news.length ? `
+              <section style="margin-bottom: var(--space-2xl);">
+                <h2 style="font-size: var(--text-h3); margin: 0 0 var(--space-md);">Aktuell (${matches.news.length})</h2>
+                <ul class="search-results">
+                  ${matches.news.map(n => `
+                    <li><a href="#/news/${n.id}">
+                      <strong>${P.escapeHtml(n.type)}</strong> · ${P.formatDate(n.date)} · <span class="search-results__title">${P.escapeHtml(n.title)}</span>
+                      <p class="search-results__lead">${P.escapeHtml(n.lead.slice(0, 160))}…</p>
+                    </a></li>
+                  `).join('')}
+                </ul>
+              </section>
+            ` : ''}
+
+            ${matches.applications.length ? `
+              <section style="margin-bottom: var(--space-2xl);">
+                <h2 style="font-size: var(--text-h3); margin: 0 0 var(--space-md);">Anträge (${matches.applications.length})</h2>
+                <ul class="search-results">
+                  ${matches.applications.map(a => `
+                    <li><a href="#/inbox/${a.id}">
+                      <strong>${a.id}</strong> · ${a.type} · <span class="search-results__title">${P.escapeHtml(a.address)}</span>
+                      <p class="search-results__lead">Eingereicht ${P.formatDate(a.submittedAt)} · ${P.statusBadge(a.status)}</p>
+                    </a></li>
+                  `).join('')}
+                </ul>
+              </section>
+            ` : ''}
+
+            ${matches.properties.length ? `
+              <section style="margin-bottom: var(--space-2xl);">
+                <h2 style="font-size: var(--text-h3); margin: 0 0 var(--space-md);">Liegenschaften (${matches.properties.length})</h2>
+                <ul class="search-results">
+                  ${matches.properties.map(t => `
+                    <li><a href="#/properties/${t.id}">
+                      <strong>${t.sap}</strong> · <span class="search-results__title">${P.escapeHtml(t.buildingName)}</span>
+                      <p class="search-results__lead">${P.escapeHtml(t.address)} · ${t.hnf2} m² HNF2</p>
+                    </a></li>
+                  `).join('')}
+                </ul>
+              </section>
+            ` : ''}
+
+            ${matches.info.length ? `
+              <section style="margin-bottom: var(--space-2xl);">
+                <h2 style="font-size: var(--text-h3); margin: 0 0 var(--space-md);">Arbeitsinstrumente und Informationen (${matches.info.length})</h2>
+                <ul class="search-results">
+                  ${matches.info.map(it => `
+                    <li><a href="#/info" onclick="setTimeout(() => window.t3lite.scrollToInfo('${it.id}'), 100);">
+                      <span class="search-results__title">${P.escapeHtml(it.label)}</span>
+                      <p class="search-results__lead">Abschnitt auf der Info-Seite öffnen.</p>
+                    </a></li>
+                  `).join('')}
+                </ul>
+              </section>
+            ` : ''}
+          `}
+        </div>
+      </section>
+    `;
+  }
+
+  // ── ARBEITSINSTRUMENTE UND INFORMATIONEN ─────────────────────────────────
+  // Single long-scroll page with a sticky Inhaltsverzeichnis on the right
+  // (kbob-fdk Handbuch & Downloads pattern; armasuisse Immo-Portal layout).
+  // Public — no login required.
+
+  const INFO_TOC = [
+    { id: 'einfuehrung',   label: 'Einführung' },
+    { id: 'faq',           label: 'Häufige Fragen' },
+    { id: 'workflow',      label: 'Workflow erklärt' },
+    { id: 'naw',           label: 'NAW & Bürowelten' },
+    { id: 'merkblaetter',  label: 'Merkblätter & Vorlagen' },
+    { id: 'schulungen',    label: 'Schulungen & Erklärvideos' },
+    { id: 'glossar',       label: 'Glossar' },
+    { id: 'kontakt',       label: 'Kontakt & weitere Quellen' },
+  ];
+
+  function renderInfoPage() {
+    shell({ activeNav: 'info', breadcrumb: [
+      { href: '#/', label: 'Start' },
+      { label: 'Arbeitsinstrumente und Informationen' }
+    ]});
+
+    document.getElementById('page-body').innerHTML = `
+      ${P.renderShareBar()}
+      <section class="section">
+        <div class="container">
+          <header style="max-width: 60ch; margin-bottom: var(--space-2xl);">
+            <p class="section-eyebrow">Öffentlich · kein Login nötig</p>
+            <h1 style="font-size: var(--text-display); letter-spacing: -0.02em; margin: 0 0 var(--space-md);">Arbeitsinstrumente und Informationen</h1>
+            <p style="color: var(--color-text-secondary); font-size: var(--text-body); line-height: var(--line-height-relaxed); margin: 0;">
+              Erklärungen, Merkblätter, Vorlagen und Schulungsmaterial rund um das Mieterportal des BBL. Diese Inhalte sind öffentlich zugänglich und unterstützen Sie dabei, Anfragen vorzubereiten oder den BBL-Workflow zu verstehen.
+            </p>
+          </header>
+
+          <div class="page-with-toc">
+            <main class="page-with-toc__content">
+
+              <article id="einfuehrung">
+                <h2>Einführung</h2>
+                <p>Das BBL (Bundesamt für Bauten und Logistik) bewirtschaftet rund 2'700 Bundesimmobilien für die gesamte Bundesverwaltung — von Büroflächen in Bundeshäusern über Empfangszentren des SEM bis zu Auslandvertretungen der EDA. Das Mieterportal ist die zentrale digitale Anlaufstelle für Bundes-Mietende: Bedarfsmeldung, Schadensmeldung, Statusverfolgung und Dokumentenzugriff.</p>
+                <p>Diese Sammlung enthält die wichtigsten Hintergrundinformationen — bewusst öffentlich, damit Sie sich vor der Anmeldung vorbereiten oder Konzepte nachschlagen können. Für die eigentlichen Anfragen ist eine Anmeldung über eIAM erforderlich.</p>
+              </article>
+
+              <article id="faq">
+                <h2>Häufige Fragen</h2>
+                <div class="accordion">
+                  ${faqItem('Wer kann das Mieterportal nutzen?', 'Logistikbeauftragte (ILBO) und weitere zuständige Personen der Verwaltungseinheiten des Bundes. Die Anmeldung erfolgt mit dem föderalen eIAM-Konto.')}
+                  ${faqItem('Was bedeutet NAW?', 'NAW steht für „Neue Arbeitswelten" — eine föderale Klassifizierung von Büro-Arbeitsstilen (Konzentriert, Kollaborativ, Hybrid, Labor). Die Klasse bestimmt die m²/FTE-Basis für die Flächenberechnung.')}
+                  ${faqItem('Wer prüft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihrer Verwaltungseinheit. Ausnahme: die Bundeskanzlei (BK) hat kein GS — ihre Anträge gehen direkt an BBL Portfolio-Management.')}
+                  ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die von Ihnen angegebene Adresse noch nicht im SAP-Stammdatensatz registriert ist (z. B. eine neue Auslandvertretung), aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem angenommen — BBL legt die WE später an.')}
+                  ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeiten variieren je nach Antragstyp und beteiligten Stellen. Konkrete SLAs werden mit Ihrem GS vereinbart und im Antragsdetail angezeigt.')}
+                </div>
+              </article>
+
+              <article id="workflow">
+                <h2>Workflow erklärt</h2>
+                <p>Eine Bedarfsmeldung durchläuft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
+                <ol style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
+                  <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Auto-Save alle 30 Sekunden.</li>
+                  <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat Ihrer VE prüft Feld für Feld; Rückfragen können einzelne Felder betreffen.</li>
+                  <li><strong>Genehmigt → in ePPM</strong> — Die genehmigte Meldung wird als Bedarfsmeldung an SAP ePPM übergeben. Sie erhalten eine Bedarfsmeldungsnummer.</li>
+                  <li><strong>Abgeschlossen</strong> — Die Akte ist vollständig dokumentiert und im Audit-Log auffindbar.</li>
+                </ol>
+                <p>Spezialfälle: <strong>BK-Bypass</strong> überspringt den GS-Schritt (FUNC-FG-005), <strong>Greenfield</strong> ergänzt einen Schritt „WE-Anlage durch BBL" vor der ePPM-Übergabe.</p>
+              </article>
+
+              <article id="naw">
+                <h2>NAW & Bürowelten erklärt</h2>
+                <p>Die NAW-Klassen sind die föderale Vorgabe für die Flächenberechnung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
+                <table class="table" style="margin-top: var(--space-md);">
+                  <thead>
+                    <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Konzentriert-Einzel</td><td>15.0</td><td>28.0</td><td>Einzelbüros, hohe Vertraulichkeit</td></tr>
+                    <tr><td>Konzentriert-Gruppe</td><td>13.0</td><td>25.0</td><td>2–4-Personen-Büros</td></tr>
+                    <tr><td>Kollaborativ-Standard</td><td>12.0</td><td>24.0</td><td>Standard-Bundesbüro (Default)</td></tr>
+                    <tr><td>Kollaborativ-Open</td><td>10.0</td><td>21.0</td><td>Open Space, Publikumsverkehr</td></tr>
+                    <tr><td>Hybrid-Activity-Based</td><td>9.0</td><td>20.0</td><td>Activity-Based-Working ≥ 40 % Remote</td></tr>
+                    <tr><td>Sicherheit-Labor</td><td>18.0</td><td>34.0</td><td>Spezialausstattung, Sicherheit, Labor</td></tr>
+                  </tbody>
+                </table>
+              </article>
+
+              <article id="merkblaetter">
+                <h2>Merkblätter & Vorlagen</h2>
+                <p>Öffentlich zugängliche Dokumente, die Sie vor oder während der Bedarfsmeldung nutzen können:</p>
+                <ul class="attachment-list">
+                  <li>📄 Anleitung „Antrag richtig stellen" <span class="badge badge--success">🟢 verifiziert</span> <span class="meta">PDF · 320 KB · DE/FR/IT · Stand 11.05.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                  <li>📄 Checkliste vor der Bedarfsmeldung <span class="badge badge--success">🟢 verifiziert</span> <span class="meta">PDF · 180 KB · DE/FR · Stand 02.05.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                  <li>📄 Vorlage SEM-Bedarfsmeldung <span class="badge badge--info">SEM</span> <span class="meta">DOCX · 240 KB · DE/FR · Stand 17.05.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                  <li>📄 EDA-Raumprogramm-Formular <span class="badge badge--info">EDA</span> <span class="meta">PDF · 410 KB · DE/FR · Stand 22.04.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                  <li>📄 NAW-Klassifizierung Übersicht <span class="meta">PDF · 290 KB · DE · Stand 10.01.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
+                </ul>
+              </article>
+
+              <article id="schulungen">
+                <h2>Schulungen & Erklärvideos</h2>
+                <p>Der BBL bietet regelmässige Schulungen für Bundes-Mietende. Aufzeichnungen ergänzen den Hybrid-Modus.</p>
+                <ul style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
+                  <li><strong>Mieterportal kompakt</strong> (60 Min., DE/FR) — Einstieg in das Portal, geeignet für neue Logistikbeauftragte. Nächste Termine: 03.06., 17.06., 02.07.2026.</li>
+                  <li><strong>Bedarf richtig erfassen</strong> (Aufbaukurs, 90 Min., DE) — Vertiefung NAW-Klassifizierung, FUNC-AU-019-Felder, Anhänge-Management. Termin: 11.06.2026.</li>
+                  <li><strong>SEM-Spezialschulung</strong> (45 Min., DE/FR) — Bettenplatz-Logik, Verfahrensräume, Pauschalansatz. Termin: 25.06.2026.</li>
+                </ul>
+                <p style="margin-top: var(--space-md);">Anmeldung über die <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">BBL-Geschäftsstelle</a>.</p>
+              </article>
+
+              <article id="glossar">
+                <h2>Glossar</h2>
+                <dl class="glossary">
+                  <dt>BBL</dt><dd>Bundesamt für Bauten und Logistik.</dd>
+                  <dt>BK</dt><dd>Buchungskreis — buchhalterische Organisation. BBL hat den Buchungskreis 1086; jede Immobilie im BBL-Portfolio trägt diesen BK.</dd>
+                  <dt>Bundeskanzlei (BK)</dt><dd>Stabsstelle des Bundesrates. Hat keine Generalsekretariate — Anträge der BK gehen daher direkt an BBL-PFM (FUNC-FG-005).</dd>
+                  <dt>eIAM</dt><dd>Föderales Identity & Access Management — Einmal-Anmeldung der Bundesverwaltung. Ab Dezember 2026 schrittweise Umstellung auf AGOV / E-ID.</dd>
+                  <dt>ePPM</dt><dd>SAP Enterprise Portfolio & Project Management — föderales Projektportfoliosystem von BBL.</dd>
+                  <dt>FLM</dt><dd>Flächenmanagement.</dd>
+                  <dt>GS</dt><dd>Generalsekretariat einer Verwaltungseinheit. Prüft Bedarfsmeldungen vor der Übergabe an BBL.</dd>
+                  <dt>ILBO</dt><dd>Logistikbeauftragte/r — Rolle in einer Verwaltungseinheit, die Bedarf erfasst und Liegenschaftsfragen koordiniert.</dd>
+                  <dt>NAW</dt><dd>Neue Arbeitswelten — Klassifizierung von Bürowelten, treibt die m²/FTE-Berechnung.</dd>
+                  <dt>PFM</dt><dd>Portfolio-Management (bei BBL).</dd>
+                  <dt>SEM</dt><dd>Staatssekretariat für Migration — eine VE mit spezialisierten Empfangszentren.</dd>
+                  <dt>VE</dt><dd>Verwaltungseinheit — Bundesamt, Sekretariat oder Departement.</dd>
+                  <dt>WE</dt><dd>Wirtschaftseinheit — SAP RE-FX-Objekt-Schlüssel im Format BK/WE/Obj, z.B. 1086/2010/AA.</dd>
+                </dl>
+              </article>
+
+              <article id="kontakt">
+                <h2>Kontakt & weitere Quellen</h2>
+                <p>Für Fragen, die diese Sammlung nicht beantwortet:</p>
+                <ul style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
+                  <li><strong>BBL Geschäftsstelle</strong> — <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">bbl.admin.ch/de/kontakt ↗</a></li>
+                  <li><strong>BIT IT-Support</strong> (technische Fragen zum eIAM-Zugang) — service-desk@bit.admin.ch</li>
+                  <li><strong>Anforderungskatalog des Prototyps</strong> — <a href="docs/REQUIREMENTS.md" target="_blank">REQUIREMENTS.md ↗</a></li>
+                  <li><strong>Wireframes & Design-Studien</strong> — <a href="docs/WIREFRAMES.md" target="_blank">WIREFRAMES.md ↗</a></li>
+                  <li><strong>Quellcode</strong> — <a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">github.com/bbl-dres/tenant-portal ↗</a></li>
+                </ul>
+              </article>
+
+            </main>
+
+            <aside class="page-with-toc__toc" aria-label="Inhaltsverzeichnis">
+              <h2 class="page-with-toc__toc-title">Inhaltsverzeichnis</h2>
+              <ul class="page-with-toc__toc-list">
+                ${INFO_TOC.map((it, i) => `
+                  <li class="page-with-toc__toc-item ${i === 0 ? 'page-with-toc__toc-item--active' : ''}">
+                    <a class="page-with-toc__toc-link" href="#${it.id}"
+                       onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
+                      ${P.escapeHtml(it.label)}
+                    </a>
+                  </li>
+                `).join('')}
+              </ul>
+            </aside>
+          </div>
+        </div>
+      </section>
+    `;
+
+    wireInfoScrollSpy();
+  }
+
+  function faqItem(question, answer) {
+    return `
+      <div class="accordion__item">
+        <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+          <span>${P.escapeHtml(question)}</span>
+          <span class="accordion__icon" aria-hidden="true"></span>
+        </button>
+        <div class="accordion__panel"><p>${P.escapeHtml(answer)}</p></div>
+      </div>
+    `;
+  }
+
+  function wireInfoScrollSpy() {
+    const articles = document.querySelectorAll('.page-with-toc__content > article[id]');
+    const items = document.querySelectorAll('.page-with-toc__toc-item');
+    if (!articles.length || !items.length) return;
+
+    const setActive = (id) => {
+      items.forEach(item => {
+        const href = item.querySelector('a')?.getAttribute('href');
+        item.classList.toggle('page-with-toc__toc-item--active', href === '#' + id);
+      });
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: '-30% 0% -55% 0%', threshold: 0 });
+
+    articles.forEach(a => observer.observe(a));
   }
 
   // ── NEWS SECTION (swisstopo "Aktuell" carousel pattern) ─────────────────
-  function renderNewsSection(items = P.state.news, max = 3) {
-    const visible = items.slice(0, max);
+  // 10 mock items in news.json → 4 pages of 3 (last page may be partial).
+  // Page state lives in window for stable across re-renders.
+  function renderNewsSection(items = P.state.news, perPage = 3) {
+    if (!Array.isArray(items)) items = [];
+    const totalPages = Math.max(1, Math.ceil(items.length / perPage));
+    let page = window._newsPage = window._newsPage || 0;
+    if (page >= totalPages) page = window._newsPage = 0;
+    const start = page * perPage;
+    const visible = items.slice(start, start + perPage);
+    const prevDisabled = page === 0;
+    const nextDisabled = page >= totalPages - 1;
+
     return `
       <section class="news-section section section--alt section--lg" aria-labelledby="newsSectionTitle">
         <div class="container">
           <h2 class="section-heading" id="newsSectionTitle">Aktuell</h2>
           <div class="news-section__viewport">
-            <button class="news-section__nav news-section__nav--prev" type="button" aria-label="Vorherige Nachrichten" disabled>
+            <button class="news-section__nav news-section__nav--prev" type="button" aria-label="Vorherige Nachrichten"
+                    onclick="window.t3lite.newsPage(${page - 1})" ${prevDisabled ? 'disabled' : ''}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <div class="news-section__track">
+            <div class="news-section__track" id="newsTrack">
               ${visible.map(newsCard).join('')}
             </div>
-            <button class="news-section__nav news-section__nav--next" type="button" aria-label="Nächste Nachrichten">
+            <button class="news-section__nav news-section__nav--next" type="button" aria-label="Nächste Nachrichten"
+                    onclick="window.t3lite.newsPage(${page + 1})" ${nextDisabled ? 'disabled' : ''}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
           <div class="news-section__footer">
             <div class="news-section__dots" role="tablist" aria-label="Seiten">
-              <button class="news-section__dot news-section__dot--active" aria-label="Seite 1, aktiv" aria-current="true"></button>
-              <button class="news-section__dot" aria-label="Seite 2"></button>
+              ${Array.from({ length: totalPages }, (_, i) => `
+                <button class="news-section__dot ${i === page ? 'news-section__dot--active' : ''}"
+                        aria-label="Seite ${i + 1}${i === page ? ', aktiv' : ''}"
+                        ${i === page ? 'aria-current="true"' : ''}
+                        onclick="window.t3lite.newsPage(${i})"></button>
+              `).join('')}
             </div>
             <a class="news-section__more" href="#/news">Weitere News <span aria-hidden="true">→</span></a>
           </div>
@@ -134,6 +1250,7 @@
     if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
     shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/news', label: 'News-Übersicht' }, { label: n.title }] });
     document.getElementById('page-body').innerHTML = `
+      ${P.renderShareBar()}
       <article class="section">
         <div class="container" style="max-width: 780px;">
           <p style="color: var(--color-text-secondary); font-size: var(--text-body-sm); margin: 0 0 var(--space-sm);"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
@@ -171,25 +1288,32 @@
   // Surface: the "Dienstleistungen" nav-menu dropdown.
   // Source: REQUIREMENTS.md §1.3 pilot + §4.1 Case A roadmap (REQ-FA-*) +
   // FUNC-LP-007 self-service downloads / training.
+  // Services (login required) — appear only in authenticated nav.
+  // Source: REQUIREMENTS.md §2.x pilot + §4.1 Case A roadmap.
   const SERVICES_MENU = {
     id: 'services',
     label: 'Dienstleistungen',
     type: 'dropdown',
     items: [
-      { href: '#/services',  label: 'Übersicht aller Dienstleistungen' },
-      { href: '#/wizard/1',  label: 'Bedarf anmelden — Unterbringung, Büro, Auslandvertretung' },
-      { href: '#/repair',    label: 'Schaden melden — Reparaturen, Sanitär, Schliesssystem' },
-      { href: '#/moves',     label: 'Umzug & Sonderreinigung — Transport- und Reinigungsanfragen' },
-      { href: '#/mobiliar',  label: 'Möbel bestellen — Standard- und Spezialmobiliar' },
-      { href: '#/downloads', label: 'Pläne & Dokumente — Grundrisse, Merkblätter, Schulungen' },
-      { href: '#/training',  label: 'Schulungen — „Mieterportal kompakt" und weitere' },
+      { href: '#/services',  label: 'Übersicht',               desc: 'Alle Dienstleistungen im Überblick' },
+      { href: '#/wizard/1',  label: 'Bedarf anmelden',         desc: 'Unterbringung, Büro, Auslandvertretung' },
+      { href: '#/repair',    label: 'Schaden melden',          desc: 'Reparaturen, Sanitär, Schliesssystem' },
+      { href: '#/moves',     label: 'Umzug & Sonderreinigung', desc: 'Transport- und Reinigungsanfragen' },
+      { href: '#/mobiliar',  label: 'Möbel bestellen',         desc: 'Standard- und Spezialmobiliar' },
+      { href: '#/downloads', label: 'Pläne & Dokumente',       desc: 'Grundrisse, Merkblätter, Schulungen' },
+      { href: '#/training',  label: 'Schulungen',              desc: '„Mieterportal kompakt" und weitere' },
     ]
   };
+
+  // Arbeitsinstrumente und Informationen (public, always visible) — single
+  // page at #/info with sticky TOC. Pattern: armasuisse Immo-Portal +
+  // kbob-fdk "Handbuch & Downloads".
+  const INFO_LINK = { id: 'info', href: '#/info', label: 'Arbeitsinstrumente und Informationen' };
 
   function publicNavItems() {
     return [
       { id: 'start', href: '#/', label: 'Start' },
-      SERVICES_MENU,
+      INFO_LINK,
     ];
   }
 
@@ -200,6 +1324,7 @@
         { id: 'queue', href: '#/queue', label: 'Pendenzen' },
         { id: 'inbox', href: '#/inbox', label: 'Anträge der VE' },
         SERVICES_MENU,
+        INFO_LINK,
       ];
     }
     if (role === 'ILBO' || !role) {
@@ -208,11 +1333,13 @@
         SERVICES_MENU,
         { id: 'properties', href: '#/properties', label: 'Liegenschaften' },
         { id: 'inbox',      href: '#/inbox',      label: 'Meine Anträge' },
+        INFO_LINK,
       ];
     }
     return [
       { id: 'home', href: '#/home', label: 'Start' },
       SERVICES_MENU,
+      INFO_LINK,
     ];
   }
 
@@ -237,7 +1364,6 @@
           <figure class="hero__figure">
             <img src="https://images.unsplash.com/photo-1568667256549-094345857637?w=1200&q=80"
                  alt="Bundeshaus West in Bern, beispielhaft für die durch BBL bewirtschafteten Bundesimmobilien.">
-            <figcaption>Bundesimmobilien — Bundeshaus West, Bern. Foto Unsplash, Platzhalter für die Produktiv­version.</figcaption>
           </figure>
         </div>
       </section>
@@ -253,42 +1379,28 @@
         </div>
       </section>
 
-      <section class="section section--dark section--lg" aria-labelledby="profileChooserTitle">
+      <section class="section explainer-section" aria-labelledby="explainerTitle">
         <div class="container">
-          <p class="section-eyebrow">Demo-Personas</p>
-          <h2 class="section-heading" id="profileChooserTitle">Wählen Sie Ihr Profil</h2>
-          <p style="max-width:60ch;margin: 0 0 var(--space-2xl); color: rgba(255,255,255,0.85); font-size: var(--text-body);">
-            Der Mieterportal-Prototyp zeigt vier reale Personas der föderalen Immobilien-Workflow. Wählen Sie ein Profil, um die jeweilige Sicht aus erster Hand zu erleben — Wizard, Inbox, Reviewer-Sicht oder Audit-Sicht.
-          </p>
-          <div class="profile-grid">
-            ${profileCard({
-              image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=720&q=80',
-              title: 'Logistikbeauftragte',
-              date: 'ILBO — Verwaltungs­einheit',
-              desc: 'Sie sind Logistikbeauftragte einer Bundes-VE und melden Bedarf an. Drei laufende Anträge, ein Rückfrage-Fall.',
-              cta: 'demoRole', role: 'ILBO'
-            })}
-            ${profileCard({
-              image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=720&q=80',
-              title: 'GS-Prüfer/in',
-              date: 'Generalsekretariat',
-              desc: 'Sie prüfen Anträge des UVEK. Pendenzen-Queue, Feld-für-Feld-Markierungen, mandatorische Begründung.',
-              cta: 'demoRole', role: 'GS-Prüfer/in'
-            })}
-            ${profileCard({
-              image: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=720&q=80',
-              title: 'BBL Portfolio-Management',
-              date: 'PFM-Operations',
-              desc: 'Sie übergeben genehmigte Anträge als Bedarfsmeldung an SAP ePPM. KPI-Cockpit, ePPM-Handover, Master-Daten.',
-              cta: 'demoRole', role: 'BBL-PFM'
-            })}
-            ${profileCard({
-              image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=720&q=80',
-              title: 'EFD Auditor',
-              date: 'Revisionsdienst',
-              desc: 'Sie haben Lesezugriff über alle VE. Vollständige Audit-Spur, Diff je Feld, Korrelations-ID, Hash-Integrität.',
-              cta: 'demoRole', role: 'Auditor'
-            })}
+          <div class="explainer-section__grid">
+            <div class="explainer-section__copy">
+              <p class="section-eyebrow">Erklärvideo</p>
+              <h2 class="section-heading" id="explainerTitle">Mieterportal in 90 Sekunden</h2>
+              <p style="color: var(--color-text-secondary); font-size: var(--text-body); line-height: var(--line-height-relaxed); margin: 0 0 var(--space-lg);">
+                Bedarfsmeldung, Statusverfolgung, Pläne und Dokumente — alles an einem Ort.
+                Sehen Sie in 90 Sekunden, wie das Mieterportal Bundes-Mietenden den Alltag
+                erleichtert und welche Anfragen Sie direkt an das BBL stellen können.
+              </p>
+              <a href="#/help" class="btn btn--outline">Häufige Fragen ansehen</a>
+            </div>
+            <div class="video-embed">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/rin3crkLpRk?si=P1B2d_YofDZNkdOG"
+                title="Erklärvideo Mieterportal (Platzhalter — Video der Stadt Zürich)"
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
           </div>
         </div>
       </section>
@@ -351,52 +1463,73 @@
 
     const draft = P.loadDraft();
 
+    const rueckfrage = userApps.filter(a => a.status === 'rueckfrage').length;
+    const greeting = greetingFor(new Date().getHours());
+
     document.getElementById('page-body').innerHTML = `
-      <section class="section">
+      <section class="section section--surface">
         <div class="container">
-          ${userApps.length ? `
-            <div class="open-items-band">
-              <div class="open-items-band__header">
-                <span>Ihre offenen Anliegen (${userApps.length})</span>
-                <a href="#/inbox" class="btn btn--ghost btn--sm">Alle ansehen →</a>
-              </div>
-              <div class="open-items-band__list">
-                ${userApps.slice(0, 4).map(a => `
-                  <a href="#/inbox/${a.id}" class="open-items-band__item">
-                    ${P.statusBadge(a.status)} <strong>${a.id}</strong>
-                  </a>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          <section class="auth-hero" style="margin-top: var(--space-xl);">
-            <div class="auth-hero__copy">
-              <p class="section-eyebrow">Hauptaktion</p>
-              <h2 class="auth-hero__title">Neuen Bedarf anmelden</h2>
-              <p class="auth-hero__lead">
-                Unterbringung, Bürofläche oder Auslandvertretung erfassen — geführter Ablauf in fünf Schritten,
-                inklusive NAW-Klassifizierung, Kostenrechnung und Übergabe an SAP ePPM.
-              </p>
-              <div class="auth-hero__cta">
-                <a href="#/wizard/1" class="btn btn--primary btn--lg">+ Bedarf starten →</a>
-                ${draft ? `
-                  <button class="btn btn--outline btn--lg" onclick="window.t3lite.continueDraft()">Entwurf fortsetzen</button>
-                ` : `
-                  <button class="btn btn--outline btn--lg" onclick="window.portal.toggleNavMenu('services')">Alle Dienstleistungen</button>
-                `}
-              </div>
-            </div>
-            <figure class="auth-hero__figure" aria-hidden="true">
-              <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=720&q=80" alt="">
-            </figure>
-          </section>
-
+          <p class="greeting-strip">
+            ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
+            ${userApps.length
+              ? `Sie haben <a href="#/inbox" class="greeting-strip__count"><strong>${userApps.length} offene Anliegen</strong></a>${rueckfrage ? `, <strong>${rueckfrage}</strong> mit Rückfrage` : ''}.`
+              : `Sie haben derzeit keine offenen Anliegen.`}
+            ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
+          </p>
+          <p class="section-eyebrow">Übersicht</p>
+          <h1 class="section-heading">Häufig genutzte Dienste</h1>
+          <p style="max-width: 60ch; color: var(--color-text-secondary); margin: 0 0 var(--space-2xl);">
+            Anfragen, die Bundes-Mietende über das Mieterportal direkt an das BBL stellen können.
+          </p>
+          <div class="card-grid">
+            <a href="#/wizard/1" class="quick-card quick-card--highlight">
+              <p class="quick-card__title">Bedarf anmelden</p>
+              <p class="quick-card__desc">Unterbringung, Bürofläche oder Auslandvertretung erfassen. Geführter Ablauf in fünf Schritten mit NAW-Klassifizierung und Übergabe an SAP ePPM.</p>
+              <p class="quick-card__meta"><span>FUNC-AU-*</span></p>
+              ${arrowBtn()}
+            </a>
+            <a href="#/repair" class="quick-card">
+              <p class="quick-card__title">Schaden melden</p>
+              <p class="quick-card__desc">Defekte Heizung, Wasserschaden, Beleuchtung oder Schliesssystem? Schnellmeldung an BBL-IM, koordiniert mit Ihrem zuständigen Immobilien-Manager.</p>
+              <p class="quick-card__meta"><span>REQ-FA-005</span></p>
+              ${arrowBtn()}
+            </a>
+            <a href="#/downloads" class="quick-card">
+              <p class="quick-card__title">Pläne & Dokumente</p>
+              <p class="quick-card__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit zum Herunterladen — gefiltert nach Sichtbarkeit und Stand.</p>
+              <p class="quick-card__meta"><span>FUNC-LP-007</span></p>
+              ${arrowBtn()}
+            </a>
+            <a href="#/mobiliar" class="quick-card">
+              <p class="quick-card__title">Möbel bestellen</p>
+              <p class="quick-card__desc">Standard- und Spezialmobiliar via Mobiliar-Shop des Bundes bestellen — angebunden an das Schwesterprojekt „Arbeitsplatz-Management".</p>
+              <p class="quick-card__meta"><span>REQ-FA-007</span></p>
+              ${arrowBtn()}
+            </a>
+            <a href="#/moves" class="quick-card">
+              <p class="quick-card__title">Umzug & Sonderreinigung</p>
+              <p class="quick-card__desc">Transport- oder Reinigungsanfrage erfassen — etwa nach grösseren Reorganisationen, Veranstaltungen oder Mieterwechseln.</p>
+              <p class="quick-card__meta"><span>REQ-FA-006</span></p>
+              ${arrowBtn()}
+            </a>
+            <a href="#/training" class="quick-card">
+              <p class="quick-card__title">Schulungen</p>
+              <p class="quick-card__desc">„Mieterportal kompakt" (60 Min., DE/FR) und Aufbaukurse für ILBO und GS-Prüfende. Termine Q2 2026 zur Anmeldung offen.</p>
+              <p class="quick-card__meta"><span>FUNC-LP-007</span></p>
+              ${arrowBtn()}
+            </a>
+          </div>
         </div>
       </section>
 
       ${renderNewsSection()}
     `;
+  }
+
+  function greetingFor(hour) {
+    if (hour < 11) return 'Guten Morgen';
+    if (hour < 18) return 'Guten Tag';
+    return 'Guten Abend';
   }
 
   function arrowBtn(extraClass = 'quick-card__arrow-btn') {
@@ -1171,6 +2304,7 @@
     const tab = (location.hash.split('?tab=')[1] || 'daten');
 
     document.getElementById('page-body').innerHTML = `
+      ${P.renderShareBar()}
       <section class="section">
         <div class="container">
           ${a._isNew ? `
@@ -1189,7 +2323,6 @@
               <p style="margin:0;color:var(--color-text-secondary);">Eingereicht ${P.formatDate(a.submittedAt)} · Typ ${a.type}</p>
             </div>
             <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
-              <button class="btn btn--outline btn--sm" onclick="window.print()">🖨 Drucken / PDF</button>
               ${a.status === 'rueckfrage' ? '<button class="btn btn--primary btn--sm" onclick="window.t3lite.startResubmit(\''+a.id+'\')">Auflagen erfüllen → Erneut einreichen</button>' : ''}
             </div>
           </div>
@@ -1378,6 +2511,7 @@
     const initialMarks = a._marks || {};
 
     document.getElementById('page-body').innerHTML = `
+      ${P.renderShareBar()}
       <section class="section">
         <div class="container">
           <h1 style="margin-top:0;">${a.id} — Prüfung <span style="font-weight:normal;color:var(--color-text-secondary);font-size:var(--text-body);">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe}) · ${P.escapeHtml(a.address)}</span></h1>
@@ -1574,6 +2708,7 @@
     const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
 
     document.getElementById('page-body').innerHTML = `
+      ${P.renderShareBar()}
       <section class="section">
         <div class="container">
           <header style="display:grid;grid-template-columns:1fr;gap:var(--space-lg);margin-bottom:var(--space-xl);">
@@ -1869,8 +3004,8 @@
           <div class="card-grid">
             ${SERVICES_MENU.items.slice(1).map(svc => `
               <a href="${svc.href}" class="quick-card">
-                <p class="quick-card__title">${P.escapeHtml(svc.label.split(' — ')[0])}</p>
-                <p class="quick-card__desc">${P.escapeHtml(svc.label.split(' — ')[1] || '')}</p>
+                <p class="quick-card__title">${P.escapeHtml(svc.label)}</p>
+                <p class="quick-card__desc">${P.escapeHtml(svc.desc || '')}</p>
                 ${arrowBtn()}
               </a>
             `).join('')}
@@ -1896,7 +3031,7 @@
             <a href="#/services" class="btn btn--outline">← Zurück zur Übersicht</a>
           </div>
           <p style="margin-top: var(--space-2xl);font-size: var(--text-body-xs);color: var(--color-text-muted);">
-            Roadmap-Eintrag <code>${reqId}</code> — siehe <a href="../../docs/REQUIREMENTS.md">REQUIREMENTS.md</a> §4. Diese Funktion wird in einer der nächsten Iterationen freigeschaltet.
+            Roadmap-Eintrag <code>${reqId}</code> — siehe <a href="docs/REQUIREMENTS.md">REQUIREMENTS.md</a> §4. Diese Funktion wird in einer der nächsten Iterationen freigeschaltet.
           </p>
         </div>
       </section>
@@ -1952,6 +3087,24 @@
 
   // ── EXTERNAL API (used by inline event handlers) ─────────────────────────
   window.t3lite = {
+    newsPage(p) {
+      const total = Math.max(1, Math.ceil((P.state.news || []).length / 3));
+      const target = Math.max(0, Math.min(total - 1, p));
+      window._newsPage = target;
+      const track = document.getElementById('newsTrack');
+      if (!track) { P.handleHash(); return; }
+      // Re-render only the news section in place to avoid a full route re-render.
+      const section = track.closest('.news-section');
+      if (section) section.outerHTML = renderNewsSection();
+    },
+    scrollToInfo(anchorId) {
+      const target = document.getElementById(anchorId);
+      if (!target) return;
+      // Offset for the sticky federal header (~150px)
+      const offset = 160;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    },
     submitRepair(form) {
       const data = new FormData(form);
       const building = P.state.tenancies.find(t => t.id === data.get('building'));

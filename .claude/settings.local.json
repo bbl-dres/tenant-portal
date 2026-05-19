@@ -111,7 +111,20 @@
       "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\); new Function\\(s\\); console.log\\('t3-lite.js parses OK'\\)\")",
       "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\); new Function\\(s\\); console.log\\('portal.js parses OK'\\)\")",
       "Bash(node -e \"const fs=require\\('fs'\\);new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\); console.log\\('Both JS files parse OK'\\);\")",
-      "Bash(node -e \"const fs=require\\('fs'\\);new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\); console.log\\('OK'\\)\")"
+      "Bash(node -e \"const fs=require\\('fs'\\);new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); JSON.parse\\(fs.readFileSync\\('wireframes/shared/data/news.json','utf8'\\)\\); console.log\\('OK · news items:', JSON.parse\\(fs.readFileSync\\('wireframes/shared/data/news.json','utf8'\\)\\).length\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); console.log\\('items:', JSON.parse\\(fs.readFileSync\\('wireframes/shared/data/news.json','utf8'\\)\\).length\\); new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); console.log\\('JS OK'\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); JSON.parse\\(fs.readFileSync\\('wireframes/shared/data/news.json','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); new Function\\(fs.readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); new Function\\(fs.readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"new Function\\(require\\('fs'\\).readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\);new Function\\(require\\('fs'\\).readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\);console.log\\('OK'\\)\")",
+      "Bash(node -e \"new Function\\(require\\('fs'\\).readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\);new Function\\(require\\('fs'\\).readFileSync\\('wireframes/shared/portal.js','utf8'\\)\\);console.log\\('OK'\\)\")",
+      "Bash(node -e \"new Function\\(require\\('fs'\\).readFileSync\\('wireframes/t3-lite/t3-lite.js','utf8'\\)\\);console.log\\('OK'\\)\")",
+      "Bash(git -C c:/Users/DavidRasner/Documents/GitHub/tenant-portal status --short)",
+      "Bash(git -C c:/Users/DavidRasner/Documents/GitHub/tenant-portal log --oneline -20)",
+      "Bash(cp -v wireframes/shared/data/*.json data/)",
+      "Bash(cp -v wireframes/shared/assets/BundLogo.svg assets/BundLogo.svg)",
+      "Bash(cp -v wireframes/shared/tokens.css css/tokens.css)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}\\\\t%{size_download}' http://127.0.0.1:8765__TRACKED_VAR__)"
     ],
     "additionalDirectories": [
       "C:\\Users\\DavidRasner\\Documents\\GitHub\\designsystem\\app\\assets\\logos"

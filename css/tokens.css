@@ -166,7 +166,7 @@
   --btn-min-h:                 44px;
   --btn-sm-min-h:              34px;
   --btn-lg-min-h:              48px;
-  --topbar-height:             46px;
+  --topbar-height:             46px;   /* scales below */
   --nav-height:                56px;
   --section-py:                3.5rem;          /* 56px base — scales below */
   --section-py-half:           1.75rem;         /* 28px base */
@@ -235,6 +235,10 @@
 @media (min-width: 1024px) { :root { --container-padding: 2.5rem; } }    /* 40 */
 @media (min-width: 1280px) { :root { --container-padding: 3rem; } }      /* 48 */
 @media (min-width: 1920px) { :root { --container-padding: 4rem; } }      /* 64 */
+
+/* ── RESPONSIVE TOP-BAR HEIGHT — CD Bund pattern (44/48/52 px) ──────── */
+@media (min-width: 1280px) { :root { --topbar-height: 50px; } }
+@media (min-width: 1920px) { :root { --topbar-height: 56px; } }
 
 /* ── RESPONSIVE SECTION PADDING — CD Bund .container--py scales aggressively
    3.5rem (56) base → 5rem (80) lg → 6rem (96) 2xl → 8rem (128) 3xl. */
