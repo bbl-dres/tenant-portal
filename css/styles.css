@@ -1,8 +1,30 @@
 /* ==========================================================================
-   PORTAL.CSS — BBL Mieterportal prototype shared components
+   STYLES.CSS — BBL Mieterportal prototype
 
-   Imports tokens.css. Renders: federal shell, status pipeline, cards,
-   wizard chrome, buttons, badges, modal, toast, tables, forms.
+   Loaded after tokens.css. Single sheet, two halves: federal chrome &
+   shared components (this half) and app-specific views (after the
+   "App-specific styles" banner ~line 1430).
+
+   Sections (search for the BANNER text to jump):
+     LAYOUT                        — .container, .section, .stack
+     FEDERAL CHROME — BARS         — top-bar, top-header, navbar, nav-menu
+     LANGUAGE SWITCHER             — top-bar__lang dropdown
+     SEARCH                        — header-search toggle + form
+     SKIP LINK                     — .skip-to-content
+     BREADCRUMB                    — .breadcrumb
+     HEADINGS / TYPOGRAPHY         — section-heading, section-eyebrow
+     BUTTONS                       — .btn variants
+     BADGES                        — .badge, status colours
+     CARDS                         — .card, .quick-card, .application-card
+     FORMS                         — .form-field, validation states
+     STEP INDICATOR + PIPELINE     — wizard + status visualisations
+     TABLES                        — .table, queue grid
+     MODAL                         — .modal-backdrop, .modal
+     TOAST                         — .toast-host, .toast
+     SHORTCUT OVERLAY              — "?" key panel
+     FOOTER                        — .app-footer
+     UTILITY + PRINT               — print rules, helpers
+     APP-SPECIFIC (former t3-lite) — split hero, profile chooser, info page
    ========================================================================== */
 
 /* ── LAYOUT ─────────────────────────────────────────────────────────────── */

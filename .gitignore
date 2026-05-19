@@ -3,3 +3,6 @@
 # only — REQUIREMENTS.md references their content but the files themselves
 # are not published.
 docs/BBL Requierements/
+
+# Per-machine Claude Code settings — not shared
+.claude/settings.local.json

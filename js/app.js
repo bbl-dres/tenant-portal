@@ -1,18 +1,24 @@
 /* ==========================================================================
-   PORTAL.JS — BBL Mieterportal prototype shared module
+   APP.JS — BBL Mieterportal prototype, single-page app.
 
-   Shared between all typology SPAs. Exports:
-   - state: global state object
-   - bootstrap(): load mock data + wire global listeners
-   - router: hash-based routing (per-typology routes registered separately)
-   - renderShell(): federal CD-Bund chrome (top bar, brand bar, navbar, footer)
-   - renderPipeline(application): status pipeline with three variants
-   - renderStepIndicator(currentStep, steps): wizard StepIndicator
-   - toast(): toast notifications
-   - modal(): modal helper
-   - shortcutOverlay(): "?" key overlay
-   - calcWizard(): NAW × desk-sharing × FTE → HNF2/GF/UK
-   - utility renderers: badge, card, application card, attachments list
+   Hash-routed, no framework, no build step. Two namespaces share this file:
+     - portal.*   federal chrome, router, state, formatters, helpers
+                  (renderShell, renderPipeline, renderStepIndicator,
+                   loadData, calcWizard, toast, modal, statusBadge,
+                   formatChf/Date, escapeHtml/escapeJs, …)
+     - t3lite.*   inline-handler bridge for the views below
+                  (newsPage, scrollToInfo, submitRepair, demoRole, …)
+
+   Routes:
+     #/              landing (public) OR home (authenticated)
+     #/login         eIAM stub
+     #/home          auth home (role-routed via state.user.activeRole)
+     #/wizard/:step  5-step demand wizard
+     #/inbox         submitter inbox
+     #/inbox/:id     application detail
+     #/queue         reviewer queue (GS-Prüfer/in)
+     #/review/:id    reviewer split-pane
+     #/help · #/info · #/properties · #/downloads · #/news · #/search …
    ========================================================================== */
 
 (function (global) {
@@ -50,26 +56,40 @@
   }
 
   // ── PERSISTENCE (localStorage) ──────────────────────────────────────────
+  // Wrapped because localStorage throws in Safari private mode, on quota,
+  // and when storage is disabled by enterprise policy. Failures degrade
+  // silently — drafts won't persist across reloads but the session keeps
+  // working.
+  function safeGet(key) {
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+  function safeSet(key, value) {
+    try { localStorage.setItem(key, value); } catch { /* quota or disabled */ }
+  }
+  function safeRemove(key) {
+    try { localStorage.removeItem(key); } catch { /* nothing to do */ }
+  }
   function persistDraft(draft) {
     if (!state.user) return;
-    localStorage.setItem('mp-draft-' + state.user.id, JSON.stringify(draft));
+    safeSet('mp-draft-' + state.user.id, JSON.stringify(draft));
   }
   function loadDraft() {
     if (!state.user) return null;
-    const raw = localStorage.getItem('mp-draft-' + state.user.id);
-    return raw ? JSON.parse(raw) : null;
+    const raw = safeGet('mp-draft-' + state.user.id);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
   }
   function clearDraft() {
     if (!state.user) return;
-    localStorage.removeItem('mp-draft-' + state.user.id);
+    safeRemove('mp-draft-' + state.user.id);
   }
   function persistRole(role) {
     if (!state.user) return;
-    localStorage.setItem('mp-active-role-' + state.user.id, role);
+    safeSet('mp-active-role-' + state.user.id, role);
   }
   function loadRole() {
     if (!state.user) return null;
-    return localStorage.getItem('mp-active-role-' + state.user.id);
+    return safeGet('mp-active-role-' + state.user.id);
   }
 
   // ── ROUTER (hash-based) ──────────────────────────────────────────────────
@@ -206,8 +226,7 @@
           <div class="top-header__inner">
             <div class="top-header__left" onclick="window.portal.navigate('#/')" role="link" tabindex="0">
               <img class="top-header__bundmark" src="assets/BundLogo.svg"
-                   alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra"
-                   width="259" height="64">
+                   alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra">
               <div class="top-header__divider" aria-hidden="true"></div>
               <div class="top-header__dept">
                 <strong>Bundesamt für Bauten und Logistik BBL</strong><br>
@@ -644,6 +663,18 @@
   function escapeHtml(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   }
+  // Use when interpolating into a JS-string literal that lives inside an
+  // HTML attribute (e.g. onclick="foo('${escapeJs(x)}')"). escapeHtml is
+  // wrong here because the browser HTML-decodes the attribute before the
+  // JS parser sees it, so &#39; turns back into ' and breaks the literal.
+  function escapeJs(s) {
+    return String(s ?? '').replace(/[\\'"<>&\r\n\u2028\u2029]/g, c => ({
+      '\\': '\\\\', "'": "\\'", '"': '\\"',
+      '<': '\\x3C', '>': '\\x3E', '&': '\\x26',
+      '\r': '\\r', '\n': '\\n',
+      '\u2028': '\\u2028', '\u2029': '\\u2029'
+    }[c]));
+  }
 
   function toggleNavMenu(id, force) {
     const panel = document.getElementById('navMenu-' + id);
@@ -788,28 +819,15 @@
     toast, modal, toggleSearch, toggleNavMenu, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
     openRoleMenu, login, logout,
     statusBadge, statusKey,
-    formatChf, formatDate, escapeHtml, roleLabel,
+    formatChf, formatDate, escapeHtml, escapeJs, roleLabel,
     PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
   };
 
-})(window);
-/* ============================================================================
-   T3-LITE Hero-CTA prototype — single-page app, hash router.
-   Routes:
-     #/              — landing (public) OR home (authenticated)
-     #/login         — eIAM stub
-     #/home          — auth home (role-routed via state.user.activeRole)
-     #/wizard/:step  — wizard step 1..5
-     #/inbox         — submitter inbox of own applications
-     #/inbox/:id     — application detail
-     #/queue         — reviewer queue (when activeRole = GS-Prüfer/in)
-     #/review/:id    — reviewer split-pane detail
-     #/help          — FAQ stub
-   ============================================================================ */
-
-(function () {
-  'use strict';
-  const P = window.portal;
+  // ── VIEWS ───────────────────────────────────────────────────────────────
+  // Per-route renderers. They use the helpers above via local alias `P`
+  // (kept so the existing inline-handler call sites — window.portal.x —
+  // keep working without rewriting every view).
+  const P = global.portal;
   const root = document.getElementById('root');
 
   // ── BOOTSTRAP ────────────────────────────────────────────────────────────
@@ -1154,12 +1172,13 @@
 
   // ── NEWS SECTION (swisstopo "Aktuell" carousel pattern) ─────────────────
   // 10 mock items in news.json → 4 pages of 3 (last page may be partial).
-  // Page state lives in window for stable across re-renders.
+  // Module-scoped so paging survives re-renders without leaking to window.
+  let newsPage = 0;
   function renderNewsSection(items = P.state.news, perPage = 3) {
     if (!Array.isArray(items)) items = [];
     const totalPages = Math.max(1, Math.ceil(items.length / perPage));
-    let page = window._newsPage = window._newsPage || 0;
-    if (page >= totalPages) page = window._newsPage = 0;
+    if (newsPage >= totalPages) newsPage = 0;
+    const page = newsPage;
     const start = page * perPage;
     const visible = items.slice(start, start + perPage);
     const prevDisabled = page === 0;
@@ -2848,7 +2867,7 @@
   function documentCard(d) {
     const icon = ({ PDF: '📄', MP4: '🎥', DOCX: '📝' })[d.format] || '📎';
     return `
-      <a href="#" onclick="window.portal.toast('Download simuliert: ${P.escapeHtml(d.title)}'); return false;" class="quick-card" style="min-height:auto;">
+      <a href="#" onclick="window.portal.toast('Download simuliert: ${P.escapeJs(d.title)}'); return false;" class="quick-card" style="min-height:auto;">
         <p class="quick-card__title">${icon} ${P.escapeHtml(d.title)}</p>
         <p class="quick-card__desc">${d.format} · ${d.size} · ${d.languages}</p>
         <p class="quick-card__meta">
@@ -3090,7 +3109,7 @@
     newsPage(p) {
       const total = Math.max(1, Math.ceil((P.state.news || []).length / 3));
       const target = Math.max(0, Math.min(total - 1, p));
-      window._newsPage = target;
+      newsPage = target;
       const track = document.getElementById('newsTrack');
       if (!track) { P.handleHash(); return; }
       // Re-render only the news section in place to avoid a full route re-render.
@@ -3254,4 +3273,4 @@
     }
   };
 
-})();
+})(window);
