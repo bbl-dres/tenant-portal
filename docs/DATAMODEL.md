@@ -73,15 +73,27 @@ A future migration could rename fields to fully comply (e.g. `leaseStart`
 
 ## 2. Architecture Overview
 
-### 2.1 Entity layers
+### 2.1 Domain overview
 
-| Layer            | Entities                                                | Description                                                                       |
-| ---------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **Workflow**     | Application, Attachment, Condition, HistoryEntry         | Demand-application lifecycle — the portal's only owned domain.                    |
-| **Tenancy**      | Tenancy, Organisation                                    | Existing lease relationships and the occupying admin units.                       |
-| **Reference**    | Building, User, NewsArticle                              | Read-only / display data; canonical records live in external lead systems.        |
-| **Master data**  | MasterData (singleton), NawClass                         | Slowly-changing reference tables used by calculations and validation.             |
-| **Future**       | Site, Parcel, Floor, Space, AreaMeasurement, Document, Contact, Contract, Ticket, Service, Decision, DocumentVersion, Notification | Not in scope today; documented as lead-system or portal extension candidates. |
+The Mieterportal model covers six domains. Each entity in § 2.3 belongs
+to exactly one. The "Portal's role" column distinguishes the domain the
+portal **owns** (writes records into) from domains where the portal is a
+**reader** of canonical records held by an external system.
+
+| Domain                  | What it covers                                                                                                                   | Portal's role                                            |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Spatial inventory**   | Buildings, floors, rooms, parcels — plus the assets installed in them (BuildingElements, TechnicalSystems, Components, Furnishings) and their measurements. | Reader — canonical record in the lead asset registry.    |
+| **Demand workflow**     | Bedarfsmeldung lifecycle — from draft, via review by GS / BBL-PFM, to hand-off into the project-management system.                | **Owner** — the only domain the portal owns end-to-end.   |
+| **Tenancy management**  | Existing lease relationships between Verwaltungseinheiten and a rented object (Building / Floor / Space set).                     | Reader; **originator of demand** for new tenancies.       |
+| **Records management**  | Lease contracts (Mietvertrag), floor plans, permits, certificates, training material, application attachments.                    | Reader — canonical record in the records-management system. |
+| **Organisational data** | Verwaltungseinheiten (Organisation), federal users, contact roles, postal addresses.                                              | Reader — canonical record in the IdP + organisational MDM. |
+| **Reference data**      | Closed value lists, federal coefficients, validation thresholds (NAW classes, desk-sharing factor, PFM categories, …).             | **Owner** — curated by the BBL portfolio team out-of-band. |
+
+Plus two **future-only** domains the model anticipates but the portal
+doesn't yet touch:
+
+- **Facility management** — Tickets (Schadensmeldungen, repairs, moves), service catalogue, FM contracts, certifications. Schadensmeldungen tie directly into Spatial inventory: a ticket points at a TechnicalSystem or Component, which is inside a Building / Floor / Space — that chain is what makes a damage report actionable for the facility manager.
+- **Communications** — News articles today; in-portal notifications and inbox in the future.
 
 ### 2.2 Entity relationship diagram
 
@@ -104,12 +116,15 @@ erDiagram
     APPLICATION ||--o{ ATTACHMENT    : "attachments[]"
     APPLICATION ||--o{ CONDITION     : "conditions[]"
     NAW_CLASS   ||--o{ APPLICATION   : "naw.class"
-    MASTER_DATA ||--|{ NAW_CLASS     : "nawClasses[]"
+    REFERENCE_DATA ||--|{ NAW_CLASS     : "nawClasses[]"
     DOCUMENT    }o..o{ BUILDING      : "linkedTo (planned)"
     DOCUMENT    }o..o{ FLOOR         : "linkedTo (planned)"
     DOCUMENT    }o..o{ SPACE         : "linkedTo (planned)"
     DOCUMENT    }o..o{ TENANCY       : "linkedTo (planned)"
     DOCUMENT    }o..o{ APPLICATION   : "linkedTo (planned, replaces Attachment)"
+    AREA_MEASUREMENT }o..o{ BUILDING : "subject (planned)"
+    AREA_MEASUREMENT }o..o{ FLOOR    : "subject (planned)"
+    AREA_MEASUREMENT }o..o{ SPACE    : "subject (planned)"
 
     BUILDING {
         string buildingId PK
@@ -168,7 +183,7 @@ erDiagram
         string comment
         bool   done
     }
-    MASTER_DATA {
+    REFERENCE_DATA {
         number deskSharingFactor
         number furnitureBudgetPerSqm
         string companyCode
@@ -197,6 +212,17 @@ erDiagram
         date   validFrom
         date   validUntil
     }
+    AREA_MEASUREMENT {
+        string measurementId PK
+        string subjectType "Building / Floor / Space / Parcel"
+        string subjectId FK
+        enum   areaType "GF / NGF / HNF / HNF2 / NF / NNF / VF / FF / Footprint / Sealed / Green"
+        number value "m²"
+        enum   basis "SIA416 / IPMS1 / IPMS2 / IPMS3 / GEFMA198 / DIN277"
+        enum   accuracy "Measured / Estimated / Aggregated / Survey"
+        date   validFrom
+        date   validUntil
+    }
 ```
 
 ### 2.3 Entity overview
@@ -209,28 +235,10 @@ floor-plan libraries.
 
 **Status legend**
 
-| Status         | Meaning                                                                                                    |
-| -------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Implemented**| Exists today as a separate file under `data/` and is used by the portal's views or workflow.                |
-| **Embedded**   | Exists today, but only as an embedded sub-record on a parent entity (no separate file or table yet).        |
-| **Planned**    | Not modelled today, but a concrete near-term feature in the portal's roadmap depends on it.                 |
-| **Future**     | Documented for completeness — neither code nor near-term roadmap depends on it yet.                         |
-
-#### Workflow
-
-| Entity                  | Description                                                                                                                          | Status         | File                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
-| **Application**         | Demand request raised by a Verwaltungseinheit. Carries the full review pipeline + audit trail.                                       | Implemented    | [`data/applications.json`](../data/applications.json) |
-| **Attachment**          | File attached to an Application during submission (WiBe.pdf, Rechtsgrundlage.pdf, …). Will resolve to a `Document` once Document is live. | Embedded       | in Application                                        |
-| **Condition** (Auflage) | Reviewer-set compliance instruction during the `clarification` state. Submitter ticks each off before resubmitting.                  | Embedded       | in Application                                        |
-| **HistoryEntry**        | Immutable record of a state transition on an Application (VwVG Art. 35 audit trail).                                                  | Embedded       | in Application                                        |
-
-#### Tenancy & Occupier
-
-| Entity                  | Description                                                                                                                          | Status         | File                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
-| **Tenancy**             | Existing lease relationship between a Verwaltungseinheit and a rented object (Building / Floor / Space[]). Aggregates lease terms + occupier into a read-optimised record. | Implemented    | [`data/tenancies.json`](../data/tenancies.json)       |
-| **Organisation**        | Federal admin unit (Departement, Bundesamt, Stabsstelle). Today a denormalised string `ve` on User / Application / Tenancy. Promotion to a proper entity (with hierarchy, validity, eCH-0046 alignment) is planned. | Embedded → Planned | embedded in user / application / tenancy           |
+- **Implemented** — exists today as a separate file under `data/` and is used by the portal's views or workflow.
+- **Embedded** — exists today, but only as an embedded sub-record on a parent entity (no separate file or table yet).
+- **Planned** — not modelled today, but a concrete near-term feature in the portal's roadmap depends on it.
+- **Future** — documented for completeness — neither code nor near-term roadmap depends on it yet.
 
 #### Spatial hierarchy (lead-system reference)
 
@@ -241,7 +249,26 @@ floor-plan libraries.
 | **Building**            | Read-only reference to a physical property — name, address, asset key, cadastral identifier, coordinates. Canonical record lives in the lead asset registry; this is the portal's local cache. | Implemented    | [`data/buildings.geojson`](../data/buildings.geojson) † |
 | **Floor**               | A level within a building. Carries `levelNumber` (UG/EG/OG), gross area, optional `floorPlanUrl` / `floorPlanGeoJson`. **Required by the planned floor-plan viewer.** | Planned        | `data/floors.geojson` (planned)                       |
 | **Space** (Raum)        | A room — the smallest rentable unit. **The Tenancy's actual rented object is one or more Spaces (or a Floor, or a Building).** Carries `useType` (Büro / Sitzungszimmer / Open Space / …), area, geometry, capacity. | Planned        | `data/spaces.geojson` (planned)                       |
-| **Address** (structured)| Street / number / postal code / city / canton / country broken out per eCH-0010 + eCH-0046. Today flattened to a single free-text `address` string on Building / Tenancy / Application. | Future         | —                                                     |
+| **AreaMeasurement**     | Quantitative measurement record attached to any spatial entity (Building, Floor, Space, Parcel). Carries the *measurement basis* (SIA 416 / IPMS 1 / 2 / 3 / GEFMA 198 / DIN 277), the *area type* (GF / NGF / NF / HNF / NNF / VF / FF / footprint / sealed / green), *accuracy* (Measured / Estimated / Aggregated / Survey), surveyor, and validity. The scalar `Floor.areaGross` / `Space.area` / `Tenancy.hnf2` fields are read-cached projections of canonical AreaMeasurements. | Planned        | `data/area-measurements.json` (planned)               |
+| **BuildingElement**     | Constructive element of the building fabric — Wand, Decke, Stütze, Treppe, Tür, Fenster, Dach. Attaches to Building / Floor / Space. IFC `IfcBuildingElement`.                          | Future         | —                                                     |
+| **TechnicalSystem**     | Technical installation — Lüftung, Heizung, Elektro, Sanitär, Transport (Aufzüge), Brandschutz, Sicherheit, BACS. Attaches to Building / Floor / Space. Groups one or more Components. IFC `IfcSystem`. **Schadensmeldungs target.** | Future         | —                                                     |
+| **Component**           | Sub-part of a TechnicalSystem — Filter, Zähler, Klappe, Lüfter, Pumpe, Sensor. Parent FK → TechnicalSystem. IFC `IfcDistributionElement`. **Also a Schadensmeldungs target (component-level).** | Future         | —                                                     |
+| **Furnishing**          | Movable fit-out — Möbel, Leuchten, Garderobe, Geräte. Attaches to Space (per-room) or Floor. IFC `IfcFurnishingElement`. Distinct from BuildingElement because Furnishing is tenant-mutable, not constructive. | Future         | —                                                     |
+
+#### Demand workflow
+
+| Entity                  | Description                                                                                                                          | Status         | File                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
+| **Application**         | Demand request raised by a Verwaltungseinheit. Carries the full review pipeline + audit trail.                                       | Implemented    | [`data/applications.json`](../data/applications.json) |
+| **Attachment**          | File attached to an Application during submission (WiBe.pdf, Rechtsgrundlage.pdf, …). Will resolve to a `Document` once Document is live. | Embedded       | in Application                                        |
+| **Condition** (Auflage) | Reviewer-set compliance instruction during the `clarification` state. Submitter ticks each off before resubmitting.                  | Embedded       | in Application                                        |
+| **HistoryEntry**        | Immutable record of a state transition on an Application (VwVG Art. 35 audit trail).                                                  | Embedded       | in Application                                        |
+
+#### Tenancy management
+
+| Entity                  | Description                                                                                                                          | Status         | File                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
+| **Tenancy**             | Existing lease relationship between a Verwaltungseinheit and a rented object (Building / Floor / Space[]). Aggregates lease terms + occupier into a read-optimised record. | Implemented    | [`data/tenancies.json`](../data/tenancies.json)       |
 
 #### Records & Documents
 
@@ -250,28 +277,34 @@ floor-plan libraries.
 | **Document**            | Canonical records entity. Subsumes **lease contracts (Mietvertrag)**, floor plans, permits, certificates, training manuals, and Application attachments. Anchored in ISO 15489 / eCH-0002. Per-entity link patterns: `linkedTo: building | floor | space | tenancy | application`. | Planned        | `data/documents.json` (planned)                       |
 | **DocumentVersion**     | Versioned + signed instance of a Document. Triggered by signature-service integration (ZertES / SwissID).                              | Future         | —                                                     |
 
-#### People & Contacts
+#### Organisational data
+
+Cross-cutting reference data about *who* the portal interacts with and
+*where* they sit. Address is included here because it attaches to
+**multiple parents** (Building, Organisation, Contact) — it is not a
+spatial entity in its own right.
 
 | Entity                  | Description                                                                                                                          | Status         | File                                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
 | **User**                | Authenticated person who can submit applications, review them, or access portfolio data. Carries 1..n roles from the federated identity provider. | Implemented    | [`data/users.json`](../data/users.json)               |
-| **Contact**             | Person × Building × role (Portfolio-Manager, Immobilien-Manager, Flächen-Manager, Hauswart, …). Today denormalised on `tenancy.contacts` as three name strings. | Future         | —                                                     |
+| **Organisation**        | Federal admin unit (Departement, Bundesamt, Stabsstelle). Today a denormalised string `ve` on User / Application / Tenancy. Promotion to a proper entity (hierarchy, validity, eCH-0046 alignment) is planned. | Embedded → Planned | embedded in user / application / tenancy           |
+| **Contact**             | Person × parent × role record (Portfolio-Manager, Immobilien-Manager, Flächen-Manager, Hauswart, …). Parents include Building, Organisation, and Tenancy. Today denormalised on `tenancy.contacts` as three name strings. | Future         | —                                                     |
+| **Address** (structured)| Postal address record. **Attaches to multiple parents (Building, Organisation, Contact) — each parent can hold many addresses** (postal / billing / HQ / property / shipping). Broken out per eCH-0010 + eCH-0046 into street / number / postal code / city / canton / country. Today flattened to a free-text `address` string on Building / Tenancy / Application. | Future         | —                                                     |
 
-#### Master & catalogue
+#### Reference data & catalogues
 
 | Entity                  | Description                                                                                                                          | Status         | File                                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
-| **MasterData**          | Singleton of slowly-changing reference data: NAW classification table, federal coefficients, PFM portfolio categories, BBL company code. Read-only at runtime; managed out-of-band by the BBL portfolio team. | Implemented    | [`data/master-data.json`](../data/master-data.json)   |
-| **NawClass**            | NAW classification entry: name, m²/FTE for HNF2 and GF, description. Drives the wizard's area calculation.                            | Implemented    | inside MasterData                                     |
+| **ReferenceData**       | Singleton of slowly-changing reference data: NAW classification table, federal coefficients, PFM portfolio categories, BBL company code. Read-only at runtime; managed out-of-band by the BBL portfolio team. | Implemented    | [`data/master-data.json`](../data/master-data.json)   |
+| **NawClass**            | NAW classification entry: name, m²/FTE for HNF2 and GF, description. Drives the wizard's area calculation.                            | Implemented    | inside ReferenceData                                     |
 | **NewsArticle**         | Operational communication shown on the home page and `#/news` route (maintenance notices, training sessions, federal-level announcements). Hand-curated; no CMS in the prototype. | Implemented    | [`data/news.json`](../data/news.json)                 |
 
 #### Operations & FM (future)
 
 | Entity                  | Description                                                                                                                          | Status         | File                                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
-| **Ticket** (Anliegen)   | Service request raised against a Building / Tenancy (Schaden, Reparatur, Umzug, Sonderreinigung). Triggered by ticketing-system integration; aligned with GEFMA 920-3. | Future         | —                                                     |
+| **Ticket** (Anliegen / Schadensmeldung) | Service request raised against a spatial entity (Building / Floor / Space) **and optionally a specific TechnicalSystem or Component** — e.g. *"Heizung defekt, Bundeshaus West, Raum 3.04"*. The asset link is what makes the ticket actionable for the facility manager: it pinpoints the broken system / component, not just the room. Triggered by ticketing-system integration; aligned with GEFMA 920-3. | Future         | —                                                     |
 | **Service**             | FM service catalogue entry (id, scope, eligibility, SLA). Triggered when the catalogue grows past ~6 services; aligned with GEFMA 100. | Future         | —                                                     |
-| **AreaMeasurement**     | Measurement record carrying *basis* (SIA 416 / IPMS / GEFMA 198), *accuracy* (Measured / Estimated / Aggregated), and *validity*. Today the portal stores scalar `hnf2` / `gf` only. | Future         | —                                                     |
 | **Contract** (service)  | Service agreements / maintenance contracts. Distinct from `Document.type = 'Lease'` — these are *FM* contracts (cleaning, security, HVAC service).                                                        | Future         | —                                                     |
 | **Certificate**         | Energy (GEAK / Minergie) / accessibility / fire-safety certifications attached to a Building.                                          | Future         | —                                                     |
 | **Asset**               | Building systems (HVAC, elevators, fire protection, BACS). Typically owned by a CAFM system.                                          | Future         | —                                                     |
@@ -676,7 +709,45 @@ object is most precisely a set of Spaces** (or a Floor, or a Building).
 | **validFrom**    |       | string (ISO 8601) | Valid from.                                                           |               | Valid From        | Gültig von        |
 | **validUntil**   |       | string (ISO 8601) | Valid until.                                                          |               | Valid Until       | Gültig bis        |
 
-### 5.4 Document [Planned]
+### 5.4 AreaMeasurement (Bemessung) [Planned]
+
+**File:** `data/area-measurements.json` (planned).
+
+Canonical record for any quantitative area on a spatial entity. Borrows
+from ISO 16739 `IfcQuantitySet` / `IfcQuantityArea` and IBPDI *Quantity*.
+**Each Building / Floor / Space / Parcel can have many AreaMeasurements**
+(different bases, accuracies, validity periods, surveyors). The scalar
+`Floor.areaGross`, `Space.area`, `Tenancy.hnf2` / `gf`, and `Application.hnf2`
+/ `gf` are **denormalised projections** of canonical AreaMeasurements —
+fast to read for the wizard and the property views, but the source of
+truth lives here.
+
+#### Schema definition
+
+| Field             | PK/FK | Type             | Description                                                                  | Constraints   | Alias (EN)       | Alias (DE)            |
+| ----------------- | ----- | ---------------- | ---------------------------------------------------------------------------- | ------------- | ---------------- | --------------------- |
+| **measurementId** | PK    | string           | Unique identifier.                                                            | **mandatory** | Measurement ID   | Bemessungs-ID         |
+| **subjectType**   |       | string, enum     | One of `Building` / `Floor` / `Space` / `Parcel`.                              | **mandatory** | Subject Type     | Gegenstandstyp        |
+| **subjectId**     | FK    | string           | PK of the linked spatial entity.                                              | **mandatory** | Subject ID       | Gegenstands-ID        |
+| **areaType**      |       | string, enum     | Area category — see Appendix A.11.                                             | **mandatory** | Area Type        | Flächenart            |
+| **value**         |       | number           | Numeric value in m² (or m³ for volume; document `unit` if non-m²).            | **mandatory**, minimum: 0 | Value         | Wert                  |
+| **unit**          |       | string           | Unit of measurement; default `m²`. Use `m³` for volumes (`gv`, `gvo`, `gvu`). | default `m²`  | Unit             | Einheit               |
+| **basis**         |       | string, enum     | Standard the value follows — see Appendix B + Appendix A.11.                   | **mandatory** | Basis            | Norm                  |
+| **accuracy**      |       | string, enum     | How the value was obtained — see Appendix A.12.                                | **mandatory** | Accuracy         | Genauigkeit           |
+| **measuredAt**    |       | string (ISO date) | Date the measurement was performed.                                          |               | Measured At      | Vermessen am          |
+| **measuredBy**    |       | string           | Surveyor / source (e.g. `Vermessungsamt Bern`, `BBL-internal`).                |               | Measured By      | Vermessen durch       |
+| **validFrom**     |       | string (ISO 8601) | Valid from.                                                                  | **mandatory** | Valid From       | Gültig von            |
+| **validUntil**    |       | string (ISO 8601) | Valid until (null when current).                                              |               | Valid Until      | Gültig bis            |
+| **note**          |       | string           | Free-text annotation (e.g. *"includes balcony per IPMS 1 footnote"*).         |               | Note             | Bemerkung             |
+| extensionData     |       | object           | Jurisdiction-specific extensions.                                              |               | Extension Data   | Erweiterungsdaten     |
+
+> **Multiple measurements per subject.** A single Building can carry an
+> `areaType: GF, basis: SIA416` measurement *and* an `areaType: GF,
+> basis: IPMS1` measurement, valid simultaneously. The portal picks the
+> one matching the user's context (SIA 416 for Swiss federal views, IPMS
+> for international reporting).
+
+### 5.5 Document [Planned]
 
 **File:** `data/documents.json` (planned).
 
@@ -718,7 +789,7 @@ disposition) live in an external records-management system referenced by
 > references rather than blobs. The current prototype keeps the embedded
 > shape; the migration is part of the records-management integration.
 
-### 5.5 User (Benutzer)
+### 5.6 User (Benutzer)
 
 **File:** [`data/users.json`](../data/users.json)
 
@@ -739,7 +810,7 @@ master data may be governed by **SAP MDG** in some deployments.
 The active role is persisted client-side under
 `mp-active-role-{userId}` in `localStorage`.
 
-### 5.6 NewsArticle
+### 5.7 NewsArticle
 
 **File:** [`data/news.json`](../data/news.json)
 
@@ -760,16 +831,24 @@ Internal communications shown on the home page and `#/news` route.
 
 ---
 
-## 6. Master Data
+## 6. Reference Data
 
-### 6.1 MasterData (singleton)
+### 6.1 ReferenceData (singleton)
 
-**File:** [`data/master-data.json`](../data/master-data.json)
+**File:** [`data/master-data.json`](../data/master-data.json) (legacy filename; target: `data/reference-data.json`).
 
-Single document of slowly-changing reference data. Holds NAW classes,
-federal coefficients, the closed list of portfolio categories, and the
-BBL company code. Read-only at runtime; managed out-of-band by the BBL
-portfolio team.
+Single document of **reference data**: closed value lists, federal
+coefficients, validation thresholds, the BBL company code. Read-only at
+runtime; managed out-of-band by the BBL portfolio team.
+
+> **Naming note.** *Reference data* is the DAMA-DMBOK term for value
+> lists / coefficients / classifications that change slowly. We do **not**
+> call this "master data" because in SAP / MDG terminology *master data*
+> means organisational records (customer / vendor / material / employee
+> master). Organisational data in our model lives separately under
+> § 5 (User, Organisation, Contact, Address). The file is still called
+> `master-data.json` from the early prototype; renaming to
+> `reference-data.json` is queued with the other rename items.
 
 #### Schema definition
 
@@ -809,19 +888,30 @@ portal would *read* from, and portal-side extensions it might *own*.
 
 These belong to canonical real-estate / records / FM systems. The portal
 would never own them; it would resolve them on demand when a view needs
-them. (Floor / Space / Document have been promoted from this list to
-**Planned** — see §§ 5.2 – 5.4.)
+them. (Floor, Space, Document, and AreaMeasurement have been promoted
+from this list to **Planned** — see §§ 5.2 – 5.5. Address has moved to
+Organisational data — see § 5 and § 2.3.)
 
 | Entity                   | DE term                  | Standard anchor                              | Portal use case (when integrated)                                            |
 | ------------------------ | ------------------------ | -------------------------------------------- | ---------------------------------------------------------------------------- |
 | **Site**                 | Standort                 | ISO 16739 `IfcSite`, IBPDI Site               | Campus / area view; group buildings on the map by site.                     |
-| **Parcel**               | Parzelle                 | National cadastre (CH: EGRID)                 | Cadastral context on Tenancy detail.                                         |
-| **Address** (structured) | Adresse                  | IBPDI Address, eCH-0010 / eCH-0046            | Canonical postal address (today flattened into the `address` string).        |
-| **AreaMeasurement**      | Bemessung                | ISO 16739 `IfcQuantitySet`, IBPDI Quantity   | Provides basis (SIA 416 / IPMS / GEFMA 198), accuracy, validity for `hnf2` / `gf` values. |
-| **Contact**              | Kontakt                  | ISO 16739 `IfcActor`, IBPDI Contact           | Person × Building × role relationship; canonicalises today's denormalised `tenancy.contacts`. |
+| **Parcel**               | Parzelle                 | National cadastre (CH: EGRID)                 | Cadastral context on Tenancy detail. AreaMeasurement (§ 5.4) can attach to a Parcel — `subjectType: Parcel`. |
 | **Contract** (FM)        | Vertrag                  | IBPDI Contract                                | Service agreements, maintenance contracts. Distinct from `Document.type = 'Lease'`. |
 | **Certificate**          | Zertifikat               | (IBPDI Certificate, future)                   | Energy / accessibility / fire-safety certifications.                         |
-| **Asset**                | Anlage / Ausstattung     | ISO 16739 `IfcSystem`, IBPDI Asset            | HVAC, elevators, fire protection — typically FM concern.                     |
+| **BuildingElement**      | Bauteil                  | ISO 16739 `IfcBuildingElement`                | Constructive fabric — Wand / Decke / Stütze / Treppe / Tür / Fenster / Dach. Replaced during Umbau projects, never by tenants. |
+| **TechnicalSystem**      | Technische Anlage / System | ISO 16739 `IfcSystem`                       | Lüftung, Heizung, Elektro, Sanitär, Transport (Aufzüge), Brandschutz, Sicherheit, BACS. Serviced on intervals; **the primary target of Schadensmeldungen**. |
+| **Component**            | Komponente               | ISO 16739 `IfcDistributionElement`            | Sub-part of a TechnicalSystem — Filter, Zähler, Klappe, Lüfter, Pumpe, Sensor. Replaced individually during service. **Finer-grained Schadensmeldungs target.** |
+| **Furnishing**           | Möbel / Ausstattung      | ISO 16739 `IfcFurnishingElement`              | Movable fit-out — Schreibtisch, Stuhl, Leuchten, Garderobe. Tenant-mutable; overlaps with the sibling **workspace-management** mobiliar catalogue. |
+
+> **Why four entities instead of one "Asset" bucket.** The four categories
+> have different lifecycle owners (Umbau / FM service intervals / per-
+> service replacement / tenant moves), different parents (BuildingElement
+> hangs off Building/Floor/Space; Component hangs off TechnicalSystem;
+> Furnishing is per-Space), and different IFC supertypes. Collapsing
+> them to a single "Asset" with a `type` enum flattens the IFC taxonomy
+> and breaks the System → Component containment that a Schadensmeldung
+> workflow specifically needs to navigate. The decision is documented in
+> §11 Version History (v0.6.0).
 
 ### 7.2 Portal-side extensions (potentially owned)
 
@@ -845,7 +935,7 @@ them. (Floor / Space / Document have been promoted from this list to
 | [`data/applications.json`](../data/applications.json) | 5              | Application (with embedded Attachment / Condition / HistoryEntry) |
 | [`data/tenancies.json`](../data/tenancies.json)       | 3              | Tenancy                                                          |
 | [`data/users.json`](../data/users.json)               | 5              | User                                                             |
-| [`data/master-data.json`](../data/master-data.json)   | 1              | MasterData (single object)                                       |
+| [`data/master-data.json`](../data/master-data.json)   | 1              | ReferenceData (single object)                                       |
 | [`data/news.json`](../data/news.json)                 | 10             | NewsArticle                                                      |
 | [`data/buildings.json`](../data/buildings.json)       | 4              | Building (read-only local reference; canonical record in lead system) |
 
@@ -857,6 +947,7 @@ them. (Floor / Space / Document have been promoted from this list to
 | `data/floors.geojson`      | Floor (GeoJSON `FeatureCollection` of `Polygon` features, floor outlines) |
 | `data/spaces.geojson`      | Space (GeoJSON `FeatureCollection` of `Polygon` features, room footprints) |
 | `data/documents.json`      | Document (metadata + `linkedTo[]`; file blobs live in the records-management system) |
+| `data/area-measurements.json` | AreaMeasurement (one record per Building/Floor/Space × `areaType` × `basis`) |
 
 ---
 
@@ -995,7 +1086,7 @@ Aligned with SIA 416 / DIN 277 / ArcGIS Indoors `USE_TYPE`.
 | `SecurityArea`    | Sicherheitsbereich |
 | `Other`           | Andere             |
 
-### A.10 Document Type [Planned, § 5.4]
+### A.10 Document Type [Planned, § 5.5]
 
 | Value (EN)         | Value (DE)              | Typical `linkedTo`              |
 | ------------------ | ----------------------- | ------------------------------- |
@@ -1009,6 +1100,40 @@ Aligned with SIA 416 / DIN 277 / ArcGIS Indoors `USE_TYPE`.
 | `LegalBasis`       | Rechtsgrundlage         | Application                       |
 | `Attachment`       | Beilage                 | Application                       |
 | `Other`            | Andere                  | any                               |
+
+### A.11 Area Type [Planned, § 5.4]
+
+Used by `AreaMeasurement.areaType`. SIA 416 / IPMS / GEFMA 198 mappings are
+in Appendix B.
+
+| Value (EN)     | Value (DE)                        | Typical subject                            |
+| -------------- | --------------------------------- | ------------------------------------------ |
+| `GF`           | Geschossfläche                    | Building, Floor                            |
+| `NGF`          | Netto-Geschossfläche              | Building, Floor                            |
+| `NF`           | Nutzfläche                        | Building, Floor                            |
+| `HNF`          | Hauptnutzfläche                   | Building, Floor, Space                     |
+| `HNF1`–`HNF7`  | HNF-Unterklasse (SIA 416)         | Space                                      |
+| `NNF`          | Nebennutzfläche                   | Building, Floor                            |
+| `VF`           | Verkehrsfläche                    | Building, Floor                            |
+| `FF`           | Funktionsfläche                   | Building, Floor                            |
+| `EBF`          | Energiebezugsfläche (SIA 380/1)   | Building                                   |
+| `Footprint`    | Gebäudegrundfläche                | Building, Parcel                           |
+| `PlotArea`     | Grundstücksfläche                 | Parcel                                     |
+| `SealedArea`   | Versiegelte Fläche                | Parcel                                     |
+| `GreenArea`    | Grünfläche                        | Parcel                                     |
+| `Volume`       | Gebäudevolumen (GV)               | Building (unit `m³`, not `m²`)             |
+
+### A.12 Measurement Accuracy [Planned, § 5.4]
+
+Used by `AreaMeasurement.accuracy`. Mirrors the property-inventory + IBPDI
+quantity-quality vocabulary.
+
+| Value (EN)    | Value (DE)        | Description                                                            |
+| ------------- | ----------------- | ---------------------------------------------------------------------- |
+| `Measured`    | Vermessen         | Result of a recent on-site survey / Vermessung.                         |
+| `Survey`      | AV (Amtliche Vermessung) | Sourced from the official cadastral survey.                       |
+| `Estimated`   | Geschätzt         | Calculated from plans or estimated by surveyor.                         |
+| `Aggregated`  | Aggregiert        | Sum of measurements on child entities (e.g. Building.GF = Σ Floor.GF). |
 
 ---
 
@@ -1099,4 +1224,5 @@ external walls and balconies are counted.)
 | 0.2.0   | 2026-05-19 | Reframed solution-neutral; dropped sibling-project references; added standards alignment.           |
 | 0.3.0   | 2026-05-19 | Added eCH / ISO 15489 / SAP MDG / BPMN 2.0 references; documented EN-only schema principle.        |
 | 0.4.0   | 2026-05-19 | Restructured to layered template (Workflow / Tenancy / Reference / Master / Future). Schema tables now use `Field | PK/FK | Type | Description | Constraints | Alias (EN) | Alias (DE)` format. |
-| 0.5.0   | 2026-05-19 | Promoted **Floor**, **Space**, **Document** to Planned reference entities (§§ 5.2–5.4). Tenancy `rentedObject` now expressed as `buildingId` + optional `floorIds[]` / `spaceIds[]` with `rentedScope`. Hedged standards-alignment language (IBPDI / eCH / IfcOwnerHistory). Added `currency` to MasterData, Space-useType + Document-type enums (Appendix A.9, A.10), and HNF2 + coordinate-convention notes to Appendix B. |
+| 0.5.0   | 2026-05-19 | Promoted **Floor**, **Space**, **Document** to Planned reference entities (§§ 5.2–5.4). Tenancy `rentedObject` now expressed as `buildingId` + optional `floorIds[]` / `spaceIds[]` with `rentedScope`. Hedged standards-alignment language (IBPDI / eCH / IfcOwnerHistory). Added `currency` to ReferenceData, Space-useType + Document-type enums (Appendix A.9, A.10), and HNF2 + coordinate-convention notes to Appendix B. |
+| 0.6.0   | 2026-05-19 | Renamed `MasterData` → **`ReferenceData`** (the previous name conflicted with SAP-MDG meaning of "master data"). Replaced § 2.1 *Entity layers* with a **Domain overview** (six business domains + two future-only). Promoted **AreaMeasurement** to Planned and placed it in the Spatial hierarchy alongside the spatial entities it measures (§ 5.4). Split the previous `Asset` row into four standards-aligned Future entities: **BuildingElement** (IFC `IfcBuildingElement`), **TechnicalSystem** (IFC `IfcSystem`, Schadensmeldungs target), **Component** (IFC `IfcDistributionElement`), **Furnishing** (IFC `IfcFurnishingElement`). Moved **Address** out of Spatial and into Organisational data (Address can attach to Building / Organisation / Contact — n:m). New Appendix A.11 (Area Type) and A.12 (Measurement Accuracy). |

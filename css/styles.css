@@ -28,6 +28,16 @@
    ========================================================================== */
 
 /* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+/* Sticky-footer scaffold: #root spans at least the viewport and #page-body
+   absorbs any leftover space, so short pages (e.g. Liegenschaften with a
+   single card) still push the footer to the bottom edge. */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+#page-body { flex: 1 0 auto; }
+
 .container {
   max-width: var(--container-max-width);
   margin: 0 auto;
