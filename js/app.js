@@ -1538,8 +1538,8 @@
             </div>
           </div>
           <figure class="hero__figure">
-            <img src="https://images.unsplash.com/photo-1568667256549-094345857637?w=1200&q=80"
-                 alt="Bundeshaus West in Bern, beispielhaft für die durch BBL bewirtschafteten Bundesimmobilien.">
+            <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&q=80"
+                 alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien.">
           </figure>
         </div>
       </section>
