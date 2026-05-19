@@ -12,10 +12,10 @@
      SEARCH                        — header-search toggle + form
      SKIP LINK                     — .skip-to-content
      BREADCRUMB                    — .breadcrumb
-     HEADINGS / TYPOGRAPHY         — section-heading, section-eyebrow
+     HEADINGS / TYPOGRAPHY         — section-heading, card__title, meta-info
      BUTTONS                       — .btn variants
      BADGES                        — .badge, status colours
-     CARDS                         — .card, .quick-card, .application-card
+     CARDS                         — .card, .card--quick, .card--application
      FORMS                         — .form-field, validation states
      STEP INDICATOR + PIPELINE     — wizard + status visualisations
      TABLES                        — .table, queue grid
@@ -52,7 +52,6 @@
 .section--dark .section-heading,
 .section--dark h2,
 .section--dark h3 { color: var(--color-text-inverse); }
-.section--dark .section-eyebrow { color: rgba(255,255,255,0.7); }
 
 .stack > * + * { margin-top: var(--space-md); }
 .stack--lg > * + * { margin-top: var(--space-lg); }
@@ -88,19 +87,17 @@
 }
 .top-bar__authorities:hover { background: var(--color-white-20); }
 .top-bar__authorities svg { width: 12px; height: 12px; }
+/* Prototype notice — centred red label inside the dark top-bar. Plain text,
+   no pill background; kept inline so it doesn't steal vertical real estate. */
 .top-bar__prototype-notice {
-  /* Centered horizontally within the top-bar__inner — pulled to the centre by
-     absolute positioning so it doesn't interact with flex spacing. */
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   font-size: var(--text-body-xs);
-  background: var(--color-prototype-notice);
-  color: #fff;
-  padding: 2px 10px;
-  border-radius: var(--radius);
+  color: var(--color-prototype-notice);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.2px;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -137,7 +134,7 @@
   border-radius: var(--radius);
   transition: background var(--transition-fast);
 }
-.top-bar__link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.top-bar__link:hover { background: rgba(255,255,255,0.12); color: var(--color-white); }
 .top-bar__link--user svg { width: 16px; height: 16px; }
 .top-bar__sep {
   width: 1px;
@@ -170,7 +167,7 @@
   right: 0;
   top: 100%;
   background: var(--color-surface-dark);
-  color: #fff;
+  color: var(--color-white);
   box-shadow: 0 8px 20px -4px rgba(0,0,0,0.4);
   min-width: 70px;
   z-index: var(--z-toast);
@@ -197,7 +194,7 @@
 .language-switcher__option:hover { background: rgba(255,255,255,0.10); }
 .language-switcher__option--active {
   background: var(--color-link);
-  color: #fff;
+  color: var(--color-white);
 }
 .language-switcher__option--active:hover {
   background: var(--color-link-hover);
@@ -206,7 +203,7 @@
 /* ── FEDERAL CHROME — BRAND BAR ─────────────────────────────────────────── */
 /* Full-bleed white background; content constrained inside __inner. */
 .top-header {
-  background: #fff;
+  background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
 }
 .top-header__inner {
@@ -218,25 +215,63 @@
   gap: var(--space-md);
   flex-wrap: wrap;
 }
-.top-header__left { display: flex; align-items: center; gap: var(--space-md); cursor: pointer; }
+/* Federal mark — sizing + alignment mirrors designsystem css/components/logo.postcss.
+   Centred on mobile, top-aligned from md+ (matches DS .logo `md:items-start`).
+   Mark and divider scale up at lg / xl / 3xl so the brand reads at laptop and
+   widescreen sizes; on mobile the mark stays compact. */
+.top-header__left {
+  display: flex;
+  align-items: center;            /* base: vertical centre on phones */
+  gap: var(--space-md);
+  cursor: pointer;
+}
+@media (min-width: 768px) {
+  .top-header__left { align-items: flex-start; gap: var(--space-lg); }
+}
 .top-header__bundmark {
-  height: 44px;
+  height: 40px;                   /* mobile base */
   width: auto;
   flex-shrink: 0;
 }
-@media (max-width: 640px) {
-  .top-header__bundmark { height: 36px; }
-}
+@media (min-width: 1024px) { .top-header__bundmark { height: 52px; } }
+@media (min-width: 1280px) { .top-header__bundmark { height: 60px; } }
+@media (min-width: 1920px) { .top-header__bundmark { height: 70px; } }
+
 .top-header__divider {
-  width: 1px; height: 32px; background: var(--color-border);
+  width: 1px;
+  height: 40px;                   /* mobile base; matches mark height */
+  background: var(--color-gray-300);
+  align-self: stretch;            /* lets it grow with the flex-start row */
+  flex-shrink: 0;
 }
+@media (min-width: 1024px) { .top-header__divider { height: 52px; } }
+@media (min-width: 1280px) { .top-header__divider { height: 60px; } }
+@media (min-width: 1920px) { .top-header__divider { height: 70px; } }
+
+/* Dept title — sizing tracks designsystem css/components/logo.postcss .logo__title:
+   text-sm base / text-base @ xl / text-lg @ 3xl (14 / 16 / 18 px). Never larger.
+   The small negative margin-top optically aligns the bold title with the SVG's
+   first text row, mirroring DS `mt-[-0.160rem]`. */
 .top-header__dept {
-  font-size: var(--text-body-sm);
-  line-height: var(--line-height-tight);
+  font-size: var(--text-body-sm);                /* 14 px base */
+  line-height: var(--line-height-snug);
+  margin-top: -0.16rem;
 }
+@media (min-width: 1280px) { .top-header__dept { font-size: var(--text-body); } }    /* 16 px @ xl */
+@media (min-width: 1920px) { .top-header__dept { font-size: 1.125rem;        } }     /* 18 px @ 3xl */
+
+.top-header__dept strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+/* Sub-line ("Mieterportal") — same size as the dept title (inherits via the
+   parent .top-header__dept rule that already scales 14 → 16 → 18 px), but
+   regular weight to keep the bold dept name dominant. */
 .top-header__dept-sub {
+  display: inline-block;
   color: var(--color-text-secondary);
-  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-normal);
+  margin-top: 2px;
 }
 .top-header__right {
   margin-left: auto;
@@ -319,7 +354,7 @@
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 .header-search__input:focus {
-  background: #fff;
+  background: var(--color-white);
   box-shadow: var(--shadow-card);
   border-color: var(--color-border-input);
 }
@@ -350,14 +385,14 @@
 .top-header__action:hover { background: var(--color-bg-alt); }
 .top-header__action--primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-white);
   border-color: var(--color-primary);
 }
 .top-header__action--primary:hover { background: var(--color-primary-hover); }
 
 /* ── FEDERAL CHROME — NAVBAR ────────────────────────────────────────────── */
 .navbar {
-  background: #fff;
+  background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
 }
 .navbar__inner {
@@ -418,7 +453,7 @@
   position: absolute;
   top: 100%;
   z-index: var(--z-modal);
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.18), 0 2px 4px rgba(0,0,0,0.04);
   width: 480px;
   max-width: calc(100vw - 24px);
@@ -535,13 +570,6 @@
 }
 .hero--surface { background: var(--color-bg-surface); }
 .hero__inner { max-width: var(--container-max-width); margin: 0 auto; }
-.hero__eyebrow {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  margin-bottom: var(--space-sm);
-}
 .hero__title {
   font-size: var(--text-display);
   line-height: var(--line-height-tight);
@@ -583,7 +611,7 @@
    for danger and brand-accent surfaces (active nav underline, card rails). */
 .btn--primary {
   background: var(--color-secondary-600);
-  color: #fff;
+  color: var(--color-white);
 }
 .btn--primary:hover { background: var(--color-secondary-700); }
 .btn--outline {
@@ -599,7 +627,7 @@
 .btn--ghost:hover { background: var(--color-bg-alt); }
 .btn--danger {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-white);
 }
 .btn--danger:hover { background: #B91C1C; }
 .btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-xs); }
@@ -652,7 +680,7 @@
 }
 
 /* ── QUICK-CARD (kbob-fdk pattern) — link-style card with arrow button ── */
-.quick-card {
+.card--quick {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -668,15 +696,15 @@
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
-.quick-card:hover {
+.card--quick:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-card-hover);
 }
-.quick-card,
-.quick-card:hover,
-.quick-card *,
-.quick-card:hover * { text-decoration: none; }
-.quick-card__title {
+.card--quick,
+.card--quick:hover,
+.card--quick *,
+.card--quick:hover * { text-decoration: none; }
+.card--quick__title {
   font-size: var(--text-h4);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
@@ -684,14 +712,14 @@
   line-height: var(--line-height-snug);
   transition: color var(--transition-fast);
 }
-.quick-card:hover .quick-card__title { color: var(--color-primary); }
-.quick-card__desc {
+.card--quick:hover .card--quick__title { color: var(--color-primary); }
+.card--quick__desc {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0;
   line-height: var(--line-height-relaxed);
 }
-.quick-card__meta {
+.card--quick__meta {
   margin-top: var(--space-md);
   font-size: var(--text-body-xs);
   color: var(--color-text-muted);
@@ -699,7 +727,7 @@
   gap: var(--space-sm);
   flex-wrap: wrap;
 }
-.quick-card__arrow-btn {
+.card--quick__arrow-btn {
   position: absolute;
   bottom: var(--space-lg);
   right: var(--space-lg);
@@ -717,9 +745,9 @@
 @media (min-width: 1280px) {
   .profile-grid { grid-template-columns: repeat(4, 1fr); }
 }
-.profile-card {
+.card--profile {
   position: relative;
-  background: #fff;
+  background: var(--color-white);
   color: var(--color-text-primary);
   text-decoration: none;
   display: flex;
@@ -728,29 +756,29 @@
   overflow: hidden;
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.profile-card:hover {
+.card--profile:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
 }
-.profile-card__image {
+.card--profile__image {
   height: 200px;
   background-size: cover;
   background-position: center;
   background-color: var(--color-gray-200);
 }
-.profile-card__body {
+.card--profile__body {
   padding: var(--space-lg);
   padding-bottom: calc(var(--space-lg) + 56px);
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-.profile-card__date {
+.card--profile__date {
   font-size: var(--text-body-xs);
   color: var(--color-text-muted);
   margin: 0 0 var(--space-sm);
 }
-.profile-card__title {
+.card--profile__title {
   font-size: var(--text-h3);
   font-weight: var(--font-weight-bold);
   margin: 0 0 var(--space-sm);
@@ -760,16 +788,16 @@
 }
 /* Profile cards sit *inside* .section--dark but have a white card body;
    override the generic dark-section heading rule so the title stays readable. */
-.section--dark .profile-card__title { color: var(--color-text-primary); }
-.section--dark .profile-card:hover .profile-card__title { color: var(--color-primary); }
-.profile-card:hover .profile-card__title { color: var(--color-primary); }
-.profile-card__desc {
+.section--dark .card--profile__title { color: var(--color-text-primary); }
+.section--dark .card--profile:hover .card--profile__title { color: var(--color-primary); }
+.card--profile:hover .card--profile__title { color: var(--color-primary); }
+.card--profile__desc {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0;
   line-height: var(--line-height-relaxed);
 }
-.profile-card__arrow {
+.card--profile__arrow {
   position: absolute;
   bottom: var(--space-lg);
   right: var(--space-lg);
@@ -803,11 +831,11 @@
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 .profile-section__links a:hover {
-  color: #fff;
+  color: var(--color-white);
   border-bottom-color: rgba(255,255,255,0.5);
 }
 
-/* ── ARROW BUTTON (shared with quick-card) ──────────────────────────────── */
+/* ── ARROW BUTTON (shared with card--quick) ──────────────────────────────── */
 .arrow-btn {
   width: 44px;
   height: 44px;
@@ -820,21 +848,33 @@
   border-radius: var(--radius);
 }
 .arrow-btn svg { width: 20px; height: 20px; color: var(--color-primary); stroke: var(--color-primary); transition: color var(--transition-fast); }
-.quick-card:hover .arrow-btn { background: var(--color-primary); }
-.quick-card:hover .arrow-btn svg { color: #fff; stroke: #fff; }
+.card--quick:hover .arrow-btn { background: var(--color-primary); }
+.card--quick:hover .arrow-btn svg { color: var(--color-white); stroke: var(--color-white); }
 
-/* Section heading used above quick-card grids */
+/* Section heading used above card--quick grids */
 .section-heading {
   font-size: var(--text-h2);
   margin: 0 0 var(--space-lg);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.01em;
 }
-.section-eyebrow {
+
+/* Card-internal heading — used as the only title inside a plain .card.
+   Aligns with DS .card__title shape (bold body-size text) but sized for
+   the inset/aside use case where it sits at the top of a card. */
+.card__title {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+/* Inline meta line — small secondary text, sentence case. Used for
+   contextual info above page headings (e.g. "Öffentlich · kein Login nötig")
+   instead of the marketing-style uppercase eyebrow. */
+.meta-info {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
   margin: 0 0 var(--space-sm);
 }
 
@@ -899,18 +939,18 @@
 .pipeline__step:last-child::after { display: none; }
 .pipeline__step--done {
   background: var(--color-pipeline-done);
-  color: #fff;
+  color: var(--color-white);
 }
 .pipeline__step--done::after { border-left-color: var(--color-pipeline-done); }
 .pipeline__step--active {
   background: var(--color-pipeline-active);
-  color: #fff;
+  color: var(--color-white);
   font-weight: var(--font-weight-semibold);
 }
 .pipeline__step--active::after { border-left-color: var(--color-pipeline-active); }
 .pipeline__step--rejected {
   background: var(--color-pipeline-rejected);
-  color: #fff;
+  color: var(--color-white);
 }
 .pipeline__step--rejected::after { border-left-color: var(--color-pipeline-rejected); }
 .pipeline__step--rueckfrage {
@@ -919,28 +959,94 @@
 }
 .pipeline__step--rueckfrage::after { border-left-color: var(--color-warning); }
 
-/* ── STEP INDICATOR (wizard) ────────────────────────────────────────────── */
+/* Inline icon — used by P.icon() helper. Vertically centres a 16px SVG
+   alongside body-sm text and adds a small trailing gap. Stroke colour is
+   inherited from the parent via currentColor. */
+.inline-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  margin-right: var(--space-xs);
+  flex-shrink: 0;
+}
+
+/* ── STEP INDICATOR (wizard) ──────────────────────────────────────────────
+   Mirrors designsystem css/components/step-indicator.postcss — 36px circles
+   with gray-400 outline; active filled gray-400; confirmed filled green-500
+   with a checkmark. Wraps with .step-indicator__label below each dot, plus
+   a thin connector line between consecutive dots. */
 .step-indicator {
   display: flex;
-  gap: var(--space-sm);
+  align-items: flex-start;
+  gap: 0;
   margin-block: var(--space-md);
+  padding: 0;
+  list-style: none;
   flex-wrap: wrap;
+  row-gap: var(--space-md);
 }
 .step-indicator__item {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 120px;
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-  background: #fff;
-  font-size: var(--text-body-sm);
-  display: flex;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  grid-template-rows: 36px auto;
   align-items: center;
-  gap: var(--space-xs);
+  column-gap: var(--space-sm);
+  position: relative;
 }
-.step-indicator__item--done { background: var(--color-success-light); color: var(--color-success); border-color: var(--color-success); }
-.step-indicator__item--active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); font-weight: var(--font-weight-semibold); }
-.step-indicator__item--disabled { opacity: 0.5; }
+.step-indicator__step {
+  grid-column: 1;
+  grid-row: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-gray-400);
+  background: transparent;
+  color: var(--color-gray-400);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body-sm);
+  flex-shrink: 0;
+}
+.step-indicator__step--active {
+  background: var(--color-gray-400);
+  border-color: var(--color-gray-400);
+  color: var(--color-white);
+}
+.step-indicator__step--confirmed {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-white);
+}
+.step-indicator__step--confirmed svg { width: 18px; height: 18px; }
+.step-indicator__label {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-snug);
+}
+.step-indicator__item[aria-current="step"] .step-indicator__label {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+.step-indicator__connector {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 2px;
+  background: var(--color-gray-300);
+  margin-top: var(--space-xs);
+  margin-right: var(--space-sm);
+}
+.step-indicator__connector--confirmed { background: var(--color-success); }
+@media (max-width: 640px) {
+  .step-indicator__item { min-width: 100%; }
+  .step-indicator__connector { display: none; }
+}
 
 /* ── FORM FIELDS ────────────────────────────────────────────────────────── */
 .form-field { display: flex; flex-direction: column; gap: var(--space-xs); }
@@ -960,7 +1066,7 @@
   /* CD Bund: subtle shadow + thin border, focus elevates the shadow */
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--color-white);
   font-size: var(--text-body);
   font-family: inherit;
   min-height: var(--btn-min-h);
@@ -1060,7 +1166,7 @@
   padding: var(--space-md);
 }
 .modal {
-  background: #fff;
+  background: var(--color-white);
   border-radius: var(--radius-lg);
   max-width: 600px;
   width: 100%;
@@ -1128,7 +1234,7 @@
   height: 48px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
-  color: #fff;
+  color: var(--color-white);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1141,6 +1247,8 @@
 }
 .app-footer__top-btn svg { width: 20px; height: 20px; }
 
+/* Footer grid — matches designsystem css/sections/footer.postcss .footer-information:
+   single column on mobile, three equal columns from lg (1024px) up. */
 .footer-information__inner {
   display: grid;
   grid-template-columns: 1fr;
@@ -1149,9 +1257,9 @@
   max-width: var(--container-max-width);
   margin: 0 auto;
 }
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .footer-information__inner {
-    grid-template-columns: 1fr 1.4fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-3xl);
   }
 }
@@ -1208,7 +1316,7 @@
   transition: color var(--transition-fast);
 }
 .footer-information__list a:hover {
-  color: #fff;
+  color: var(--color-white);
 }
 .footer-information__list a:hover .footer-information__arrow {
   transform: translateX(4px);
@@ -1235,7 +1343,7 @@
   border-bottom: 1px solid rgba(255,255,255,0.4);
   transition: color var(--transition-fast);
 }
-.footer-information__big-link:hover { color: #fff; }
+.footer-information__big-link:hover { color: var(--color-white); }
 .footer-information__big-link:hover .footer-information__arrow { transform: translateX(4px); }
 .footer-information__big-link .footer-information__arrow { font-size: 1.4em; }
 
@@ -1256,7 +1364,7 @@
   color: rgba(255,255,255,0.75);
   text-decoration: none;
 }
-.app-footer__bottom-link:hover { color: #fff; text-decoration: underline; }
+.app-footer__bottom-link:hover { color: var(--color-white); text-decoration: underline; }
 
 /* ── SHARE-BAR (detail-view utility bar — print, copy-link) ─────────────
    Sits right under the breadcrumb. Adds breathing room above and below
@@ -1356,7 +1464,7 @@
 }
 .shortcut-overlay.open { display: flex; }
 .shortcut-overlay__inner {
-  background: #fff;
+  background: var(--color-white);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   max-width: 720px;
@@ -1429,7 +1537,6 @@
   .main-navigation.open { display: flex; }
   .main-navigation__link { padding: var(--space-md); border-bottom: 1px solid var(--color-border); }
   .top-bar__authorities span { display: none; }
-  .top-bar__prototype-notice { display: none; }
   .header-search__input { width: 140px; }
   .top-header__dept { display: none; }
   .top-header__divider { display: none; }
@@ -1447,7 +1554,7 @@
 @media print {
   .top-bar, .navbar, .app-footer, .toast-host, .shortcut-overlay, .skip-to-content, .breadcrumb { display: none !important; }
   .hero { padding: var(--space-md) 0; background: none; }
-  body { color: #000; background: #fff; }
+  body { color: #000; background: var(--color-white); }
 }
 /* ===== App-specific styles (merged from former t3-lite.css) ===== */
 
@@ -1516,7 +1623,7 @@
 .page-with-toc__toc {
   position: sticky;
   top: var(--space-xl);
-  background: #fff;
+  background: var(--color-white);
   padding: var(--space-lg);
   box-shadow: var(--shadow-card);
   border-radius: var(--radius);
@@ -1533,10 +1640,13 @@
   }
 }
 .page-with-toc__toc-title {
-  font-size: var(--text-h4);
+  /* Matches CD prominence of "Inhaltsverzeichnis" on kbob/armasuisse — large,
+     not a subordinate label. */
+  font-size: var(--text-h2);
   font-weight: var(--font-weight-bold);
   margin: 0 0 var(--space-md);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
 }
 .page-with-toc__toc-list {
   list-style: none;
@@ -1567,10 +1677,76 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Glossary list styling */
-.glossary { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: var(--space-sm) var(--space-md); margin: 0; }
-.glossary dt { font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
-.glossary dd { margin: 0; color: var(--color-text-secondary); }
+/* Link list — bulleted list of links in accordion bodies and content sections.
+   Mirrors the ar.admin.ch / VBS pattern: dark text bullet, red underlined link,
+   trailing external-link icon for hrefs that open in a new window. */
+.link-list {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+.link-list > li + li { margin-top: var(--space-sm); }
+.link-list a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: var(--font-weight-bold);
+}
+.link-list a:hover { color: var(--color-primary-hover); }
+
+/* External-link affordance — small arrow glyph after the link text. Used by
+   any anchor with class="link link--external" (matches DS .link--external). */
+.link--external::after {
+  content: '';
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.25em;
+  vertical-align: -1px;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-external-link) center / contain no-repeat;
+          mask: var(--icon-external-link) center / contain no-repeat;
+}
+:root {
+  --icon-external-link: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath d="m14.5 2.7v1.9h3.8l.6-.5.3.1-.7.6-6.4 6.4 1.4 1.4 6.4-6.4.6-.7.1.3-.5.7v3.7h1.9v-7.5z"/%3E%3Cpath d="m16.9 19.9h-12v-12.2h5.7v-1.9h-7.6v16h15.9v-7.7h-2z"/%3E%3C/svg%3E');
+}
+
+/* Contact block — armasuisse / bbl.admin.ch pattern. Two-column on desktop:
+   address + phone + email on the left, description on the right. Red SVG
+   icon prefixes for phone/mail/web. */
+.contact-block {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  margin-top: var(--space-md);
+}
+@media (min-width: 768px) {
+  .contact-block { grid-template-columns: minmax(220px, 1fr) 2fr; gap: var(--space-3xl); }
+}
+.contact-block__address {
+  font-size: var(--text-body);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-md);
+  color: var(--color-text-primary);
+}
+.contact-block__row { margin: 0 0 var(--space-sm); }
+.contact-block__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+.contact-block__link:hover { color: var(--color-primary-hover); text-decoration: underline; }
+.contact-block__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.contact-block__lead { margin: 0 0 var(--space-xs); }
 
 /* Explainer-video section (landing) */
 .explainer-section__grid {
@@ -1653,19 +1829,8 @@
 .greeting-strip__draft { color: var(--color-text-muted); }
 .greeting-strip__draft a { color: var(--color-link); }
 
-/* Highlight variant for the priority quick-card (e.g. "Bedarf anmelden"
+/* Highlight variant for the priority card--quick (e.g. "Bedarf anmelden"
    on the auth home). 4 px red left rail, same shadow rhythm. */
-.quick-card--highlight {
-  padding-left: calc(var(--space-xl) + 6px);
-}
-.quick-card--highlight::before {
-  content: '';
-  position: absolute;
-  left: 0; top: var(--space-md); bottom: var(--space-md);
-  width: 4px;
-  background: var(--color-primary);
-  border-radius: 2px;
-}
 
 /* Authenticated home hero — single primary CTA + companion image
    (replaces the previous hero-cta split with role card) */
@@ -1675,7 +1840,7 @@
   gap: var(--space-xl);
   align-items: center;
   padding: var(--space-2xl);
-  background: linear-gradient(135deg, #fff 0%, var(--color-bg-surface) 100%);
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-bg-surface) 100%);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
 }
@@ -1722,7 +1887,7 @@
   .hero-cta { grid-template-columns: 1fr 320px; }
 }
 .hero-cta__primary {
-  background: linear-gradient(135deg, #fff 0%, #FAE1E2 100%);
+  background: linear-gradient(135deg, var(--color-white) 0%, #FAE1E2 100%);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
@@ -1737,7 +1902,7 @@
 }
 .hero-cta__primary .btn { font-size: var(--text-body); }
 .hero-cta__secondary {
-  background: #fff;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
@@ -1807,11 +1972,11 @@
 }
 
 /* News tile metadata triplet — content items only (FUNC-LP-009 v0.5) */
-.content-card {
+.card--content {
   border-left: 4px solid var(--color-info);
   padding-left: var(--space-md);
 }
-.content-card__meta {
+.card--content__meta {
   font-size: var(--text-body-xs);
   color: var(--color-text-secondary);
   margin-top: var(--space-sm);
@@ -1821,7 +1986,7 @@
 
 /* Wizard layout */
 .wizard {
-  background: #fff;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
@@ -1889,7 +2054,7 @@
 
 /* Calculation block */
 .calc-block {
-  background: #fff;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-md);
@@ -1921,7 +2086,7 @@
 
 /* NAW confidence indicator */
 .naw-confidence {
-  background: #fff;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-md);
@@ -1950,7 +2115,7 @@
   .reviewer-split { grid-template-columns: 1.4fr 1fr; }
 }
 .reviewer-marks {
-  background: #fff;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
@@ -1973,13 +2138,13 @@
 .mark-button {
   padding: 2px 8px;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-white);
   border-radius: var(--radius);
   font-size: var(--text-body-xs);
   cursor: pointer;
 }
-.mark-button--active-ok { background: var(--color-success); color: #fff; border-color: var(--color-success); }
-.mark-button--active-nok { background: var(--color-danger); color: #fff; border-color: var(--color-danger); }
+.mark-button--active-ok { background: var(--color-success); color: var(--color-white); border-color: var(--color-success); }
+.mark-button--active-nok { background: var(--color-danger); color: var(--color-white); border-color: var(--color-danger); }
 .mark-button--active-comment { background: var(--color-warning); color: var(--color-gray-900); border-color: var(--color-warning); }
 
 /* Application detail tabs */
@@ -2075,7 +2240,7 @@
 }
 .queue-stats--open .queue-stats__body { display: grid; }
 .queue-stats__tile {
-  background: #fff;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-md);
@@ -2185,8 +2350,8 @@
 .news-section__more span { transition: transform var(--transition-fast); display: inline-block; margin-left: var(--space-xs); }
 .news-section__more:hover span { transform: translateX(4px); }
 
-/* News card variant: minor tweaks to .profile-card to fit the news context */
-.news-card .profile-card__date strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+/* News card variant: minor tweaks to .card--profile to fit the news context */
+.news-card .card--profile__date strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
 
 /* ── NEWS-ÜBERSICHT LIST PAGE (swisstopo News-Übersicht pattern) ────────── */
 .news-list {
@@ -2247,10 +2412,10 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-lg);
 }
-.property-card {
+.card--property {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--color-white);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -2258,42 +2423,42 @@
   color: inherit;
   transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
-.property-card:hover {
+.card--property:hover {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
-.property-card:hover .property-card__title { color: var(--color-primary); }
-.property-card__image {
+.card--property:hover .card--property__title { color: var(--color-primary); }
+.card--property__image {
   height: 180px;
   background-size: cover;
   background-position: center;
   background-color: var(--color-bg-alt);
 }
-.property-card__body {
+.card--property__body {
   padding: var(--space-md) var(--space-lg) var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
   flex: 1;
 }
-.property-card__sap {
+.card--property__sap {
   margin: 0;
   font-family: var(--font-family-mono);
   font-size: var(--text-body-xs);
   color: var(--color-text-muted);
 }
-.property-card__title {
+.card--property__title {
   margin: 0;
   font-size: var(--text-h4);
   font-weight: var(--font-weight-bold);
   transition: color var(--transition-fast);
 }
-.property-card__address {
+.card--property__address {
   margin: 0;
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
-.property-card__meta {
+.card--property__meta {
   display: flex;
   gap: var(--space-md);
   flex-wrap: wrap;
@@ -2301,7 +2466,7 @@
   color: var(--color-text-secondary);
   margin-top: var(--space-sm);
 }
-.property-card__footer {
+.card--property__footer {
   margin-top: auto;
   padding-top: var(--space-md);
   border-top: 1px solid var(--color-border-light);
@@ -2323,7 +2488,7 @@
   .property-aside { position: sticky; top: var(--space-md); }
 }
 
-/* Attachments list */
+/* Attachments list — used in wizard attachments, drafts. Compact single-row. */
 .attachment-list {
   list-style: none;
   padding: 0;
@@ -2342,4 +2507,70 @@
   margin-left: auto;
   font-size: var(--text-body-xs);
   color: var(--color-text-secondary);
+}
+
+/* Download list — federal CD pattern (cf. kbob.admin.ch and ar.admin.ch/de/immo-portal).
+   Each row: red down-arrow icon · stacked (title + optional subtitle + meta strip).
+   Whole row clickable. No badges. Metadata is "format | size | date" with the pipe
+   character as a visual separator. */
+.download-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.download-list__item {
+  border-bottom: 1px solid var(--color-border-light);
+}
+.download-list__item:last-child { border-bottom: none; }
+.download-list__link {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  column-gap: var(--space-md);
+  align-items: start;
+  padding: var(--space-md) 0;
+  text-decoration: none;
+  color: inherit;
+}
+.download-list__link:hover { color: var(--color-primary); text-decoration: none; }
+.download-list__link:hover .download-list__title { color: var(--color-primary); }
+.download-list__icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.download-list__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+.download-list__title {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  font-size: var(--text-body);
+  line-height: var(--line-height-snug);
+  margin: 0;
+  transition: color var(--transition-fast);
+}
+.download-list__subtitle {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-snug);
+}
+.download-list__meta {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin: var(--space-xs) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-md);
+}
+.download-list__meta > span { display: inline-flex; align-items: center; }
+.download-list__meta > span + span::before {
+  content: '|';
+  margin-right: var(--space-md);
+  color: var(--color-border);
 }

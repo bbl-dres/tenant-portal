@@ -309,7 +309,15 @@
                 <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
                 <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
                 <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              </ul>
+            </div>
+
+            <div class="footer-information__col footer-information__col--links">
+              <h3 class="footer-information__heading">Prototyp</h3>
+              <ul class="footer-information__list">
                 <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="docs/REQUIREMENTS.md" target="_blank">Anforderungskatalog <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+                <li><a href="docs/DESIGNGUIDE.md" target="_blank">Design-Guide <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
               </ul>
             </div>
 
@@ -392,15 +400,36 @@
     `;
   }
 
+  // Step indicator — mirrors designsystem css/components/step-indicator.postcss:
+  // 36px circles, gray-400 outline → bg-gray-400 active → bg-green-500 confirmed.
+  // Connectors between dots make the progression readable on wide screens.
   function renderStepIndicator(currentStep, steps) {
+    const lastIdx = steps.length - 1;
     return `
       <ol class="step-indicator" aria-label="Schritt-Anzeige">
         ${steps.map((label, i) => {
           const n = i + 1;
-          const cls = n < currentStep ? 'step-indicator__item--done' :
-                      n === currentStep ? 'step-indicator__item--active' : '';
-          const glyph = n < currentStep ? '✓' : '';
-          return `<li class="step-indicator__item ${cls}">${glyph} ${n}. ${label}</li>`;
+          const confirmed = n < currentStep;
+          const active = n === currentStep;
+          const stepCls = confirmed
+            ? 'step-indicator__step step-indicator__step--confirmed'
+            : active
+              ? 'step-indicator__step step-indicator__step--active'
+              : 'step-indicator__step';
+          const dotInner = confirmed
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
+            : String(n);
+          const connector = i < lastIdx
+            ? `<span class="step-indicator__connector ${confirmed ? 'step-indicator__connector--confirmed' : ''}" aria-hidden="true"></span>`
+            : '';
+          const ariaCurrent = active ? ' aria-current="step"' : '';
+          return `
+            <li class="step-indicator__item"${ariaCurrent}>
+              <span class="${stepCls}">${dotInner}</span>
+              <span class="step-indicator__label">${label}</span>
+              ${connector}
+            </li>
+          `;
         }).join('')}
       </ol>
     `;
@@ -638,19 +667,35 @@
   // ── BADGE / CARD UTILITIES ───────────────────────────────────────────────
   function statusBadge(status) {
     const map = {
-      'entwurf': { cls: 'badge', label: '◯ Entwurf' },
-      'eingereicht': { cls: 'badge badge--info', label: '● Eingereicht' },
-      'in_gs_pruefung': { cls: 'badge badge--warning', label: '◐ in GS-Prüfung' },
-      'in_pfm_pruefung': { cls: 'badge badge--warning', label: '◐ in PFM-Prüfung' },
-      'genehmigt': { cls: 'badge badge--success', label: '✓ genehmigt' },
-      'in_eppm': { cls: 'badge badge--info', label: '→ in ePPM' },
-      'abgeschlossen': { cls: 'badge badge--success', label: '✓ abgeschlossen' },
-      'rueckfrage': { cls: 'badge badge--orange', label: '↻ Rückfrage' },
-      'abgelehnt': { cls: 'badge badge--danger', label: '✕ abgelehnt' },
+      'entwurf':         { cls: 'badge',                  label: 'Entwurf' },
+      'eingereicht':     { cls: 'badge badge--info',      label: 'Eingereicht' },
+      'in_gs_pruefung':  { cls: 'badge badge--warning',   label: 'in GS-Prüfung' },
+      'in_pfm_pruefung': { cls: 'badge badge--warning',   label: 'in PFM-Prüfung' },
+      'genehmigt':       { cls: 'badge badge--success',   label: 'genehmigt' },
+      'in_eppm':         { cls: 'badge badge--info',      label: 'in ePPM' },
+      'abgeschlossen':   { cls: 'badge badge--success',   label: 'abgeschlossen' },
+      'rueckfrage':      { cls: 'badge badge--orange',    label: 'Rückfrage' },
+      'abgelehnt':       { cls: 'badge badge--danger',    label: 'abgelehnt' },
     };
     const b = map[status] || { cls: 'badge', label: status };
     return `<span class="${b.cls}">${b.label}</span>`;
   }
+
+  // Inline-SVG icon set. Single source for the small handful of icons used
+  // across views — replaces ad-hoc emoji glyphs (📄/🎥/📎/🛠/…) so the UI
+  // doesn't depend on the user's emoji font for visual chrome.
+  const ICONS = {
+    document:   '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    video:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
+    attachment: '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 12-8.5 8.5a5 5 0 0 1-7-7L14 5a3.5 3.5 0 1 1 5 5l-8.5 8.5a2 2 0 0 1-3-3l7.5-7.5"/></svg>',
+    shield:     '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    ruler:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0L2.7 16.7a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/></svg>',
+    tool:       '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg>',
+    truck:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+    sparkles:   '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 1.7L12 19l-1.9-6.3L4 11l6.1-2.2z"/></svg>',
+    download:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  };
+  function icon(name) { return ICONS[name] || ''; }
 
   function formatChf(n) {
     return 'CHF ' + n.toLocaleString('de-CH');
@@ -819,7 +864,7 @@
     toast, modal, toggleSearch, toggleNavMenu, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
     openRoleMenu, login, logout,
     statusBadge, statusKey,
-    formatChf, formatDate, escapeHtml, escapeJs, roleLabel,
+    formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
     PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
   };
 
@@ -902,7 +947,6 @@
       ${P.renderShareBar()}
       <section class="section">
         <div class="container" style="max-width: 960px;">
-          <p class="section-eyebrow">Suche</p>
           <h1 class="section-heading">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
           ${!query ? `
             <p style="color: var(--color-text-secondary);">Bitte geben Sie einen Suchbegriff in der Suchleiste oben ein.</p>
@@ -986,10 +1030,10 @@
     { id: 'faq',           label: 'Häufige Fragen' },
     { id: 'workflow',      label: 'Workflow erklärt' },
     { id: 'naw',           label: 'NAW & Bürowelten' },
-    { id: 'merkblaetter',  label: 'Merkblätter & Vorlagen' },
-    { id: 'schulungen',    label: 'Schulungen & Erklärvideos' },
-    { id: 'glossar',       label: 'Glossar' },
-    { id: 'kontakt',       label: 'Kontakt & weitere Quellen' },
+    { id: 'verordnungen',  label: 'Verordnungen, Weisungen und Vorgaben' },
+    { id: 'strategien',    label: 'Strategien und Konzepte' },
+    { id: 'schulungen',    label: 'Schulungen' },
+    { id: 'kontakt',       label: 'Kontakt' },
   ];
 
   function renderInfoPage() {
@@ -1003,7 +1047,7 @@
       <section class="section">
         <div class="container">
           <header style="max-width: 60ch; margin-bottom: var(--space-2xl);">
-            <p class="section-eyebrow">Öffentlich · kein Login nötig</p>
+            <p class="meta-info">Öffentlich · kein Login nötig</p>
             <h1 style="font-size: var(--text-display); letter-spacing: -0.02em; margin: 0 0 var(--space-md);">Arbeitsinstrumente und Informationen</h1>
             <p style="color: var(--color-text-secondary); font-size: var(--text-body); line-height: var(--line-height-relaxed); margin: 0;">
               Erklärungen, Merkblätter, Vorlagen und Schulungsmaterial rund um das Mieterportal des BBL. Diese Inhalte sind öffentlich zugänglich und unterstützen Sie dabei, Anfragen vorzubereiten oder den BBL-Workflow zu verstehen.
@@ -1015,18 +1059,20 @@
 
               <article id="einfuehrung">
                 <h2>Einführung</h2>
-                <p>Das BBL (Bundesamt für Bauten und Logistik) bewirtschaftet rund 2'700 Bundesimmobilien für die gesamte Bundesverwaltung — von Büroflächen in Bundeshäusern über Empfangszentren des SEM bis zu Auslandvertretungen der EDA. Das Mieterportal ist die zentrale digitale Anlaufstelle für Bundes-Mietende: Bedarfsmeldung, Schadensmeldung, Statusverfolgung und Dokumentenzugriff.</p>
-                <p>Diese Sammlung enthält die wichtigsten Hintergrundinformationen — bewusst öffentlich, damit Sie sich vor der Anmeldung vorbereiten oder Konzepte nachschlagen können. Für die eigentlichen Anfragen ist eine Anmeldung über eIAM erforderlich.</p>
+                <p>Das Bundesamt für Bauten und Logistik (BBL) bewirtschaftet als Eigentümervertretung rund 2'800 Liegenschaften der zivilen Bundesverwaltung — überwiegend Büroflächen in Bundeshäusern und Departementssitzen, dazu spezialisierte Objekte wie die Empfangs- und Verfahrenszentren des SEM. Die Liegenschaften des VBS (armasuisse Immobilien) und die Auslandvertretungen der EDA sind nicht Teil des BBL-Portfolios.</p>
+                <p>Das Mieterportal ist die zentrale digitale Anlaufstelle für die Verwaltungseinheiten als Mietende: Bedarfsmeldung, Schadensmeldung, Statusverfolgung und Zugriff auf Dokumente zu Ihren Liegenschaften. Die hier zusammengetragenen Informationen sind öffentlich zugänglich; für eigentliche Anträge ist eine Anmeldung mit dem föderalen eIAM-Konto erforderlich.</p>
               </article>
 
               <article id="faq">
                 <h2>Häufige Fragen</h2>
                 <div class="accordion">
-                  ${faqItem('Wer kann das Mieterportal nutzen?', 'Logistikbeauftragte (ILBO) und weitere zuständige Personen der Verwaltungseinheiten des Bundes. Die Anmeldung erfolgt mit dem föderalen eIAM-Konto.')}
-                  ${faqItem('Was bedeutet NAW?', 'NAW steht für „Neue Arbeitswelten" — eine föderale Klassifizierung von Büro-Arbeitsstilen (Konzentriert, Kollaborativ, Hybrid, Labor). Die Klasse bestimmt die m²/FTE-Basis für die Flächenberechnung.')}
-                  ${faqItem('Wer prüft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihrer Verwaltungseinheit. Ausnahme: die Bundeskanzlei (BK) hat kein GS — ihre Anträge gehen direkt an BBL Portfolio-Management.')}
-                  ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die von Ihnen angegebene Adresse noch nicht im SAP-Stammdatensatz registriert ist (z. B. eine neue Auslandvertretung), aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem angenommen — BBL legt die WE später an.')}
-                  ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeiten variieren je nach Antragstyp und beteiligten Stellen. Konkrete SLAs werden mit Ihrem GS vereinbart und im Antragsdetail angezeigt.')}
+                  ${faqItem('Wer kann das Mieterportal nutzen?', 'Hauptnutzergruppe sind die Logistikbeauftragten (LBO) der Verwaltungseinheiten der zivilen Bundesverwaltung. Daneben haben Generalsekretariate (GS) sowie das Portfolio-Management des BBL Zugriff auf die jeweils zuständigen Sichten. Die Anmeldung erfolgt mit dem föderalen eIAM-Konto.')}
+                  ${faqItem('Was bedeutet NAW?', 'NAW steht für „Neue Arbeitswelten" — die föderale Vorgabe für die Klassifizierung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; zusammen mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie die HNF2 und die Geschossfläche.')}
+                  ${faqItem('Wer prüft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihres Departements. Die Bundeskanzlei nimmt selbst Generalsekretariats-Funktion wahr — Anträge aus der BK gehen daher ohne zusätzliche GS-Prüfung direkt an das BBL Portfolio-Management.')}
+                  ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die angegebene Adresse noch nicht im SAP RE-FX-Stammdatensatz registriert ist — etwa weil ein Neubau- oder Anmietungsprojekt gerade erst geplant wird — aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem entgegengenommen; BBL legt die Wirtschaftseinheit (WE) im weiteren Verlauf an.')}
+                  ${faqItem('Wie geht es nach der Genehmigung weiter?', 'Genehmigte Bedarfsmeldungen werden automatisch an SAP ePPM übergeben, wo die zugehörige Projektakte mit einer Bedarfsmeldungs-Nummer eröffnet wird. Sie erhalten eine Eingangsbestätigung sowie die ePPM-Nummer als Referenz für die weitere Korrespondenz.')}
+                  ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeit hängt vom Antragstyp ab. Kleinanträge (z. B. punktuelle Anpassungen, Mobiliarbestellungen) werden in der Regel innerhalb von 10 Arbeitstagen entschieden, Grossanträge mit Projekteröffnung benötigen mehrere Wochen. Die konkrete Frist sehen Sie im Antragsdetail.')}
+                  ${faqItem('Wer ist während der Bauphase mein Ansprechpartner?', 'Sobald der Antrag in ePPM überführt ist, übernimmt der BBL-Bauherrenvertretung / -Projektmanagement die Leitung. Im Portal sehen Sie die zuständige Kontaktperson in der Antragsdetail-Sicht. Die LBO bleibt während der gesamten Laufzeit die mieterseitige Anlaufstelle.')}
                 </div>
               </article>
 
@@ -1034,12 +1080,16 @@
                 <h2>Workflow erklärt</h2>
                 <p>Eine Bedarfsmeldung durchläuft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
                 <ol style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
-                  <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Auto-Save alle 30 Sekunden.</li>
-                  <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat Ihrer VE prüft Feld für Feld; Rückfragen können einzelne Felder betreffen.</li>
-                  <li><strong>Genehmigt → in ePPM</strong> — Die genehmigte Meldung wird als Bedarfsmeldung an SAP ePPM übergeben. Sie erhalten eine Bedarfsmeldungsnummer.</li>
-                  <li><strong>Abgeschlossen</strong> — Die Akte ist vollständig dokumentiert und im Audit-Log auffindbar.</li>
+                  <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Eingaben werden automatisch zwischengespeichert; Sie können jederzeit unterbrechen und später weiterarbeiten.</li>
+                  <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat Ihres Departements prüft die Angaben feldweise auf Vollständigkeit und Plausibilität. Rückfragen können einzelne Felder betreffen; Sie erhalten in diesem Fall einen kommentierten Auflagenkatalog zur Nachbearbeitung.</li>
+                  <li><strong>Genehmigt → in ePPM</strong> — Die freigegebene Meldung wird automatisch an SAP ePPM (Enterprise Portfolio &amp; Project Management) übergeben. Dort eröffnet das BBL-Portfolio-Management die Projektakte und vergibt eine Bedarfsmeldungs-Nummer, die als zukünftige Referenz dient.</li>
+                  <li><strong>Abgeschlossen</strong> — Nach Umsetzung und Übergabe an die Mietenden gilt die Akte als abgeschlossen. Die Historie bleibt im Mieterportal abrufbar und ist gemäss BBL-Aktenführung archiviert.</li>
                 </ol>
-                <p>Spezialfälle: <strong>BK-Bypass</strong> überspringt den GS-Schritt (FUNC-FG-005), <strong>Greenfield</strong> ergänzt einen Schritt „WE-Anlage durch BBL" vor der ePPM-Übergabe.</p>
+                <p>Zwei Spezialfälle:</p>
+                <ul style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
+                  <li><strong>Bundeskanzlei-Pfad</strong> — Anträge der Bundeskanzlei werden ohne separate GS-Prüfung direkt dem BBL Portfolio-Management vorgelegt.</li>
+                  <li><strong>Greenfield-Pfad</strong> — Wenn das Objekt noch keinen SAP RE-FX-Eintrag hat, ergänzt BBL vor der ePPM-Übergabe einen zusätzlichen Schritt „Wirtschaftseinheit anlegen".</li>
+                </ul>
               </article>
 
               <article id="naw">
@@ -1060,58 +1110,119 @@
                 </table>
               </article>
 
-              <article id="merkblaetter">
-                <h2>Merkblätter & Vorlagen</h2>
-                <p>Öffentlich zugängliche Dokumente, die Sie vor oder während der Bedarfsmeldung nutzen können:</p>
-                <ul class="attachment-list">
-                  <li>📄 Anleitung „Antrag richtig stellen" <span class="badge badge--success">🟢 verifiziert</span> <span class="meta">PDF · 320 KB · DE/FR/IT · Stand 11.05.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                  <li>📄 Checkliste vor der Bedarfsmeldung <span class="badge badge--success">🟢 verifiziert</span> <span class="meta">PDF · 180 KB · DE/FR · Stand 02.05.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                  <li>📄 Vorlage SEM-Bedarfsmeldung <span class="badge badge--info">SEM</span> <span class="meta">DOCX · 240 KB · DE/FR · Stand 17.05.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                  <li>📄 EDA-Raumprogramm-Formular <span class="badge badge--info">EDA</span> <span class="meta">PDF · 410 KB · DE/FR · Stand 22.04.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                  <li>📄 NAW-Klassifizierung Übersicht <span class="meta">PDF · 290 KB · DE · Stand 10.01.2026 · <a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                </ul>
+              <article id="verordnungen">
+                <h2>Verordnungen, Weisungen und Vorgaben</h2>
+                <p>Rechtsgrundlagen und föderale Vorgaben, die für die Bewirtschaftung von Bundes-Immobilien und die Einreichung von Bedarfsmeldungen massgebend sind.</p>
+                ${downloadList([
+                  { title: 'Verordnung über das Immobilienmanagement und die Logistik des Bundes (VILB)', subtitle: 'SR 172.010.21',                      format: 'PDF', size: '210 KB', date: '01.01.2025' },
+                  { title: 'Weisung über das Immobilienmanagement der zivilen Bundesverwaltung (WILB)',   subtitle: 'EFD-Weisung',                         format: 'PDF', size: '180 KB', date: '01.04.2024' },
+                  { title: 'Verordnung über das öffentliche Beschaffungswesen (VöB)',                    subtitle: 'SR 172.056.11 · Auszug Immobilien',  format: 'PDF', size: '320 KB', date: '01.01.2024' },
+                  { title: 'Architekturkonzept Bund',                                                     subtitle: 'BBL Vorgabe für Neu- und Umbauten',  format: 'PDF', size: '4.1 MB', date: '15.05.2024' },
+                  { title: 'Vorgaben Bürobeschaffung & Arbeitsplatzstandards',                            subtitle: 'Anhang zur WILB',                     format: 'PDF', size: '290 KB', date: '12.02.2025' },
+                ])}
+              </article>
+
+              <article id="strategien">
+                <h2>Strategien und Konzepte</h2>
+                <p>Übergeordnete Strategien des BBL und des Bundes, die das Mieterportal und die zugrunde liegenden Flächenentscheide prägen.</p>
+                ${downloadList([
+                  { title: 'Immobilienstrategie der zivilen Bundesverwaltung 2030',         subtitle: 'BBL Portfolio-Management',                  format: 'PDF', size: '2.3 MB', date: '20.11.2023' },
+                  { title: 'Nachhaltigkeitsstrategie Bundesimmobilien',                     subtitle: 'Klima, Energie, Kreislaufwirtschaft',       format: 'PDF', size: '1.8 MB', date: '03.07.2024' },
+                  { title: 'Vorbildwirkung Energie und Klima — Aktionsplan Bund',           subtitle: 'EFD / BFE',                                  format: 'PDF', size: '950 KB', date: '15.01.2025' },
+                  { title: 'Konzept «Neue Arbeitswelten» (NAW)',                            subtitle: 'Bürowelten, Desk-Sharing, Flächenkennzahlen', format: 'PDF', size: '1.4 MB', date: '06.09.2024' },
+                  { title: 'Digitalisierungsstrategie BBL',                                  subtitle: 'Stossrichtungen 2024–2028',                  format: 'PDF', size: '780 KB', date: '28.03.2024' },
+                ])}
+                <p style="margin-top: var(--space-md); color: var(--color-text-secondary); font-size: var(--text-body-sm);">
+                  <strong>Hinweis:</strong> Formulare und Checklisten zur Bedarfsmeldung werden direkt im Mieterportal geführt
+                  (5-Schritte-Wizard, Wirtschaftlichkeitsbetrachtung, Anhänge-Management) — es ist kein Download von Vorlagen mehr nötig.
+                </p>
               </article>
 
               <article id="schulungen">
-                <h2>Schulungen & Erklärvideos</h2>
-                <p>Der BBL bietet regelmässige Schulungen für Bundes-Mietende. Aufzeichnungen ergänzen den Hybrid-Modus.</p>
-                <ul style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
-                  <li><strong>Mieterportal kompakt</strong> (60 Min., DE/FR) — Einstieg in das Portal, geeignet für neue Logistikbeauftragte. Nächste Termine: 03.06., 17.06., 02.07.2026.</li>
-                  <li><strong>Bedarf richtig erfassen</strong> (Aufbaukurs, 90 Min., DE) — Vertiefung NAW-Klassifizierung, FUNC-AU-019-Felder, Anhänge-Management. Termin: 11.06.2026.</li>
-                  <li><strong>SEM-Spezialschulung</strong> (45 Min., DE/FR) — Bettenplatz-Logik, Verfahrensräume, Pauschalansatz. Termin: 25.06.2026.</li>
-                </ul>
-                <p style="margin-top: var(--space-md);">Anmeldung über die <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">BBL-Geschäftsstelle</a>.</p>
+                <h2>Ausbildung</h2>
+                <p>Hier finden Sie aktuelle Informationen zu den Ausbildungen rund um das Mieterportal des BBL. Logistikbeauftragte und weitere am Bedarfsprozess beteiligte Personen werden stufengerecht geschult und damit befähigt, ihre Rolle effizient wahrzunehmen.</p>
+
+                <h3 style="margin-top: var(--space-xl);">Anmeldungen Ausbildung Mieterportal</h3>
+                <div class="accordion" style="margin-bottom: var(--space-xl);">
+                  <div class="accordion__item accordion__item--open">
+                    <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+                      <span>Für Ausbildungen anmelden</span>
+                      <span class="accordion__icon" aria-hidden="true"></span>
+                    </button>
+                    <div class="accordion__panel">
+                      <ul class="link-list">
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Grundausbildung Mieterportal BBL</a></li>
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Bedarfserfassung & NAW-Klassifizierung</a></li>
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Greenfield- und Auslandfälle</a></li>
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Reviewer GS / BBL-PFM</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="accordion__item">
+                    <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+                      <span>Lernvideos</span>
+                      <span class="accordion__icon" aria-hidden="true"></span>
+                    </button>
+                    <div class="accordion__panel">
+                      <ul class="link-list">
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Mieterportal in fünf Minuten — Überblick</a></li>
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Bedarfsmeldung Schritt für Schritt</a></li>
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">NAW-Klassifizierung erklärt</a></li>
+                        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Greenfield-Pfad und Stammdatenanlage</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <h3>Ausbildungsunterlagen</h3>
+                ${downloadList([
+                  { title: 'Modul 1 — Einleitung',                       subtitle: 'Mieterportal BBL', format: 'PDF', size: '540 KB', date: '15.04.2026' },
+                  { title: 'Modul 2 — Rollen und Verantwortlichkeiten',  subtitle: 'Mieterportal BBL', format: 'PDF', size: '1.4 MB', date: '15.04.2026' },
+                  { title: 'Modul 3 — Bedarfsmeldung erfassen',          subtitle: 'Mieterportal BBL', format: 'PDF', size: '2.1 MB', date: '15.04.2026' },
+                  { title: 'Modul 4 — NAW und Flächenstandards',         subtitle: 'Mieterportal BBL', format: 'PDF', size: '1.1 MB', date: '15.04.2026' },
+                  { title: 'Modul 5 — Greenfield, BK-Bypass und SEM',    subtitle: 'Mieterportal BBL', format: 'PDF', size: '230 KB', date: '15.04.2026' },
+                ])}
               </article>
 
-              <article id="glossar">
-                <h2>Glossar</h2>
-                <dl class="glossary">
-                  <dt>BBL</dt><dd>Bundesamt für Bauten und Logistik.</dd>
-                  <dt>BK</dt><dd>Buchungskreis — buchhalterische Organisation. BBL hat den Buchungskreis 1086; jede Immobilie im BBL-Portfolio trägt diesen BK.</dd>
-                  <dt>Bundeskanzlei (BK)</dt><dd>Stabsstelle des Bundesrates. Hat keine Generalsekretariate — Anträge der BK gehen daher direkt an BBL-PFM (FUNC-FG-005).</dd>
-                  <dt>eIAM</dt><dd>Föderales Identity & Access Management — Einmal-Anmeldung der Bundesverwaltung. Ab Dezember 2026 schrittweise Umstellung auf AGOV / E-ID.</dd>
-                  <dt>ePPM</dt><dd>SAP Enterprise Portfolio & Project Management — föderales Projektportfoliosystem von BBL.</dd>
-                  <dt>FLM</dt><dd>Flächenmanagement.</dd>
-                  <dt>GS</dt><dd>Generalsekretariat einer Verwaltungseinheit. Prüft Bedarfsmeldungen vor der Übergabe an BBL.</dd>
-                  <dt>ILBO</dt><dd>Logistikbeauftragte/r — Rolle in einer Verwaltungseinheit, die Bedarf erfasst und Liegenschaftsfragen koordiniert.</dd>
-                  <dt>NAW</dt><dd>Neue Arbeitswelten — Klassifizierung von Bürowelten, treibt die m²/FTE-Berechnung.</dd>
-                  <dt>PFM</dt><dd>Portfolio-Management (bei BBL).</dd>
-                  <dt>SEM</dt><dd>Staatssekretariat für Migration — eine VE mit spezialisierten Empfangszentren.</dd>
-                  <dt>VE</dt><dd>Verwaltungseinheit — Bundesamt, Sekretariat oder Departement.</dd>
-                  <dt>WE</dt><dd>Wirtschaftseinheit — SAP RE-FX-Objekt-Schlüssel im Format BK/WE/Obj, z.B. 1086/2010/AA.</dd>
-                </dl>
-              </article>
-
-              <article id="kontakt">
-                <h2>Kontakt & weitere Quellen</h2>
-                <p>Für Fragen, die diese Sammlung nicht beantwortet:</p>
-                <ul style="line-height: var(--line-height-relaxed); padding-left: var(--space-lg);">
-                  <li><strong>BBL Geschäftsstelle</strong> — <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">bbl.admin.ch/de/kontakt ↗</a></li>
-                  <li><strong>BIT IT-Support</strong> (technische Fragen zum eIAM-Zugang) — service-desk@bit.admin.ch</li>
-                  <li><strong>Anforderungskatalog des Prototyps</strong> — <a href="docs/REQUIREMENTS.md" target="_blank">REQUIREMENTS.md ↗</a></li>
-                  <li><strong>Wireframes & Design-Studien</strong> — <a href="docs/WIREFRAMES.md" target="_blank">WIREFRAMES.md ↗</a></li>
-                  <li><strong>Quellcode</strong> — <a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">github.com/bbl-dres/tenant-portal ↗</a></li>
-                </ul>
+<article id="kontakt">
+                <h2>BBL Bundesamt für Bauten und Logistik</h2>
+                <div class="contact-block">
+                  <div class="contact-block__col">
+                    <p class="contact-block__address">
+                      Fellerstrasse 21<br>
+                      CH-3003 Bern
+                    </p>
+                    <p class="contact-block__row">
+                      <a class="contact-block__link" href="tel:+41584655000">
+                        <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        +41 58 465 50 00
+                      </a>
+                    </p>
+                    <p class="contact-block__row">
+                      <a class="contact-block__link" href="mailto:info@bbl.admin.ch">
+                        <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        info@bbl.admin.ch
+                      </a>
+                    </p>
+                    <p class="contact-block__row">
+                      <a class="contact-block__link" href="https://www.bbl.admin.ch" target="_blank" rel="noopener">
+                        <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        www.bbl.admin.ch
+                      </a>
+                    </p>
+                  </div>
+                  <div class="contact-block__col">
+                    <p class="contact-block__lead"><strong>Geschäftsstelle Portfolio-Management</strong></p>
+                    <p style="color: var(--color-text-secondary); font-size: var(--text-body-sm); margin: 0 0 var(--space-md);">
+                      Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
+                      Bei dringenden technischen Problemen mit dem eIAM-Zugang wenden Sie sich an den BIT IT-Support.
+                    </p>
+                    <p class="contact-block__lead"><strong>BIT IT-Support — eIAM</strong></p>
+                    <p style="color: var(--color-text-secondary); font-size: var(--text-body-sm); margin: 0;">
+                      <a href="mailto:service-desk@bit.admin.ch">service-desk@bit.admin.ch</a>
+                    </p>
+                  </div>
+                </div>
               </article>
 
             </main>
@@ -1219,14 +1330,14 @@
 
   function newsCard(n) {
     return `
-      <a class="profile-card news-card" href="#/news/${n.id}">
-        <div class="profile-card__image" style="background-image:url('${n.image}');"></div>
-        <div class="profile-card__body">
-          <p class="profile-card__date"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
-          <h3 class="profile-card__title">${P.escapeHtml(n.title)}</h3>
-          <p class="profile-card__desc">${P.escapeHtml(n.lead.length > 160 ? n.lead.slice(0, 157) + '…' : n.lead)}</p>
+      <a class="card--profile news-card" href="#/news/${n.id}">
+        <div class="card--profile__image" style="background-image:url('${n.image}');"></div>
+        <div class="card--profile__body">
+          <p class="card--profile__date"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
+          <h3 class="card--profile__title">${P.escapeHtml(n.title)}</h3>
+          <p class="card--profile__desc">${P.escapeHtml(n.lead.length > 160 ? n.lead.slice(0, 157) + '…' : n.lead)}</p>
         </div>
-        ${arrowBtn('profile-card__arrow')}
+        ${arrowBtn('card--profile__arrow')}
       </a>
     `;
   }
@@ -1369,7 +1480,6 @@
       <section class="hero hero--wide hero--split">
         <div class="hero__inner hero__inner--split">
           <div>
-            <div class="hero__eyebrow">Mieterportal BBL</div>
             <h1 class="hero__title">Bedarf anmelden, Status verfolgen, Dokumente herunterladen.</h1>
             <p class="hero__lead">
               Die zentrale Anlaufstelle für Bundes-Mietende — Bürofläche, Empfangs­zentren, Auslandvertretungen.
@@ -1402,7 +1512,6 @@
         <div class="container">
           <div class="explainer-section__grid">
             <div class="explainer-section__copy">
-              <p class="section-eyebrow">Erklärvideo</p>
               <h2 class="section-heading" id="explainerTitle">Mieterportal in 90 Sekunden</h2>
               <p style="color: var(--color-text-secondary); font-size: var(--text-body); line-height: var(--line-height-relaxed); margin: 0 0 var(--space-lg);">
                 Bedarfsmeldung, Statusverfolgung, Pläne und Dokumente — alles an einem Ort.
@@ -1495,46 +1604,45 @@
               : `Sie haben derzeit keine offenen Anliegen.`}
             ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
           </p>
-          <p class="section-eyebrow">Übersicht</p>
           <h1 class="section-heading">Häufig genutzte Dienste</h1>
           <p style="max-width: 60ch; color: var(--color-text-secondary); margin: 0 0 var(--space-2xl);">
             Anfragen, die Bundes-Mietende über das Mieterportal direkt an das BBL stellen können.
           </p>
           <div class="card-grid">
-            <a href="#/wizard/1" class="quick-card quick-card--highlight">
-              <p class="quick-card__title">Bedarf anmelden</p>
-              <p class="quick-card__desc">Unterbringung, Bürofläche oder Auslandvertretung erfassen. Geführter Ablauf in fünf Schritten mit NAW-Klassifizierung und Übergabe an SAP ePPM.</p>
-              <p class="quick-card__meta"><span>FUNC-AU-*</span></p>
+            <a href="#/wizard/1" class="card--quick">
+              <p class="card--quick__title">Bedarf anmelden</p>
+              <p class="card--quick__desc">Unterbringung, Bürofläche oder Auslandvertretung erfassen. Geführter Ablauf in fünf Schritten mit NAW-Klassifizierung und Übergabe an SAP ePPM.</p>
+              <p class="card--quick__meta"><span>FUNC-AU-*</span></p>
               ${arrowBtn()}
             </a>
-            <a href="#/repair" class="quick-card">
-              <p class="quick-card__title">Schaden melden</p>
-              <p class="quick-card__desc">Defekte Heizung, Wasserschaden, Beleuchtung oder Schliesssystem? Schnellmeldung an BBL-IM, koordiniert mit Ihrem zuständigen Immobilien-Manager.</p>
-              <p class="quick-card__meta"><span>REQ-FA-005</span></p>
+            <a href="#/repair" class="card--quick">
+              <p class="card--quick__title">Schaden melden</p>
+              <p class="card--quick__desc">Defekte Heizung, Wasserschaden, Beleuchtung oder Schliesssystem? Schnellmeldung an BBL-IM, koordiniert mit Ihrem zuständigen Immobilien-Manager.</p>
+              <p class="card--quick__meta"><span>REQ-FA-005</span></p>
               ${arrowBtn()}
             </a>
-            <a href="#/downloads" class="quick-card">
-              <p class="quick-card__title">Pläne & Dokumente</p>
-              <p class="quick-card__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit zum Herunterladen — gefiltert nach Sichtbarkeit und Stand.</p>
-              <p class="quick-card__meta"><span>FUNC-LP-007</span></p>
+            <a href="#/downloads" class="card--quick">
+              <p class="card--quick__title">Pläne & Dokumente</p>
+              <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit zum Herunterladen — gefiltert nach Sichtbarkeit und Stand.</p>
+              <p class="card--quick__meta"><span>FUNC-LP-007</span></p>
               ${arrowBtn()}
             </a>
-            <a href="#/mobiliar" class="quick-card">
-              <p class="quick-card__title">Möbel bestellen</p>
-              <p class="quick-card__desc">Standard- und Spezialmobiliar via Mobiliar-Shop des Bundes bestellen — angebunden an das Schwesterprojekt „Arbeitsplatz-Management".</p>
-              <p class="quick-card__meta"><span>REQ-FA-007</span></p>
+            <a href="#/mobiliar" class="card--quick">
+              <p class="card--quick__title">Möbel bestellen</p>
+              <p class="card--quick__desc">Standard- und Spezialmobiliar via Mobiliar-Shop des Bundes bestellen — angebunden an das Schwesterprojekt „Arbeitsplatz-Management".</p>
+              <p class="card--quick__meta"><span>REQ-FA-007</span></p>
               ${arrowBtn()}
             </a>
-            <a href="#/moves" class="quick-card">
-              <p class="quick-card__title">Umzug & Sonderreinigung</p>
-              <p class="quick-card__desc">Transport- oder Reinigungsanfrage erfassen — etwa nach grösseren Reorganisationen, Veranstaltungen oder Mieterwechseln.</p>
-              <p class="quick-card__meta"><span>REQ-FA-006</span></p>
+            <a href="#/moves" class="card--quick">
+              <p class="card--quick__title">Umzug & Sonderreinigung</p>
+              <p class="card--quick__desc">Transport- oder Reinigungsanfrage erfassen — etwa nach grösseren Reorganisationen, Veranstaltungen oder Mieterwechseln.</p>
+              <p class="card--quick__meta"><span>REQ-FA-006</span></p>
               ${arrowBtn()}
             </a>
-            <a href="#/training" class="quick-card">
-              <p class="quick-card__title">Schulungen</p>
-              <p class="quick-card__desc">„Mieterportal kompakt" (60 Min., DE/FR) und Aufbaukurse für ILBO und GS-Prüfende. Termine Q2 2026 zur Anmeldung offen.</p>
-              <p class="quick-card__meta"><span>FUNC-LP-007</span></p>
+            <a href="#/training" class="card--quick">
+              <p class="card--quick__title">Schulungen</p>
+              <p class="card--quick__desc">„Mieterportal kompakt" (60 Min., DE/FR) und Aufbaukurse für ILBO und GS-Prüfende. Termine Q2 2026 zur Anmeldung offen.</p>
+              <p class="card--quick__meta"><span>FUNC-LP-007</span></p>
               ${arrowBtn()}
             </a>
           </div>
@@ -1551,7 +1659,7 @@
     return 'Guten Abend';
   }
 
-  function arrowBtn(extraClass = 'quick-card__arrow-btn') {
+  function arrowBtn(extraClass = 'card--quick__arrow-btn') {
     return `
       <span class="arrow-btn ${extraClass}" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1561,14 +1669,14 @@
 
   function profileCard({ image, title, date, desc, role }) {
     return `
-      <a href="#" class="profile-card" onclick="event.preventDefault(); window.t3lite.demoRole('${role}');">
-        <div class="profile-card__image" style="background-image:url('${image}');"></div>
-        <div class="profile-card__body">
-          <p class="profile-card__date">${P.escapeHtml(date)}</p>
-          <h3 class="profile-card__title">${P.escapeHtml(title)}</h3>
-          <p class="profile-card__desc">${P.escapeHtml(desc)}</p>
+      <a href="#" class="card--profile" onclick="event.preventDefault(); window.t3lite.demoRole('${role}');">
+        <div class="card--profile__image" style="background-image:url('${image}');"></div>
+        <div class="card--profile__body">
+          <p class="card--profile__date">${P.escapeHtml(date)}</p>
+          <h3 class="card--profile__title">${P.escapeHtml(title)}</h3>
+          <p class="card--profile__desc">${P.escapeHtml(desc)}</p>
         </div>
-        ${arrowBtn('profile-card__arrow')}
+        ${arrowBtn('card--profile__arrow')}
       </a>
     `;
   }
@@ -1833,7 +1941,7 @@
             <label class="form-field__label">Anzahl FTE <span class="form-field__required">*</span></label>
             <input class="form-field__input" type="number" min="1" max="2000" name="fte" value="${draft.fte}">
           </div>
-          <p class="form-field__hint">Belegungsfaktor (Desk-Sharing) <strong>0.8</strong> 🔒 — Bundes-Stammdatenvorgabe (FUNC-AU-014).</p>
+          <p class="form-field__hint">Belegungsfaktor (Desk-Sharing) <strong>0.8</strong> — Bundes-Stammdatenvorgabe (FUNC-AU-014).</p>
           <div id="calcBlock"></div>
         </div>
       </div>
@@ -1950,11 +2058,11 @@
 
   function attachmentLi(a, i) {
     const badge = a.scanStatus === 'scanning'
-      ? '<span class="badge badge--warning">⏳ Virenscan läuft</span>'
+      ? '<span class="badge badge--warning">Virenscan läuft</span>'
       : a.scanStatus === 'ok'
-        ? '<span class="badge badge--success">🟢 ok</span>'
-        : '<span class="badge badge--danger">✕ abgewiesen</span>';
-    return `<li>📎 ${P.escapeHtml(a.name)} ${badge} <span class="meta">${P.escapeHtml(a.size)}</span></li>`;
+        ? '<span class="badge badge--success">ok</span>'
+        : '<span class="badge badge--danger">abgewiesen</span>';
+    return `<li>${P.icon('attachment')}${P.escapeHtml(a.name)} ${badge} <span class="meta">${P.escapeHtml(a.size)}</span></li>`;
   }
 
   function wireStep3(draft) {
@@ -2147,7 +2255,7 @@
         <p style="margin:0;font-size:var(--text-body-sm);">
           Nach dem Senden geht der Antrag an
           ${draft.pipelineVariant === 'bk' ? '<strong>BBL Portfolio-Management</strong> (BK-Pfad — kein GS, FUNC-FG-005)' : '<strong>GS UVEK</strong>'}
-          (Bearbeitungszeit gemäss SLA). Sie erhalten eine E-Mail und sehen den Status in der Inbox (🔔, FUNC-FG-004).
+          (Bearbeitungszeit gemäss SLA). Sie erhalten eine E-Mail und sehen den Status in der Inbox (FUNC-FG-004).
         </p>
         ${draft.greenfield ? '<p style="margin:var(--space-sm) 0 0;font-size:var(--text-body-xs);color:var(--color-text-secondary);">Greenfield-Pfad: nach Genehmigung legt BBL-IM die WE im SAP an, danach ePPM-Übergabe.</p>' : ''}
       </div>
@@ -2250,7 +2358,7 @@
               <option value="in_eppm">in ePPM</option>
               <option value="abgeschlossen">Abgeschlossen</option>
             </select>
-            <input id="filterText" type="search" class="form-field__input" placeholder="🔍 Suche …" style="flex:1;min-width:200px;min-height:auto;">
+            <input id="filterText" type="search" class="form-field__input" placeholder="Suche …" style="flex:1;min-width:200px;min-height:auto;">
           </div>
 
           ${apps.length === 0 ? renderInboxEmptyState() : `
@@ -2476,7 +2584,7 @@
           </table>
 
           <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-md);flex-wrap:wrap;">
-            <button class="btn btn--outline btn--sm" onclick="window.t3lite.openBatchApprove()">Bulk: ☑ Genehmigen</button>
+            <button class="btn btn--outline btn--sm" onclick="window.t3lite.openBatchApprove()">Bulk genehmigen</button>
             <button class="btn btn--ghost btn--sm">Bulk: Zuweisen</button>
             <button class="btn btn--ghost btn--sm">Bulk: Mehr Info anfragen</button>
           </div>
@@ -2656,7 +2764,6 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container">
-          <p class="section-eyebrow">Übersicht</p>
           <h1 class="section-heading">Liegenschaften ${isBblView ? '(BBL-Sicht)' : 'Ihrer Verwaltungs­einheit'}</h1>
           <p style="color:var(--color-text-secondary);max-width: 60ch;margin: 0 0 var(--space-xl);">
             ${isBblView
@@ -2690,18 +2797,18 @@
       ? `<span class="badge badge--warning">${t.openIssues} offen</span>`
       : `<span class="badge badge--success">keine offenen Anliegen</span>`;
     return `
-      <a href="#/properties/${t.id}" class="property-card">
-        <div class="property-card__image" style="background-image:url('${t.image}');"></div>
-        <div class="property-card__body">
-          <p class="property-card__sap">${t.sap} · EGID ${t.egid}</p>
-          <h3 class="property-card__title">${P.escapeHtml(t.buildingName)}</h3>
-          <p class="property-card__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
-          <div class="property-card__meta">
+      <a href="#/properties/${t.id}" class="card--property">
+        <div class="card--property__image" style="background-image:url('${t.image}');"></div>
+        <div class="card--property__body">
+          <p class="card--property__sap">${t.sap} · EGID ${t.egid}</p>
+          <h3 class="card--property__title">${P.escapeHtml(t.buildingName)}</h3>
+          <p class="card--property__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
+          <div class="card--property__meta">
             <span>${t.hnf2} m² HNF2</span>
             <span>${t.arbeitsplaetze} AP</span>
             <span>${P.formatChf(t.yearlyCost)} / Jahr</span>
           </div>
-          <div class="property-card__footer">
+          <div class="card--property__footer">
             ${issuesBadge}
             <span style="font-size:var(--text-body-xs);color:var(--color-text-muted);">${P.escapeHtml(t.pfmKategorie)}</span>
           </div>
@@ -2732,9 +2839,9 @@
         <div class="container">
           <header style="display:grid;grid-template-columns:1fr;gap:var(--space-lg);margin-bottom:var(--space-xl);">
             <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;height:280px;background:url('${t.image}') center/cover;">
-              <div style="position:absolute;inset:auto 0 0 0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:var(--space-lg);color:#fff;">
+              <div style="position:absolute;inset:auto 0 0 0;background:linear-gradient(transparent,var(--color-black-70));padding:var(--space-lg);color:var(--color-white);">
                 <p style="margin:0 0 var(--space-xs);font-size:var(--text-body-xs);text-transform:uppercase;letter-spacing:1px;opacity:0.85;">${t.sap} · EGID ${t.egid}</p>
-                <h1 style="margin:0;font-size:var(--text-h1);color:#fff;">${P.escapeHtml(t.buildingName)}</h1>
+                <h1 style="margin:0;font-size:var(--text-h1);color:var(--color-white);">${P.escapeHtml(t.buildingName)}</h1>
                 <p style="margin:var(--space-xs) 0 0;opacity:0.9;">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
               </div>
             </div>
@@ -2743,7 +2850,6 @@
           <div class="property-layout">
             <div>
               <section style="margin-bottom: var(--space-2xl);">
-                <p class="section-eyebrow">Mietverhältnis</p>
                 <h2 class="section-heading">Vertrag & Mengengerüst</h2>
                 <table class="table" style="margin-top:var(--space-md);">
                   <tr><th>Mietende VE</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
@@ -2757,7 +2863,6 @@
               </section>
 
               <section style="margin-bottom: var(--space-2xl);">
-                <p class="section-eyebrow">Anliegen</p>
                 <h2 class="section-heading">Anträge zu dieser Liegenschaft (${related.length})</h2>
                 ${related.length === 0
                   ? `<p style="color:var(--color-text-secondary);">Keine offenen oder vergangenen Anträge zu dieser Liegenschaft.</p>`
@@ -2767,39 +2872,38 @@
               </section>
 
               <section style="margin-bottom: var(--space-2xl);">
-                <p class="section-eyebrow">Dokumente</p>
                 <h2 class="section-heading">Pläne & Belege zu dieser Liegenschaft</h2>
-                <ul class="attachment-list">
-                  <li>📐 Grundriss ${P.escapeHtml(t.floor)} · PDF · 4.2 MB · Stand 15.03.2026 <span class="meta"><a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                  <li>📄 Mietvertrag (Auszug) · PDF · 1.1 MB · Stand 01.07.2024 <span class="meta"><a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                  <li>🛡 Sicherheits- & Brandschutzkonzept · PDF · 2.4 MB · Stand 22.11.2025 <span class="meta"><a href="#" onclick="window.portal.toast('Download simuliert'); return false;">Herunterladen ↓</a></span></li>
-                </ul>
+                ${downloadList([
+                  { title: `Grundriss ${t.floor}`,              subtitle: 'Plan',     format: 'PDF', size: '4.2 MB', date: '15.03.2026' },
+                  { title: 'Mietvertrag (Auszug)',              subtitle: 'Vertrag',  format: 'PDF', size: '1.1 MB', date: '01.07.2024' },
+                  { title: 'Sicherheits- & Brandschutzkonzept', subtitle: 'Konzept',  format: 'PDF', size: '2.4 MB', date: '22.11.2025' },
+                ])}
               </section>
             </div>
 
             <aside class="property-aside">
               <div class="card" style="margin-bottom: var(--space-lg);">
-                <p class="section-eyebrow" style="margin:0 0 var(--space-sm);">Aktionen</p>
+                <h3 class="card__title">Aktionen</h3>
                 <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-                  <a href="#/repair?building=${t.buildingId}" class="btn btn--primary">🛠 Schaden / Reparatur melden</a>
-                  <a href="#/wizard/1" class="btn btn--outline">+ Bedarf zu dieser Liegenschaft</a>
-                  <button class="btn btn--ghost" onclick="window.portal.toast('Umzug-Workflow noch nicht implementiert')">🚚 Umzug anmelden</button>
-                  <button class="btn btn--ghost" onclick="window.portal.toast('Sonderreinigung noch nicht implementiert')">🧹 Sonderreinigung anfragen</button>
+                  <a href="#/repair?building=${t.buildingId}" class="btn btn--primary">${P.icon('tool')}Schaden / Reparatur melden</a>
+                  <a href="#/wizard/1" class="btn btn--outline">Bedarf zu dieser Liegenschaft</a>
+                  <button class="btn btn--ghost" onclick="window.portal.toast('Umzug-Workflow noch nicht implementiert')">${P.icon('truck')}Umzug anmelden</button>
+                  <button class="btn btn--ghost" onclick="window.portal.toast('Sonderreinigung noch nicht implementiert')">${P.icon('sparkles')}Sonderreinigung anfragen</button>
                 </div>
               </div>
               <div class="card">
-                <p class="section-eyebrow" style="margin:0 0 var(--space-sm);">Ansprechpersonen BBL</p>
+                <h3 class="card__title">Ansprechpersonen BBL</h3>
                 <dl style="margin:0;display:grid;grid-template-columns:1fr;gap:var(--space-sm);">
                   <div>
-                    <dt style="font-size:var(--text-body-xs);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.4px;">Portfolio-Management</dt>
+                    <dt style="font-size:var(--text-body-sm);color:var(--color-text-secondary);font-weight:var(--font-weight-normal);">Portfolio-Management</dt>
                     <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblPfm)}</dd>
                   </div>
                   <div>
-                    <dt style="font-size:var(--text-body-xs);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.4px;">Immobilien-Management</dt>
+                    <dt style="font-size:var(--text-body-sm);color:var(--color-text-secondary);font-weight:var(--font-weight-normal);">Immobilien-Management</dt>
                     <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblIm)}</dd>
                   </div>
                   <div>
-                    <dt style="font-size:var(--text-body-xs);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.4px;">Flächenmanagement (FLM)</dt>
+                    <dt style="font-size:var(--text-body-sm);color:var(--color-text-secondary);font-weight:var(--font-weight-normal);">Flächenmanagement (FLM)</dt>
                     <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblFlm)}</dd>
                   </div>
                 </dl>
@@ -2819,7 +2923,6 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container">
-          <p class="section-eyebrow">Bibliothek</p>
           <h1 class="section-heading">Pläne & Dokumente</h1>
           <p style="color:var(--color-text-secondary);max-width:60ch;margin: 0 0 var(--space-lg);">
             Sie sehen: alle für <strong>${P.state.user.ve}</strong> freigegebenen Dateien plus öffentliche Merkblätter. Pro Datei sind Quelle, verantwortliche Person und Stand sichtbar (FUNC-LP-009).
@@ -2833,7 +2936,7 @@
               <option value="Vorlage">Vorlage</option>
               <option value="Vertrag">Vertrag (intern)</option>
             </select>
-            <input class="form-field__input" type="search" id="filterDocText" placeholder="🔍 Suchen …" style="flex:1;min-width:200px;min-height:auto;">
+            <input class="form-field__input" type="search" id="filterDocText" placeholder="Suchen …" style="flex:1;min-width:200px;min-height:auto;">
           </div>
           <div class="card-grid" id="docGrid">
             ${docs.map(documentCard).join('')}
@@ -2864,13 +2967,41 @@
     ];
   }
 
-  function documentCard(d) {
-    const icon = ({ PDF: '📄', MP4: '🎥', DOCX: '📝' })[d.format] || '📎';
+  // Federal-CD download list (kbob.admin.ch / armasuisse Immo-Portal pattern).
+  // Each item:  red down-arrow icon | bold title | optional subtitle | format|size|date meta.
+  // `items` shape: { title, subtitle?, format, size, languages?, date }
+  function downloadList(items) {
     return `
-      <a href="#" onclick="window.portal.toast('Download simuliert: ${P.escapeJs(d.title)}'); return false;" class="quick-card" style="min-height:auto;">
-        <p class="quick-card__title">${icon} ${P.escapeHtml(d.title)}</p>
-        <p class="quick-card__desc">${d.format} · ${d.size} · ${d.languages}</p>
-        <p class="quick-card__meta">
+      <ul class="download-list">
+        ${items.map(it => `
+          <li class="download-list__item">
+            <a class="download-list__link" href="#"
+               onclick="window.portal.toast('Download simuliert: ${P.escapeJs(it.title)}'); return false;">
+              <span class="download-list__icon">${P.icon('download')}</span>
+              <div class="download-list__body">
+                <p class="download-list__title">${P.escapeHtml(it.title)}</p>
+                ${it.subtitle ? `<p class="download-list__subtitle">${P.escapeHtml(it.subtitle)}</p>` : ''}
+                <p class="download-list__meta">
+                  ${it.format    ? `<span>${P.escapeHtml(it.format)}</span>`    : ''}
+                  ${it.size      ? `<span>${P.escapeHtml(it.size)}</span>`      : ''}
+                  ${it.languages ? `<span>${P.escapeHtml(it.languages)}</span>` : ''}
+                  ${it.date      ? `<span>${P.escapeHtml(it.date)}</span>`      : ''}
+                </p>
+              </div>
+            </a>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  function documentCard(d) {
+    const iconName = ({ MP4: 'video' })[d.format] || 'document';
+    return `
+      <a href="#" onclick="window.portal.toast('Download simuliert: ${P.escapeJs(d.title)}'); return false;" class="card--quick" style="min-height:auto;">
+        <p class="card--quick__title">${P.icon(iconName)}${P.escapeHtml(d.title)}</p>
+        <p class="card--quick__desc">${d.format} · ${d.size} · ${d.languages}</p>
+        <p class="card--quick__meta">
           <span>Quelle: ${P.escapeHtml(d.source)}</span>
           <span>${P.escapeHtml(d.responsible)}</span>
           <span>Stand ${d.stand}</span>
@@ -2893,7 +3024,6 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container" style="max-width: 720px;">
-          <p class="section-eyebrow">Schnellmeldung</p>
           <h1 class="section-heading">Schaden oder Störung melden</h1>
           <p style="color:var(--color-text-secondary);margin: 0 0 var(--space-lg);">
             Defekte Heizung, Wasserschaden, Beleuchtung, Schliesssystem: kurze Meldung — BBL-IM nimmt Kontakt auf und koordiniert die Behebung. Roadmap REQ-FA-005.
@@ -2957,7 +3087,6 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container" style="max-width: 720px;">
-          <p class="section-eyebrow">Konto & Einstellungen</p>
           <h1 class="section-heading">Mein Profil</h1>
 
           <div class="card" style="margin-bottom: var(--space-lg);">
@@ -3014,7 +3143,6 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container">
-          <p class="section-eyebrow">Übersicht</p>
           <h1 class="section-heading">Dienstleistungen des Mieterportals</h1>
           <p style="max-width:60ch;color:var(--color-text-secondary);margin: 0 0 var(--space-2xl);">
             BBL bewirtschaftet die Immobilien der Bundesverwaltung. Über das Mieterportal stellen Bundes-Mietende
@@ -3022,9 +3150,9 @@
           </p>
           <div class="card-grid">
             ${SERVICES_MENU.items.slice(1).map(svc => `
-              <a href="${svc.href}" class="quick-card">
-                <p class="quick-card__title">${P.escapeHtml(svc.label)}</p>
-                <p class="quick-card__desc">${P.escapeHtml(svc.desc || '')}</p>
+              <a href="${svc.href}" class="card--quick">
+                <p class="card--quick__title">${P.escapeHtml(svc.label)}</p>
+                <p class="card--quick__desc">${P.escapeHtml(svc.desc || '')}</p>
                 ${arrowBtn()}
               </a>
             `).join('')}
@@ -3040,7 +3168,7 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container" style="max-width: 720px;">
-          <p class="section-eyebrow">${reqId}</p>
+          <p class="meta-info"><code>${reqId}</code></p>
           <h1 class="section-heading">${P.escapeHtml(title)}</h1>
           <p style="color:var(--color-text-secondary);font-size: var(--text-h4);line-height: var(--line-height-relaxed);margin: 0 0 var(--space-lg);">
             ${P.escapeHtml(lead)}
