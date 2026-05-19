@@ -554,12 +554,22 @@
    chevron separators and an underlined current page. The full federal
    variant adds per-level dropdowns; we ship the simpler flat form here. */
 .breadcrumb {
+  /* `#root` is a flex column container. Without an explicit width, a flex
+     child with only `max-width` can shrink to fit its content — the
+     auto-margins then centre that narrow box, leaving the text floating
+     in the middle of the viewport. `width: 100%` forces the box to fill
+     up to `max-width` so content sits at the left padding edge instead.
+     `box-sizing: border-box` (set globally on `*`) keeps `width: 100%`
+     compatible with the horizontal padding. */
+  display: block;
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
   padding: var(--space-md) var(--container-padding) var(--space-sm);
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   background: transparent;
-  max-width: var(--container-max-width);
-  margin: 0 auto;
+  text-align: left;
 }
 .breadcrumb a { color: inherit; text-decoration: none; }
 .breadcrumb a:hover { color: var(--color-primary); text-decoration: underline; }

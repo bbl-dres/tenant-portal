@@ -28,9 +28,12 @@
   const state = {
     user: null,                  // { id, name, ve, roles, activeRole }
     applications: [],            // loaded from data/applications.json
-    masterData: null,            // loaded from data/master-data.json
+    referenceData: null,         // loaded from data/reference-data.json
     buildings: [],               // loaded from data/buildings.json
     users: [],                   // loaded from data/users.json
+    tenancies: [],               // loaded from data/tenancies.json
+    news: [],                    // loaded from data/news.json
+    downloads: null,             // loaded from data/downloads.json (documents, regulations, strategies, training)
     page: 'home',                // current route id
     params: {},                  // route params
     draft: null,                 // current wizard draft
@@ -38,21 +41,48 @@
   };
 
   // ── DATA LOADING ────────────────────────────────────────────────────────
+  // On-disk JSON conforms to docs/DATAMODEL.md (canonical schema).
+  // In-memory records get two convenience aliases injected here:
+  //   - `id` → mirrors the entity's canonical PK (applicationId / tenancyId / …)
+  //   - `address` → composed display string from the atomic fields
+  //     (street / houseNumber / postalCode / city) so render code can use
+  //     a single string without dragging the Tidy-data split through the UI.
+  // The originals stay on the record; aliases are read-only conveniences.
+  function formatAddressLine(o) {
+    if (!o || !o.street) return '';
+    const num = o.houseNumber ? ' ' + o.houseNumber : '';
+    return `${o.street}${num}, ${o.postalCode || ''} ${o.city || ''}`.trim().replace(/\s+,/g, ',');
+  }
+  function formatAssetKey(ak) {
+    if (!ak) return '';
+    return `${ak.bk || ''}/${ak.we || ''}/${ak.obj || ''}`;
+  }
+  // Flatten a GeoJSON Point feature to the plain-object shape downstream
+  // code expects: properties are hoisted to the top level, and the canonical
+  // scalar `lng` / `lat` fields are reconstituted from `geometry.coordinates`
+  // per Appendix B of docs/DATAMODEL.md (logical schema is scalar; on-disk
+  // FeatureCollection is just the wire format).
+  function flattenFeature(feature) {
+    const [lng, lat] = feature.geometry?.coordinates || [];
+    return { ...(feature.properties || {}), lng, lat };
+  }
   async function loadData(basePath = 'data/') {
-    const [apps, master, users, buildings, tenancies, news] = await Promise.all([
+    const [apps, reference, users, buildingsFc, tenancies, news, downloads] = await Promise.all([
       fetch(basePath + 'applications.json').then(r => r.json()),
-      fetch(basePath + 'master-data.json').then(r => r.json()),
+      fetch(basePath + 'reference-data.json').then(r => r.json()),
       fetch(basePath + 'users.json').then(r => r.json()),
-      fetch(basePath + 'buildings.json').then(r => r.json()),
+      fetch(basePath + 'buildings.geojson').then(r => r.json()),
       fetch(basePath + 'tenancies.json').then(r => r.json()).catch(() => []),
       fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
+      fetch(basePath + 'downloads.json').then(r => r.json()).catch(() => ({ documents: [], regulations: [], strategies: [], training: [] })),
     ]);
-    state.applications = apps;
-    state.masterData = master;
-    state.users = users;
-    state.buildings = buildings;
-    state.tenancies = tenancies;
-    state.news = news;
+    state.applications = apps.map(a => ({ ...a, id: a.applicationId, type: a.applicationType, address: formatAddressLine(a) }));
+    state.referenceData = reference;
+    state.users = users.map(u => ({ ...u, id: u.userId }));
+    state.buildings = (buildingsFc.features || []).map(flattenFeature).map(b => ({ ...b, id: b.buildingId, address: formatAddressLine(b) }));
+    state.tenancies = tenancies.map(t => ({ ...t, id: t.tenancyId, address: formatAddressLine(t) }));
+    state.news = news.map(n => ({ ...n, id: n.newsId }));
+    state.downloads = downloads;
   }
 
   // ── PERSISTENCE (localStorage) ──────────────────────────────────────────
@@ -89,7 +119,13 @@
   }
   function loadRole() {
     if (!state.user) return null;
-    return safeGet('mp-active-role-' + state.user.id);
+    const raw = safeGet('mp-active-role-' + state.user.id);
+    // Migrate v0.10.x role names persisted to localStorage before the
+    // schema rename pass (ILBO → LBO, GS-Prüfer/in → GS-Reviewer).
+    // Drop unknown values so the user falls back to their first role.
+    const migrated = ({ 'ILBO': 'LBO', 'GS-Prüfer/in': 'GS-Reviewer' })[raw] || raw;
+    if (migrated && !state.user.roles.includes(migrated)) return null;
+    return migrated;
   }
 
   // ── ROUTER (hash-based) ──────────────────────────────────────────────────
@@ -341,8 +377,8 @@
 
   function roleLabel(role) {
     return ({
-      'ILBO': 'Logistikbeauftragte',
-      'GS-Prüfer/in': 'GS-Prüfer/in',
+      'LBO': 'Logistikbeauftragte',
+      'GS-Reviewer': 'GS-Prüfer/in',
       'BBL-PFM': 'BBL Portfolio-Management',
       'BBL-Campus': 'BBL Campus',
       'Auditor': 'EFD Auditor',
@@ -351,30 +387,50 @@
 
   // ── STATUS PIPELINE ──────────────────────────────────────────────────────
   // Maps to §0.3 (three variants). Each step describes one transition state.
-  const PIPELINE_STANDARD = ['Entwurf', 'Eingereicht', 'in GS-Prüfung', 'genehmigt', 'in ePPM', 'abgeschlossen'];
-  const PIPELINE_BK       = ['Entwurf', 'Eingereicht', 'in PFM-Prüfung', 'genehmigt', 'in ePPM', 'abgeschlossen'];
-  const PIPELINE_GREENFIELD = ['Entwurf', 'Eingereicht', 'in GS-Prüfung', 'genehmigt', 'WE-Anlage', 'in ePPM', 'abgeschlossen'];
-
-  function statusKey(label) {
-    return label.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-  }
+  // Each entry is { status, label }: status matches the canonical enum
+  // (docs/DATAMODEL.md Appendix A.3); label is the German display string.
+  const PIPELINE_STANDARD = [
+    { status: 'draft',        label: 'Entwurf' },
+    { status: 'submitted',    label: 'Eingereicht' },
+    { status: 'in_review_gs', label: 'in GS-Prüfung' },
+    { status: 'approved',     label: 'genehmigt' },
+    { status: 'in_project',   label: 'in ePPM' },
+    { status: 'closed',       label: 'abgeschlossen' },
+  ];
+  const PIPELINE_BK = [
+    { status: 'draft',         label: 'Entwurf' },
+    { status: 'submitted',     label: 'Eingereicht' },
+    { status: 'in_review_pfm', label: 'in PFM-Prüfung' },
+    { status: 'approved',      label: 'genehmigt' },
+    { status: 'in_project',    label: 'in ePPM' },
+    { status: 'closed',        label: 'abgeschlossen' },
+  ];
+  const PIPELINE_GREENFIELD = [
+    { status: 'draft',              label: 'Entwurf' },
+    { status: 'submitted',          label: 'Eingereicht' },
+    { status: 'in_review_gs',       label: 'in GS-Prüfung' },
+    { status: 'approved',           label: 'genehmigt' },
+    { status: 'asset_key_creation', label: 'WE-Anlage' },
+    { status: 'in_project',         label: 'in ePPM' },
+    { status: 'closed',             label: 'abgeschlossen' },
+  ];
 
   function renderPipeline(application) {
     let steps;
-    if (application.pipelineVariant === 'bk') steps = PIPELINE_BK;
+    if (application.pipelineVariant === 'bypass') steps = PIPELINE_BK;
     else if (application.pipelineVariant === 'greenfield') steps = PIPELINE_GREENFIELD;
     else steps = PIPELINE_STANDARD;
 
-    const currentIdx = steps.findIndex(s => statusKey(s) === application.status);
-    const isRejected = application.status === 'abgelehnt';
-    const isRueckfrage = application.status === 'rueckfrage';
+    const currentIdx = steps.findIndex(s => s.status === application.status);
+    const isRejected = application.status === 'rejected';
+    const isRueckfrage = application.status === 'clarification';
 
     if (isRueckfrage) {
       // Show pipeline up to "in GS-Prüfung" then a "Rückfrage" bubble
       return `
         <div class="pipeline" role="list" aria-label="Statusverlauf">
           ${steps.slice(0, 3).map((s, i) => `
-            <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rueckfrage'}" role="listitem">↻ ${s === 'in GS-Prüfung' ? 'Rückfrage' : s}</div>
+            <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rueckfrage'}" role="listitem">↻ ${s.status === 'in_review_gs' ? 'Rückfrage' : s.label}</div>
           `).join('')}
           <div class="pipeline__step" role="listitem" style="opacity:0.5">… genehmigt</div>
         </div>
@@ -385,7 +441,7 @@
       return `
         <div class="pipeline" role="list" aria-label="Statusverlauf">
           ${steps.slice(0, 3).map((s, i) => `
-            <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rejected'}" role="listitem">${i < 2 ? '✓' : '✕'} ${s}</div>
+            <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rejected'}" role="listitem">${i < 2 ? '✓' : '✕'} ${s.label}</div>
           `).join('')}
           <div class="pipeline__step pipeline__step--rejected" role="listitem">abgelehnt</div>
         </div>
@@ -398,7 +454,7 @@
           const cls = i < currentIdx ? 'pipeline__step--done' :
                       i === currentIdx ? 'pipeline__step--active' : '';
           const glyph = i < currentIdx ? '✓ ' : i === currentIdx ? '◐ ' : '';
-          return `<div class="pipeline__step ${cls}" role="listitem">${glyph}${s}</div>`;
+          return `<div class="pipeline__step ${cls}" role="listitem">${glyph}${s.label}</div>`;
         }).join('')}
       </div>
     `;
@@ -441,10 +497,10 @@
 
   // ── WIZARD CALCULATION (FUNC-AU-014/-015 — see WIREFRAMES.md §8.1) ─────
   function calcWizard(fields) {
-    if (!state.masterData) return null;
-    const naw = state.masterData.nawClasses.find(n => n.name === fields.nawClass)
-              || state.masterData.nawClasses.find(n => n.name === 'Kollaborativ-Standard');
-    const ds  = state.masterData.deskSharingFactor;       // fixed 0.8
+    if (!state.referenceData) return null;
+    const naw = state.referenceData.nawClasses.find(n => n.name === fields.nawClass)
+              || state.referenceData.nawClasses.find(n => n.name === 'Kollaborativ-Standard');
+    const ds  = state.referenceData.deskSharingFactor;       // fixed 0.8
     const fte = Number(fields.fte) || 0;
 
     const arbeitsplaetze = Math.ceil(fte * ds);            // FTE × 0.8
@@ -453,9 +509,9 @@
 
     // UK-Kosten: master data has CHF per m² GF; placeholder calculation
     const ukKosten = Math.round(gf * 3000);                // illustrative
-    const moeblierung = Math.round(hnf2 * state.masterData.moeblierungProM2);
-    const betriebskostenProM2Gf = state.masterData.ukKostenObergrenzeProM2Gf;
-    const hardBlockMultiplier   = state.masterData.ukKostenHardBlockMultiplier;
+    const moeblierung = Math.round(hnf2 * state.referenceData.furnitureBudgetPerSqm);
+    const betriebskostenProM2Gf = state.referenceData.operatingCostCeilingPerSqmGf;
+    const hardBlockMultiplier   = state.referenceData.operatingCostHardBlockMultiplier;
     const ukProM2Gf = gf > 0 ? Math.round(ukKosten / gf / 12) : 0; // monthly
 
     return {
@@ -672,15 +728,15 @@
   // ── BADGE / CARD UTILITIES ───────────────────────────────────────────────
   function statusBadge(status) {
     const map = {
-      'entwurf':         { cls: 'badge',                  label: 'Entwurf' },
-      'eingereicht':     { cls: 'badge badge--info',      label: 'Eingereicht' },
-      'in_gs_pruefung':  { cls: 'badge badge--warning',   label: 'in GS-Prüfung' },
-      'in_pfm_pruefung': { cls: 'badge badge--warning',   label: 'in PFM-Prüfung' },
-      'genehmigt':       { cls: 'badge badge--success',   label: 'genehmigt' },
-      'in_eppm':         { cls: 'badge badge--info',      label: 'in ePPM' },
-      'abgeschlossen':   { cls: 'badge badge--success',   label: 'abgeschlossen' },
-      'rueckfrage':      { cls: 'badge badge--orange',    label: 'Rückfrage' },
-      'abgelehnt':       { cls: 'badge badge--danger',    label: 'abgelehnt' },
+      'draft':         { cls: 'badge',                  label: 'Entwurf' },
+      'submitted':     { cls: 'badge badge--info',      label: 'Eingereicht' },
+      'in_review_gs':  { cls: 'badge badge--warning',   label: 'in GS-Prüfung' },
+      'in_review_pfm': { cls: 'badge badge--warning',   label: 'in PFM-Prüfung' },
+      'approved':      { cls: 'badge badge--success',   label: 'genehmigt' },
+      'in_project':    { cls: 'badge badge--info',      label: 'in ePPM' },
+      'closed':        { cls: 'badge badge--success',   label: 'abgeschlossen' },
+      'clarification': { cls: 'badge badge--orange',    label: 'Rückfrage' },
+      'rejected':      { cls: 'badge badge--danger',    label: 'abgelehnt' },
     };
     const b = map[status] || { cls: 'badge', label: status };
     return `<span class="${b.cls}">${b.label}</span>`;
@@ -875,7 +931,7 @@
     calcWizard, deriveNawClass,
     toast, modal, toggleSearch, toggleNavMenu, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
     openRoleMenu, login, logout,
-    statusBadge, statusKey,
+    statusBadge,
     formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
     PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
   };
@@ -1005,7 +1061,7 @@
                 <ul class="search-results">
                   ${matches.properties.map(t => `
                     <li><a href="#/properties/${t.id}">
-                      <strong>${t.sap}</strong> · <span class="search-results__title">${P.escapeHtml(t.buildingName)}</span>
+                      <strong>${formatAssetKey(t.assetKey)}</strong> · <span class="search-results__title">${P.escapeHtml(t.buildingName)}</span>
                       <p class="search-results__lead">${P.escapeHtml(t.address)} · ${t.hnf2} m² HNF2</p>
                     </a></li>
                   `).join('')}
@@ -1112,12 +1168,9 @@
                     <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
                   </thead>
                   <tbody>
-                    <tr><td>Konzentriert-Einzel</td><td>15.0</td><td>28.0</td><td>Einzelbüros, hohe Vertraulichkeit</td></tr>
-                    <tr><td>Konzentriert-Gruppe</td><td>13.0</td><td>25.0</td><td>2–4-Personen-Büros</td></tr>
-                    <tr><td>Kollaborativ-Standard</td><td>12.0</td><td>24.0</td><td>Standard-Bundesbüro (Default)</td></tr>
-                    <tr><td>Kollaborativ-Open</td><td>10.0</td><td>21.0</td><td>Open Space, Publikumsverkehr</td></tr>
-                    <tr><td>Hybrid-Activity-Based</td><td>9.0</td><td>20.0</td><td>Activity-Based-Working ≥ 40 % Remote</td></tr>
-                    <tr><td>Sicherheit-Labor</td><td>18.0</td><td>34.0</td><td>Spezialausstattung, Sicherheit, Labor</td></tr>
+                    ${(P.state.referenceData?.nawClasses || []).map(nc => `
+                      <tr><td>${P.escapeHtml(nc.name)}</td><td>${nc.hnf2PerFte.toFixed(1)}</td><td>${nc.gfPerFte.toFixed(1)}</td><td>${P.escapeHtml(nc.description)}</td></tr>
+                    `).join('')}
                   </tbody>
                 </table>
               </article>
@@ -1125,25 +1178,13 @@
               <article id="verordnungen">
                 <h2>Verordnungen, Weisungen und Vorgaben</h2>
                 <p>Rechtsgrundlagen und föderale Vorgaben, die für die Bewirtschaftung von Bundes-Immobilien und die Einreichung von Bedarfsmeldungen massgebend sind.</p>
-                ${downloadList([
-                  { title: 'Verordnung über das Immobilienmanagement und die Logistik des Bundes (VILB)', subtitle: 'SR 172.010.21',                      format: 'PDF', size: '210 KB', date: '01.01.2025' },
-                  { title: 'Weisung über das Immobilienmanagement der zivilen Bundesverwaltung (WILB)',   subtitle: 'EFD-Weisung',                         format: 'PDF', size: '180 KB', date: '01.04.2024' },
-                  { title: 'Verordnung über das öffentliche Beschaffungswesen (VöB)',                    subtitle: 'SR 172.056.11 · Auszug Immobilien',  format: 'PDF', size: '320 KB', date: '01.01.2024' },
-                  { title: 'Architekturkonzept Bund',                                                     subtitle: 'BBL Vorgabe für Neu- und Umbauten',  format: 'PDF', size: '4.1 MB', date: '15.05.2024' },
-                  { title: 'Vorgaben Bürobeschaffung & Arbeitsplatzstandards',                            subtitle: 'Anhang zur WILB',                     format: 'PDF', size: '290 KB', date: '12.02.2025' },
-                ])}
+                ${downloadList(P.state.downloads?.regulations || [])}
               </article>
 
               <article id="strategien">
                 <h2>Strategien und Konzepte</h2>
                 <p>Übergeordnete Strategien des BBL und des Bundes, die das Mieterportal und die zugrunde liegenden Flächenentscheide prägen.</p>
-                ${downloadList([
-                  { title: 'Immobilienstrategie der zivilen Bundesverwaltung 2030',         subtitle: 'BBL Portfolio-Management',                  format: 'PDF', size: '2.3 MB', date: '20.11.2023' },
-                  { title: 'Nachhaltigkeitsstrategie Bundesimmobilien',                     subtitle: 'Klima, Energie, Kreislaufwirtschaft',       format: 'PDF', size: '1.8 MB', date: '03.07.2024' },
-                  { title: 'Vorbildwirkung Energie und Klima — Aktionsplan Bund',           subtitle: 'EFD / BFE',                                  format: 'PDF', size: '950 KB', date: '15.01.2025' },
-                  { title: 'Konzept «Neue Arbeitswelten» (NAW)',                            subtitle: 'Bürowelten, Desk-Sharing, Flächenkennzahlen', format: 'PDF', size: '1.4 MB', date: '06.09.2024' },
-                  { title: 'Digitalisierungsstrategie BBL',                                  subtitle: 'Stossrichtungen 2024–2028',                  format: 'PDF', size: '780 KB', date: '28.03.2024' },
-                ])}
+                ${downloadList(P.state.downloads?.strategies || [])}
                 <p style="margin-top: var(--space-md); color: var(--color-text-secondary); font-size: var(--text-body-sm);">
                   <strong>Hinweis:</strong> Formulare und Checklisten zur Bedarfsmeldung werden direkt im Mieterportal geführt
                   (5-Schritte-Wizard, Wirtschaftlichkeitsbetrachtung, Anhänge-Management) — es ist kein Download von Vorlagen mehr nötig.
@@ -1187,13 +1228,7 @@
                 </div>
 
                 <h3>Ausbildungsunterlagen</h3>
-                ${downloadList([
-                  { title: 'Modul 1 — Einleitung',                       subtitle: 'Mieterportal BBL', format: 'PDF', size: '540 KB', date: '15.04.2026' },
-                  { title: 'Modul 2 — Rollen und Verantwortlichkeiten',  subtitle: 'Mieterportal BBL', format: 'PDF', size: '1.4 MB', date: '15.04.2026' },
-                  { title: 'Modul 3 — Bedarfsmeldung erfassen',          subtitle: 'Mieterportal BBL', format: 'PDF', size: '2.1 MB', date: '15.04.2026' },
-                  { title: 'Modul 4 — NAW und Flächenstandards',         subtitle: 'Mieterportal BBL', format: 'PDF', size: '1.1 MB', date: '15.04.2026' },
-                  { title: 'Modul 5 — Greenfield, BK-Bypass und SEM',    subtitle: 'Mieterportal BBL', format: 'PDF', size: '230 KB', date: '15.04.2026' },
-                ])}
+                ${downloadList(P.state.downloads?.training || [])}
               </article>
 
 <article id="kontakt">
@@ -1461,7 +1496,7 @@
 
   function authNavItems() {
     const role = P.state.user.activeRole;
-    if (role === 'GS-Prüfer/in') {
+    if (role === 'GS-Reviewer') {
       return [
         { id: 'queue', href: '#/queue', label: 'Pendenzen' },
         { id: 'inbox', href: '#/inbox', label: 'Anträge der VE' },
@@ -1469,7 +1504,7 @@
         INFO_LINK,
       ];
     }
-    if (role === 'ILBO' || !role) {
+    if (role === 'LBO' || !role) {
       return [
         { id: 'home',       href: '#/home',       label: 'Start' },
         SERVICES_MENU,
@@ -1570,13 +1605,13 @@
             <dl style="margin: 0; display: grid; grid-template-columns: 140px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm);">
               <dt style="color: var(--color-text-secondary);">Name</dt><dd style="margin: 0;">Andrea Muster</dd>
               <dt style="color: var(--color-text-secondary);">Verwaltung</dt><dd style="margin: 0;">UVEK / BAFU</dd>
-              <dt style="color: var(--color-text-secondary);">Rollen</dt><dd style="margin: 0;">Logistikbeauftragte (ILBO) · GS-Prüfer/in</dd>
+              <dt style="color: var(--color-text-secondary);">Rollen</dt><dd style="margin: 0;">Logistikbeauftragte (LBO) · GS-Prüfer/in</dd>
             </dl>
 
             <button class="btn btn--filled btn--lg" style="margin-top: var(--space-lg);" onclick="window.portal.login()">Als Demo-Nutzerin anmelden</button>
 
             <p style="font-size: var(--text-body-xs); color: var(--color-text-secondary); margin-top: var(--space-md);">
-              Für den Test der GS-Prüfer-Sicht: nach Login die URL <code>#/queue</code> aufrufen, oder direkt <a href="#/queue" onclick="window.t3lite.demoRole('GS-Prüfer/in'); return false;">hier die GS-Rolle aktivieren</a>.
+              Für den Test der GS-Prüfer-Sicht: nach Login die URL <code>#/queue</code> aufrufen, oder direkt <a href="#/queue" onclick="window.t3lite.demoRole('GS-Reviewer'); return false;">hier die GS-Rolle aktivieren</a>.
             </p>
             <p style="font-size: var(--text-body-xs); color: var(--color-text-muted); margin-top: var(--space-sm);">
               Hinweis: Die Produktivversion plant ab Dezember 2026 den schrittweisen Übergang von eIAM auf AGOV / E-ID (REQUIREMENTS.md OP-3).
@@ -1591,7 +1626,7 @@
   function renderHome() {
     if (!P.state.user) { P.navigate('#/'); return; }
     const role = P.state.user.activeRole;
-    if (role === 'GS-Prüfer/in') return renderQueue();
+    if (role === 'GS-Reviewer') return renderQueue();
     return renderSubmitterHome();
   }
 
@@ -1599,11 +1634,11 @@
     const main = shell({ activeNav: 'home', breadcrumb: [{ label: 'Start' }] });
     const userApps = P.state.applications
       .filter(a => a.submitterId === P.state.user.id)
-      .filter(a => !['abgeschlossen', 'abgelehnt'].includes(a.status));
+      .filter(a => !['closed', 'rejected'].includes(a.status));
 
     const draft = P.loadDraft();
 
-    const rueckfrage = userApps.filter(a => a.status === 'rueckfrage').length;
+    const rueckfrage = userApps.filter(a => a.status === 'clarification').length;
     const greeting = greetingFor(new Date().getHours());
 
     document.getElementById('page-body').innerHTML = `
@@ -1625,6 +1660,12 @@
               <p class="card--quick__title">Bedarf anmelden</p>
               <p class="card--quick__desc">Unterbringung, Bürofläche oder Auslandvertretung erfassen. Geführter Ablauf in fünf Schritten mit NAW-Klassifizierung und Übergabe an SAP ePPM.</p>
               <p class="card--quick__meta"><span>FUNC-AU-*</span></p>
+              ${arrowBtn()}
+            </a>
+            <a href="#/properties" class="card--quick">
+              <p class="card--quick__title">Liegenschaften Inventar</p>
+              <p class="card--quick__desc">Übersicht der von Ihrer Verwaltungseinheit belegten Liegenschaften — Adresse, Fläche, Belegung, Vertragslaufzeit und zuständige BBL-Ansprechpersonen.</p>
+              <p class="card--quick__meta"><span>FUNC-LP-001</span></p>
               ${arrowBtn()}
             </a>
             <a href="#/repair" class="card--quick">
@@ -1653,7 +1694,7 @@
             </a>
             <a href="#/training" class="card--quick">
               <p class="card--quick__title">Schulungen</p>
-              <p class="card--quick__desc">„Mieterportal kompakt" (60 Min., DE/FR) und Aufbaukurse für ILBO und GS-Prüfende. Termine Q2 2026 zur Anmeldung offen.</p>
+              <p class="card--quick__desc">„Mieterportal kompakt" (60 Min., DE/FR) und Aufbaukurse für LBO und GS-Prüfende. Termine Q2 2026 zur Anmeldung offen.</p>
               <p class="card--quick__meta"><span>FUNC-LP-007</span></p>
               ${arrowBtn()}
             </a>
@@ -1725,7 +1766,7 @@
     if (!P.state.user) { P.navigate('#/login'); return; }
     const stepNum = parseInt(step, 10) || 1;
     if (stepNum < 1 || stepNum > 5) { P.navigate('#/wizard/1'); return; }
-    if (P.state.user.activeRole === 'GS-Prüfer/in') {
+    if (P.state.user.activeRole === 'GS-Reviewer') {
       P.toast('Bedarf anmelden steht nur in der Mieter-Rolle zur Verfügung. Bitte Rolle wechseln.');
       P.navigate('#/queue');
       return;
@@ -1825,9 +1866,9 @@
       body.querySelector('select[name="ve"]').addEventListener('change', e => {
         draft.ve = e.target.value;
         // BK detection (FUNC-FG-005)
-        draft.pipelineVariant = e.target.value === 'BK' ? 'bk' : 'standard';
+        draft.pipelineVariant = e.target.value === 'BK' ? 'bypass' : 'standard';
         P.persistDraft(draft);
-        if (draft.pipelineVariant === 'bk') {
+        if (draft.pipelineVariant === 'bypass') {
           P.toast('BK-Pfad erkannt: Antrag wird ohne GS-Schritt direkt an BBL-PFM geroutet (FUNC-FG-005).');
         }
       });
@@ -1857,8 +1898,8 @@
       if (draft.address && draft.address.length > 5) {
         // Greenfield path (FUNC-AU-013)
         draft.greenfield = true;
-        draft.pipelineVariant = draft.pipelineVariant === 'bk' ? 'bk' : 'greenfield';
-        draft.sap = null;
+        draft.pipelineVariant = draft.pipelineVariant === 'bypass' ? 'bypass' : 'greenfield';
+        draft.assetKey = null;
         draft.egid = null;
         info.innerHTML = `
           <div class="notification-banner notification-banner--warning">
@@ -1876,17 +1917,17 @@
       return;
     }
     draft.greenfield = false;
-    draft.sap = { bk: match.bk, we: match.we, obj: match.obj };
+    draft.assetKey = { ...match.assetKey };
     draft.egid = match.egid;
-    draft.pipelineVariant = draft.ve === 'BK' ? 'bk' : 'standard';
-    const bkOk = match.bk === P.state.masterData.buchungskreisBbl;
+    draft.pipelineVariant = draft.ve === 'BK' ? 'bypass' : 'standard';
+    const bkOk = match.assetKey.bk === P.state.referenceData.companyCode;
     draft.bk1086Ok = bkOk;
     info.innerHTML = `
       <div class="notification-banner notification-banner--${bkOk ? 'success' : 'danger'}">
         <div class="notification-banner__wrapper">
           <p class="notification-banner__text">
             <strong>Erkannt:</strong>
-            SAP <code>${match.bk}/${match.we}/${match.obj}</code> · EGID <code>${match.egid}</code>
+            SAP <code>${formatAssetKey(match.assetKey)}</code> · EGID <code>${match.egid}</code>
             ${bkOk
               ? '<br><span style="font-size:var(--text-body-xs);">✓ BK 1086 = BBL-Portfolio — Antrag geht an BBL.</span>'
               : '<br><span style="font-size:var(--text-body-xs);">⚠ BK ≠ 1086 — Objekt gehört nicht zu BBL. Bitte zuständige Organisation kontaktieren.</span>'
@@ -2015,16 +2056,16 @@
           <div class="calc-block">
             <dl>
               <dt>Arbeitsplätze (AP) = FTE × 0.8</dt>
-              <dd>${fte} × 0.8 = ${(fte * 0.8).toFixed(1)} → <strong>${c.arbeitsplaetze} AP</strong></dd>
+              <dd>${fte} × 0.8 = ${(fte * 0.8).toFixed(1)} → <strong>${c.workstations} AP</strong></dd>
               <dt>HNF2 = ${c.nawHnf2} m²/FTE × FTE × 0.8</dt>
               <dd>${c.nawHnf2} × ${fte} × 0.8 = <strong>${c.hnf2} m²</strong></dd>
               <dt>GF = ${c.nawGf} m²/FTE × FTE × 0.8</dt>
               <dd>${c.nawGf} × ${fte} × 0.8 = <strong>${c.gf} m²</strong></dd>
               <hr>
               <dt>UK-Kosten (vorl., illustrativ)</dt>
-              <dd>${P.formatChf(c.ukKosten)}</dd>
+              <dd>${P.formatChf(c.operatingCosts)}</dd>
               <dt>Möblierung CHF 650/m² HNF2</dt>
-              <dd>${P.formatChf(c.moeblierung)}</dd>
+              <dd>${P.formatChf(c.furnitureBudget)}</dd>
             </dl>
             ${c.overBudget ? `
               <div class="${c.hardBlocked ? 'calc-block__guardrail-block' : 'calc-block__guardrail-warn'}">
@@ -2256,8 +2297,8 @@
       </div>
 
       <div class="accordion">
-        ${section('Schritt 1 — Basisangaben', `${draft.type} · ${draft.ve} · ${P.escapeHtml(draft.address)} ${draft.sap ? `· SAP ${draft.sap.bk}/${draft.sap.we}/${draft.sap.obj}` : draft.greenfield ? '· ◼ Greenfield' : ''} ${draft.egid ? `· EGID ${draft.egid}` : ''}`, true)}
-        ${section('Schritt 2 — Flächenbedarf', c ? `NAW: ${draft.nawClass} · FTE ${c.fte} · HNF2 ${c.hnf2} m² · GF ${c.gf} m² · UK ${P.formatChf(c.ukKosten)}` : 'noch unvollständig', false)}
+        ${section('Schritt 1 — Basisangaben', `${draft.type} · ${draft.ve} · ${P.escapeHtml(draft.address)} ${draft.assetKey ? `· SAP ${draft.assetKey.bk}/${draft.assetKey.we}/${draft.assetKey.obj}` : draft.greenfield ? '· ◼ Greenfield' : ''} ${draft.egid ? `· EGID ${draft.egid}` : ''}`, true)}
+        ${section('Schritt 2 — Flächenbedarf', c ? `NAW: ${draft.nawClass} · FTE ${c.fte} · HNF2 ${c.hnf2} m² · GF ${c.gf} m² · UK ${P.formatChf(c.operatingCosts)}` : 'noch unvollständig', false)}
         ${section('Schritt 3 — Anhänge', (draft.attachments || []).map(a => a.name).join(' · ') || 'keine', false)}
         ${draft.type === 'Grossantrag' ? section('Schritt 4 — Detail-Felder', grossOk ? 'vollständig ausgefüllt' : 'unvollständig', false) : ''}
       </div>
@@ -2266,7 +2307,7 @@
         <h3>Workflow-Vorschau</h3>
         <p style="margin:0;font-size:var(--text-body-sm);">
           Nach dem Senden geht der Antrag an
-          ${draft.pipelineVariant === 'bk' ? '<strong>BBL Portfolio-Management</strong> (BK-Pfad — kein GS, FUNC-FG-005)' : '<strong>GS UVEK</strong>'}
+          ${draft.pipelineVariant === 'bypass' ? '<strong>BBL Portfolio-Management</strong> (BK-Pfad — kein GS, FUNC-FG-005)' : '<strong>GS UVEK</strong>'}
           (Bearbeitungszeit gemäss SLA). Sie erhalten eine E-Mail und sehen den Status in der Inbox (FUNC-FG-004).
         </p>
         ${draft.greenfield ? '<p style="margin:var(--space-sm) 0 0;font-size:var(--text-body-xs);color:var(--color-text-secondary);">Greenfield-Pfad: nach Genehmigung legt BBL-IM die WE im SAP an, danach ePPM-Übergabe.</p>' : ''}
@@ -2313,33 +2354,46 @@
   }
 
   function submitDraft(draft) {
-    // Promote draft to a submitted application (in-memory)
-    const id = 'BE-2026-' + String(Math.floor(Math.random() * 900 + 100));
+    // Promote draft to a submitted application (in-memory).
+    // Schema-canonical fields per docs/DATAMODEL.md §4.1. The `id` and
+    // `address` aliases mirror what loadData() injects so render code
+    // doesn't have to distinguish freshly-submitted from loaded records.
+    const applicationId = 'BE-2026-' + String(Math.floor(Math.random() * 900 + 100));
     const c = P.calcWizard({ nawClass: draft.nawClass, fte: draft.fte });
+    // Pull atomic address fields from the matched Building when one exists;
+    // greenfield drafts keep the free-text only.
+    const match = P.state.buildings.find(b => b.address && draft.address && b.address.toLowerCase() === draft.address.toLowerCase());
+    const ts = new Date().toISOString();
     const newApp = {
-      id, type: draft.type, pipelineVariant: draft.pipelineVariant,
-      status: 'eingereicht',
+      applicationId, applicationType: draft.type, pipelineVariant: draft.pipelineVariant,
+      status: 'submitted',
       submitterId: P.state.user.id, submitterVe: draft.ve, submitterDep: P.state.user.dep,
-      submittedAt: new Date().toISOString(),
-      address: draft.address,
-      sap: draft.sap, egid: draft.egid,
+      buildingId: match ? match.buildingId : null,
+      submittedAt: ts,
+      street: match ? match.street : '', houseNumber: match ? match.houseNumber : '',
+      postalCode: match ? match.postalCode : '', city: match ? match.city : '', country: 'CH',
+      assetKey: draft.assetKey, egid: draft.egid,
       naw: { class: draft.nawClass, confidence: draft.nawConfidence, answers: draft.nawAnswers },
       fte: draft.fte,
-      arbeitsplaetze: c ? c.arbeitsplaetze : null,
+      workstations: c ? c.workstations : null,
       hnf2: c ? c.hnf2 : null, gf: c ? c.gf : null,
-      ukKosten: c ? c.ukKosten : null, moeblierung: c ? c.moeblierung : null,
+      operatingCosts: c ? c.operatingCosts : null, furnitureBudget: c ? c.furnitureBudget : null,
       attachments: draft.attachments || [],
       history: [
-        { ts: new Date().toISOString(), actor: P.state.user.name, action: 'Antrag erstellt' },
-        { ts: new Date().toISOString(), actor: P.state.user.name, action: 'Eingereicht' }
+        { ts, actor: P.state.user.name, eventType: 'ApplicationAdded',     action: 'Antrag erstellt' },
+        { ts, actor: P.state.user.name, eventType: 'ApplicationSubmitted', action: 'Eingereicht' }
       ],
       _isNew: true,
+      // Aliases mirroring loadData() normalisation
+      id: applicationId,
+      type: draft.type,
+      address: draft.address,
     };
     P.state.applications.unshift(newApp);
     P.clearDraft();
     P.state.draft = null;
-    P.toast(`Antrag ${id} eingereicht. ${draft.pipelineVariant === 'bk' ? 'Routet an BBL-PFM (BK-Bypass).' : 'Routet an GS.'}`, 'success');
-    P.navigate('#/inbox/' + id);
+    P.toast(`Antrag ${applicationId} eingereicht. ${draft.pipelineVariant === 'bypass' ? 'Routet an BBL-PFM (BK-Bypass).' : 'Routet an GS.'}`, 'success');
+    P.navigate('#/inbox/' + applicationId);
   }
 
   // ── 5. SUBMITTER INBOX ───────────────────────────────────────────────────
@@ -2347,7 +2401,7 @@
     if (!P.state.user) { P.navigate('#/'); return; }
     const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Meine Anträge' }] });
     const role = P.state.user.activeRole;
-    const apps = role === 'GS-Prüfer/in'
+    const apps = role === 'GS-Reviewer'
       ? P.state.applications.filter(a => a.submitterVe === P.state.user.ve)
       : P.state.applications.filter(a => a.submitterId === P.state.user.id);
 
@@ -2358,17 +2412,17 @@
     document.getElementById('page-body').innerHTML = `
       <section class="section">
         <div class="container">
-          <h1 style="margin-top:0;">${role === 'GS-Prüfer/in' ? 'Anträge der VE' : 'Meine Anträge'}</h1>
+          <h1 style="margin-top:0;">${role === 'GS-Reviewer' ? 'Anträge der VE' : 'Meine Anträge'}</h1>
           <div style="display:flex;gap:var(--space-md);margin-bottom:var(--space-md);flex-wrap:wrap;">
             <select id="filterStatus" class="form-field__select" style="min-height:auto;">
               <option value="">Alle Status</option>
-              <option value="entwurf">Entwurf</option>
-              <option value="eingereicht">Eingereicht</option>
-              <option value="in_gs_pruefung">in GS-Prüfung</option>
-              <option value="in_pfm_pruefung">in PFM-Prüfung</option>
-              <option value="rueckfrage">Rückfrage</option>
-              <option value="in_eppm">in ePPM</option>
-              <option value="abgeschlossen">Abgeschlossen</option>
+              <option value="draft">Entwurf</option>
+              <option value="submitted">Eingereicht</option>
+              <option value="in_review_gs">in GS-Prüfung</option>
+              <option value="in_review_pfm">in PFM-Prüfung</option>
+              <option value="clarification">Rückfrage</option>
+              <option value="in_project">in ePPM</option>
+              <option value="closed">Abgeschlossen</option>
             </select>
             <input id="filterText" type="search" class="form-field__input" placeholder="Suche …" style="flex:1;min-width:200px;min-height:auto;">
           </div>
@@ -2462,7 +2516,7 @@
               <p style="margin:0;color:var(--color-text-secondary);">Eingereicht ${P.formatDate(a.submittedAt)} · Typ ${a.type}</p>
             </div>
             <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
-              ${a.status === 'rueckfrage' ? '<button class="btn btn--filled btn--sm" onclick="window.t3lite.startResubmit(\''+a.id+'\')">Auflagen erfüllen → Erneut einreichen</button>' : ''}
+              ${a.status === 'clarification' ? '<button class="btn btn--filled btn--sm" onclick="window.t3lite.startResubmit(\''+a.id+'\')">Auflagen erfüllen → Erneut einreichen</button>' : ''}
             </div>
           </div>
 
@@ -2510,11 +2564,11 @@
       return `
         <div class="card">
           <h3 class="card__title">SAP RE-FX Integration</h3>
-          ${a.sap ? `
-            <p>Objekt-Schlüssel: <code>${a.sap.bk}/${a.sap.we}/${a.sap.obj}</code></p>
+          ${a.assetKey ? `
+            <p>Objekt-Schlüssel: <code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code></p>
             <p>EGID: <code>${a.egid}</code></p>
           ` : '<p>◼ Greenfield — WE/Obj noch nicht vergeben.</p>'}
-          ${a.bedarfsmeldungNr ? `<p>Bedarfsmeldung: <strong>${a.bedarfsmeldungNr}</strong></p>` : ''}
+          ${a.projectNumber ? `<p>Bedarfsmeldung: <strong>${a.projectNumber}</strong></p>` : ''}
           <p style="font-size:var(--text-body-xs);color:var(--color-text-muted);">Korrelations-ID: <code>MP-${(a.id || '').slice(-4)}-Z3K9-F2M8-XQ${(Math.random() * 100 | 0)}</code></p>
         </div>
       `;
@@ -2528,25 +2582,25 @@
         </div>
         <div class="card">
           <h3 class="card__title">Standort</h3>
-          <p style="margin:0;">${P.escapeHtml(a.address)}<br>${a.sap ? `<code>${a.sap.bk}/${a.sap.we}/${a.sap.obj}</code> · EGID <code>${a.egid}</code>` : '◼ Greenfield'}</p>
+          <p style="margin:0;">${P.escapeHtml(a.address)}<br>${a.assetKey ? `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · EGID <code>${a.egid}</code>` : '◼ Greenfield'}</p>
         </div>
         ${a.naw ? `
           <div class="card">
             <h3 class="card__title">Flächenbedarf</h3>
-            <p style="margin:0;">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} · AP ${a.arbeitsplaetze} · HNF2 ${a.hnf2} m² · GF ${a.gf} m²<br>UK ${P.formatChf(a.ukKosten)} · Möblierung ${P.formatChf(a.moeblierung)}</p>
+            <p style="margin:0;">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} · AP ${a.workstations} · HNF2 ${a.hnf2} m² · GF ${a.gf} m²<br>UK ${P.formatChf(a.operatingCosts)} · Möblierung ${P.formatChf(a.furnitureBudget)}</p>
           </div>
-        ` : a.berths ? `
+        ` : a.extensionData?.berths ? `
           <div class="card">
             <h3 class="card__title">SEM-Variante</h3>
-            <p style="margin:0;">Schlafplätze: <strong>${a.berths}</strong> (Familie ${a.berthsFamily} · Einzel ${a.berthsSingle} · Mehrbett ${a.berthsShared})<br>Investitionspauschale ${P.formatChf(a.investitionspauschale)}</p>
+            <p style="margin:0;">Schlafplätze: <strong>${a.extensionData.berths}</strong> (Familie ${a.extensionData.berthsFamily} · Einzel ${a.extensionData.berthsSingle} · Mehrbett ${a.extensionData.berthsShared})<br>Investitionspauschale ${P.formatChf(a.extensionData.investmentLumpSum)}</p>
           </div>
         ` : ''}
-        ${a.status === 'rueckfrage' && a.auflagen ? `
+        ${a.status === 'clarification' && a.conditions ? `
           <div class="card" style="grid-column: 1 / -1;border-left: 4px solid var(--color-warning);">
             <h3 class="card__title">↻ Rückfrage / Offene Auflagen</h3>
-            <p style="margin:0 0 var(--space-sm);font-size:var(--text-body-sm);"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerBegruendung)}</p>
+            <p style="margin:0 0 var(--space-sm);font-size:var(--text-body-sm);"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
             <ul class="auflagen-list">
-              ${a.auflagen.map((x, i) => `
+              ${a.conditions.map((x, i) => `
                 <li class="${x.done ? 'done' : ''}">
                   <input type="checkbox" ${x.done ? 'checked' : ''} onclick="window.t3lite.toggleAuflage('${a.id}', ${i})">
                   <span>${P.escapeHtml(x.comment)}</span>
@@ -2566,8 +2620,8 @@
     const main = shell({ activeNav: 'queue', breadcrumb: [{ label: 'Pendenzen' }], deptSub: 'Mieterportal · GS-Prüfer/in' });
     const queue = P.state.applications.filter(a => {
       // Reviewers see all VE applications that are awaiting review
-      return ['eingereicht', 'in_gs_pruefung', 'rueckfrage'].includes(a.status)
-          && a.pipelineVariant !== 'bk';
+      return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
+          && a.pipelineVariant !== 'bypass';
     });
 
     document.getElementById('page-body').innerHTML = `
@@ -2664,12 +2718,12 @@
                   <tr><th>Antragstyp</th><td>${a.type}</td></tr>
                   <tr><th>VE / DEP</th><td>${a.submitterVe} ${a.submitterDep ? '/ ' + a.submitterDep : ''}</td></tr>
                   <tr><th>Adresse</th><td>${P.escapeHtml(a.address)}</td></tr>
-                  ${a.sap ? `<tr><th>SAP / EGID</th><td><code>${a.sap.bk}/${a.sap.we}/${a.sap.obj}</code> · ${a.egid}</td></tr>` : ''}
+                  ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · ${a.egid}</td></tr>` : ''}
                   ${a.naw ? `<tr><th>NAW-Klasse</th><td>${a.naw.class} (Konfidenz ${Math.round((a.naw.confidence || 0) * 100)} %)</td></tr>` : ''}
-                  ${a.fte ? `<tr><th>FTE / AP</th><td>${a.fte} / ${a.arbeitsplaetze}</td></tr>` : ''}
+                  ${a.fte ? `<tr><th>FTE / AP</th><td>${a.fte} / ${a.workstations}</td></tr>` : ''}
                   ${a.hnf2 ? `<tr><th>HNF2 / GF</th><td>${a.hnf2} m² / ${a.gf} m²</td></tr>` : ''}
-                  ${a.ukKosten ? `<tr><th>UK-Kosten</th><td>${P.formatChf(a.ukKosten)}</td></tr>` : ''}
-                  ${a.berths ? `<tr><th>SEM Schlafplätze</th><td>${a.berths} (Pauschale ${P.formatChf(a.investitionspauschale)})</td></tr>` : ''}
+                  ${a.operatingCosts ? `<tr><th>UK-Kosten</th><td>${P.formatChf(a.operatingCosts)}</td></tr>` : ''}
+                  ${a.extensionData?.berths ? `<tr><th>SEM Schlafplätze</th><td>${a.extensionData.berths} (Pauschale ${P.formatChf(a.extensionData.investmentLumpSum)})</td></tr>` : ''}
                   <tr><th>Anhänge</th><td>${(a.attachments || []).map(x => x.name).join(' · ') || 'keine'}</td></tr>
                 </table>
               </div>
@@ -2744,18 +2798,18 @@
       a.history = a.history || [];
       a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: `Entscheid: ${dec} — "${begr}"` });
       if (dec === 'genehmigen') {
-        a.status = 'genehmigt';
+        a.status = 'approved';
         setTimeout(() => {
-          a.status = 'in_eppm';
-          a.bedarfsmeldungNr = 'BM-2026-00' + Math.floor(Math.random() * 900 + 100);
-          P.toast(`ePPM-Übergabe erfolgreich: ${a.bedarfsmeldungNr}`, 'success');
+          a.status = 'in_project';
+          a.projectNumber = 'BM-2026-00' + Math.floor(Math.random() * 900 + 100);
+          P.toast(`ePPM-Übergabe erfolgreich: ${a.projectNumber}`, 'success');
         }, 2000);
       } else if (dec === 'auflage') {
-        a.status = 'rueckfrage';
-        a.reviewerBegruendung = begr;
-        a.auflagen = a.auflagen || [{ field: 'fte', comment: begr, done: false }];
+        a.status = 'clarification';
+        a.reviewerJustification = begr;
+        a.conditions = a.conditions || [{ field: 'fte', comment: begr, done: false }];
       } else {
-        a.status = 'abgelehnt';
+        a.status = 'rejected';
       }
       P.toast('Entscheid gespeichert.', 'success');
       P.navigate('#/queue');
@@ -2856,7 +2910,7 @@
   function filterTenancies(list, q) {
     if (!q) return list;
     return list.filter(t => {
-      const hay = [t.buildingName, t.address, t.sap, t.egid, t.ve, t.dep, t.pfmKategorie]
+      const hay = [t.buildingName, t.address, formatAssetKey(t.assetKey), t.egid, t.ve, t.dep, t.portfolioCategory]
         .filter(Boolean).join(' ').toLowerCase();
       return hay.includes(q);
     });
@@ -2934,12 +2988,12 @@
             ${items.map(t => `
               <tr onclick="location.hash='#/properties/${t.id}'" tabindex="0"
                   onkeydown="if(event.key==='Enter')location.hash='#/properties/${t.id}'">
-                <td><code>${t.sap}</code></td>
+                <td><code>${formatAssetKey(t.assetKey)}</code></td>
                 <td>${t.egid}</td>
                 <td><strong>${P.escapeHtml(t.buildingName)}</strong></td>
                 <td>${P.escapeHtml(t.address)}</td>
                 <td class="numeric">${t.hnf2}</td>
-                <td class="numeric">${t.arbeitsplaetze}</td>
+                <td class="numeric">${t.workstations}</td>
                 <td>${t.openIssues > 0
                   ? `<span class="badge badge--warning">${t.openIssues} offen</span>`
                   : `<span class="badge badge--success">ok</span>`}</td>
@@ -3035,8 +3089,8 @@
           const popup = new maplibregl.Popup({ offset: 22, closeButton: false, maxWidth: '260px' }).setHTML(`
             <div class="property-popup">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
-              <p class="property-popup__meta">${t.sap} · ${P.escapeHtml(t.address)}</p>
-              <p class="property-popup__meta">${t.hnf2} m² · ${t.arbeitsplaetze} AP</p>
+              <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · ${P.escapeHtml(t.address)}</p>
+              <p class="property-popup__meta">${t.hnf2} m² · ${t.workstations} AP</p>
               <a class="property-popup__link" href="#/properties/${t.id}">Details öffnen →</a>
             </div>`);
           const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
@@ -3074,17 +3128,17 @@
       <a href="#/properties/${t.id}" class="card--property">
         <div class="card--property__image" style="background-image:url('${t.image}');"></div>
         <div class="card--property__body">
-          <p class="card--property__sap">${t.sap} · EGID ${t.egid}</p>
+          <p class="card--property__sap">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
           <h3 class="card--property__title">${P.escapeHtml(t.buildingName)}</h3>
-          <p class="card--property__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
+          <p class="card--property__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
           <div class="card--property__meta">
             <span>${t.hnf2} m² HNF2</span>
-            <span>${t.arbeitsplaetze} AP</span>
+            <span>${t.workstations} AP</span>
             <span>${P.formatChf(t.yearlyCost)} / Jahr</span>
           </div>
           <div class="card--property__footer">
             ${issuesBadge}
-            <span style="font-size:var(--text-body-xs);color:var(--color-text-muted);">${P.escapeHtml(t.pfmKategorie)}</span>
+            <span style="font-size:var(--text-body-xs);color:var(--color-text-muted);">${P.escapeHtml(t.portfolioCategory)}</span>
           </div>
         </div>
       </a>
@@ -3114,9 +3168,9 @@
           <header style="display:grid;grid-template-columns:1fr;gap:var(--space-lg);margin-bottom:var(--space-xl);">
             <div style="position:relative;border-radius:var(--radius-lg);overflow:hidden;height:280px;background:url('${t.image}') center/cover;">
               <div style="position:absolute;inset:auto 0 0 0;background:linear-gradient(transparent,var(--color-black-70));padding:var(--space-lg);color:var(--color-white);">
-                <p style="margin:0 0 var(--space-xs);font-size:var(--text-body-xs);text-transform:uppercase;letter-spacing:1px;opacity:0.85;">${t.sap} · EGID ${t.egid}</p>
+                <p style="margin:0 0 var(--space-xs);font-size:var(--text-body-xs);text-transform:uppercase;letter-spacing:1px;opacity:0.85;">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
                 <h1 style="margin:0;font-size:var(--text-h1);color:var(--color-white);">${P.escapeHtml(t.buildingName)}</h1>
-                <p style="margin:var(--space-xs) 0 0;opacity:0.9;">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floor)}</p>
+                <p style="margin:var(--space-xs) 0 0;opacity:0.9;">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
               </div>
             </div>
           </header>
@@ -3127,9 +3181,9 @@
                 <h2 class="h2 section-heading">Vertrag & Mengengerüst</h2>
                 <table class="table" style="margin-top:var(--space-md);">
                   <tr><th>Mietende VE</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
-                  <tr><th>PFM-Kategorie</th><td>${P.escapeHtml(t.pfmKategorie)}</td></tr>
+                  <tr><th>PFM-Kategorie</th><td>${P.escapeHtml(t.portfolioCategory)}</td></tr>
                   <tr><th>HNF2 / GF</th><td>${t.hnf2} m² / ${t.gf} m²</td></tr>
-                  <tr><th>Arbeitsplätze</th><td>${t.arbeitsplaetze}</td></tr>
+                  <tr><th>Arbeitsplätze</th><td>${t.workstations}</td></tr>
                   <tr><th>Mietkosten</th><td>${P.formatChf(t.yearlyCost)} / Jahr</td></tr>
                   <tr><th>Vertragslaufzeit</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)} ${t.leaseAuto ? '<span class="badge badge--success">automatisch verlängernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
                   <tr><th>Restlaufzeit</th><td>~${monthsToEnd} Monate</td></tr>
@@ -3147,11 +3201,10 @@
 
               <section style="margin-bottom: var(--space-2xl);">
                 <h2 class="h2 section-heading">Pläne & Belege zu dieser Liegenschaft</h2>
-                ${downloadList([
-                  { title: `Grundriss ${t.floor}`,              subtitle: 'Plan',     format: 'PDF', size: '4.2 MB', date: '15.03.2026' },
-                  { title: 'Mietvertrag (Auszug)',              subtitle: 'Vertrag',  format: 'PDF', size: '1.1 MB', date: '01.07.2024' },
-                  { title: 'Sicherheits- & Brandschutzkonzept', subtitle: 'Konzept',  format: 'PDF', size: '2.4 MB', date: '22.11.2025' },
-                ])}
+                ${downloadList((P.state.downloads?.propertyDetail || []).map(d => ({
+                  ...d,
+                  title: d.title || (d.titleTemplate || '').replace('{floorLabel}', t.floorLabel || ''),
+                })))}
               </section>
             </div>
 
@@ -3170,15 +3223,15 @@
                 <dl style="margin:0;display:grid;grid-template-columns:1fr;gap:var(--space-sm);">
                   <div>
                     <dt style="font-size:var(--text-body-sm);color:var(--color-text-secondary);font-weight:var(--font-weight-normal);">Portfolio-Management</dt>
-                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblPfm)}</dd>
+                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.pfm)}</dd>
                   </div>
                   <div>
                     <dt style="font-size:var(--text-body-sm);color:var(--color-text-secondary);font-weight:var(--font-weight-normal);">Immobilien-Management</dt>
-                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblIm)}</dd>
+                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.im)}</dd>
                   </div>
                   <div>
                     <dt style="font-size:var(--text-body-sm);color:var(--color-text-secondary);font-weight:var(--font-weight-normal);">Flächenmanagement (FLM)</dt>
-                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.bblFlm)}</dd>
+                    <dd style="margin:0;font-weight:var(--font-weight-semibold);">${P.escapeHtml(t.contacts.flm)}</dd>
                   </div>
                 </dl>
               </div>
@@ -3228,17 +3281,10 @@
     document.getElementById('filterDocText').addEventListener('input', applyDocFilter);
   }
 
+  // Downloads-page content lives in data/downloads.json (loaded by loadData).
+  // Returns an empty list before data has loaded so the page renders cleanly.
   function sampleDocuments() {
-    return [
-      { title: 'Merkblatt: Antrag richtig stellen', type: 'Merkblatt', format: 'PDF', size: '320 KB', languages: 'DE · FR · IT', source: 'BBL Campus', responsible: 'E. Frey', stand: '11.05.2026', scope: 'Alle' },
-      { title: 'Grundriss Bundeshaus West, 3. OG', type: 'Grundriss', format: 'PDF', size: '4.2 MB', languages: 'DE', source: 'BBL-IM', responsible: 'A. Wirz', stand: '15.03.2026', scope: 'UVEK' },
-      { title: 'Schulung „Mieterportal kompakt" (60 Min.)', type: 'Schulung', format: 'MP4', size: '245 MB', languages: 'DE', source: 'BBL Campus', responsible: 'M. Diener', stand: '13.05.2026', scope: 'Alle' },
-      { title: 'Vorlage: SEM-Bedarfsmeldung', type: 'Vorlage', format: 'DOCX', size: '180 KB', languages: 'DE · FR', source: 'BBL PFM', responsible: 'H. Ludwig', stand: '17.05.2026', scope: 'SEM' },
-      { title: 'Sicherheits- & Brandschutzkonzept BBL', type: 'Merkblatt', format: 'PDF', size: '2.4 MB', languages: 'DE · FR · IT', source: 'BBL Campus', responsible: 'E. Frey', stand: '22.11.2025', scope: 'Alle' },
-      { title: 'NAW-Klassen Übersicht (Bürowelten)', type: 'Merkblatt', format: 'PDF', size: '410 KB', languages: 'DE', source: 'BBL PFM', responsible: 'H. Ludwig', stand: '10.01.2026', scope: 'Alle' },
-      { title: 'Grundriss Sulgenrain 19, EG', type: 'Grundriss', format: 'PDF', size: '3.8 MB', languages: 'DE', source: 'BBL-IM', responsible: 'H. Studer', stand: '02.04.2026', scope: 'BAFU' },
-      { title: 'Vertragsvorlage Mieterportal (Bsp.)', type: 'Vertrag', format: 'PDF', size: '780 KB', languages: 'DE', source: 'BBL PFM', responsible: 'H. Ludwig', stand: '20.02.2026', scope: 'Intern' },
-    ];
+    return P.state.downloads?.documents || [];
   }
 
   // Federal-CD download list (kbob.admin.ch / armasuisse Immo-Portal pattern).
@@ -3400,11 +3446,6 @@
             </div>
           </div>
 
-          <div class="card card--highlight" style="margin-bottom: var(--space-lg);">
-            <h2 class="card__title">AGOV / E-ID — geplante Migration</h2>
-            <p class="card__lead">Ab Dezember 2026 wird der Zugang für externe Mietende schrittweise von eIAM auf die föderale AGOV-Plattform und das E-ID umgestellt. Sie werden rechtzeitig informiert und müssen nichts vorab unternehmen. Roadmap-Eintrag <code>OP-3</code>.</p>
-          </div>
-
           <button class="btn btn--bare" onclick="window.portal.logout()">Abmelden</button>
         </div>
       </section>
@@ -3531,21 +3572,21 @@
       const building = P.state.tenancies.find(t => t.id === data.get('building'));
       if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
       const ticketId = 'R-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
-      P.toast(`Schadensmeldung ${ticketId} an BBL-IM gesendet (${P.escapeHtml(building.contacts.bblIm)}).`, 'success');
+      P.toast(`Schadensmeldung ${ticketId} an BBL-IM gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
       setTimeout(() => P.navigate('#/properties/' + building.id), 800);
     },
     demoRole(role) {
       // Convenience: log in as a demo user whose roles include the requested
-      // role. Different profile cards demo different personas (ILBO, GS,
-      // BBL-PFM, Auditor) — pick the matching user from users.json.
+      // role. Different profile cards demo different personas (LBO,
+      // GS-Reviewer, BBL-PFM, Auditor) — pick the matching user from users.json.
       const candidate = P.state.users.find(u => u.roles.includes(role));
       if (!candidate) { P.toast('Demo-Profil für ' + role + ' nicht vorhanden.'); return; }
       P.state.user = { ...candidate, activeRole: role };
       P.persistRole(role);
       P.toast(`Angemeldet als ${candidate.name} — Rolle ${P.roleLabel(role)}`, 'success');
       const landing = {
-        'ILBO':           '#/home',
-        'GS-Prüfer/in':   '#/queue',
+        'LBO':           '#/home',
+        'GS-Reviewer':   '#/queue',
         'BBL-PFM':        '#/home',
         'BBL-Campus':     '#/home',
         'Auditor':        '#/inbox',
@@ -3629,7 +3670,7 @@
             begrs.forEach(b => {
               const a = P.state.applications.find(x => x.id === b.id);
               if (!a) return;
-              a.status = 'genehmigt';
+              a.status = 'approved';
               a.history = a.history || [];
               a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: 'Bulk-genehmigt — "' + b.text + '"' });
             });
@@ -3647,8 +3688,8 @@
     },
     toggleAuflage(appId, idx) {
       const a = P.state.applications.find(x => x.id === appId);
-      if (!a || !a.auflagen) return;
-      a.auflagen[idx].done = !a.auflagen[idx].done;
+      if (!a || !a.conditions) return;
+      a.conditions[idx].done = !a.conditions[idx].done;
       P.handleHash();
     },
     startResubmit(appId) {
@@ -3663,8 +3704,8 @@
           { label: 'Erneut einreichen', variant: 'btn--filled', onClick: () => {
             const a = P.state.applications.find(x => x.id === appId);
             if (a) {
-              a.auflagen?.forEach(x => x.done = true);
-              a.status = 'eingereicht';
+              a.conditions?.forEach(x => x.done = true);
+              a.status = 'submitted';
               a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: 'Resubmission nach Auflagenerfüllung' });
               P.toast('Antrag erneut eingereicht.', 'success');
               P.handleHash();

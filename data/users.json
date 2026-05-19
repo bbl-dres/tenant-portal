@@ -1,22 +1,22 @@
 [
   {
-    "id": "U.123.456",
+    "userId": "U.123.456",
     "name": "Andrea Muster",
     "email": "andrea.muster@uvek.admin.ch",
     "ve": "UVEK",
     "dep": "BAFU",
-    "roles": ["ILBO", "GS-Prüfer/in"]
+    "roles": ["LBO", "GS-Reviewer"]
   },
   {
-    "id": "U.654.321",
+    "userId": "U.654.321",
     "name": "Jörg Berger",
     "email": "joerg.berger@uvek.admin.ch",
     "ve": "UVEK",
     "dep": "GS UVEK",
-    "roles": ["GS-Prüfer/in"]
+    "roles": ["GS-Reviewer"]
   },
   {
-    "id": "U.111.222",
+    "userId": "U.111.222",
     "name": "Holger Ludwig",
     "email": "holger.ludwig@bbl.admin.ch",
     "ve": "BBL",
@@ -24,7 +24,7 @@
     "roles": ["BBL-PFM"]
   },
   {
-    "id": "U.333.444",
+    "userId": "U.333.444",
     "name": "Daniela Imbach",
     "email": "daniela.imbach@efv.admin.ch",
     "ve": "EFV",
@@ -32,7 +32,7 @@
     "roles": ["Auditor"]
   },
   {
-    "id": "U.555.666",
+    "userId": "U.555.666",
     "name": "Eveline Frey",
     "email": "eveline.frey@bbl.admin.ch",
     "ve": "BBL",

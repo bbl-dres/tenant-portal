@@ -1,0 +1,38 @@
+{
+  "documents": [
+    { "title": "Merkblatt: Antrag richtig stellen",           "type": "Merkblatt", "format": "PDF",  "size": "320 KB", "languages": "DE · FR · IT", "source": "BBL Campus", "responsible": "E. Frey",     "stand": "11.05.2026", "scope": "Alle" },
+    { "title": "Grundriss Bundeshaus West, 3. OG",            "type": "Grundriss", "format": "PDF",  "size": "4.2 MB", "languages": "DE",           "source": "BBL-IM",     "responsible": "A. Wirz",     "stand": "15.03.2026", "scope": "UVEK" },
+    { "title": "Schulung „Mieterportal kompakt\" (60 Min.)",  "type": "Schulung",  "format": "MP4",  "size": "245 MB", "languages": "DE",           "source": "BBL Campus", "responsible": "M. Diener",   "stand": "13.05.2026", "scope": "Alle" },
+    { "title": "Vorlage: SEM-Bedarfsmeldung",                 "type": "Vorlage",   "format": "DOCX", "size": "180 KB", "languages": "DE · FR",      "source": "BBL PFM",    "responsible": "H. Ludwig",   "stand": "17.05.2026", "scope": "SEM" },
+    { "title": "Sicherheits- & Brandschutzkonzept BBL",       "type": "Merkblatt", "format": "PDF",  "size": "2.4 MB", "languages": "DE · FR · IT", "source": "BBL Campus", "responsible": "E. Frey",     "stand": "22.11.2025", "scope": "Alle" },
+    { "title": "NAW-Klassen Übersicht (Bürowelten)",          "type": "Merkblatt", "format": "PDF",  "size": "410 KB", "languages": "DE",           "source": "BBL PFM",    "responsible": "H. Ludwig",   "stand": "10.01.2026", "scope": "Alle" },
+    { "title": "Grundriss Sulgenrain 19, EG",                 "type": "Grundriss", "format": "PDF",  "size": "3.8 MB", "languages": "DE",           "source": "BBL-IM",     "responsible": "H. Studer",   "stand": "02.04.2026", "scope": "BAFU" },
+    { "title": "Vertragsvorlage Mieterportal (Bsp.)",         "type": "Vertrag",   "format": "PDF",  "size": "780 KB", "languages": "DE",           "source": "BBL PFM",    "responsible": "H. Ludwig",   "stand": "20.02.2026", "scope": "Intern" }
+  ],
+  "regulations": [
+    { "title": "Verordnung über das Immobilienmanagement und die Logistik des Bundes (VILB)", "subtitle": "SR 172.010.21",                     "format": "PDF", "size": "210 KB", "date": "01.01.2025" },
+    { "title": "Weisung über das Immobilienmanagement der zivilen Bundesverwaltung (WILB)",   "subtitle": "EFD-Weisung",                        "format": "PDF", "size": "180 KB", "date": "01.04.2024" },
+    { "title": "Verordnung über das öffentliche Beschaffungswesen (VöB)",                     "subtitle": "SR 172.056.11 · Auszug Immobilien", "format": "PDF", "size": "320 KB", "date": "01.01.2024" },
+    { "title": "Architekturkonzept Bund",                                                      "subtitle": "BBL Vorgabe für Neu- und Umbauten", "format": "PDF", "size": "4.1 MB", "date": "15.05.2024" },
+    { "title": "Vorgaben Bürobeschaffung & Arbeitsplatzstandards",                             "subtitle": "Anhang zur WILB",                    "format": "PDF", "size": "290 KB", "date": "12.02.2025" }
+  ],
+  "strategies": [
+    { "title": "Immobilienstrategie der zivilen Bundesverwaltung 2030", "subtitle": "BBL Portfolio-Management",                   "format": "PDF", "size": "2.3 MB", "date": "20.11.2023" },
+    { "title": "Nachhaltigkeitsstrategie Bundesimmobilien",             "subtitle": "Klima, Energie, Kreislaufwirtschaft",        "format": "PDF", "size": "1.8 MB", "date": "03.07.2024" },
+    { "title": "Vorbildwirkung Energie und Klima — Aktionsplan Bund",   "subtitle": "EFD / BFE",                                   "format": "PDF", "size": "950 KB", "date": "15.01.2025" },
+    { "title": "Konzept «Neue Arbeitswelten» (NAW)",                    "subtitle": "Bürowelten, Desk-Sharing, Flächenkennzahlen", "format": "PDF", "size": "1.4 MB", "date": "06.09.2024" },
+    { "title": "Digitalisierungsstrategie BBL",                          "subtitle": "Stossrichtungen 2024–2028",                   "format": "PDF", "size": "780 KB", "date": "28.03.2024" }
+  ],
+  "training": [
+    { "title": "Modul 1 — Einleitung",                      "subtitle": "Mieterportal BBL", "format": "PDF", "size": "540 KB", "date": "15.04.2026" },
+    { "title": "Modul 2 — Rollen und Verantwortlichkeiten", "subtitle": "Mieterportal BBL", "format": "PDF", "size": "1.4 MB", "date": "15.04.2026" },
+    { "title": "Modul 3 — Bedarfsmeldung erfassen",         "subtitle": "Mieterportal BBL", "format": "PDF", "size": "2.1 MB", "date": "15.04.2026" },
+    { "title": "Modul 4 — NAW und Flächenstandards",        "subtitle": "Mieterportal BBL", "format": "PDF", "size": "1.1 MB", "date": "15.04.2026" },
+    { "title": "Modul 5 — Greenfield, BK-Bypass und SEM",   "subtitle": "Mieterportal BBL", "format": "PDF", "size": "230 KB", "date": "15.04.2026" }
+  ],
+  "propertyDetail": [
+    { "titleTemplate": "Grundriss {floorLabel}",      "subtitle": "Plan",    "format": "PDF", "size": "4.2 MB", "date": "15.03.2026" },
+    { "title": "Mietvertrag (Auszug)",                "subtitle": "Vertrag", "format": "PDF", "size": "1.1 MB", "date": "01.07.2024" },
+    { "title": "Sicherheits- & Brandschutzkonzept",   "subtitle": "Konzept", "format": "PDF", "size": "2.4 MB", "date": "22.11.2025" }
+  ]
+}

@@ -8,16 +8,17 @@
     { "name": "Sicherheit-Labor",        "hnf2PerFte": 18.0, "gfPerFte": 34.0, "description": "Sicherheitsbereich, Labor, Spezial-Ausstattung" }
   ],
   "deskSharingFactor": 0.8,
-  "moeblierungProM2": 650,
-  "ukKostenObergrenzeProM2Gf": 60,
-  "ukKostenHardBlockMultiplier": 1.2,
-  "semProBettenplatz": 120000,
-  "buchungskreisBbl": "1086",
-  "pfmKategorien": [
-    "Verwaltung Klasse I (Repräsentativ)",
-    "Verwaltung Klasse II (Standard)",
-    "Verwaltung Klasse III (Funktional)",
-    "Empfangszentrum SEM",
-    "Vertretung EDA"
+  "furnitureBudgetPerSqm": 650,
+  "operatingCostCeilingPerSqmGf": 60,
+  "operatingCostHardBlockMultiplier": 1.2,
+  "semBerthLumpSum": 120000,
+  "companyCode": "1086",
+  "currency": "CHF",
+  "portfolioCategories": [
+    "Administration Class I",
+    "Administration Class II",
+    "Administration Class III",
+    "SEM Reception Centre",
+    "EDA Representation"
   ]
 }
