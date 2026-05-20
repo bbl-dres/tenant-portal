@@ -4221,8 +4221,44 @@ a.btn[aria-disabled="true"] {
 }
 .property-popup__title { margin: 0 0 4px; font-weight: var(--font-weight-bold); font-size: var(--text-body); }
 .property-popup__meta  { margin: 0 0 2px; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
-.property-popup__link  { display: inline-block; margin-top: 6px; font-size: var(--text-body-sm); color: var(--color-primary); font-weight: var(--font-weight-bold); text-decoration: none; }
+.property-popup__link  { display: inline-block; margin-top: var(--space-sm); font-size: var(--text-body-sm); color: var(--color-primary); font-weight: var(--font-weight-bold); text-decoration: none; }
 .property-popup__link:hover { text-decoration: underline; }
+/* Banner image at the top of the portfolio-map popup — confirms which
+   building the user is hovering on before they commit to the click. */
+.property-popup__image {
+  width: calc(100% + var(--space-md) * 2);
+  height: 120px;
+  margin: calc(-1 * var(--space-md)) calc(-1 * var(--space-md)) var(--space-sm);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-bg-alt);
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+}
+.property-popup__body { display: block; }
+
+/* `.property-location-map` — Standort map at the bottom of the property
+   detail page. Single marker centred on the building. Uses MapLibre +
+   positron + WGS84 because the BBL portfolio spans federal-wide and
+   eventually overseas FDFA missions, so the basemap must work globally. */
+.property-location-map {
+  width: 100%;
+  height: 320px;
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-bg-alt);
+}
+@media (min-width: 768px) { .property-location-map { height: 400px; } }
+@media (min-width: 1280px) { .property-location-map { height: 480px; } }
+.property-location-meta {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+/* Static marker variant — same teardrop pin but without hover/active
+   treatments (no click interaction on a single-building map). */
+.property-marker--static { cursor: default; pointer-events: none; }
 
 /* (Pagination rules consolidated — single canonical block lives in the
    "DOCUMENTS PAGE — filter bar, document table, pagination" section above.

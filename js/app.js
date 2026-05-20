@@ -2001,12 +2001,18 @@ function initPropertiesMap(items) {
         el.dataset.id = t.id;
         el.innerHTML = '<span class="property-marker__pin"></span>';
         el.addEventListener('click', () => focusPropertyOnMap(t.id));
-        const popup = new maplibregl.Popup({ offset: 22, closeButton: false, maxWidth: '260px' }).setHTML(`
+        const veLine = `${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}`;
+        const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' }).setHTML(`
           <div class="property-popup">
-            <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
-            <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · ${P.escapeHtml(t.address)}</p>
-            <p class="property-popup__meta">${t.hnf2} m² · ${t.workstations} AP</p>
-            <a class="property-popup__link" href="#/properties/${t.id}">Details öffnen →</a>
+            <div class="property-popup__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${t.image}');"></div>
+            <div class="property-popup__body">
+              <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
+              <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+              <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>
+              <p class="property-popup__meta">${veLine} · ${P.escapeHtml(t.portfolioCategory)}</p>
+              <p class="property-popup__meta">${t.hnf2.toLocaleString('de-CH')} m² HNF2 · ${t.workstations} Arbeitsplätze</p>
+              <a class="property-popup__link" href="#/properties/${t.id}">Details öffnen →</a>
+            </div>
           </div>`);
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([t.lng, t.lat]).setPopup(popup).addTo(map);
@@ -2271,6 +2277,12 @@ function renderPropertyDetail({ id }) {
                 ? `<p class="text-secondary">Keine Dokumente zu dieser Liegenschaft hinterlegt.</p>`
                 : `<div class="doc-groups">${docGroupHtml}</div>`}
             </section>
+
+            <section class="property-section">
+              <h2 class="h2 section-heading">Standort</h2>
+              <div id="propertyLocationMap" class="property-location-map" aria-label="Karte: Standort der Liegenschaft"></div>
+              <p class="property-location-meta">${P.escapeHtml(t.address)}${typeof t.lat === 'number' && typeof t.lng === 'number' ? ` · ${t.lat.toFixed(4)}°N, ${t.lng.toFixed(4)}°E` : ''}</p>
+            </section>
           </div>
 
           <aside class="property-aside">
@@ -2305,6 +2317,48 @@ function renderPropertyDetail({ id }) {
       </div>
     </section>
   `;
+
+  initPropertyDetailMap(t);
+}
+
+// `Standort` map on the property detail page — single marker on a positron
+// basemap, centred on the building's lat/lng. WGS84 since the portfolio is
+// federal-wide and (eventually) overseas (FDFA missions). Lazy-initialised
+// MapLibre, torn down on route change.
+let _propertyDetailMap = null;
+function initPropertyDetailMap(t) {
+  if (typeof t.lat !== 'number' || typeof t.lng !== 'number') return;
+  loadMapLibre().then(maplibregl => {
+    const container = document.getElementById('propertyLocationMap');
+    if (!container) return;
+    if (_propertyDetailMap) { try { _propertyDetailMap.remove(); } catch {} _propertyDetailMap = null; }
+
+    const map = new maplibregl.Map({
+      container,
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [t.lng, t.lat],
+      zoom: 15,
+      attributionControl: { compact: true },
+    });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    _propertyDetailMap = map;
+
+    map.on('load', () => {
+      const el = document.createElement('div');
+      el.className = 'property-marker property-marker--static';
+      el.setAttribute('aria-label', t.buildingName);
+      el.innerHTML = '<span class="property-marker__pin"></span>';
+      new maplibregl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([t.lng, t.lat])
+        .addTo(map);
+    });
+  }).catch(err => {
+    console.error('[property location map]', err);
+    const container = document.getElementById('propertyLocationMap');
+    if (container) {
+      container.innerHTML = '<p class="text-secondary" style="padding: var(--space-lg);">Karte konnte nicht geladen werden.</p>';
+    }
+  });
 }
 
 // ── 10b. GESCHOSS-DETAIL — interaktiver Grundriss ────────────────────────
