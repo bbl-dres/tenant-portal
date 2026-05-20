@@ -600,7 +600,7 @@ function renderInfoPage() {
 
           <div class="contact-section__map">
             <iframe
-              src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2596141&N=1199499&zoom=11&crosshair=marker"
+              src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2596141&N=1199499&zoom=10&crosshair=marker"
               title="Standort BBL Fellerstrasse 21, 3027 Bern auf swisstopo"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"></iframe>
