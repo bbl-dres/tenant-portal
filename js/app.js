@@ -2335,6 +2335,30 @@ const USETYPE_LABEL_DE = {
 let _floorMap = null;
 let _floorPopup = null;  // active MapLibre Popup for the clicked room
 
+// useType → fill colour. Single source of truth, mirrored in the legend
+// swatches in styles.css. Pre-computed onto each feature property at
+// spacesFc construction time so the MapLibre paint spec stays trivial —
+// `['get', 'fillColor']` rather than a `match` expression.
+const USETYPE_FILL = {
+  Office:        '#bfdbfe',
+  OpenSpace:     '#bfdbfe',
+  FocusRoom:     '#93c5fd',
+  Reception:     '#bfdbfe',
+  MeetingRoom:   '#fde68a',
+  TrainingRoom:  '#fde68a',
+  Lounge:        '#fde68a',
+  Cafeteria:     '#fcd34d',
+  Corridor:      '#e5e7eb',
+  WC:            '#d1d5db',
+  Kitchenette:   '#e5e7eb',
+  PrintRoom:     '#e5e7eb',
+  Cloakroom:     '#e5e7eb',
+  Storage:       '#ddd6fe',
+  Archive:       '#c4b5fd',
+  TechnicalRoom: '#d1d5db',
+  Lab:           '#ddd6fe',
+};
+
 function renderFloorDetail({ id, floorSlug }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
@@ -2481,48 +2505,51 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     }]};
     const spacesFc = { type: 'FeatureCollection', features: spaces.map(s => {
       const useLabel = USETYPE_LABEL_DE[s.useType] || s.useType;
-      // Pre-compose a three-line label (number / Nutzung / Fläche). Doing it
-      // here instead of via a MapLibre `format` expression avoids needing a
-      // bold glyph stack and keeps the label render predictable.
+      // Pre-compose a three-line label (number / Nutzung / Fläche) and the
+      // fill colour. Pre-computing client-side keeps the MapLibre paint spec
+      // trivial (`['get', 'fillColor']` instead of a `match` expression) —
+      // useful both for performance and for spotting data issues quickly.
       const label = `${s.name}\n${useLabel}\n${s.area} m²`;
+      const fillColor = USETYPE_FILL[s.useType] || '#ff66cc'; // bright pink = unmapped useType, visible in QA
       return {
         type: 'Feature',
         geometry: s.geometry,
         properties: {
           spaceId: s.spaceId, floorId: s.floorId, name: s.name,
-          useType: s.useType, useLabel, area: s.area, label,
+          useType: s.useType, useLabel, area: s.area, label, fillColor,
           capacity: s.capacity, isBookable: s.isBookable,
           occupierVe: s.occupierVe, occupierDep: s.occupierDep,
         }
       };
     })};
-    console.log('[floor canvas]', floor.floorId, 'building', spacesFc.features.length, 'space features');
+    console.log('[floor canvas]', floor.floorId, 'with', spacesFc.features.length, 'space features');
     if (spacesFc.features.length > 0) {
-      console.log('[floor canvas] sample feature:', spacesFc.features[0]);
+      const sample = spacesFc.features[0];
+      console.log('[floor canvas] sample feature props:', sample.properties);
+      console.log('[floor canvas] sample feature geometry:', sample.geometry);
     }
 
     const coords = floor.geometry.coordinates[0];
     const lngs = coords.map(c => c[0]);
     const lats = coords.map(c => c[1]);
-    const bounds = [
-      [Math.min(...lngs), Math.min(...lats)],
-      [Math.max(...lngs), Math.max(...lats)]
-    ];
+    // Centroid as the average of the polygon vertices — good enough for
+    // the simple rectangular floors used in the mock data.
+    const centerLng = lngs.reduce((s, v) => s + v, 0) / lngs.length;
+    const centerLat = lats.reduce((s, v) => s + v, 0) / lats.length;
 
+    // Mirror the working pattern from the workspace-management sample:
+    // boot the map with a real basemap style (positron) and a stable
+    // `center` + `zoom`, then jumpTo the floor centroid after load. An
+    // inline blank style with `bounds` in the constructor pushed MapLibre
+    // to auto-fit zoom ~20-21 where small fill polygons stopped rendering.
     const map = new maplibregl.Map({
       container,
-      style: {
-        version: 8,
-        // MapLibre's public demo glyph server — needed for text-field rendering
-        // (room labels). No basemap or sprite, just the font glyphs.
-        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-        sources: {},
-        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#fafafa' } }]
-      },
-      bounds,
-      fitBoundsOptions: { padding: 32, animate: false },
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [centerLng, centerLat],
+      zoom: 18.5,
       attributionControl: false,
       maxZoom: 22,
+      preserveDrawingBuffer: true,
       // Keep the floor plan oriented like architectural drawings — north up,
       // no rotation gestures. Pinch-zoom and pan stay enabled so users can
       // get close to dense room clusters on a big floor.
@@ -2559,43 +2586,41 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     }
 
     map.on('load', () => {
-      map.addSource('floor', { type: 'geojson', data: floorFc });
+      // Strip every layer that came from positron so the basemap doesn't
+      // bleed under the floor plan. We could hide them individually but a
+      // sweep keeps this resilient to upstream style changes — we want
+      // only our floor + room polygons visible above a clean background.
+      map.getStyle().layers.forEach(l => { try { map.removeLayer(l.id); } catch {} });
+      map.addLayer({ id: 'floor-bg', type: 'background', paint: { 'background-color': '#fafafa' } });
+
+      map.addSource('floor',  { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
       console.log('[floor canvas] map loaded, sources added');
+      // Sanity-check: query the source to confirm features made it through
+      map.once('idle', () => {
+        try {
+          const querySrc = map.querySourceFeatures('spaces');
+          console.log('[floor canvas] spaces source contains', querySrc.length, 'queried features');
+        } catch (e) {
+          console.warn('[floor canvas] querySourceFeatures failed', e);
+        }
+      });
 
-      // Room fills — colour by useType macro-category. The room polygons
-      // tile the entire floor (8 north + corridor + 8 south = full coverage),
-      // so a separate floor-fill underlay is redundant. The colours are
-      // mirrored in the `.floor-legend__swatch--*` styles.
+      // Room fills — colour is pre-computed onto each feature's `fillColor`
+      // property (see USETYPE_FILL above). The room polygons tile the entire
+      // floor (8 north + corridor + 8 south = full coverage), so a separate
+      // floor-fill underlay is redundant. Bright pink fallback flags any
+      // feature whose useType isn't in USETYPE_FILL.
       map.addLayer({
         id: 'rooms-fill',
         type: 'fill',
         source: 'spaces',
         paint: {
-          'fill-color': [
-            'match', ['get', 'useType'],
-            'Office',        '#bfdbfe',
-            'OpenSpace',     '#bfdbfe',
-            'FocusRoom',     '#93c5fd',
-            'Reception',     '#bfdbfe',
-            'MeetingRoom',   '#fde68a',
-            'TrainingRoom',  '#fde68a',
-            'Lounge',        '#fde68a',
-            'Cafeteria',     '#fcd34d',
-            'Corridor',      '#e5e7eb',
-            'WC',            '#d1d5db',
-            'Kitchenette',   '#e5e7eb',
-            'PrintRoom',     '#e5e7eb',
-            'Cloakroom',     '#e5e7eb',
-            'Storage',       '#ddd6fe',
-            'Archive',       '#c4b5fd',
-            'TechnicalRoom', '#d1d5db',
-            'Lab',           '#ddd6fe',
-            /* default */    '#f3f4f6'
-          ],
+          'fill-color': ['coalesce', ['get', 'fillColor'], '#ff66cc'],
           'fill-opacity': 1
         }
       });
+      console.log('[floor canvas] rooms-fill layer added');
 
       // Default room outlines — darker / thicker than before for a more
       // legible "every cell is a room" grid feel.
@@ -2669,6 +2694,14 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       });
       map.on('mouseenter', 'rooms-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
       map.on('mouseleave', 'rooms-fill', () => { map.getCanvas().style.cursor = ''; });
+
+      // Fit the floor outline into the visible canvas after every layer is
+      // in place. maxZoom 20 keeps us below the level where MapLibre's
+      // internal vector tile gets fussy with small fill polygons.
+      map.fitBounds(
+        [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+        { padding: 40, maxZoom: 20, animate: false }
+      );
 
       if (initialSpaceId) {
         const initial = spaces.find(s => s.spaceId === initialSpaceId);
