@@ -1,7 +1,7 @@
-# Mieterportal des Bundes
+# Federal Tenant Portal (Mieterportal des Bundes)
 
 <p align="center">
-  <img src="assets/Social.jpg" width="100%" alt="BBL Mieterportal"/>
+  <img src="assets/Social.jpg" width="100%" alt="BBL Federal Tenant Portal"/>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 > **This is an unofficial mockup for demonstration purposes only.**
 > All data is fictional. Not all features are fully functional. This project serves as a visual and conceptual prototype — it is not intended for production use.
 
-Prototype of the federal tenant portal for [Bundesamt für Bauten und Logistik (BBL)](https://www.bbl.admin.ch). The Mieterportal is the digital entry point for the administrative units (Verwaltungseinheiten) of the civilian federal administration to register space needs, track application status, manage their tenancies, report damage, and access plans + documents for the ~ 2 800 BBL-managed properties.
+Prototype of the federal tenant portal for the [Federal Office for Buildings and Logistics (Bundesamt für Bauten und Logistik, BBL)](https://www.bbl.admin.ch). The portal (Mieterportal) is the digital entry point for the administrative units (Verwaltungseinheiten, VE) of the civilian federal administration to register space needs, track application status, manage their tenancies (Mietverhältnisse), report damage, and access plans + documents for the ~ 2 800 BBL-managed properties.
 
 ## Preview
 
@@ -38,15 +38,15 @@ Prototype of the federal tenant portal for [Bundesamt für Bauten und Logistik (
 ## Features
 
 ### Core flows
-- **5-step Bedarfsmeldung wizard** — guided application for office space, accommodation, or foreign-mission premises. Live NAW classification, m²/FTE area calculation with desk-sharing factor, attachment scan, validation checklist, draft auto-save.
+- **5-step space-needs application wizard (Bedarfsmeldung)** — guided application for office space, accommodation, or foreign-mission premises. Live workplace-standards classification (NAW), m²/FTE area calculation with desk-sharing factor, attachment scan, validation checklist, draft auto-save.
 - **Application inbox** — submitter's view of their own applications with status pipeline, filter chips by status, paginated table, full detail view with attachments + history tabs.
-- **Reviewer queue** (GS-Prüfer/in) — keyboard-driven (`j`/`k`/`Enter`/`x`), bulk-approve modal, queue statistics strip, dense table with 25 rows per page.
-- **Property portfolio** — gallery / list / map views with MapLibre GL JS, filtered by VE, exportable, with detail page per property (banner, mietverhältnis, related applications, contacts).
-- **Pläne & Dokumente** — paginated documents page with type / building / text filters, simulated downloads.
+- **Reviewer queue** (General Secretariat reviewer, GS-Prüfer/in) — keyboard-driven (`j`/`k`/`Enter`/`x`), bulk-approve modal, queue statistics strip, dense table with 25 rows per page.
+- **Property portfolio** — gallery / list / map views with MapLibre GL JS, filtered by administrative unit (VE), exportable, with detail page per property (banner, tenancy (Mietverhältnis), related applications, contacts).
+- **Plans & Documents (Pläne & Dokumente)** — paginated documents page with type / building / text filters, simulated downloads.
 - **News + Info** — long-form info page with sticky TOC scroll-spy, news overview + detail, search across all entities.
-- **Role switching** — LBO (tenant), GS-Reviewer, BBL-PFM, BBL-Campus, Auditor. Each role gets a tailored nav + landing.
+- **Role switching** — tenant (LBO), GS reviewer, BBL Portfolio Management (BBL-PFM), BBL Campus, Auditor. Each role gets a tailored nav + landing.
 
-### Federal CD alignment
+### Federal Corporate Design (CD Bund) alignment
 - ≈ 99 % aligned with [`swiss/designsystem`](https://github.com/swiss/designsystem) v1.0.9 — typography, color, layout, spacing, components.
 - Bundled Noto Sans (Regular / Bold / Italic / Bold-Italic).
 - WCAG 2.1 AA: skip-link, focus rings, `prefers-reduced-motion`, ARIA disclosure for dropdowns, semantic markup, contrast verified.
@@ -65,9 +65,9 @@ Prototype of the federal tenant portal for [Bundesamt für Bauten und Logistik (
 | Vanilla JavaScript | ES6+ ESM | Router, state, views |
 | HTML5 / CSS3 | Modern | Structure + styling (Flexbox, Grid, CSS Variables) |
 | MapLibre GL JS | v5.x (CDN) | Property portfolio map view |
-| `swiss/designsystem` | v1.0.9 | CD Bund tokens + components (hand-translated) |
+| `swiss/designsystem` | v1.0.9 | Federal Corporate Design (CD Bund) tokens + components (hand-translated) |
 | Noto Sans | bundled | Federal canonical typeface |
-| JSON | static | Mock data (applications, buildings, tenancies, …) |
+| JSON | static | Mock data (applications, buildings, tenancies (Mietverhältnisse), …) |
 
 No build tools, no package manager, no framework — pure static files.
 
@@ -92,46 +92,13 @@ Then open http://localhost:8000
 
 ```
 tenant-portal/
-├── index.html                  # SPA entry — mounts #root, loads js/app.js as module
-├── README.md
-├── LICENSE
-├── assets/
-│   ├── Social.jpg / .png       # GitHub social-preview image
-│   ├── Preview1.JPG            # README hero preview
-│   ├── Preview2.JPG            # README side-by-side preview (left)
-│   ├── Preview3.JPG            # README side-by-side preview (right)
-│   ├── BundLogo.svg            # Federal CD wordmark
-│   ├── swiss-logo-flag.svg     # CH Wappen (for YouTube channel-avatar)
-│   ├── swiss-logo-name.svg     # CH lettermark
-│   ├── youtube-play.svg        # YouTube play glyph
-│   ├── fonts/                  # Noto Sans (bundled per CD Bund)
-│   └── images/                 # Explainer video thumbnail, etc.
-├── css/
-│   ├── tokens.css              # Design tokens — CD Bund canonical
-│   └── styles.css              # Federal chrome + app components
-├── js/
-│   ├── app.js                  # Router, views, role logic, wizard handlers
-│   ├── shell.js                # Federal chrome (top-bar, navbar, breadcrumb, footer)
-│   ├── wizard.js               # 5-step Bedarfsmeldung — calcWizard, deriveNawClass
-│   ├── state.js                # State singleton + loadData
-│   └── lib.js                  # Pure helpers, icons, toast, modal, pipeline
-├── data/
-│   ├── applications.json       # Application records
-│   ├── buildings.geojson       # Building inventory (GeoJSON FeatureCollection)
-│   ├── tenancies.json          # Mietverhältnisse
-│   ├── documents.json          # Document records (per § 6.2)
-│   ├── downloads.json          # UI download lists
-│   ├── news.json               # News items
-│   ├── users.json              # Demo users + role mapping
-│   └── reference-data.json     # NAW classes, desk-sharing factor, etc.
-└── docs/
-    ├── REQUIREMENTS.md         # Functional + non-functional requirements
-    ├── DATAMODEL.md            # Canonical schema (Tidy-data principles)
-    ├── DESIGNGUIDE.md          # CD Bund mapping, BEM conventions, authoring rules
-    ├── CD-AUDIT.md             # CD Bund vs app gap analysis (≈ 99 % aligned)
-    ├── IDEATE-WIREFRAMES.md    # Wireframe sketches per route
-    ├── RESEARCH-EXAMPLES.md    # Federal-site references (swisstopo, kbob, armasuisse)
-    └── RESEARCH-MARKET.md      # Market screening notes
+├── index.html   # SPA entry — mounts #root, loads js/app.js as module
+├── assets/      # Images, logos, bundled Noto Sans fonts
+├── css/         # Design tokens (CD Bund) + app stylesheet
+├── js/          # Router, shell, wizard, state, helpers (ES modules)
+├── data/        # Static JSON / GeoJSON mocks (applications, buildings, tenancies, …)
+├── docs/        # Requirements, data model, design guide, CD audit, research
+└── scripts/     # Local utility scripts
 ```
 
 ## Deployment
