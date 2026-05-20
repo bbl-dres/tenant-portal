@@ -167,10 +167,31 @@ const root = document.getElementById('root');
 // ── BOOTSTRAP ────────────────────────────────────────────────────────────
 init();
 
+// Hashes that work for an unauthenticated visitor. Everything else is a
+// detail/list view behind the eIAM-equivalent gate and must auto-login
+// first so shareable deep links resolve to the intended page.
+const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info']);
+
 async function init() {
   await P.loadData('data/');
   P.wireGlobalShortcuts();
   registerRoutes();
+  // Deep-link auto-login: a user opening a shared URL like
+  // `#/properties/T-2011-AA-01/floors/1OG` would otherwise be bounced to
+  // `#/` because every detail handler does `if (!state.user) navigate('#/')`.
+  // In production this is where eIAM session restore happens — for the
+  // prototype we silently grant the first multi-role demo user so the
+  // intended route renders directly. Toast + navigate() are skipped
+  // because we want to land on the URL the user actually typed.
+  const initialPath = (location.hash.split('?')[0] || '').toLowerCase();
+  if (!state.user && !PUBLIC_HASHES.has(initialPath)) {
+    const user = state.users.find(u => u.roles.length > 1) || state.users[0];
+    if (user) {
+      state.user = { ...user };
+      const persistedRole = loadRole();
+      state.user.activeRole = persistedRole || user.roles[0];
+    }
+  }
   window.addEventListener('hashchange', P.handleHash);
   P.handleHash();
 }
@@ -2475,6 +2496,10 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         }
       };
     })};
+    console.log('[floor canvas]', floor.floorId, 'building', spacesFc.features.length, 'space features');
+    if (spacesFc.features.length > 0) {
+      console.log('[floor canvas] sample feature:', spacesFc.features[0]);
+    }
 
     const coords = floor.geometry.coordinates[0];
     const lngs = coords.map(c => c[0]);
@@ -2536,17 +2561,12 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     map.on('load', () => {
       map.addSource('floor', { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
+      console.log('[floor canvas] map loaded, sources added');
 
-      // Floor fill — a near-white slab so room colours read clearly against it.
-      map.addLayer({
-        id: 'floor-fill',
-        type: 'fill',
-        source: 'floor',
-        paint: { 'fill-color': '#ffffff', 'fill-opacity': 1 }
-      });
-
-      // Room fills — colour by useType macro-category. The same palette is
-      // mirrored in the legend swatches in styles.css.
+      // Room fills — colour by useType macro-category. The room polygons
+      // tile the entire floor (8 north + corridor + 8 south = full coverage),
+      // so a separate floor-fill underlay is redundant. The colours are
+      // mirrored in the `.floor-legend__swatch--*` styles.
       map.addLayer({
         id: 'rooms-fill',
         type: 'fill',
@@ -2554,35 +2574,36 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         paint: {
           'fill-color': [
             'match', ['get', 'useType'],
-            'Office',        '#dbeafe',
-            'OpenSpace',     '#dbeafe',
-            'FocusRoom',     '#bfdbfe',
-            'Reception',     '#dbeafe',
-            'MeetingRoom',   '#fef3c7',
-            'TrainingRoom',  '#fef3c7',
-            'Lounge',        '#fef3c7',
-            'Cafeteria',     '#fde68a',
-            'Corridor',      '#f3f4f6',
-            'WC',            '#e5e7eb',
-            'Kitchenette',   '#f3f4f6',
-            'PrintRoom',     '#f3f4f6',
-            'Cloakroom',     '#f3f4f6',
-            'Storage',       '#ede9fe',
-            'Archive',       '#ddd6fe',
-            'TechnicalRoom', '#e5e7eb',
-            'Lab',           '#ede9fe',
-            /* default */    '#f9fafb'
+            'Office',        '#bfdbfe',
+            'OpenSpace',     '#bfdbfe',
+            'FocusRoom',     '#93c5fd',
+            'Reception',     '#bfdbfe',
+            'MeetingRoom',   '#fde68a',
+            'TrainingRoom',  '#fde68a',
+            'Lounge',        '#fde68a',
+            'Cafeteria',     '#fcd34d',
+            'Corridor',      '#e5e7eb',
+            'WC',            '#d1d5db',
+            'Kitchenette',   '#e5e7eb',
+            'PrintRoom',     '#e5e7eb',
+            'Cloakroom',     '#e5e7eb',
+            'Storage',       '#ddd6fe',
+            'Archive',       '#c4b5fd',
+            'TechnicalRoom', '#d1d5db',
+            'Lab',           '#ddd6fe',
+            /* default */    '#f3f4f6'
           ],
-          'fill-opacity': 0.9
+          'fill-opacity': 1
         }
       });
 
-      // Default room outlines (light gray).
+      // Default room outlines — darker / thicker than before for a more
+      // legible "every cell is a room" grid feel.
       map.addLayer({
         id: 'rooms-outline',
         type: 'line',
         source: 'spaces',
-        paint: { 'line-color': '#9ca3af', 'line-width': 1 }
+        paint: { 'line-color': '#6b7280', 'line-width': 1.25 }
       });
 
       // "My VE" outlines (federal red).
