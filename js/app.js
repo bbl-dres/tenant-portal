@@ -2337,7 +2337,7 @@ function initPropertyDetailMap(t) {
       container,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [t.lng, t.lat],
-      zoom: 15,
+      zoom: 17.5,
       attributionControl: { compact: true },
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');

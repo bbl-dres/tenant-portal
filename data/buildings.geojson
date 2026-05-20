@@ -3,7 +3,13 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4459, 46.9481] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.445525,
+          46.947071
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2010",
         "name": "Bundeshaus Nord",
@@ -12,7 +18,11 @@
         "postalCode": "3003",
         "city": "Bern",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2010", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2010",
+          "obj": "AA"
+        },
         "egid": "100123456",
         "portfolioCategory": "Administration Class I",
         "image": "https://images.unsplash.com/photo-1684599243896-1e084b386da8?w=400"
@@ -20,7 +30,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4884, 46.9766] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.480078,
+          46.973789
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2011",
         "name": "BAFU Hauptsitz Worblentalstrasse",
@@ -29,7 +45,11 @@
         "postalCode": "3063",
         "city": "Ittigen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2011", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2011",
+          "obj": "AA"
+        },
         "egid": "100234567",
         "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400"
@@ -37,7 +57,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4880, 46.9763] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.478989,
+          46.973946
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2012",
         "name": "ARE Hauptsitz",
@@ -46,7 +72,11 @@
         "postalCode": "3063",
         "city": "Ittigen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2012", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2012",
+          "obj": "AA"
+        },
         "egid": "100345678",
         "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1576731753569-3e93a228048c?w=400"
@@ -54,7 +84,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4858, 46.9776] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.473168,
+          46.976067
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2013",
         "name": "BAV Hauptsitz",
@@ -63,7 +99,11 @@
         "postalCode": "3063",
         "city": "Ittigen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2013", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2013",
+          "obj": "AA"
+        },
         "egid": "100456789",
         "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400"
@@ -71,7 +111,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4863, 46.9779] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.474186,
+          46.975094
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2014",
         "name": "BAZL Hauptsitz",
@@ -80,7 +126,11 @@
         "postalCode": "3063",
         "city": "Ittigen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2014", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2014",
+          "obj": "AA"
+        },
         "egid": "100567890",
         "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400"
@@ -88,7 +138,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4815, 46.9744] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.471904,
+          46.97644
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2015",
         "name": "BFE Hauptsitz",
@@ -97,7 +153,11 @@
         "postalCode": "3063",
         "city": "Ittigen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2015", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2015",
+          "obj": "AA"
+        },
         "egid": "100678901",
         "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1621831337128-35676ca30868?w=400"
@@ -105,7 +165,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.9505, 47.2872] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.953462,
+          47.29208
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2016",
         "name": "ASTRA Filiale Zofingen",
@@ -114,7 +180,11 @@
         "postalCode": "4800",
         "city": "Zofingen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2016", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2016",
+          "obj": "AA"
+        },
         "egid": "100789012",
         "portfolioCategory": "Administration Class III",
         "image": "https://images.unsplash.com/photo-1470075801209-17f9ec0cada6?w=400"
@@ -122,7 +192,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.2569, 47.1493] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.247909,
+          47.132824
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2017",
         "name": "BAKOM Hauptsitz",
@@ -131,7 +207,11 @@
         "postalCode": "2503",
         "city": "Biel/Bienne",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2017", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2017",
+          "obj": "AA"
+        },
         "egid": "100890123",
         "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1600531529272-023c4b821f14?w=400"
@@ -139,7 +219,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [8.5614, 47.4502] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.540425,
+          47.462534
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2018",
         "name": "MeteoSchweiz Flughafen Zürich",
@@ -148,7 +234,11 @@
         "postalCode": "8058",
         "city": "Zürich-Flughafen",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2018", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2018",
+          "obj": "AA"
+        },
         "egid": "100901234",
         "portfolioCategory": "Administration Class III",
         "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400"
@@ -156,7 +246,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [8.7869, 46.1748] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          8.787636,
+          46.172569
+        ]
+      },
       "properties": {
         "buildingId": "BLD-2019",
         "name": "MeteoSchweiz Locarno-Monti",
@@ -165,7 +261,11 @@
         "postalCode": "6605",
         "city": "Locarno-Monti",
         "country": "CH",
-        "assetKey": { "bk": "1086", "we": "2019", "obj": "AA" },
+        "assetKey": {
+          "bk": "1086",
+          "we": "2019",
+          "obj": "AA"
+        },
         "egid": "101012345",
         "portfolioCategory": "Administration Class III",
         "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400"
