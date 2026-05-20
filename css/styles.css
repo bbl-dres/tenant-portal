@@ -2112,49 +2112,170 @@ a.btn[aria-disabled="true"] {
 .share-bar__btn span { display: none; }
 @media (min-width: 640px) { .share-bar__btn span { display: inline; } }
 
-/* ── SEARCH RESULTS LIST ────────────────────────────────────────────────── */
-/* Grouped layout — each origin (News / Anträge / Liegenschaften /
-   Informationen) gets a section header and a result list. Replaces a
-   half-dozen inline `style="margin-bottom:var(--space-2xl);font-size:..."`
-   blocks. */
+/* ── SEARCH HERO ─────────────────────────────────────────────────────────
+   Top section on the search-results page — federal cool-blue-gray tint
+   (.section--alt) carrying the H1 + a prominent search input that
+   re-displays the current query so the user can refine without going
+   back to the global nav. CD pattern from designsystem
+   `app/pages/searchResults.vue` (search--large search--page-result). */
+.search-hero__title {
+  margin: 0 0 var(--space-lg);
+}
+.search-hero__form {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: stretch;
+  max-width: 720px;
+}
+.search-hero__field {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.search-hero__field .inline-icon {
+  position: absolute;
+  left: var(--space-md);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+.search-hero__input {
+  width: 100%;
+  padding-left: 48px;
+  font-size: var(--text-body);
+  background: var(--color-white);
+}
+.search-hero__meta {
+  margin: var(--space-lg) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+/* ── SEARCH RESULTS LIST ─────────────────────────────────────────────────
+   Grouped layout — each origin (News / Anträge / Liegenschaften /
+   Informationen) gets a section header and a result list. Each row is a
+   card-list-style entity with meta-info (type + date/key) on top, a
+   bold title, optional lead, and a chevron-right affordance on the
+   right matching the CD SearchResultsList card pattern. */
 .search-results__group {
   margin-bottom: var(--space-2xl);
 }
 .search-results__group-title {
-  margin: 0 0 var(--space-md);
+  margin: 0 0 var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+.search-results__group-count {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--text-body);
 }
 .search-results {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.search-results li {
-  border-top: 1px solid var(--color-border-light);
+.search-results__item {
+  border-top: 1px solid var(--color-secondary-100);
 }
-.search-results li:last-child { border-bottom: 1px solid var(--color-border-light); }
-.search-results a {
-  display: block;
-  padding: var(--space-md) 0;
+.search-results__item:last-child { border-bottom: 1px solid var(--color-secondary-100); }
+.search-results__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
   text-decoration: none;
   color: var(--color-text-primary);
-  transition: color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
-.search-results a:hover .search-results__title { color: var(--color-primary); }
-.search-results__title {
+.search-results__link:hover {
+  background: var(--color-secondary-50);
+  color: var(--color-text-primary);
+}
+.search-results__link:hover .search-results__title,
+.search-results__link:hover .search-results__arrow {
+  color: var(--color-primary);
+}
+.search-results__body {
+  flex: 1;
+  min-width: 0;
+}
+.search-results__meta {
+  margin: 0 0 var(--space-xs);
+}
+.search-results__type {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  font-size: var(--text-body-xs);
   font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+.search-results__title {
+  margin: 0;
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-snug);
   transition: color var(--transition-fast);
 }
 .search-results__lead {
   margin: var(--space-xs) 0 0;
   color: var(--color-text-secondary);
   font-size: var(--text-body-sm);
+  line-height: var(--line-height-snug);
+}
+.search-results__arrow {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+.search-results__link:hover .search-results__arrow {
+  transform: translateX(3px);
 }
 /* "+ X weitere in der … →" link below a capped search-results group.
    Lets the user pivot to the canonical paginated surface when a group
    has more matches than the cap. */
 .search-results__more {
-  margin: var(--space-sm) 0 0;
+  margin: var(--space-md) 0 0;
   font-size: var(--text-body-sm);
+}
+
+/* ── SEARCH NO-RESULTS STATE ─────────────────────────────────────────────
+   CD canonical: bold-search-term H2, "Tipps zur Suche" h3 + list,
+   "Hinweis" h3 + paragraph. Replaces our previous bare
+   `.empty-state` treatment with something users can actually act on. */
+.search-no-results {
+  max-width: 640px;
+}
+.search-no-results__title {
+  margin: 0 0 var(--space-xl);
+}
+.search-no-results__title strong { color: var(--color-text-primary); }
+.search-no-results__heading {
+  margin: var(--space-lg) 0 var(--space-sm);
+}
+.search-no-results__list {
+  margin: 0 0 var(--space-lg);
+  padding-left: var(--space-lg);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+}
+.search-no-results__list li + li { margin-top: var(--space-xs); }
+.search-no-results__hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Bottom-of-page info notification on search results — federal pattern
+   from CD `searchResults.vue` (Notification type="info"). */
+.search-results__contact {
+  margin-top: var(--space-2xl);
 }
 
 /* ── EMPTY STATE ────────────────────────────────────────────────────────── */
