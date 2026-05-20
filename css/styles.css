@@ -42,6 +42,11 @@
   max-width: var(--container-max-width);
   margin: 0 auto;
   padding: 0 var(--container-padding);
+  /* CD Bund `.container` adds `overflow-x: clip` so an accidentally-
+     overflowing child (long table, wide image) doesn't trigger a
+     horizontal scrollbar on the whole page. Defensive — costs nothing
+     when nothing overflows. */
+  overflow-x: clip;
 }
 /* `.container--reading` — narrow column tuned for long-form prose (news
    articles, help pages). 780 px is the sweet spot for 60–80 chars/line at
@@ -65,6 +70,36 @@
 .section { padding-block: var(--section-py); }
 .section--lg { padding-block: var(--section-py); }
 .section--py-tight { padding-block: var(--section-py-half); }
+/* CD canonical name for the half-padding modifier. Alias so CD
+   markup like `<section class="section section--py-half">` works
+   straight from a CD copy-paste. */
+.section--py-half { padding-block: var(--section-py-half); }
+
+/* ── .vertical-spacing — CD foundation utility ─────────────────────────
+   From `designsystem/css/foundations/spacings.postcss`. Applied to a
+   container; child elements inherit a consistent vertical rhythm so
+   views stop bolting on ad-hoc `margin-top` per element. Default child
+   gap 48 → 56 px; heading-to-element 24 px; consecutive paragraphs
+   16 px. First child gets no top margin so the rhythm starts at zero.
+*/
+.vertical-spacing > * { margin-top: var(--space-2xl); }
+@media (min-width: 1544px) {
+  .vertical-spacing > * { margin-top: 3.5rem; }   /* 56 px at 2xl, per CD */
+}
+.vertical-spacing > *:first-child { margin-top: 0; }
+/* Headings reset their own bottom margin (so the rhythm comes from the
+   next sibling's top margin only) and tighten the gap to the next
+   element. Matches CD's heading-to-content cadence (24 px to most
+   elements, 16 px to paragraphs). */
+.vertical-spacing > :is(h1, h2, h3, h4, h5) { margin-bottom: 0; }
+.vertical-spacing > :is(h1, h2, h3, h4, h5) + * { margin-top: var(--space-lg); }
+.vertical-spacing > :is(h1, h2, h3, h4, h5) + p { margin-top: var(--space-md); }
+/* Consecutive paragraphs / lists keep a tight 16 px reading rhythm. */
+.vertical-spacing > p + p,
+.vertical-spacing > p + ul,
+.vertical-spacing > p + ol,
+.vertical-spacing > ul + p,
+.vertical-spacing > ol + p { margin-top: var(--space-md); }
 
 /* Section background variants — admin.ch alternation pattern (modern CD).
    The DS uses three distinct tints so adjacent sections never look like
@@ -1067,13 +1102,33 @@ figcaption {
   color: var(--color-text-primary);
 }
 
-/* Inline meta line — small secondary text, sentence case. Used for
-   contextual info above page headings (e.g. "Öffentlich · kein Login nötig")
-   instead of the marketing-style uppercase eyebrow. */
+/* CD Bund `meta-info` — publication metadata strip above an H1
+   (typically "Webartikel | 23. Februar 2022" or
+   "Veröffentlicht am 18. Februar 2025 | Autor"). The BEM `__item`
+   children carry the values; the `::after` pseudo on every non-last
+   item draws an auto-pipe separator with px-2/lg:px-3 padding around
+   it — matches `designsystem/css/components/meta-info.postcss`.
+   This replaces our prior flat-string `.meta-info` and the route-
+   specific `.news-list__meta` / `.news-detail__meta` siblings. */
 .meta-info {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.meta-info__item {
+  display: inline-flex;
+  align-items: center;
+}
+.meta-info__item:not(:last-child)::after {
+  content: '|';
+  color: var(--color-text-muted);
+  padding: 0 var(--space-sm);
+}
+@media (min-width: 1024px) {
+  .meta-info__item:not(:last-child)::after { padding: 0 var(--space-md); }
 }
 
 /* ── BADGES ─────────────────────────────────────────────────────────────── */
@@ -2110,9 +2165,17 @@ a.btn[aria-disabled="true"] {
   align-items: flex-start;
   gap: var(--space-md);
   flex-wrap: wrap;
-  margin-bottom: var(--space-md);
+  /* CD reference pages keep ≥ 32 px between an H1 block and the first
+     content row. Was 16 px (too tight — caused subtitle / filter chips /
+     table to crash into the heading). Scales 24 → 32 → 48 px so wide
+     desktops get the federal breathing room. */
+  margin-bottom: var(--space-lg);
 }
-.page-header__title { margin: 0 0 var(--space-xs); }
+@media (min-width: 1024px) { .page-header { margin-bottom: var(--space-xl); } }
+@media (min-width: 1280px) { .page-header { margin-bottom: var(--space-2xl); } }
+/* H1 → subtitle gap was 4 px; subtitle descenders into title baseline.
+   8 px gives the daylight CD reference pages have. */
+.page-header__title { margin: 0 0 var(--space-sm); }
 .page-header__sub { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
 .page-header__actions {
   display: flex;
@@ -2363,9 +2426,21 @@ a.btn[aria-disabled="true"] {
 /* ── INFO PAGE HEADER ────────────────────────────────────────────────────
    Header above the .page-with-toc layout on the Arbeitsinstrumente page.
    Replaces three inline-styled blocks. */
+/* Header above the .page-with-toc layout. Scaling left padding gives
+   the title block a small inset from the container edge — visually
+   "set in" rather than flush against the viewport padding. Scales up
+   on wide desktops where the container padding alone leaves less
+   ambient air. */
 .info-page__header {
   max-width: 60ch;
   margin-bottom: var(--space-2xl);
+  padding-left: var(--space-md);
+}
+@media (min-width: 1024px) {
+  .info-page__header { padding-left: var(--space-lg); }
+}
+@media (min-width: 1280px) {
+  .info-page__header { padding-left: var(--space-xl); }
 }
 .info-page__title {
   font-size: var(--text-display);
@@ -2428,13 +2503,16 @@ a.btn[aria-disabled="true"] {
   font-size: var(--text-body-sm);
 }
 
-/* Sticky TOC card on the right */
+/* Sticky TOC card on the right. CD Bund anchor-nav lives inside a
+   `<Card>` with a real drop shadow (not the quieter `--shadow-card`).
+   Stronger `--shadow-lg` so the card visually detaches from the
+   surrounding page content and reads as a floating side-rail. */
 .page-with-toc__toc {
   position: sticky;
   top: var(--space-xl);
   background: var(--color-white);
   padding: var(--space-lg);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-lg);
   border-radius: var(--radius);
   /* Keep the card itself within the viewport on shorter screens so the
      bottom TOC items don't fall below the fold. */
@@ -2444,8 +2522,11 @@ a.btn[aria-disabled="true"] {
 @media (max-width: 1023px) {
   .page-with-toc__toc {
     position: static;
-    box-shadow: none;
-    background: var(--color-bg-surface);
+    /* Keep a softer shadow on mobile so the card still has depth — the
+       card-on-page treatment matches the federal pattern across
+       viewports. */
+    box-shadow: var(--shadow-card);
+    background: var(--color-white);
   }
 }
 .page-with-toc__toc-title {
@@ -2462,28 +2543,62 @@ a.btn[aria-disabled="true"] {
   padding: 0;
   margin: 0;
 }
+/* CD Bund `menu__item` pattern (used as TOC items in AnchorNav):
+   flex row with label left + arrow right, secondary divider, hover
+   fills bg-secondary-50, active state draws a 3 px red bar via
+   ::after. The chevron-right icon signals "click to jump", a key
+   federal affordance — text-only TOC items were missing the cue. */
 .page-with-toc__toc-item {
-  border-left: 2px solid transparent;
-  transition: border-color var(--transition-fast);
+  position: relative;
+  transition: background var(--transition-fast);
 }
-.page-with-toc__toc-item--active {
-  border-left-color: var(--color-primary);
+/* 3 px red bar on the active item — CD canonical:
+   `.menu__item--active::after { content:''; block bg-primary-500
+   w-[3px] absolute top-0 bottom-0 left-0 }`. */
+.page-with-toc__toc-item--active::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--color-primary);
 }
 .page-with-toc__toc-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   color: var(--color-text-secondary);
   text-decoration: none;
   font-size: var(--text-body-sm);
   line-height: var(--line-height-snug);
-  border-bottom: 1px solid var(--color-border-light);
-  transition: color var(--transition-fast);
+  border-bottom: 1px solid var(--color-secondary-100);
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 .page-with-toc__toc-list li:last-child .page-with-toc__toc-link { border-bottom: none; }
-.page-with-toc__toc-link:hover { color: var(--color-text-primary); }
+.page-with-toc__toc-link:hover {
+  color: var(--color-text-primary);
+  background: var(--color-secondary-50);
+}
+.page-with-toc__toc-label { min-width: 0; }
+.page-with-toc__toc-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+.page-with-toc__toc-link:hover .page-with-toc__toc-icon {
+  color: var(--color-primary);
+  transform: translateX(2px);
+}
 .page-with-toc__toc-item--active .page-with-toc__toc-link {
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-secondary-50);
+}
+.page-with-toc__toc-item--active .page-with-toc__toc-icon {
+  color: var(--color-primary);
 }
 
 /* Link list — bulleted list of links in accordion bodies and content sections.
@@ -2532,6 +2647,52 @@ a.btn[aria-disabled="true"] {
 }
 @media (min-width: 768px) {
   .contact-block { grid-template-columns: minmax(220px, 1fr) 2fr; gap: var(--space-3xl); }
+}
+
+/* ── CONTACT SECTION (full-bleed footer-of-page contact block) ──────────
+   Federal pattern: armasuisse Immobilien / kbob-fdk. Sits below the page
+   content as `.section.section--alt` (federal cool-blue-gray tint). Two
+   columns at desktop: contact info on the left, swisstopo map iframe on
+   the right. Stacks on narrower viewports.
+   `scroll-margin-top` matches the TOC-article rule so clicking
+   "Kontakt" in the sticky TOC doesn't land the section under the
+   federal chrome. */
+.contact-section { scroll-margin-top: 160px; }
+.contact-section__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .contact-section__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+  }
+}
+.contact-section__heading {
+  margin: 0 0 var(--space-lg);
+}
+.contact-section__info {
+  /* Inherits contact-block helpers (__address, __row, __link, __lead,
+     __note) but flattens the two-column grid — left column is the
+     section itself now. */
+}
+.contact-section__map {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  background: var(--color-bg-alt);
+}
+.contact-section__map iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
 }
 .contact-block__address {
   font-size: var(--text-body);
@@ -2586,21 +2747,139 @@ a.btn[aria-disabled="true"] {
   max-width: 56ch;
 }
 
-/* Generic 16:9 video embed wrapper used for the explainer iframe */
-.video-embed {
+/* Video thumbnail card — used by the landing-page explainer block in
+   place of a live iframe. CD-aligned: federal mark + title + author
+   overlaid on a 16:9 image, with a "Watch on YouTube" pill bottom-right.
+   The whole tile is an anchor: click anywhere → opens the real video
+   on YouTube. No third-party tracking until the user actively opts in.
+
+   Image lives in assets/images/Explain-Video.png; swap when a real
+   video lands. The overlay chrome is pure CSS so swapping the image
+   doesn't require any markup changes. */
+.video-thumb {
   position: relative;
+  display: block;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  background: #000;
+  background: var(--color-secondary-800);
+  text-decoration: none;
+  color: var(--color-white);
+  transition: box-shadow var(--transition), transform var(--transition);
 }
-.video-embed iframe {
+.video-thumb:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: var(--color-white);
+}
+.video-thumb:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.video-thumb__image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  border: 0;
+  object-fit: cover;
+  display: block;
+}
+/* Top overlay: dark-to-transparent gradient anchors the federal mark +
+   title block. Gradient depth tuned so the title stays legible on any
+   image content beneath. */
+.video-thumb__header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.45) 60%, transparent 100%);
+  z-index: 1;
+}
+/* Channel-avatar logo — round, like the channel-avatar on a real YouTube
+   embed. `assets/swiss-logo-flag.svg` is the simple federal mark, already
+   coloured for use against any background. White ring + subtle shadow
+   so the badge reads as a "channel pill" rather than a flat sticker. */
+.video-thumb__logo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  padding: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  object-fit: contain;
+}
+@media (min-width: 1024px) { .video-thumb__logo { width: 40px; height: 40px; } }
+.video-thumb__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.video-thumb__title {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-white);
+}
+@media (min-width: 1024px) { .video-thumb__title { font-size: var(--text-h4); } }
+/* Author line — small + muted, matches YouTube's channel-name secondary
+   row beneath the video title. */
+.video-thumb__author {
+  margin: 2px 0 0;
+  font-size: var(--text-body-xs);
+  color: rgba(255, 255, 255, 0.75);
+  line-height: var(--line-height-snug);
+}
+/* Centred YouTube play button — the iconic red rounded-rect glyph that
+   marks a thumbnail as a video. SVG asset, no shadow (the play glyph
+   already carries enough visual weight on any photo). Hover scales up
+   slightly so the affordance reads as "clickable". */
+.video-thumb__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 48px;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+  transition: transform var(--transition);
+}
+@media (min-width: 1024px) { .video-thumb__play { width: 84px; height: 60px; } }
+.video-thumb:hover .video-thumb__play { transform: translate(-50%, -50%) scale(1.06); }
+/* "Watch on YouTube" pill — bottom-right CTA. White-ish background with
+   the red YouTube glyph + dark text matches the canonical YouTube embed
+   chrome (replaces the previous dark-glass pill). Bigger overall — 14 px
+   font, generous padding, prominent corner radius. */
+.video-thumb__cta {
+  position: absolute;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+.video-thumb__cta-icon {
+  width: 26px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* Portfolio stats band — intentionally tighter than a full `.section`
@@ -2954,11 +3233,10 @@ a.btn[aria-disabled="true"] {
    .container--reading (780 px); meta line above the title, big image
    below the title, lead paragraph, then a footer "source / responsible"
    stripe and a back-link. */
-.news-detail__meta {
-  color: var(--color-text-secondary);
-  font-size: var(--text-body-sm);
-  margin: 0 0 var(--space-sm);
-}
+/* `.news-detail__meta` retired — markup now uses `.meta-info` /
+   `.meta-info__item` per CD canonical pattern. The kept-empty rule
+   shell is here only as a breadcrumb; safe to delete in a follow-up
+   sweep once no .news-detail__meta references remain. */
 .news-detail__title {
   margin: 0 0 var(--space-lg);
   font-size: var(--text-display);
@@ -3500,12 +3778,8 @@ a.btn[aria-disabled="true"] {
 }
 .news-list__link:hover .news-list__title { color: var(--color-primary); }
 .news-list__body { min-width: 0; }
-.news-list__meta {
-  margin: 0 0 var(--space-sm);
-  color: var(--color-text-secondary);
-  font-size: var(--text-body-sm);
-}
-.news-list__meta strong { color: var(--color-primary); font-weight: var(--font-weight-bold); }
+/* `.news-list__meta` retired — markup now uses `.meta-info` /
+   `.meta-info__item` per CD canonical pattern. */
 .news-list__title {
   margin: 0 0 var(--space-md);
   font-size: var(--text-h3);
@@ -3888,8 +4162,15 @@ a.btn[aria-disabled="true"] {
   padding: 0;
   margin: 0;
 }
+/* Divider colour: CD Bund `.download-item` uses `border-b
+   border-secondary-200` (federal blue-gray #ACB4BD). The red accent
+   on a download row comes from the leading icon + hover-title, NOT
+   from the divider. We previously used a generic gray; switched to
+   `--color-secondary-100` (#DFE4E9) for slightly softer than CD's
+   200 but firmly on the federal blue-gray ramp — reads as part of
+   the federal palette instead of a neutral gray. */
 .download-list__item {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-secondary-100);
 }
 .download-list__item:last-child { border-bottom: none; }
 .download-list__link {

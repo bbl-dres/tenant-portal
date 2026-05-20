@@ -346,7 +346,10 @@ function renderInfoPage() {
     <section class="section">
       <div class="container">
         <header class="info-page__header">
-          <p class="meta-info">Öffentlich · kein Login nötig</p>
+          <p class="meta-info">
+            <span class="meta-info__item">Stand: ${P.formatDate(new Date().toISOString())}</span>
+            <span class="meta-info__item">Öffentlich · kein Login nötig</span>
+          </p>
           <h1 class="info-page__title">Arbeitsinstrumente und Informationen</h1>
           <p class="section-intro section-intro--tight">
             Erklärungen, Merkblätter, Vorlagen und Schulungsmaterial rund um das Mieterportal.
@@ -461,46 +464,6 @@ function renderInfoPage() {
               ${downloadList(P.state.downloads?.training || [])}
             </article>
 
-<article id="kontakt">
-              <h2>BBL Bundesamt für Bauten und Logistik</h2>
-              <div class="contact-block">
-                <div class="contact-block__col">
-                  <p class="contact-block__address">
-                    Fellerstrasse 21<br>
-                    CH-3003 Bern
-                  </p>
-                  <p class="contact-block__row">
-                    <a class="contact-block__link" href="tel:+41584655000">
-                      <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                      +41 58 465 50 00
-                    </a>
-                  </p>
-                  <p class="contact-block__row">
-                    <a class="contact-block__link" href="mailto:info@bbl.admin.ch">
-                      <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      info@bbl.admin.ch
-                    </a>
-                  </p>
-                  <p class="contact-block__row">
-                    <a class="contact-block__link" href="https://www.bbl.admin.ch" target="_blank" rel="noopener">
-                      <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                      www.bbl.admin.ch
-                    </a>
-                  </p>
-                </div>
-                <div class="contact-block__col">
-                  <p class="contact-block__lead"><strong>Geschäftsstelle Portfolio-Management</strong></p>
-                  <p class="contact-block__note">
-                    Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM. Bei technischen Problemen mit eIAM den BIT-Support.
-                  </p>
-                  <p class="contact-block__lead"><strong>BIT IT-Support — eIAM</strong></p>
-                  <p class="contact-block__note contact-block__note--last">
-                    <a href="mailto:service-desk@bit.admin.ch">service-desk@bit.admin.ch</a>
-                  </p>
-                </div>
-              </div>
-            </article>
-
           </main>
 
           <aside class="page-with-toc__toc" aria-label="Inhaltsverzeichnis">
@@ -510,12 +473,61 @@ function renderInfoPage() {
                 <li class="page-with-toc__toc-item ${i === 0 ? 'page-with-toc__toc-item--active' : ''}">
                   <a class="page-with-toc__toc-link" href="#${it.id}"
                      onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
-                    ${P.escapeHtml(it.label)}
+                    <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
+                    <svg class="page-with-toc__toc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
                   </a>
                 </li>
               `).join('')}
             </ul>
           </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt contact-section" id="kontakt" aria-labelledby="kontakt-heading">
+      <div class="container">
+        <div class="contact-section__grid">
+          <div class="contact-section__info">
+            <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt für Bauten und Logistik</h2>
+            <p class="contact-block__address">
+              Fellerstrasse 21<br>
+              CH&#8201;–&#8201;3003 Bern
+            </p>
+            <p class="contact-block__row">
+              <a class="contact-block__link" href="tel:+41584655000">
+                <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                +41 58 465 50 00
+              </a>
+            </p>
+            <p class="contact-block__row">
+              <a class="contact-block__link" href="mailto:info@bbl.admin.ch">
+                <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                info@bbl.admin.ch
+              </a>
+            </p>
+            <p class="contact-block__row">
+              <a class="contact-block__link" href="https://www.bbl.admin.ch" target="_blank" rel="noopener">
+                <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                www.bbl.admin.ch
+              </a>
+            </p>
+            <p class="contact-block__lead"><strong>Geschäftsstelle Portfolio-Management</strong></p>
+            <p class="contact-block__note">
+              Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
+            </p>
+            <p class="contact-block__lead"><strong>BIT IT-Support — eIAM</strong></p>
+            <p class="contact-block__note contact-block__note--last">
+              <a href="mailto:service-desk@bit.admin.ch">service-desk@bit.admin.ch</a>
+            </p>
+          </div>
+
+          <div class="contact-section__map">
+            <iframe
+              src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2598400&N=1200200&zoom=8&crosshair=marker"
+              title="Standort BBL Fellerstrasse 21, 3003 Bern auf swisstopo"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
         </div>
       </div>
     </section>
@@ -537,9 +549,17 @@ function faqItem(question, answer) {
 }
 
 function wireInfoScrollSpy() {
-  const articles = document.querySelectorAll('.page-with-toc__content > article[id]');
+  // Scroll-spy watches the article anchors inside the TOC content column
+  // AND any top-level anchored section that the TOC lists — currently the
+  // `#kontakt` block was lifted out of the grid into its own
+  // `.section--alt` (federal contact pattern, mirrors armasuisse Immo).
+  // Build the watch list from `INFO_TOC` ids so adding a new entry there
+  // is enough — no need to keep this selector list in sync by hand.
+  const targets = INFO_TOC
+    .map(it => document.getElementById(it.id))
+    .filter(Boolean);
   const items = document.querySelectorAll('.page-with-toc__toc-item');
-  if (!articles.length || !items.length) return;
+  if (!targets.length || !items.length) return;
 
   const setActive = (id) => {
     items.forEach(item => {
@@ -554,7 +574,7 @@ function wireInfoScrollSpy() {
     });
   }, { rootMargin: '-30% 0% -55% 0%', threshold: 0 });
 
-  articles.forEach(a => observer.observe(a));
+  targets.forEach(t => observer.observe(t));
 }
 
 // ── NEWS SECTION (swisstopo "Aktuell" carousel pattern) ─────────────────
@@ -662,7 +682,10 @@ function newsListRow(n) {
     <li class="news-list__item">
       <a class="news-list__link" href="#/news/${n.id}">
         <div class="news-list__body">
-          <p class="news-list__meta"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
+          <p class="meta-info">
+            <span class="meta-info__item"><strong>${P.escapeHtml(n.type)}</strong></span>
+            <span class="meta-info__item">${P.formatDate(n.date)}</span>
+          </p>
           <h2 class="news-list__title">${P.escapeHtml(n.title)}</h2>
           <p class="news-list__lead">${P.escapeHtml(n.lead)}</p>
         </div>
@@ -680,7 +703,10 @@ function renderNewsDetail({ id }) {
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <article class="section">
       <div class="container container--reading">
-        <p class="news-detail__meta"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
+        <p class="meta-info">
+          <span class="meta-info__item"><strong>${P.escapeHtml(n.type)}</strong></span>
+          <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
+        </p>
         <h1 class="news-detail__title">${P.escapeHtml(n.title)}</h1>
         <img class="news-detail__image" src="${n.image}" alt="">
         <p class="news-detail__lead">${P.escapeHtml(n.lead)}</p>
@@ -749,15 +775,27 @@ function renderLanding() {
             </p>
             <a href="#/help" class="btn btn--outline">Häufige Fragen ansehen</a>
           </div>
-          <div class="video-embed">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/rin3crkLpRk?si=P1B2d_YofDZNkdOG"
-              title="Erklärvideo Mieterportal (Platzhalter — Video der Stadt Zürich)"
-              loading="lazy"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen></iframe>
-          </div>
+          <a class="video-thumb"
+             href="https://www.youtube.com/watch?v=rin3crkLpRk"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Erklärvideo „Mieterportal des Bundes" auf YouTube öffnen">
+            <img class="video-thumb__image"
+                 src="assets/images/Explain-Video.png"
+                 alt=""
+                 loading="lazy">
+            <div class="video-thumb__header">
+              <img class="video-thumb__logo" src="assets/swiss-logo-flag.svg" alt="">
+              <div class="video-thumb__titles">
+                <p class="video-thumb__title">Mieterportal des Bundes</p>
+                <p class="video-thumb__author">Bundesamt für Bauten und Logistik</p>
+              </div>
+            </div>
+            <img class="video-thumb__play" src="assets/youtube-play.svg" alt="" aria-hidden="true">
+            <span class="video-thumb__cta">
+              <img class="video-thumb__cta-icon" src="assets/youtube-play.svg" alt="" aria-hidden="true">
+              <span>Watch on YouTube</span>
+            </span>
+          </a>
         </div>
       </div>
     </section>

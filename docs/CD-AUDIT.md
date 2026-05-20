@@ -26,9 +26,10 @@ Reference patterns: swisstopo.admin.ch, kbob-fdk, workspace-management.
 
 ## TL;DR
 
-The prototype is now ≈ 97 % aligned with CD Bund on tokens, chrome,
-typography, color, and detail-page anatomy. The biggest visible drift
-items have been resolved in successive iterations:
+The prototype is now ≈ 98 % aligned with CD Bund on tokens, chrome,
+typography, color, detail-page anatomy, and data-density patterns.
+The biggest visible drift items have been resolved in successive
+iterations:
 
 **Resolved (cross-referenced in the relevant sections):**
 - Noto Sans now bundled and loads via `url()` — was rendering in
@@ -48,6 +49,14 @@ items have been resolved in successive iterations:
   popup-type signal (§3.7 / §9.2).
 - Focus ring on filled buttons: white inner-ring + lighter outline
   keeps the target visible against saturated bg colours (§9.3).
+- Pagination spread: `renderPagination` refactored into a generic helper;
+  applied to `#/inbox` (25/page), `#/queue` (25/page), `#/news` (10/page);
+  `#/search` got per-group cap with "weitere" affordance (§5.6).
+- `.table--compact` variant shipped and applied to the reviewer queue
+  (§5.2).
+- Accordion content padding bumped to match CD's `pb-10` (§7.1).
+- Typography polish: `word-spacing` on html, `mark` highlight,
+  `.overtitle` kicker class (§12.3.6, §12.4).
 - Property-banner now full-bleed of the viewport — no more left
   margin (§14.1.1).
 - Share-bar gained a `Zurück` affordance on detail pages (§14.1.3).
@@ -55,17 +64,14 @@ items have been resolved in successive iterations:
   documented, tag-item contradiction resolved, deliberate-divergences
   list refreshed (§15.1, §15.2, §15.4, §15.5, §15.6, §15.7).
 
-**Remaining gaps cluster in two areas:**
+**Remaining gaps cluster in one area:**
 
-1. **Pagination spread + table density** (§5) — inbox, queue, news,
-   search are still un-paginated; no `.table--compact` variant for the
-   reviewer queue. Federal data sets scale; this is the highest-impact
-   remaining work.
-2. **Layout utility coverage** (§14.3) — CD ships `.vertical-spacing`,
+1. **Layout utility coverage** (§14.3) — CD ships `.vertical-spacing`,
    `.container__main` + `.container__aside`, `.container--grid` that we
    shim with one-off classes. Promote when the next layout work lands.
 
-Everything else is cosmetic cleanup or minor coverage gaps — listed in §16.
+Everything else is cosmetic cleanup, minor coverage gaps, or
+markup-application of CSS classes already shipped — listed in §16.
 
 ---
 
@@ -79,7 +85,7 @@ Everything else is cosmetic cleanup or minor coverage gaps — listed in §16.
 | 1.4 | Focus ring uses purple-500 `#8655F6` (CD Bund eCH-0059). [tokens.css:83](../css/tokens.css#L83) | — | ✓ aligned |
 | 1.5 | Shadow scale: `--shadow-card` is markedly softer than CD's `shadow-lg`. Reads as a deliberate choice for a quieter admin UI — record rationale so it's not re-flagged on every review. | low | ◻ deliberate? |
 | 1.6 | Badge palette is a 6-variant subset of CD's 10 (missing indigo/pink/purple/negative). Acceptable for current taxonomy; expand if new statuses appear. | low | — won't fix yet |
-| 1.7 | Custom token `--color-prototype-notice` is only used in the footer warning; redundant after softening that warning to `rgba(255,255,255,0.65)` (see §3.3). Retire the token or repurpose. | low | ◻ |
+| 1.7 | **Audit correction**: token is still used by `.top-bar__prototype-notice` (the centred red "Prototyp" label in the top-bar). Saturated red `#ff4444` against navy reads correctly as a warning chip there — only the footer use was problematic, and that's softened. Token kept; name remains semantic. | low | ✓ |
 
 ## 2. Layout & grid
 
@@ -121,11 +127,12 @@ Everything else is cosmetic cleanup or minor coverage gaps — listed in §16.
 | # | Finding | Severity | Status |
 |---|---|---|---|
 | 5.1 | `.table` + `.table--zebra` + `.table--rows-clickable` align with CD Bund table base. Headers use `--color-bg-alt` (gray-100); uppercase is opt-in via `.table--caps`. | — | ✓ aligned |
-| 5.2 | No `.table--compact` variant. CD Bund ships one with `px-2 py-2` cells. Reviewer queue + inbox tables hit 8+ columns and can crowd at desktop / overflow at narrow widths. | medium | ◻ |
+| 5.2 | **Resolved**: added `.table--compact` variant (`var(--space-xs) var(--space-sm)` cell padding). Applied to the reviewer queue table at `#/queue` — row height drops from ~52 px to ~36 px so 25-row pages fit on one screen. [styles.css:1512-1522](../css/styles.css#L1512-L1522) | medium | ✓ |
 | 5.3 | No mobile-stack / row-as-card responsive table pattern. Neither does CD Bund explicitly, but federal sites typically defer to horizontal scroll inside a `.table-wrap`. Confirm app has `.table-wrap` overflow scroll everywhere — spot-checked `.property-list-wrap`, OK. | low | ◐ spot-check rest |
 | 5.4 | Pagination on `#/properties` always-visible, right-aligned, with item-range count ("1–12 von 247 Liegenschaften"). [styles.css:1555](../css/styles.css#L1555), [app.js:1624](../js/app.js#L1624) | medium | ✓ |
 | 5.5 | Pagination on `#/downloads` matches the properties pattern (count + chevron-input-chevron), always visible. [app.js:1999](../js/app.js#L1999) | medium | ✓ |
-| 5.6 | **Pagination spread — open** — the following surfaces still render unpaginated and need the same treatment because federal data scales: `#/inbox` (applications), `#/queue` (reviewer queue), `#/news` (news list), `#/search` (multi-section results). Detail-page sub-lists (`#/inbox/:id` attachments + history, `#/properties/:id` related applications + documents) are bounded by single-record cardinality and don't need pagination. | medium | ◻ |
+| 5.6 | **Resolved**: `renderPagination` refactored into a generic helper accepting `hrefFor: (page) => string` + `entitySingular`/`entityPlural` labels. Applied to `#/inbox` (25/page, "Anträge"), `#/queue` (25/page, "Pendenzen"), `#/news` (10/page, "Nachrichten"). `#/search` got a per-group cap (10) with a "+X weitere in der …" link to the canonical paginated surface — the CD Bund `searchResults.vue` pattern (one mega-list doesn't fit grouped results). [app.js renderPagination](../js/app.js), [app.js:889 renderInbox](../js/app.js#L889), [app.js renderQueue](../js/app.js), [app.js renderNewsList](../js/app.js), [app.js renderSearchResults](../js/app.js#L211) | medium | ✓ |
+| 5.6.1 | Inbox filter chips + text-search currently rewrite the table DOM with all matching rows; pagination footer continues to show the un-filtered totals. With mock data (8 apps) the inconsistency is never observable. Refactor to URL-state filtering is a separate larger pass. | low | ◻ noted |
 | 5.7 | List density: `.attachment-list`, `.search-results`, news list all use ≥ 12 px vertical padding per row. CD Bund list pattern is similar but offers a `--compact` modifier. Not a gap; flag if rows feel airy on dense pages. | low | — won't fix yet |
 
 ## 6. Components — feedback (notifications, toasts, banners, modals)
@@ -142,7 +149,7 @@ Everything else is cosmetic cleanup or minor coverage gaps — listed in §16.
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 7.1 | `.accordion__panel` open-state padding is `0 var(--space-sm) var(--space-md)` (≈ 8/16 px). CD Bund `.accordion__content` uses `pb-10` (40 px) — long content can feel cramped at our setting. | medium | ◻ |
+| 7.1 | **Resolved**: `.accordion__item--open .accordion__panel` bottom padding bumped from `--space-md` (16 px) to `--space-2xl` (48 px) per CD Bund `.accordion__content` `pb-10`. Long multi-paragraph panels no longer feel cramped. [styles.css:2091-2103](../css/styles.css#L2091-L2103) | medium | ✓ |
 | 7.2 | Accordion transition 320 ms vs. CD's 300 ms — imperceptible. Aligned. | — | ✓ |
 | 7.3 | `renderStepIndicator()` in [lib.js:228](../js/lib.js#L228) implements 36 px circles with connectors, gray-400 outline → green confirmed. CD Bund confirmed uses `green-500` (`#22C55E`); we use `var(--color-success)` = `#047857` (green-700). Visibly darker — verify on the wizard. | low | ◻ |
 | 7.4 | Step indicator carries `aria-current="step"` on the active item — correct ARIA. | — | ✓ aligned |
@@ -243,7 +250,7 @@ rendering doesn't have the weights we're asking for.
 | 12.3.3 | `--text-display` (32→40→48→56) doesn't map to any CD step — it sits between `text--3xl` (30→60) and `text--4xl` (36→72). Used only on landing-page hero / wizard step counter. Probably keep, but document. | low | — deliberate |
 | 12.3.4 | Line-heights: `tight` 1.25 / `snug` 1.375 / `normal` 1.5 / `relaxed` 1.625. CD uses Tailwind defaults (`leading-tight` 1.25, `leading-normal` 1.5). Our `snug` and `relaxed` are portal additions. ≈ aligned. | — | ✓ aligned |
 | 12.3.5 | `.h1` / `.h2` add `letter-spacing: -0.01em`. CD doesn't tighten heading tracking. Mild drift — barely visible but inconsistent. ~15 other letter-spacing declarations scattered across [styles.css](../css/styles.css) ranging from -0.02em to +1px — most are local component overrides (badges, kickers, brand mark). Worth a token: `--tracking-tight`, `--tracking-wide`, `--tracking-label`. | low | ◻ |
-| 12.3.6 | `html { word-spacing: 0.0625em }` in CD Bund's typography foundation — subtle, but designed to ease scanning of long German compounds (Verwaltungseinheit, Bundesamt). Not in our `tokens.css`. Cheap to add. | low | ◻ |
+| 12.3.6 | **Resolved**: `html { word-spacing: 0.0625em }` added per CD Bund `typography.postcss`. [tokens.css:329-332](../css/tokens.css#L329-L332) | low | ✓ |
 
 ### 12.4 Missing CD Bund typography utilities
 
@@ -251,10 +258,10 @@ rendering doesn't have the weights we're asking for.
 |---|---|---|---|
 | `.text--{xs,sm,base,lg,xl,2xl,3xl,4xl,5xl}` | Responsive type-size utilities | No — we read `var(--text-*)` per component | Optional. Util-first matches CD but conflicts with the portal's component-CSS-only style. |
 | `.font--regular` / `.font--bold` / `.font--italic` / `.font--bold-italic` | Weight utilities | No | Add if we collapse to two-weight system (§12.2.3); they make sweep edits cleaner. |
-| `.overtitle` | Kicker label (`text--xs`, secondary-100, gap-2) above h1 | No | Useful on `#/news/:id`, property detail (e.g. "Liegenschaft" kicker above building name). |
+| `.overtitle` | Kicker label (`text--xs`, secondary-coloured, gap-2) above h1 | **Resolved** — `.overtitle` class shipped (uppercase tracked, `--text-body-xs`, secondary text). Not yet applied to any view; available for `#/news/:id`, property detail, etc. [tokens.css:360-370](../css/tokens.css#L360-L370) | css ready · markup pending |
 | `.text--negative` / `.text--default` / `.text--light` | Inverse, default, muted colour modifiers | We use `var(--color-text-*)` directly | Optional — but `.text--light` would collide with the §9.4 muted-text contrast failure (current `gray-400` fails WCAG AA on white). Fix the token before promoting it. |
 | `.text--asterisk` | Auto-append `*` for required-field labels | No — we use `<span class="form-field__required">*</span>` | Both work. Keep ours. |
-| `mark` styling | `bg-primary-200` light-red highlight for search matches | No — relies on browser default (yellow) | Add — gives "Treffer hervorheben" on `#/search` a federal look. |
+| `mark` styling | `bg-primary-200` light-red highlight for search matches | **Resolved** — `mark { background: var(--color-primary-200); padding: 0 0.125em; border-radius: var(--radius-sm); }` added. [tokens.css:351-358](../css/tokens.css#L351-L358) | done |
 
 ### 12.5 Heading classes in app: spot check
 
@@ -373,7 +380,7 @@ and on the small "ok" badges. Cross-reference §7.3.
 | # | Finding | Severity | Status |
 |---|---|---|---|
 | 13.5.1 | `--color-danger` and `--color-primary` are the same value (`#D8232A`). Semantically fine on a federal site (red is both the brand and the danger signal), but the design language conflates two meanings. CD Bund does too (uses red-600 for both); document the deliberate conflation in DESIGNGUIDE.md. | low | — deliberate |
-| 13.5.2 | `--color-prototype-notice: #ff4444` — saturated red on the navy footer was already softened to `rgba(255,255,255,0.65)` (§3.3). The token itself is now unreferenced. Retire. | low | ◻ (already in §1.7) |
+| 13.5.2 | `--color-prototype-notice: #ff4444` — token still used correctly by `.top-bar__prototype-notice` (the centred top-bar warning label, navy bg). Only the footer use was problematic and that's softened. See §1.7. | low | ✓ |
 | 13.5.3 | `--color-focus-tint: rgba(134, 85, 246, 0.25)` — purple-500 @ 25 % used as input focus ring soft-glow. Not a CD Bund token but a sensible portal addition. | — | ✓ deliberate |
 | 13.5.4 | Badge palette uses CD-canonical 100/800 pairs across all six variants (green/blue/red/yellow/orange/gray). | — | ✓ aligned |
 | 13.5.5 | Alpha tokens (`--color-white-20/70/92`, `--color-black-10/40/70`, `--color-backdrop`) — portal-specific composition helpers. CD uses Tailwind's `/N` opacity syntax inline; both arrive at the same place. | — | ✓ aligned |
@@ -563,33 +570,229 @@ Resolved across iterations (cross-referenced in their respective sections):
 ~~heading scale h2/h3/h4 aligned to CD~~ · ~~color ramps filled (red 50-900,
 secondary 200/400/900)~~ · ~~success-bright variant + wired to step-indicator~~ ·
 ~~nav-menu ARIA refined (disclosure pattern confirmed correct)~~ ·
-~~focus ring on filled buttons~~.
+~~focus ring on filled buttons~~ · ~~pagination spread (inbox / queue / news /
+search-cap)~~ · ~~.table--compact variant + applied to queue~~ ·
+~~accordion content padding~~ · ~~word-spacing on html~~ ·
+~~`mark` highlight~~ · ~~`.overtitle` kicker class~~ ·
+~~`--color-prototype-notice` audit-correction (token kept; used by top-bar
+label)~~ · ~~page-header bottom margin scale~~ ·
+~~page-header title-to-sub gap~~ · ~~section-py 2xl step (96 → 80, CD
+parity)~~ · ~~`.container { overflow-x: clip }`~~ ·
+~~`.section--py-half` alias~~ · ~~`.vertical-spacing` utility shipped~~ ·
+~~`.meta-info` BEM refactor (auto-pipe separator, applied across
+news-list / news-detail / info-page)~~ · ~~`.info-page__header` left
+margin indent~~ · ~~`.download-list` divider aligned to CD
+secondary-100 (verified: CD does NOT use red)~~ · ~~`.page-with-toc__toc-item`
+refinements (chevron icon, hover bg, 3 px ::after active rail,
+secondary-100 dividers)~~.
 
 Remaining, highest leverage first:
 
-**Data-density / pagination spread**
-1. **Pagination spread** (§5.6) — inbox, queue, news, search still un-paginated.
-2. **Table density variant** (§5.2) — add `.table--compact` for reviewer queue + inbox.
-
 **Layout & component coverage**
-3. **`.vertical-spacing` utility** (§14.3) — codify the CD utility that gives children vertical rhythm. Reduces ad-hoc `margin-top` in detail-page content blocks.
-4. **`.layout--with-aside` reusable class** (§14.3) — promote the property-detail aside pattern from a one-off `.property-layout` grid.
-5. **News detail hero variant** (§14.1.6) — promote the inline title + image to a `.hero--default` variant.
-6. **Card variants — `--clickable`** (§4.7) — formalise the property-card hover affordance.
-7. **Accordion content padding** (§7.1) — raise from `--space-md` to `--space-lg` or higher on the `__panel` open state.
-8. **Info-state notification + toast variants** (§6.1 / §6.3) — add `info` semantics.
+1. **`.vertical-spacing` utility — apply** (§17.7.1) — CSS shipped; retro-fit on detail-page content blocks (info articles, news lead, profile sections) to replace per-element ad-hoc `margin-top`.
+2. **`.layout--with-aside` reusable class** (§14.3) — promote the property-detail aside pattern from a one-off `.property-layout` grid.
+3. **News detail hero variant** (§14.1.6) — promote the inline title + image to a `.hero--default` variant.
+4. **Card variants — `--clickable`** (§4.7) — formalise the property-card hover affordance.
+5. **Info-state notification + toast variants** (§6.1 / §6.3) — add `info` semantics.
+6. **Section padding-collapse on consecutive same-bg** (§17.1.4) — defer until a stacked-section page makes the double-gap observable.
+7. **Conditional section padding** (§17.1.3) — only apply `--section-py` when `.section--default` or background variant; broader refactor.
+
+**Data-density refinements**
+6. **Inbox filtering → URL-state** (§5.6.1) — filter chips + text-search currently rewrite DOM with all matches; pagination footer stays on un-filtered totals. With mock data the inconsistency isn't observable, but at scale it's confusing.
 
 **Cosmetic / cleanup**
-9. **Two-weight cleanup sweep** (§12.2.3) — replace `--font-weight-medium/-semibold` aliases with `--font-weight-regular/-bold` in the ~28 call sites, then retire the aliases.
-10. **Tracking tokens** (§12.3.5) — consolidate the ~15 ad-hoc `letter-spacing` declarations into `--tracking-tight`, `--tracking-label`, `--tracking-wide`.
-11. **`word-spacing: 0.0625em` on html** (§12.3.6) — German-compound scan-ability. One-line CSS change.
-12. **`.overtitle` kicker class + `mark` highlight** (§12.4) — small but visible federal-pattern wins.
-13. **Retire `--color-prototype-notice` token** (§1.7 / §13.5.2).
+7. **Two-weight cleanup sweep** (§12.2.3) — replace `--font-weight-medium/-semibold` aliases with `--font-weight-regular/-bold` in the ~28 call sites, then retire the aliases.
+8. **Tracking tokens** (§12.3.5) — consolidate the ~15 ad-hoc `letter-spacing` declarations into `--tracking-tight`, `--tracking-label`, `--tracking-wide`.
+9. **Use `.overtitle` in views** (§12.4) — class is shipped; not yet applied. Wire on `#/news/:id`, property detail, etc.
 
 **DESIGNGUIDE.md remaining**
-14. **Shadow-count fix** (§15.3) — DS has 7 box-shadow tokens, not 6.
-15. **rgba/hex rule clarification** (§15.9) — soften the "no `#hex`" rule to allow `rgba()` overlays, or move overlays to `--color-white-N` / `--color-black-N` tokens.
-16. **Reorganise §3 component table** (§15.10) — split into chrome / form / data / feedback / utility groups.
+10. **Shadow-count fix** (§15.3) — DS has 7 box-shadow tokens, not 6.
+11. **rgba/hex rule clarification** (§15.9) — soften the "no `#hex`" rule to allow `rgba()` overlays, or move overlays to `--color-white-N` / `--color-black-N` tokens.
+12. **Reorganise §3 component table** (§15.10) — split into chrome / form / data / feedback / utility groups.
+
+## 17. Margins + padding (deep-dive)
+
+CD Bund's spacing system lives in three places:
+- [`css/foundations/spacings.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\foundations\spacings.postcss) — the `.vertical-spacing` utility (child rhythm).
+- [`css/layouts/container.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\layouts\container.postcss) — `.container`, `.container--py`, `.container--py-half`, `.container--pt`, `.container--pb`, the 12-column grid + main/aside columns.
+- [`css/layouts/section.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\layouts\section.postcss) — `.section`, `.section--default`, `.section--py`, `.section--py-half`, plus the consecutive-same-bg padding-collapse rule.
+
+Ours lives in [tokens.css](../css/tokens.css) (`--section-py` / `--section-py-half` / `--container-padding` / `--space-*`) + [styles.css](../css/styles.css) (`.section`, `.section--*`, `.page-header`, `.section-heading`, `.section-intro`).
+
+### 17.1 Section vertical padding
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.1.1 | Was: `--section-py` added a 96 px step at 2xl (1544+) where CD stays at 80 px until 3xl. **Resolved**: dropped the 2xl override; the lg value (80 px) now holds through 1543 px until the 3xl jump to 128 px. [tokens.css:315-322](../css/tokens.css#L315-L322) | low | ✓ |
+| 17.1.2 | Was: `--section-py-half` had a 48 px step at 2xl where CD stays at 40 px. **Resolved** in the same `tokens.css` edit. | low | ✓ |
+| 17.1.3 | CD Bund's `.section` has NO default padding — only `.section--default`, `.section--py`, or any `.section[class^="bg--"]` gets `container--py`. Our `.section` applies `padding-block: var(--section-py)` unconditionally. **Consequence**: every `<section class="section">` in our views gets the full 56–128 px vertical padding even when nested or stacked, where CD would zero-pad. | medium | ◻ |
+| 17.1.4 | CD has an explicit *consecutive-same-bg padding collapse* — a long selector list at [section.postcss:31-50](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\layouts\section.postcss) removes top padding when adjacent sections share a background (e.g. white → white, secondary-50 → secondary-50, hero → default). We don't have this — stacking two `.section.section--alt` gives double the gap CD would. Currently only visible on landing-page section sequences. | medium | ◻ |
+| 17.1.5 | **Resolved**: added `.section--py-half` as an alias for `.section--py-tight` (same `padding-block: var(--section-py-half)`). CD copy-paste markup now works. [styles.css:69-73](../css/styles.css#L69-L73) | low | ✓ |
+| 17.1.6 | We have `.section--lg` as a back-compat alias for the full scale — kept to avoid breaking views that pre-date the `.section` consolidation. Confirmed it has no functional drift. | — | ✓ deliberate |
+
+### 17.2 Container
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.2.1 | **Resolved**: added `overflow-x: clip` to `.container`. Defensive — prevents accidental horizontal scrollbar from an overflowing child. [styles.css:41-50](../css/styles.css#L41-L50) | low | ✓ |
+| 17.2.2 | CD has `.container:not(.breadcrumb) + .container { padding-top: py-14 lg:py-20 3xl:py-32 }` — auto-spaces consecutive containers (e.g. ShareBar container above main-content container in `<header>`). We mostly use one `.container` per page-body so this doesn't manifest. | — | ✓ deferred |
+| 17.2.3 | Horizontal padding ladder `16 → 28 → 36 → 40 → 48 → 64 px` matches CD exactly. [tokens.css:246-250](../css/tokens.css#L246-L250) | — | ✓ aligned |
+| 17.2.4 | `.container__main` + `.container__aside` are part of CD's 12-col grid system. We don't use them — `.property-layout` is our one-off equivalent. Cross-ref §14.3. | low | ◻ noted |
+
+### 17.3 Page-header
+
+`.page-header` is portal-specific (CD uses `<Hero>` for page-titling and doesn't ship a flex-row title+actions header). It sits at the top of inbox / queue / detail pages.
+
+[styles.css:2107-2125](../css/styles.css#L2107-L2125):
+
+```css
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);   /* 16 px */
+}
+.page-header__title { margin: 0 0 var(--space-xs); }   /* 4 px to subtitle */
+.page-header__sub   { margin: 0; color: secondary; font-size: body-sm; }
+```
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.3.1 | **Resolved**: `.page-header` bottom margin bumped from `--space-md` (16 px) to a scaling `--space-lg → --space-xl → --space-2xl` (24 → 32 → 48 px across base / lg / xl). Single biggest visible improvement on inbox / queue / detail. [styles.css:2107-2127](../css/styles.css#L2107-L2127) | medium | ✓ |
+| 17.3.2 | **Resolved**: `.page-header__title` → `__sub` gap bumped from `--space-xs` (4 px) to `--space-sm` (8 px). | low | ✓ |
+| 17.3.3 | `.page-header__sub` is `font-size: body-sm` (14 px on mobile, scaling to 18 px at 3xl). On wide desktops the subtitle gets large enough to compete with the H1 visually. Could keep it at `body-sm` non-scaling — but our recent §12.3 fix made body-sm scale on purpose. Acceptable trade-off; flag for re-evaluation if subtitles read too prominent at 3xl. | low | — re-evaluate |
+| 17.3.4 | `.page-header` itself has no top margin — it sits flush against the section's top padding (56–128 px). That's correct (the section provides the breathing room). No fix needed. | — | ✓ aligned |
+| 17.3.5 | When `.page-header` has no actions, the H1 sits left + space-between has only one flex child. Layout still works (single child gets `flex-start` from `space-between` per spec, so it stays left-aligned). Verified on `#/help`. | — | ✓ aligned |
+
+### 17.4 Section-heading + section-intro
+
+[styles.css:1008-1026](../css/styles.css#L1008-L1026):
+
+```css
+.section-heading { margin-bottom: var(--space-lg); }   /* 24 px base */
+@media (min-width: 1024px) { .section-heading { margin-bottom: var(--space-xl); } }    /* 32 px lg */
+@media (min-width: 1280px) { .section-heading { margin-bottom: var(--space-2xl); } }   /* 48 px xl */
+.section-intro { max-width: 60ch; color: secondary; margin: 0 0 var(--space-2xl); }
+.section-intro--tight { margin-bottom: var(--space-lg); }
+```
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.4.1 | CD's equivalent `.section__title { pb-10 }` is a flat 40 px regardless of breakpoint. Ours scales 24 → 32 → 48 px. **Portal scaling is more aggressive than CD** — heading-to-content gap on wide desktop (1280+) is 48 px, where CD stays at 40. Could go either way; flag as deliberate. | low | — deliberate |
+| 17.4.2 | `.section-intro` margin-bottom is `--space-2xl` (48 px) which leaves a generous gap. `.section-intro--tight` halves it to 24 px. Both reasonable; check that usages pick the right variant. Audit found 8 uses of `.section-intro` and 3 uses of `.section-intro--tight` — the tight variant is mostly on pages where a `.section-heading` already provides bottom space. | — | ✓ aligned |
+| 17.4.3 | `.section-intro` doesn't scale at desktop (stays at `--space-2xl` = 48 px). CD's `.section__subtitle { pb-10 }` does the same — no scaling. ✓ Aligned. | — | ✓ aligned |
+
+### 17.5 Card body padding
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.5.1 | Already audited in §4.6 — card vertical padding `var(--space-lg)` (24 px) is tighter than CD's `card__body { px-6 py-10 }` (40 px Y). Documented as a deliberate divergence for the admin UI's dense aesthetic (§11.1). | — | ✓ deliberate |
+
+### 17.6 Form-field spacing
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.6.1 | `.form-field` rows use `gap` between label / control / hint / error — verified to be tight enough for compact wizards but not crushing labels into controls. CD `form.postcss` uses similar `space-y-2` (8 px) between elements. Aligned. | — | ✓ aligned |
+| 17.6.2 | Wizard section spacing (`.wizard__section { margin-bottom: ... }`) uses `--space-2xl` (48 px) consistently. CD `formExample.vue` uses `.section--default + section--default` pattern for between-section gaps which equates to `container--py` (56–128 px). Our wizard is denser by design — single tall form, multiple groups stacked. ✓ Acceptable. | — | ✓ deliberate |
+
+### 17.7 Foundations utility — `.vertical-spacing`
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 17.7.1 | **Resolved**: shipped `.vertical-spacing` matching CD `spacings.postcss`. Default child gap `--space-2xl` (48 px) base, `3.5rem` (56 px) at 2xl; first child margin-top zero; heading-to-element 24 px (16 px to paragraphs); consecutive paragraph rhythm 16 px. Now available to retro-fit on detail-page content blocks; not auto-applied to any markup yet. [styles.css:74-97](../css/styles.css#L74-L97) | medium | ✓ css ready · markup pending |
+
+### 17.8 Recommended fix sequence
+
+1. **§17.3.1 — Bump `.page-header` bottom margin** (16 → 24 → 48 px scale). Single biggest visible improvement across inbox / queue / detail.
+2. **§17.3.2 — `.page-header__title` → `__sub` gap** 4 → 8 px.
+3. **§17.2.1 — `.container { overflow-x: clip }`** defensive add.
+4. **§17.1.1 + §17.1.2 — Trim 2xl steps** to match CD (96 → 80 for full, 48 → 40 for half).
+5. **§17.1.5 — Add `.section--py-half` alias** for CD copy-paste compatibility.
+6. **§17.7.1 — Add `.vertical-spacing` utility** (also unlocks the cleanup of view-level ad-hoc margins).
+7. **§17.1.3 / §17.1.4 — Conditional section padding + consecutive-bg collapse** — bigger refactor; defer until we have stacked-section pages where the double-gap is observable.
+
+---
+
+## 18. Smaller design elements (deep-dive)
+
+Targeted audit of four small components flagged in iterative review.
+Each was verified against CD Bund source before the fix landed.
+
+### 18.1 `.meta-info` — publication-metadata strip
+
+CD Bund [`meta-info.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\components\meta-info.postcss):
+
+```css
+.meta-info       { @apply text-gray-500 text--sm; }
+.meta-info__item:not(:last-child)::after {
+  content: '|';
+  @apply px-2 lg:px-3;
+}
+```
+
+Canonical use: publication metadata above an H1 — "Webartikel | 23. Februar 2022", "Stand: 18. Februar 2025", "Veröffentlicht am … | Autor". The BEM `__item` children carry the values; an `::after` pseudo on every non-last item draws the auto-pipe with `px-2 lg:px-3` padding.
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 18.1.1 | We used `.meta-info` as a flat `<p>` with a manual `·` separator. CD canonical pattern is BEM `__item` children with an auto-pipe. **Resolved**: refactored `.meta-info` to flex-wrap with `__item` children + `::after { content: '|' }` separator. [styles.css:1102-1128](../css/styles.css#L1102-L1128) | medium | ✓ |
+| 18.1.2 | `.news-list__meta` and `.news-detail__meta` were route-specific dupes of the same pattern. **Resolved**: news-list + news-detail now use `.meta-info` / `__item`; the old CSS rules retired (kept as breadcrumb comments). [app.js:681-684, 699-702](../js/app.js#L681) | low | ✓ |
+| 18.1.3 | Info-page header used `.meta-info` for "Öffentlich · kein Login nötig" — not strictly publication metadata. **Resolved**: now uses "Stand: <today> | Öffentlich · kein Login nötig" so the meta line carries a real "Veröffentlicht am" / "Stand" date matching the federal pattern. [app.js:349-352](../js/app.js#L349) | low | ✓ |
+
+### 18.2 `.info-page__header` — left margin
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 18.2.1 | Header was `max-width: 60ch` with no auto-margin — sat flush against the container's left padding, with empty space to the right. **Resolved**: added scaling `padding-left` (16 → 24 → 32 px across base / lg / xl) so the title block reads as "set in" rather than abutting the viewport. No red rail (kept optional for a future call). [styles.css:2552-2569](../css/styles.css#L2552-L2569) | medium | ✓ |
+| 18.2.2 | CD Bund's hero centres content via `.container__center--sm`; ours indents instead. Both are valid federal patterns; indent matches the bbl.admin.ch / kbob-fdk article-lead-in style better than centering. Documented as deliberate. | — | ✓ deliberate |
+
+### 18.3 `.download-list` divider
+
+CD Bund [`download-item.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\components\download-item.postcss):
+
+```css
+.download-item { @apply border-b border-secondary-200; }
+.download-item__icon { @apply text-primary-600; }
+```
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 18.3.1 | **Verification**: User suspected the divider should be red. **CD does not use a red divider** — `.download-item` uses `border-b border-secondary-200` (federal blue-gray `#ACB4BD`). The red accent on a download row comes from the leading icon (`text-primary-600`) and the hover-title state, not from the divider. A red divider would diverge from CD. | — | ✓ verified |
+| 18.3.2 | Our `.download-list__item` used a generic `--color-border-light` (gray-100). **Resolved**: switched to `--color-secondary-100` (federal blue-gray `#DFE4E9`) — slightly softer than CD's 200 but firmly on the federal palette. The divider now reads as part of the federal blue-gray family instead of a neutral gray. [styles.css:4031-4044](../css/styles.css#L4031-L4044) | low | ✓ |
+
+### 18.4 `.page-with-toc__toc-item` — TOC item refinements
+
+CD Bund [`menu.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\components\menu.postcss) (used by anchor-nav TOCs in `detailPageAnchorNav.vue`):
+
+```
+.menu__item                       flex items-center justify-between px-4 py-3 (hover: bg-secondary-50)
+.menu__item--border               border-b border-secondary-100
+.menu__item--condensed            px-3 py-3
+.menu__item--active::after        absolute left-0 top-0 bottom-0 w-[3px] bg-primary-500
+.menu__item__icon                 ArrowAngleBottomLeft (or chevron) on the right
+```
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 18.4.1 | TOC items were text-only — missing the right-side arrow icon that CD's `menu__item__icon` ships. The icon signals "click to jump", a key federal affordance. **Resolved**: added a chevron-right SVG on the right of each link. Hover state colours the chevron primary-red and nudges it 2 px right. [app.js:472-481](../js/app.js#L472), [styles.css:2528-2546](../css/styles.css#L2528-L2546) | medium | ✓ |
+| 18.4.2 | Hover state was text-only colour change. CD's `menu__item:hover { bg-secondary-50 }` adds a subtle background fill. **Resolved**: hover now sets `background: var(--color-secondary-50)` to match. | low | ✓ |
+| 18.4.3 | Active-state marker was a 2 px transparent-to-red `border-left`. CD canonical is a **3 px absolute-positioned `::after`** pseudo with `bg-primary-500`. **Resolved**: switched to `::after { content:''; position:absolute; left:0; width:3px }` — a touch thicker, more confident, and detaches the marker from the border collapse semantics. | low | ✓ |
+| 18.4.4 | Divider colour was `--color-border-light` (gray-100). **Resolved**: now `--color-secondary-100` (federal blue-gray) per CD `.menu__item--border`. Consistent with the §18.3 download-list change. | low | ✓ |
+| 18.4.5 | Active label weight was semibold (600 → aliased to bold per §12.2). CD pattern bolds the active label, so this was already aligned post-§12.2. | — | ✓ aligned |
+| 18.4.6 | Padding (`var(--space-sm) var(--space-md)` = 8/16 px) is tighter than CD's `--condensed` (`px-3 py-3` = 12 px). Minor; not visually broken. Could tighten to 12/12 to match exactly. | low | — defer |
+
+### 18.5 Recommended next sweep
+
+Other small elements worth a similar deep-dive:
+- **`.tag-item`** — verified earlier (§3.5.4 / DESIGNGUIDE §3); structure aligned. Could check focus-ring presence.
+- **`.breadcrumb__sep`** — uses `›` literal; CD uses an SVG chevron. Cosmetic.
+- **`.contact-block__icon`** — red SVG icons (✓ aligned with CD download-item icon convention).
+- **`.modal__close`** — verify size + hit area vs CD's `.modal__close` (24 px hit area minimum).
+- **`.toast` close button** — currently no close affordance; CD `toast-message` includes one.
+- **`.pipeline__step`** — verify cell heights / icon sizes against CD's `.steps` component.
+
+---
 
 ## Reference
 

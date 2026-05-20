@@ -353,10 +353,13 @@
 @media (min-width: 1280px) { :root { --topbar-height: 50px; } }
 @media (min-width: 1920px) { :root { --topbar-height: 56px; } }
 
-/* ── RESPONSIVE SECTION PADDING — CD Bund .container--py scales aggressively
-   3.5rem (56) base → 5rem (80) lg → 6rem (96) 2xl → 8rem (128) 3xl. */
+/* ── RESPONSIVE SECTION PADDING — CD Bund .container--py canonical scale
+   py-14 lg:py-20 3xl:py-32 (56 → 80 → 80 → 128 px across base / lg / 2xl / 3xl).
+   No 2xl bump in CD — `lg` (80 px) holds through 1544 px until `3xl`
+   (128 px). Previous portal scale added a 96 px step at 2xl, which we
+   removed for exact CD parity. Half scale: py-7 lg:py-10 3xl:py-16
+   (28 → 40 → 40 → 64 px). */
 @media (min-width: 1024px) { :root { --section-py: 5rem;   --section-py-half: 2.5rem; } }
-@media (min-width: 1544px) { :root { --section-py: 6rem;   --section-py-half: 3rem;   } }
 @media (min-width: 1920px) { :root { --section-py: 8rem;   --section-py-half: 4rem;   } }
 
 /* Breakpoint reference (use in @media; CSS variables can't be used in @media):
@@ -386,6 +389,29 @@ button { font-family: inherit; cursor: pointer; }
    prevents descender collisions and matches federal sites. */
 a { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; }
 a:hover { color: var(--color-link-hover); }
+
+/* `mark` — CD Bund `typography.postcss` uses `bg-primary-200` (light
+   red) instead of the browser-default lurid yellow. Used by search-hit
+   highlighting and any inline "Treffer" emphasis. */
+mark {
+  background: var(--color-primary-200);
+  padding: 0 0.125em;
+  border-radius: var(--radius-sm);
+}
+
+/* `.overtitle` — CD Bund kicker label above an h1 / hero title.
+   Small, secondary-coloured uppercase tag. Used on news / press-release
+   / property detail pages to identify the content type. */
+.overtitle {
+  display: inline-flex;
+  gap: var(--space-xs);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-sm);
+}
 
 /* Focus ring (federal eCH-0059) */
 :focus-visible {
