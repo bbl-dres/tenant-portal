@@ -23,7 +23,16 @@ Status legend: ◻ open · ◐ in progress · ✓ done · — won't fix (rationa
 |---|---|---|---|
 | 2.1 | `.card--property__footer` adds a separator + extra row solely to host the portfolio-category chip — visually noisy, breaks the card's vertical rhythm. Chip can sit inline with `.card--property__meta` (or simply be dropped — VE is already inferable from address/portfolio context). | low | ✓ |
 
-## 3. Open follow-ups (not yet addressed)
+## 3. Pagination
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 3.1 | `renderPagination` on `#/properties` hid the entire pagination footer when `totalPages <= 1`. Federal portfolios scale to thousands of buildings — a persistent pagination affordance signals scale and keeps muscle memory consistent across filters. Made the footer always-visible, with prev/next correctly disabled at the boundaries. | medium | ✓ |
+| 3.2 | The documents-list page on `#/downloads` uses the same hide-when-`totalPages<=1` pattern (`js/app.js` ~L1999). Same fix recommended; not applied yet — out of scope for the current sweep. | low | ◻ |
+| 3.3 | `.pagination` was left-aligned with no item-range label. CD Bund ships `.pagination` (left, default) and `.pagination--right` (right + generous vertical padding); centered is **not** in the design system. swisstopo / kbob-fdk both use the right-aligned variant. Switched `.pagination` to `justify-content: flex-end` with `flex-wrap` for narrow viewports. | low | ✓ |
+| 3.4 | Pagination showed page-of-pages ("3 von 21 Seiten") but no item-range count. At portfolio scale ("12 of 1'247") the count is the load-bearing scale cue. Added a `.pagination__count` span ("1–12 von 247 Liegenschaften") to the left of the controls, with `margin-right: auto` pushing the chevron cluster to the right edge. Uses de-CH thousands separator. Singular / empty-state copy variants included. | low | ✓ |
+
+## 4. Open follow-ups (not yet addressed)
 
 - [ ] Confirm `--color-prototype-notice` is only used in the footer; if so, retire the token or repurpose it.
 - [ ] Sweep all uses of `--text-h3` on dark surfaces — CD Bund typically downshifts headings on inverse backgrounds.

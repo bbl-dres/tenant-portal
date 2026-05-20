@@ -1555,9 +1555,22 @@ figcaption {
 .pagination {
   display: flex;
   align-items: stretch;
+  justify-content: flex-end;            /* CD Bund .pagination--right pattern */
+  flex-wrap: wrap;
   gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  padding-block: var(--space-lg);
   font-size: var(--text-body-sm);
+}
+/* Item-range label (e.g. "1–12 von 247 Liegenschaften"). Sits to the
+   left of the controls — `margin-right: auto` pushes the chevron / page
+   input / chevron cluster to the right. Not in the CD Bund component
+   itself, but matches the swisstopo / kbob-fdk federal pattern. */
+.pagination__count {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 .pagination__input {
   width: 48px;

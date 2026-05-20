@@ -320,8 +320,7 @@ export function renderFooter() {
             <h3 class="footer-information__heading">Prototyp</h3>
             <ul class="footer-information__list">
               <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
-              <li><a href="docs/REQUIREMENTS.md" target="_blank">Anforderungskatalog <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
-              <li><a href="docs/DESIGNGUIDE.md" target="_blank">Design-Guide <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="https://github.com/swiss/designsystem" target="_blank" rel="noopener">CD Bund <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
             </ul>
           </div>
 

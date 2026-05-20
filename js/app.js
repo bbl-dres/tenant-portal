@@ -1458,7 +1458,15 @@ function renderProperties() {
               ${view === 'map'     ? renderMapView(filtered)      : ''}
             </div>
 
-            ${view !== 'map' ? renderPagination(safePage, totalPages, view, query) : ''}
+            ${view !== 'map' ? renderPagination({
+              current: safePage,
+              totalPages,
+              view,
+              q: query,
+              from: filtered.length === 0 ? 0 : (safePage - 1) * perPage + 1,
+              to: Math.min(safePage * perPage, filtered.length),
+              totalItems: filtered.length,
+            }) : ''}
           `}
         `}
       </div>
@@ -1621,20 +1629,32 @@ function renderMapView(/* items */) {
 // all work; the page-input is an editable number field — submit on Enter or
 // blur to jump directly to a page (the only scalable affordance at thousands
 // of pages, where a list of numbered buttons stops working).
-function renderPagination(current, total, view, q) {
-  if (total <= 1) return '';
+// Rendered unconditionally — federal portfolios scale to thousands of
+// buildings, so a persistent pagination footer is a load-bearing
+// affordance even when the current filter happens to return ≤ 1 page.
+// Item-range count ("1–12 von 247 Liegenschaften") sits left of the
+// controls so the row reads count → controls. de-CH thousands separator
+// keeps four-digit totals legible (e.g. "1'247").
+function renderPagination({ current, totalPages, view, q, from, to, totalItems }) {
   const prevHref = buildPropertiesHash({ view, q, page: Math.max(1, current - 1) });
-  const nextHref = buildPropertiesHash({ view, q, page: Math.min(total, current + 1) });
+  const nextHref = buildPropertiesHash({ view, q, page: Math.min(totalPages, current + 1) });
   const prevDisabled = current <= 1;
-  const nextDisabled = current >= total;
+  const nextDisabled = current >= totalPages;
+  const fmt = (n) => n.toLocaleString('de-CH');
+  const countText = totalItems === 0
+    ? 'Keine Liegenschaften'
+    : totalItems === 1
+      ? '1 Liegenschaft'
+      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} Liegenschaften`;
   return `
     <nav class="pagination" role="navigation" aria-label="Seitennavigation">
+      <span class="pagination__count" aria-live="polite">${countText}</span>
       <a class="btn btn--outline btn--icon-only" href="${prevHref}" aria-label="Vorherige Seite"
          ${prevDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronLeft')}</a>
       <input class="pagination__input" type="number"
-             id="paginationInput" min="1" max="${total}" value="${current}"
+             id="paginationInput" min="1" max="${totalPages}" value="${current}"
              aria-label="Seite auswählen">
-      <span class="pagination__text">von ${total} Seite${total === 1 ? '' : 'n'}</span>
+      <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
       <a class="btn btn--outline btn--icon-only" href="${nextHref}" aria-label="Nächste Seite"
          ${nextDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronRight')}</a>
     </nav>
@@ -1741,9 +1761,7 @@ function propertyCard(t) {
           <span>${t.workstations} AP</span>
           <span>${P.formatChf(t.yearlyCost)} / Jahr</span>
         </div>
-        <div class="card--property__footer">
-          <span class="card--property__category">${P.escapeHtml(t.portfolioCategory)}</span>
-        </div>
+        <span class="card--property__category">${P.escapeHtml(t.portfolioCategory)}</span>
       </div>
     </a>
   `;
