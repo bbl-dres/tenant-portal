@@ -237,34 +237,83 @@ function renderSearchResults() {
 
   const total = matches.news.length + matches.applications.length + matches.properties.length + matches.info.length;
 
+  // Renderers for each origin-group's row. Each row uses the CD card-list
+  // pattern: meta-info above title, title + lead in the body, chevron-right
+  // affordance on the right. `__type` highlights the canonical entity-type
+  // pill so users can scan by origin at a glance.
+  const searchRow = ({ href, type, meta, title, lead, onclick }) => `
+    <li class="search-results__item">
+      <a class="search-results__link" href="${href}" ${onclick ? `onclick="${onclick}"` : ''}>
+        <div class="search-results__body">
+          <p class="meta-info search-results__meta">
+            <span class="meta-info__item search-results__type">${P.escapeHtml(type)}</span>
+            ${meta ? `<span class="meta-info__item">${meta}</span>` : ''}
+          </p>
+          <h3 class="search-results__title">${P.escapeHtml(title)}</h3>
+          ${lead ? `<p class="search-results__lead">${P.escapeHtml(lead)}</p>` : ''}
+        </div>
+        <svg class="search-results__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </li>
+  `;
+
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar()}
+
+    <section class="section section--alt search-hero">
+      <div class="container">
+        <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
+        <form class="search-hero__form" role="search" aria-label="Portal durchsuchen"
+              onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v);">
+          <div class="search-hero__field">
+            ${P.icon('search')}
+            <input type="search" name="q" class="input search-hero__input"
+                   value="${P.escapeHtml(query)}"
+                   placeholder="Suchbegriff eingeben …"
+                   aria-label="Suchbegriff"
+                   autocomplete="off">
+          </div>
+          <button class="btn btn--filled" type="submit">Suchen</button>
+        </form>
+        ${query && total > 0
+          ? `<p class="search-hero__meta">${total} ${total === 1 ? 'Treffer' : 'Treffer'} in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>`
+          : ''}
+      </div>
+    </section>
+
     <section class="section">
       <div class="container container--narrow">
-        <h1 class="h1 section-heading">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
         ${!query ? `
-          <p class="section-intro">Bitte geben Sie einen Suchbegriff in der Suchleiste oben ein.</p>
+          <p class="section-intro">Bitte geben Sie einen Suchbegriff oben ein.</p>
         ` : total === 0 ? `
-          <div class="empty-state">
-            <div class="empty-state__glyph" aria-hidden="true">
-              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="28" cy="28" r="16"/><line x1="40" y1="40" x2="56" y2="56"/></svg>
-            </div>
-            <h2 class="empty-state__title">Keine Treffer</h2>
-            <p class="empty-state__lead">Versuchen Sie es mit anderen Schlüsselwörtern oder durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</p>
+          <div class="search-no-results">
+            <h2 class="h3 search-no-results__title">Die Suche nach <strong>„${P.escapeHtml(query)}"</strong> ergab keine Treffer.</h2>
+
+            <h3 class="h4 search-no-results__heading">Tipps zur Suche</h3>
+            <ul class="search-no-results__list">
+              <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffs.</li>
+              <li>Verwenden Sie einen anderen oder allgemeineren Begriff.</li>
+              <li>Versuchen Sie es mit weniger Suchbegriffen.</li>
+              <li>Durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</li>
+            </ul>
+
+            <h3 class="h4 search-no-results__heading">Hinweis</h3>
+            <p class="search-no-results__hint">
+              Die Suche durchsucht aktuell Ihre Anträge, freigegebene Liegenschaften, News-Einträge und die Informationsseite. Erweiterte Suchfilter werden in einer späteren Iteration ergänzt.
+            </p>
           </div>
         ` : `
-          <p class="section-intro">${total} Treffer in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>
-
           ${matches.news.length ? `
             <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Aktuell (${matches.news.length})</h2>
+              <h2 class="h3 search-results__group-title">Aktuell <span class="search-results__group-count">(${matches.news.length})</span></h2>
               <ul class="search-results">
-                ${matches.news.slice(0, SEARCH_GROUP_CAP).map(n => `
-                  <li><a href="#/news/${n.id}">
-                    <strong>${P.escapeHtml(n.type)}</strong> · ${P.formatDate(n.date)} · <span class="search-results__title">${P.escapeHtml(n.title)}</span>
-                    <p class="search-results__lead">${P.escapeHtml(n.lead.slice(0, 160))}…</p>
-                  </a></li>
-                `).join('')}
+                ${matches.news.slice(0, SEARCH_GROUP_CAP).map(n => searchRow({
+                  href: `#/news/${n.id}`,
+                  type: n.type || 'Aktuell',
+                  meta: P.formatDate(n.date),
+                  title: n.title,
+                  lead: n.lead.slice(0, 180) + (n.lead.length > 180 ? '…' : ''),
+                })).join('')}
               </ul>
               ${matches.news.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/news">${matches.news.length - SEARCH_GROUP_CAP} weitere in der News-Übersicht ansehen →</a></p>` : ''}
             </section>
@@ -272,14 +321,15 @@ function renderSearchResults() {
 
           ${matches.applications.length ? `
             <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Anträge (${matches.applications.length})</h2>
+              <h2 class="h3 search-results__group-title">Anträge <span class="search-results__group-count">(${matches.applications.length})</span></h2>
               <ul class="search-results">
-                ${matches.applications.slice(0, SEARCH_GROUP_CAP).map(a => `
-                  <li><a href="#/inbox/${a.id}">
-                    <strong>${a.id}</strong> · ${a.type} · <span class="search-results__title">${P.escapeHtml(a.address)}</span>
-                    <p class="search-results__lead">Eingereicht ${P.formatDate(a.submittedAt)} · ${P.statusBadge(a.status)}</p>
-                  </a></li>
-                `).join('')}
+                ${matches.applications.slice(0, SEARCH_GROUP_CAP).map(a => searchRow({
+                  href: `#/inbox/${a.id}`,
+                  type: a.type || 'Antrag',
+                  meta: `Eingereicht ${P.formatDate(a.submittedAt)}`,
+                  title: `${a.id} — ${a.address}`,
+                  lead: '',
+                })).join('')}
               </ul>
               ${matches.applications.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/inbox">${matches.applications.length - SEARCH_GROUP_CAP} weitere Anträge in der Inbox →</a></p>` : ''}
             </section>
@@ -287,14 +337,15 @@ function renderSearchResults() {
 
           ${matches.properties.length ? `
             <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Liegenschaften (${matches.properties.length})</h2>
+              <h2 class="h3 search-results__group-title">Liegenschaften <span class="search-results__group-count">(${matches.properties.length})</span></h2>
               <ul class="search-results">
-                ${matches.properties.slice(0, SEARCH_GROUP_CAP).map(t => `
-                  <li><a href="#/properties/${t.id}">
-                    <strong>${formatAssetKey(t.assetKey)}</strong> · <span class="search-results__title">${P.escapeHtml(t.buildingName)}</span>
-                    <p class="search-results__lead">${P.escapeHtml(t.address)} · ${t.hnf2} m² HNF2</p>
-                  </a></li>
-                `).join('')}
+                ${matches.properties.slice(0, SEARCH_GROUP_CAP).map(t => searchRow({
+                  href: `#/properties/${t.id}`,
+                  type: 'Liegenschaft',
+                  meta: formatAssetKey(t.assetKey),
+                  title: t.buildingName,
+                  lead: `${t.address} · ${t.hnf2} m² HNF2`,
+                })).join('')}
               </ul>
               ${matches.properties.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/properties?q=${encodeURIComponent(query)}">${matches.properties.length - SEARCH_GROUP_CAP} weitere Liegenschaften im Portfolio →</a></p>` : ''}
             </section>
@@ -302,21 +353,47 @@ function renderSearchResults() {
 
           ${matches.info.length ? `
             <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Arbeitsinstrumente und Informationen (${matches.info.length})</h2>
+              <h2 class="h3 search-results__group-title">Arbeitsinstrumente und Informationen <span class="search-results__group-count">(${matches.info.length})</span></h2>
               <ul class="search-results">
-                ${matches.info.map(it => `
-                  <li><a href="#/info" onclick="setTimeout(() => window.t3lite.scrollToInfo('${it.id}'), 100);">
-                    <span class="search-results__title">${P.escapeHtml(it.label)}</span>
-                    <p class="search-results__lead">Abschnitt auf der Info-Seite öffnen.</p>
-                  </a></li>
-                `).join('')}
+                ${matches.info.map(it => searchRow({
+                  href: '#/info',
+                  type: 'Information',
+                  meta: '',
+                  title: it.label,
+                  lead: 'Abschnitt auf der Info-Seite öffnen.',
+                  onclick: `setTimeout(() => window.t3lite.scrollToInfo('${it.id}'), 100);`,
+                })).join('')}
               </ul>
             </section>
           ` : ''}
+
+          <div class="notification-banner notification-banner--info search-results__contact" role="note">
+            <span class="notification-banner__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </span>
+            <div class="notification-banner__wrapper">
+              <p class="notification-banner__text">
+                <strong>Haben Sie nicht gefunden, wonach Sie suchen?</strong>
+                <span class="notification-banner__sub">Wir helfen gerne weiter — schreiben Sie uns über das <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontaktformular der BBL</a>.</span>
+              </p>
+            </div>
+          </div>
         `}
       </div>
     </section>
   `;
+
+  // Move keyboard focus into the hero search field — most users land on
+  // this page intending to refine the query.
+  setTimeout(() => {
+    const input = document.querySelector('.search-hero__input');
+    if (input) {
+      input.focus();
+      // Place caret at end without selecting all
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }, 0);
 }
 
 // ── ARBEITSINSTRUMENTE UND INFORMATIONEN ─────────────────────────────────
