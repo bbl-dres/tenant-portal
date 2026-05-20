@@ -36,7 +36,14 @@ chrome). Plus a derived gray/text scale matching Tailwind defaults.
 --color-primary-600: #D8232A    /* federal red, brand */
 --color-secondary-600: #2F4356  /* top-bar dark, footer */
 --color-text-primary: #1F2937   /* gray-800 */
+--color-link: #D8232A           /* primary-600 — CD Bund canonical (was #1F6FAB blue) */
 ```
+
+**Links** use the federal red `primary-600` per the CD Bund design
+system (`.link, main a { @apply text-primary-600 ... }` in
+[`link.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\components\link.postcss)).
+If the project later mirrors swisstopo's blue links, use CD's `blue-700`
+`#1d4ed8`, not an off-palette value.
 
 **Semantic aliases** (`--color-text-primary`, `--color-bg-alt`, etc.) wrap
 ramp values for component use; never `#hex` a color inside a component.
@@ -54,8 +61,22 @@ ramp values for component use; never `#hex` a color inside a component.
 | `--text-body-sm`  | 0.875                                          |
 | `--text-body-xs`  | 0.75                                           |
 
-Scale follows DS's `.text--Nxl` responsive chain. Font family: **NotoSans**
-(DS uses Hind — see §5).
+Scale **approximates** DS's `.text--Nxl` responsive chain but starts one
+step smaller across the breakpoints (e.g. base `--text-h1` 1.625 vs DS
+`.h1`/`text--3xl` 1.875). Body text doesn't scale at `xl`/`3xl` — see
+[CD-AUDIT.md §12.3](CD-AUDIT.md) for the deep-dive.
+
+Font family: **Noto Sans** — CD Bund's canonical typeface. We bundle
+all four faces (regular + bold + italic + bold-italic) from
+`designsystem/css/foundations/fonts/` in `assets/fonts/` and reference
+them via `url()`, with `local()` as the fast path. A `Fallback-NotoSans`
+family with `advance-override`/`ascent-override` metric tuning keeps
+line-box heights stable while the web font swaps in.
+
+**Weight axis is binary** — CD Bund uses only `400` (regular) and `700`
+(bold). The `--font-weight-medium` and `--font-weight-semibold` tokens
+in [`tokens.css`](../css/tokens.css) are aliases that resolve to 400 and 700
+respectively, kept for backwards-compat with existing call sites.
 
 ### 2.3 Spacing
 
@@ -165,7 +186,9 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.property-section` | (modifier)                                | section block on a property-detail page (consistent bottom margin)      |
 | `.property-aside__{card,actions}` | (block)                    | aside actions stack on the property detail page                         |
 | `.contact-dl[__row]` | (block)                                  | definition list of contact persons (label above name, grid-based)       |
-| `.card--property__{status,status--quiet,category}` | (block)     | property-card status badge overlaying image, plus footer category chip |
+| `.card--property__{status,status--quiet,category}` | (block)     | property-card status badge overlaying image + portfolio-category chip in body (no separate footer row — flat layout) |
+| `.share-bar__back`, `.share-bar__actions` | derived from DS `.back-bar` + `.share-bar` | combined detail-page utility bar: Zurück on the left, Teilen + Drucken on the right |
+| `.pagination__count`, `.pagination__controls` | derived from DS pagination | item-range line ("1–12 von 247") to the left of the chevron + page-input controls |
 | `.wizard__id`, `.wizard__autosave` | (block)                   | wizard subtitle parts (ID badge + auto-save status with aria-live)      |
 | `.text-secondary` | (utility)                                  | small muted-text utility for empty-state notes                          |
 | `.share-bar`         | `share-bar.postcss`                       | portal-specific layout                                               |
@@ -227,30 +250,41 @@ size | date` metadata strip. Whole row is one clickable link.
 
 ## 5. Intentional deviations from CD-Bund
 
-1. **Font family** — DS uses Hind (loaded from custom files) with all weights
-   set to 400 (bold ships as a separate font-family). We use **NotoSans** as
-   the system fallback; weights 400/500/600/700 render normally. Future
-   iteration may bundle the federal Hind font.
+1. **Softer card shadows** — `--shadow-card` is softer than DS `shadow-lg`.
+   Quieter aesthetic for a dense admin UI; cards shouldn't feel "floating"
+   when stacked in a property grid.
 
-2. **`.alert-banner` not used** — DS specifies a full-bleed colored alert
+2. **Wider button padding** — `var(--space-lg)` (24 px) vs DS `px-4` (16 px).
+   Better visual balance in form-heavy wizard pages.
+
+3. **Single-level breadcrumb** — DS supports hierarchical dropdowns per level;
+   we render flat. Admin tool paths are flat; hierarchical breadcrumbs add noise.
+
+4. **6-variant badge palette** (vs DS's 10) — tuned to the application /
+   tenancy status taxonomy; expand if new statuses appear.
+
+5. **Pagination — right-align + item-range count** — adds the
+   swisstopo / kbob-fdk "1–12 von 247" count line on top of DS's base
+   pagination; right-aligned matches DS's `.pagination--right`.
+
+6. **Property banner** — image-with-caption-overlay hero is a federal
+   real-estate pattern (armasuisse Immo-Portal), not one of DS's six
+   abstract hero variants (`.hero--default/main-image/main/hub/overview/title-only`).
+   Kept as a portal-specific hero variant.
+
+7. **`.alert-banner` not used** — DS specifies a full-bleed colored alert
    banner above the shell. For the prototype warning we keep the **inline red
-   text in the top-bar centre** (less vertical real estate; aligns with bbl.admin.ch).
+   text in the top-bar centre** (less vertical real estate; aligns with
+   bbl.admin.ch).
 
-3. **Mobile menu** — current implementation is a plain `display:none → flex`
+8. **Mobile menu** — current implementation is a plain `display:none → flex`
    toggle on the main navigation. DS provides a full-screen overlay with
    animated entry; flagged for a follow-up pass.
 
-4. **No build step** — we are vanilla HTML/CSS/JS while DS is Tailwind +
+9. **No build step** — we are vanilla HTML/CSS/JS while DS is Tailwind +
    PostCSS. Tokens are hand-translated from `app/tailwind.config.js` and
    `css/skins/default.postcss`. When DS changes, [`css/tokens.css`](../css/tokens.css) must be
    reviewed.
-
-5. **`.tag-item` not adopted** — at first glance our `.badge--info` for
-   categorical labels (SEM/EDA/BK) looked like a `.tag-item` candidate, but
-   DS `.tag-item` is a 44 px-min-height **filter chip** (clickable, pill-shaped,
-   active/hover states). For small inline categorical labels, our `.badge--info`
-   is the correct fit. Adopt `.tag-item` when we add actual filter UIs (e.g.
-   tag-based search refinement).
 
 ## 5a. Naming-collision register
 

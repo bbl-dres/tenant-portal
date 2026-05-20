@@ -203,6 +203,11 @@ function registerRoutes() {
 }
 
 // ── GLOBAL SEARCH RESULTS ────────────────────────────────────────────────
+// CD Bund search-results pattern caps each origin-group at a small
+// number and offers a "view all in [origin]" link below. Less overwhelm
+// than one mega-list, lets the user pivot to the canonical paginated
+// surface (inbox / properties / news) when they want to keep digging.
+const SEARCH_GROUP_CAP = 10;
 function renderSearchResults() {
   shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'Suchergebnisse' }] });
   const q = (location.hash.split('?q=')[1] || '').replace(/^=/, '');
@@ -254,13 +259,14 @@ function renderSearchResults() {
             <section class="search-results__group">
               <h2 class="h3 search-results__group-title">Aktuell (${matches.news.length})</h2>
               <ul class="search-results">
-                ${matches.news.map(n => `
+                ${matches.news.slice(0, SEARCH_GROUP_CAP).map(n => `
                   <li><a href="#/news/${n.id}">
                     <strong>${P.escapeHtml(n.type)}</strong> · ${P.formatDate(n.date)} · <span class="search-results__title">${P.escapeHtml(n.title)}</span>
                     <p class="search-results__lead">${P.escapeHtml(n.lead.slice(0, 160))}…</p>
                   </a></li>
                 `).join('')}
               </ul>
+              ${matches.news.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/news">${matches.news.length - SEARCH_GROUP_CAP} weitere in der News-Übersicht ansehen →</a></p>` : ''}
             </section>
           ` : ''}
 
@@ -268,13 +274,14 @@ function renderSearchResults() {
             <section class="search-results__group">
               <h2 class="h3 search-results__group-title">Anträge (${matches.applications.length})</h2>
               <ul class="search-results">
-                ${matches.applications.map(a => `
+                ${matches.applications.slice(0, SEARCH_GROUP_CAP).map(a => `
                   <li><a href="#/inbox/${a.id}">
                     <strong>${a.id}</strong> · ${a.type} · <span class="search-results__title">${P.escapeHtml(a.address)}</span>
                     <p class="search-results__lead">Eingereicht ${P.formatDate(a.submittedAt)} · ${P.statusBadge(a.status)}</p>
                   </a></li>
                 `).join('')}
               </ul>
+              ${matches.applications.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/inbox">${matches.applications.length - SEARCH_GROUP_CAP} weitere Anträge in der Inbox →</a></p>` : ''}
             </section>
           ` : ''}
 
@@ -282,13 +289,14 @@ function renderSearchResults() {
             <section class="search-results__group">
               <h2 class="h3 search-results__group-title">Liegenschaften (${matches.properties.length})</h2>
               <ul class="search-results">
-                ${matches.properties.map(t => `
+                ${matches.properties.slice(0, SEARCH_GROUP_CAP).map(t => `
                   <li><a href="#/properties/${t.id}">
                     <strong>${formatAssetKey(t.assetKey)}</strong> · <span class="search-results__title">${P.escapeHtml(t.buildingName)}</span>
                     <p class="search-results__lead">${P.escapeHtml(t.address)} · ${t.hnf2} m² HNF2</p>
                   </a></li>
                 `).join('')}
               </ul>
+              ${matches.properties.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/properties?q=${encodeURIComponent(query)}">${matches.properties.length - SEARCH_GROUP_CAP} weitere Liegenschaften im Portfolio →</a></p>` : ''}
             </section>
           ` : ''}
 
@@ -611,8 +619,16 @@ function newsCard(n) {
 }
 
 // ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
+const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
   shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'News-Übersicht' }] });
+  const items = P.state.news || [];
+  const params = parseHashQuery(location.hash);
+  const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
+  const totalPages = Math.max(1, Math.ceil(items.length / NEWS_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = items.slice((safePage - 1) * NEWS_PAGE_SIZE, safePage * NEWS_PAGE_SIZE);
+
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--narrow">
@@ -621,11 +637,24 @@ function renderNewsList() {
           <h1 class="news-list__title">News-Übersicht</h1>
         </header>
         <ul class="news-list">
-          ${P.state.news.map(newsListRow).join('')}
+          ${pageItems.map(newsListRow).join('')}
         </ul>
+
+        ${renderPagination({
+          current: safePage,
+          totalPages,
+          from: items.length === 0 ? 0 : (safePage - 1) * NEWS_PAGE_SIZE + 1,
+          to: Math.min(safePage * NEWS_PAGE_SIZE, items.length),
+          totalItems: items.length,
+          entitySingular: 'Nachricht',
+          entityPlural: 'Nachrichten',
+          hrefFor: (p) => '#/news' + (p > 1 ? '?page=' + p : ''),
+          inputId: 'newsPaginationInput',
+        })}
       </div>
     </section>
   `;
+  wirePaginationInput('newsPaginationInput');
 }
 
 function newsListRow(n) {
@@ -648,7 +677,7 @@ function renderNewsDetail({ id }) {
   if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
   shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/news', label: 'News-Übersicht' }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar()}
+    ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <article class="section">
       <div class="container container--reading">
         <p class="news-detail__meta"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
@@ -658,7 +687,6 @@ function renderNewsDetail({ id }) {
         <p class="news-detail__footer">
           Quelle: ${P.escapeHtml(n.source)} · Verantwortlich: ${P.escapeHtml(n.responsible)} · Stand: ${P.formatDate(n.date)} · DE
         </p>
-        <p class="news-detail__back"><a href="#/news" class="btn btn--outline">${P.icon('chevronLeft')} Zur News-Übersicht</a></p>
       </div>
     </article>
   `;
@@ -887,6 +915,7 @@ function profileCard({ image, title, date, desc, role }) {
 }
 
 // ── 5. SUBMITTER INBOX ───────────────────────────────────────────────────
+const INBOX_PAGE_SIZE = 25;
 function renderInbox() {
   if (!P.state.user) { P.navigate('#/'); return; }
   const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Meine Anträge' }] });
@@ -895,14 +924,18 @@ function renderInbox() {
     ? P.state.applications.filter(a => a.submitterVe === P.state.user.ve)
     : P.state.applications.filter(a => a.submitterId === P.state.user.id);
 
-  const filter = (location.hash.split('?')[1] || '').split('&').reduce((o, p) => {
-    const [k, v] = p.split('='); if (k) o[k] = decodeURIComponent(v || ''); return o;
-  }, {});
+  // URL state: ?status=… (filter chips also write here on click) · ?page=N
+  const params = parseHashQuery(location.hash);
+  const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
+  const totalPages = Math.max(1, Math.ceil(apps.length / INBOX_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = apps.slice((safePage - 1) * INBOX_PAGE_SIZE, safePage * INBOX_PAGE_SIZE);
 
   // Build status filter chips dynamically from what's actually in the
   // user's set, so we never show "Rückfrage" when there are no
   // clarification items. Counts on each chip give an at-a-glance
-  // distribution (DS tag-item pattern).
+  // distribution (DS tag-item pattern). Counts are derived from the
+  // full apps array, not the paginated slice.
   const STATUS_LABELS = {
     draft: 'Entwurf', submitted: 'Eingereicht', in_review_gs: 'in GS-Prüfung',
     in_review_pfm: 'in PFM-Prüfung', clarification: 'Rückfrage',
@@ -942,15 +975,30 @@ function renderInbox() {
               </tr>
             </thead>
             <tbody id="inboxTbody">
-              ${apps.map(rowHtml).join('')}
+              ${pageItems.map(rowHtml).join('')}
             </tbody>
           </table>
           <p class="table-hint">Klicken Sie eine Zeile, um Details zu öffnen.</p>
+
+          ${renderPagination({
+            current: safePage,
+            totalPages,
+            from: apps.length === 0 ? 0 : (safePage - 1) * INBOX_PAGE_SIZE + 1,
+            to: Math.min(safePage * INBOX_PAGE_SIZE, apps.length),
+            totalItems: apps.length,
+            entitySingular: 'Antrag',
+            entityPlural: 'Anträge',
+            hrefFor: (p) => '#/inbox' + (p > 1 ? '?page=' + p : ''),
+            inputId: 'inboxPaginationInput',
+          })}
         `}
       </div>
     </section>
   `;
-  if (apps.length > 0) wireInboxFilters(apps);
+  if (apps.length > 0) {
+    wireInboxFilters(apps);
+    wirePaginationInput('inboxPaginationInput');
+  }
 }
 
 function renderInboxEmptyState() {
@@ -1020,7 +1068,7 @@ function renderApplicationDetail({ id }) {
   const tab = (location.hash.split('?tab=')[1] || 'daten');
 
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar()}
+    ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'Anträge' })}
     <section class="section">
       <div class="container">
         ${a._isNew ? `
@@ -1182,6 +1230,7 @@ function renderDetailTab(a, tab) {
 }
 
 // ── 7. REVIEWER QUEUE (when activeRole = GS-Prüfer/in) ───────────────────
+const QUEUE_PAGE_SIZE = 25;
 function renderQueue() {
   if (!P.state.user) { P.navigate('#/'); return; }
   const main = shell({ activeNav: 'queue', breadcrumb: [{ label: 'Pendenzen' }], deptSub: 'Mieterportal · GS-Prüfer/in' });
@@ -1190,6 +1239,12 @@ function renderQueue() {
     return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
         && a.pipelineVariant !== 'bypass';
   });
+
+  const params = parseHashQuery(location.hash);
+  const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
+  const totalPages = Math.max(1, Math.ceil(queue.length / QUEUE_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = queue.slice((safePage - 1) * QUEUE_PAGE_SIZE, safePage * QUEUE_PAGE_SIZE);
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -1200,7 +1255,7 @@ function renderQueue() {
             <p class="page-header__sub">Anträge zur Prüfung in Ihrer Verwaltungseinheit</p>
           </div>
         </header>
-        <table class="table table--zebra table--rows-clickable" aria-label="Pendenzen">
+        <table class="table table--zebra table--rows-clickable table--compact" aria-label="Pendenzen">
           <thead>
             <tr>
               <th><input type="checkbox" id="selectAll" aria-label="Alle auswählen"></th>
@@ -1208,7 +1263,7 @@ function renderQueue() {
             </tr>
           </thead>
           <tbody>
-            ${queue.map(a => `
+            ${pageItems.map(a => `
               <tr data-app-id="${a.id}">
                 <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}"></td>
                 <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
@@ -1220,6 +1275,18 @@ function renderQueue() {
             `).join('') || `<tr><td colspan="6" class="table-empty">Keine offenen Pendenzen.</td></tr>`}
           </tbody>
         </table>
+
+        ${renderPagination({
+          current: safePage,
+          totalPages,
+          from: queue.length === 0 ? 0 : (safePage - 1) * QUEUE_PAGE_SIZE + 1,
+          to: Math.min(safePage * QUEUE_PAGE_SIZE, queue.length),
+          totalItems: queue.length,
+          entitySingular: 'Pendenz',
+          entityPlural: 'Pendenzen',
+          hrefFor: (p) => '#/queue' + (p > 1 ? '?page=' + p : ''),
+          inputId: 'queuePaginationInput',
+        })}
 
         <div class="queue-actions">
           <button class="btn btn--outline btn--sm" onclick="window.t3lite.openBatchApprove()">Bulk genehmigen</button>
@@ -1245,6 +1312,7 @@ function renderQueue() {
   document.getElementById('selectAll')?.addEventListener('change', e => {
     document.querySelectorAll('.rowSel').forEach(c => c.checked = e.target.checked);
   });
+  wirePaginationInput('queuePaginationInput');
   wireQueueShortcuts();
 }
 
@@ -1461,11 +1529,12 @@ function renderProperties() {
             ${view !== 'map' ? renderPagination({
               current: safePage,
               totalPages,
-              view,
-              q: query,
               from: filtered.length === 0 ? 0 : (safePage - 1) * perPage + 1,
               to: Math.min(safePage * perPage, filtered.length),
               totalItems: filtered.length,
+              entitySingular: 'Liegenschaft',
+              entityPlural: 'Liegenschaften',
+              hrefFor: (page) => buildPropertiesHash({ view, q: query, page }),
             }) : ''}
           `}
         `}
@@ -1557,20 +1626,9 @@ function wirePropertiesToolbar(view) {
   if (clearBtn) clearBtn.addEventListener('click', () => {
     location.hash = buildPropertiesHash({ view, q: '', page: 1 });
   });
-  // CD Bund pagination input — jump on Enter or blur. Clamps to valid range.
-  const pageInput = document.getElementById('paginationInput');
-  if (pageInput) {
-    const params = parseHashQuery(location.hash);
-    const max = parseInt(pageInput.getAttribute('max'), 10) || 1;
-    const go = () => {
-      const v = Math.max(1, Math.min(max, parseInt(pageInput.value, 10) || 1));
-      location.hash = buildPropertiesHash({ view, q: params.q || '', page: v });
-    };
-    pageInput.addEventListener('change', go);
-    pageInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); go(); }
-    });
-  }
+  // CD Bund pagination input — generic helper picks up the hrefFor
+  // closure stashed by renderPagination.
+  wirePaginationInput();
 }
 
 function renderGalleryView(items) {
@@ -1624,41 +1682,66 @@ function renderMapView(/* items */) {
 
 // CD Bund pagination — compact pattern from the federal design system
 // (designsystem css/components/pagination.postcss, app/components/ch/components/Pagination.vue):
-//   [chevron-left] [page-input] von X Seiten [chevron-right]
-// Properties uses anchor-based chevrons so middle-click + share + back/forward
-// all work; the page-input is an editable number field — submit on Enter or
-// blur to jump directly to a page (the only scalable affordance at thousands
+//   [count] [chevron-left] [page-input] von X Seiten [chevron-right]
+// Anchor-based chevrons so middle-click + share + back/forward all work;
+// the page-input is an editable number field — submit on Enter or blur
+// to jump directly to a page (the only scalable affordance at thousands
 // of pages, where a list of numbered buttons stops working).
-// Rendered unconditionally — federal portfolios scale to thousands of
-// buildings, so a persistent pagination footer is a load-bearing
+// Rendered unconditionally — federal data sets scale to thousands of
+// records, so a persistent pagination footer is a load-bearing
 // affordance even when the current filter happens to return ≤ 1 page.
-// Item-range count ("1–12 von 247 Liegenschaften") sits left of the
-// controls so the row reads count → controls. de-CH thousands separator
-// keeps four-digit totals legible (e.g. "1'247").
-function renderPagination({ current, totalPages, view, q, from, to, totalItems }) {
-  const prevHref = buildPropertiesHash({ view, q, page: Math.max(1, current - 1) });
-  const nextHref = buildPropertiesHash({ view, q, page: Math.min(totalPages, current + 1) });
+// Generic across routes: caller passes `hrefFor: (page) => string` to
+// build URLs, plus `entitySingular`/`entityPlural` for the count label
+// ("1 Antrag" / "1–12 von 247 Anträgen" / "Keine Anträge"). The de-CH
+// thousands separator keeps four-digit totals legible (e.g. "1'247").
+// The hrefFor closure is stashed in a module-level Map keyed by
+// `inputId` so `wirePaginationInput` can navigate without round-tripping
+// the URL through a fragile data-attribute template.
+const _paginationHrefBuilders = new Map();
+function renderPagination({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, hrefFor, inputId }) {
+  const id = inputId || 'paginationInput';
+  _paginationHrefBuilders.set(id, hrefFor);
+  const prevHref = hrefFor(Math.max(1, current - 1));
+  const nextHref = hrefFor(Math.min(totalPages, current + 1));
   const prevDisabled = current <= 1;
   const nextDisabled = current >= totalPages;
   const fmt = (n) => n.toLocaleString('de-CH');
   const countText = totalItems === 0
-    ? 'Keine Liegenschaften'
+    ? `Keine ${entityPlural}`
     : totalItems === 1
-      ? '1 Liegenschaft'
-      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} Liegenschaften`;
+      ? `1 ${entitySingular}`
+      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} ${entityPlural}`;
   return `
     <nav class="pagination" role="navigation" aria-label="Seitennavigation">
       <span class="pagination__count" aria-live="polite">${countText}</span>
       <a class="btn btn--outline btn--icon-only" href="${prevHref}" aria-label="Vorherige Seite"
          ${prevDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronLeft')}</a>
       <input class="pagination__input" type="number"
-             id="paginationInput" min="1" max="${totalPages}" value="${current}"
+             id="${id}" min="1" max="${totalPages}" value="${current}"
              aria-label="Seite auswählen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
       <a class="btn btn--outline btn--icon-only" href="${nextHref}" aria-label="Nächste Seite"
          ${nextDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronRight')}</a>
     </nav>
   `;
+}
+
+// Wire the page-input field to navigate on Enter / blur. Looks up the
+// hrefFor closure from the Map populated by `renderPagination`.
+function wirePaginationInput(inputId) {
+  const id = inputId || 'paginationInput';
+  const el = document.getElementById(id);
+  const hrefFor = _paginationHrefBuilders.get(id);
+  if (!el || !hrefFor) return;
+  const max = parseInt(el.getAttribute('max'), 10) || 1;
+  const go = () => {
+    const v = Math.max(1, Math.min(max, parseInt(el.value, 10) || 1));
+    location.hash = hrefFor(v);
+  };
+  el.addEventListener('change', go);
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); go(); }
+  });
 }
 
 // MapLibre GL — loaded on demand only when the map view is active.
@@ -1784,17 +1867,19 @@ function renderPropertyDetail({ id }) {
   const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
 
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar()}
+    ${P.renderShareBar({ backTo: '#/properties', backLabel: 'Liegenschaften' })}
     <section class="section">
-      <div class="container">
-        <header class="property-banner" style="background-image:url('${t.image}');">
-          <div class="property-banner__caption">
+      <header class="property-banner" style="background-image:url('${t.image}');">
+        <div class="property-banner__caption">
+          <div class="container">
             <p class="property-banner__sap">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
             <h1 class="property-banner__title">${P.escapeHtml(t.buildingName)}</h1>
             <p class="property-banner__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
           </div>
-        </header>
+        </div>
+      </header>
 
+      <div class="container">
         <div class="property-layout">
           <div>
             <section class="property-section">

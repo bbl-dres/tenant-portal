@@ -113,7 +113,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
         <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
                 type="button"
                 aria-expanded="false"
-                aria-haspopup="true"
+                aria-haspopup="menu"
                 aria-controls="navMenu-${item.id}"
                 data-menu="${item.id}"
                 onclick="window.portal.toggleNavMenu('${item.id}')">
@@ -416,19 +416,33 @@ export function toggleNavMenu(id, force) {
 
 
 // ── SHARE BAR (above detail pages: Teilen + Drucken) ──────────────────────
-export function renderShareBar() {
+// Optional `backTo`/`backLabel` adds a "Zurück" affordance on the left
+// — CD Bund pattern (separate `.back-bar` + `.share-bar` rows, federal
+// detail-page convention). We combine into one bar with
+// `justify-content: space-between` so the row reads back-on-left,
+// actions-on-right. Pass these from detail pages reached from a list.
+export function renderShareBar({ backTo = null, backLabel = null } = {}) {
+  const back = backTo
+    ? `<a class="share-bar__back" href="${backTo}" aria-label="Zurück zu ${backLabel || 'Übersicht'}">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+         <span>Zurück${backLabel ? ` zu ${backLabel}` : ''}</span>
+       </a>`
+    : '';
   return `
-    <div class="share-bar" role="toolbar" aria-label="Seite teilen oder drucken">
-      <button class="share-bar__btn" type="button" aria-label="Link kopieren"
-              onclick="window.portal.copyShareLink()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        <span>Teilen</span>
-      </button>
-      <button class="share-bar__btn" type="button" aria-label="Seite drucken"
-              onclick="window.print()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        <span>Drucken</span>
-      </button>
+    <div class="share-bar" role="toolbar" aria-label="Seite-Aktionen">
+      ${back}
+      <div class="share-bar__actions">
+        <button class="share-bar__btn" type="button" aria-label="Link kopieren"
+                onclick="window.portal.copyShareLink()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>Teilen</span>
+        </button>
+        <button class="share-bar__btn" type="button" aria-label="Seite drucken"
+                onclick="window.print()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span>Drucken</span>
+        </button>
+      </div>
     </div>
   `;
 }

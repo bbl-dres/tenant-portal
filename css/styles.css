@@ -744,6 +744,15 @@
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
 }
+/* Filled buttons (currently navy / secondary-600) get a defensive
+   white inner-ring + the lighter purple outline. This keeps the focus
+   target visible on saturated bg colours regardless of whether the
+   button is navy now or red in a future `--danger` variant. */
+.btn--filled:focus-visible {
+  outline-color: var(--color-focus-dark);
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 5px var(--color-focus-dark);
+  outline: none;
+}
 /* On dark surfaces (top-bar, footer, .section--dark) the global purple
    focus ring is the same hue as Cabinet badges and can lose contrast
    against navy. Add a thin white inner ring so the keyboard target stays
@@ -1235,9 +1244,13 @@ figcaption {
   border-color: var(--color-gray-400);
   color: var(--color-white);
 }
+/* Confirmed step uses success-bright (green-500) — CD Bund pattern for
+   in-flight / just-completed states. The darker `--color-success`
+   (green-700) is reserved for terminal "done" badges where the
+   completion is archival rather than active. */
 .step-indicator__step--confirmed {
-  background: var(--color-success);
-  border-color: var(--color-success);
+  background: var(--color-success-bright);
+  border-color: var(--color-success-bright);
   color: var(--color-white);
 }
 .step-indicator__step--confirmed svg { width: 18px; height: 18px; }
@@ -1260,7 +1273,7 @@ figcaption {
   margin-top: var(--space-xs);
   margin-right: var(--space-sm);
 }
-.step-indicator__connector--confirmed { background: var(--color-success); }
+.step-indicator__connector--confirmed { background: var(--color-success-bright); }
 @media (max-width: 640px) {
   .step-indicator__item { min-width: 100%; }
   .step-indicator__connector { display: none; }
@@ -1495,6 +1508,17 @@ figcaption {
    `.table--rows-clickable` opts in to the row-hover-cursor + highlight. */
 .table tr:hover td { background: var(--color-bg-surface); }
 .table--rows-clickable tr:hover td { cursor: pointer; }
+
+/* `.table--compact` — tighter cell padding for data-dense reviewer
+   surfaces (queue, inbox). Mirrors CD Bund `.table--compact`. Trims
+   the row height from ~52 px to ~36 px so 25 rows fit a single screen
+   without scrolling. The .table--zebra alternation stays useful at
+   this density. */
+.table--compact th,
+.table--compact td {
+  padding: var(--space-xs) var(--space-sm);
+}
+.table--compact { font-size: var(--text-body-sm); }
 
 /* Small helpers used alongside .table — kept here so future tables can
    share them without re-introducing inline styles in views. */
@@ -1867,20 +1891,43 @@ a.btn[aria-disabled="true"] {
 }
 .app-footer__bottom-link:hover { color: var(--color-white); text-decoration: underline; }
 
-/* ── SHARE-BAR (detail-view utility bar — print, copy-link) ─────────────
-   Sits right under the breadcrumb. Adds breathing room above and below
-   so detail pages don't feel cramped. */
+/* ── SHARE-BAR (detail-view utility bar — back / print / share) ────────
+   Sits right under the breadcrumb. CD Bund pairs a `.back-bar` + `.share-bar`;
+   we combine into one row with `justify-content: space-between` so the
+   row reads back-on-left, actions-on-right. The back link is optional
+   (omitted on non-detail pages) — when absent, actions naturally collapse
+   to the right via the empty first child. */
 .share-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-md);
   padding: var(--space-md) var(--container-padding);
   max-width: var(--container-max-width);
   margin: 0 auto;
   border-bottom: 1px solid var(--color-border-light);
   margin-bottom: var(--space-xl);
 }
+.share-bar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;             /* keeps actions right-aligned even if back is absent */
+}
+.share-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.share-bar__back:hover { color: var(--color-primary); background: var(--color-bg-surface); }
+.share-bar__back svg { width: 18px; height: 18px; }
 .share-bar__btn {
   background: transparent;
   border: none;
@@ -1897,6 +1944,8 @@ a.btn[aria-disabled="true"] {
 }
 .share-bar__btn:hover { color: var(--color-primary); background: var(--color-bg-surface); }
 .share-bar__btn svg { width: 18px; height: 18px; }
+/* Hide the labels on phones — icons remain visible. The back link keeps
+   its label always (the icon-alone affordance is too vague for "Zurück"). */
 .share-bar__btn span { display: none; }
 @media (min-width: 640px) { .share-bar__btn span { display: inline; } }
 
@@ -1935,6 +1984,13 @@ a.btn[aria-disabled="true"] {
 .search-results__lead {
   margin: var(--space-xs) 0 0;
   color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+/* "+ X weitere in der … →" link below a capped search-results group.
+   Lets the user pivot to the canonical paginated surface when a group
+   has more matches than the cap. */
+.search-results__more {
+  margin: var(--space-sm) 0 0;
   font-size: var(--text-body-sm);
 }
 
@@ -2037,9 +2093,12 @@ a.btn[aria-disabled="true"] {
   transition: max-height var(--transition-slow) ease-out, padding var(--transition-fast);
   padding: 0 var(--space-sm);
 }
+/* CD Bund `.accordion__content` uses `pb-10` (40 px) — long content
+   blocks need breathing room. Was --space-md (16 px); bumped to
+   --space-2xl (48 px) so multi-paragraph panels don't feel cramped. */
 .accordion__item--open .accordion__panel {
   max-height: 800px;            /* generous upper bound for animated reveal */
-  padding: 0 var(--space-sm) var(--space-md);
+  padding: 0 var(--space-sm) var(--space-2xl);
 }
 
 /* ── PAGE HEADER (H1 + side actions) ─────────────────────────────────────
@@ -3706,11 +3765,13 @@ a.btn[aria-disabled="true"] {
 }
 
 /* ── PROPERTY DETAIL ─────────────────────────────────────────────────────
-   Banner: full-width image with a gradient-overlay caption box at the
-   bottom. Replaces ~6 inline-styled wrappers and gradient declarations. */
+   Banner: full-bleed hero image — edge-to-edge of the viewport — with a
+   gradient-overlay caption strip at the bottom. CD Bund hero pattern:
+   image full-bleed in `<main>`, caption text constrained to `.container`.
+   The banner is rendered as a sibling of the page's outer `.container`
+   (NOT nested inside it) so the image breaks out to viewport edges. */
 .property-banner {
   position: relative;
-  border-radius: var(--radius-lg);
   overflow: hidden;
   height: 280px;
   background-size: cover;
@@ -3718,10 +3779,17 @@ a.btn[aria-disabled="true"] {
   background-color: var(--color-bg-alt);
   margin-bottom: var(--space-xl);
 }
+@media (min-width: 1024px) { .property-banner { height: 360px; } }
+@media (min-width: 1544px) { .property-banner { height: 420px; } }
+/* Caption overlay: gradient stretches full viewport width (visual weight
+   anchoring the title), but the inner `.container` constrains the actual
+   text to the canonical 1544 px column with the standard container
+   padding — so on ultra-wide displays the title doesn't float in the
+   middle of nowhere. */
 .property-banner__caption {
   position: absolute;
   inset: auto 0 0 0;
-  padding: var(--space-lg);
+  padding: var(--space-2xl) 0 var(--space-lg);
   color: var(--color-white);
   background: linear-gradient(transparent, var(--color-black-70));
 }
