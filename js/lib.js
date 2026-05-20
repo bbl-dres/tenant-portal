@@ -280,8 +280,23 @@ export function toast(message, variant = '') {
   const host = ensureToastHost();
   const el = document.createElement('div');
   el.className = 'toast' + (variant ? ' toast--' + variant : '');
-  el.textContent = message;
   el.setAttribute('role', 'status');
+
+  // Message + close affordance — CD `toast-message` ships a dismiss
+  // button so users who need more reading time aren't forced to wait
+  // the auto-hide out. `textContent` on the inner span keeps message
+  // strings safe against HTML injection.
+  const msg = document.createElement('span');
+  msg.className = 'toast__message';
+  msg.textContent = message;
+  const close = document.createElement('button');
+  close.className = 'toast__close';
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Benachrichtigung schliessen');
+  close.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  close.addEventListener('click', () => el.remove());
+
+  el.append(msg, close);
   host.appendChild(el);
   setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 200ms'; }, 3500);
   setTimeout(() => el.remove(), 3800);

@@ -218,18 +218,23 @@
   --line-height-normal:        1.5;
   --line-height-relaxed:       1.625;
 
+  /* Letter-spacing — three named tracks consolidate the ad-hoc tunings
+     scattered through styles.css. Remaining literal values (-0.02em,
+     0.4px, 1px, etc.) are intentional one-off micro-adjustments for
+     a specific element and don't fit a token. */
+  --tracking-tight:            -0.01em;   /* h1/h2/h3 + page titles */
+  --tracking-label:            0.06em;    /* uppercase-tracked labels (e.g. .overtitle, footer-information__heading) */
+  --tracking-wide:             0.05em;    /* eyebrow / kicker text */
+
   /* CD Bund typography uses a binary weight axis: regular (400) and
-     bold (700). Noto Sans only ships those two faces; 500/600 weights
-     would synthesise faux-bold, which renders muddier than the real
-     weight and can collapse contrast on small text-on-colour.
-     The `--medium`/`--semibold` aliases are kept so existing call
-     sites compile, but they now resolve to 400 / 700 — the closest
-     CD-canonical pair. Sweep the ~28 call sites in styles.css to use
-     `--regular`/`--bold` directly when time permits. */
+     bold (700). Noto Sans only ships those two faces; intermediate
+     weights would synthesise faux-bold, which renders muddier than
+     the real weight and can collapse contrast on small text-on-colour.
+     Aliases for `--medium`/`--semibold` were retired in the §12.2.3
+     sweep — all call sites now reference `--font-weight-regular` or
+     `--font-weight-bold` directly. */
   --font-weight-regular:       400;
   --font-weight-normal:        400;
-  --font-weight-medium:        400;   /* was 500 — collapsed to regular */
-  --font-weight-semibold:      700;   /* was 600 — collapsed to bold */
   --font-weight-bold:          700;
 
   /* ── SPACING (4px base unit) ──────────────────────────────────────────── */

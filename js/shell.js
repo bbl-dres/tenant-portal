@@ -183,7 +183,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
              <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                ${i === a.length - 1
                  ? `<span aria-current="page" itemprop="name">${b.label}</span>`
-                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a><span class="breadcrumb__sep" aria-hidden="true">›</span>`}
+                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a><svg class="breadcrumb__sep" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>`}
                <meta itemprop="position" content="${i + 1}">
              </li>
            `).join('')}

@@ -703,11 +703,11 @@ function renderNewsDetail({ id }) {
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <article class="section">
       <div class="container container--reading">
+        <p class="overtitle">${P.escapeHtml(n.type)}</p>
+        <h1 class="news-detail__title">${P.escapeHtml(n.title)}</h1>
         <p class="meta-info">
-          <span class="meta-info__item"><strong>${P.escapeHtml(n.type)}</strong></span>
           <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
         </p>
-        <h1 class="news-detail__title">${P.escapeHtml(n.title)}</h1>
         <img class="news-detail__image" src="${n.image}" alt="">
         <p class="news-detail__lead">${P.escapeHtml(n.lead)}</p>
         <p class="news-detail__footer">
@@ -784,7 +784,9 @@ function renderLanding() {
                  alt=""
                  loading="lazy">
             <div class="video-thumb__header">
-              <img class="video-thumb__logo" src="assets/swiss-logo-flag.svg" alt="">
+              <span class="video-thumb__logo" aria-hidden="true">
+                <img class="video-thumb__logo-inner" src="assets/swiss-logo-flag.svg" alt="">
+              </span>
               <div class="video-thumb__titles">
                 <p class="video-thumb__title">Mieterportal des Bundes</p>
                 <p class="video-thumb__author">Bundesamt für Bauten und Logistik</p>

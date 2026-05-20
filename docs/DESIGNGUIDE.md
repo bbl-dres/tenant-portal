@@ -74,9 +74,9 @@ family with `advance-override`/`ascent-override` metric tuning keeps
 line-box heights stable while the web font swaps in.
 
 **Weight axis is binary** — CD Bund uses only `400` (regular) and `700`
-(bold). The `--font-weight-medium` and `--font-weight-semibold` tokens
-in [`tokens.css`](../css/tokens.css) are aliases that resolve to 400 and 700
-respectively, kept for backwards-compat with existing call sites.
+(bold). Tokens: `--font-weight-regular` (or `--font-weight-normal`)
+and `--font-weight-bold`. The legacy `--font-weight-medium` /
+`--font-weight-semibold` aliases were retired in the §12.2.3 sweep.
 
 ### 2.3 Spacing
 
@@ -114,8 +114,10 @@ Components default to `var(--radius)` (3 px). Pills use `--radius-full`.
 ### 2.7 Shadows
 
 Three depths: `--shadow-sm`, `--shadow`, `--shadow-lg`, plus a portal-specific
-`--shadow-card / --shadow-card-hover` pair. DS has 6 depths; we use the subset
-we actually need.
+`--shadow-card / --shadow-card-hover` pair tuned softer than CD's `shadow-lg`
+(see [CD-AUDIT.md §1.5](CD-AUDIT.md) for the rationale). DS Tailwind config
+ships 7 box-shadow tokens (`sm`, default, `md`, `lg`, `xl`, `2xl`, `none`);
+we use the subset we actually need.
 
 ## 3. Components — what we ship
 
@@ -317,7 +319,15 @@ contributes a single responsibility — mirrors the DS pattern in
 
 ## 6. Authoring rules
 
-- **No `#hex` in component CSS.** All colors via `var(--color-*)`.
+- **No opaque `#hex` in component CSS.** Opaque colors via `var(--color-*)`.
+  `rgba()` overlays are acceptable for one-off transparency on top of an
+  underlying surface (e.g. gradient overlays, card backdrops, glassy
+  pills) — prefer the `--color-white-N` / `--color-black-N` alpha
+  tokens (declared in [tokens.css](../css/tokens.css)) when a value is reused.
+  Exception: the federal Wappen avatar on the explainer card uses
+  literal `#ff0000` because it must match the exact red of
+  `assets/swiss-logo-flag.svg` to render seamlessly inside the round
+  channel-avatar — documented at the rule site.
 - **No emoji glyphs** in user-visible markup. Use `P.icon('name')`.
 - **No requirements / traceability IDs in user-facing text.** `FUNC-*`,
   `REQ-*`, `NFA-*`, `OP-*` etc. belong in code comments, commit messages,

@@ -26,10 +26,14 @@ Reference patterns: swisstopo.admin.ch, kbob-fdk, workspace-management.
 
 ## TL;DR
 
-The prototype is now ≈ 98 % aligned with CD Bund on tokens, chrome,
-typography, color, detail-page anatomy, and data-density patterns.
-The biggest visible drift items have been resolved in successive
-iterations:
+The prototype is now ≈ 99 % aligned with CD Bund on tokens, chrome,
+typography, color, detail-page anatomy, data-density patterns, and
+small-element details. All low-impact CD alignment items are closed;
+the remaining backlog is component-coverage gaps for features the
+prototype doesn't yet need (alert-banner, popover, progress, etc.)
+and a few refactors that only matter at scale (URL-state filtering,
+section padding-collapse). The biggest visible drift items have been
+resolved in successive iterations:
 
 **Resolved (cross-referenced in the relevant sections):**
 - Noto Sans now bundled and loads via `url()` — was rendering in
@@ -64,14 +68,19 @@ iterations:
   documented, tag-item contradiction resolved, deliberate-divergences
   list refreshed (§15.1, §15.2, §15.4, §15.5, §15.6, §15.7).
 
-**Remaining gaps cluster in one area:**
+**Remaining work — wait for a real feature need:**
 
-1. **Layout utility coverage** (§14.3) — CD ships `.vertical-spacing`,
-   `.container__main` + `.container__aside`, `.container--grid` that we
-   shim with one-off classes. Promote when the next layout work lands.
+1. **Component coverage gaps** (§10) — `.alert-banner`, `.info-block`,
+   `.popover`, `.progress`, `.multiselect`, `.load-more`, `.separator`,
+   semantic `.tab`. Add when a feature requires them.
+2. **Layout utility coverage** (§14.3) — `.layout--with-aside` as a
+   reusable class, `.vertical-spacing` retro-fit on existing markup,
+   news-detail hero variant. Promote when the next layout work lands.
+3. **Bigger refactors that only matter at scale** — URL-state inbox
+   filtering (§5.6.1), conditional section padding (§17.1.3),
+   consecutive-same-bg padding-collapse (§17.1.4).
 
-Everything else is cosmetic cleanup, minor coverage gaps, or
-markup-application of CSS classes already shipped — listed in §16.
+Everything observable is closed. Full list in §16.
 
 ---
 
@@ -238,7 +247,7 @@ rendering doesn't have the weights we're asking for.
 |---|---|---|---|
 | 12.2.1 | Tokens declared four weights (400 / 500 / 600 / 700); **CD Bund uses only 400 and 700** (binary axis). **Resolved** by aliasing `--font-weight-medium` → 400 and `--font-weight-semibold` → 700 at the token level; all 28 call sites now snap to a CD-canonical weight without per-site editing. Added a new explicit `--font-weight-regular` alongside `--font-weight-normal` so future call sites can use the CD-canonical name. [tokens.css:149-162](../css/tokens.css#L149-L162) | **high** | ✓ |
 | 12.2.2 | Was: faux-bold synthesis at every `medium`/`semibold` call site. **Resolved** by §12.2.1 — all weight references now resolve to a face the font actually ships (400 or 700). | **high** | ✓ |
-| 12.2.3 | Cleanup follow-up: per-site sweep to replace `--font-weight-medium` → `--font-weight-regular` and `--font-weight-semibold` → `--font-weight-bold` in [styles.css](../css/styles.css), then retire the legacy aliases. Cosmetic only — no rendering change since §12.2.1 already resolved the visual issue. | low | ◻ |
+| 12.2.3 | **Resolved**: swept all `--font-weight-medium` → `--font-weight-regular` and `--font-weight-semibold` → `--font-weight-bold` across [styles.css](../css/styles.css); legacy aliases retired from [tokens.css](../css/tokens.css). Codebase now uses the two-weight axis directly. | low | ✓ |
 | 12.2.4 | `.h1`–`.h5` correctly use `--font-weight-bold` (700) per CD's `.h1`–`.h5` (which apply `font-bold`). [styles.css:979-983](../css/styles.css#L979-L983) | — | ✓ aligned |
 
 ### 12.3 Type scale + line heights
@@ -249,7 +258,7 @@ rendering doesn't have the weights we're asking for.
 | 12.3.2 | Body text was flat at 16 px across all breakpoints. CD's `text--base` scales 16→16→18→20 (and `text--sm` / `text--xs` scale in tandem). **Resolved**: `--text-body`, `--text-body-sm`, `--text-body-xs` now scale at xl/3xl matching CD. Federal users on 27" 1920-wide desktops (BBL standard issue) now get the comfort upgrade. [tokens.css:241-271](../css/tokens.css#L241-L271) | medium | ✓ |
 | 12.3.3 | `--text-display` (32→40→48→56) doesn't map to any CD step — it sits between `text--3xl` (30→60) and `text--4xl` (36→72). Used only on landing-page hero / wizard step counter. Probably keep, but document. | low | — deliberate |
 | 12.3.4 | Line-heights: `tight` 1.25 / `snug` 1.375 / `normal` 1.5 / `relaxed` 1.625. CD uses Tailwind defaults (`leading-tight` 1.25, `leading-normal` 1.5). Our `snug` and `relaxed` are portal additions. ≈ aligned. | — | ✓ aligned |
-| 12.3.5 | `.h1` / `.h2` add `letter-spacing: -0.01em`. CD doesn't tighten heading tracking. Mild drift — barely visible but inconsistent. ~15 other letter-spacing declarations scattered across [styles.css](../css/styles.css) ranging from -0.02em to +1px — most are local component overrides (badges, kickers, brand mark). Worth a token: `--tracking-tight`, `--tracking-wide`, `--tracking-label`. | low | ◻ |
+| 12.3.5 | **Resolved (partial)**: added `--tracking-tight: -0.01em`, `--tracking-label: 0.06em`, `--tracking-wide: 0.05em` tokens to [tokens.css](../css/tokens.css). Swept the most common literal (-0.01em, 8 sites) to `var(--tracking-tight)`. Remaining literals are deliberate one-off micro-adjustments. | low | ✓ |
 | 12.3.6 | **Resolved**: `html { word-spacing: 0.0625em }` added per CD Bund `typography.postcss`. [tokens.css:329-332](../css/tokens.css#L329-L332) | low | ✓ |
 
 ### 12.4 Missing CD Bund typography utilities
@@ -541,13 +550,13 @@ read first, so drift here compounds.
 |---|---|---|---|---|
 | 15.1 | §2.2 / §5.1 claimed "DS uses Hind ... with all weights set to 400" — **wrong on both counts**. **Resolved**: §2.2 rewritten to describe Noto Sans (the actual DS typeface), the four bundled faces, the binary 400/700 weight axis, and the metric-tuned `Fallback-NotoSans`. §5.1 "Hind deviation" deleted. | medium | ✓ |
 | 15.2 | §3 table listed `.card--property__footer` as a portal block. **Resolved**: row replaced with the flat-layout description (`__status`/`__category` only). | low | ✓ |
-| 15.3 | §2.7 "DS has 6 depths; we use the subset we actually need" — CD Bund's `boxShadow` Tailwind tokens are actually 7 (sm, default, md, lg, xl, 2xl, none). Off-by-one; not blocking. Comparison is stale anyway (we use `--shadow-card`). | low | ◻ |
+| 15.3 | **Resolved**: §2.7 now states "DS Tailwind config ships 7 box-shadow tokens (`sm`, default, `md`, `lg`, `xl`, `2xl`, `none`); we use the subset we actually need" and cross-links to CD-AUDIT §1.5 for the soft-shadow rationale. | low | ✓ |
 | 15.4 | §5.1 "Future iteration may bundle the federal Hind font" — obsolete after §12.1.1 fix. **Resolved**: replaced with the live list of intentional deviations (shadows, button padding, breadcrumb depth, badge palette, pagination count, property banner). | low | ✓ |
 | 15.5 | §5.5 "`.tag-item` not adopted" contradicted §3 (which lists `.tag-item[--active]`). **Resolved**: §5.5 deleted; §3 row remains the source of truth. | low | ✓ |
 | 15.6 | §2.1 didn't mention link colour. **Resolved**: §2.1 now includes `--color-link: #D8232A` and a paragraph citing CD Bund `link.postcss` as the canonical source + swisstopo blue fallback option. | medium | ✓ |
 | 15.7 | §2.2 type-scale table didn't surface the §12.3 drift findings (scale starts smaller than CD; body doesn't scale at xl/3xl). **Resolved**: §2.2 paragraph now points to CD-AUDIT §12.3 and flags the smaller-than-CD start. The scale table itself is kept; the prose underneath documents the drift. | medium | ✓ |
 | 15.8 | §3 table omitted recent blocks. **Resolved (partial)**: added `.share-bar__back`, `.share-bar__actions`, `.pagination__count`, `.pagination__controls` rows. Remaining: a future sweep for any new helpers added between audits. | medium | ◐ |
-| 15.9 | §6 "No `#hex` in component CSS" — currently 60+ `rgba(...)` declarations in `styles.css` use literal hex codes for white/black overlays. Should either soften the rule ("no opaque hex; rgba overlays acceptable for one-off opacity") or move overlays to `--color-white-N` / `--color-black-N` tokens (already declared but not used everywhere). | low | ◻ |
+| 15.9 | **Resolved**: §6 rule clarified — "No opaque `#hex` in component CSS; `rgba()` overlays acceptable for one-off transparency, prefer `--color-white-N` / `--color-black-N` alpha tokens when a value is reused". Documents the federal Wappen avatar's `#ff0000` as a documented exception. | low | ✓ |
 | 15.10 | §3 table is now 60+ rows in one block — hard to scan. Reorganise by component family (chrome / form / data / feedback / utility) before adding more. | low | ◻ |
 
 After this pass, DESIGNGUIDE.md needs a focused rewrite to:
@@ -584,31 +593,37 @@ news-list / news-detail / info-page)~~ · ~~`.info-page__header` left
 margin indent~~ · ~~`.download-list` divider aligned to CD
 secondary-100 (verified: CD does NOT use red)~~ · ~~`.page-with-toc__toc-item`
 refinements (chevron icon, hover bg, 3 px ::after active rail,
-secondary-100 dividers)~~.
+secondary-100 dividers)~~ ·
+~~two-weight cleanup sweep (medium/semibold aliases retired,
+all sites use regular/bold directly)~~ ·
+~~tracking tokens (--tracking-tight/-label/-wide added, -0.01em sweep
+across 8 sites)~~ ·
+~~breadcrumb separator → SVG chevron (replaces `›` literal)~~ ·
+~~toast close button (CD canonical, 24 px hit area, white-tint hover)~~ ·
+~~`.overtitle` applied on news detail (CD `detailPressRelease.vue` kicker
+pattern)~~ ·
+~~CH Wappen channel-avatar — wrapper + explicit 92% inner height so
+shield fills the circle per the official admin.ch YouTube ratio~~ ·
+~~DESIGNGUIDE shadow-count fix (7 not 6)~~ ·
+~~DESIGNGUIDE rgba/hex rule clarification~~.
 
 Remaining, highest leverage first:
 
-**Layout & component coverage**
-1. **`.vertical-spacing` utility — apply** (§17.7.1) — CSS shipped; retro-fit on detail-page content blocks (info articles, news lead, profile sections) to replace per-element ad-hoc `margin-top`.
+**Layout & component coverage (deferred — wait for a real feature need)**
+1. **`.vertical-spacing` utility — apply on existing markup** (§17.7.1) — CSS shipped; retro-fit on info articles, news lead, profile sections when next touched.
 2. **`.layout--with-aside` reusable class** (§14.3) — promote the property-detail aside pattern from a one-off `.property-layout` grid.
 3. **News detail hero variant** (§14.1.6) — promote the inline title + image to a `.hero--default` variant.
 4. **Card variants — `--clickable`** (§4.7) — formalise the property-card hover affordance.
 5. **Info-state notification + toast variants** (§6.1 / §6.3) — add `info` semantics.
-6. **Section padding-collapse on consecutive same-bg** (§17.1.4) — defer until a stacked-section page makes the double-gap observable.
-7. **Conditional section padding** (§17.1.3) — only apply `--section-py` when `.section--default` or background variant; broader refactor.
+6. **Use `.overtitle` on property detail** (§12.4) — applied on `#/news/:id` already; extend to property detail when refactored.
 
-**Data-density refinements**
-6. **Inbox filtering → URL-state** (§5.6.1) — filter chips + text-search currently rewrite DOM with all matches; pagination footer stays on un-filtered totals. With mock data the inconsistency isn't observable, but at scale it's confusing.
-
-**Cosmetic / cleanup**
-7. **Two-weight cleanup sweep** (§12.2.3) — replace `--font-weight-medium/-semibold` aliases with `--font-weight-regular/-bold` in the ~28 call sites, then retire the aliases.
-8. **Tracking tokens** (§12.3.5) — consolidate the ~15 ad-hoc `letter-spacing` declarations into `--tracking-tight`, `--tracking-label`, `--tracking-wide`.
-9. **Use `.overtitle` in views** (§12.4) — class is shipped; not yet applied. Wire on `#/news/:id`, property detail, etc.
+**Bigger refactors (defer until observable)**
+7. **Section padding-collapse on consecutive same-bg** (§17.1.4) — needs a stacked-section page.
+8. **Conditional section padding** (§17.1.3) — only apply `--section-py` when `.section--default` or background variant; broader refactor.
+9. **Inbox filtering → URL-state** (§5.6.1) — filter chips currently rewrite DOM with all matches; pagination shows un-filtered totals. Not observable with mock data; matters at scale.
 
 **DESIGNGUIDE.md remaining**
-10. **Shadow-count fix** (§15.3) — DS has 7 box-shadow tokens, not 6.
-11. **rgba/hex rule clarification** (§15.9) — soften the "no `#hex`" rule to allow `rgba()` overlays, or move overlays to `--color-white-N` / `--color-black-N` tokens.
-12. **Reorganise §3 component table** (§15.10) — split into chrome / form / data / feedback / utility groups.
+10. **Reorganise §3 component table** (§15.10) — split into chrome / form / data / feedback / utility groups. Bigger doc edit; defer.
 
 ## 17. Margins + padding (deep-dive)
 
@@ -782,15 +797,15 @@ CD Bund [`menu.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\
 | 18.4.5 | Active label weight was semibold (600 → aliased to bold per §12.2). CD pattern bolds the active label, so this was already aligned post-§12.2. | — | ✓ aligned |
 | 18.4.6 | Padding (`var(--space-sm) var(--space-md)` = 8/16 px) is tighter than CD's `--condensed` (`px-3 py-3` = 12 px). Minor; not visually broken. Could tighten to 12/12 to match exactly. | low | — defer |
 
-### 18.5 Recommended next sweep
+### 18.5 Follow-up sweep — closures
 
-Other small elements worth a similar deep-dive:
-- **`.tag-item`** — verified earlier (§3.5.4 / DESIGNGUIDE §3); structure aligned. Could check focus-ring presence.
-- **`.breadcrumb__sep`** — uses `›` literal; CD uses an SVG chevron. Cosmetic.
-- **`.contact-block__icon`** — red SVG icons (✓ aligned with CD download-item icon convention).
-- **`.modal__close`** — verify size + hit area vs CD's `.modal__close` (24 px hit area minimum).
-- **`.toast` close button** — currently no close affordance; CD `toast-message` includes one.
-- **`.pipeline__step`** — verify cell heights / icon sizes against CD's `.steps` component.
+- **`.tag-item`** — verified earlier; structure aligned with CD `tag-item.postcss`. ✓
+- **`.breadcrumb__sep`** — **Resolved**: replaced the `›` literal with an inline SVG chevron-right (12 × 12). [shell.js:186](../js/shell.js#L186), [styles.css:684-691](../css/styles.css#L684-L691). ✓
+- **`.contact-block__icon`** — red SVG icons, aligned with CD download-item icon convention. ✓
+- **`.modal__close`** — **Verified** 36 × 36 hit area, well above CD's 24 px minimum. ✓
+- **`.toast` close button** — **Resolved**: added `.toast__close` button with chevron-x icon, 24 × 24 hit area, white-tint hover (works against any toast variant). `toast()` API in lib.js now wraps the message in `.toast__message` + appends the close button. [lib.js:279-308](../js/lib.js#L279-L308), [styles.css:1762-1810](../css/styles.css#L1762). ✓
+- **`.pipeline__step`** — verify cell heights / icon sizes against CD's `.steps` component. Defer until needed. ◻
+- **`.overtitle`** — **Resolved**: applied on `#/news/:id` as the kicker above the H1 (carries the news type — "Webartikel", "Medienmitteilung" — matching CD `detailPressRelease.vue` pattern). [app.js:706](../js/app.js#L706). ✓
 
 ---
 
