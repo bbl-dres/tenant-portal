@@ -69,9 +69,17 @@
   --color-primary:             var(--color-primary-600);
   --color-primary-hover:       var(--color-primary-700);
 
-  /* ── INTERACTIVE BLUE (links, info-class accents) ────────────────────── */
-  --color-link:                #1F6FAB;
-  --color-link-hover:          #134A77;
+  /* ── LINK COLOUR — federal red (CD Bund canonical) ─────────────────────
+     CD Bund's design system specifies `text-primary-600` (federal red)
+     for body links: `.link, main a { @apply text-primary-600
+     hover:text-primary-800 ... }` per
+     `designsystem/css/components/link.postcss`.
+     swisstopo (a federal site that follows the CD loosely) uses blue
+     instead — if you ever want that look, swap to CD's `blue-700`
+     `#1d4ed8` / `blue-800` `#1e40af` (NOT the previous off-palette
+     `#1F6FAB` — that wasn't on any federal ramp). */
+  --color-link:                #D8232A;   /* primary-600 — was #1F6FAB blue */
+  --color-link-hover:          #99191E;   /* primary-800 — was #134A77 */
 
   /* ── NEUTRALS ─────────────────────────────────────────────────────────── */
   --color-white:               #FFFFFF;
@@ -97,9 +105,15 @@
   --color-secondary-800:       #1C2834;
 
   /* ── SEMANTIC TEXT ─────────────────────────────────────────────────────── */
-  --color-text-primary:        #1F2937;
-  --color-text-secondary:      #6B7280;
-  --color-text-muted:          #9CA3AF;
+  --color-text-primary:        #1F2937;   /* text-800 */
+  --color-text-secondary:      #6B7280;   /* text-500 — WCAG AA on white: 4.69:1 */
+  /* `--color-text-muted` previously `#9CA3AF` (text-400) which fails
+     WCAG AA on white at 2.85:1. Collapsed to text-500 — same value as
+     `--color-text-secondary`. We get a passing colour everywhere
+     muted was used (SAP keys on property cards, category chips, table
+     secondary cells, calc-block hint text). For a genuinely lighter
+     tertiary, reach for a smaller font-size instead of a paler grey. */
+  --color-text-muted:          #6B7280;
   --color-text-inverse:        #FFFFFF;
 
   /* ── SURFACES ─────────────────────────────────────────────────────────── */
@@ -324,13 +338,34 @@ body {
 }
 img, svg { display: block; max-width: 100%; }
 button { font-family: inherit; cursor: pointer; }
-a { color: var(--color-link); text-decoration: underline; }
+/* Underline with 2 px offset per CD Bund `.link, main a` pattern —
+   prevents descender collisions and matches federal sites. */
+a { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; }
 a:hover { color: var(--color-link-hover); }
 
 /* Focus ring (federal eCH-0059) */
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* ── REDUCED MOTION — WCAG 2.1 SC 2.3.3 / SC 2.2.2 ─────────────────────
+   Respect the user's OS-level "reduce motion" setting. Collapses every
+   transition and animation in the app (toast fade, nav-menu open,
+   accordion expand, wizard step transitions, button hover transforms,
+   spinner) to a near-instant 0.01 ms — the minimum non-zero value
+   browsers reliably honour without breaking transition-end events.
+   `scroll-behavior: auto` also undoes any `scroll-behavior: smooth`
+   declarations that might be present elsewhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Skip-link (NFA-CD-004) */

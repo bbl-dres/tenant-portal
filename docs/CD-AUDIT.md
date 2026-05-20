@@ -77,7 +77,7 @@ chrome. The remaining gaps cluster in seven areas:
 |---|---|---|---|
 | 2.1 | `.container` max-width `1544 px` and responsive padding (16→28→36→40→48→64 px) match CD Bund container scaling. [tokens.css:164-167, 246-250](../css/tokens.css#L164-L167) | — | ✓ aligned |
 | 2.2 | `--section-py` scales 56→80→96→128 px. CD Bund `container--py` is `py-14 lg:py-20 3xl:py-32` (56→80→128 px). Portal is +16 px at `2xl` (96 vs. 80). Minor — read as more breathing room on wide desktop. | low | — deliberate |
-| 2.3 | No `prefers-reduced-motion` media query anywhere in `styles.css`. CD Bund applies it (at least on `back-to-top-btn`). Wizard step transitions, accordion open, toast fade, nav-menu open all animate unconditionally — fails WCAG 2.1 SC 2.3.3 / SC 2.2.2 "Animation from Interactions". | **high** | ◻ |
+| 2.3 | Was: no `prefers-reduced-motion` handling anywhere — fails WCAG 2.1 SC 2.3.3 / SC 2.2.2. **Resolved** by adding a global `@media (prefers-reduced-motion: reduce)` block that collapses all `animation-duration` / `transition-duration` to 0.01 ms and forces `scroll-behavior: auto`. Covers toast fade, nav-menu open, accordion expand, wizard transitions, button hover transforms. [tokens.css:353-371](../css/tokens.css#L353-L371) | **high** | ✓ |
 
 ## 3. Chrome (top-bar, header, navbar, breadcrumb, footer)
 
@@ -149,10 +149,10 @@ chrome. The remaining gaps cluster in seven areas:
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 9.1 | No `@media (prefers-reduced-motion: reduce)` anywhere in `styles.css`. WCAG 2.1 SC 2.3.3 + SC 2.2.2 require respecting the user preference for: wizard transitions, accordion open/close, toast fade, nav-menu open/close, share-bar hover, button hover transforms. **Single biggest a11y gap.** | **high** | ◻ |
+| 9.1 | Was: no `@media (prefers-reduced-motion: reduce)` rules — WCAG 2.1 SC 2.3.3 + SC 2.2.2 fail. **Resolved** at [tokens.css:353-371](../css/tokens.css#L353-L371) with a universal `*, *::before, *::after { animation-duration: 0.01ms; transition-duration: 0.01ms; scroll-behavior: auto; }` under the media query. Covers every transition and animation in the app. | **high** | ✓ |
 | 9.2 | Dropdown `.nav-menu` missing `role="menu"` + `role="menuitem"`. Keyboard users get no semantic indication they're inside a menu. Currently only `role="region"`. | medium | ◻ |
 | 9.3 | Focus ring on red CTAs (e.g. `.btn--filled` on red) — purple `#8655F6` outline on red `#D8232A` background. Run an APCA contrast check; may need a white inner ring on filled-red focus, similar to the existing dark-surface override at [styles.css:751-757](../css/styles.css#L751-L757). | medium | ◻ |
-| 9.4 | Muted text color `--color-text-muted` = `#9CA3AF` (gray-400) on white background: contrast ratio ≈ 2.85:1 — fails WCAG AA for body text (needs 4.5:1) and is borderline for large text (needs 3:1). Used in `.card--property__sap`, `.card--property__category`, table secondary cells. | **high** | ◻ |
+| 9.4 | `--color-text-muted` was `#9CA3AF` (text-400) → 2.85:1 on white (AA fail). **Resolved**: collapsed to `#6B7280` (text-500, same as `--color-text-secondary`) → 4.69:1 (AA pass). The muted/secondary distinction is now a naming alias; for a genuinely lighter tertiary, reach for a smaller font-size. [tokens.css:64-72](../css/tokens.css#L64-L72) | **high** | ✓ |
 | 9.5 | Toast host has `aria-live="polite"` + `aria-atomic="false"` — correct for non-disruptive notifications. [lib.js:272-274](../js/lib.js#L272-L274) | — | ✓ aligned |
 | 9.6 | Breadcrumb uses `aria-current="page"` + Schema.org BreadcrumbList microdata — matches admin.ch SEO/a11y pattern. | — | ✓ aligned (above CD-Bund-baseline) |
 | 9.7 | Skip-to-content link present and properly off-screen until focus. [tokens.css:291-305](../css/tokens.css#L291-L305) | — | ✓ aligned |
@@ -341,9 +341,9 @@ We use **blue** (`#1F6FAB` → `#134A77` on hover) at [tokens.css:37-38](../css/
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 13.3.1 | Link colour blue → should be primary-600 red per CD Bund design system. Affects every inline `<a>`, breadcrumb links, footer links, search results, the `.greeting-strip` draft link, and the LLM badge dot. | **high** | ◻ |
-| 13.3.2 | Underline pattern: we use bare `text-decoration: underline`; CD adds `underline-offset-2` (2 px) so descenders don't collide. Cheap to add globally. | low | ◻ |
-| 13.3.3 | swisstopo (reference site) uses **blue** links — outlier from the design-system default. If we mirror swisstopo, document as a deliberate divergence (§11) and keep blue but **align it to CD's blue ramp** (blue-700 `#1d4ed8` or blue-800 `#1e40af`) instead of the off-palette `#1F6FAB`. **Decision needed.** | medium | ◐ decision |
+| 13.3.1 | Link colour swapped from custom blue `#1F6FAB` to CD canonical `primary-600` (`#D8232A`), hover from `#134A77` to `primary-800` (`#99191E`). Cascades through every inline `<a>`, breadcrumb links, footer links, search results, the `.greeting-strip` draft link, the language-switcher active background, and the LLM badge dot. [tokens.css:37-47](../css/tokens.css#L37-L47) | **high** | ✓ |
+| 13.3.2 | Added `text-underline-offset: 2px` to the global `a` rule per CD Bund `.link, main a` pattern — prevents descender collisions. [tokens.css:287](../css/tokens.css#L287) | low | ✓ |
+| 13.3.3 | If the project later decides to mirror swisstopo's blue (a deliberate divergence from the design system), the swap is one-line in [tokens.css](../css/tokens.css#L37-L47): use `blue-700` `#1d4ed8` / `blue-800` `#1e40af`. Comment in the file already documents this. | low | — deliberate (current default: red) |
 
 ### 13.4 Success / confirmed-state colour
 
