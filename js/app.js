@@ -568,7 +568,7 @@ function renderInfoPage() {
             <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt für Bauten und Logistik</h2>
             <p class="contact-block__address">
               Fellerstrasse 21<br>
-              CH&#8201;–&#8201;3003 Bern
+              CH&#8201;–&#8201;3027 Bern
             </p>
             <p class="contact-block__row">
               <a class="contact-block__link" href="tel:+41584655000">
@@ -600,8 +600,8 @@ function renderInfoPage() {
 
           <div class="contact-section__map">
             <iframe
-              src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2598400&N=1200200&zoom=8&crosshair=marker"
-              title="Standort BBL Fellerstrasse 21, 3003 Bern auf swisstopo"
+              src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2596141&N=1199499&zoom=9&crosshair=marker"
+              title="Standort BBL Fellerstrasse 21, 3027 Bern auf swisstopo"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"></iframe>
           </div>
