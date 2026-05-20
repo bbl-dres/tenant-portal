@@ -2012,40 +2012,46 @@ function renderDownloads() {
 
     // CD Bund pagination — same compact pattern as #/properties (chevron-left
     // + page-number input + "von X Seiten" + chevron-right). See
-    // designsystem/css/components/pagination.postcss.
+    // designsystem/css/components/pagination.postcss. Rendered unconditionally
+    // (federal lists scale — the count line is the load-bearing scale cue).
     const pag = document.getElementById('docPagination');
-    if (totalPages <= 1) {
-      pag.innerHTML = '';
-    } else {
-      pag.innerHTML = `
-        <button class="btn btn--outline btn--icon-only" type="button"
-                data-step="-1" aria-label="Vorherige Seite"
-                ${docState.page <= 1 ? 'disabled' : ''}>${P.icon('chevronLeft')}</button>
-        <input class="pagination__input" type="number"
-               id="docPaginationInput" min="1" max="${totalPages}" value="${docState.page}"
-               aria-label="Seite auswählen">
-        <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
-        <button class="btn btn--outline btn--icon-only" type="button"
-                data-step="1" aria-label="Nächste Seite"
-                ${docState.page >= totalPages ? 'disabled' : ''}>${P.icon('chevronRight')}</button>
-      `;
-      pag.querySelectorAll('button[data-step]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          docState.page = Math.max(1, Math.min(totalPages, docState.page + parseInt(btn.dataset.step, 10)));
-          applyDocState();
-        });
-      });
-      const docPageInput = document.getElementById('docPaginationInput');
-      const goPage = () => {
-        const v = Math.max(1, Math.min(totalPages, parseInt(docPageInput.value, 10) || 1));
-        docState.page = v;
+    const fmt = (n) => n.toLocaleString('de-CH');
+    const from = total === 0 ? 0 : start + 1;
+    const to   = Math.min(start + DOCUMENT_PAGE_SIZE, total);
+    const countText = total === 0
+      ? 'Keine Dokumente'
+      : total === 1
+        ? '1 Dokument'
+        : `${fmt(from)}–${fmt(to)} von ${fmt(total)} Dokumenten`;
+    pag.innerHTML = `
+      <span class="pagination__count" aria-live="polite">${countText}</span>
+      <button class="btn btn--outline btn--icon-only" type="button"
+              data-step="-1" aria-label="Vorherige Seite"
+              ${docState.page <= 1 ? 'disabled' : ''}>${P.icon('chevronLeft')}</button>
+      <input class="pagination__input" type="number"
+             id="docPaginationInput" min="1" max="${totalPages}" value="${docState.page}"
+             aria-label="Seite auswählen">
+      <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
+      <button class="btn btn--outline btn--icon-only" type="button"
+              data-step="1" aria-label="Nächste Seite"
+              ${docState.page >= totalPages ? 'disabled' : ''}>${P.icon('chevronRight')}</button>
+    `;
+    pag.querySelectorAll('button[data-step]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        docState.page = Math.max(1, Math.min(totalPages, docState.page + parseInt(btn.dataset.step, 10)));
         applyDocState();
-      };
-      docPageInput.addEventListener('change', goPage);
-      docPageInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); goPage(); }
       });
-    }
+    });
+    const docPageInput = document.getElementById('docPaginationInput');
+    const goPage = () => {
+      const v = Math.max(1, Math.min(totalPages, parseInt(docPageInput.value, 10) || 1));
+      docState.page = v;
+      applyDocState();
+    };
+    docPageInput.addEventListener('change', goPage);
+    docPageInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); goPage(); }
+    });
 
     const qp = new URLSearchParams();
     if (docState.type)     qp.set('type', docState.type);
