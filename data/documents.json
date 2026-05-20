@@ -1,0 +1,2306 @@
+[
+  {
+    "documentId": "DOC-0001",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.8 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-01-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0002",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-03-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0003",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-10-14",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0004",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-04-08",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0005",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-09-07",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0006",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-04-15",
+    "scanStatus": "ok",
+    "validFrom": "2025-04-15",
+    "validUntil": "2030-04-15"
+  },
+  {
+    "documentId": "DOC-0007",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "500 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-12-14",
+    "scanStatus": "ok",
+    "validFrom": "2021-12-14",
+    "validUntil": "2026-12-14"
+  },
+  {
+    "documentId": "DOC-0008",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.4 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2022-06-04",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0009",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-06-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0010",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-01-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0011",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-07-03",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0012",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-10-07",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0013",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-11-08",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0014",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-04-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0015",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.7 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-08-21",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0016",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "700 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-06-12",
+    "scanStatus": "ok",
+    "validFrom": "2021-06-12",
+    "validUntil": "2031-06-12"
+  },
+  {
+    "documentId": "DOC-0017",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "400 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-10-21",
+    "scanStatus": "ok",
+    "validFrom": "2020-10-21",
+    "validUntil": "2025-10-21"
+  },
+  {
+    "documentId": "DOC-0018",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "5.2 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2021-08-13",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0019",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-11-11",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0020",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - BAFU Hauptsitz Worblentalstrasse",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2011",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-04-27",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0021",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-07-09",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0022",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-04-21",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0023",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-03-09",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0024",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-12-19",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0025",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.8 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-06-08",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0026",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "700 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-09-16",
+    "scanStatus": "ok",
+    "validFrom": "2021-09-16",
+    "validUntil": "2026-09-16"
+  },
+  {
+    "documentId": "DOC-0027",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "400 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-03-21",
+    "scanStatus": "ok",
+    "validFrom": "2020-03-21",
+    "validUntil": "2030-03-21"
+  },
+  {
+    "documentId": "DOC-0028",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "6.7 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2020-07-13",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0029",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.6 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-09-09",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0030",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - ARE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2012",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-11-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0031",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-11-11",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0032",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-03-15",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0033",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-09-25",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0034",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.6 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-11-10",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0035",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.6 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-03-12",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0036",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "900 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-10-11",
+    "scanStatus": "ok",
+    "validFrom": "2019-10-11",
+    "validUntil": "2024-10-11"
+  },
+  {
+    "documentId": "DOC-0037",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "300 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-05-08",
+    "scanStatus": "ok",
+    "validFrom": "2024-05-08",
+    "validUntil": "2029-05-08"
+  },
+  {
+    "documentId": "DOC-0038",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "7.7 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2020-12-16",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0039",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-03-22",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0040",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - BAV Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2013",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-05-17",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0041",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-04-18",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0042",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.8 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-12-10",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0043",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-08-17",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0044",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-04-03",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0045",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "900 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-10-08",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0046",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-04-03",
+    "scanStatus": "ok",
+    "validFrom": "2019-04-03",
+    "validUntil": "2029-04-03"
+  },
+  {
+    "documentId": "DOC-0047",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "400 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-09-08",
+    "scanStatus": "ok",
+    "validFrom": "2020-09-08",
+    "validUntil": "2030-09-08"
+  },
+  {
+    "documentId": "DOC-0048",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "7.3 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2022-09-05",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0049",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-04-26",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0050",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - BAZL Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2014",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-04-04",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0051",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-06-14",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0052",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "5.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-11-21",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0053",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-01-13",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0054",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.7 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-04-07",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0055",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-03-14",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0056",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-04-28",
+    "scanStatus": "ok",
+    "validFrom": "2026-04-28",
+    "validUntil": "2036-04-28"
+  },
+  {
+    "documentId": "DOC-0057",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "800 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-01-21",
+    "scanStatus": "ok",
+    "validFrom": "2020-01-21",
+    "validUntil": "2025-01-21"
+  },
+  {
+    "documentId": "DOC-0058",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "5.8 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2020-04-06",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0059",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-04-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0060",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - BFE Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2015",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-03-13",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0061",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "5.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-05-26",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0062",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-07-23",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0063",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.8 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-03-07",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0064",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-10-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0065",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-01-02",
+    "scanStatus": "ok",
+    "validFrom": "2024-01-02",
+    "validUntil": "2029-01-02"
+  },
+  {
+    "documentId": "DOC-0066",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "700 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-09-03",
+    "scanStatus": "ok",
+    "validFrom": "2019-09-03",
+    "validUntil": "2024-09-03"
+  },
+  {
+    "documentId": "DOC-0067",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "5.1 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2020-11-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0068",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-10-08",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0069",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - ASTRA Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2016",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-10-03",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0070",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.7 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-05-07",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0071",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.8 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-04-09",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0072",
+    "type": "FloorPlan",
+    "title": "Grundriss 2. OG - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-08-11",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0073",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-01-15",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0074",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-02-18",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0075",
+    "type": "Certificate",
+    "title": "GEAK-Zertifikat - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-03-12",
+    "scanStatus": "ok",
+    "validFrom": "2023-03-12",
+    "validUntil": "2028-03-12"
+  },
+  {
+    "documentId": "DOC-0076",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "500 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-05-06",
+    "scanStatus": "ok",
+    "validFrom": "2024-05-06",
+    "validUntil": "2034-05-06"
+  },
+  {
+    "documentId": "DOC-0077",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "6.5 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2019-11-27",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0078",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "800 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-03-09",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0079",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - BAKOM Hauptsitz",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2017",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.6 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-12-18",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0080",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-10-07",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0081",
+    "type": "FloorPlan",
+    "title": "Grundriss 1. OG - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.7 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-11-21",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0082",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-05-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0083",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "900 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-05-02",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0084",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "400 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-11-09",
+    "scanStatus": "ok",
+    "validFrom": "2021-11-09",
+    "validUntil": "2031-11-09"
+  },
+  {
+    "documentId": "DOC-0085",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.5 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2025-09-01",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0086",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.5 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-09-02",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0087",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-07-05",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0088",
+    "type": "FloorPlan",
+    "title": "Grundriss EG - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "floor-plan"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.7 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-01-12",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0089",
+    "type": "Permit",
+    "title": "Brandschutzkonzept - Bewilligung - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-11-04",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0090",
+    "type": "Permit",
+    "title": "Baubewilligung - Innenausbau 2022 - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-10-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0091",
+    "type": "Certificate",
+    "title": "Aufzug-TÜV-Protokoll 2024 - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "700 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-03-26",
+    "scanStatus": "ok",
+    "validFrom": "2022-03-26",
+    "validUntil": "2032-03-26"
+  },
+  {
+    "documentId": "DOC-0092",
+    "type": "Manual",
+    "title": "Betriebsführungshandbuch HLK - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "8.2 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2019-03-24",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0093",
+    "type": "Manual",
+    "title": "Wartungsplan Technik 2026 - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "manual"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-11-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0094",
+    "type": "Other",
+    "title": "Asbest-Gutachten (Bestandsaufnahme) - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "4.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-05-06",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0095",
+    "type": "Other",
+    "title": "Denkmalpflege-Gutachten - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "3.6 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2020-07-28",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0096",
+    "type": "Certificate",
+    "title": "Minergie-Zertifizierung - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "800 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2026-04-07",
+    "scanStatus": "ok",
+    "validFrom": "2026-04-07",
+    "validUntil": "2036-04-07"
+  },
+  {
+    "documentId": "DOC-0097",
+    "type": "Permit",
+    "title": "Antennenkonzession (BAKOM) - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-05-27",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0098",
+    "type": "Other",
+    "title": "Wartungsprotokoll Messinstrumente - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.8 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-04-01",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0099",
+    "type": "Certificate",
+    "title": "Kalibrierungsprotokoll Meteodaten - MeteoSchweiz Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2018",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "800 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-06-09",
+    "scanStatus": "ok",
+    "validFrom": "2025-06-09",
+    "validUntil": "2035-06-09"
+  },
+  {
+    "documentId": "DOC-0100",
+    "type": "Permit",
+    "title": "Antennenkonzession (BAKOM) - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "permit"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.0 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-11-17",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0101",
+    "type": "Other",
+    "title": "Wartungsprotokoll Messinstrumente - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "report"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-01-04",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0102",
+    "type": "Certificate",
+    "title": "Kalibrierungsprotokoll Meteodaten - MeteoSchweiz Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2019",
+        "role": "certificate"
+      }
+    ],
+    "format": "PDF",
+    "size": "900 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-03-19",
+    "scanStatus": "ok",
+    "validFrom": "2023-03-19",
+    "validUntil": "2033-03-19"
+  },
+  {
+    "documentId": "DOC-0103",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / GS - Bundeshaus Nord",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2010-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.2 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2019-02-20",
+    "scanStatus": "ok",
+    "validFrom": "2019-02-20",
+    "validUntil": "2039-02-20"
+  },
+  {
+    "documentId": "DOC-0104",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / BAFU - Worblentalstrasse 68",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2011-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.9 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-07-20",
+    "scanStatus": "ok",
+    "validFrom": "2024-07-20",
+    "validUntil": "2034-07-20"
+  },
+  {
+    "documentId": "DOC-0105",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / ARE - Worblentalstrasse 66",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2012-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-10-07",
+    "scanStatus": "ok",
+    "validFrom": "2025-10-07",
+    "validUntil": "2045-10-07"
+  },
+  {
+    "documentId": "DOC-0106",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / BAV - Mühlestrasse 6",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2013-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.7 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-01-17",
+    "scanStatus": "ok",
+    "validFrom": "2025-01-17",
+    "validUntil": "2045-01-17"
+  },
+  {
+    "documentId": "DOC-0107",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / BAZL - Mühlestrasse 2",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2014-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.1 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2022-06-14",
+    "scanStatus": "ok",
+    "validFrom": "2022-06-14",
+    "validUntil": "2042-06-14"
+  },
+  {
+    "documentId": "DOC-0108",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / BFE - Pulverstrasse 13",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2015-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2024-10-11",
+    "scanStatus": "ok",
+    "validFrom": "2024-10-11",
+    "validUntil": "2034-10-11"
+  },
+  {
+    "documentId": "DOC-0109",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / ASTRA - Filiale Zofingen",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2016-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.3 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2023-09-10",
+    "scanStatus": "ok",
+    "validFrom": "2023-09-10",
+    "validUntil": "2038-09-10"
+  },
+  {
+    "documentId": "DOC-0110",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / BAKOM - Zukunftstrasse 44 Biel",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2017-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.5 MB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2025-12-10",
+    "scanStatus": "ok",
+    "validFrom": "2025-12-10",
+    "validUntil": "2035-12-10"
+  },
+  {
+    "documentId": "DOC-0111",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / MeteoSchweiz - Flughafen Zürich",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2018-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.4 MB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2025-11-13",
+    "scanStatus": "ok",
+    "validFrom": "2025-11-13",
+    "validUntil": "2035-11-13"
+  },
+  {
+    "documentId": "DOC-0112",
+    "type": "Lease",
+    "title": "Mietvertrag UVEK / MeteoSchweiz - Locarno-Monti",
+    "linkedTo": [
+      {
+        "entityType": "Tenancy",
+        "entityId": "T-2019-AA-01",
+        "role": "lease-document"
+      }
+    ],
+    "format": "PDF",
+    "size": "1.2 MB",
+    "languages": [
+      "de",
+      "it"
+    ],
+    "issuedAt": "2023-07-18",
+    "scanStatus": "ok",
+    "validFrom": "2023-07-18",
+    "validUntil": "2038-07-18"
+  },
+  {
+    "documentId": "DOC-0113",
+    "type": "WiBe",
+    "title": "WiBe-Vorlage Bedarfsmeldung 2026",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "template"
+      }
+    ],
+    "format": "DOCX",
+    "size": "300 KB",
+    "languages": [
+      "de",
+      "fr"
+    ],
+    "issuedAt": "2023-04-14",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0114",
+    "type": "LegalBasis",
+    "title": "Rechtsgrundlage VILB - Auszug",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "legal"
+      }
+    ],
+    "format": "PDF",
+    "size": "300 KB",
+    "languages": [
+      "de",
+      "fr",
+      "it"
+    ],
+    "issuedAt": "2024-08-15",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0115",
+    "type": "Manual",
+    "title": "Merkblatt: Antrag richtig stellen",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "guide"
+      }
+    ],
+    "format": "PDF",
+    "size": "400 KB",
+    "languages": [
+      "de",
+      "fr",
+      "it"
+    ],
+    "issuedAt": "2022-09-16",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0116",
+    "type": "Manual",
+    "title": "NAW-Klassen Übersicht",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "guide"
+      }
+    ],
+    "format": "PDF",
+    "size": "400 KB",
+    "languages": [
+      "de"
+    ],
+    "issuedAt": "2021-11-03",
+    "scanStatus": "ok"
+  },
+  {
+    "documentId": "DOC-0117",
+    "type": "Manual",
+    "title": "Sicherheits- und Brandschutzkonzept BBL",
+    "linkedTo": [
+      {
+        "entityType": "Building",
+        "entityId": "BLD-2010",
+        "role": "guide"
+      }
+    ],
+    "format": "PDF",
+    "size": "2.6 MB",
+    "languages": [
+      "de",
+      "fr",
+      "it"
+    ],
+    "issuedAt": "2024-02-27",
+    "scanStatus": "ok"
+  }
+]

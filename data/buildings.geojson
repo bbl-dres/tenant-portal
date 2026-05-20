@@ -3,12 +3,12 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4416, 46.9468] },
+      "geometry": { "type": "Point", "coordinates": [7.4459, 46.9481] },
       "properties": {
         "buildingId": "BLD-2010",
-        "name": "Bundeshaus West",
-        "street": "Bundesgasse",
-        "houseNumber": "3",
+        "name": "Bundeshaus Nord",
+        "street": "Kochergasse",
+        "houseNumber": "10",
         "postalCode": "3003",
         "city": "Bern",
         "country": "CH",
@@ -20,14 +20,14 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4456, 46.9501] },
+      "geometry": { "type": "Point", "coordinates": [7.4884, 46.9766] },
       "properties": {
         "buildingId": "BLD-2011",
-        "name": "Eichweg 22",
-        "street": "Eichweg",
-        "houseNumber": "22",
-        "postalCode": "3003",
-        "city": "Bern",
+        "name": "BAFU Hauptsitz Worblentalstrasse",
+        "street": "Worblentalstrasse",
+        "houseNumber": "68",
+        "postalCode": "3063",
+        "city": "Ittigen",
         "country": "CH",
         "assetKey": { "bk": "1086", "we": "2011", "obj": "AA" },
         "egid": "100234567",
@@ -37,53 +37,138 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [6.8400, 46.9530] },
+      "geometry": { "type": "Point", "coordinates": [7.4880, 46.9763] },
       "properties": {
         "buildingId": "BLD-2012",
-        "name": "Empfangszentrum Boudry",
-        "street": "Route Cantonale",
-        "houseNumber": "",
-        "postalCode": "2017",
-        "city": "Boudry",
+        "name": "ARE Hauptsitz",
+        "street": "Worblentalstrasse",
+        "houseNumber": "66",
+        "postalCode": "3063",
+        "city": "Ittigen",
         "country": "CH",
         "assetKey": { "bk": "1086", "we": "2012", "obj": "AA" },
         "egid": "100345678",
-        "portfolioCategory": "SEM Reception Centre",
-        "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400"
+        "portfolioCategory": "Administration Class II",
+        "image": "https://images.unsplash.com/photo-1576731753569-3e93a228048c?w=400"
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4380, 46.9420] },
+      "geometry": { "type": "Point", "coordinates": [7.4858, 46.9776] },
       "properties": {
         "buildingId": "BLD-2013",
-        "name": "Sulgenrain 19",
-        "street": "Sulgenrain",
-        "houseNumber": "19",
-        "postalCode": "3007",
-        "city": "Bern",
+        "name": "BAV Hauptsitz",
+        "street": "Mühlestrasse",
+        "houseNumber": "6",
+        "postalCode": "3063",
+        "city": "Ittigen",
         "country": "CH",
         "assetKey": { "bk": "1086", "we": "2013", "obj": "AA" },
         "egid": "100456789",
-        "portfolioCategory": "Administration Class III",
+        "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400"
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [7.4450, 46.9477] },
+      "geometry": { "type": "Point", "coordinates": [7.4863, 46.9779] },
       "properties": {
         "buildingId": "BLD-2014",
-        "name": "Bundeshaus Ost",
-        "street": "Kochergasse",
-        "houseNumber": "9",
-        "postalCode": "3003",
-        "city": "Bern",
+        "name": "BAZL Hauptsitz",
+        "street": "Mühlestrasse",
+        "houseNumber": "2",
+        "postalCode": "3063",
+        "city": "Ittigen",
         "country": "CH",
         "assetKey": { "bk": "1086", "we": "2014", "obj": "AA" },
         "egid": "100567890",
-        "portfolioCategory": "Administration Class I",
+        "portfolioCategory": "Administration Class II",
         "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [7.4815, 46.9744] },
+      "properties": {
+        "buildingId": "BLD-2015",
+        "name": "BFE Hauptsitz",
+        "street": "Pulverstrasse",
+        "houseNumber": "13",
+        "postalCode": "3063",
+        "city": "Ittigen",
+        "country": "CH",
+        "assetKey": { "bk": "1086", "we": "2015", "obj": "AA" },
+        "egid": "100678901",
+        "portfolioCategory": "Administration Class II",
+        "image": "https://images.unsplash.com/photo-1621831337128-35676ca30868?w=400"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [7.9505, 47.2872] },
+      "properties": {
+        "buildingId": "BLD-2016",
+        "name": "ASTRA Filiale Zofingen",
+        "street": "Brünnliackerstrasse",
+        "houseNumber": "45",
+        "postalCode": "4800",
+        "city": "Zofingen",
+        "country": "CH",
+        "assetKey": { "bk": "1086", "we": "2016", "obj": "AA" },
+        "egid": "100789012",
+        "portfolioCategory": "Administration Class III",
+        "image": "https://images.unsplash.com/photo-1470075801209-17f9ec0cada6?w=400"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [7.2569, 47.1493] },
+      "properties": {
+        "buildingId": "BLD-2017",
+        "name": "BAKOM Hauptsitz",
+        "street": "Zukunftstrasse",
+        "houseNumber": "44",
+        "postalCode": "2503",
+        "city": "Biel/Bienne",
+        "country": "CH",
+        "assetKey": { "bk": "1086", "we": "2017", "obj": "AA" },
+        "egid": "100890123",
+        "portfolioCategory": "Administration Class II",
+        "image": "https://images.unsplash.com/photo-1600531529272-023c4b821f14?w=400"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.5614, 47.4502] },
+      "properties": {
+        "buildingId": "BLD-2018",
+        "name": "MeteoSchweiz Flughafen Zürich",
+        "street": "Operation Center",
+        "houseNumber": "1",
+        "postalCode": "8058",
+        "city": "Zürich-Flughafen",
+        "country": "CH",
+        "assetKey": { "bk": "1086", "we": "2018", "obj": "AA" },
+        "egid": "100901234",
+        "portfolioCategory": "Administration Class III",
+        "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.7869, 46.1748] },
+      "properties": {
+        "buildingId": "BLD-2019",
+        "name": "MeteoSchweiz Locarno-Monti",
+        "street": "Via ai Monti della Trinità",
+        "houseNumber": "146",
+        "postalCode": "6605",
+        "city": "Locarno-Monti",
+        "country": "CH",
+        "assetKey": { "bk": "1086", "we": "2019", "obj": "AA" },
+        "egid": "101012345",
+        "portfolioCategory": "Administration Class III",
+        "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400"
       }
     }
   ]

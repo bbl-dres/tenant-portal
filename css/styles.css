@@ -43,18 +43,49 @@
   margin: 0 auto;
   padding: 0 var(--container-padding);
 }
-.section { padding-block: var(--section-py-half); }
+/* `.container--reading` — narrow column tuned for long-form prose (news
+   articles, help pages). 780 px is the sweet spot for 60–80 chars/line at
+   the base body size. Replaces inline `style="max-width: 780px"`. */
+.container--reading {
+  max-width: 780px;
+}
+/* `.container--narrow` — slightly wider task-page column for forms /
+   focused panels (used by the wizard and search results page). Matches
+   the previous inline `style="max-width: 960px"`. */
+.container--narrow {
+  max-width: 960px;
+}
+/* `.section` defaults to the full CD-Bund `.container--py` rhythm:
+   56→80→96→128 px top/bottom across breakpoints. The previous default
+   used `--section-py-half`, which is the modifier scale (28→40→48→64) —
+   that's literally half the federal pattern and made pages feel dense.
+   `.section--py-tight` keeps the old half-scale for bands that intentionally
+   need less air (e.g. the portfolio-stats strip between hero and explainer).
+   `.section--lg` is kept as a back-compat alias for the same full scale. */
+.section { padding-block: var(--section-py); }
 .section--lg { padding-block: var(--section-py); }
+.section--py-tight { padding-block: var(--section-py-half); }
 
-/* Section background variants for contrast — admin.ch sites alternate white
-   with subtle gray (--section--alt) and use dark navy for emphasis sections
-   like the profile chooser (--section--dark). */
+/* Section background variants — admin.ch alternation pattern (modern CD).
+   The DS uses three distinct tints so adjacent sections never look like
+   the same shade:
+     • default       white                    (--color-bg-default)
+     • --alt         cool blue-gray tint      (--color-secondary-50, #F0F4F7)
+     • --surface     warmer near-white        (--color-bg-surface,  #F9FAFB)
+     • --dark        federal navy             (--color-surface-dark)
+   Previously --alt and --surface were both flavours of `--color-gray-*`
+   (1 step apart on the gray ramp) and read as the same shade in the
+   browser — fixed by routing --alt to the federal blue-gray. */
 .section--alt {
-  background: var(--color-bg-alt);
+  background: var(--color-secondary-50);
+  border-top: 1px solid var(--color-secondary-100);
+  border-bottom: 1px solid var(--color-secondary-100);
+}
+.section--surface {
+  background: var(--color-bg-surface);
   border-top: 1px solid var(--color-border-light);
   border-bottom: 1px solid var(--color-border-light);
 }
-.section--surface { background: var(--color-bg-surface); }
 .section--dark {
   background: var(--color-surface-dark);
   color: var(--color-text-inverse);
@@ -94,8 +125,13 @@
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius);
+  /* Was a <button>; now a real <a> linking out to admin.ch. Suppress the
+     global anchor underline so the link reads as a utility chip in the
+     dark top-bar, matching kbob/swisstopo. */
+  text-decoration: none;
+  font-size: var(--text-body-sm);
 }
-.top-bar__authorities:hover { background: var(--color-white-20); }
+.top-bar__authorities:hover { background: var(--color-white-20); text-decoration: none; color: var(--color-white); }
 .top-bar__authorities svg { width: 12px; height: 12px; }
 /* Prototype notice — centred red label inside the dark top-bar. Plain text,
    no pill background; kept inline so it doesn't steal vertical real estate. */
@@ -225,6 +261,12 @@
   gap: var(--space-md);
   flex-wrap: wrap;
 }
+@media (min-width: 1024px) {
+  .top-header__inner { padding-block: var(--space-lg); }
+}
+@media (min-width: 1280px) {
+  .top-header__inner { padding-block: var(--space-xl); }
+}
 /* Federal mark — sizing + alignment mirrors designsystem css/components/logo.postcss.
    Centred on mobile, top-aligned from md+ (matches DS .logo `md:items-start`).
    Mark and divider scale up at lg / xl / 3xl so the brand reads at laptop and
@@ -234,7 +276,13 @@
   align-items: center;            /* base: vertical centre on phones */
   gap: var(--space-md);
   cursor: pointer;
+  /* `.top-header__left` is now a real anchor (was a div+role=link). Reset
+     the default link styling so the brand still reads as branded text. */
+  color: var(--color-text-primary);
+  text-decoration: none;
 }
+.top-header__left:hover { text-decoration: none; }
+.top-header__left:hover .top-header__dept strong { color: var(--color-primary); }
 @media (min-width: 768px) {
   .top-header__left { align-items: flex-start; gap: var(--space-lg); }
 }
@@ -270,6 +318,15 @@
 @media (min-width: 1280px) { .top-header__dept { font-size: var(--text-body); } }    /* 16 px @ xl */
 @media (min-width: 1920px) { .top-header__dept { font-size: 1.125rem;        } }     /* 18 px @ 3xl */
 
+/* Dept name + sub-line are now distinct block-level spans inside the anchor
+   (replaced the previous `<br>`-inside-span construct). Both rules below
+   apply to the inner spans so the visual rhythm is unchanged. */
+.top-header__dept-name { display: block; }
+.top-header__dept-name strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+/* Back-compat: any remaining `.top-header__dept strong` markup still styles. */
 .top-header__dept strong {
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
@@ -278,7 +335,7 @@
    parent .top-header__dept rule that already scales 14 → 16 → 18 px), but
    regular weight to keep the bold dept name dominant. */
 .top-header__dept-sub {
-  display: inline-block;
+  display: block;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-normal);
   margin-top: 2px;
@@ -400,7 +457,12 @@
 }
 .top-header__action--primary:hover { background: var(--color-primary-hover); }
 
-/* ── FEDERAL CHROME — NAVBAR ────────────────────────────────────────────── */
+/* ── FEDERAL CHROME — NAVBAR ──────────────────────────────────────────────
+   Modern CD-Bund (swiss/designsystem v1.x — swisstopo, bbl, kbob) does
+   NOT use a red separator strip between the brand bar and the navigation;
+   that was a legacy 2.x styleguide pattern. Keep a single light bottom
+   border so the navigation reads as part of the chrome without adding
+   chrome we don't need. */
 .navbar {
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
@@ -453,6 +515,11 @@
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
+.main-navigation__chevron { margin-left: 6px; flex-shrink: 0; }
+.main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__chevron {
+  transform: rotate(180deg);
+  transition: transform var(--transition-fast);
+}
 
 /* ── NAV DROPDOWN PANEL (swisstopo "Dienstleistungen" pattern) ──────────
    Constrained card anchored under the trigger word (left:Xpx set in JS),
@@ -487,12 +554,14 @@
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
+  border-radius: var(--radius);
 }
-.nav-menu__close:hover { color: var(--color-primary); }
+.nav-menu__close:hover { color: var(--color-primary); background: var(--color-bg-surface); }
+.nav-menu__close svg { flex-shrink: 0; }
 
 .nav-menu__heading {
   font-size: var(--text-h4);
@@ -578,6 +647,21 @@
   font-weight: var(--font-weight-medium);
 }
 .breadcrumb__sep { margin: 0 var(--space-xs); color: var(--color-text-muted); }
+/* Breadcrumb is now an <ol> with schema.org/BreadcrumbList microdata.
+   The list itself stays inline so the chevron rhythm reads as one line. */
+.breadcrumb__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
+}
+.breadcrumb__item {
+  display: inline-flex;
+  align-items: baseline;
+}
 
 /* ── HERO ───────────────────────────────────────────────────────────────── */
 /* CD Bund hero is layout-driven, white background, no gradient. Large
@@ -653,6 +737,24 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+/* Explicit focus ring on buttons. The global :focus-visible already covers
+   the keyboard-only case, but a 3 px purple outline on a navy filled
+   button needs extra offset to read against the button itself. */
+.btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+/* On dark surfaces (top-bar, footer, .section--dark) the global purple
+   focus ring is the same hue as Cabinet badges and can lose contrast
+   against navy. Add a thin white inner ring so the keyboard target stays
+   visible regardless of the underlying background. */
+.top-bar :focus-visible,
+.app-footer :focus-visible,
+.section--dark :focus-visible {
+  outline: 3px solid var(--color-focus-dark);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
+}
 
 /* ── CARDS ──────────────────────────────────────────────────────────────── */
 /* CD Bund Card uses shadow, not border. --highlight variant uses a
@@ -668,6 +770,7 @@
   box-shadow: var(--shadow-card);
   transition: box-shadow var(--transition-fast);
 }
+@media (min-width: 1024px) { .card { padding: var(--space-xl); } }
 .card:hover { box-shadow: var(--shadow-card-hover); }
 .card:hover .card__title { color: var(--color-primary-700); }
 .card__title { transition: color var(--transition-fast); }
@@ -694,6 +797,8 @@
   gap: var(--space-lg);
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
+@media (min-width: 1024px) { .card-grid { gap: var(--space-xl); } }
+@media (min-width: 1280px) { .card-grid { gap: var(--space-2xl); } }
 
 /* ── QUICK-CARD (kbob-fdk pattern) — link-style card with arrow button ── */
 .card--quick {
@@ -889,10 +994,58 @@ figcaption {
 
 /* Section heading — layout-only. Combine with .h2 (or .h1) for size:
    `<h2 class="h2 section-heading">…</h2>`. Adds extra bottom space below
-   the heading vs. the default --space-md from .h2. Mirrors the DS pattern
-   of composing a typography utility (.h1..h5) with a layout block class. */
+   the heading. Scales up on desktop so wide-screen sections breathe with
+   the same generosity as admin.ch / swisstopo. */
 .section-heading {
   margin-bottom: var(--space-lg);
+}
+@media (min-width: 1024px) { .section-heading { margin-bottom: var(--space-xl); } }
+@media (min-width: 1280px) { .section-heading { margin-bottom: var(--space-2xl); } }
+
+/* Section intro lead paragraph — sits below a section-heading and gives
+   one sentence of context. Replaces ad-hoc inline `style="max-width:60ch;
+   color: ...; margin: 0 0 var(--space-2xl);"` blocks scattered across
+   landing + auth-home views. Mirrors DS pattern of a single utility class
+   per layout responsibility. */
+.section-intro {
+  max-width: 60ch;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-2xl);
+}
+.section-intro--tight { margin-bottom: var(--space-lg); }
+
+/* `.card__title--icon` — card title with a leading inline-icon (e.g. the
+   "Rückfrage" card carries a refresh glyph). Aligns the icon with the
+   first text baseline. */
+.card__title--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.card__title--icon .inline-icon {
+  margin-right: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* `.card__inset` — paragraph living inside a `.card` that shouldn't add
+   the default `<p>` top/bottom margin (the card already supplies
+   --space-sm gap between its children). Replaces inline `style="margin:0;"`. */
+.card__inset { margin: 0; }
+.card__inset-meta { color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+
+/* `.card--clarification` — the Rückfrage / offene Auflagen card that
+   spans the full grid row and shows a warning rail on the left.
+   Replaces the previous inline `style="grid-column: 1 / -1; border-left: 4px solid var(--color-warning);"`. */
+.card--clarification {
+  grid-column: 1 / -1;
+  border-left: 4px solid var(--color-warning);
+}
+.card__justification {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-body-sm);
 }
 
 /* Card-internal heading — used as the only title inside a plain .card.
@@ -934,13 +1087,33 @@ figcaption {
 .badge--danger  { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
 .badge--orange  { background: var(--color-badge-orange-bg); color: var(--color-badge-orange-text); }
 
-/* Data-quality glyph badges (from §0.3) */
-.badge--verified::before  { content: "🟢"; }
-.badge--stale::before     { content: "🟡"; }
-.badge--manual::before    { content: "🔴"; }
-.badge--unchecked::before { content: "⚪"; }
-.badge--greenfield::before { content: "◼"; }
-.badge--llm::before       { content: "🤖"; }
+/* Data-quality glyph badges (from §0.3).
+   DESIGNGUIDE §6 forbids emoji in user-visible markup; previously these
+   badges leaned on 🟢🟡🔴⚪◼🤖 which depend on the OS emoji font and
+   render inconsistently between Windows / macOS / Linux. Replaced with
+   CSS-drawn 8 px dots (and a square for greenfield) so colour is the
+   semantic signal and is consistent in every browser. The :before slot
+   is decorative: screen readers continue to announce the badge text. */
+.badge--verified::before,
+.badge--stale::before,
+.badge--manual::before,
+.badge--unchecked::before,
+.badge--greenfield::before,
+.badge--llm::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;            /* falls back to badge text colour */
+}
+.badge--verified::before   { background: var(--color-success); }
+.badge--stale::before      { background: var(--color-warning); }
+.badge--manual::before     { background: var(--color-danger); }
+.badge--unchecked::before  { background: var(--color-gray-300); border: 1px solid var(--color-gray-400); }
+.badge--greenfield::before { background: var(--color-secondary-600); border-radius: 1px; }   /* square: distinct from coloured dots */
+.badge--llm::before        { background: var(--color-link); }
 
 /* ── STATUS PIPELINE (§0.3) ─────────────────────────────────────────────── */
 .pipeline {
@@ -994,6 +1167,15 @@ figcaption {
   color: var(--color-gray-900);
 }
 .pipeline__step--rueckfrage::after { border-left-color: var(--color-warning); }
+/* Pending / faded step ("… genehmigt" on a Rückfrage pipeline). Replaces
+   the previous inline `style="opacity:0.5"` so the styling lives with
+   the rest of the pipeline rules. */
+.pipeline__step--pending {
+  opacity: 0.5;
+}
+/* Reserve a thin gap between the pipeline icon and the label so the
+   inline-icon doesn't bump into the text on smaller pills. */
+.pipeline__step .inline-icon { margin-right: 4px; }
 
 /* Inline icon — used by P.icon() helper. Vertically centres a 16px SVG
    alongside body-sm text and adds a small trailing gap. Stroke colour is
@@ -1084,17 +1266,44 @@ figcaption {
   .step-indicator__connector { display: none; }
 }
 
-/* ── FORM FIELDS ────────────────────────────────────────────────────────── */
-.form-field { display: flex; flex-direction: column; gap: var(--space-xs); }
+/* ── FORM FIELDS ──────────────────────────────────────────────────────────
+   Form fields stack their parts (label / control / hint / error) with
+   small gaps. The wizard-form-section parent supplies the larger gap
+   between fields so the page rhythm reads cleanly. */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
 .form-field__label {
-  font-size: var(--text-body-sm);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   display: flex;
   gap: var(--space-xs);
   align-items: center;
+  margin-bottom: var(--space-xs);
 }
 .form-field__required { color: var(--color-danger); }
-.form-field__hint { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+.form-field__hint {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+/* Visually-hidden utility for screen-reader-only labels (e.g. fieldset
+   legends that are duplicates of a visible `.form-field__label`). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 /* Standalone input — mirrors DS .input from css/components/input.postcss.
    Used as the base for any text-like control (input/textarea/select),
    reusable outside .form-field (e.g. header search, inline filters).
@@ -1159,6 +1368,43 @@ figcaption {
   cursor: pointer;
 }
 
+/* ── OPTION GROUP (radios / checkboxes) ──────────────────────────────────
+   Modern DS pattern: each option is its own row by default (better tap
+   targets and easier scanning); `--wrap` allows multi-column wrap for
+   short labels (e.g. specials). The fieldset itself has no visible
+   chrome; the legend uses `.sr-only` so AT still announces the group. */
+.option-group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.option-group--wrap {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+.option-group__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-body);
+  cursor: pointer;
+  min-height: 28px;            /* touch-target hint */
+  padding: 4px 0;
+}
+.option-group__item input[type="radio"],
+.option-group__item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-secondary-600);    /* CD navy active fill */
+  flex-shrink: 0;
+}
+.option-group__item:hover span { color: var(--color-text-primary); }
+.option-group__item:has(input:checked) span { font-weight: var(--font-weight-semibold); }
+
 /* ── INFO BANNERS ───────────────────────────────────────────────────────── */
 .notification-banner {
   padding: var(--space-md) var(--container-padding);
@@ -1188,6 +1434,32 @@ figcaption {
 .notification-banner__wrapper { display: flex; flex: 1; gap: var(--space-md); align-items: center; }
 .notification-banner__text { margin: 0; flex: 1; }
 .notification-banner__actions { display: flex; gap: var(--space-sm); }
+/* Icon slot — CD Bund alert/info widgets carry a leading status icon to
+   reinforce the colour signal (WCAG 1.4.1 "use of colour"). The icon is
+   aria-hidden; the banner role/text carry the semantic meaning. */
+.notification-banner__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.notification-banner__icon svg { width: 22px; height: 22px; }
+
+/* Sub-line inside a notification-banner__text — a quieter, smaller line
+   below the main message (e.g. "BK 1086 = BBL-Portfolio …" rationale).
+   Replaces the previous inline `style="font-size:var(--text-body-xs)"`
+   on a wrapping <span>. */
+.notification-banner__sub {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: var(--text-body-xs);
+}
+/* `.notification-banner--page-top` — banner sitting at the top of a page
+   body (login, application-detail success message). Adds bottom margin
+   so the next section breathes. Replaces inline `style="margin-bottom: var(--space-lg);"`. */
+.notification-banner--page-top { margin-bottom: var(--space-lg); }
 
 /* ── TABLE ──────────────────────────────────────────────────────────────── */
 .table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); }
@@ -1197,15 +1469,139 @@ figcaption {
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
+/* Zebra striping for long lists (DS `.table--zebra`). Use on the <table>
+   when there are roughly >12 rows and rows aren't grouped semantically. */
+.table--zebra tbody tr:nth-child(even) td { background: var(--color-bg-surface); }
+.table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
+
+/* DS table headers are sentence-case by default; uppercase is an opt-in
+   variant (designsystem css/components/table.postcss .table--caps). The
+   marketing-eyebrow look was here as a leftover and made reviewer queues
+   harder to scan. Add `.table--caps` on the <table> to restore the old
+   uppercase look when the table really is index-style. */
 .table th {
   background: var(--color-bg-alt);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  letter-spacing: 0;
+}
+.table--caps th {
   font-size: var(--text-body-xs);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
-.table tr:hover td { background: var(--color-bg-surface); cursor: pointer; }
+/* Only show the pointer affordance when the row actually has an action.
+   `.table--rows-clickable` opts in to the row-hover-cursor + highlight. */
+.table tr:hover td { background: var(--color-bg-surface); }
+.table--rows-clickable tr:hover td { cursor: pointer; }
+
+/* Small helpers used alongside .table — kept here so future tables can
+   share them without re-introducing inline styles in views. */
+.table-hint {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-md);
+}
+.table-empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+}
+
+/* ── DOCUMENTS PAGE — filter bar, document table, pagination ─────────────
+   The downloads page can list thousands of records when wired to the real
+   records-management system. The pattern here scales:
+   - .docs-filter-bar: 3-up filter row (type / building / text) that wraps
+     to stack on narrow viewports.
+   - .docs-table-wrap: horizontal scroll fallback so the table never breaks
+     the page below a min content width.
+   - .table--documents: medium-density list-view; title column uses an icon
+     prefix and a hover affordance via .docs-table__title-link.
+   - .pagination: shared component, reusable by any future paginated table. */
+.docs-filter-bar {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+.docs-table-wrap {
+  overflow-x: auto;
+}
+.table--documents th,
+.table--documents td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.table--documents td:first-child {
+  white-space: normal;            /* allow titles to wrap on narrow viewports */
+}
+.docs-table__title-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.docs-table__title-link:hover { color: var(--color-primary); text-decoration: underline; }
+.docs-table__title-link .inline-icon { flex: 0 0 auto; color: var(--color-text-muted); }
+
+/* CD Bund pagination — compact pattern (designsystem css/components/pagination.postcss).
+   Layout: [chevron-left btn] [page-number input] "von X Seiten" [chevron-right btn]
+   The numbered-button list with ellipses is *not* a CD Bund pattern — the
+   federal design system uses a small input field for direct page jump
+   instead, which is more accessible at scale (works for any page count
+   without a long row of buttons). */
+.pagination {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+  font-size: var(--text-body-sm);
+}
+.pagination__input {
+  width: 48px;
+  text-align: center;
+  padding: 0 var(--space-xs);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius);
+  /* Hide the spinner arrows — they make the field look noisy at this size */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.pagination__input::-webkit-outer-spin-button,
+.pagination__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pagination__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+.pagination__text {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+/* Icon-only button variant for chevron-left / chevron-right.
+   Squared the .btn rule's text padding so the icon centers. */
+.btn--icon-only {
+  padding: 0;
+  width: var(--btn-min-h);
+}
+@media (min-width: 1280px) { .btn--icon-only { width: var(--btn-lg-min-h); } }
+.btn--icon-only .inline-icon { width: 18px; height: 18px; }
+/* Anchor variant of the pagination buttons — properties pagination uses
+   <a href> so middle-click + back/forward + share links all work. */
+a.btn { text-decoration: none; }
+a.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
 
 /* ── MODAL ──────────────────────────────────────────────────────────────── */
 .modal-backdrop {
@@ -1235,12 +1631,18 @@ figcaption {
 .modal__header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; }
 .modal__title { margin: 0; font-size: var(--text-h3); }
 .modal__close {
-  background: none; border: none; font-size: 1.5rem;
+  background: none; border: none;
   margin-left: auto;
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
   border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
 }
-.modal__close:hover { background: var(--color-bg-alt); }
+.modal__close:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
+.modal__close svg { flex-shrink: 0; }
 .modal__body { padding: var(--space-lg); }
 .modal__footer { padding: var(--space-lg); border-top: 1px solid var(--color-border); display: flex; gap: var(--space-sm); justify-content: flex-end; }
 
@@ -1310,8 +1712,8 @@ figcaption {
 .footer-information__inner {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-xl);
-  padding: var(--space-3xl) var(--container-padding) var(--space-2xl);
+  gap: var(--space-2xl);
+  padding: var(--space-3xl) var(--container-padding);
   max-width: var(--container-max-width);
   margin: 0 auto;
 }
@@ -1319,6 +1721,18 @@ figcaption {
   .footer-information__inner {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-3xl);
+    padding-block: var(--space-4xl);          /* 80 px at lg */
+  }
+}
+@media (min-width: 1544px) {
+  .footer-information__inner {
+    padding-block: calc(var(--space-4xl) + var(--space-md));   /* ~96 px at 2xl */
+    gap: var(--space-4xl);
+  }
+}
+@media (min-width: 1920px) {
+  .footer-information__inner {
+    padding-block: 7rem;                       /* 112 px at 3xl */
   }
 }
 
@@ -1335,23 +1749,27 @@ figcaption {
   font-size: var(--text-body);
   line-height: var(--line-height-relaxed);
   color: rgba(255,255,255,0.9);
-  max-width: 22ch;
+  max-width: 34ch;
 }
 .footer-information__prototype-warning {
   margin: var(--space-lg) 0 0;
   font-size: var(--text-body-sm);
   line-height: var(--line-height-relaxed);
-  color: var(--color-prototype-notice);
-  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: var(--font-weight-normal);
   max-width: 36ch;
 }
 
-/* "Weitere Informationen" link block */
+/* Footer column label — CD Bund / swisstopo pattern: small uppercase,
+   medium weight, generous tracking. Reads as a column header, not a
+   page-level heading. */
 .footer-information__heading {
-  font-size: var(--text-h3);
-  font-weight: var(--font-weight-semibold);
-  margin: 0 0 var(--space-lg);
-  color: var(--color-text-inverse);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-md);
+  color: rgba(255, 255, 255, 0.75);
 }
 .footer-information__list {
   list-style: none;
@@ -1372,6 +1790,10 @@ figcaption {
   text-decoration: none;
   border-bottom: 1px solid rgba(255,255,255,0.15);
   transition: color var(--transition-fast);
+}
+@media (min-width: 1024px) {
+  /* Match the CD-Bund footer cadence — wider link rows at desktop. */
+  .footer-information__list a { padding: var(--space-lg) 0; }
 }
 .footer-information__list a:hover {
   color: var(--color-white);
@@ -1405,10 +1827,15 @@ figcaption {
 .footer-information__big-link:hover .footer-information__arrow { transform: translateX(4px); }
 .footer-information__big-link .footer-information__arrow { font-size: 1.4em; }
 
-/* Bottom strip — slightly darker, three small links */
+/* Bottom strip — slightly darker, three small links. CD Bund cadence is
+   tight (~12–16 px vertical) so the strip reads as a meta-line rather
+   than a second footer band. */
 .app-footer__bottom {
   background: var(--color-surface-darker);
-  padding: var(--space-md) var(--container-padding);
+  padding: var(--space-sm) var(--container-padding);
+}
+@media (min-width: 1024px) {
+  .app-footer__bottom { padding-block: var(--space-md); }
 }
 .app-footer__bottom-inner {
   max-width: var(--container-max-width);
@@ -1417,6 +1844,9 @@ figcaption {
   flex-wrap: wrap;
   gap: var(--space-xl);
   font-size: var(--text-body-sm);
+}
+@media (min-width: 1024px) {
+  .app-footer__bottom-inner { gap: var(--space-2xl); }
 }
 .app-footer__bottom-link {
   color: rgba(255,255,255,0.75);
@@ -1458,6 +1888,16 @@ figcaption {
 @media (min-width: 640px) { .share-bar__btn span { display: inline; } }
 
 /* ── SEARCH RESULTS LIST ────────────────────────────────────────────────── */
+/* Grouped layout — each origin (News / Anträge / Liegenschaften /
+   Informationen) gets a section header and a result list. Replaces a
+   half-dozen inline `style="margin-bottom:var(--space-2xl);font-size:..."`
+   blocks. */
+.search-results__group {
+  margin-bottom: var(--space-2xl);
+}
+.search-results__group-title {
+  margin: 0 0 var(--space-md);
+}
 .search-results {
   list-style: none;
   padding: 0;
@@ -1539,6 +1979,11 @@ figcaption {
 .shortcut-overlay__group dl { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm); }
 .shortcut-overlay__group dt { font-family: var(--font-family-mono); }
 .shortcut-overlay__group dd { margin: 0; }
+.shortcut-overlay__hint {
+  margin-top: var(--space-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
 
 /* ── ACCORDION (CD Bund: max-height animation, not display toggle) ──────── */
 .accordion__item {
@@ -1584,6 +2029,189 @@ figcaption {
   padding: 0 var(--space-sm) var(--space-md);
 }
 
+/* ── PAGE HEADER (H1 + side actions) ─────────────────────────────────────
+   Used on inbox / detail / queue. Replaces ad-hoc inline
+   `style="display:flex;justify-content:space-between;..."` blocks. */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+.page-header__title { margin: 0 0 var(--space-xs); }
+.page-header__sub { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+.page-header__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.page-header__count {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Reviewer queue — toolbar of bulk actions below the table. */
+.queue-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* "Fresh submission" success banner on the application-detail view —
+   the only difference from the default notification-banner is the
+   `margin-bottom: var(--space-lg)` spacing. */
+.app-detail__fresh-banner { margin-bottom: var(--space-lg); }
+
+/* Wizard step-5 / pre-submission checklist. Each list item carries an
+   inline-icon at the front; the modifier colours the icon to match the
+   semantic state (ok / warn / danger). The text itself remains
+   text-primary so the meaning is colour-independent (WCAG 1.4.1). */
+.checklist__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  list-style: none;
+  margin-bottom: var(--space-xs);
+}
+.checklist__item .inline-icon { width: 18px; height: 18px; margin-right: 0; }
+.checklist__item--ok .inline-icon     { color: var(--color-success); }
+.checklist__item--warn .inline-icon   { color: var(--color-warning); }
+.checklist__item--danger .inline-icon { color: var(--color-danger); }
+.checklist__item--danger { color: var(--color-badge-red-text); }
+
+/* ── FILTER ROW + FILTER CHIPS (DS tag-item pattern) ─────────────────────
+   `.filter-row` is the horizontal toolbar shell holding chips + the text
+   search. `.filter-chips` is the chip group. `.tag-item` mirrors DS
+   `css/components/tag-item.postcss` — pill, 34 px tall, active state
+   uses the brand-tinted surface. Chips are real <button>s so keyboard
+   users can activate them; selected state is `aria-pressed="true"` and
+   styled with `.tag-item--active`. */
+.filter-row {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+.filter-row__search {
+  flex: 1 1 220px;
+  min-width: 220px;
+  min-height: var(--btn-min-h);
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 6px var(--space-md);
+  min-height: 34px;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+.tag-item:hover { background: var(--color-bg-surface); border-color: var(--color-border-input); }
+.tag-item--active,
+.tag-item[aria-pressed="true"] {
+  background: var(--color-badge-red-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary-700);
+}
+.tag-item--active:hover,
+.tag-item[aria-pressed="true"]:hover {
+  background: var(--color-badge-red-bg);
+  border-color: var(--color-primary-700);
+}
+.tag-item__count {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+.tag-item--active .tag-item__count,
+.tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-primary-700); }
+
+/* Empty-state glyph slot — sized to host an inline SVG circle illustration.
+   Replaces the previous emoji glyph (📭 / 📁 / …) which depended on the
+   user's emoji font. SVG fill stays consistent across OSes. */
+.empty-state__glyph svg {
+  width: 64px;
+  height: 64px;
+  color: var(--color-gray-400);
+}
+/* `.empty-state--inset` — empty state shown inside an already-padded
+   surface (e.g. after the properties toolbar). Adds top breathing room
+   without doubling vertical padding everywhere. Replaces inline
+   `style="margin-top: var(--space-xl);"`. */
+.empty-state--inset { margin-top: var(--space-xl); }
+
+/* ── ROLE SWITCH BUTTON (modal stack) ────────────────────────────────────
+   Full-width outlined button used inside the "Rolle wechseln" modal. The
+   active role's button gets a primary-tinted background + checkmark icon
+   instead of the previous inline `style="width:100%;..."` block. */
+.role-switch-btn {
+  width: 100%;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+}
+.role-switch-btn--active {
+  background: var(--color-badge-red-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary-700);
+}
+.role-switch-btn--active strong { color: var(--color-primary-700); }
+.role-switch-btn__spacer {
+  display: inline-block;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* ── LOGIN PAGE ──────────────────────────────────────────────────────────
+   CD-Bund pattern for narrow, single-column flows (login, contact form,
+   subscription): centred container on an alt-surface section so the form
+   reads as a "task page" rather than free-floating chrome. */
+.login-page {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.login-page__title {
+  font-size: var(--text-h2);
+  margin: 0 0 var(--space-md);
+}
+.login-page__subhead {
+  font-size: var(--text-h4);
+  margin: var(--space-md) 0 var(--space-sm);
+}
+.login-page__dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-xs);
+  font-size: var(--text-body-sm);
+}
+.login-page__dl dt { color: var(--color-text-secondary); margin: 0; }
+.login-page__dl dd { margin: 0; }
+.login-page__cta { margin-top: var(--space-lg); }
+.login-page__hint { font-size: var(--text-body-xs); color: var(--color-text-secondary); margin-top: var(--space-md); }
+.login-page__hint--muted { color: var(--color-text-muted); margin-top: var(--space-sm); }
+
+/* Mobile-only meta links inside the burger menu — surfaces Kontakt/Hilfe
+   that would otherwise be hidden alongside .top-header__meta. */
+.main-navigation__mobile-meta { display: none; }
+
 /* ── RESPONSIVE ────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .top-header { flex-wrap: wrap; }
@@ -1600,6 +2228,19 @@ figcaption {
   .top-header__divider { display: none; }
   .top-header__meta-nav { display: none; }
   .shortcut-overlay__grid { grid-template-columns: 1fr; }
+  /* Surface meta links (Kontakt/Hilfe) that are hidden at this width
+     inside the burger menu so they remain reachable on mobile. */
+  .main-navigation__mobile-meta {
+    display: block;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+  .main-navigation__mobile-meta .main-navigation__link {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
+  }
 }
 @media (max-width: 480px) {
   .hero { padding: var(--section-py-half) var(--container-padding); }
@@ -1640,6 +2281,26 @@ figcaption {
   object-fit: cover;
   display: block;
 }
+/* At <480 px the 4:3 hero photo crowds the CTA. The text + CTA pair is
+   the primary affordance; the photo is decorative. Hide on the smallest
+   screens (kept from 480 px up where it still adds value). */
+@media (max-width: 479px) {
+  .hero--split .hero__figure { display: none; }
+}
+
+/* ── INFO PAGE HEADER ────────────────────────────────────────────────────
+   Header above the .page-with-toc layout on the Arbeitsinstrumente page.
+   Replaces three inline-styled blocks. */
+.info-page__header {
+  max-width: 60ch;
+  margin-bottom: var(--space-2xl);
+}
+.info-page__title {
+  font-size: var(--text-display);
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--space-md);
+}
 
 /* ── PAGE-WITH-TOC (info long-scroll page; kbob-fdk + armasuisse pattern) ── */
 .page-with-toc {
@@ -1675,6 +2336,25 @@ figcaption {
   line-height: var(--line-height-relaxed);
 }
 .page-with-toc__content table { margin: var(--space-md) 0; }
+/* Scoped typography defaults so the info-page article body doesn't have
+   to repeat `style="padding-left:var(--space-lg);..."` on every <ol>/<ul>.
+   These match the kbob/armasuisse long-form pattern: comfortable indent,
+   relaxed line-height, secondary-text note paragraphs use `.text-note`. */
+.page-with-toc__content ol,
+.page-with-toc__content ul {
+  padding-left: var(--space-lg);
+  line-height: var(--line-height-relaxed);
+}
+.page-with-toc__content h3 {
+  margin-top: var(--space-xl);
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+}
+.page-with-toc__content .text-note {
+  margin-top: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
 
 /* Sticky TOC card on the right */
 .page-with-toc__toc {
@@ -1804,6 +2484,18 @@ figcaption {
   flex-shrink: 0;
 }
 .contact-block__lead { margin: 0 0 var(--space-xs); }
+/* Secondary descriptive line under a `.contact-block__lead`. The `--last`
+   variant drops the bottom margin for the trailing email line. */
+.contact-block__note {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin: 0 0 var(--space-md);
+}
+.contact-block__note--last { margin-bottom: 0; }
+
+/* `.accordion--inset` — accordion with extra breathing room below it
+   when used inside a long-form article (info page). */
+.accordion--inset { margin-bottom: var(--space-xl); }
 
 /* Explainer-video section (landing) */
 .explainer-section__grid {
@@ -1839,12 +2531,16 @@ figcaption {
   border: 0;
 }
 
-/* Portfolio stats band */
+/* Portfolio stats band — intentionally tighter than a full `.section`
+   (sits between hero and explainer; the stat numerals carry the rhythm). */
 .portfolio-stats {
   background: var(--color-bg-alt);
   padding: var(--section-py-half) var(--container-padding);
   border-top: 1px solid var(--color-border-light);
   border-bottom: 1px solid var(--color-border-light);
+}
+@media (min-width: 1024px) {
+  .portfolio-stats { padding-block: var(--space-3xl); }
 }
 .portfolio-stats__grid {
   display: grid;
@@ -1859,11 +2555,17 @@ figcaption {
   flex-direction: column;
   gap: var(--space-xs);
 }
+/* Modern CD reserves primary red for brand accents only (active nav rail,
+   card rails, danger). Big numerals used to be `--color-primary` which
+   pulled focus away from the hero. Switched to text-primary so the stats
+   read as data, not as marketing. Kept the mono treatment for the "data
+   feel" admin.ch uses. */
 .portfolio-stats__grid strong {
   font-size: var(--text-h1);
-  color: var(--color-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-family-mono);
   letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
 }
 .portfolio-stats__grid span {
   font-size: var(--text-body-sm);
@@ -2028,6 +2730,191 @@ figcaption {
   gap: var(--space-xs);
 }
 
+/* ── APP-DETAIL HELPERS ──────────────────────────────────────────────────
+   Small typography utilities used inside the application-detail card body
+   and the SAP/ePPM tab. Replaces inline style declarations. */
+.app-detail__correlation {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+
+/* `.modal__meta` — small muted line inside modal body copy (e.g. ID
+   continuity note in the resubmit modal). */
+.modal__meta {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Inline secondary hint inside a form-field label (e.g. "(VwVG Art. 35
+   — verpflichtend)" next to "Begründung"). Replaces an inline
+   `style="font-weight:normal;"`. */
+.form-field__hint--inline {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+/* Reviewer marks panel — action row below the decision + justification.
+   Replaces inline `style="display:flex;gap:var(--space-sm);margin-top:..."`. */
+.reviewer-marks__actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* Generic horizontal rule used as a soft separator inside panels and
+   modals. Replaces a `<hr style="margin: var(--space-md) 0; border:none;
+   border-top:1px solid var(--color-border);">` pattern. */
+.rule {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-md) 0;
+}
+
+/* ── DOWNLOADS PAGE ──────────────────────────────────────────────────────
+   Filter bar (typed selects + search), table column widths, download
+   action cell. Replaces ~10 inline style declarations across the
+   downloads view. */
+.docs-filter-bar__select {
+  min-height: var(--btn-min-h);
+}
+.docs-filter-bar__search {
+  flex: 1;
+  min-width: 200px;
+  min-height: var(--btn-min-h);
+}
+.table--documents .col-title   { width: 32%; }
+.table--documents .col-type    { width: 13%; }
+.table--documents .col-linked  { width: 22%; }
+.table--documents .col-format  { width: 7%; }
+.table--documents .col-size    { width: 8%; }
+.table--documents .col-lang    { width: 8%; }
+.table--documents .col-date    { width: 8%; }
+.table--documents .col-action  { width: 2%; }
+.docs-table__linked { color: var(--color-text-secondary); }
+.docs-table__action { text-align: right; }
+.docs-table__download { color: var(--color-primary); }
+.docs-table__download:hover { color: var(--color-primary-hover); }
+
+/* ── PROFILE PAGE ────────────────────────────────────────────────────────
+   `.profile-page__card` stacks the three profile cards with consistent
+   bottom margin; `.profile-dl` lays out the identity definition list as
+   a 160 px label column + flexible value column. */
+.profile-page__card { margin-bottom: var(--space-lg); }
+.profile-page__note {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+  margin: var(--space-md) 0 0;
+}
+.profile-page__save { margin-top: var(--space-md); }
+.profile-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--space-sm);
+}
+.profile-dl dt {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+.profile-dl dd { margin: 0; }
+@media (max-width: 480px) {
+  .profile-dl { grid-template-columns: 1fr; gap: var(--space-xs); }
+  .profile-dl dt { font-size: var(--text-body-sm); }
+  .profile-dl dd { margin-bottom: var(--space-sm); }
+}
+
+/* ── BATCH-APPROVE MODAL ─────────────────────────────────────────────────
+   The "Bulk genehmigen" modal: an optional template textarea, a copy
+   toggle, then one form-field per selected application. */
+.batch-approve__copy-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  font-size: var(--text-body-sm);
+}
+.batch-approve__field { margin-bottom: var(--space-sm); }
+
+/* ── SERVICE STUB (placeholder pages for not-yet-wired services) ─────────
+   Replaces a cluster of inline styles inside renderServiceStub. */
+.service-stub__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--text-h4);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-lg);
+}
+.service-stub__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.service-stub__hint {
+  margin-top: var(--space-2xl);
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+
+/* ── NEWS LIST PAGE (overview header + list) ─────────────────────────────
+   Replaces inline styles on the news-overview heading block. Centred
+   "Veröffentlicht am …" eyebrow above a large display title. */
+.news-list__header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+.news-list__date {
+  margin: 0 0 var(--space-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+.news-list__title {
+  margin: 0;
+  font-size: var(--text-display);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
+}
+
+/* ── NEWS DETAIL (long-form article) ─────────────────────────────────────
+   Replaces ~6 inline style= blocks in renderNewsDetail. Sits inside a
+   .container--reading (780 px); meta line above the title, big image
+   below the title, lead paragraph, then a footer "source / responsible"
+   stripe and a back-link. */
+.news-detail__meta {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin: 0 0 var(--space-sm);
+}
+.news-detail__title {
+  margin: 0 0 var(--space-lg);
+  font-size: var(--text-display);
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
+}
+.news-detail__image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+}
+.news-detail__lead {
+  font-size: var(--text-h4);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-lg);
+}
+.news-detail__footer {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin: 0;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+.news-detail__back { margin-top: var(--space-xl); }
+
 /* News tile metadata triplet — content items only (FUNC-LP-009 v0.5) */
 .card--content {
   border-left: 4px solid var(--color-info);
@@ -2049,7 +2936,27 @@ figcaption {
   padding: var(--space-lg);
 }
 .wizard__title { margin: 0 0 var(--space-sm); font-size: var(--text-h3); }
-.wizard__subtitle { color: var(--color-text-secondary); margin: 0 0 var(--space-lg); font-size: var(--text-body-sm); }
+.wizard__subtitle {
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-lg);
+  font-size: var(--text-body-sm);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+/* Wizard ID badge — Antrags-ID line on the wizard subtitle. */
+.wizard__id { display: inline-flex; align-items: center; gap: var(--space-xs); }
+/* Auto-save status — visually muted, with a small green check icon. The
+   `aria-live="polite"` makes saves announceable to AT users. */
+.wizard__autosave {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+.wizard__autosave .inline-icon { width: 14px; height: 14px; margin-right: 0; }
 .wizard__sticky-footer {
   position: sticky;
   bottom: 0;
@@ -2071,19 +2978,25 @@ figcaption {
 }
 .wizard__section {
   background: var(--color-bg-surface);
-  border-radius: var(--radius);
-  padding: var(--space-md);
-  margin-bottom: var(--space-md);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 .wizard__section h3 {
-  margin: 0 0 var(--space-sm);
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-sm);
 }
+/* The legacy radio-group/checkbox-group descendants inside a wizard
+   section also inherit the section's flex gap. */
+.wizard__section .form-field { gap: var(--space-xs); }
 .wizard__section--required-incomplete h3::after {
   content: "Pflicht fehlt";
   font-size: var(--text-body-xs);
@@ -2099,14 +3012,54 @@ figcaption {
   font-weight: bold;
 }
 
-/* Two-column wizard step 2 layout */
+/* Wizard step-2 used to be a two-column grid that cramped the radios on
+   small laptops. Now always stacks — kept the class as a no-op so any
+   leftover call sites still work, with a vertical gap between sections. */
 .wizard-two-col {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-md);
 }
-@media (min-width: 1024px) {
-  .wizard-two-col { grid-template-columns: 1fr 1fr; }
+
+/* `.wizard__sap-info` — slot below the SAP address autocomplete where
+   the BK 1086 banner / Greenfield notice gets rendered. Replaces inline
+   `style="margin-top:var(--space-sm);"`. */
+.wizard__sap-info { margin-top: var(--space-sm); }
+
+/* `.wizard__inline-toggle` — small toggle (e.g. "Erweiterte Ansicht
+   (ePPM-Mapping)") inlined inside a wizard subtitle. Replaces inline
+   `style="font-size:var(--text-body-xs);"`. */
+.wizard__inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-body-xs);
+  margin-left: var(--space-sm);
+}
+
+/* `.eppm-tab` — auxiliary ePPM-mapping label next to a wizard field label.
+   Hidden by default, revealed when the user toggles "Erweiterte Ansicht".
+   Replaces a half-dozen inline `style="display:${f._eppmToggle ?
+   'inline' : 'none'};color:var(--color-text-muted);font-size:...;"`
+   blocks across step-4. */
+.eppm-tab {
+  display: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-xs);
+  margin-left: var(--space-xs);
+}
+.eppm-tab--visible { display: inline; }
+
+/* `.date-grid` — three equal columns of date inputs (Start / Milestone /
+   End). Replaces inline `style="display:grid;grid-template-columns:
+   repeat(3,1fr);gap:var(--space-sm);"`. Stacks on narrow screens. */
+.date-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+@media (min-width: 640px) {
+  .date-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* Calculation block */
@@ -2122,39 +3075,52 @@ figcaption {
 .calc-block dt { font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); font-size: var(--text-body-xs); }
 .calc-block dd { margin: 0 0 var(--space-sm); }
 .calc-block hr { border: none; border-top: 1px solid var(--color-border); margin: var(--space-sm) 0; }
-.calc-block__guardrail-warn {
-  font-family: var(--font-family);
-  background: var(--color-warning-light);
-  color: var(--color-badge-yellow-text);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius);
-  font-size: var(--text-body-xs);
-  margin-top: var(--space-sm);
-}
+.calc-block__guardrail-warn,
 .calc-block__guardrail-block {
   font-family: var(--font-family);
-  background: var(--color-danger-light);
-  color: var(--color-badge-red-text);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius);
   font-size: var(--text-body-xs);
   margin-top: var(--space-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
 }
+.calc-block__guardrail-warn .inline-icon,
+.calc-block__guardrail-block .inline-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  margin-right: 0;
+  width: 16px; height: 16px;
+}
+.calc-block__guardrail-warn  { background: var(--color-warning-light); color: var(--color-badge-yellow-text); }
+.calc-block__guardrail-block { background: var(--color-danger-light);  color: var(--color-badge-red-text); }
 
-/* NAW confidence indicator */
+/* NAW confidence indicator — recommendation panel that appears after the
+   user answers the NAW questions. Sits below the option-groups, styled
+   as a calm card with a leading "Empfehlung" eyebrow. */
 .naw-confidence {
   background: var(--color-white);
   border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-success);
   border-radius: var(--radius);
-  padding: var(--space-md);
-  margin-top: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
 }
 .naw-confidence__line {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--text-body-sm);
+  align-items: baseline;
+  gap: var(--space-md);
+  font-size: var(--text-body);
+}
+.naw-confidence__line strong { font-weight: var(--font-weight-semibold); }
+.naw-confidence__line--meta {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
 }
 .naw-confidence__alt {
   font-size: var(--text-body-xs);
@@ -2188,20 +3154,32 @@ figcaption {
   align-items: center;
 }
 .reviewer-marks__row:last-child { border-bottom: none; }
+/* Heading inside the reviewer marks panel — replaces inline `style="margin-top:0;"`. */
+.reviewer-marks__heading { margin-top: 0; margin-bottom: var(--space-sm); }
 .mark-buttons {
   display: inline-flex;
   gap: var(--space-xs);
 }
 .mark-button {
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 28px;
+  padding: var(--space-xs) var(--space-sm);
   border: 1px solid var(--color-border);
   background: var(--color-white);
   border-radius: var(--radius);
+  font-family: inherit;
   font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
   cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
-.mark-button--active-ok { background: var(--color-success); color: var(--color-white); border-color: var(--color-success); }
-.mark-button--active-nok { background: var(--color-danger); color: var(--color-white); border-color: var(--color-danger); }
+.mark-button .inline-icon { width: 14px; height: 14px; margin-right: 0; flex-shrink: 0; }
+.mark-button:hover { border-color: var(--color-border-input); background: var(--color-bg-surface); }
+.mark-button--active-ok      { background: var(--color-success); color: var(--color-white); border-color: var(--color-success); }
+.mark-button--active-nok     { background: var(--color-danger);  color: var(--color-white); border-color: var(--color-danger); }
 .mark-button--active-comment { background: var(--color-warning); color: var(--color-gray-900); border-color: var(--color-warning); }
 
 /* Application detail tabs */
@@ -2240,11 +3218,25 @@ figcaption {
   cursor: pointer;
   white-space: nowrap;
 }
-.tab--active {
+.tab--active,
+.tab[aria-selected="true"] {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
 .tab:hover { color: var(--color-text-primary); }
+/* When the tab itself receives keyboard focus, lift the outline slightly
+   below the underline so both affordances are visible at once. */
+.tab:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+  border-radius: var(--radius);
+}
+/* Tabpanel keyboard focus ring — the panel becomes focusable so a Tab
+   from the active tab lands on the content first. */
+[role="tabpanel"]:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
 
 /* History timeline */
 .history-list {
@@ -2470,18 +3462,11 @@ figcaption {
    Mirrors patterns from sibling prototypes (transaction-immo, property-inventory). */
 .property-toolbar {
   display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: "search toggle" "count count";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "search toggle";
   gap: var(--space-md);
   align-items: center;
   margin-bottom: var(--space-lg);
-}
-@media (min-width: 1024px) {
-  .property-toolbar {
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas: "search toggle count";
-    column-gap: var(--space-md);
-  }
 }
 .property-toolbar__search {
   grid-area: search;
@@ -2513,14 +3498,6 @@ figcaption {
   border-radius: var(--radius);
 }
 .property-toolbar__clear:hover { color: var(--color-text-primary); background: var(--color-bg-alt); }
-.property-toolbar__count {
-  grid-area: count;
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  text-align: right;
-}
-
 /* View toggle — segmented control, DS-aligned pill group. */
 .view-toggle {
   grid-area: toggle;
@@ -2624,47 +3601,9 @@ figcaption {
 .property-popup__link  { display: inline-block; margin-top: 6px; font-size: var(--text-body-sm); color: var(--color-primary); font-weight: var(--font-weight-bold); text-decoration: none; }
 .property-popup__link:hover { text-decoration: underline; }
 
-/* Pagination — DS-aligned simple list pattern. Used by gallery + list. */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
-  margin: var(--space-xl) 0 0;
-  flex-wrap: wrap;
-}
-.pagination__list {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.pagination__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  min-height: 36px;
-  padding: var(--space-xs) var(--space-md);
-  font-size: var(--text-body-sm);
-  text-decoration: none;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-white);
-  transition: background var(--transition-fast);
-}
-.pagination__btn:hover { background: var(--color-bg-alt); }
-.pagination__btn--active {
-  background: var(--color-secondary-600);
-  color: var(--color-white);
-  border-color: var(--color-secondary-600);
-  font-weight: var(--font-weight-bold);
-}
-.pagination__btn--active:hover { background: var(--color-secondary-700); color: var(--color-white); }
-.pagination__btn--disabled { opacity: 0.4; pointer-events: none; }
-.pagination__ellipsis { padding: 0 var(--space-xs); color: var(--color-text-muted); }
+/* (Pagination rules consolidated — single canonical block lives in the
+   "DOCUMENTS PAGE — filter bar, document table, pagination" section above.
+   Both #/properties and #/downloads now use that shared block.) */
 
 /* Existing card grid (gallery view) */
 .property-grid {
@@ -2689,10 +3628,30 @@ figcaption {
 }
 .card--property:hover .card--property__title { color: var(--color-primary); }
 .card--property__image {
+  position: relative;
   height: 180px;
   background-size: cover;
   background-position: center;
   background-color: var(--color-bg-alt);
+}
+/* Status badge overlaying the top-left of the property card image —
+   moves the "open issues" / "ok" chip off the body so the SAP line +
+   title + meta have full width. Backdrop sits on a translucent white
+   surface so the badge stays legible over any photo. */
+.card--property__status {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: 1;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+/* Quiet variant for the success state — semi-transparent white surface
+   over the photo so an all-green portfolio doesn't shout. */
+.card--property__status--quiet {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
 }
 .card--property__body {
   padding: var(--space-md) var(--space-lg) var(--space-lg);
@@ -2726,16 +3685,86 @@ figcaption {
   color: var(--color-text-secondary);
   margin-top: var(--space-sm);
 }
-.card--property__footer {
-  margin-top: auto;
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--color-border-light);
+/* Footer dropped the status badge (moved to image overlay); now just hosts
+   the portfolio-category chip (Verwaltungseinheit). Left-aligned. */
+.card--property__category {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+
+/* ── PROPERTY DETAIL ─────────────────────────────────────────────────────
+   Banner: full-width image with a gradient-overlay caption box at the
+   bottom. Replaces ~6 inline-styled wrappers and gradient declarations. */
+.property-banner {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 280px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-bg-alt);
+  margin-bottom: var(--space-xl);
+}
+.property-banner__caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--space-lg);
+  color: var(--color-white);
+  background: linear-gradient(transparent, var(--color-black-70));
+}
+.property-banner__sap {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--text-body-xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+.property-banner__title {
+  margin: 0;
+  font-size: var(--text-h1);
+  color: var(--color-white);
+  line-height: var(--line-height-tight);
+}
+.property-banner__address {
+  margin: var(--space-xs) 0 0;
+  opacity: 0.9;
+}
+
+/* Section block — left column of the property-detail two-column layout.
+   Replaces ad-hoc `style="margin-bottom: var(--space-2xl)"`. */
+.property-section { margin-bottom: var(--space-2xl); }
+
+/* Aside actions stack: each action button on its own row. */
+.property-aside__card { margin-bottom: var(--space-lg); }
+.property-aside__actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-sm);
 }
+
+/* `.contact-dl` — definition list inside the contacts card. Label above
+   name, label is secondary text and name is semibold. Replaces a stack
+   of inline `style="font-size:...;color:...;font-weight:..."` blocks. */
+.contact-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+.contact-dl__row { display: contents; }
+.contact-dl dt {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+.contact-dl dd {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* `.text-secondary` — small utility for muted body copy. Used in empty
+   states inside the property-detail page. */
+.text-secondary { color: var(--color-text-secondary); }
 
 /* Property detail layout (sidebar) */
 .property-layout {

@@ -1,0 +1,570 @@
+/* ==========================================================================
+   SHELL.JS — federal chrome around every page.
+
+   What lives here:
+     • renderShell — top-bar / brand bar / navbar / breadcrumb (the federal
+       chrome above <main>)
+     • renderFooter — the bbl.admin.ch-style footer
+     • renderShareBar — the small Teilen/Drucken bar above detail pages
+     • Language switcher (toggleLang, pickLang) — listbox + keyboard support
+     • Search header (toggleSearch, submitSearch) — collapsing search input
+     • Burger menu (toggleBurger) — mobile nav toggle
+     • Dropdown nav menus (toggleNavMenu) — anchored under the trigger word
+     • Copy-link / fallback (copyShareLink, fallbackCopy)
+     • shell() — convenience wrapper that mounts the chrome + reserves
+       a #page-body container for the route renderer to fill.
+     • SERVICES_MENU, INFO_LINK, publicNavItems, authNavItems — the data
+       behind the navbar (kept here because they're closed-set chrome content,
+       not domain data).
+
+   Coupling notes:
+     • Reads `state` from ./state.js (renderShell uses state.user for the
+       auth pill; authNavItems uses state.user.activeRole).
+     • Reads helpers from ./lib.js (toast, icon, renderShortcutOverlay).
+     • Inline `onclick="window.portal.X()"` handlers (login, toggleLang,
+       toggleNavMenu, pickLang, toggleSearch, submitSearch, toggleBurger,
+       copyShareLink) keep working because app.js re-exposes shell.js's
+       exports on `window.portal`. The router seam — `navigate` —
+       is read off `window.portal` for the same reason; a dedicated
+       router module is a future refactor.
+   ========================================================================== */
+
+import { state } from './state.js';
+import { toast, icon, renderShortcutOverlay } from './lib.js';
+
+// ── NAV-MENU CONTENT (closed-set chrome data — not domain data) ───────────
+// Canonical service catalogue — all BBL services tenants can request.
+// Surface: the "Dienstleistungen" nav-menu dropdown.
+// Source: REQUIREMENTS.md §1.3 pilot + §4.1 Case A roadmap (REQ-FA-*) +
+// FUNC-LP-007 self-service downloads / training.
+// Services (login required) — appear only in authenticated nav.
+const SERVICES_MENU = {
+  id: 'services',
+  label: 'Dienstleistungen',
+  type: 'dropdown',
+  items: [
+    { href: '#/services',  label: 'Übersicht',               desc: 'Alle Dienstleistungen im Überblick' },
+    { href: '#/wizard/1',  label: 'Bedarf anmelden',         desc: 'Unterbringung, Büro, Auslandvertretung' },
+    { href: '#/repair',    label: 'Schaden melden',          desc: 'Reparaturen, Sanitär, Schliesssystem' },
+    { href: '#/moves',     label: 'Umzug & Sonderreinigung', desc: 'Transport- und Reinigungsanfragen' },
+    { href: 'https://bbl-dres.github.io/workspace-management/', label: 'Möbel bestellen', desc: 'Standard- und Spezialmobiliar', external: true },
+    { href: '#/downloads', label: 'Pläne & Dokumente',       desc: 'Grundrisse, Merkblätter, Schulungen' },
+    { href: '#/training',  label: 'Schulungen',              desc: '„Mieterportal kompakt" und weitere' },
+  ]
+};
+
+// Arbeitsinstrumente und Informationen (public, always visible) — single
+// page at #/info with sticky TOC. Pattern: armasuisse Immo-Portal +
+// kbob-fdk "Handbuch & Downloads".
+const INFO_LINK = { id: 'info', href: '#/info', label: 'Arbeitsinstrumente und Informationen' };
+
+export function publicNavItems() {
+  return [
+    { id: 'start', href: '#/', label: 'Start' },
+    INFO_LINK,
+  ];
+}
+
+export function authNavItems() {
+  const role = state.user.activeRole;
+  if (role === 'GS-Reviewer') {
+    return [
+      { id: 'queue', href: '#/queue', label: 'Pendenzen' },
+      { id: 'inbox', href: '#/inbox', label: 'Anträge der VE' },
+      SERVICES_MENU,
+      INFO_LINK,
+    ];
+  }
+  if (role === 'LBO' || !role) {
+    return [
+      { id: 'home',       href: '#/home',       label: 'Start' },
+      SERVICES_MENU,
+      { id: 'properties', href: '#/properties', label: 'Liegenschaften' },
+      { id: 'inbox',      href: '#/inbox',      label: 'Meine Anträge' },
+      INFO_LINK,
+    ];
+  }
+  return [
+    { id: 'home', href: '#/home', label: 'Start' },
+    SERVICES_MENU,
+    INFO_LINK,
+  ];
+}
+
+
+// ── FEDERAL SHELL ──────────────────────────────────────────────────────────
+export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcrumb = [], navItems = [] } = {}) {
+  // Anmelden lives in the top-bar (dark utility bar), not the brand bar.
+  // Plain white text per CD pattern — not a red filled button.
+  const authPill = state.user
+    ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="Profil von ${state.user.name}">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+         ${state.user.name}
+       </a>`
+    : `<button class="top-bar__link top-bar__link--user" type="button" onclick="window.portal.login()">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+         Anmelden
+       </button>`;
+
+  const navHtml = navItems.map((item, i) => {
+    const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
+    if (item.type === 'dropdown') {
+      return `
+        <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
+                type="button"
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-controls="navMenu-${item.id}"
+                data-menu="${item.id}"
+                onclick="window.portal.toggleNavMenu('${item.id}')">
+          ${item.label}
+          <svg class="main-navigation__chevron" viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" focusable="false"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+        </button>
+      `;
+    }
+    return `<a class="main-navigation__link ${activeCls}" href="${item.href}">${item.label}</a>`;
+  }).join('');
+
+  // Mobile-only meta links rendered at the foot of the burger menu so
+  // Kontakt / Hilfe stay reachable when the top-header meta nav is
+  // hidden at narrow widths.
+  const mobileMetaHtml = `
+    <div class="main-navigation__mobile-meta" aria-label="Meta-Navigation (mobil)">
+      <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
+      <a class="main-navigation__link" href="#/help">Hilfe</a>
+    </div>
+  `;
+
+  // Dropdown panels (CD Bund pattern: constrained card under the trigger,
+  // single-line label rows, red left-bar on the active route).
+  const currentHash = location.hash || '#/';
+  const isActiveSub = (href) => {
+    if (href === '#/services')  return currentHash === '#/services';
+    if (href === '#/wizard/1')  return currentHash.startsWith('#/wizard');
+    if (href === '#/downloads') return currentHash.startsWith('#/downloads');
+    return currentHash === href || currentHash.startsWith(href + '/');
+  };
+  const navMenus = navItems.filter(i => i.type === 'dropdown').map(item => `
+    <div class="nav-menu" id="navMenu-${item.id}" role="region" aria-label="${item.label}" hidden>
+      <div class="nav-menu__inner">
+        <button class="nav-menu__close" type="button"
+                aria-label="Menü schliessen"
+                onclick="window.portal.toggleNavMenu('${item.id}', false)">
+          <span>Schliessen</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h2 class="nav-menu__heading">${item.label}</h2>
+        <ul class="nav-menu__list">
+          ${(item.items || []).map(sub => {
+            const isExternal = sub.external === true;
+            const extraAttrs = isExternal ? 'target="_blank" rel="noopener"' : '';
+            const extraClass = isExternal ? 'nav-menu__link link--external' : 'nav-menu__link';
+            return `
+              <li class="nav-menu__item ${isActiveSub(sub.href) ? 'nav-menu__item--active' : ''}">
+                <a class="${extraClass}" href="${sub.href}" ${extraAttrs}
+                   onclick="window.portal.toggleNavMenu('${item.id}', false)">
+                  ${sub.label}
+                </a>
+              </li>
+            `;
+          }).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+
+  // Schema.org BreadcrumbList microdata mirrors what bbl/admin.ch
+  // serves publicly. Each entry is a ListItem with `position` (1-based)
+  // and `name`; the anchor's `href` plays the `item` role.
+  const breadcrumbHtml = breadcrumb.length
+    ? `<nav class="breadcrumb" aria-label="Brotkrumen">
+         <ol class="breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">
+           ${breadcrumb.map((b, i, a) => `
+             <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+               ${i === a.length - 1
+                 ? `<span aria-current="page" itemprop="name">${b.label}</span>`
+                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a><span class="breadcrumb__sep" aria-hidden="true">›</span>`}
+               <meta itemprop="position" content="${i + 1}">
+             </li>
+           `).join('')}
+         </ol>
+       </nav>`
+    : '';
+
+  return `
+    <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+
+    <header class="site-header" role="banner">
+      <div class="top-bar">
+        <div class="top-bar__inner">
+          <a class="top-bar__authorities" href="https://www.admin.ch/gov/de/start/bundesbehoerden.html"
+             target="_blank" rel="noopener" title="Alle Schweizer Bundesbehörden (admin.ch)">
+            <span>Alle Schweizer Bundesbehörden</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          </a>
+          <span class="top-bar__prototype-notice">Prototyp — nur zur Demonstration</span>
+          <div class="top-bar__actions">
+            ${authPill}
+            <div class="language-switcher" id="langSwitch">
+              <button class="top-bar__lang" aria-label="Sprache wählen" aria-haspopup="listbox" aria-expanded="false"
+                      onclick="window.portal.toggleLang()">
+                <span id="langCurrent">DE</span>
+                <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+              </button>
+              <ul class="language-switcher__dropdown" role="listbox" aria-label="Sprache">
+                <li role="presentation"><button class="language-switcher__option language-switcher__option--active" role="option" aria-selected="true" data-lang="DE" lang="de" onclick="window.portal.pickLang('DE')">DE</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="FR" lang="fr" onclick="window.portal.pickLang('FR')">FR</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="IT" lang="it" onclick="window.portal.pickLang('IT')">IT</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="top-header">
+        <div class="top-header__inner">
+          <a class="top-header__left" href="#/"
+             aria-label="Startseite — Bundesamt für Bauten und Logistik BBL · ${deptSub}">
+            <img class="top-header__bundmark" src="assets/BundLogo.svg"
+                 alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra">
+            <span class="top-header__divider" aria-hidden="true"></span>
+            <span class="top-header__dept">
+              <span class="top-header__dept-name"><strong>Bundesamt für Bauten und Logistik BBL</strong></span>
+              <span class="top-header__dept-sub">${deptSub}</span>
+            </span>
+          </a>
+          <div class="top-header__right">
+            <nav class="top-header__meta" aria-label="Meta-Navigation">
+              <a class="top-header__meta-link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
+              <a class="top-header__meta-link" href="#/help">Hilfe</a>
+            </nav>
+            <div class="top-header__actions">
+              <div class="header-search" id="headerSearch">
+                <button class="header-search__toggle" type="button"
+                        aria-expanded="false" aria-controls="headerSearchForm"
+                        onclick="window.portal.toggleSearch(true)">
+                  <span>Suche</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                </button>
+                <form class="header-search__form" id="headerSearchForm" role="search" aria-label="Portal durchsuchen"
+                      onsubmit="event.preventDefault(); window.portal.submitSearch(this);">
+                  <input class="header-search__input" id="headerSearchInput" type="search"
+                         name="q"
+                         placeholder="Suchbegriff eingeben" aria-label="Suchbegriff eingeben"
+                         autocomplete="off"
+                         onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
+                  <button class="header-search__submit" type="submit" aria-label="Suchen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="navbar" aria-label="Hauptnavigation">
+        <div class="navbar__inner">
+          <button class="burger" type="button"
+                  aria-label="Menü öffnen"
+                  aria-expanded="false"
+                  aria-controls="mainNavigation"
+                  onclick="window.portal.toggleBurger();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="main-navigation" id="mainNavigation">${navHtml}${mobileMetaHtml}</div>
+        </div>
+        ${navMenus}
+      </nav>
+    </header>
+
+    ${breadcrumbHtml}
+
+    <main id="main" tabindex="-1"></main>
+  `;
+}
+
+
+// ── FOOTER ────────────────────────────────────────────────────────────────
+// Content + structure matches bbl.admin.ch/de footer pattern:
+// brand column (motto), Weitere Informationen (link list with arrows),
+// Prototyp meta column, then a narrow darker strip with AGB / Rechtliches /
+// Barrierefreiheit, plus a back-to-top button anchored top-right.
+export function renderFooter() {
+  return `
+    <footer class="app-footer" role="contentinfo">
+      <button class="app-footer__top-btn" type="button" aria-label="Zum Seitenanfang"
+              onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg>
+      </button>
+      <div class="footer-information">
+        <div class="footer-information__inner">
+          <div class="footer-information__col footer-information__col--brand">
+            <h3 class="footer-information__brand">BBL</h3>
+            <p class="footer-information__motto">Nachhaltig, partnerschaftlich und vorbildlich</p>
+            <p class="footer-information__prototype-warning" role="note">
+              Diese Anwendung ist ein Prototyp. Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration.
+            </p>
+          </div>
+
+          <div class="footer-information__col footer-information__col--links">
+            <h3 class="footer-information__heading">Weitere Informationen</h3>
+            <ul class="footer-information__list">
+              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+            </ul>
+          </div>
+
+          <div class="footer-information__col footer-information__col--links">
+            <h3 class="footer-information__heading">Prototyp</h3>
+            <ul class="footer-information__list">
+              <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="docs/REQUIREMENTS.md" target="_blank">Anforderungskatalog <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="docs/DESIGNGUIDE.md" target="_blank">Design-Guide <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="app-footer__bottom">
+        <div class="app-footer__bottom-inner">
+          <a class="app-footer__bottom-link" href="https://www.bkb.admin.ch/bkb/de/home/themen/agb.html" target="_blank" rel="noopener">Allgemeine Geschäftsbedingungen des Bundes</a>
+          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">Rechtliches</a>
+          <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">Barrierefreiheit in der Bundesverwaltung</a>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
+
+// ── NAV-MENU DROPDOWN (anchored under trigger word) ───────────────────────
+// Click-outside + Esc closers + viewport-resize repositioner live as
+// module-load side effects below the function. The repositioner is
+// rAF-debounced so continuous-resize doesn't thrash layout.
+let _navMenuRaf = null;
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.nav-menu, .main-navigation__link--has-menu')) return;
+  document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+    const id = m.id.replace('navMenu-', '');
+    toggleNavMenu(id, false);
+  });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+    const id = m.id.replace('navMenu-', '');
+    toggleNavMenu(id, false);
+  });
+});
+window.addEventListener('resize', () => {
+  if (_navMenuRaf) return;
+  _navMenuRaf = requestAnimationFrame(() => {
+    _navMenuRaf = null;
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      const trigger = document.querySelector(`[data-menu="${id}"]`);
+      const navbar = trigger && trigger.closest('.navbar');
+      if (!trigger || !navbar) return;
+      const navRect = navbar.getBoundingClientRect();
+      const tRect = trigger.getBoundingClientRect();
+      const panelW = m.offsetWidth;
+      let leftPx = tRect.left - navRect.left;
+      if (leftPx + panelW > navRect.width - 12) {
+        leftPx = Math.max(12, navRect.width - panelW - 12);
+      }
+      m.style.left = leftPx + 'px';
+    });
+  });
+});
+export function toggleNavMenu(id, force) {
+  const panel = document.getElementById('navMenu-' + id);
+  const trigger = document.querySelector(`[data-menu="${id}"]`);
+  if (!panel) return;
+  const isOpen = !panel.hasAttribute('hidden');
+  const next = (typeof force === 'boolean') ? force : !isOpen;
+  // Close any other open nav menus
+  document.querySelectorAll('.nav-menu').forEach(m => {
+    m.setAttribute('hidden', '');
+    m.classList.remove('open');
+  });
+  document.querySelectorAll('.main-navigation__link--has-menu').forEach(t => t.setAttribute('aria-expanded', 'false'));
+  if (next) {
+    panel.removeAttribute('hidden');
+    panel.classList.add('open');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'true');
+      // Anchor the dropdown panel under the trigger word, like swisstopo.
+      // The .navbar is position:relative, so we offset from its left edge.
+      const navbar = trigger.closest('.navbar');
+      if (navbar) {
+        const navRect = navbar.getBoundingClientRect();
+        const tRect = trigger.getBoundingClientRect();
+        const panelW = panel.offsetWidth;
+        let leftPx = tRect.left - navRect.left;
+        // Clamp so the panel never goes past the navbar right edge
+        if (leftPx + panelW > navRect.width - 12) {
+          leftPx = Math.max(12, navRect.width - panelW - 12);
+        }
+        panel.style.left = leftPx + 'px';
+        panel.style.right = 'auto';
+      }
+    }
+  }
+}
+
+
+// ── SHARE BAR (above detail pages: Teilen + Drucken) ──────────────────────
+export function renderShareBar() {
+  return `
+    <div class="share-bar" role="toolbar" aria-label="Seite teilen oder drucken">
+      <button class="share-bar__btn" type="button" aria-label="Link kopieren"
+              onclick="window.portal.copyShareLink()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>Teilen</span>
+      </button>
+      <button class="share-bar__btn" type="button" aria-label="Seite drucken"
+              onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span>Drucken</span>
+      </button>
+    </div>
+  `;
+}
+
+export function copyShareLink() {
+  const url = location.href;
+  if (navigator.share) {
+    navigator.share({ title: document.title, url }).catch(() => fallbackCopy(url));
+  } else {
+    fallbackCopy(url);
+  }
+}
+function fallbackCopy(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => toast('Link kopiert: ' + text, 'success'),
+      () => toast('Kopieren nicht möglich — bitte Adresse manuell aus dem Browser kopieren.')
+    );
+  } else {
+    toast('Link: ' + text);
+  }
+}
+
+
+// ── LANGUAGE SWITCHER (top-bar listbox) ───────────────────────────────────
+export function toggleLang(forceOpen) {
+  const el = document.getElementById('langSwitch');
+  const btn = el && el.querySelector('.top-bar__lang');
+  if (!el) return;
+  const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !el.classList.contains('open');
+  el.classList.toggle('open', willOpen);
+  if (btn) btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  // When opening, move focus to the currently active option so arrow-key
+  // navigation has a starting point. When closing, return focus to the
+  // trigger so the keyboard user stays oriented.
+  if (willOpen) {
+    const active = el.querySelector('.language-switcher__option--active') || el.querySelector('.language-switcher__option');
+    if (active) setTimeout(() => active.focus(), 0);
+  } else if (btn && document.activeElement && el.contains(document.activeElement)) {
+    btn.focus();
+  }
+}
+export function pickLang(code) {
+  document.querySelectorAll('.language-switcher__option').forEach(o => {
+    const isActive = o.getAttribute('data-lang') === code;
+    o.classList.toggle('language-switcher__option--active', isActive);
+    o.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+  const current = document.getElementById('langCurrent');
+  if (current) current.textContent = code;
+  toggleLang(false);
+  if (code !== 'DE') {
+    toast(`${code}-Lokalisation noch nicht implementiert — Anzeige bleibt auf DE.`, '');
+  }
+}
+
+// Click-outside + Esc close + Arrow-key navigation for the language
+// listbox. Keeps the dropdown reachable to keyboard-only users without
+// bolting on a library. Side-effect on module load.
+document.addEventListener('click', (e) => {
+  const el = document.getElementById('langSwitch');
+  if (!el || !el.classList.contains('open')) return;
+  if (e.target.closest('#langSwitch')) return;
+  toggleLang(false);
+});
+document.addEventListener('keydown', (e) => {
+  const el = document.getElementById('langSwitch');
+  if (!el || !el.classList.contains('open')) return;
+  const opts = Array.from(el.querySelectorAll('.language-switcher__option'));
+  const idx = opts.indexOf(document.activeElement);
+  if (e.key === 'Escape') { e.preventDefault(); toggleLang(false); return; }
+  if (e.key === 'ArrowDown') { e.preventDefault(); (opts[(idx + 1) % opts.length] || opts[0]).focus(); }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); (opts[(idx - 1 + opts.length) % opts.length] || opts[opts.length - 1]).focus(); }
+  if (e.key === 'Home')      { e.preventDefault(); opts[0] && opts[0].focus(); }
+  if (e.key === 'End')       { e.preventDefault(); opts[opts.length - 1] && opts[opts.length - 1].focus(); }
+});
+
+
+// ── HEADER SEARCH (collapsing) ────────────────────────────────────────────
+export function submitSearch(form) {
+  const q = (form.querySelector('input[name="q"]').value || '').trim();
+  if (!q) return;
+  toggleSearch(false);
+  // Router seam: navigate lives in app.js. Read via window.portal so we
+  // don't form a circular import. A dedicated router.js module is a future
+  // refactor.
+  window.portal.navigate('#/search?q=' + encodeURIComponent(q));
+}
+
+export function toggleSearch(open) {
+  const el = document.getElementById('headerSearch');
+  const toggle = document.querySelector('.header-search__toggle');
+  const input = document.getElementById('headerSearchInput');
+  if (!el) return;
+  if (open) {
+    el.classList.add('open');
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('tabindex', '-1');   // hide collapsed trigger from tab order while open
+    }
+    if (input) setTimeout(() => input.focus(), 50);
+  } else {
+    el.classList.remove('open');
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.removeAttribute('tabindex');
+    }
+  }
+}
+
+
+// ── BURGER MENU (mobile nav toggle) ───────────────────────────────────────
+// Keep the visible icon and the aria-expanded state in sync. Returning
+// focus to the burger on close mirrors the language switcher behaviour
+// and keeps the keyboard user oriented.
+export function toggleBurger(forceOpen) {
+  const nav = document.getElementById('mainNavigation');
+  const btn = document.querySelector('.burger');
+  if (!nav || !btn) return;
+  const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !nav.classList.contains('open');
+  nav.classList.toggle('open', willOpen);
+  btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  btn.setAttribute('aria-label', willOpen ? 'Menü schliessen' : 'Menü öffnen');
+}
+
+
+// ── SHELL WRAPPER (mounts the chrome + reserves #page-body) ──────────────
+// Called by every route renderer. Returns the <main> element so the
+// renderer can use it for focus management.
+export function shell({ activeNav = '', breadcrumb = [], deptSub = 'Mieterportal' } = {}) {
+  const root = document.getElementById('root');
+  const navItems = state.user ? authNavItems() : publicNavItems();
+  root.innerHTML = renderShell({ deptSub, activeNav, breadcrumb, navItems })
+                 + '<div id="page-body"></div>'
+                 + renderFooter()
+                 + renderShortcutOverlay();
+  return document.getElementById('main');
+}

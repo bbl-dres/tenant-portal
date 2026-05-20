@@ -315,7 +315,7 @@ libraries.
 | Entity EN              | Entity DE                  | Description                                                                                                                          | Status         | File                                                  |
 | ---------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
 | [**Dossier**](#61-dossier-geschäftsfall-future) | Geschäftsfall | **GEVER** aggregating container — collects all Documents that belong to one business case (e.g. all artefacts of one Bedarfsmeldung: WiBe, Rechtsgrundlage, Begründung, Decision, correspondence). Carries its own classification, retention period, and lifecycle (`opened` → `active` → `closed` → `archived`). Anchored in **GEVER** (Swiss federal records-management standard) and ISO 15489. | Future | — |
-| [**Document**](#62-document-dokument-planned) | Dokument | Canonical records entity. Subsumes **lease contracts (Mietvertrag)**, floor plans, permits, certificates, training manuals, and Application attachments. Anchored in ISO 15489 / eCH-0002. A Document optionally belongs to one Dossier (`dossierId` FK) and links polymorphically to Building / Floor / Space / Tenancy / Application via `linkedTo`. | Planned | `data/documents.json` (planned) |
+| [**Document**](#62-document-dokument) | Dokument | Canonical records entity. Subsumes **lease contracts (Mietvertrag)**, floor plans, permits, certificates, training manuals, and Application attachments. Anchored in ISO 15489 / eCH-0002. A Document optionally belongs to one Dossier (`dossierId` FK) and links polymorphically to Building / Floor / Space / Tenancy / Application via `linkedTo`. | Implemented | [`data/documents.json`](../data/documents.json) |
 | [**DocumentVersion**](#63-future-entities-in-this-domain) | Dokumentversion | Versioned + signed instance of a Document. Triggered by signature-service integration (ZertES / SwissID). | Future | — |
 
 #### Organisational data (§ 7)
@@ -904,9 +904,9 @@ between agencies is governed by **eCH-0039**; long-term archival by
 A `Document` (§ 6.2) optionally carries a `dossierId` FK referencing one
 Dossier; one Dossier holds many Documents.
 
-### 6.2 Document (Dokument) [Planned]
+### 6.2 Document (Dokument)
 
-**File:** `data/documents.json` (planned).
+**File:** [`data/documents.json`](../data/documents.json)
 
 Canonical records entity. Subsumes **lease contracts (Mietvertrag)**, floor
 plans, permits, certificates, training manuals, and per-Application
@@ -1141,13 +1141,14 @@ attached to a Building. Standard anchor: IBPDI Certificate (future).
 
 | File                                                  | Records (mock) | Entities held                                                  |
 | ----------------------------------------------------- | -------------- | -------------------------------------------------------------- |
-| [`data/applications.json`](../data/applications.json)   | 5              | Application (with embedded Attachment / Condition / HistoryEntry) |
-| [`data/tenancies.json`](../data/tenancies.json)         | 3              | Tenancy                                                          |
+| [`data/applications.json`](../data/applications.json)   | 7              | Application (with embedded Attachment / Condition / HistoryEntry) |
+| [`data/tenancies.json`](../data/tenancies.json)         | 6              | Tenancy                                                          |
 | [`data/users.json`](../data/users.json)                 | 5              | User                                                             |
 | [`data/reference-data.json`](../data/reference-data.json) | 1              | ReferenceData (single object)                                     |
 | [`data/news.json`](../data/news.json)                   | 10             | NewsArticle                                                      |
-| [`data/buildings.geojson`](../data/buildings.geojson)   | 5              | Building (GeoJSON `FeatureCollection` of `Point` features; canonical record in lead system) |
-| [`data/downloads.json`](../data/downloads.json)         | 1              | UI download-link catalogues (`documents`, `regulations`, `strategies`, `training`, `propertyDetail`). Not a canonical schema entity — extracted from the JS to keep the codebase free of hardcoded reference content. |
+| [`data/buildings.geojson`](../data/buildings.geojson)   | 10             | Building (GeoJSON `FeatureCollection` of `Point` features; canonical record in lead system) |
+| [`data/documents.json`](../data/documents.json)         | 115            | Document (metadata + `linkedTo[]`; file blobs live in the records-management system). Type taxonomy inspired by the **KBOB IPB Dokumenttypenkatalog**. |
+| [`data/downloads.json`](../data/downloads.json)         | 1              | UI download-link catalogues (`regulations`, `strategies`, `training`, `propertyDetail`). Not a canonical schema entity — extracted from the JS to keep the codebase free of hardcoded reference content. |
 
 ### 11.2 Planned files
 
@@ -1155,7 +1156,6 @@ attached to a Building. Standard anchor: IBPDI Certificate (future).
 | -------------------------- | --------------------------------------------------------------------- |
 | `data/floors.geojson`      | Floor (GeoJSON `FeatureCollection` of `Polygon` features, floor outlines) |
 | `data/spaces.geojson`      | Space (GeoJSON `FeatureCollection` of `Polygon` features, room footprints) |
-| `data/documents.json`      | Document (metadata + `linkedTo[]`; file blobs live in the records-management system) |
 | `data/area-measurements.json` | AreaMeasurement (one record per Building/Floor/Space × `areaType` × `standard`) |
 
 ---
