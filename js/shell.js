@@ -38,7 +38,9 @@ import { toast, icon, renderShortcutOverlay } from './lib.js';
 // Source: REQUIREMENTS.md §1.3 pilot + §4.1 Case A roadmap (REQ-FA-*) +
 // FUNC-LP-007 self-service downloads / training.
 // Services (login required) — appear only in authenticated nav.
-const SERVICES_MENU = {
+// Exported so #/services can also render this list as a card grid via
+// `renderServicesOverview` in app.js without duplicating the catalogue.
+export const SERVICES_MENU = {
   id: 'services',
   label: 'Dienstleistungen',
   type: 'dropdown',

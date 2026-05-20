@@ -148,7 +148,7 @@ Everything observable is closed. Full list in §16.
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 6.1 | `.notification-banner` covers success / warning / danger variants. CD Bund `notification.postcss` adds `info` and `alert` variants — `info` is genuinely missing (e.g. for "Antrag automatisch entwertet nach 30 Tagen" type notices). | low | ◻ |
+| 6.1 | **Resolved (info variant)**: added `.notification-banner--info` (teal-tinted, federal canonical) — used by the search-results "Haben Sie nicht gefunden …" callout. `alert-banner` (full-bleed page-top critical messages) is still a separate CD component not yet shipped — kept as ◻ for that subset. [styles.css:1506-1515](../css/styles.css#L1506-L1515) | low | ◐ |
 | 6.2 | No `.alert-banner` component. CD Bund distinguishes `notification-banner` (in-page) from `alert-banner` (full-bleed page-top critical messages, e.g. maintenance windows). For a prototype this can wait; flag for production. | low | ◻ |
 | 6.3 | `.toast` host + `toast()` API in [lib.js:262-289](../js/lib.js#L262-L289) — correct `role="region"` + `aria-live="polite"`. Variants `--success` + (implicit) error. CD Bund's `toast-message.postcss` adds an info variant. | low | ◻ |
 | 6.4 | `.modal` size variants `--sm`/`--md`/`--lg`/`--xl`/`--auto` with fixed px widths. CD Bund uses `max-w-screen-*` (breakpoint-based). Portal values are more conservative — modals don't stretch on wide desktop, which suits the form-heavy content. Functionally aligned. | — | ✓ aligned |
@@ -867,14 +867,14 @@ Our current `renderSearchResults` at [app.js:206](../js/app.js#L206):
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 19.1.1 | **No hero search section with re-displayed input**. CD shows a prominent search field at the top of the results page (with the current query pre-filled) so users can refine without going back to the global nav. Ours only has the breadcrumb + H1. | medium | ◻ |
-| 19.1.2 | **Section lacks the `bg--secondary-50` tint**. CD places the search hero on the federal cool-blue-gray (we map this to `.section--alt`). Visually separates the search input from the result list below. | medium | ◻ |
-| 19.1.3 | **Result rows are minimal text-only `<li>`** — no image, no rich MetaInfo, no description, no "Weiterlesen" affordance. CD uses `<Card type="list">` with image + meta + title + content + footer action. Our rows visually under-sell each result. | **high** | ◻ |
-| 19.1.4 | **Result row markup doesn't use `.meta-info` BEM** — we have `<strong>type</strong> · date` flat string. After §18.1 we have a proper `.meta-info__item` pattern that should be used here. | low | ◻ |
+| 19.1.1 | **Resolved**: added `.search-hero` section with re-displayed search input + a "Suchen" submit. Initial focus on the input lands the cursor at the end of the existing query for fast refinement. [app.js renderSearchResults](../js/app.js#L211), [styles.css search-hero](../css/styles.css) | medium | ✓ |
+| 19.1.2 | **Resolved**: hero now sits on `.section--alt` (federal cool-blue-gray) above the white `.section` carrying the results. Two-tone matches CD canonical. | medium | ✓ |
+| 19.1.3 | **Resolved**: result rows promoted to card-list items — `.search-results__link` is a flex row with `.search-results__body` (meta-info above title + lead) and a chevron-right `.search-results__arrow` on the right that translates on hover. Light-blue-gray hover bg + primary-coloured title & arrow on hover. | **high** | ✓ |
+| 19.1.4 | **Resolved**: rows use `.meta-info` / `.meta-info__item` BEM with a `.search-results__type` modifier that picks out the entity type as a small uppercase tracked label in primary red. | low | ✓ |
 | 19.1.5 | **No "Sortierung" controls** (CD: Radio for Relevanz / Datum). Acceptable for a prototype with relevance-only ordering, but worth flagging. | low | — defer |
 | 19.1.6 | **No tabs to filter result types**. CD uses tabs (Webseiten / Dokumente). We use grouped sections side-by-side, which is also a valid federal pattern (matches kbob's grouped search). Document as deliberate. | — | — deliberate |
-| 19.1.7 | **No-results state is bare** — "Keine Treffer" + one tip-line. CD shows a richer no-results with bold search term in H2, "Tipps zur Suche" list (Schreibweise / allgemeineren Begriff / weniger Begriffe), and a "Hinweis" paragraph. | medium | ◻ |
-| 19.1.8 | **No bottom "Kontakt" notification**. CD shows an info-notification at the foot of the results: "Haben Sie nicht gefunden wonach Sie suchen?" with a link to a contact form. Useful federal pattern. | low | ◻ |
+| 19.1.7 | **Resolved**: replaced the bare `.empty-state` with a CD-canonical `.search-no-results` block: bold search term in the H2 lead, "Tipps zur Suche" sub-heading + bulleted list (Schreibweise / allgemeineren Begriff / weniger Suchbegriffe / Arbeitsinstrumente), and a "Hinweis" sub-heading + paragraph explaining the search scope. | medium | ✓ |
+| 19.1.8 | **Resolved**: added a bottom `.notification-banner--info` callout — "Haben Sie nicht gefunden, wonach Sie suchen?" with a link to the BBL Kontaktformular. Required adding the `--info` variant to the notification-banner system (federal teal-tinted; closes §6.1 too). | low | ✓ |
 | 19.1.9 | **No per-result image/thumbnail**. CD `SearchResultsList` Cards include optional images. For news / property results we have image data available; surfacing it would lift the visual weight. | low | — defer |
 | 19.1.10 | **Per-group cap + "+X weitere" link** (our pattern) vs CD's tabbed list + pagination. Our pattern is the kbob/swisstopo deliberate divergence (cross-ref §5.6 — applied during pagination spread). Keep. | — | ✓ deliberate |
 | 19.1.11 | **Section background variants** — CD uses two sections (hero `bg--secondary-50` + content `section--default`) to separate input from results. We use one. | medium | — covered by 19.1.2 |

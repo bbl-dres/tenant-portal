@@ -37,7 +37,7 @@ import { state, loadData } from './state.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
   toggleNavMenu, toggleLang, pickLang, submitSearch, toggleSearch, toggleBurger,
-  shell, publicNavItems, authNavItems,
+  shell, publicNavItems, authNavItems, SERVICES_MENU,
 } from './shell.js';
 import {
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,

@@ -1508,6 +1508,14 @@ figcaption {
   color: var(--color-success);
   border-left-color: var(--color-success);
 }
+/* `--info` — federal teal-tinted variant. CD Bund `Notification` ships
+   an info variant alongside success/warning/danger; used on the search-
+   results page for the "Haben Sie nicht gefunden …" callout. */
+.notification-banner--info {
+  background: var(--color-info-light);
+  color: var(--color-info);
+  border-left-color: var(--color-info);
+}
 .notification-banner__wrapper { display: flex; flex: 1; gap: var(--space-md); align-items: center; }
 .notification-banner__text { margin: 0; flex: 1; }
 .notification-banner__actions { display: flex; gap: var(--space-sm); }
