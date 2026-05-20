@@ -29,10 +29,5 @@
     { "title": "Modul 3 — Bedarfsmeldung erfassen",         "subtitle": "Mieterportal BBL", "format": "PDF", "size": "2.1 MB", "date": "15.04.2026" },
     { "title": "Modul 4 — NAW und Flächenstandards",        "subtitle": "Mieterportal BBL", "format": "PDF", "size": "1.1 MB", "date": "15.04.2026" },
     { "title": "Modul 5 — Greenfield, BK-Bypass und SEM",   "subtitle": "Mieterportal BBL", "format": "PDF", "size": "230 KB", "date": "15.04.2026" }
-  ],
-  "propertyDetail": [
-    { "titleTemplate": "Grundriss {floorLabel}",      "subtitle": "Plan",    "format": "PDF", "size": "4.2 MB", "date": "15.03.2026" },
-    { "title": "Mietvertrag (Auszug)",                "subtitle": "Vertrag", "format": "PDF", "size": "1.1 MB", "date": "01.07.2024" },
-    { "title": "Sicherheits- & Brandschutzkonzept",   "subtitle": "Konzept", "format": "PDF", "size": "2.4 MB", "date": "22.11.2025" }
   ]
 }

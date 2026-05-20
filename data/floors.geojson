@@ -1,0 +1,1038 @@
+{
+  "type": "FeatureCollection",
+  "name": "BBL Floors",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2010-EG",
+        "buildingId": "BLD-2010",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4454,
+              46.94795
+            ],
+            [
+              7.4464,
+              46.94795
+            ],
+            [
+              7.4464,
+              46.948249999999994
+            ],
+            [
+              7.4454,
+              46.948249999999994
+            ],
+            [
+              7.4454,
+              46.94795
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2010-1OG",
+        "buildingId": "BLD-2010",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4454,
+              46.94795
+            ],
+            [
+              7.4464,
+              46.94795
+            ],
+            [
+              7.4464,
+              46.948249999999994
+            ],
+            [
+              7.4454,
+              46.948249999999994
+            ],
+            [
+              7.4454,
+              46.94795
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2011-EG",
+        "buildingId": "BLD-2011",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487900000000001,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.97645
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2011-1OG",
+        "buildingId": "BLD-2011",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487900000000001,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.97645
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2011-2OG",
+        "buildingId": "BLD-2011",
+        "name": "2. OG",
+        "levelNumber": 2,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487900000000001,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.97645
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2011-3OG",
+        "buildingId": "BLD-2011",
+        "name": "3. OG",
+        "levelNumber": 3,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487900000000001,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.97645
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2011-4OG",
+        "buildingId": "BLD-2011",
+        "name": "4. OG",
+        "levelNumber": 4,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487900000000001,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.97645
+            ],
+            [
+              7.4889,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.976749999999996
+            ],
+            [
+              7.487900000000001,
+              46.97645
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2012-EG",
+        "buildingId": "BLD-2012",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487500000000001,
+              46.976150000000004
+            ],
+            [
+              7.4885,
+              46.976150000000004
+            ],
+            [
+              7.4885,
+              46.97645
+            ],
+            [
+              7.487500000000001,
+              46.97645
+            ],
+            [
+              7.487500000000001,
+              46.976150000000004
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2012-1OG",
+        "buildingId": "BLD-2012",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.487500000000001,
+              46.976150000000004
+            ],
+            [
+              7.4885,
+              46.976150000000004
+            ],
+            [
+              7.4885,
+              46.97645
+            ],
+            [
+              7.487500000000001,
+              46.97645
+            ],
+            [
+              7.487500000000001,
+              46.976150000000004
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2013-EG",
+        "buildingId": "BLD-2013",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2013-1OG",
+        "buildingId": "BLD-2013",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2013-2OG",
+        "buildingId": "BLD-2013",
+        "name": "2. OG",
+        "levelNumber": 2,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2013-3OG",
+        "buildingId": "BLD-2013",
+        "name": "3. OG",
+        "levelNumber": 3,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.977450000000005
+            ],
+            [
+              7.4863,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.97775
+            ],
+            [
+              7.4853000000000005,
+              46.977450000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2014-EG",
+        "buildingId": "BLD-2014",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4858,
+              46.97775
+            ],
+            [
+              7.4868,
+              46.97775
+            ],
+            [
+              7.4868,
+              46.978049999999996
+            ],
+            [
+              7.4858,
+              46.978049999999996
+            ],
+            [
+              7.4858,
+              46.97775
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2014-1OG",
+        "buildingId": "BLD-2014",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4858,
+              46.97775
+            ],
+            [
+              7.4868,
+              46.97775
+            ],
+            [
+              7.4868,
+              46.978049999999996
+            ],
+            [
+              7.4858,
+              46.978049999999996
+            ],
+            [
+              7.4858,
+              46.97775
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2014-2OG",
+        "buildingId": "BLD-2014",
+        "name": "2. OG",
+        "levelNumber": 2,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.4858,
+              46.97775
+            ],
+            [
+              7.4868,
+              46.97775
+            ],
+            [
+              7.4868,
+              46.978049999999996
+            ],
+            [
+              7.4858,
+              46.978049999999996
+            ],
+            [
+              7.4858,
+              46.97775
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2015-EG",
+        "buildingId": "BLD-2015",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.481,
+              46.974250000000005
+            ],
+            [
+              7.481999999999999,
+              46.974250000000005
+            ],
+            [
+              7.481999999999999,
+              46.97455
+            ],
+            [
+              7.481,
+              46.97455
+            ],
+            [
+              7.481,
+              46.974250000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2015-1OG",
+        "buildingId": "BLD-2015",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.481,
+              46.974250000000005
+            ],
+            [
+              7.481999999999999,
+              46.974250000000005
+            ],
+            [
+              7.481999999999999,
+              46.97455
+            ],
+            [
+              7.481,
+              46.97455
+            ],
+            [
+              7.481,
+              46.974250000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2015-2OG",
+        "buildingId": "BLD-2015",
+        "name": "2. OG",
+        "levelNumber": 2,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.481,
+              46.974250000000005
+            ],
+            [
+              7.481999999999999,
+              46.974250000000005
+            ],
+            [
+              7.481999999999999,
+              46.97455
+            ],
+            [
+              7.481,
+              46.97455
+            ],
+            [
+              7.481,
+              46.974250000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2016-EG",
+        "buildingId": "BLD-2016",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.95,
+              47.28705
+            ],
+            [
+              7.951,
+              47.28705
+            ],
+            [
+              7.951,
+              47.287349999999996
+            ],
+            [
+              7.95,
+              47.287349999999996
+            ],
+            [
+              7.95,
+              47.28705
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2016-1OG",
+        "buildingId": "BLD-2016",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.95,
+              47.28705
+            ],
+            [
+              7.951,
+              47.28705
+            ],
+            [
+              7.951,
+              47.287349999999996
+            ],
+            [
+              7.95,
+              47.287349999999996
+            ],
+            [
+              7.95,
+              47.28705
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2017-EG",
+        "buildingId": "BLD-2017",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.2564,
+              47.14915
+            ],
+            [
+              7.2574,
+              47.14915
+            ],
+            [
+              7.2574,
+              47.149449999999995
+            ],
+            [
+              7.2564,
+              47.149449999999995
+            ],
+            [
+              7.2564,
+              47.14915
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2017-1OG",
+        "buildingId": "BLD-2017",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.2564,
+              47.14915
+            ],
+            [
+              7.2574,
+              47.14915
+            ],
+            [
+              7.2574,
+              47.149449999999995
+            ],
+            [
+              7.2564,
+              47.149449999999995
+            ],
+            [
+              7.2564,
+              47.14915
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2017-2OG",
+        "buildingId": "BLD-2017",
+        "name": "2. OG",
+        "levelNumber": 2,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.2564,
+              47.14915
+            ],
+            [
+              7.2574,
+              47.14915
+            ],
+            [
+              7.2574,
+              47.149449999999995
+            ],
+            [
+              7.2564,
+              47.149449999999995
+            ],
+            [
+              7.2564,
+              47.14915
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2018-EG",
+        "buildingId": "BLD-2018",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.5609,
+              47.450050000000005
+            ],
+            [
+              8.561900000000001,
+              47.450050000000005
+            ],
+            [
+              8.561900000000001,
+              47.45035
+            ],
+            [
+              8.5609,
+              47.45035
+            ],
+            [
+              8.5609,
+              47.450050000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2018-1OG",
+        "buildingId": "BLD-2018",
+        "name": "1. OG",
+        "levelNumber": 1,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.5609,
+              47.450050000000005
+            ],
+            [
+              8.561900000000001,
+              47.450050000000005
+            ],
+            [
+              8.561900000000001,
+              47.45035
+            ],
+            [
+              8.5609,
+              47.45035
+            ],
+            [
+              8.5609,
+              47.450050000000005
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "floorId": "BLD-2019-EG",
+        "buildingId": "BLD-2019",
+        "name": "EG",
+        "levelNumber": 0,
+        "areaGross": 2240,
+        "floorPlanDocumentId": null
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.786399999999999,
+              46.17465
+            ],
+            [
+              8.7874,
+              46.17465
+            ],
+            [
+              8.7874,
+              46.174949999999995
+            ],
+            [
+              8.786399999999999,
+              46.174949999999995
+            ],
+            [
+              8.786399999999999,
+              46.17465
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -282,8 +282,8 @@ libraries.
 | [**Site**](#35-future-entities-in-this-domain) | Standort | Logical grouping of buildings (campus / area). Resolved from the lead system on demand if a campus view ever appears. | Future | — |
 | [**Parcel**](#35-future-entities-in-this-domain) | Grundstück | Cadastral land plot recorded in the Grundbuch (ZGB Art. 655), keyed by **EGRID** (Eidgenössischer **Grundstücks**identifikator). A Grundstück with one or more Buildings on it is a *Liegenschaft* (a sub-category — not a separate entity). Polygon geometry. | Future | — |
 | [**Building**](#31-building-gebäude) | Gebäude | Read-only reference to a physical property — name, atomic address fields (street, houseNumber, postalCode, city, country), asset key, cadastral identifier, coordinates. Canonical record lives in the lead asset registry; this is the portal's local cache. | Implemented | [`data/buildings.geojson`](../data/buildings.geojson) |
-| [**Floor**](#32-floor-geschoss-planned) | Geschoss | A level within a building. Carries `levelNumber` (UG/EG/OG), gross area, and a `floorPlanDocumentId` FK to a Document of `type=FloorPlan`. **Required by the planned floor-plan viewer.** | Planned | `data/floors.geojson` (planned) |
-| [**Space**](#33-space-raum-planned) | Raum | A room — the smallest rentable unit. **The Tenancy's actual rented object is one or more Spaces (or a Floor, or a Building).** Carries `useType` (Büro / Sitzungszimmer / Open Space / …), area, geometry, capacity. | Planned | `data/spaces.geojson` (planned) |
+| [**Floor**](#32-floor-geschoss) | Geschoss | A level within a building. Carries `levelNumber` (UG/EG/OG), gross area, and a `floorPlanDocumentId` FK to a Document of `type=FloorPlan`. Drives the floor-plan viewer. | Implemented (mock) | [`data/floors.geojson`](../data/floors.geojson) |
+| [**Space**](#33-space-raum) | Raum | A room — the smallest rentable unit. **The Tenancy's actual rented object is one or more Spaces (or a Floor, or a Building).** Carries `useType` (Büro / Sitzungszimmer / Open Space / …), area, geometry, capacity. | Implemented (mock) | [`data/spaces.geojson`](../data/spaces.geojson) |
 | [**AreaMeasurement**](#34-areameasurement-bemessung-planned) | Bemessung | Quantitative measurement record attached to any spatial entity (Building, Floor, Space, Parcel). Carries the *measurement standard* (SIA 416 / IPMS 1 / 2 / 3 / GEFMA 198 / DIN 277), the *area type* (GF / NGF / NF / HNF / NNF / VF / FF / footprint / sealed / green), *accuracy* (Measured / Estimated / Aggregated / Survey), surveyor, and validity. The scalar `Floor.areaGross` / `Space.area` / `Tenancy.hnf2` fields are read-cached projections of canonical AreaMeasurements. | Planned | `data/area-measurements.json` (planned) |
 | [**BuildingElement**](#35-future-entities-in-this-domain) | Bauteil | Constructive element of the building fabric — Wand, Decke, Stütze, Treppe, Tür, Fenster, Dach. Attaches to Building / Floor / Space. IFC `IfcBuildingElement`. | Future | — |
 | [**TechnicalSystem**](#35-future-entities-in-this-domain) | Technische Anlage / System | Technical installation — Lüftung, Heizung, Elektro, Sanitär, Transport (Aufzüge), Brandschutz, Sicherheit, BACS. Attaches to Building / Floor / Space. Groups one or more Components. IFC `IfcSystem`. **Schadensmeldungs target.** | Future | — |
@@ -409,9 +409,9 @@ and IBPDI *Building*. Spatial hierarchy: Building → Floor (§ 3.2) → Space
 > dropped — multiple VEs can occupy one building, so the primary-VE
 > attribution is derived from Tenancy rather than stored on Building.
 
-### 3.2 Floor (Geschoss) [Planned]
+### 3.2 Floor (Geschoss)
 
-**File:** `data/floors.geojson` (planned, GeoJSON `FeatureCollection` of `Polygon` features carrying the floor outline).
+**File:** [`data/floors.geojson`](../data/floors.geojson) — GeoJSON `FeatureCollection` of `Polygon` features carrying the floor outline. Populated for all 10 BBL buildings (27 floors total) via [`scripts/generate-floor-spaces.py`](../scripts/generate-floor-spaces.py).
 
 A level within a Building. Required by the planned floor-plan viewer; also
 the granularity at which whole-storey leases (a frequent federal pattern —
@@ -433,9 +433,9 @@ the granularity at which whole-storey leases (a frequent federal pattern —
 | **validFrom**          |       | string (date) | Valid from.                                                          |               | Valid From        | Gültig von         |
 | **validUntil**         |       | string (date) | Valid until.                                                         |               | Valid Until       | Gültig bis         |
 
-### 3.3 Space (Raum) [Planned]
+### 3.3 Space (Raum)
 
-**File:** `data/spaces.geojson` (planned, GeoJSON `FeatureCollection` of `Polygon` features).
+**File:** [`data/spaces.geojson`](../data/spaces.geojson) — GeoJSON `FeatureCollection` of `Polygon` features. Populated for all 10 BBL buildings — 459 rooms across 27 floors (17 rooms per floor: 8 north, corridor, 8 south), generated via [`scripts/generate-floor-spaces.py`](../scripts/generate-floor-spaces.py).
 
 A room — the smallest rentable unit. Borrows from ISO 16739 `IfcSpace`,
 IBPDI *Unit*, and ArcGIS Indoors *Unit*. **The Tenancy's actual rented
@@ -1148,7 +1148,7 @@ attached to a Building. Standard anchor: IBPDI Certificate (future).
 | [`data/news.json`](../data/news.json)                   | 10             | NewsArticle                                                      |
 | [`data/buildings.geojson`](../data/buildings.geojson)   | 10             | Building (GeoJSON `FeatureCollection` of `Point` features; canonical record in lead system) |
 | [`data/documents.json`](../data/documents.json)         | 115            | Document (metadata + `linkedTo[]`; file blobs live in the records-management system). Type taxonomy inspired by the **KBOB IPB Dokumenttypenkatalog**. |
-| [`data/downloads.json`](../data/downloads.json)         | 1              | UI download-link catalogues (`regulations`, `strategies`, `training`, `propertyDetail`). Not a canonical schema entity — extracted from the JS to keep the codebase free of hardcoded reference content. |
+| [`data/downloads.json`](../data/downloads.json)         | 1              | UI download-link catalogues (`regulations`, `strategies`, `training`). Not a canonical schema entity — extracted from the JS to keep the codebase free of hardcoded reference content. |
 
 ### 11.2 Planned files
 

@@ -2084,20 +2084,30 @@ a.btn[aria-disabled="true"] {
   gap: var(--space-xs);
   margin-left: auto;             /* keeps actions right-aligned even if back is absent */
 }
-.share-bar__back {
-  display: inline-flex;
-  align-items: center;
+/* `.btn--back` — CD Bund back-button modifier. The federal canonical
+   `.btn--outline` ships with primary-600 text + border (see
+   `designsystem/css/components/btn.postcss`). Our portal's `.btn--outline`
+   was recoloured to neutral, so `.btn--back` reasserts the primary-red
+   federal styling locally to match the design system reference. Sized
+   like `.btn--sm` to keep the utility bar compact. */
+.btn--back {
+  min-height: var(--btn-sm-min-h);
+  padding: var(--space-xs) var(--space-md);
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-sm);
-  font-family: inherit;
   font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
+  /* CD Bund `.btn--outline` ships with `font-normal`; our portal's `.btn`
+     defaults to bold. Reassert normal weight on the back-button to match. */
+  font-weight: var(--font-weight-normal);
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
   text-decoration: none;
-  border-radius: var(--radius);
-  transition: color var(--transition-fast), background var(--transition-fast);
 }
-.share-bar__back:hover { color: var(--color-primary); background: var(--color-bg-surface); }
-.share-bar__back svg { width: 18px; height: 18px; }
+.btn--back:hover {
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  background: transparent;
+}
+.btn--back .btn__icon { width: 18px; height: 18px; }
 .share-bar__btn {
   background: transparent;
   border: none;
@@ -4306,62 +4316,193 @@ a.btn[aria-disabled="true"] {
 }
 
 /* ── PROPERTY DETAIL ─────────────────────────────────────────────────────
-   Banner: full-bleed hero image — edge-to-edge of the viewport — with a
-   gradient-overlay caption strip at the bottom. CD Bund hero pattern:
-   image full-bleed in `<main>`, caption text constrained to `.container`.
-   The banner is rendered as a sibling of the page's outer `.container`
-   (NOT nested inside it) so the image breaks out to viewport edges. */
-.property-banner {
-  position: relative;
-  overflow: hidden;
-  height: 280px;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--color-bg-alt);
-  margin-bottom: var(--space-xl);
+   `.property-header` — compact info strip that replaces the old decorative
+   image banner. Two-column layout: textual body on the left (meta, title,
+   address, chips) and a thumbnail of the building on the right. The
+   thumbnail acts as a "you are looking at the right building" cue without
+   dominating the viewport like the previous full-bleed banner did. */
+.property-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-secondary-100);
 }
-@media (min-width: 1024px) { .property-banner { height: 360px; } }
-@media (min-width: 1544px) { .property-banner { height: 420px; } }
-/* Caption overlay: gradient stretches full viewport width (visual weight
-   anchoring the title), but the inner `.container` constrains the actual
-   text to the canonical 1544 px column with the standard container
-   padding — so on ultra-wide displays the title doesn't float in the
-   middle of nowhere. */
-.property-banner__caption {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: var(--space-2xl) 0 var(--space-lg);
-  color: var(--color-white);
-  background: linear-gradient(transparent, var(--color-black-70));
+.property-header__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--space-xs);
 }
-.property-banner__sap {
-  margin: 0 0 var(--space-xs);
+.property-header__meta {
+  margin: 0;
   font-size: var(--text-body-xs);
   text-transform: uppercase;
   letter-spacing: 1px;
-  opacity: 0.85;
+  color: var(--color-text-secondary);
 }
-.property-banner__title {
+.property-header__title {
   margin: 0;
-  font-size: var(--text-h1);
-  color: var(--color-white);
   line-height: var(--line-height-tight);
 }
-.property-banner__address {
-  margin: var(--space-xs) 0 0;
-  opacity: 0.9;
+.property-header__address {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.property-header__chips {
+  margin: var(--space-sm) 0 0;
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.property-header__image {
+  width: 100%;
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-bg-alt);
+  border-radius: var(--radius);
+}
+@media (min-width: 768px) {
+  .property-header { flex-direction: row; align-items: center; gap: var(--space-xl); }
+  .property-header__body { flex: 1; min-width: 0; }
+  .property-header__image { width: 240px; height: 140px; flex-shrink: 0; }
+}
+@media (min-width: 1280px) {
+  .property-header__image { width: 280px; height: 160px; }
+}
+
+/* `.property-stats` — 4-up numeric strip above the contractual facts
+   table. Big numbers, secondary labels. Pattern from CD Bund key-figure
+   cards (`.info-block` family) but lighter — no card chrome, just a
+   strong type contrast that lets the four numbers read at a glance. */
+.property-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin: 0 0 var(--space-lg);
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--color-secondary-100);
+  border-bottom: 1px solid var(--color-secondary-100);
+}
+@media (min-width: 768px) {
+  .property-stats { grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); }
+}
+.property-stats__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.property-stats__label {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.property-stats__value {
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+.property-stats__value small {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+}
+
+/* `.property-facts` — variant of `.table` for the lighter facts row under
+   the stat strip. Slimmer padding; the th column is fixed-width so the
+   fact rows align tightly. */
+.property-facts th {
+  width: 180px;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+}
+
+/* `.floor-list` — table variant on the property-detail page listing the
+   building's floors with KPIs and navigating to the floor-detail view on
+   row click. Right-aligned numeric columns; a chevron column nudges the
+   user toward the "click row to drill in" affordance. */
+.floor-list th,
+.floor-list td { vertical-align: middle; }
+.floor-list__num { text-align: right; }
+.floor-list__chevron {
+  text-align: right;
+  color: var(--color-text-secondary);
+  width: 24px;
+}
+.floor-list__chevron-th { width: 24px; }
+.floor-list__chevron .inline-icon { vertical-align: middle; }
+
+/* `.doc-groups` — collapsible category buckets on the property-detail
+   Dokumente section. Built on native `<details>`/`<summary>` for keyboard
+   + screen-reader support out of the box. The summary row carries a
+   count chip on the right; the body reuses `.download-list`. */
+.doc-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.doc-group {
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  background: var(--color-white);
+}
+.doc-group__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  list-style: none;
+  font-weight: var(--font-weight-bold);
+}
+.doc-group__summary::-webkit-details-marker { display: none; }
+.doc-group__summary::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.doc-group[open] > .doc-group__summary::before { transform: rotate(45deg); }
+.doc-group__title { flex: 1; }
+.doc-group__count {
+  font-weight: var(--font-weight-normal);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-secondary-50);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-full);
+}
+.doc-group__body {
+  padding: 0 var(--space-lg) var(--space-md);
+  border-top: 1px solid var(--color-secondary-100);
+}
+.doc-group__more {
+  margin: var(--space-sm) 0 0;
+  font-size: var(--text-body-sm);
 }
 
 /* Section block — left column of the property-detail two-column layout.
    Replaces ad-hoc `style="margin-bottom: var(--space-2xl)"`. */
 .property-section { margin-bottom: var(--space-2xl); }
 
-/* Aside actions stack: each action button on its own row. */
+/* Aside actions stack: each action button on its own row. All four use
+   `.btn--bare` for visual consistency (the heading "Aktionen" already
+   signals these are clickable affordances — no fill needed) and content
+   is left-aligned with the leading icon, overriding `.btn`'s default
+   `justify-content: center` for this menu context. */
 .property-aside__card { margin-bottom: var(--space-lg); }
 .property-aside__actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
+}
+.property-aside__actions .btn {
+  justify-content: flex-start;
+  padding-inline: var(--space-sm);
+  text-align: left;
 }
 
 /* `.contact-dl` — definition list inside the contacts card. Label above
@@ -4587,3 +4728,238 @@ a.btn[aria-disabled="true"] {
   margin-right: var(--space-md);
   color: var(--color-border);
 }
+
+/* ── FLOOR DETAIL — interactive floor plan ───────────────────────────────
+   The page reuses `.property-header` (building image + name + address) for
+   the top strip so the building identity stays consistent with the
+   property-detail page.  Below that, `.floor-header` is a lighter h2 +
+   KPI line that identifies the specific floor being viewed.  Then the
+   toolbar (etage switcher + view dropdown + fullscreen), the MapLibre
+   canvas, and the legend.  Floor switcher is a chip group derived from
+   `.tag-item` styling but acts as navigation (anchors, not toggle
+   buttons). */
+
+.floor-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.floor-header__title { margin: 0; }
+.floor-header__kpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.floor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-surface, var(--color-secondary-50));
+  border-radius: var(--radius);
+}
+.floor-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.floor-toolbar__group--right { margin-left: auto; }
+.floor-toolbar__label {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* `.floor-switcher` — chip group of floor links. Active chip carries the
+   federal primary fill (matches `.tag-item--active` energy without
+   piggybacking on the filter-chip aria-pressed semantics). */
+.floor-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.floor-switcher__chip {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-secondary-200);
+  background: var(--color-white);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.floor-switcher__chip:hover {
+  background: var(--color-secondary-50);
+  border-color: var(--color-secondary-300);
+}
+.floor-switcher__chip--active,
+.floor-switcher__chip[aria-current="page"] {
+  background: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  color: var(--color-white);
+}
+.floor-switcher__chip--active:hover {
+  background: var(--color-primary-700, var(--color-primary-600));
+}
+
+/* `.floor-stage` — the canvas surface only.  Room details live in a
+   MapLibre Popup anchored on the clicked polygon (see `.room-popup`),
+   not in a sidebar — gives the floor plan the full container width. */
+.floor-stage {
+  margin-bottom: var(--space-md);
+}
+
+.floor-canvas {
+  width: 100%;
+  height: 460px;
+  min-height: 400px;
+  background: #fafafa;
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+}
+@media (min-width: 768px) { .floor-canvas { height: 560px; } }
+@media (min-width: 1280px) { .floor-canvas { height: 640px; } }
+
+/* When the `.floor-stage` enters native fullscreen, the canvas needs to
+   span the whole viewport — override the fixed heights. */
+.floor-stage:fullscreen,
+.floor-stage:-webkit-full-screen { background: var(--color-white); padding: 0; }
+.floor-stage:fullscreen .floor-canvas,
+.floor-stage:-webkit-full-screen .floor-canvas {
+  height: 100vh;
+  min-height: 100vh;
+  border-radius: 0;
+  border: 0;
+}
+
+.floor-canvas__error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+/* `.room-popup` — info popup anchored on the clicked room.  Lives inside
+   MapLibre's `.maplibregl-popup-content` (which provides padding +
+   tail).  Same dl/row pattern as the inbox/property detail cards so the
+   reading rhythm is consistent across the app. */
+.floor-popup .maplibregl-popup-content {
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.floor-popup .maplibregl-popup-close-button {
+  font-size: 1.25rem;
+  padding: 0 var(--space-sm);
+  color: var(--color-text-secondary);
+}
+.room-popup { font-size: var(--text-body-sm); }
+.room-popup__title {
+  margin: 0 0 2px;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body);
+}
+.room-popup__subtitle {
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text-secondary);
+}
+.room-popup__facts {
+  margin: 0 0 var(--space-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-secondary-100);
+}
+.room-popup__row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: var(--space-sm);
+}
+.room-popup__row dt {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+.room-popup__row dd {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+.room-popup__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  color: var(--color-primary-600);
+  text-decoration: none;
+  font-weight: var(--font-weight-bold);
+}
+.room-popup__action:hover { color: var(--color-primary-700); text-decoration: underline; }
+
+/* `.floor-legend` — horizontal swatch row below the canvas. Each swatch
+   colour mirrors the MapLibre `match` expression for `rooms-fill` so the
+   key stays in sync with what the map renders. "Mine" swatch shows the
+   red outline treatment, not a fill, because that's how the canvas
+   distinguishes the tenant's rooms. */
+.floor-legend {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-sm) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-lg);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.floor-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.floor-legend__swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid var(--color-secondary-200);
+}
+.floor-legend__swatch--work    { background: #dbeafe; }
+.floor-legend__swatch--collab  { background: #fef3c7; }
+.floor-legend__swatch--infra   { background: #f3f4f6; }
+.floor-legend__swatch--special { background: #ede9fe; }
+.floor-legend__swatch--mine {
+  background: var(--color-white);
+  border: 2px solid var(--color-primary-600);
+}
+
+/* ── PRINT — floor-plan page ─────────────────────────────────────────────
+   When the user hits the "Drucken" button, hide all federal chrome,
+   toolbar, drawer, and footer. Keep the property-header strip + canvas
+   + legend. The canvas keeps its computed pixel size — MapLibre's WebGL
+   canvas is captured as a raster which prints predictably. */
+@media print {
+  .skip-to-content,
+  header[role="banner"],
+  .breadcrumb,
+  .share-bar,
+  .floor-toolbar,
+  .floor-drawer,
+  footer { display: none !important; }
+  .floor-stage { grid-template-columns: 1fr; }
+  .floor-canvas { height: 680px; border: 1px solid #999; page-break-inside: avoid; }
+  .section { padding: 0 !important; }
+}
+

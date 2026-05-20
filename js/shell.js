@@ -424,10 +424,14 @@ export function toggleNavMenu(id, force) {
 // `justify-content: space-between` so the row reads back-on-left,
 // actions-on-right. Pass these from detail pages reached from a list.
 export function renderShareBar({ backTo = null, backLabel = null } = {}) {
+  // Canonical CD Bund back button: `.btn .btn--outline .btn--back` with an
+  // ArrowLeft glyph + "Zurück" label. The full destination ("Zurück zu …")
+  // stays in `aria-label` for screen-reader context; the breadcrumb above
+  // already shows it visually.
   const back = backTo
-    ? `<a class="share-bar__back" href="${backTo}" aria-label="Zurück zu ${backLabel || 'Übersicht'}">
-         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-         <span>Zurück${backLabel ? ` zu ${backLabel}` : ''}</span>
+    ? `<a class="btn btn--outline btn--back" href="${backTo}" aria-label="Zurück${backLabel ? ` zu ${backLabel}` : ''}">
+         <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+         <span>Zurück</span>
        </a>`
     : '';
   return `

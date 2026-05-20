@@ -188,6 +188,7 @@ function registerRoutes() {
   P.registerRoute('#/help',        renderHelp);
   P.registerRoute('#/properties',  renderProperties);
   P.registerRoute('#/properties/:id', renderPropertyDetail);
+  P.registerRoute('#/properties/:id/floors/:floorSlug', renderFloorDetail);
   P.registerRoute('#/downloads',   renderDownloads);
   P.registerRoute('#/repair',      renderRepairQuickForm);
   P.registerRoute('#/profile',     renderProfile);
@@ -2042,6 +2043,29 @@ function propertyCard(t) {
 }
 
 // ── 10. LIEGENSCHAFTS-DETAIL ─────────────────────────────────────────────
+// Document-type labels for the grouped Dokumente section on the property
+// detail page. Keys match the schema A.10 enum (canonical EN).
+const DOC_TYPE_LABEL_DE = {
+  Lease:       'Mietvertrag',
+  FloorPlan:   'Grundriss',
+  Permit:      'Bewilligung',
+  Certificate: 'Zertifikat',
+  Manual:      'Handbuch',
+  LegalBasis:  'Rechtsgrundlage',
+  WiBe:        'WiBe',
+  Other:       'Sonstiges',
+  Attachment:  'Anhang',
+};
+
+// Property-detail Dokumente: four buckets by user intent (not by chronology).
+// Empty buckets are skipped at render time.
+const PROPERTY_DOC_GROUPS = [
+  { title: 'Mietvertrag & Anhänge',     types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
+  { title: 'Pläne als Dateien',         types: ['FloorPlan'],                       defaultOpen: false },
+  { title: 'Sicherheit & Betrieb',      types: ['Certificate', 'Manual', 'Permit'], defaultOpen: false },
+  { title: 'Historie & Korrespondenz',  types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
+];
+
 function renderPropertyDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
@@ -2056,34 +2080,156 @@ function renderPropertyDetail({ id }) {
   const today = new Date();
   const leaseEnd = new Date(t.leaseEnd);
   const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
+  const restWarn = monthsToEnd <= 12;
+
+  // Floors for this building, sorted by levelNumber. Empty for buildings
+  // that have no floors.geojson coverage yet — section is then hidden.
+  const floors = P.state.floors
+    .filter(f => f.buildingId === t.buildingId)
+    .sort((a, b) => a.levelNumber - b.levelNumber);
+
+  const userVe = P.state.user.ve;
+  const userDep = P.state.user.dep;
+
+  const floorKpis = floors.map(f => {
+    const spaces = P.state.spaces.filter(s => s.floorId === f.floorId);
+    const rooms = spaces.filter(s => s.useType !== 'Corridor');
+    const totalArea = rooms.reduce((sum, s) => sum + (s.area || 0), 0);
+    const workstations = spaces
+      .filter(s => s.useType === 'Office' || s.useType === 'OpenSpace')
+      .reduce((sum, s) => sum + (s.capacity || 0), 0);
+    const myVeCount = rooms.filter(s => s.occupierVe === userVe).length;
+    return {
+      ...f,
+      slug: f.floorId.replace(t.buildingId + '-', ''),
+      roomCount: rooms.length,
+      totalArea, workstations, myVeCount,
+      isYourFloor: myVeCount > 0,
+    };
+  });
+
+  // Documents linked to this building or this tenancy.
+  const linkedDocs = P.state.documents.filter(d =>
+    (d.linkedTo || []).some(l =>
+      (l.entityType === 'Building' && l.entityId === t.buildingId) ||
+      (l.entityType === 'Tenancy'  && l.entityId === t.id)
+    )
+  );
+
+  const docGroupHtml = PROPERTY_DOC_GROUPS
+    .map(g => {
+      const items = linkedDocs
+        .filter(d => g.types.includes(d.type))
+        .sort((a, b) => (b.issuedAt || '').localeCompare(a.issuedAt || ''));
+      if (items.length === 0) return '';
+      const visible = items.slice(0, 6);
+      const overflow = items.length - visible.length;
+      const adapted = visible.map(d => ({
+        title:    d.title,
+        subtitle: DOC_TYPE_LABEL_DE[d.type] || d.type,
+        format:   d.format,
+        size:     d.size,
+        languages: Array.isArray(d.languages) ? d.languages.map(l => l.toUpperCase()).join(' · ') : d.languages,
+        date:     d.issuedAt ? P.formatDate(d.issuedAt) : undefined,
+      }));
+      return `
+        <details class="doc-group" ${g.defaultOpen ? 'open' : ''}>
+          <summary class="doc-group__summary">
+            <span class="doc-group__title">${P.escapeHtml(g.title)}</span>
+            <span class="doc-group__count">${items.length}</span>
+          </summary>
+          <div class="doc-group__body">
+            ${downloadList(adapted)}
+            ${overflow > 0 ? `<p class="doc-group__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">… ${overflow} weitere im Dokumenten-Archiv anzeigen</a></p>` : ''}
+          </div>
+        </details>
+      `;
+    })
+    .join('');
 
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/properties', backLabel: 'Liegenschaften' })}
-    <section class="section">
-      <header class="property-banner" style="background-image:url('${t.image}');">
-        <div class="property-banner__caption">
-          <div class="container">
-            <p class="property-banner__sap">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
-            <h1 class="property-banner__title">${P.escapeHtml(t.buildingName)}</h1>
-            <p class="property-banner__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
+    <section class="section section--py-tight">
+      <div class="container">
+        <header class="property-header">
+          <div class="property-header__body">
+            <p class="property-header__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+            <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
+            <p class="property-header__address">${P.escapeHtml(t.address)}</p>
+            <p class="property-header__chips">
+              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
+            </p>
           </div>
-        </div>
-      </header>
+          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${t.image}');"></div>
+        </header>
+      </div>
+    </section>
 
+    <section class="section">
       <div class="container">
         <div class="property-layout">
           <div>
             <section class="property-section">
               <h2 class="h2 section-heading">Vertrag & Mengengerüst</h2>
-              <table class="table">
+
+              <div class="property-stats">
+                <div class="property-stats__item">
+                  <span class="property-stats__label">HNF2</span>
+                  <span class="property-stats__value">${t.hnf2.toLocaleString('de-CH')}<small> m²</small></span>
+                </div>
+                <div class="property-stats__item">
+                  <span class="property-stats__label">GF</span>
+                  <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
+                </div>
+                <div class="property-stats__item">
+                  <span class="property-stats__label">Arbeitsplätze</span>
+                  <span class="property-stats__value">${t.workstations}</span>
+                </div>
+                <div class="property-stats__item">
+                  <span class="property-stats__label">Mietkosten / Jahr</span>
+                  <span class="property-stats__value">${P.formatChf(t.yearlyCost)}</span>
+                </div>
+              </div>
+
+              <table class="table property-facts">
                 <tr><th>Mietende VE</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
                 <tr><th>PFM-Kategorie</th><td>${P.escapeHtml(t.portfolioCategory)}</td></tr>
-                <tr><th>HNF2 / GF</th><td>${t.hnf2} m² / ${t.gf} m²</td></tr>
-                <tr><th>Arbeitsplätze</th><td>${t.workstations}</td></tr>
-                <tr><th>Mietkosten</th><td>${P.formatChf(t.yearlyCost)} / Jahr</td></tr>
-                <tr><th>Vertragslaufzeit</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)} ${t.leaseAuto ? '<span class="badge badge--success">automatisch verlängernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
-                <tr><th>Restlaufzeit</th><td>~${monthsToEnd} Monate</td></tr>
+                <tr><th>Vertragsart</th><td>${t.leaseAuto ? '<span class="badge badge--success">automatisch verlängernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
+                <tr><th>Laufzeit</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)}</td></tr>
               </table>
+            </section>
+
+            <section class="property-section">
+              <h2 class="h2 section-heading">Geschosse (${floors.length})</h2>
+              ${floors.length === 0
+                ? `<p class="text-secondary">Für diese Liegenschaft liegt noch kein interaktiver Grundriss vor.</p>`
+                : `<table class="table table--zebra table--rows-clickable floor-list" aria-label="Geschosse mit interaktivem Grundriss">
+                    <thead>
+                      <tr>
+                        <th scope="col">Etage</th>
+                        <th scope="col" class="floor-list__num">Räume</th>
+                        <th scope="col" class="floor-list__num">HNF2</th>
+                        <th scope="col" class="floor-list__num">Arbeitsplätze</th>
+                        <th scope="col" class="floor-list__num">Davon ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
+                        <th scope="col" aria-hidden="true" class="floor-list__chevron-th"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${floorKpis.map(f => `
+                        <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
+                          <td>
+                            <strong>${P.escapeHtml(f.name)}</strong>
+                            ${f.isYourFloor ? ' <span class="badge badge--success">Ihr Standort</span>' : ''}
+                          </td>
+                          <td class="floor-list__num">${f.roomCount}</td>
+                          <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} m²</td>
+                          <td class="floor-list__num">${f.workstations}</td>
+                          <td class="floor-list__num">${f.myVeCount}</td>
+                          <td class="floor-list__chevron">${P.icon('chevronRight')}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>`}
             </section>
 
             <section class="property-section">
@@ -2099,11 +2245,10 @@ function renderPropertyDetail({ id }) {
             </section>
 
             <section class="property-section">
-              <h2 class="h2 section-heading">Pläne & Belege zu dieser Liegenschaft</h2>
-              ${downloadList((P.state.downloads?.propertyDetail || []).map(d => ({
-                ...d,
-                title: d.title || (d.titleTemplate || '').replace('{floorLabel}', t.floorLabel || ''),
-              })))}
+              <h2 class="h2 section-heading">Dokumente zu dieser Liegenschaft (${linkedDocs.length})</h2>
+              ${linkedDocs.length === 0
+                ? `<p class="text-secondary">Keine Dokumente zu dieser Liegenschaft hinterlegt.</p>`
+                : `<div class="doc-groups">${docGroupHtml}</div>`}
             </section>
           </div>
 
@@ -2111,8 +2256,8 @@ function renderPropertyDetail({ id }) {
             <div class="card property-aside__card">
               <h3 class="card__title">Aktionen</h3>
               <div class="property-aside__actions">
-                <a href="#/repair?building=${t.buildingId}" class="btn btn--filled">${P.icon('tool')}Schaden / Reparatur melden</a>
-                <a href="#/wizard/1" class="btn btn--outline">Bedarf zu dieser Liegenschaft</a>
+                <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.icon('tool')}Schaden / Reparatur melden</a>
+                <a href="#/wizard/1" class="btn btn--bare">${P.icon('document')}Bedarf zu dieser Liegenschaft</a>
                 <button class="btn btn--bare" type="button" onclick="window.portal.toast('Umzug-Workflow noch nicht implementiert')">${P.icon('truck')}Umzug anmelden</button>
                 <button class="btn btn--bare" type="button" onclick="window.portal.toast('Sonderreinigung noch nicht implementiert')">${P.icon('sparkles')}Sonderreinigung anfragen</button>
               </div>
@@ -2138,6 +2283,414 @@ function renderPropertyDetail({ id }) {
         </div>
       </div>
     </section>
+  `;
+}
+
+// ── 10b. GESCHOSS-DETAIL — interaktiver Grundriss ────────────────────────
+// Space useType DE labels — canonical EN keys per docs/DATAMODEL.md A.9.
+const USETYPE_LABEL_DE = {
+  Office:        'Büro',
+  MeetingRoom:   'Sitzungszimmer',
+  OpenSpace:     'Open Space',
+  FocusRoom:     'Fokusraum',
+  Reception:     'Empfang',
+  Kitchenette:   'Teeküche',
+  WC:            'WC',
+  Corridor:      'Korridor',
+  Storage:       'Lager',
+  Archive:       'Archiv',
+  TechnicalRoom: 'Technikraum',
+  Cloakroom:     'Garderobe',
+  PrintRoom:     'Druckerraum',
+  Lounge:        'Lounge',
+  Cafeteria:     'Cafeteria',
+  TrainingRoom:  'Schulungsraum',
+  Lab:           'Labor',
+};
+
+// MapLibre instance for the floor canvas — lazy-initialised, torn down on
+// route change. The "rooms-fill" useType→colour map is shared with the legend
+// styling so a future palette change touches both ends.
+let _floorMap = null;
+let _floorPopup = null;  // active MapLibre Popup for the clicked room
+
+function renderFloorDetail({ id, floorSlug }) {
+  if (!P.state.user) { P.navigate('#/'); return; }
+  const t = P.state.tenancies.find(x => x.id === id);
+  if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
+
+  const buildingFloors = P.state.floors
+    .filter(f => f.buildingId === t.buildingId)
+    .sort((a, b) => a.levelNumber - b.levelNumber);
+  const floor = buildingFloors.find(f => f.floorId === `${t.buildingId}-${floorSlug}`);
+  if (!floor) {
+    shell({ activeNav: 'properties', breadcrumb: [
+      { href: '#/home', label: 'Start' },
+      { href: '#/properties', label: 'Liegenschaften' },
+      { href: `#/properties/${t.id}`, label: t.buildingName },
+      { label: floorSlug }
+    ]});
+    document.getElementById('page-body').innerHTML = '<div class="container section"><p>Für dieses Geschoss liegt noch kein interaktiver Grundriss vor.</p></div>';
+    return;
+  }
+
+  shell({ activeNav: 'properties', breadcrumb: [
+    { href: '#/home', label: 'Start' },
+    { href: '#/properties', label: 'Liegenschaften' },
+    { href: `#/properties/${t.id}`, label: t.buildingName },
+    { label: floor.name }
+  ]});
+
+  const spaces = P.state.spaces.filter(s => s.floorId === floor.floorId);
+  const rooms = spaces.filter(s => s.useType !== 'Corridor');
+  const userVe = P.state.user.ve;
+  const totalArea = rooms.reduce((sum, s) => sum + (s.area || 0), 0);
+  const workstations = spaces
+    .filter(s => s.useType === 'Office' || s.useType === 'OpenSpace')
+    .reduce((sum, s) => sum + (s.capacity || 0), 0);
+
+  // Reuse the property-detail Restlaufzeit calculation so the chip stays
+  // consistent across the property page and the floor page.
+  const today = new Date();
+  const leaseEnd = new Date(t.leaseEnd);
+  const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
+  const restWarn = monthsToEnd <= 12;
+
+  // Pre-select a room from ?space=… on the hash
+  const queryStr = (location.hash.split('?')[1] || '');
+  const initialSpaceId = new URLSearchParams(queryStr).get('space');
+
+  document.getElementById('page-body').innerHTML = `
+    ${P.renderShareBar({ backTo: `#/properties/${t.id}`, backLabel: t.buildingName })}
+    <section class="section section--py-tight">
+      <div class="container">
+        <header class="property-header">
+          <div class="property-header__body">
+            <p class="property-header__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+            <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
+            <p class="property-header__address">${P.escapeHtml(t.address)}</p>
+            <p class="property-header__chips">
+              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
+            </p>
+          </div>
+          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${t.image}');"></div>
+        </header>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <header class="floor-header">
+          <h2 class="h2 floor-header__title">Geschoss ${P.escapeHtml(floor.name)}</h2>
+          <p class="floor-header__kpis">${rooms.length} Räume · ${totalArea.toLocaleString('de-CH')} m² HNF2 · ${workstations} Arbeitsplätze</p>
+        </header>
+        <div class="floor-toolbar">
+          <div class="floor-toolbar__group">
+            <span class="floor-toolbar__label">Etage</span>
+            <div class="floor-switcher" role="tablist" aria-label="Etage wechseln">
+              ${buildingFloors.map(f => {
+                const slug = f.floorId.replace(t.buildingId + '-', '');
+                const isActive = f.floorId === floor.floorId;
+                return `<a class="floor-switcher__chip${isActive ? ' floor-switcher__chip--active' : ''}"
+                          href="#/properties/${t.id}/floors/${slug}"
+                          ${isActive ? 'aria-current="page"' : ''}>${P.escapeHtml(f.name)}</a>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <div class="floor-toolbar__group floor-toolbar__group--right">
+            <label class="floor-toolbar__label" for="floorViewMode">Ansicht</label>
+            <select id="floorViewMode" class="input input--sm">
+              <option value="useType">Nutzung</option>
+            </select>
+            <button class="btn btn--bare btn--sm" type="button" id="floorFullscreenBtn" aria-label="Vollbild">${P.icon('maximize')}Vollbild</button>
+          </div>
+        </div>
+
+        <div class="floor-stage">
+          <div id="floorCanvas" class="floor-canvas" aria-label="Interaktiver Grundriss"></div>
+        </div>
+
+        <ul class="floor-legend" aria-label="Legende">
+          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--work"></span>Arbeitsplätze</li>
+          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--collab"></span>Zusammenarbeit</li>
+          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--infra"></span>Infrastruktur</li>
+          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--special"></span>Sonderräume</li>
+          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--mine"></span>${P.escapeHtml(userVe)}-Räume (rote Umrandung)</li>
+        </ul>
+      </div>
+    </section>
+  `;
+
+  initFloorCanvas(t, floor, spaces, userVe, initialSpaceId);
+
+  // Vollbild toggle — uses HTML5 Fullscreen API on the canvas container.
+  // After entering / leaving fullscreen the MapLibre canvas needs a resize
+  // tick so it reflows to the new dimensions.
+  const fsBtn = document.getElementById('floorFullscreenBtn');
+  const stage = document.querySelector('.floor-stage');
+  if (fsBtn && stage) {
+    fsBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        stage.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+  }
+}
+
+// Resize the floor map whenever the fullscreen state of any element flips.
+// Bound once at module load — re-binding inside renderFloorDetail would
+// double-fire on every route hit.
+document.addEventListener('fullscreenchange', () => {
+  if (_floorMap) setTimeout(() => { try { _floorMap.resize(); } catch {} }, 60);
+});
+
+function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
+  loadMapLibre().then(maplibregl => {
+    const container = document.getElementById('floorCanvas');
+    if (!container) return;
+    if (_floorMap) { try { _floorMap.remove(); } catch {} _floorMap = null; }
+
+    const floorFc = { type: 'FeatureCollection', features: [{
+      type: 'Feature',
+      geometry: floor.geometry,
+      properties: { floorId: floor.floorId, name: floor.name }
+    }]};
+    const spacesFc = { type: 'FeatureCollection', features: spaces.map(s => {
+      const useLabel = USETYPE_LABEL_DE[s.useType] || s.useType;
+      // Pre-compose a three-line label (number / Nutzung / Fläche). Doing it
+      // here instead of via a MapLibre `format` expression avoids needing a
+      // bold glyph stack and keeps the label render predictable.
+      const label = `${s.name}\n${useLabel}\n${s.area} m²`;
+      return {
+        type: 'Feature',
+        geometry: s.geometry,
+        properties: {
+          spaceId: s.spaceId, floorId: s.floorId, name: s.name,
+          useType: s.useType, useLabel, area: s.area, label,
+          capacity: s.capacity, isBookable: s.isBookable,
+          occupierVe: s.occupierVe, occupierDep: s.occupierDep,
+        }
+      };
+    })};
+
+    const coords = floor.geometry.coordinates[0];
+    const lngs = coords.map(c => c[0]);
+    const lats = coords.map(c => c[1]);
+    const bounds = [
+      [Math.min(...lngs), Math.min(...lats)],
+      [Math.max(...lngs), Math.max(...lats)]
+    ];
+
+    const map = new maplibregl.Map({
+      container,
+      style: {
+        version: 8,
+        // MapLibre's public demo glyph server — needed for text-field rendering
+        // (room labels). No basemap or sprite, just the font glyphs.
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+        sources: {},
+        layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#fafafa' } }]
+      },
+      bounds,
+      fitBoundsOptions: { padding: 32, animate: false },
+      attributionControl: false,
+      maxZoom: 22,
+      // Keep the floor plan oriented like architectural drawings — north up,
+      // no rotation gestures. Pinch-zoom and pan stay enabled so users can
+      // get close to dense room clusters on a big floor.
+      pitchWithRotate: false,
+      dragRotate: false,
+      touchZoomRotate: true,
+    });
+    map.touchZoomRotate.disableRotation();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    _floorMap = map;
+
+    function applyFilter(spaceId) {
+      if (!map.getLayer('rooms-selected')) return;
+      map.setFilter('rooms-selected', ['==', ['get', 'spaceId'], spaceId || '__none__']);
+    }
+    function closePopup() {
+      if (_floorPopup) { try { _floorPopup.remove(); } catch {} _floorPopup = null; }
+      applyFilter(null);
+    }
+    function openPopup(space, lngLat) {
+      closePopup();
+      applyFilter(space.spaceId);
+      _floorPopup = new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: '280px',
+        offset: 8,
+        className: 'floor-popup',
+      })
+        .setLngLat(lngLat)
+        .setHTML(buildRoomPopupHtml(t, floor, space))
+        .addTo(map);
+      _floorPopup.on('close', () => { applyFilter(null); _floorPopup = null; });
+    }
+
+    map.on('load', () => {
+      map.addSource('floor', { type: 'geojson', data: floorFc });
+      map.addSource('spaces', { type: 'geojson', data: spacesFc });
+
+      // Floor fill — a near-white slab so room colours read clearly against it.
+      map.addLayer({
+        id: 'floor-fill',
+        type: 'fill',
+        source: 'floor',
+        paint: { 'fill-color': '#ffffff', 'fill-opacity': 1 }
+      });
+
+      // Room fills — colour by useType macro-category. The same palette is
+      // mirrored in the legend swatches in styles.css.
+      map.addLayer({
+        id: 'rooms-fill',
+        type: 'fill',
+        source: 'spaces',
+        paint: {
+          'fill-color': [
+            'match', ['get', 'useType'],
+            'Office',        '#dbeafe',
+            'OpenSpace',     '#dbeafe',
+            'FocusRoom',     '#bfdbfe',
+            'Reception',     '#dbeafe',
+            'MeetingRoom',   '#fef3c7',
+            'TrainingRoom',  '#fef3c7',
+            'Lounge',        '#fef3c7',
+            'Cafeteria',     '#fde68a',
+            'Corridor',      '#f3f4f6',
+            'WC',            '#e5e7eb',
+            'Kitchenette',   '#f3f4f6',
+            'PrintRoom',     '#f3f4f6',
+            'Cloakroom',     '#f3f4f6',
+            'Storage',       '#ede9fe',
+            'Archive',       '#ddd6fe',
+            'TechnicalRoom', '#e5e7eb',
+            'Lab',           '#ede9fe',
+            /* default */    '#f9fafb'
+          ],
+          'fill-opacity': 0.9
+        }
+      });
+
+      // Default room outlines (light gray).
+      map.addLayer({
+        id: 'rooms-outline',
+        type: 'line',
+        source: 'spaces',
+        paint: { 'line-color': '#9ca3af', 'line-width': 1 }
+      });
+
+      // "My VE" outlines (federal red).
+      map.addLayer({
+        id: 'rooms-mine-outline',
+        type: 'line',
+        source: 'spaces',
+        filter: ['==', ['get', 'occupierVe'], userVe],
+        paint: { 'line-color': '#D8232A', 'line-width': 2.5 }
+      });
+
+      // Selection outline — filter set on click. Starts hidden.
+      map.addLayer({
+        id: 'rooms-selected',
+        type: 'line',
+        source: 'spaces',
+        filter: ['==', ['get', 'spaceId'], '__none__'],
+        paint: { 'line-color': '#7f1d1d', 'line-width': 4 }
+      });
+
+      // Floor outline — dark, on top.
+      map.addLayer({
+        id: 'floor-outline',
+        type: 'line',
+        source: 'floor',
+        paint: { 'line-color': '#1F2937', 'line-width': 2 }
+      });
+
+      // Room labels — three lines: room number, German useType label, area.
+      // Corridor is excluded to keep the central spine visually clean.
+      map.addLayer({
+        id: 'room-labels',
+        type: 'symbol',
+        source: 'spaces',
+        filter: ['!=', ['get', 'useType'], 'Corridor'],
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-font': ['Open Sans Regular'],
+          'text-size': 11,
+          'text-line-height': 1.2,
+          'text-anchor': 'center',
+          'text-justify': 'center',
+          'text-allow-overlap': false,
+          'text-ignore-placement': false,
+        },
+        paint: {
+          'text-color': '#1F2937',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.2
+        }
+      });
+
+      map.on('click', 'rooms-fill', e => {
+        if (e.features && e.features.length > 0) {
+          const props = e.features[0].properties;
+          const space = spaces.find(s => s.spaceId === props.spaceId);
+          if (space) openPopup(space, e.lngLat);
+        }
+      });
+      map.on('click', e => {
+        const hits = map.queryRenderedFeatures(e.point, { layers: ['rooms-fill'] });
+        if (hits.length === 0) closePopup();
+      });
+      map.on('mouseenter', 'rooms-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'rooms-fill', () => { map.getCanvas().style.cursor = ''; });
+
+      if (initialSpaceId) {
+        const initial = spaces.find(s => s.spaceId === initialSpaceId);
+        if (initial) {
+          // Anchor on the polygon's centre — average of its vertices.
+          const ring = initial.geometry.coordinates[0];
+          const cx = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+          const cy = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+          openPopup(initial, { lng: cx, lat: cy });
+        }
+      }
+    });
+  }).catch(err => {
+    console.error(err);
+    const container = document.getElementById('floorCanvas');
+    if (container) {
+      container.innerHTML = '<div class="floor-canvas__error"><p><strong>Grundriss nicht geladen.</strong></p><p>MapLibre konnte nicht initialisiert werden.</p></div>';
+    }
+  });
+}
+
+// HTML for the room info popup — anchored to the click point on the floor
+// canvas (map-style). Replaces the prior right-side drawer. Compact: room
+// number, useType, key facts, and the single most-likely follow-up action
+// (Schadensmeldung). Other actions belong on the property-level page.
+function buildRoomPopupHtml(t, floor, space) {
+  const useLabel = USETYPE_LABEL_DE[space.useType] || space.useType;
+  const subtitle = `${P.escapeHtml(useLabel)}${space.capacity > 0 ? ` · ${space.capacity} ${space.capacity === 1 ? 'Platz' : 'Plätze'}` : ''}`;
+  const occupier = space.occupierVe
+    ? `${P.escapeHtml(space.occupierVe)}${space.occupierDep ? ' / ' + P.escapeHtml(space.occupierDep) : ''}`
+    : '<span class="text-secondary">Gemeinschaftsfläche</span>';
+  const repairHref = `#/repair?building=${encodeURIComponent(t.buildingId)}&floor=${encodeURIComponent(floor.floorId)}&space=${encodeURIComponent(space.spaceId)}`;
+  return `
+    <div class="room-popup">
+      <p class="room-popup__title">${P.escapeHtml(space.name)}</p>
+      <p class="room-popup__subtitle">${subtitle}</p>
+      <dl class="room-popup__facts">
+        <div class="room-popup__row"><dt>Fläche</dt><dd>${space.area} m²</dd></div>
+        <div class="room-popup__row"><dt>Belegt</dt><dd>${occupier}</dd></div>
+        <div class="room-popup__row"><dt>Buchbar</dt><dd>${space.isBookable ? 'ja' : 'nein'}</dd></div>
+      </dl>
+      <a class="room-popup__action" href="${repairHref}">${P.icon('tool')}Schaden hier melden</a>
+    </div>
   `;
 }
 
