@@ -23,8 +23,9 @@
 
 import {
 // formatters + escapers
-formatChf, formatDate, escapeHtml, escapeJs,
+formatChf, formatDate, escapeHtml, escapeJs, safeImageUrl,
 formatAddressLine, formatAssetKey, flattenFeature, roleLabel,
+DOC_TYPE_LABEL,
 // storage primitives
 safeGet, safeSet, safeRemove,
 // UI primitives
@@ -715,7 +716,7 @@ function renderNewsSection(items = P.state.news, perPage = 3) {
 function newsCard(n) {
   return `
     <a class="card--profile news-card" href="#/news/${n.id}">
-      <div class="card--profile__image" style="background-image:url('${n.image}');"></div>
+      <div class="card--profile__image" style="background-image:url('${safeImageUrl(n.image)}');"></div>
       <div class="card--profile__body">
         <p class="card--profile__date"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
         <h3 class="card--profile__title">${P.escapeHtml(n.title)}</h3>
@@ -777,7 +778,7 @@ function newsListRow(n) {
           <h2 class="news-list__title">${P.escapeHtml(n.title)}</h2>
           <p class="news-list__lead">${P.escapeHtml(n.lead)}</p>
         </div>
-        <div class="news-list__image" style="background-image:url('${n.image}');"></div>
+        <div class="news-list__image" style="background-image:url('${safeImageUrl(n.image)}');"></div>
       </a>
     </li>
   `;
@@ -1031,7 +1032,7 @@ function arrowBtn(extraClass = 'card--quick__arrow-btn') {
 function profileCard({ image, title, date, desc, role }) {
   return `
     <a href="#" class="card--profile" onclick="event.preventDefault(); window.t3lite.demoRole('${role}');">
-      <div class="card--profile__image" style="background-image:url('${image}');"></div>
+      <div class="card--profile__image" style="background-image:url('${safeImageUrl(image)}');"></div>
       <div class="card--profile__body">
         <p class="card--profile__date">${P.escapeHtml(date)}</p>
         <h3 class="card--profile__title">${P.escapeHtml(title)}</h3>
@@ -2004,7 +2005,7 @@ function initPropertiesMap(items) {
         const veLine = `${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}`;
         const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' }).setHTML(`
           <div class="property-popup">
-            <div class="property-popup__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${t.image}');"></div>
+            <div class="property-popup__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${safeImageUrl(t.image)}');"></div>
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
               <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
@@ -2051,7 +2052,7 @@ function propertyCard(t) {
     : `<span class="badge badge--success card--property__status card--property__status--quiet">ok</span>`;
   return `
     <a href="#/properties/${t.id}" class="card--property">
-      <div class="card--property__image" style="background-image:url('${t.image}');">
+      <div class="card--property__image" style="background-image:url('${safeImageUrl(t.image)}');">
         ${issuesBadge}
       </div>
       <div class="card--property__body">
@@ -2070,19 +2071,9 @@ function propertyCard(t) {
 }
 
 // ── 10. LIEGENSCHAFTS-DETAIL ─────────────────────────────────────────────
-// Document-type labels for the grouped Dokumente section on the property
-// detail page. Keys match the schema A.10 enum (canonical EN).
-const DOC_TYPE_LABEL_DE = {
-  Lease:       'Mietvertrag',
-  FloorPlan:   'Grundriss',
-  Permit:      'Bewilligung',
-  Certificate: 'Zertifikat',
-  Manual:      'Handbuch',
-  LegalBasis:  'Rechtsgrundlage',
-  WiBe:        'WiBe',
-  Other:       'Sonstiges',
-  Attachment:  'Anhang',
-};
+// Document-type labels come from the canonical DOC_TYPE_LABEL map in lib.js
+// — shared with the downloads page so a Permit doesn't render as
+// "Bewilligung" here and "Baubewilligung" there.
 
 // Property-detail Dokumente: four buckets by user intent (not by chronology).
 // Empty buckets are skipped at render time.
@@ -2153,7 +2144,7 @@ function renderPropertyDetail({ id }) {
       const overflow = items.length - visible.length;
       const adapted = visible.map(d => ({
         title:    d.title,
-        subtitle: DOC_TYPE_LABEL_DE[d.type] || d.type,
+        subtitle: DOC_TYPE_LABEL[d.type] || d.type,
         format:   d.format,
         size:     d.size,
         languages: Array.isArray(d.languages) ? d.languages.map(l => l.toUpperCase()).join(' · ') : d.languages,
@@ -2187,7 +2178,7 @@ function renderPropertyDetail({ id }) {
               <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
             </p>
           </div>
-          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${t.image}');"></div>
+          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${safeImageUrl(t.image)}');"></div>
         </header>
       </div>
     </section>
@@ -2472,7 +2463,7 @@ function renderFloorDetail({ id, floorSlug }) {
               <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
             </p>
           </div>
-          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${t.image}');"></div>
+          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${safeImageUrl(t.image)}');"></div>
         </header>
       </div>
     </section>
@@ -2576,12 +2567,6 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         }
       };
     })};
-    console.log('[floor canvas]', floor.floorId, 'with', spacesFc.features.length, 'space features');
-    if (spacesFc.features.length > 0) {
-      const sample = spacesFc.features[0];
-      console.log('[floor canvas] sample feature props:', sample.properties);
-      console.log('[floor canvas] sample feature geometry:', sample.geometry);
-    }
 
     const coords = floor.geometry.coordinates[0];
     const lngs = coords.map(c => c[0]);
@@ -2602,7 +2587,11 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       center: [centerLng, centerLat],
       zoom: 18.5,
       attributionControl: false,
-      maxZoom: 22,
+      // Cap at 20. Above this, MapLibre's internal geojson vector-tile
+      // pipeline behaves inconsistently with our small room polygons —
+      // matches the `fitBounds maxZoom: 20` below so the user can never
+      // manually scroll back into the broken range.
+      maxZoom: 20,
       preserveDrawingBuffer: true,
       // Keep the floor plan oriented like architectural drawings — north up,
       // no rotation gestures. Pinch-zoom and pan stay enabled so users can
@@ -2649,16 +2638,6 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
 
       map.addSource('floor',  { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
-      console.log('[floor canvas] map loaded, sources added');
-      // Sanity-check: query the source to confirm features made it through
-      map.once('idle', () => {
-        try {
-          const querySrc = map.querySourceFeatures('spaces');
-          console.log('[floor canvas] spaces source contains', querySrc.length, 'queried features');
-        } catch (e) {
-          console.warn('[floor canvas] querySourceFeatures failed', e);
-        }
-      });
 
       // Room fills — colour is pre-computed onto each feature's `fillColor`
       // property (see USETYPE_FILL above). The room polygons tile the entire
@@ -2674,7 +2653,6 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
           'fill-opacity': 1
         }
       });
-      console.log('[floor canvas] rooms-fill layer added');
 
       // Default room outlines — darker / thicker than before for a more
       // legible "every cell is a room" grid feel.
@@ -2803,20 +2781,9 @@ function buildRoomPopupHtml(t, floor, space) {
 }
 
 // ── 11. DOWNLOADS — paginated Document table (§ 6.2) ─────────────────────
-// Document-type DE labels — keyed by the schema A.10 enum (canonical EN).
-// Records come from data/documents.json (state.documents).
-const DOCUMENT_TYPE_LABEL = {
-  Lease:       'Mietvertrag',
-  FloorPlan:   'Grundriss',
-  Permit:      'Baubewilligung',
-  Certificate: 'Zertifikat',
-  Manual:      'Handbuch',
-  Regulation:  'Verordnung',
-  WiBe:        'WiBe',
-  LegalBasis:  'Rechtsgrundlage',
-  Attachment:  'Beilage',
-  Other:       'Sonstiges',
-};
+// Document-type DE labels come from the canonical DOC_TYPE_LABEL map in
+// lib.js — shared with the property-detail Dokumente groups so labels
+// don't diverge between the two surfaces.
 const DOCUMENT_PAGE_SIZE = 25;
 
 function documentLinkedLabel(d) {
@@ -2856,7 +2823,7 @@ function renderDownloads() {
         <div class="docs-filter-bar">
           <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
             <option value="">Alle Typen</option>
-            ${Object.entries(DOCUMENT_TYPE_LABEL).map(([v, l]) =>
+            ${Object.entries(DOC_TYPE_LABEL).map(([v, l]) =>
               `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${l}</option>`).join('')}
           </select>
           <select class="input docs-filter-bar__select" id="filterDocBuilding" aria-label="Liegenschaft">
@@ -2919,7 +2886,7 @@ function renderDownloads() {
     if (!pills) return;
     const active = [];
     if (docState.type) {
-      active.push({ key: 'type', label: 'Typ', value: DOCUMENT_TYPE_LABEL[docState.type] || docState.type });
+      active.push({ key: 'type', label: 'Typ', value: DOC_TYPE_LABEL[docState.type] || docState.type });
     }
     if (docState.building) {
       const b = P.state.buildings.find(x => x.buildingId === docState.building);
@@ -2992,7 +2959,7 @@ function renderDownloads() {
               ${P.icon('document')}<span>${P.escapeHtml(d.title)}</span>
             </a>
           </td>
-          <td><span class="badge badge--info">${P.escapeHtml(DOCUMENT_TYPE_LABEL[d.type] || d.type)}</span></td>
+          <td><span class="badge badge--info">${P.escapeHtml(DOC_TYPE_LABEL[d.type] || d.type)}</span></td>
           <td class="docs-table__linked">${P.escapeHtml(documentLinkedLabel(d))}</td>
           <td><code>${P.escapeHtml(d.format || '')}</code></td>
           <td>${P.escapeHtml(d.size || '')}</td>

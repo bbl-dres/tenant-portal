@@ -71,6 +71,35 @@ export function roleLabel(role) {
   })[role] || role;
 }
 
+// Single canonical Document.type → German label map. Used by the downloads
+// page, the property-detail Dokumente groups, and the linked-document table
+// helpers. Keys match the schema A.10 enum (canonical EN) in
+// docs/DATAMODEL.md. Add a new key here whenever the enum grows — both
+// consumer surfaces pick it up automatically.
+export const DOC_TYPE_LABEL = {
+  Lease:       'Mietvertrag',
+  FloorPlan:   'Grundriss',
+  Permit:      'Bewilligung',
+  Certificate: 'Zertifikat',
+  Manual:      'Handbuch',
+  Regulation:  'Verordnung',
+  WiBe:        'WiBe',
+  LegalBasis:  'Rechtsgrundlage',
+  Attachment:  'Anhang',
+  Other:       'Sonstiges',
+};
+
+// Safety guard for interpolating an image URL into a CSS `url(...)`
+// expression inside an inline `style="background-image:..."` attribute.
+// Returns an empty string for anything that isn't an http(s) URL (broken
+// image, never a CSS-injection vector), and replaces single / double
+// quotes that would otherwise break out of the surrounding string.
+export function safeImageUrl(url) {
+  if (typeof url !== 'string') return '';
+  if (!/^https?:\/\//i.test(url)) return '';
+  return url.replace(/['"\\]/g, c => encodeURIComponent(c));
+}
+
 
 // ── STORAGE PRIMITIVES ─────────────────────────────────────────────────────
 // Wrapped because localStorage throws in Safari private mode, on quota,
