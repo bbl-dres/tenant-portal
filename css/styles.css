@@ -1611,8 +1611,77 @@ figcaption {
   display: flex;
   gap: var(--space-md);
   flex-wrap: wrap;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
+
+/* ── ACTIVE FILTER PILLS ─────────────────────────────────────────────────
+   Row of removable pills that sits between a filter bar and the data
+   grid below it. Each pill shows the facet label (`Typ`, `Liegenschaft`,
+   `Suche`, …) + the active value + an X button to clear that single
+   facet. When ≥ 2 facets are active, a trailing "Alle zurücksetzen"
+   text-link clears the whole filter set in one click.
+   Used by #/downloads (.docs-filter-bar) and #/properties
+   (.property-toolbar). */
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-lg);
+}
+.filter-pills[hidden] { display: none; }
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 4px 4px var(--space-md);
+  background: var(--color-secondary-50);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-snug);
+}
+.filter-pill__label {
+  color: var(--color-text-secondary);
+}
+.filter-pill__value {
+  font-weight: var(--font-weight-bold);
+}
+.filter-pill__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: var(--space-xs);
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.filter-pill__remove:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+.filter-pill__remove:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.filter-pills__clear-all {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin-left: var(--space-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.filter-pills__clear-all:hover { color: var(--color-primary); }
 .docs-table-wrap {
   overflow-x: auto;
 }
@@ -3871,17 +3940,30 @@ a.btn[aria-disabled="true"] {
    Mirrors patterns from sibling prototypes (transaction-immo, property-inventory). */
 .property-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "search toggle";
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "search filter toggle";
   gap: var(--space-md);
   align-items: center;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+@media (max-width: 768px) {
+  .property-toolbar {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "search"
+      "filter"
+      "toggle";
+  }
 }
 .property-toolbar__search {
   grid-area: search;
   position: relative;
   display: flex;
   align-items: center;
+}
+.property-toolbar__select {
+  grid-area: filter;
+  min-width: 200px;
 }
 .property-toolbar__search .inline-icon {
   position: absolute;
@@ -4195,25 +4277,120 @@ a.btn[aria-disabled="true"] {
   .property-aside { position: sticky; top: var(--space-md); }
 }
 
-/* Attachments list — used in wizard attachments, drafts. Compact single-row. */
+/* Attachments list — shared by the wizard upload step (badge shows
+   scan status) and the application-detail Anhänge tab (read-only).
+   BEM `__item` / `__icon` / `__name` / `__badge` / `__size` for proper
+   grid layout; legacy `.attachment-list li` rule kept for any draft
+   markup that still uses plain `<li>`. */
 .attachment-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
+.attachment-list__item,
 .attachment-list li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--color-border-light);
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-secondary-100);
   font-size: var(--text-body-sm);
 }
+.attachment-list__item:last-child,
 .attachment-list li:last-child { border-bottom: none; }
+.attachment-list__icon {
+  color: var(--color-primary);
+  display: inline-flex;
+}
+.attachment-list__icon svg { width: 20px; height: 20px; }
+.attachment-list__name {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachment-list__badge {
+  display: inline-flex;
+  align-items: center;
+}
+.attachment-list__size,
 .attachment-list .meta {
-  margin-left: auto;
   font-size: var(--text-body-xs);
   color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* History timeline — refined: vertical rail on the left, tone-coloured
+   dots per event type, monospace time, secondary-coloured action line.
+   Replaces the older 3-column grid that read as a table. */
+.history-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+.history-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--color-secondary-100);
+}
+.history-timeline__item {
+  position: relative;
+  padding: 0 0 var(--space-lg) var(--space-xl);
+}
+.history-timeline__item:last-child { padding-bottom: 0; }
+.history-timeline__dot {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary-300);
+  box-shadow: 0 0 0 3px var(--color-bg-default);
+}
+.history-timeline__dot--info     { background: var(--color-info); }
+.history-timeline__dot--success  { background: var(--color-success-bright); }
+.history-timeline__dot--warning  { background: var(--color-warning); }
+.history-timeline__dot--neutral  { background: var(--color-secondary-500); }
+.history-timeline__time {
+  display: block;
+  font-family: var(--font-family-mono);
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: 2px;
+}
+.history-timeline__action {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-snug);
+}
+
+/* SAP / ePPM tab definition list — two columns with right-aligned
+   labels for a scannable infobox feel. */
+.sap-dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-sm) var(--space-lg);
+  margin: var(--space-md) 0 0;
+}
+.sap-dl dt {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-regular);
+}
+.sap-dl dd {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
 }
 
 /* Download list — federal CD pattern (cf. kbob.admin.ch and ar.admin.ch/de/immo-portal).

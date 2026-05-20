@@ -28,7 +28,7 @@ formatAddressLine, formatAssetKey, flattenFeature, roleLabel,
 // storage primitives
 safeGet, safeSet, safeRemove,
 // UI primitives
-toast, modal, ICONS, icon, statusBadge,
+toast, modal, ICONS, icon, statusBadge, attachmentLi,
 PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts,
@@ -1204,27 +1204,63 @@ function tabBtn(key, label, active) {
 
 function renderDetailTab(a, tab) {
   if (tab === 'anhaenge') {
-    return `<ul class="attachment-list">${(a.attachments || []).map((x, i) => attachmentLi(x, i)).join('') || '<li>Keine Anhänge.</li>'}</ul>`;
+    const items = a.attachments || [];
+    if (items.length === 0) {
+      return `<p class="text-secondary">Keine Anhänge zu diesem Antrag.</p>`;
+    }
+    return `
+      <ul class="attachment-list" aria-label="Anhänge zu diesem Antrag">
+        ${items.map(x => attachmentLi(x)).join('')}
+      </ul>
+      <p class="table-hint">Klicken Sie ein Dokument, um es herunterzuladen. Anhänge bleiben für die Dauer der Aktenführung verfügbar.</p>
+    `;
   }
   if (tab === 'historie') {
-    return `<ol class="history-list">${(a.history || []).map(h => `
-      <li>
-        <time>${new Date(h.ts).toLocaleString('de-CH')}</time>
-        <span><strong>${P.escapeHtml(h.actor)}</strong></span>
-        <span>${P.escapeHtml(h.action)}</span>
-      </li>
-    `).join('')}</ol>`;
+    // Map eventType → tone for the timeline dot. Aligned with the
+    // canonical Application history events from docs/DATAMODEL.md.
+    const dotTone = (eventType) => {
+      if (!eventType) return '';
+      if (/Added|Submitted/i.test(eventType)) return 'history-timeline__dot--info';
+      if (/Approved|Closed/i.test(eventType)) return 'history-timeline__dot--success';
+      if (/Rejected|Clarification/i.test(eventType)) return 'history-timeline__dot--warning';
+      if (/Handover|Project|System/i.test(eventType)) return 'history-timeline__dot--neutral';
+      return '';
+    };
+    return `
+      <ol class="history-timeline" aria-label="Ereignisverlauf">
+        ${(a.history || []).map(h => `
+          <li class="history-timeline__item">
+            <span class="history-timeline__dot ${dotTone(h.eventType)}" aria-hidden="true"></span>
+            <div class="history-timeline__body">
+              <time class="history-timeline__time" datetime="${P.escapeHtml(h.ts)}">${new Date(h.ts).toLocaleString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
+              <p class="history-timeline__action"><strong>${P.escapeHtml(h.actor)}</strong> · ${P.escapeHtml(h.action)}</p>
+            </div>
+          </li>
+        `).join('')}
+      </ol>
+    `;
   }
   if (tab === 'sap') {
     return `
       <div class="card">
         <h3 class="card__title">SAP RE-FX Integration</h3>
-        ${a.assetKey ? `
-          <p>Objekt-Schlüssel: <code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code></p>
-          <p>EGID: <code>${a.egid}</code></p>
-        ` : '<p><span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben.</p>'}
-        ${a.projectNumber ? `<p>Bedarfsmeldung: <strong>${a.projectNumber}</strong></p>` : ''}
-        <p class="app-detail__correlation">Korrelations-ID: <code>MP-${(a.id || '').slice(-4)}-Z3K9-F2M8-XQ${(Math.random() * 100 | 0)}</code></p>
+        <dl class="sap-dl">
+          ${a.assetKey ? `
+            <dt>Objekt-Schlüssel</dt>
+            <dd><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code></dd>
+            <dt>EGID</dt>
+            <dd><code>${a.egid}</code></dd>
+          ` : `
+            <dt>Objekt-Schlüssel</dt>
+            <dd><span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben</dd>
+          `}
+          ${a.projectNumber ? `
+            <dt>Bedarfsmeldung (ePPM)</dt>
+            <dd><strong>${P.escapeHtml(a.projectNumber)}</strong></dd>
+          ` : ''}
+          <dt>Korrelations-ID</dt>
+          <dd><code>MP-${(a.id || '').slice(-4)}-Z3K9-F2M8-XQ${(Math.random() * 100 | 0)}</code></dd>
+        </dl>
       </div>
     `;
   }
@@ -1512,13 +1548,17 @@ function renderProperties() {
     ? P.state.tenancies
     : P.state.tenancies.filter(t => t.ve === ve || t.dep === ve);
 
-  // URL state: ?view=gallery|list|map · ?q=… · ?page=N (1-based)
+  // URL state: ?view=gallery|list|map · ?q=… · ?cat=… · ?page=N
   const params = parseHashQuery(location.hash);
   const view = ['gallery','list','map'].includes(params.view) ? params.view : 'gallery';
   const query = (params.q || '').toLowerCase().trim();
+  const category = (params.cat || '').trim();
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
 
-  const filtered = filterTenancies(allTenancies, query);
+  // Available categories — derived from the actual data so the dropdown
+  // never shows a value with zero matches.
+  const categories = Array.from(new Set(allTenancies.map(t => t.portfolioCategory).filter(Boolean))).sort();
+  const filtered = filterTenancies(allTenancies, query, category);
   const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
   const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
@@ -1549,14 +1589,15 @@ function renderProperties() {
             </div>
           </div>
         ` : `
-          ${propertiesToolbar({ view, query })}
+          ${propertiesToolbar({ view, query, category, categories })}
+          ${renderPropertiesFilterPills({ view, query, category })}
 
           ${filtered.length === 0 ? `
             <div class="empty-state empty-state--inset">
-              <h2 class="empty-state__title">Keine Treffer für „${P.escapeHtml(query)}"</h2>
-              <p class="empty-state__lead">Versuchen Sie es mit einem anderen Suchbegriff.</p>
+              <h2 class="empty-state__title">Keine Treffer${query ? ` für „${P.escapeHtml(query)}"` : ''}</h2>
+              <p class="empty-state__lead">Versuchen Sie es mit anderen Filtern.</p>
               <div class="empty-state__cta">
-                <a href="#/properties?view=${view}" class="btn btn--outline">Filter zurücksetzen</a>
+                <a href="${buildPropertiesHash({ view, page: 1 })}" class="btn btn--outline">Filter zurücksetzen</a>
               </div>
             </div>
           ` : `
@@ -1574,7 +1615,7 @@ function renderProperties() {
               totalItems: filtered.length,
               entitySingular: 'Liegenschaft',
               entityPlural: 'Liegenschaften',
-              hrefFor: (page) => buildPropertiesHash({ view, q: query, page }),
+              hrefFor: (page) => buildPropertiesHash({ view, q: query, cat: category, page }),
             }) : ''}
           `}
         `}
@@ -1598,27 +1639,32 @@ function parseHashQuery(hash) {
   });
   return out;
 }
-function buildPropertiesHash({ view, q, page }) {
+function buildPropertiesHash({ view, q, cat, page }) {
   const parts = [];
-  if (view) parts.push('view=' + encodeURIComponent(view));
-  if (q)    parts.push('q='    + encodeURIComponent(q));
+  if (view)        parts.push('view=' + encodeURIComponent(view));
+  if (q)           parts.push('q='    + encodeURIComponent(q));
+  if (cat)         parts.push('cat='  + encodeURIComponent(cat));
   if (page && page > 1) parts.push('page=' + page);
   return '#/properties' + (parts.length ? '?' + parts.join('&') : '');
 }
 
-function filterTenancies(list, q) {
-  if (!q) return list;
-  return list.filter(t => {
-    const hay = [t.buildingName, t.address, formatAssetKey(t.assetKey), t.egid, t.ve, t.dep, t.portfolioCategory]
-      .filter(Boolean).join(' ').toLowerCase();
-    return hay.includes(q);
-  });
+function filterTenancies(list, q, cat) {
+  let out = list;
+  if (cat) out = out.filter(t => t.portfolioCategory === cat);
+  if (q) {
+    out = out.filter(t => {
+      const hay = [t.buildingName, t.address, formatAssetKey(t.assetKey), t.egid, t.ve, t.dep, t.portfolioCategory]
+        .filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  return out;
 }
 
-function propertiesToolbar({ view, query }) {
+function propertiesToolbar({ view, query, category, categories }) {
   // Count + page-position now live in the pagination footer (CD Bund
   // pagination shows "von X Seiten"), so the toolbar only carries the
-  // search field + the view-toggle tabs.
+  // search field, a portfolio-category dropdown, and the view-toggle tabs.
   const tab = (id, label, iconName) => `
     <button class="view-toggle__btn ${view === id ? 'view-toggle__btn--active' : ''}"
             type="button" data-view="${id}"
@@ -1634,11 +1680,43 @@ function propertiesToolbar({ view, query }) {
                value="${P.escapeHtml(query)}" autocomplete="off">
         ${query ? `<button type="button" class="property-toolbar__clear" aria-label="Suche löschen" data-action="clear-search">${P.icon('x')}</button>` : ''}
       </div>
+      <select class="input property-toolbar__select" id="propertiesCategory" aria-label="Portfolio-Kategorie">
+        <option value="">Alle Kategorien</option>
+        ${categories.map(c => `<option value="${P.escapeHtml(c)}" ${category === c ? 'selected' : ''}>${P.escapeHtml(c)}</option>`).join('')}
+      </select>
       <div class="view-toggle" role="group" aria-label="Ansicht wechseln">
         ${tab('gallery', 'Galerie', 'grid')}
         ${tab('list',    'Liste',   'list')}
         ${tab('map',     'Karte',   'map')}
       </div>
+    </div>
+  `;
+}
+
+function renderPropertiesFilterPills({ view, query, category }) {
+  const active = [];
+  if (query)    active.push({ key: 'q',   label: 'Suche',     value: query });
+  if (category) active.push({ key: 'cat', label: 'Kategorie', value: category });
+  if (active.length === 0) return '';
+  const hrefWithout = (key) => {
+    const params = parseHashQuery(location.hash);
+    const next = { view, q: params.q || '', cat: params.cat || '', page: 1 };
+    next[key === 'q' ? 'q' : 'cat'] = '';
+    return buildPropertiesHash(next);
+  };
+  return `
+    <div class="filter-pills" aria-label="Aktive Filter">
+      ${active.map(f => `
+        <span class="filter-pill">
+          <span class="filter-pill__label">${f.label}:</span>
+          <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
+          <a class="filter-pill__remove" href="${hrefWithout(f.key)}"
+             aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </a>
+        </span>
+      `).join('')}
+      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, page: 1 })}">Alle Filter zurücksetzen</a>
     </div>
   `;
 }
@@ -1651,20 +1729,27 @@ function wirePropertiesToolbar(view) {
       clearTimeout(t);
       const value = e.target.value;
       t = setTimeout(() => {
-        location.hash = buildPropertiesHash({ view, q: value.trim(), page: 1 });
+        const params = parseHashQuery(location.hash);
+        location.hash = buildPropertiesHash({ view, q: value.trim(), cat: params.cat || '', page: 1 });
       }, 220);
     });
   }
+  const catSelect = document.getElementById('propertiesCategory');
+  if (catSelect) catSelect.addEventListener('change', e => {
+    const params = parseHashQuery(location.hash);
+    location.hash = buildPropertiesHash({ view, q: params.q || '', cat: e.target.value, page: 1 });
+  });
   document.querySelectorAll('.view-toggle__btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const nextView = btn.getAttribute('data-view');
       const params = parseHashQuery(location.hash);
-      location.hash = buildPropertiesHash({ view: nextView, q: params.q || '', page: 1 });
+      location.hash = buildPropertiesHash({ view: nextView, q: params.q || '', cat: params.cat || '', page: 1 });
     });
   });
   const clearBtn = document.querySelector('[data-action="clear-search"]');
   if (clearBtn) clearBtn.addEventListener('click', () => {
-    location.hash = buildPropertiesHash({ view, q: '', page: 1 });
+    const params = parseHashQuery(location.hash);
+    location.hash = buildPropertiesHash({ view, q: '', cat: params.cat || '', page: 1 });
   });
   // CD Bund pagination input — generic helper picks up the hrefFor
   // closure stashed by renderPagination.
@@ -2058,6 +2143,8 @@ function renderDownloads() {
                  aria-label="Suche">
         </div>
 
+        <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
+
         <div class="docs-table-wrap">
           <table class="table table--zebra table--documents" aria-label="Dokumente">
             <thead>
@@ -2100,6 +2187,61 @@ function renderDownloads() {
     });
   }
 
+  function renderDocFilterPills() {
+    const pills = document.getElementById('docFilterPills');
+    if (!pills) return;
+    const active = [];
+    if (docState.type) {
+      active.push({ key: 'type', label: 'Typ', value: DOCUMENT_TYPE_LABEL[docState.type] || docState.type });
+    }
+    if (docState.building) {
+      const b = P.state.buildings.find(x => x.buildingId === docState.building);
+      active.push({ key: 'building', label: 'Liegenschaft', value: b ? b.name : docState.building });
+    }
+    if (docState.q) {
+      active.push({ key: 'q', label: 'Suche', value: docState.q });
+    }
+    if (active.length === 0) {
+      pills.hidden = true;
+      pills.innerHTML = '';
+      return;
+    }
+    pills.hidden = false;
+    pills.innerHTML = active.map(f => `
+      <span class="filter-pill">
+        <span class="filter-pill__label">${f.label}:</span>
+        <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
+        <button class="filter-pill__remove" type="button"
+                aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
+                data-clear="${f.key}">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </span>
+    `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurücksetzen</button>`;
+    pills.querySelectorAll('[data-clear]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-clear');
+        if (key === 'all') {
+          docState.type = ''; docState.building = ''; docState.q = '';
+          document.getElementById('filterDocType').value = '';
+          document.getElementById('filterDocBuilding').value = '';
+          document.getElementById('filterDocText').value = '';
+        } else if (key === 'type') {
+          docState.type = '';
+          document.getElementById('filterDocType').value = '';
+        } else if (key === 'building') {
+          docState.building = '';
+          document.getElementById('filterDocBuilding').value = '';
+        } else if (key === 'q') {
+          docState.q = '';
+          document.getElementById('filterDocText').value = '';
+        }
+        docState.page = 1;
+        applyDocState();
+      });
+    });
+  }
+
   function applyDocState() {
     const all = filteredDocs();
     const total = all.length;
@@ -2108,6 +2250,8 @@ function renderDownloads() {
     if (docState.page < 1) docState.page = 1;
     const start = (docState.page - 1) * DOCUMENT_PAGE_SIZE;
     const slice = all.slice(start, start + DOCUMENT_PAGE_SIZE);
+
+    renderDocFilterPills();
 
     const tbody = document.getElementById('docTableBody');
     if (slice.length === 0) {

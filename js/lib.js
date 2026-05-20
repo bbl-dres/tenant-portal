@@ -124,6 +124,26 @@ export function icon(name) { return ICONS[name] || ''; }
 
 
 // ── STATUS BADGE ───────────────────────────────────────────────────────────
+// Attachment list-item renderer — shared by the wizard step 3 (upload
+// list, may show "Virenscan läuft" during scan) and the application
+// detail page (read-only download list). Lives in lib.js so both
+// modules can import without duplicating.
+export function attachmentLi(a) {
+  const badge = a.scanStatus === 'scanning'
+    ? '<span class="badge badge--warning">Virenscan läuft</span>'
+    : a.scanStatus === 'ok'
+      ? '<span class="badge badge--success">ok</span>'
+      : a.scanStatus
+        ? '<span class="badge badge--danger">abgewiesen</span>'
+        : '';
+  return `<li class="attachment-list__item">
+    <span class="attachment-list__icon" aria-hidden="true">${icon('attachment')}</span>
+    <span class="attachment-list__name">${escapeHtml(a.name)}</span>
+    ${badge ? `<span class="attachment-list__badge">${badge}</span>` : ''}
+    <span class="attachment-list__size">${escapeHtml(a.size || '')}</span>
+  </li>`;
+}
+
 // Maps the canonical Application.status enum (docs/DATAMODEL.md A.3) to a
 // styled German display badge. Used by the inbox, queue, and detail views.
 export function statusBadge(status) {

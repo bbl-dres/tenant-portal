@@ -17,7 +17,7 @@
 import { state, persistDraft, loadDraft, clearDraft } from './state.js';
 import {
   escapeHtml, escapeJs, formatChf, icon, toast, modal,
-  renderStepIndicator, formatAssetKey,
+  renderStepIndicator, formatAssetKey, attachmentLi,
 } from './lib.js';
 import { shell } from './shell.js';
 
@@ -459,15 +459,6 @@ function renderStep3(draft) {
       <button class="btn btn--filled" id="nextStep">Weiter → ${draft.type === 'Grossantrag' ? 'Detail' : 'Prüfen & Senden'}</button>
     </div>
   `;
-}
-
-function attachmentLi(a, i) {
-  const badge = a.scanStatus === 'scanning'
-    ? '<span class="badge badge--warning">Virenscan läuft</span>'
-    : a.scanStatus === 'ok'
-      ? '<span class="badge badge--success">ok</span>'
-      : '<span class="badge badge--danger">abgewiesen</span>';
-  return `<li>${icon('attachment')}${escapeHtml(a.name)} ${badge} <span class="meta">${escapeHtml(a.size)}</span></li>`;
 }
 
 function wireStep3(draft) {

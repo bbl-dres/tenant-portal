@@ -809,6 +809,86 @@ CD Bund [`menu.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\
 
 ---
 
+## 19. Search-results page (deep-dive)
+
+CD Bund's [`app/pages/searchResults.vue`](C:\Users\DavidRasner\Documents\GitHub\designsystem\app\pages\searchResults.vue) +
+[`SearchResultsList.vue`](C:\Users\DavidRasner\Documents\GitHub\designsystem\app\components\ch\components\SearchResultsList.vue) +
+[`search.postcss`](C:\Users\DavidRasner\Documents\GitHub\designsystem\css\components\search.postcss).
+
+CD canonical shape:
+
+```
+<section class="section bg--secondary-50">
+  <div class="container">
+    <h1 class="h1">Search Results</h1>
+    <div class="search search--large search--page-result">
+      <input type="search" value="<current query>">  ← lets user refine
+      <Btn icon="Search" />
+    </div>
+  </div>
+</section>
+<section class="section section--default">
+  <div class="container">
+    <div class="search-results">
+      <Tabs> Webseiten / Dokumente </Tabs>
+      <div class="search-results__header">
+        <strong>N</strong> Suchergebnisse
+        <Radio> Sortierung: Relevanz / Datum </Radio>
+      </div>
+      <SearchResultsList :itemList="…" />        ← rich Cards (image, MetaInfo, title, content, footerAction)
+      <NoResults>                                ← bold-search-term H2 + "Tipps zur Suche" list + "Hinweis" paragraph
+      <Pagination class="pagination--right">
+      <Notification type="info">                 ← "Haben Sie nicht gefunden …" with contact-form link
+    </div>
+  </div>
+</section>
+```
+
+Our current `renderSearchResults` at [app.js:206](../js/app.js#L206):
+
+```
+<section class="section">
+  <div class="container container--narrow">
+    <h1 class="h1 section-heading">Suchergebnisse für „…"</h1>
+    <p class="section-intro">N Treffer in …</p>
+    <section class="search-results__group">
+      <h2 class="h3 search-results__group-title">Aktuell (N)</h2>
+      <ul class="search-results">
+        <li><a><strong>type</strong> · date · <span>title</span><p>lead</p></a></li>
+      </ul>
+      <p class="search-results__more"><a>+ X weitere …</a></p>
+    </section>
+    [...repeats for Anträge / Liegenschaften / Arbeitsinstrumente...]
+  </div>
+</section>
+```
+
+### 19.1 Findings
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 19.1.1 | **No hero search section with re-displayed input**. CD shows a prominent search field at the top of the results page (with the current query pre-filled) so users can refine without going back to the global nav. Ours only has the breadcrumb + H1. | medium | ◻ |
+| 19.1.2 | **Section lacks the `bg--secondary-50` tint**. CD places the search hero on the federal cool-blue-gray (we map this to `.section--alt`). Visually separates the search input from the result list below. | medium | ◻ |
+| 19.1.3 | **Result rows are minimal text-only `<li>`** — no image, no rich MetaInfo, no description, no "Weiterlesen" affordance. CD uses `<Card type="list">` with image + meta + title + content + footer action. Our rows visually under-sell each result. | **high** | ◻ |
+| 19.1.4 | **Result row markup doesn't use `.meta-info` BEM** — we have `<strong>type</strong> · date` flat string. After §18.1 we have a proper `.meta-info__item` pattern that should be used here. | low | ◻ |
+| 19.1.5 | **No "Sortierung" controls** (CD: Radio for Relevanz / Datum). Acceptable for a prototype with relevance-only ordering, but worth flagging. | low | — defer |
+| 19.1.6 | **No tabs to filter result types**. CD uses tabs (Webseiten / Dokumente). We use grouped sections side-by-side, which is also a valid federal pattern (matches kbob's grouped search). Document as deliberate. | — | — deliberate |
+| 19.1.7 | **No-results state is bare** — "Keine Treffer" + one tip-line. CD shows a richer no-results with bold search term in H2, "Tipps zur Suche" list (Schreibweise / allgemeineren Begriff / weniger Begriffe), and a "Hinweis" paragraph. | medium | ◻ |
+| 19.1.8 | **No bottom "Kontakt" notification**. CD shows an info-notification at the foot of the results: "Haben Sie nicht gefunden wonach Sie suchen?" with a link to a contact form. Useful federal pattern. | low | ◻ |
+| 19.1.9 | **No per-result image/thumbnail**. CD `SearchResultsList` Cards include optional images. For news / property results we have image data available; surfacing it would lift the visual weight. | low | — defer |
+| 19.1.10 | **Per-group cap + "+X weitere" link** (our pattern) vs CD's tabbed list + pagination. Our pattern is the kbob/swisstopo deliberate divergence (cross-ref §5.6 — applied during pagination spread). Keep. | — | ✓ deliberate |
+| 19.1.11 | **Section background variants** — CD uses two sections (hero `bg--secondary-50` + content `section--default`) to separate input from results. We use one. | medium | — covered by 19.1.2 |
+
+### 19.2 Fix order
+
+1. **§19.1.1 + 19.1.2** — Hero section with re-displayed search input on `.section--alt`. Single visible improvement.
+2. **§19.1.3 + 19.1.4** — Promote result rows to card-style items with proper meta-info + title + lead + arrow affordance.
+3. **§19.1.7** — Expanded no-results state with tips + hint.
+4. **§19.1.8** — Bottom contact notification.
+5. Defer the rest (sort controls, tabs, images).
+
+---
+
 ## Reference
 
 - Design system repo: <https://github.com/swiss/designsystem>
