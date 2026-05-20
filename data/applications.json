@@ -284,7 +284,7 @@
       { "ts": "2025-11-14T13:18:00Z", "actor": "Jörg Berger",   "eventType": "ReviewerAssigned",    "action": "Zur Bearbeitung übernommen" },
       { "ts": "2025-12-08T11:02:00Z", "actor": "Jörg Berger",   "eventType": "ApplicationApproved", "action": "Genehmigt ohne Auflagen" },
       { "ts": "2025-12-10T09:14:00Z", "actor": "System",        "eventType": "ProjectHandover",     "action": "ePPM-Übergabe erfolgreich (BM-2025-001148)" },
-      { "ts": "2026-04-22T16:30:00Z", "actor": "Holger Ludwig", "eventType": "ApplicationUpdated",  "action": "Projekt umgesetzt — Akte abgeschlossen" }
+      { "ts": "2026-04-22T16:30:00Z", "actor": "Lars Hofmann", "eventType": "ApplicationUpdated",  "action": "Projekt umgesetzt — Akte abgeschlossen" }
     ]
   }
 ]

@@ -371,8 +371,8 @@ Schritt 1 von 5 — Basisangaben
 │      📍 Marker hier                 │  Verwaltungseinheit (VE)                   │
 │                                    │  [ UVEK / BAFU            ▾ ]              │
 │                                    │  Zuständige BBL-Kontakte                   │
-│   Klick auf Gebäude erkennt:        │   • H. Ludwig (PFM)                        │
-│   • SAP: 1086/2010/AA               │   • A. Wirz (IM)                           │
+│   Klick auf Gebäude erkennt:        │   • L. Hofmann (PFM)                        │
+│   • SAP: 1086/2010/AA               │   • N. Frey (IM)                           │
 │   • EGID 100123456                  │                                            │
 │   • BK 1086 = BBL-Portfolio ✓       │                                            │
 └────────────────────────────────────┴────────────────────────────────────────────┘
@@ -557,7 +557,7 @@ Schritt 1 von 5 — Basisangaben
 │                                                                                 │
 │  Verwaltungseinheit (VE)         [ UVEK / BAFU                              ▾ ] │
 │  Departement                       UVEK                              (auto)     │
-│  Zuständige BBL-Kontakte           H. Ludwig, A. Wirz                (auto)     │
+│  Zuständige BBL-Kontakte           L. Hofmann, N. Frey                (auto)     │
 │                                                                                 │
 │  Adresse                         [ Eichweg 22, 3003 Bern                      ] │
 │  SAP-Objekt-Schlüssel              BK 1086 · WE 2010 · Obj AA         🟢 (auto) │
@@ -784,7 +784,7 @@ Pipeline at top, tabbed sections (Daten / Anhänge / Historie / SAP) below.
 └─────────────────────────────────────────────────────────────────────────────────┘
 ┌─ Aktuelles ─────────────────────────────────────────────────────────────────────┐
 │  17.05.  Neue Vorlage für SEM-Anträge verfügbar                                 │
-│          Quelle BBL PFM · H. Ludwig · Stand 17.05.2026                          │
+│          Quelle BBL PFM · L. Hofmann · Stand 17.05.2026                          │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -1594,7 +1594,7 @@ Schritt 1 von 5 — Basisangaben  (Greenfield-Pfad aktiviert)
 │                                                                                │
 │  Voraussichtliche Inbetriebnahme *        [ Q3 2027                  ▾ ]      │
 │  Voraussichtliche PFM-Kategorie *         [ Verwaltung Klasse III    ▾ ]      │
-│  Verantwortlich BBL-Liegenschaftsteam     [ A. Wirz (IM, Region Bern) ]       │
+│  Verantwortlich BBL-Liegenschaftsteam     [ N. Frey (IM, Region Bern) ]       │
 │                                            (auto aus Adressregion, FUNC-AU-001)│
 │                                                                                │
 │  [ Koordinaten von Karte übernehmen ]   (swisstopo-LV95: 2 601 320 / 1 200 410)│
@@ -2023,7 +2023,7 @@ Art. 9. Filing-clerk view, no editing capability.
 │                                                                                 │
 │  ┌─ Antrag BE-2026-014 — Bundeshaus W ──────────────────────────────────────┐  │
 │  │  Status: in ePPM (Bedarfsmeldung BM-2026-000713)                          │  │
-│  │  Beteiligte: A. Muster (Antrag) · J. Berger (GS UVEK) · H. Ludwig (PFM)   │  │
+│  │  Beteiligte: A. Muster (Antrag) · J. Berger (GS UVEK) · L. Hofmann (PFM)   │  │
 │  │  Korrelations-ID: MP-7Z3K-9F2M-8XQA                                            │  │
 │  └──────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                 │
@@ -2096,7 +2096,7 @@ seeing a phantom "in GS-Prüfung" state.
 ┌─ Antrag BK-2026-007 — D. Vogel (BK)  ──────────────────────────────────────────┐
 │  Eingereicht:    14.05.2026                                                    │
 │  Status:         in PFM-Prüfung                                                │
-│  Zugewiesen an:  H. Ludwig (BBL-PFM)         (statt GS-Prüfer/in)              │
+│  Zugewiesen an:  L. Hofmann (BBL-PFM)         (statt GS-Prüfer/in)              │
 │                                                                                │
 │  Tabs: Daten | Anhänge | Historie | SAP                                        │
 │  ──────────────────────────────────────────                                    │
@@ -2167,7 +2167,7 @@ and §8.8 (FDFA categories) read their numbers from master data. FUNC-CC-001/
 Diff-Ansicht zur Freigabe (zweite PFM-Admin sieht):
 
 ┌─ Freigabe ausstehend · NAW-Klasse „Hybrid-Activity-Based" ────────────────────┐
-│  Bearbeitet von: M. Diener (PFM-Admin)       am 17.05.2026, 14:08              │
+│  Bearbeitet von: T. Spiess (PFM-Admin)       am 17.05.2026, 14:08              │
 │                                                                                │
 │  Vorherige Werte             Neue Werte                                        │
 │  ─────────────────────       ─────────────────────                             │
@@ -2176,7 +2176,7 @@ Diff-Ansicht zur Freigabe (zweite PFM-Admin sieht):
 │  Gültig ab:    01.07.2026    Gültig ab:   01.07.2026   (unverändert)           │
 │  Aktiv:        ☑             Aktiv:       ☑                                    │
 │                                                                                │
-│  Begründung der Änderung (M. Diener):                                          │
+│  Begründung der Änderung (T. Spiess):                                          │
 │  [ Pilotergebnis Activity-Based-Working Studie 03/2026: bei Hybrid-Profilen    │
 │    sind Flächenfaktoren um 10 % zu hoch. Empfehlung CC-PFM 2026-04.          ] │
 │                                                                                │
@@ -2221,7 +2221,7 @@ the urgency profile differs.
 │ Vertretene Person    Rolle                 Stv-Person             Zeitraum     │
 │ ──────────────────────────────────────────────────────────────────────────────  │
 │ J. Berger             GS-Prüfer/in UVEK    M. Schneider          12.–23.05.   │
-│ A. Wirz (IM)          IM-Region Bern        H. Studer             20.–31.05.   │
+│ N. Frey (IM)          IM-Region Bern        C. Roth             20.–31.05.   │
 │ — frei —             GS-Prüfer/in UVEK     T. Heller (Pikett)    laufend      │
 │                                                                                 │
 │ [ + Stellvertretung anlegen ]                                                   │
@@ -2491,7 +2491,7 @@ attachments to e-mails should be self-service.
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │ ┌─ Grundrisse Bundeshaus West ────────────────────────────────────────────┐    │
 │ │  📐 PDF · 4.2 MB · DE · Stand 15.03.2026               [Sichtbar: UVEK] │    │
-│ │  Quelle: BBL-IM · Verantwortlich: A. Wirz · 🟢 verifiziert              │    │
+│ │  Quelle: BBL-IM · Verantwortlich: N. Frey · 🟢 verifiziert              │    │
 │ │  [ Vorschau ] [ Herunterladen ↓ ]                                         │    │
 │ └─────────────────────────────────────────────────────────────────────────┘    │
 │ ┌─ Merkblatt „Antrag richtig stellen" ─────────────────────────────────────┐    │
@@ -2501,7 +2501,7 @@ attachments to e-mails should be self-service.
 │ └─────────────────────────────────────────────────────────────────────────┘    │
 │ ┌─ Schulung „Mieterportal kompakt" (60 min) ───────────────────────────────┐    │
 │ │  🎥 MP4 · 245 MB · DE · Stand 13.05.2026               [Sichtbar: Alle] │    │
-│ │  Quelle: BBL Campus · Verantwortlich: M. Diener · 🟢 verifiziert        │    │
+│ │  Quelle: BBL Campus · Verantwortlich: T. Spiess · 🟢 verifiziert        │    │
 │ │  [ Anschauen ↗ ] [ Folien herunterladen ↓ ]                               │    │
 │ └─────────────────────────────────────────────────────────────────────────┘    │
 │                                                                                 │

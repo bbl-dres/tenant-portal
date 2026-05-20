@@ -179,7 +179,7 @@ function renderStep1(draft) {
           <option value="BK">Bundeskanzlei (BK)</option>
         </select>
       </div>
-      <p class="form-field__hint">Zuständige BBL-Kontakte: <strong>H. Ludwig (PFM)</strong> · <strong>A. Wirz (IM)</strong> — automatisch ermittelt aus VE.</p>
+      <p class="form-field__hint">Zuständige BBL-Kontakte: <strong>L. Hofmann (PFM)</strong> · <strong>N. Frey (IM)</strong> — automatisch ermittelt aus VE.</p>
     </div>
 
     <div class="wizard__section">

@@ -1,13 +1,13 @@
 {
   "documents": [
     { "title": "Merkblatt: Antrag richtig stellen",           "type": "Merkblatt", "format": "PDF",  "size": "320 KB", "languages": "DE · FR · IT", "source": "BBL Campus", "responsible": "E. Frey",     "stand": "11.05.2026", "scope": "Alle" },
-    { "title": "Grundriss Bundeshaus West, 3. OG",            "type": "Grundriss", "format": "PDF",  "size": "4.2 MB", "languages": "DE",           "source": "BBL-IM",     "responsible": "A. Wirz",     "stand": "15.03.2026", "scope": "UVEK" },
-    { "title": "Schulung „Mieterportal kompakt\" (60 Min.)",  "type": "Schulung",  "format": "MP4",  "size": "245 MB", "languages": "DE",           "source": "BBL Campus", "responsible": "M. Diener",   "stand": "13.05.2026", "scope": "Alle" },
-    { "title": "Vorlage: SEM-Bedarfsmeldung",                 "type": "Vorlage",   "format": "DOCX", "size": "180 KB", "languages": "DE · FR",      "source": "BBL PFM",    "responsible": "H. Ludwig",   "stand": "17.05.2026", "scope": "SEM" },
+    { "title": "Grundriss Bundeshaus West, 3. OG",            "type": "Grundriss", "format": "PDF",  "size": "4.2 MB", "languages": "DE",           "source": "BBL-IM",     "responsible": "N. Frey",     "stand": "15.03.2026", "scope": "UVEK" },
+    { "title": "Schulung „Mieterportal kompakt\" (60 Min.)",  "type": "Schulung",  "format": "MP4",  "size": "245 MB", "languages": "DE",           "source": "BBL Campus", "responsible": "T. Spiess",   "stand": "13.05.2026", "scope": "Alle" },
+    { "title": "Vorlage: SEM-Bedarfsmeldung",                 "type": "Vorlage",   "format": "DOCX", "size": "180 KB", "languages": "DE · FR",      "source": "BBL PFM",    "responsible": "L. Hofmann",  "stand": "17.05.2026", "scope": "SEM" },
     { "title": "Sicherheits- & Brandschutzkonzept BBL",       "type": "Merkblatt", "format": "PDF",  "size": "2.4 MB", "languages": "DE · FR · IT", "source": "BBL Campus", "responsible": "E. Frey",     "stand": "22.11.2025", "scope": "Alle" },
-    { "title": "NAW-Klassen Übersicht (Bürowelten)",          "type": "Merkblatt", "format": "PDF",  "size": "410 KB", "languages": "DE",           "source": "BBL PFM",    "responsible": "H. Ludwig",   "stand": "10.01.2026", "scope": "Alle" },
-    { "title": "Grundriss Sulgenrain 19, EG",                 "type": "Grundriss", "format": "PDF",  "size": "3.8 MB", "languages": "DE",           "source": "BBL-IM",     "responsible": "H. Studer",   "stand": "02.04.2026", "scope": "BAFU" },
-    { "title": "Vertragsvorlage Mieterportal (Bsp.)",         "type": "Vertrag",   "format": "PDF",  "size": "780 KB", "languages": "DE",           "source": "BBL PFM",    "responsible": "H. Ludwig",   "stand": "20.02.2026", "scope": "Intern" }
+    { "title": "NAW-Klassen Übersicht (Bürowelten)",          "type": "Merkblatt", "format": "PDF",  "size": "410 KB", "languages": "DE",           "source": "BBL PFM",    "responsible": "B. Eberli",   "stand": "10.01.2026", "scope": "Alle" },
+    { "title": "Grundriss Sulgenrain 19, EG",                 "type": "Grundriss", "format": "PDF",  "size": "3.8 MB", "languages": "DE",           "source": "BBL-IM",     "responsible": "C. Roth",     "stand": "02.04.2026", "scope": "BAFU" },
+    { "title": "Vertragsvorlage Mieterportal (Bsp.)",         "type": "Vertrag",   "format": "PDF",  "size": "780 KB", "languages": "DE",           "source": "BBL PFM",    "responsible": "S. Aebischer","stand": "20.02.2026", "scope": "Intern" }
   ],
   "regulations": [
     { "title": "Verordnung über das Immobilienmanagement und die Logistik des Bundes (VILB)", "subtitle": "SR 172.010.21",                     "format": "PDF", "size": "210 KB", "date": "01.01.2025" },
