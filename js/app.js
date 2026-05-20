@@ -367,17 +367,6 @@ function renderSearchResults() {
             </section>
           ` : ''}
 
-          <div class="notification-banner notification-banner--info search-results__contact" role="note">
-            <span class="notification-banner__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            </span>
-            <div class="notification-banner__wrapper">
-              <p class="notification-banner__text">
-                <strong>Haben Sie nicht gefunden, wonach Sie suchen?</strong>
-                <span class="notification-banner__sub">Wir helfen gerne weiter — schreiben Sie uns über das <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontaktformular der BBL</a>.</span>
-              </p>
-            </div>
-          </div>
         `}
       </div>
     </section>
@@ -588,7 +577,7 @@ function renderInfoPage() {
                 www.bbl.admin.ch
               </a>
             </p>
-            <p class="contact-block__lead"><strong>Geschäftsstelle Portfolio-Management</strong></p>
+            <p class="contact-block__lead"><strong>Abteilung Immobilienmanagement</strong></p>
             <p class="contact-block__note">
               Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
             </p>

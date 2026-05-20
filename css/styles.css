@@ -1509,8 +1509,7 @@ figcaption {
   border-left-color: var(--color-success);
 }
 /* `--info` — federal teal-tinted variant. CD Bund `Notification` ships
-   an info variant alongside success/warning/danger; used on the search-
-   results page for the "Haben Sie nicht gefunden …" callout. */
+   an info variant alongside success/warning/danger. */
 .notification-banner--info {
   background: var(--color-info-light);
   color: var(--color-info);
@@ -2278,12 +2277,6 @@ a.btn[aria-disabled="true"] {
   margin: 0;
   color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);
-}
-
-/* Bottom-of-page info notification on search results — federal pattern
-   from CD `searchResults.vue` (Notification type="info"). */
-.search-results__contact {
-  margin-top: var(--space-2xl);
 }
 
 /* ── EMPTY STATE ────────────────────────────────────────────────────────── */
