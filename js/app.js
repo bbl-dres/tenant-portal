@@ -716,7 +716,7 @@ function renderNewsSection(items = P.state.news, perPage = 3) {
 function newsCard(n) {
   return `
     <a class="card--profile news-card" href="#/news/${n.id}">
-      <div class="card--profile__image" style="background-image:url('${safeImageUrl(n.image)}');"></div>
+      <img class="card--profile__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="400" height="200">
       <div class="card--profile__body">
         <p class="card--profile__date"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
         <h3 class="card--profile__title">${P.escapeHtml(n.title)}</h3>
@@ -778,7 +778,7 @@ function newsListRow(n) {
           <h2 class="news-list__title">${P.escapeHtml(n.title)}</h2>
           <p class="news-list__lead">${P.escapeHtml(n.lead)}</p>
         </div>
-        <div class="news-list__image" style="background-image:url('${safeImageUrl(n.image)}');"></div>
+        <img class="news-list__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="280" height="200">
       </a>
     </li>
   `;
@@ -838,6 +838,10 @@ function renderLanding() {
         </div>
         <figure class="hero__figure">
           <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&q=80"
+               srcset="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=600&q=80 600w,
+                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&q=80 1200w,
+                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=2400&q=80 2400w"
+               sizes="(max-width: 1023px) 100vw, 50vw"
                alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien."
                loading="lazy" decoding="async" width="1200" height="900">
         </figure>
@@ -1033,7 +1037,7 @@ function arrowBtn(extraClass = 'card--quick__arrow-btn') {
 function profileCard({ image, title, date, desc, role }) {
   return `
     <a href="#" class="card--profile" onclick="event.preventDefault(); window.t3lite.demoRole('${role}');">
-      <div class="card--profile__image" style="background-image:url('${safeImageUrl(image)}');"></div>
+      <img class="card--profile__image" src="${safeImageUrl(image)}" alt="" loading="lazy" decoding="async" width="400" height="200">
       <div class="card--profile__body">
         <p class="card--profile__date">${P.escapeHtml(date)}</p>
         <h3 class="card--profile__title">${P.escapeHtml(title)}</h3>
@@ -2009,7 +2013,7 @@ function initPropertiesMap(items) {
         const veLine = `${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}`;
         const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' }).setHTML(`
           <div class="property-popup">
-            <div class="property-popup__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${safeImageUrl(t.image)}');"></div>
+            <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="320" height="120">
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
               <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
@@ -2056,7 +2060,8 @@ function propertyCard(t) {
     : `<span class="badge badge--success card--property__status card--property__status--quiet">ok</span>`;
   return `
     <a href="#/properties/${t.id}" class="card--property">
-      <div class="card--property__image" style="background-image:url('${safeImageUrl(t.image)}');">
+      <div class="card--property__image">
+        <img src="${safeImageUrl(t.image)}" alt="" loading="lazy" decoding="async" width="320" height="180">
         ${issuesBadge}
       </div>
       <div class="card--property__body">
@@ -2182,7 +2187,7 @@ function renderPropertyDetail({ id }) {
               <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
             </p>
           </div>
-          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${safeImageUrl(t.image)}');"></div>
+          <img class="property-header__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="140">
         </header>
       </div>
     </section>
@@ -2467,7 +2472,7 @@ function renderFloorDetail({ id, floorSlug }) {
               <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
             </p>
           </div>
-          <div class="property-header__image" role="img" aria-label="Foto: ${P.escapeHtml(t.buildingName)}" style="background-image:url('${safeImageUrl(t.image)}');"></div>
+          <img class="property-header__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="140">
         </header>
       </div>
     </section>

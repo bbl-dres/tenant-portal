@@ -1024,10 +1024,16 @@
   transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
 }
+/* Card-top photo — applied to a real `<img>` (not a background-image div)
+   so the browser can lazy-load it natively and reserve the layout box
+   from the `width`/`height` attributes. `object-fit: cover` reproduces
+   the previous `background-size: cover` behaviour; the gray-200 surface
+   shows during load and as the placeholder if the image fails. */
 .card--profile__image {
+  display: block;
+  width: 100%;
   height: 200px;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   background-color: var(--color-gray-200);
 }
 .card--profile__body {
@@ -4214,12 +4220,21 @@ body.body--mobile-menu-is-open {
 }
 
 /* ── NEWS SECTION (swisstopo "Aktuell" pattern) ─────────────────────────── */
+/* Three-column grid: prev-arrow | track | next-arrow. Mobile collapses to
+   a single column because the arrows are `display: none` below 768 px,
+   and reserving 40 px + gap on each side of the track was crushing the
+   middle column to ~216 px on a 360 px phone (cards wrapped character-
+   by-character). Pagination dots in the footer cover navigation on
+   touch devices. */
 .news-section__viewport {
   position: relative;
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 1fr;
   gap: var(--space-md);
   align-items: stretch;
+}
+@media (min-width: 768px) {
+  .news-section__viewport { grid-template-columns: 40px 1fr 40px; }
 }
 .news-section__track {
   display: grid;
@@ -4343,9 +4358,10 @@ body.body--mobile-menu-is-open {
   line-height: var(--line-height-relaxed);
 }
 .news-list__image {
+  display: block;
+  width: 100%;
   height: 200px;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   background-color: var(--color-gray-200);
   border-radius: var(--radius);
 }
@@ -4511,11 +4527,11 @@ body.body--mobile-menu-is-open {
 /* Banner image at the top of the portfolio-map popup — confirms which
    building the user is hovering on before they commit to the click. */
 .property-popup__image {
+  display: block;
   width: calc(100% + var(--space-md) * 2);
   height: 120px;
   margin: calc(-1 * var(--space-md)) calc(-1 * var(--space-md)) var(--space-sm);
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   background-color: var(--color-bg-alt);
   border-top-left-radius: var(--radius);
   border-top-right-radius: var(--radius);
@@ -4571,12 +4587,21 @@ body.body--mobile-menu-is-open {
   transform: translateY(-2px);
 }
 .card--property:hover .card--property__title { color: var(--color-primary); }
+/* `.card--property__image` stays a `<div>` because it hosts the overlay
+   status badge as a positioned child. The photo itself is a real `<img>`
+   inside it (`object-fit: cover` fills the container) so it gets native
+   lazy-loading + CLS-safe dimensions. */
 .card--property__image {
   position: relative;
   height: 180px;
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   background-color: var(--color-bg-alt);
+}
+.card--property__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 /* Status badge overlaying the top-left of the property card image —
    moves the "open issues" / "ok" chip off the body so the SAP line +
@@ -4676,10 +4701,10 @@ body.body--mobile-menu-is-open {
   flex-wrap: wrap;
 }
 .property-header__image {
+  display: block;
   width: 100%;
   height: 140px;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   background-color: var(--color-bg-alt);
   border-radius: var(--radius);
 }
