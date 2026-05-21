@@ -969,7 +969,7 @@ function renderSubmitterHome() {
   const greeting = greetingFor(new Date().getHours());
 
   document.getElementById('page-body').innerHTML = `
-    <section class="section section--alt">
+    <section class="section">
       <div class="container">
         <p class="greeting-strip">
           ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.

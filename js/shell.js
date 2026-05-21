@@ -343,11 +343,12 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
 // Barrierefreiheit, plus a back-to-top button anchored top-right.
 export function renderFooter() {
   return `
-    <footer class="app-footer" role="contentinfo">
-      <button class="app-footer__top-btn" type="button" aria-label="Zum Seitenanfang"
-              onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+    <div class="back-to-top-wrapper" aria-hidden="true">
+      <a class="app-footer__top-btn" href="#main" aria-label="Zum Seitenanfang">
         ${icon('chevronUp')}
-      </button>
+      </a>
+    </div>
+    <footer class="app-footer" role="contentinfo">
       <div class="footer-information">
         <div class="footer-information__inner">
           <div class="footer-information__col footer-information__col--brand">

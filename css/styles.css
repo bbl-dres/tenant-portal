@@ -35,6 +35,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;     /* containing block for .back-to-top-wrapper */
 }
 #page-body { flex: 1 0 auto; }
 
@@ -2404,10 +2405,33 @@ a.btn[aria-disabled="true"] {
    The wrapper-positioning trick from DS `.back-to-top-wrapper` would make
    it sticky-on-scroll; we keep the simpler footer-anchored placement for
    now (the portal isn't long-form enough to need sticky). */
-.app-footer__top-btn {
+/* Back-to-top: DS pure-CSS pattern (designsystem/css/sections/
+   desktop-menu.postcss + carousel.postcss reference).
+   `.back-to-top-wrapper` is an `absolute`-positioned scroll-region
+   inside `#root`: starts at 80vh down the page and extends -22 px
+   PAST the bottom (overlapping the footer top by half a button
+   height). Inside, `.app-footer__top-btn` is `position: sticky` —
+   it floats at viewport bottom-right while the wrapper is in view,
+   then "lands" overlapping the footer when scroll reaches the end.
+   No JS needed. */
+.back-to-top-wrapper {
   position: absolute;
-  top: -22px;                                    /* half overlaps the footer top edge */
+  top: 80vh;
   right: var(--container-padding);
+  bottom: -22px;
+  width: 44px;
+  pointer-events: none;
+  z-index: 5;
+}
+@media (min-width: 1024px) {
+  .back-to-top-wrapper { bottom: -24px; width: 48px; }
+}
+@media (min-width: 1280px) {
+  .back-to-top-wrapper { bottom: -32px; width: 64px; }
+}
+.app-footer__top-btn {
+  position: sticky;
+  top: calc(100vh - 64px);   /* 44 px button + 20 px gap from viewport bottom */
   width: 44px;
   height: 44px;
   background: var(--color-white);
@@ -2418,6 +2442,8 @@ a.btn[aria-disabled="true"] {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  pointer-events: all;
+  text-decoration: none;
   box-shadow: var(--shadow-lg);
   transition: color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -2425,6 +2451,7 @@ a.btn[aria-disabled="true"] {
   border-color: var(--color-primary-700);
   color: var(--color-primary-700);
   box-shadow: var(--shadow-xl, var(--shadow-lg));
+  text-decoration: none;
 }
 .app-footer__top-btn:focus-visible {
   outline: 3px solid var(--color-focus);
@@ -2433,21 +2460,13 @@ a.btn[aria-disabled="true"] {
 .app-footer__top-btn svg {
   width: 50%;
   height: auto;
-  stroke-width: 2;
+  margin-right: 0;
 }
 @media (min-width: 1024px) {
-  .app-footer__top-btn {
-    width: 48px;
-    height: 48px;
-    top: -24px;
-  }
+  .app-footer__top-btn { width: 48px; height: 48px; top: calc(100vh - 68px); }
 }
 @media (min-width: 1280px) {
-  .app-footer__top-btn {
-    width: 64px;
-    height: 64px;
-    top: -32px;
-  }
+  .app-footer__top-btn { width: 64px; height: 64px; top: calc(100vh - 88px); }
 }
 
 /* Footer grid — matches designsystem css/sections/footer.postcss .footer-information:
