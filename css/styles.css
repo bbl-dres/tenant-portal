@@ -1377,10 +1377,10 @@ figcaption {
 .pipeline__step .inline-icon { margin-right: 4px; }
 
 /* Inline icon — used by P.icon() helper, which emits
-   `<svg class="inline-icon"><use href="assets/icons.svg#icon-name"/></svg>`.
-   Vertically centres a sprite glyph alongside body-sm text and adds a
-   small trailing gap. Colour inherits from the parent via `currentColor`
-   (every symbol in the sprite uses `fill="currentColor"`).
+   `<svg class="inline-icon"><use href="assets/icons/<Name>.svg"/></svg>`.
+   Vertically centres the glyph alongside body-sm text and adds a small
+   trailing gap. Colour inherits from the parent via `currentColor`
+   (each icon SVG carries `fill="currentColor"` on its root element).
 
    Sizes are driven by the `--icon-*` tokens in tokens.css. The default
    `.inline-icon` uses `--icon-base` (24 px declared, ~16 px visual after
@@ -3312,8 +3312,9 @@ body.body--mobile-menu-is-open {
   font-weight: var(--font-weight-regular);
 }
 .contact-block__link:hover { color: var(--color-primary-hover); text-decoration: underline; }
-/* `.contact-block__icon` retired — icons now come from the sprite via
-   `icon('phone' | 'envelope' | 'globe')` and inherit sizing from the
+/* `.contact-block__icon` retired — icons now come from
+   `icon('phone' | 'envelope' | 'globe')` (one file per glyph under
+   `assets/icons/`) and inherit sizing from the
    `.contact-block__link .inline-icon` override declared with the rest
    of the inline-icon rules above. */
 .contact-block__lead { margin: 0 0 var(--space-xs); }
@@ -4553,6 +4554,15 @@ body.body--mobile-menu-is-open {
 }
 .view-toggle__btn--active:hover { background: var(--color-secondary-600); color: var(--color-white); }
 .view-toggle__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); margin-right: 0; }
+/* When the toolbar collapses to a single column (≤ 768 px, see
+   `.property-toolbar`), stretch the toggle to fill the row and give each
+   button an equal share. Bigger touch targets on tablet / phone and a
+   layout that reads as deliberate next to the full-width search and
+   select rows above it. */
+@media (max-width: 768px) {
+  .view-toggle { display: flex; width: 100%; }
+  .view-toggle__btn { flex: 1; justify-content: center; }
+}
 @media (max-width: 640px) {
   .view-toggle__label { display: none; }
   .view-toggle__btn { padding: var(--space-sm) var(--space-md); }

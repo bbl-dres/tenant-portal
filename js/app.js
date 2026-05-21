@@ -563,7 +563,7 @@ function renderInfoPage() {
                   <a class="page-with-toc__toc-link" href="#${it.id}"
                      onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
                     <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
-                    <svg class="page-with-toc__toc-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-return"/></svg>
+                    <svg class="page-with-toc__toc-icon" aria-hidden="true" focusable="false"><use href="assets/icons/Reply.svg"/></svg>
                   </a>
                 </li>
               `).join('')}
@@ -1820,7 +1820,7 @@ function renderPropertiesFilterPills({ view, query, category }) {
           <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
           <a class="filter-pill__remove" href="${hrefWithout(f.key)}"
              aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
-            <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-x"/></svg>
+            <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons/Cancel.svg"/></svg>
           </a>
         </span>
       `).join('')}
@@ -2935,7 +2935,7 @@ function renderDownloads() {
         <button class="filter-pill__remove" type="button"
                 aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
                 data-clear="${f.key}">
-          <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-x"/></svg>
+          <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons/Cancel.svg"/></svg>
         </button>
       </span>
     `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurücksetzen</button>`;

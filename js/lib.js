@@ -162,33 +162,47 @@ export function safeRemove(key) {
 
 
 // ── ICON SET ───────────────────────────────────────────────────────────────
-// All portal icons live in a single sprite at `assets/icons.svg` — each
-// glyph exposed as a `<symbol id="icon-name">`. Consumers reference them
-// via `<svg><use href="assets/icons.svg#icon-name"/></svg>`. Vendored
-// from `swiss/designsystem` (filled-glyph CD style, MIT); the pipeline
-// `halfCircle` indicator is portal-drawn as two filled paths so the
-// glyph weight matches the rest of the CD set. Audit reference: DS-T1.
+// Each icon is its own file at `assets/icons/<PascalName>.svg`, copied
+// verbatim from `swiss/designsystem` (filled-glyph CD style, MIT). A
+// one-time patch added `fill="currentColor"` to each root `<svg>` so
+// the glyph inherits colour from the surrounding text. The portal-drawn
+// `HalfCircle.svg` (pipeline in-progress) and `Sparkles.svg` (CD doesn't
+// ship a sparkle glyph) live in the same folder.
 //
-// Sizing: `.inline-icon` defaults to 16×16 (DS `base`); use
-// `.inline-icon--{sm,md,lg,xl,2xl}` (12 / 20 / 24 / 28 / 32 px) to
-// match the DS `icon--*` scale in chrome, buttons, and modals. Colour
-// inherits via `currentColor` on every path inside the symbol.
+// `ICONS` maps the camelCase ID used in JS to the PascalCase filename
+// — most map 1:1, a few are intentional aliases (e.g. `x` and `xMark`
+// both render the same Cancel glyph; `attachment` and `document` both
+// use File). Aliasing lets callers keep semantic intent at the call
+// site without bloating the icon folder.
 //
-// The exported allow-list `ICONS` doubles as the sprite-ID inventory so
-// `icon(name)` can fall through silently for an unknown name (returns
-// '') and so callers can `Object.keys(ICONS)` in tests / docs.
+// Sizing comes from the `--icon-*` tokens via `.inline-icon` and its
+// `--{xs,sm,md,lg,xl,2xl}` modifiers in styles.css; colour inherits
+// via `currentColor`. Audit reference: DS-T1.
 export const ICONS = {
-  document: 1, video: 1, attachment: 1, tool: 1,
-  truck: 1, sparkles: 1, download: 1, grid: 1, list: 1, map: 1,
-  mapMarker: 1, search: 1, chevronLeft: 1, chevronRight: 1,
-  chevronUp: 1, chevronDown: 1, x: 1, xMark: 1, maximize: 1, check: 1,
-  halfCircle: 1, alertTriangle: 1, xCircle: 1, refresh: 1,
-  commentDots: 1, user: 1, phone: 1, envelope: 1, globe: 1, share: 1,
-  printer: 1, external: 1, info: 1, help: 1, return: 1,
+  // chrome / interactive
+  search: 'Search', user: 'User', help: 'Help', info: 'Info',
+  share: 'Share', printer: 'Printer', external: 'External',
+  download: 'Download', maximize: 'Expand', refresh: 'Refresh',
+  // contact
+  phone: 'Phone', envelope: 'Envelope', globe: 'Globe',
+  // controls
+  check: 'Checkmark', x: 'Cancel', xMark: 'Cancel', xCircle: 'CancelCircle',
+  alertTriangle: 'Warning',
+  chevronLeft: 'ChevronLeft', chevronRight: 'ChevronRight',
+  chevronUp: 'ChevronUp', chevronDown: 'ChevronDown',
+  // content / actions
+  document: 'File', attachment: 'File', video: 'Video',
+  grid: 'Apps', list: 'List',
+  map: 'Map', mapMarker: 'MapMarker',
+  tool: 'Wrench', truck: 'Truck',
+  commentDots: 'SpeechBubble', return: 'Reply',
+  // portal-drawn (CD doesn't ship these)
+  halfCircle: 'HalfCircle', sparkles: 'Sparkles',
 };
 export function icon(name) {
-  if (!ICONS[name]) return '';
-  return `<svg class="inline-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-${name}"/></svg>`;
+  const file = ICONS[name];
+  if (!file) return '';
+  return `<svg class="inline-icon" aria-hidden="true" focusable="false"><use href="assets/icons/${file}.svg"/></svg>`;
 }
 
 
@@ -282,7 +296,7 @@ export function renderPipeline(application) {
     return `
       <div class="pipeline" role="list" aria-label="Statusverlauf">
         ${steps.slice(0, 3).map((s, i) => `
-          <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rueckfrage'}" role="listitem">${i < 2 ? ICONS.check : ICONS.refresh}${s.status === 'in_review_gs' ? 'Rückfrage' : s.label}</div>
+          <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rueckfrage'}" role="listitem">${i < 2 ? icon('check') : icon('refresh')}${s.status === 'in_review_gs' ? 'Rückfrage' : s.label}</div>
         `).join('')}
         <div class="pipeline__step pipeline__step--pending" role="listitem">… genehmigt</div>
       </div>
