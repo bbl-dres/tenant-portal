@@ -38,6 +38,32 @@
 }
 #page-body { flex: 1 0 auto; }
 
+/* No-JS fallback (eCH-0059 federal-accessibility convention). The SPA
+   needs JS to render anything; in restricted federal-admin environments
+   (e.g. some VBS workstations) JS may be disabled. The `<noscript>` block
+   in index.html surfaces a polite German explanation + a support link
+   so the user is never staring at a blank page. */
+.noscript-fallback {
+  max-width: 60ch;
+  margin: var(--space-2xl) auto;
+  padding: var(--space-xl) var(--space-lg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  line-height: var(--line-height-relaxed);
+}
+.noscript-fallback h1 {
+  font-size: var(--text-h2);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-md);
+}
+.noscript-fallback p { margin: 0 0 var(--space-md); }
+.noscript-fallback p:last-child {
+  margin-top: var(--space-lg);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.noscript-fallback a { color: var(--color-primary); }
+
 .container {
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -169,22 +195,26 @@
 }
 .top-bar__authorities:hover { background: var(--color-white-20); text-decoration: none; color: var(--color-white); }
 .top-bar__authorities svg { width: 12px; height: 12px; }
-/* Prototype notice — centred red label inside the dark top-bar. Plain text,
-   no pill background; kept inline so it doesn't steal vertical real estate. */
-.top-bar__prototype-notice {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+/* Demo / Prototype chip — sits in the top-bar right cluster beside the
+   language switcher + user pill. Replaces a centred-red "Prototyp — nur
+   zur Demonstration" line that competed visually with the language and
+   user controls. The full descriptive sentence stays as the chip's
+   `aria-label` so AT users still get the context. Federal pattern: a
+   small uppercase warning chip is how `beta.admin.ch`-style services
+   flag the non-production status. */
+.top-bar__demo-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-sm);
   font-size: var(--text-body-xs);
-  color: var(--color-prototype-notice);
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0.2px;
+  background: var(--color-prototype-notice);
+  color: var(--color-white);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
-  pointer-events: none;
 }
-.top-bar__inner { position: relative; }
-@media (max-width: 768px) { .top-bar__prototype-notice { display: none; } }
 .top-bar__actions { margin-left: auto; display: flex; gap: var(--space-md); align-items: center; }
 .top-bar__action {
   background: transparent;
@@ -2940,7 +2970,9 @@ body.body--mobile-menu-is-open {
   margin: 0;
   overflow: hidden;
   border-radius: 0;            /* CD Bund: hero images are crisp-cornered */
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;        /* federal lifecycle services (admin.ch,
+                                   bbl.admin.ch, swisstopo) use 16:9 hero
+                                   photos; 4:3 reads as magazine-masthead. */
 }
 .hero__figure img {
   width: 100%;
@@ -3159,8 +3191,13 @@ body.body--mobile-menu-is-open {
 .link-list a:hover { color: var(--color-primary-hover); }
 
 /* External-link affordance — small arrow glyph after the link text. Used by
-   any anchor with class="link link--external" (matches DS .link--external). */
-.link--external::after {
+   any anchor with class="link link--external" (matches DS .link--external).
+   Excluded on buttons and on `.card--quick` cards because those surfaces
+   already carry their own affordance (filled button label / arrow-btn in
+   the bottom-right corner — passed `{ external: true }` from `arrowBtn()`
+   to swap the corner glyph for the same external icon). Matches DS canonical
+   `:not(.btn, .btn--link)` exclusion in designsystem/css/components/link.postcss. */
+.link--external:not(.btn):not(.btn--link):not(.card--quick)::after {
   content: '';
   display: inline-block;
   width: 0.85em;
@@ -4082,7 +4119,11 @@ body.body--mobile-menu-is-open {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  min-height: 28px;
+  /* 36 px — comfortable on iPad / Surface where the reviewer queue is
+     increasingly worked. Was 28 px; not strictly below WCAG 2.5.5 since
+     mark-buttons sit in tight panels, but tablet ergonomics matter for
+     BBL meeting-room review sessions. */
+  min-height: 36px;
   padding: var(--space-xs) var(--space-sm);
   border: 1px solid var(--color-border);
   background: var(--color-white);

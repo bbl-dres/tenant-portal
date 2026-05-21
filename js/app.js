@@ -837,13 +837,13 @@ function renderLanding() {
           </div>
         </div>
         <figure class="hero__figure">
-          <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&q=80"
-               srcset="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=600&q=80 600w,
-                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&q=80 1200w,
-                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=2400&q=80 2400w"
+          <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80"
+               srcset="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=600&ar=16:9&fit=crop&q=80 600w,
+                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80 1200w,
+                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=2400&ar=16:9&fit=crop&q=80 2400w"
                sizes="(max-width: 1023px) 100vw, 50vw"
                alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien."
-               loading="lazy" decoding="async" width="1200" height="900">
+               loading="lazy" decoding="async" width="1200" height="675">
         </figure>
       </div>
     </section>
@@ -1000,7 +1000,7 @@ function renderSubmitterHome() {
           <a href="https://bbl-dres.github.io/workspace-management/" target="_blank" rel="noopener" class="card--quick link--external">
             <p class="card--quick__title">Möbel bestellen</p>
             <p class="card--quick__desc">Standard- und Spezialmobiliar über den Mobiliar-Shop des Bundes.</p>
-            ${arrowBtn()}
+            ${arrowBtn({ external: true })}
           </a>
           <a href="#/moves" class="card--quick">
             <p class="card--quick__title">Umzug & Sonderreinigung</p>
@@ -1026,10 +1026,21 @@ function greetingFor(hour) {
   return 'Guten Abend';
 }
 
-function arrowBtn(extraClass = 'card--quick__arrow-btn') {
+/* `extraClass` positions the affordance per consumer (`card--quick__arrow-btn`
+   for the home/services grid; `card--profile__arrow` for news cards).
+   `external` swaps the rightward arrow for the DS canonical external-link
+   glyph (corner-bracket-out) so cards opening in a new window get a
+   distinct affordance from internal-navigation cards. */
+function arrowBtn(extraClassOrOpts = 'card--quick__arrow-btn', maybeOpts = {}) {
+  const extraClass = typeof extraClassOrOpts === 'string' ? extraClassOrOpts : (extraClassOrOpts.extraClass || 'card--quick__arrow-btn');
+  const opts = typeof extraClassOrOpts === 'object' ? extraClassOrOpts : maybeOpts;
+  const external = !!opts.external;
+  const glyph = external
+    ? `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m14.46 4.85v.75h4.171l-5.99 5.988.531.531 5.988-5.989v4.17h.75v-5.45z"/><path d="m18.118 19.151h-12.508v-12.508h4.701v-.75h-5.451v14.008h14.008v-5.451h-.75z"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
   return `
     <span class="arrow-btn ${extraClass}" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      ${glyph}
     </span>
   `;
 }
@@ -1854,7 +1865,11 @@ function wirePropertiesToolbar(view) {
 }
 
 function renderGalleryView(items) {
-  return `<div class="property-grid">${items.map(propertyCard).join('')}</div>`;
+  // First 3 cards sit above the fold on a desktop 3-column grid and on
+  // mobile single-column. Pass the index so `propertyCard` can flip
+  // `loading="eager"` for those, sparing them the lazy-load handshake
+  // and improving LCP.
+  return `<div class="property-grid">${items.map((t, i) => propertyCard(t, i)).join('')}</div>`;
 }
 
 function renderListView(items) {
@@ -2050,7 +2065,7 @@ function focusPropertyOnMap(id) {
   entry.marker.togglePopup();
 }
 
-function propertyCard(t) {
+function propertyCard(t, index = 99) {
   // Status badge moved to the top-left of the image so the body has more
   // room for SAP / address / meta lines. The warning variant calls out
   // open issues; the success variant is shown unobtrusively so an
@@ -2058,10 +2073,13 @@ function propertyCard(t) {
   const issuesBadge = t.openIssues > 0
     ? `<span class="badge badge--warning card--property__status">${t.openIssues} offen</span>`
     : `<span class="badge badge--success card--property__status card--property__status--quiet">ok</span>`;
+  // First 3 cards are above the fold on a 3-col desktop grid — eager-
+  // load for faster LCP. Cards 4+ stay lazy.
+  const imgLoading = index < 3 ? 'eager' : 'lazy';
   return `
     <a href="#/properties/${t.id}" class="card--property">
       <div class="card--property__image">
-        <img src="${safeImageUrl(t.image)}" alt="" loading="lazy" decoding="async" width="320" height="180">
+        <img src="${safeImageUrl(t.image)}" alt="" loading="${imgLoading}" decoding="async" width="320" height="180">
         ${issuesBadge}
       </div>
       <div class="card--property__body">
@@ -3208,13 +3226,18 @@ function renderServicesOverview() {
           BBL bewirtschaftet die Immobilien der Bundesverwaltung. Über das Mieterportal stellen Bundes-Mietende die folgenden Anfragen direkt — geführt, dokumentiert, übergabefähig an SAP ePPM.
         </p>
         <div class="card-grid">
-          ${SERVICES_MENU.items.slice(1).map(svc => `
-            <a href="${svc.href}" class="card--quick">
-              <p class="card--quick__title">${P.escapeHtml(svc.label)}</p>
-              <p class="card--quick__desc">${P.escapeHtml(svc.desc || '')}</p>
-              ${arrowBtn()}
-            </a>
-          `).join('')}
+          ${SERVICES_MENU.items.slice(1).map(svc => {
+            const ext = svc.external === true;
+            const cls = ext ? 'card--quick link--external' : 'card--quick';
+            const attrs = ext ? ' target="_blank" rel="noopener"' : '';
+            return `
+              <a href="${svc.href}" class="${cls}"${attrs}>
+                <p class="card--quick__title">${P.escapeHtml(svc.label)}</p>
+                <p class="card--quick__desc">${P.escapeHtml(svc.desc || '')}</p>
+                ${arrowBtn({ external: ext })}
+              </a>
+            `;
+          }).join('')}
         </div>
       </div>
     </section>

@@ -151,7 +151,7 @@ function renderWizardStep(stepNum, draft) {
 // -- Step 1 ----------------------------------------------------------------
 function renderStep1(draft) {
   return `
-    <h2 class="wizard__title">Schritt 1 von 5 — Basisangaben</h2>
+    <h2 class="wizard__title">Basisangaben</h2>
     <p class="wizard__subtitle">
       <span class="wizard__id">Antrags-ID: <strong>${draft.id}</strong></span>
       <span class="wizard__autosave" aria-live="polite">${icon('check')} Auto-Save aktiv</span>
@@ -298,7 +298,7 @@ function updateSapInfo(draft) {
 // -- Step 2 (NAW + calc) ---------------------------------------------------
 function renderStep2(draft) {
   return `
-    <h2 class="wizard__title">Schritt 2 von 5 — Flächenbedarf</h2>
+    <h2 class="wizard__title">Flächenbedarf</h2>
     <p class="wizard__subtitle">Antragstyp: ${draft.type} · NAW-Klassifizierung treibt die m²/FTE-Basis.</p>
 
     <div class="wizard__section">
@@ -447,7 +447,7 @@ function wireStep2(draft) {
 // -- Step 3 Anhänge --------------------------------------------------------
 function renderStep3(draft) {
   return `
-    <h2 class="wizard__title">Schritt 3 von 5 — Anhänge</h2>
+    <h2 class="wizard__title">Anhänge</h2>
     <p class="wizard__subtitle">Cost-Benefit-Beleg (WiBe) und Rechtsgrundlage-Beleg.</p>
 
     <div class="wizard__section">
@@ -502,7 +502,7 @@ function refreshAttachmentList(draft) {
 function renderStep4(draft) {
   if (draft.type !== 'Grossantrag') {
     return `
-      <h2 class="wizard__title">Schritt 4 von 5 — Detail-Felder</h2>
+      <h2 class="wizard__title">Detail-Felder</h2>
       <p class="wizard__subtitle">Entfällt für Antragstyp "${draft.type}". Sie können direkt zu Schritt 5 weiter.</p>
       <div class="wizard__sticky-footer">
         <span class="wizard__counter">Schritt 4 (übersprungen)</span>
@@ -513,7 +513,7 @@ function renderStep4(draft) {
   }
   const f = draft.grossantrag = draft.grossantrag || { _eppmToggle: false };
   return `
-    <h2 class="wizard__title">Schritt 4 von 5 — Grossantrag: Pflichtfelder</h2>
+    <h2 class="wizard__title">Grossantrag — Pflichtfelder</h2>
     <p class="wizard__subtitle">Zusätzliche Pflichtfelder für Grossanträge. <label class="wizard__inline-toggle"><input type="checkbox" id="eppmToggle" ${f._eppmToggle ? 'checked' : ''}> Erweiterte Ansicht (ePPM-Mapping)</label></p>
 
     <div class="wizard__section">
@@ -634,7 +634,7 @@ function renderStep5(draft) {
   );
   const hasAtt = (draft.attachments || []).length > 0;
   return `
-    <h2 class="wizard__title">Schritt 5 von 5 — Prüfen & Senden</h2>
+    <h2 class="wizard__title">Prüfen & Senden</h2>
     <p class="wizard__subtitle">Antrags-ID: <strong>${draft.id}</strong></p>
 
     <div class="wizard__section">
