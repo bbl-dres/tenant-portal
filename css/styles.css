@@ -1467,7 +1467,7 @@ figcaption {
   border-color: var(--color-success-bright);
   color: var(--color-white);
 }
-.step-indicator__step--confirmed svg { width: 18px; height: 18px; }
+.step-indicator__step--confirmed svg { width: var(--icon-base); height: var(--icon-base); }
 .step-indicator__label {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
@@ -1774,7 +1774,7 @@ input[type="checkbox"]:focus-visible {
   height: 24px;
   flex-shrink: 0;
 }
-.notification-banner__icon svg { width: 22px; height: 22px; }
+.notification-banner__icon svg { width: var(--icon-base); height: var(--icon-base); }
 
 /* Sub-line inside a notification-banner__text — a quieter, smaller line
    below the main message (e.g. "BK 1086 = BBL-Portfolio …" rationale).
@@ -2399,7 +2399,7 @@ a.btn[aria-disabled="true"] {
   border-color: var(--color-primary-700);
   background: transparent;
 }
-.btn--back .btn__icon { width: 18px; height: 18px; }
+.btn--back .btn__icon { width: var(--icon-md); height: var(--icon-md); }
 .share-bar__btn {
   background: transparent;
   border: none;
@@ -4358,7 +4358,7 @@ body.body--mobile-menu-is-open {
 }
 .news-section__nav:hover:not([disabled]) { color: var(--color-primary); }
 .news-section__nav[disabled] { opacity: 0.3; cursor: default; }
-.news-section__nav svg { width: 28px; height: 28px; stroke-width: 1.5; }
+.news-section__nav svg { width: var(--icon-md); height: var(--icon-md); stroke-width: 1.5; }
 @media (max-width: 767px) { .news-section__nav { display: none; } }
 
 .news-section__footer {
@@ -5011,7 +5011,7 @@ body.body--mobile-menu-is-open {
   color: var(--color-primary);
   display: inline-flex;
 }
-.attachment-list__icon svg { width: 20px; height: 20px; }
+.attachment-list__icon svg { width: var(--icon-base); height: var(--icon-base); }
 .attachment-list__name {
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
