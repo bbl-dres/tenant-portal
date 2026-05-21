@@ -955,7 +955,10 @@ function renderHome() {
 }
 
 function renderSubmitterHome() {
-  const main = shell({ activeNav: 'home', breadcrumb: [{ label: 'Start' }] });
+  // Home page = root. CD pattern: no breadcrumb on the landing page —
+  // a single "Start" item just restates the page title. Sub-pages get
+  // the `[Start, …, current]` chain as usual.
+  const main = shell({ activeNav: 'home', breadcrumb: [] });
   const userApps = P.state.applications
     .filter(a => a.submitterId === P.state.user.id)
     .filter(a => !['closed', 'rejected'].includes(a.status));
@@ -966,7 +969,7 @@ function renderSubmitterHome() {
   const greeting = greetingFor(new Date().getHours());
 
   document.getElementById('page-body').innerHTML = `
-    <section class="section section--surface">
+    <section class="section">
       <div class="container">
         <p class="greeting-strip">
           ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
@@ -975,7 +978,11 @@ function renderSubmitterHome() {
             : `Sie haben derzeit keine offenen Anliegen.`}
           ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
         </p>
-        <h1 class="h1 section-heading">Häufig genutzte Dienste</h1>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
+        <h2 class="h2 section-heading">Häufig genutzte Dienste</h2>
         <div class="card-grid">
           <a href="#/wizard/1" class="card--quick">
             <p class="card--quick__title">Bedarf anmelden</p>
@@ -997,22 +1004,12 @@ function renderSubmitterHome() {
             <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
             ${arrowBtn()}
           </a>
-          <a href="https://bbl-dres.github.io/workspace-management/" target="_blank" rel="noopener" class="card--quick link--external">
-            <p class="card--quick__title">Möbel bestellen</p>
-            <p class="card--quick__desc">Standard- und Spezialmobiliar über den Mobiliar-Shop des Bundes.</p>
-            ${arrowBtn({ external: true })}
-          </a>
-          <a href="#/moves" class="card--quick">
-            <p class="card--quick__title">Umzug & Sonderreinigung</p>
-            <p class="card--quick__desc">Transport- oder Reinigungsanfrage nach Reorganisationen oder Mieterwechseln.</p>
-            ${arrowBtn()}
-          </a>
-          <a href="#/training" class="card--quick">
-            <p class="card--quick__title">Schulungen</p>
-            <p class="card--quick__desc">„Mieterportal kompakt" (60 Min., DE/FR) und Aufbaukurse. Termine Q2 2026.</p>
-            ${arrowBtn()}
-          </a>
         </div>
+        <p class="section-cta">
+          <a class="section-cta__link" href="#/services">
+            Alle Dienstleistungen ansehen ${P.icon('arrowRight', 'section-cta__icon')}
+          </a>
+        </p>
       </div>
     </section>
 
@@ -1412,7 +1409,9 @@ function renderDetailTab(a, tab) {
 const QUEUE_PAGE_SIZE = 25;
 function renderQueue() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  const main = shell({ activeNav: 'queue', breadcrumb: [{ label: 'Pendenzen' }], deptSub: 'Mieterportal · GS-Prüfer/in' });
+  // GS-Reviewer's landing page — no breadcrumb (same reasoning as the
+  // LBO home: a single-item breadcrumb just restates the page title).
+  const main = shell({ activeNav: 'queue', breadcrumb: [], deptSub: 'Mieterportal · GS-Prüfer/in' });
   const queue = P.state.applications.filter(a => {
     // Reviewers see all VE applications that are awaiting review
     return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
@@ -1684,7 +1683,10 @@ function renderProperties() {
             </p>
           </div>
         </header>
-
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
         ${allTenancies.length === 0 ? `
           <div class="empty-state">
             <h2 class="empty-state__title">Keine Mietverhältnisse erfasst</h2>
@@ -3348,6 +3350,10 @@ function renderServicesOverview() {
         <p class="section-intro">
           BBL bewirtschaftet die Immobilien der Bundesverwaltung. Über das Mieterportal stellen Bundes-Mietende die folgenden Anfragen direkt — geführt, dokumentiert, übergabefähig an SAP ePPM.
         </p>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
         <div class="card-grid">
           ${SERVICES_MENU.items.slice(1).map(svc => {
             const ext = svc.external === true;

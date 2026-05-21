@@ -335,10 +335,15 @@
   --z-modal:                   200;
   --z-shortcut-overlay:        300;
 
-  /* ── CARD SHADOW (CD Bund Card uses shadow, not border) ──────────────── */
+  /* ── CARD SHADOW ──────────────────────────────────────────────────────
+     Soft shadow because we use the *section* background to lift cards
+     off the page, not the card's own elevation. Pattern: white
+     "header" section + gray (`section--surface`) "cards" section
+     side-by-side. Hover gets a slightly stronger bump for tactile
+     feedback. */
   --shadow-card:               0 1px 3px 0 rgba(15, 23, 42, 0.08),
                                0 1px 2px -1px rgba(15, 23, 42, 0.06);
-  --shadow-card-hover:         0 4px 6px -1px rgba(15, 23, 42, 0.08),
+  --shadow-card-hover:         0 8px 16px -4px rgba(15, 23, 42, 0.12),
                                0 2px 4px -2px rgba(15, 23, 42, 0.06);
 }
 

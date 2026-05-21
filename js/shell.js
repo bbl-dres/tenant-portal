@@ -500,8 +500,17 @@ export function toggleNavMenu(id, force) {
     t.classList.remove('main-navigation__link--clicked');
   });
   // Page overlay — dark-fade gradient behind the open panel (DS
-  // `.desktop-menu__overlay`). Hide unless we're about to open one.
+  // `.desktop-menu__overlay`). The CSS `top` defaults to 56 px which
+  // is wrong for our 3-row chrome (top-bar + brand bar + nav bar),
+  // so we measure the navbar's actual bottom each time and set top
+  // dynamically. Done here (not in CSS) because the chrome height
+  // varies by viewport width — the brand bar's `top-header` and the
+  // top-bar both have responsive heights.
   const overlay = ensureNavOverlay();
+  const navbarEl = document.querySelector('.navbar');
+  if (navbarEl) {
+    overlay.style.top = navbarEl.getBoundingClientRect().bottom + 'px';
+  }
   overlay.classList.toggle('main-navigation__overlay--open', next);
   if (next) {
     panel.removeAttribute('hidden');
