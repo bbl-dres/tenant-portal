@@ -165,6 +165,7 @@
      dark top-bar, matching kbob/swisstopo. */
   text-decoration: none;
   font-size: var(--text-body-sm);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__authorities:hover { background: var(--color-white-20); text-decoration: none; color: var(--color-white); }
 .top-bar__authorities svg { width: 12px; height: 12px; }
@@ -214,6 +215,7 @@
   gap: 6px;
   border-radius: var(--radius);
   transition: background var(--transition-fast);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__link:hover { background: rgba(255,255,255,0.12); color: var(--color-white); }
 .top-bar__link--user svg { width: 16px; height: 16px; }
@@ -239,6 +241,7 @@
   font-weight: var(--font-weight-regular);
   cursor: pointer;
   border-radius: var(--radius);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
 .top-bar__lang:hover { background: rgba(255,255,255,0.12); }
 .top-bar__lang svg { width: 12px; height: 12px; }
@@ -271,14 +274,32 @@
   padding: var(--space-sm) var(--space-md);
   cursor: pointer;
   letter-spacing: 0.05em;
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
-.language-switcher__option:hover { background: rgba(255,255,255,0.10); }
-.language-switcher__option--active {
-  background: var(--color-link);
+/* CD canonical: hover + selected paint the option in Tailwind `blue-600`
+   (#2563eb in designsystem/app/tailwind.config.js:82) with white text.
+   Red is reserved for primary CTAs and brand-accent surfaces; the
+   language switcher uses blue so the selection state can't be mistaken
+   for the federal CTA accent. Focus ring is the global purple
+   `:focus-visible` (var(--color-focus)) — sits on a 2 px inset offset
+   so it reads against the dark dropdown surface and the blue hover
+   alike. */
+.language-switcher__option:hover,
+.language-switcher__option:focus-visible {
+  background: #2563eb;
   color: var(--color-white);
 }
+.language-switcher__option:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+.language-switcher__option--active {
+  background: #2563eb;        /* blue-600 — currently-selected language */
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
 .language-switcher__option--active:hover {
-  background: var(--color-link-hover);
+  background: #1d4ed8;        /* blue-700 — slightly darker on hover */
 }
 
 /* ── FEDERAL CHROME — BRAND BAR ─────────────────────────────────────────── */
@@ -396,8 +417,9 @@
 }
 .top-header__meta-link:hover { color: var(--color-primary); text-decoration: underline; }
 .top-header__actions { display: flex; gap: var(--space-md); align-items: center; }
-@media (max-width: 768px) {
-  .top-header__meta { display: none; }
+/* Below lg (1024 px) — meta hides + burger menu surfaces it. Re-stated in
+   the main RESPONSIVE block; here we only adjust right-column flow. */
+@media (max-width: 1023.98px) {
   .top-header__right { flex-direction: row; }
 }
 
@@ -452,12 +474,18 @@
   font-family: inherit;
   font-size: var(--text-body-sm);
   background: var(--color-bg-surface);
-  outline: none;
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 .header-search__input:focus {
   background: var(--color-white);
-  box-shadow: var(--shadow-card);
+  border-color: var(--color-border-input);
+}
+/* Canonical CD purple focus ring — matches the global :focus-visible
+   rule applied across every interactive surface in the portal. */
+.header-search__input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  background: var(--color-white);
   border-color: var(--color-border-input);
 }
 .header-search__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
@@ -516,8 +544,53 @@
   background: transparent;
   border: none;
   padding: var(--space-sm);
+  /* Touch-target — burger lives at the navbar left edge on mobile and
+     must be reachable by thumb. */
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
-.burger svg { width: 24px; height: 24px; }
+/* Animated three-bar glyph — ports designsystem/css/components/burger.postcss
+   to vanilla CSS (no Tailwind). Bars rotate into an X when the menu is
+   open. `currentColor` lets the bars inherit the surrounding text colour
+   so the burger sits on light or dark chrome alike. Respects
+   `prefers-reduced-motion` via the global rule in tokens.css. */
+.burger__icon {
+  display: block;
+  position: relative;
+  width: 24px;
+  height: 18px;
+  color: var(--color-text-primary);
+  transition: color var(--transition-fast);
+}
+.burger:hover .burger__icon { color: var(--color-primary); }
+.burger__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 200ms ease, opacity 150ms ease, top 200ms ease;
+}
+.burger__bar:nth-child(1) { top: 0; }
+.burger__bar:nth-child(2) { top: 50%; transform: translateY(-50%); }
+.burger__bar:nth-child(3) { bottom: 0; top: auto; }
+.burger[aria-expanded="true"] .burger__bar:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.burger[aria-expanded="true"] .burger__bar:nth-child(2) {
+  opacity: 0;
+  transform: translateY(-50%) scaleX(0);
+}
+.burger[aria-expanded="true"] .burger__bar:nth-child(3) {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%) rotate(-45deg);
+}
 .main-navigation {
   display: flex;
   gap: var(--space-lg);
@@ -530,8 +603,15 @@
   font-weight: var(--font-weight-regular);
   padding: var(--space-md) 0;
   border-bottom: 3px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
-.main-navigation__link:hover { color: var(--color-primary); }
+/* CD Bund pattern: hover + active both paint the 3 px red rail under the
+   link. Mirrors designsystem/css/navigations/main-navigation.postcss:46-49
+   where `&.active::after, &:hover::after { @apply bg-primary-500 }`. */
+.main-navigation__link:hover {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
 .main-navigation__link--active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
@@ -545,7 +625,9 @@
   display: inline-flex;
   align-items: center;
   font-weight: var(--font-weight-regular);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
+.main-navigation__link--has-menu:hover,
 .main-navigation__link--has-menu[aria-expanded="true"] {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
@@ -736,7 +818,13 @@
 }
 .hero__cta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
-/* ── BUTTONS ────────────────────────────────────────────────────────────── */
+/* ── BUTTONS ──────────────────────────────────────────────────────────────
+   CD Bund applies bold only to the filled / primary CTA variant. Outline,
+   bare, and link buttons inherit body weight (regular). See
+   designsystem/css/components/btn.postcss — `.btn--outline` (line 17),
+   `.btn--bare` (line 27), `.btn--link` (line 40), `.btn--link-negative`
+   (line 57) all `@apply font-normal`; only `.btn--filled` (line 74) is
+   `font-bold`. Audit reference: DS-M1. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -746,7 +834,7 @@
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius);
   font-size: var(--text-body-sm);
-  font-weight: var(--font-weight-bold);   /* CD Bund: bold on all buttons */
+  font-weight: var(--font-weight-regular);
   font-family: inherit;
   text-decoration: none;
   border: 1px solid transparent;
@@ -756,13 +844,15 @@
 }
 @media (min-width: 1280px) { .btn { min-height: var(--btn-lg-min-h); } }
 @media (min-width: 1920px) { .btn { min-height: 52px; } }
-/* CD Bund: filled action button = navy (secondary-600). Red is reserved
-   for danger and brand-accent surfaces (active nav underline, card rails). */
+/* CD Bund: filled action button = navy. Red is reserved for danger and
+   brand-accent surfaces (active nav underline, card rails). Bold-only on
+   filled to match DS — see header comment on `.btn`. */
 .btn--filled {
-  background: var(--color-secondary-600);
+  background: var(--color-secondary-500);
   color: var(--color-white);
+  font-weight: var(--font-weight-bold);
 }
-.btn--filled:hover { background: var(--color-secondary-700); }
+.btn--filled:hover { background: var(--color-secondary-600); }
 .btn--outline {
   background: transparent;
   color: var(--color-text-primary);
@@ -1361,7 +1451,20 @@ figcaption {
   align-items: center;
   margin-bottom: var(--space-xs);
 }
-.form-field__required { color: var(--color-danger); }
+/* Required marker — colour only. The asterisk glyph itself comes from
+   the markup so existing wizard templates still work; for new fields,
+   prefer `<label class="form-field__label form-field__label--required">`
+   which appends the canonical `\202F*` and silences screen readers
+   per DS pattern (designsystem/css/foundations/typography.postcss:91-98). */
+.form-field__required {
+  color: var(--color-danger);
+  speak: none;
+}
+.form-field__label--required::after {
+  content: '\202F*';        /* NARROW NO-BREAK SPACE + asterisk */
+  color: var(--color-danger);
+  speak: none;
+}
 .form-field__hint {
   font-size: var(--text-body-xs);
   color: var(--color-text-secondary);
@@ -1444,6 +1547,38 @@ figcaption {
   gap: var(--space-xs);
   cursor: pointer;
 }
+/* Same DS-aligned appearance-none rendering as `.option-group__item`
+   inputs — kept as a separate selector for the older damage-report /
+   wizard-step-1 markup that hasn't migrated to `.option-group`. */
+.radio-group input[type="radio"],
+.checkbox-group input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-input);
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.checkbox-group input[type="checkbox"] { border-radius: var(--radius-sm); }
+.radio-group    input[type="radio"]    { border-radius: 50%; }
+.radio-group    input[type="radio"]:checked,
+.checkbox-group input[type="checkbox"]:checked {
+  background-color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+.checkbox-group input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='7' viewBox='0 0 10 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.20692 0.293031C9.39439 0.480558 9.49971 0.734866 9.49971 1.00003C9.49971 1.26519 9.39439 1.5195 9.20692 1.70703L4.20692 6.70703C4.01939 6.8945 3.76508 6.99982 3.49992 6.99982C3.23475 6.99982 2.98045 6.8945 2.79292 6.70703L0.792919 4.70703C0.610761 4.51843 0.509966 4.26583 0.512245 4.00363C0.514523 3.74143 0.619692 3.49062 0.8051 3.30521C0.990508 3.1198 1.24132 3.01463 1.50352 3.01236C1.76571 3.01008 2.01832 3.11087 2.20692 3.29303L3.49992 4.58603L7.79292 0.293031C7.98045 0.10556 8.23475 0.000244141 8.49992 0.000244141C8.76508 0.000244141 9.01939 0.10556 9.20692 0.293031Z' fill='white'/%3E%3C/svg%3E");
+}
+.radio-group input[type="radio"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='6' cy='6' r='3' fill='white'/%3E%3C/svg%3E");
+}
 
 /* ── OPTION GROUP (radios / checkboxes) ──────────────────────────────────
    Modern DS pattern: each option is its own row by default (better tap
@@ -1472,12 +1607,47 @@ figcaption {
   min-height: 28px;            /* touch-target hint */
   padding: 4px 0;
 }
+/* DS appearance-none checkbox / radio — ports
+   designsystem/css/components/input.postcss:80-152. Keeps visual fidelity
+   on Windows where the native control still renders in a 2007-era style
+   that `accent-color` alone can't override. Audit ref: DS-N1. */
 .option-group__item input[type="radio"],
 .option-group__item input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   width: 18px;
   height: 18px;
-  accent-color: var(--color-secondary-600);    /* CD navy active fill */
   flex-shrink: 0;
+  margin: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-input);
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.option-group__item input[type="checkbox"] {
+  border-radius: var(--radius-sm);
+}
+.option-group__item input[type="radio"] {
+  border-radius: 50%;
+}
+.option-group__item input[type="radio"]:checked,
+.option-group__item input[type="checkbox"]:checked {
+  background-color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+.option-group__item input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='7' viewBox='0 0 10 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.20692 0.293031C9.39439 0.480558 9.49971 0.734866 9.49971 1.00003C9.49971 1.26519 9.39439 1.5195 9.20692 1.70703L4.20692 6.70703C4.01939 6.8945 3.76508 6.99982 3.49992 6.99982C3.23475 6.99982 2.98045 6.8945 2.79292 6.70703L0.792919 4.70703C0.610761 4.51843 0.509966 4.26583 0.512245 4.00363C0.514523 3.74143 0.619692 3.49062 0.8051 3.30521C0.990508 3.1198 1.24132 3.01463 1.50352 3.01236C1.76571 3.01008 2.01832 3.11087 2.20692 3.29303L3.49992 4.58603L7.79292 0.293031C7.98045 0.10556 8.23475 0.000244141 8.49992 0.000244141C8.76508 0.000244141 9.01939 0.10556 9.20692 0.293031Z' fill='white'/%3E%3C/svg%3E");
+}
+.option-group__item input[type="radio"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='6' cy='6' r='3' fill='white'/%3E%3C/svg%3E");
+}
+.option-group__item input[type="radio"]:disabled,
+.option-group__item input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .option-group__item:hover span { color: var(--color-text-primary); }
 .option-group__item:has(input:checked) span { font-weight: var(--font-weight-bold); }
@@ -1655,7 +1825,12 @@ figcaption {
 .filter-pill__value {
   font-weight: var(--font-weight-bold);
 }
+/* Visible chip is still 22 × 22, but the clickable area expands to a
+   44 × 44 hit slop via the ::before pseudo so WCAG 2.5.5 is met without
+   blowing up the pill height — audit M-C5. The visible chip styling stays
+   on the button itself; the slop is invisible and centered. */
 .filter-pill__remove {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1669,6 +1844,11 @@ figcaption {
   cursor: pointer;
   text-decoration: none;
   transition: background var(--transition-fast), color var(--transition-fast);
+}
+.filter-pill__remove::before {
+  content: '';
+  position: absolute;
+  inset: -11px;              /* 22 + 22 = 44 px clickable square */
 }
 .filter-pill__remove:hover {
   background: var(--color-primary);
@@ -1746,6 +1926,7 @@ figcaption {
   background: var(--color-white);
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius);
+  min-height: var(--btn-min-h);          /* WCAG 2.5.5 — audit M-C9 */
   /* Hide the spinner arrows — they make the field look noisy at this size */
   appearance: textfield;
   -moz-appearance: textfield;
@@ -1892,27 +2073,62 @@ a.btn[aria-disabled="true"] {
      --section-py-half. */
 }
 
-/* Back-to-top button — anchored top-right, white border, light icon */
+/* Back-to-top button — DS canonical `.back-to-top-btn--outline` pattern
+   (designsystem/css/components/back-to-top-btn.postcss:79-88). White
+   background, primary-600 border, primary-600 chevron. Sits anchored at
+   the top-right edge of the footer's dark band, overlapping the top so
+   half of the button reads against the page background and half against
+   the navy — matches the swisstopo / bbl.admin.ch reference. Square
+   shape with a small radius; size scales 44 → 48 → 64 px following the
+   DS responsive scale (`w-11 h-11`, `lg:w-12 lg:h-12`, `xl:w-16 xl:h-16`).
+   The wrapper-positioning trick from DS `.back-to-top-wrapper` would make
+   it sticky-on-scroll; we keep the simpler footer-anchored placement for
+   now (the portal isn't long-form enough to need sticky). */
 .app-footer__top-btn {
   position: absolute;
-  top: var(--space-lg);
+  top: -22px;                                    /* half overlaps the footer top edge */
   right: var(--container-padding);
-  width: 48px;
-  height: 48px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.6);
-  color: var(--color-white);
+  width: 44px;
+  height: 44px;
+  background: var(--color-white);
+  border: 1px solid var(--color-primary-600);
+  color: var(--color-primary-600);
+  border-radius: var(--radius);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: var(--shadow-lg);
+  transition: color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .app-footer__top-btn:hover {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
+  border-color: var(--color-primary-700);
+  color: var(--color-primary-700);
+  box-shadow: var(--shadow-xl, var(--shadow-lg));
 }
-.app-footer__top-btn svg { width: 20px; height: 20px; }
+.app-footer__top-btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.app-footer__top-btn svg {
+  width: 50%;
+  height: auto;
+  stroke-width: 2;
+}
+@media (min-width: 1024px) {
+  .app-footer__top-btn {
+    width: 48px;
+    height: 48px;
+    top: -24px;
+  }
+}
+@media (min-width: 1280px) {
+  .app-footer__top-btn {
+    width: 64px;
+    height: 64px;
+    top: -32px;
+  }
+}
 
 /* Footer grid — matches designsystem css/sections/footer.postcss .footer-information:
    single column on mobile, three equal columns from lg (1024px) up. */
@@ -1943,13 +2159,27 @@ a.btn[aria-disabled="true"] {
   }
 }
 
-/* Brand column (BBL motto) */
-.footer-information__brand {
-  font-size: 2rem;
-  font-weight: var(--font-weight-bold);
+/* Column heading shared by all three footer columns. CD Bund canonical
+   per designsystem/css/sections/footer.postcss .footer-information__entry
+   `h3 { @apply text--xl; mb-6 lg:mb-10 }` — sentence-case white text at
+   ~20→24→26 px across breakpoints, regular weight, generous margin below.
+   Both `.footer-information__brand` (column 1 — descriptive heading) and
+   `.footer-information__heading` (columns 2/3 — link-list heading) share
+   the same look so the three columns scan as a uniform row. The earlier
+   "small uppercase tracked label" treatment was the CD-Bund Tailwind 2.x
+   eyebrow pattern, no longer used on swisstopo / bbl.admin.ch. */
+.footer-information__brand,
+.footer-information__heading {
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-regular);
   color: var(--color-text-inverse);
-  margin: 0 0 var(--space-md);
-  letter-spacing: 0.02em;
+  margin: 0 0 var(--space-lg);
+  letter-spacing: 0;
+  line-height: var(--line-height-snug);
+}
+@media (min-width: 1024px) {
+  .footer-information__brand,
+  .footer-information__heading { margin-bottom: var(--space-2xl); }
 }
 .footer-information__motto {
   margin: 0;
@@ -1965,18 +2195,6 @@ a.btn[aria-disabled="true"] {
   color: rgba(255, 255, 255, 0.65);
   font-weight: var(--font-weight-normal);
   max-width: 36ch;
-}
-
-/* Footer column label — CD Bund / swisstopo pattern: small uppercase,
-   medium weight, generous tracking. Reads as a column header, not a
-   page-level heading. */
-.footer-information__heading {
-  font-size: var(--text-body-sm);
-  font-weight: var(--font-weight-regular);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 var(--space-md);
-  color: rgba(255, 255, 255, 0.75);
 }
 .footer-information__list {
   list-style: none;
@@ -2095,9 +2313,8 @@ a.btn[aria-disabled="true"] {
   padding: var(--space-xs) var(--space-md);
   gap: var(--space-xs);
   font-size: var(--text-body-sm);
-  /* CD Bund `.btn--outline` ships with `font-normal`; our portal's `.btn`
-     defaults to bold. Reassert normal weight on the back-button to match. */
-  font-weight: var(--font-weight-normal);
+  /* Weight inherits from `.btn` base (regular) — matches CD Bund
+     `.btn--outline` `font-normal`. */
   color: var(--color-primary-600);
   border-color: var(--color-primary-600);
   text-decoration: none;
@@ -2114,6 +2331,7 @@ a.btn[aria-disabled="true"] {
   padding: var(--space-xs) var(--space-sm);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-xs);
   font-family: inherit;
   font-size: var(--text-body-sm);
@@ -2121,6 +2339,8 @@ a.btn[aria-disabled="true"] {
   cursor: pointer;
   border-radius: var(--radius);
   transition: color var(--transition-fast), background var(--transition-fast);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C4 */
+  min-width: 44px;
 }
 .share-bar__btn:hover { color: var(--color-primary); background: var(--color-bg-surface); }
 .share-bar__btn svg { width: 18px; height: 18px; }
@@ -2587,22 +2807,30 @@ a.btn[aria-disabled="true"] {
    that would otherwise be hidden alongside .top-header__meta. */
 .main-navigation__mobile-meta { display: none; }
 
-/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
-@media (max-width: 1024px) {
+/* Body scroll-lock while the burger menu is open. Mirrors CD Bund
+   `.body--mobile-menu-is-open` from designsystem/css/foundations/global.postcss:34
+   — fixes the bug where the underlying page could still scroll behind
+   the open mobile nav, and prevents iOS Safari rubber-band scroll from
+   exposing the page header / footer. */
+body.body--mobile-menu-is-open {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────
+   Mobile-nav breakpoint matches CD Bund: `.main-navigation--desktop` is
+   `hidden lg:flex` in designsystem/css/navigations/main-navigation.postcss,
+   and `.mobile-menu` is `lg:hidden` in designsystem/css/sections/mobile-menu.postcss.
+   So burger / vertical-list collapse engages everywhere below 1024 px. */
+@media (max-width: 1023.98px) {
   .top-header { flex-wrap: wrap; }
   .top-header__right { width: 100%; justify-content: flex-end; }
-}
-@media (max-width: 768px) {
   .burger { display: inline-flex; }
   .main-navigation { display: none; flex-direction: column; gap: 0; width: 100%; }
   .main-navigation.open { display: flex; }
   .main-navigation__link { padding: var(--space-md); border-bottom: 1px solid var(--color-border); }
-  .top-bar__authorities span { display: none; }
   .header-search__input { width: 140px; }
-  .top-header__dept { display: none; }
-  .top-header__divider { display: none; }
-  .top-header__meta-nav { display: none; }
-  .shortcut-overlay__grid { grid-template-columns: 1fr; }
+  .top-header__meta { display: none; }
   /* Surface meta links (Kontakt/Hilfe) that are hidden at this width
      inside the burger menu so they remain reachable on mobile. */
   .main-navigation__mobile-meta {
@@ -2616,6 +2844,13 @@ a.btn[aria-disabled="true"] {
     font-weight: var(--font-weight-normal);
     color: var(--color-text-secondary);
   }
+}
+@media (max-width: 768px) {
+  .top-bar__authorities span { display: none; }
+  .top-header__dept { display: none; }
+  .top-header__divider { display: none; }
+  .top-header__meta-nav { display: none; }
+  .shortcut-overlay__grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .hero { padding: var(--section-py-half) var(--container-padding); }
@@ -2828,14 +3063,21 @@ a.btn[aria-disabled="true"] {
   color: var(--color-text-muted);
   transition: color var(--transition-fast), transform var(--transition-fast);
 }
+/* CD canonical TOC pattern uses a return/enter glyph (anchor target),
+   not a chevron, so the hover affordance is colour-only — no rightward
+   translate (the glyph already points left + down). */
 .page-with-toc__toc-link:hover .page-with-toc__toc-icon {
   color: var(--color-primary);
-  transform: translateX(2px);
 }
+/* Active TOC item: bold + primary text, with the 3 px red rail from
+   `.--active::after` carrying the "you-are-here" signal. The grey fill
+   is reserved for `:hover` so the two states stay visually distinct
+   (CD Bund menu pattern: active = rail + bold; hover = background tint
+   — never both). The hover rule below keeps applying on top of `.--active`
+   so the user still gets feedback when re-aiming at the current item. */
 .page-with-toc__toc-item--active .page-with-toc__toc-link {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-bold);
-  background: var(--color-secondary-50);
 }
 .page-with-toc__toc-item--active .page-with-toc__toc-icon {
   color: var(--color-primary);
@@ -2898,6 +3140,15 @@ a.btn[aria-disabled="true"] {
    "Kontakt" in the sticky TOC doesn't land the section under the
    federal chrome. */
 .contact-section { scroll-margin-top: 160px; }
+/* Heading lives above the two-column grid so it reads as the section
+   title spanning the full width — matches swisstopo / armasuisse Immo
+   contact-block pattern. Generous margin below before the grid begins. */
+.contact-section__heading {
+  margin: 0 0 var(--space-2xl);
+}
+@media (min-width: 1024px) {
+  .contact-section__heading { margin-bottom: var(--space-3xl); }
+}
 .contact-section__grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -2910,8 +3161,14 @@ a.btn[aria-disabled="true"] {
     gap: var(--space-3xl);
   }
 }
-.contact-section__heading {
-  margin: 0 0 var(--space-lg);
+/* Department / unit sub-heading inside the left column — bold body-size
+   line introducing the address + contact rows. Matches the swisstopo
+   reference "Topography - Geodata Distribution" treatment. */
+.contact-section__subheading {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-sm);
 }
 .contact-section__info {
   /* Inherits contact-block helpers (__address, __row, __link, __lead,

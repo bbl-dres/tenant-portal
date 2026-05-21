@@ -18,6 +18,7 @@ import { state, persistDraft, loadDraft, clearDraft } from './state.js';
 import {
   escapeHtml, escapeJs, formatChf, icon, toast, modal,
   renderStepIndicator, formatAssetKey, attachmentLi,
+  setFieldError,
 } from './lib.js';
 import { shell } from './shell.js';
 
@@ -223,12 +224,19 @@ function wireWizardStep(stepNum, draft) {
     const addr = body.querySelector('input[name="address"]');
     addr.addEventListener('input', e => {
       draft.address = e.target.value;
+      // Clear any pending error as soon as the user types something.
+      if (e.target.value) setFieldError(addr, null);
       updateSapInfo(draft);
       persistDraft(draft);
     });
     updateSapInfo(draft);
     body.querySelector('#nextStep').addEventListener('click', () => {
-      if (!draft.address) { toast('Bitte Adresse eingeben'); return; }
+      if (!draft.address) {
+        setFieldError(addr, 'Bitte Adresse eingeben.');
+        addr.focus();
+        toast('Bitte Adresse eingeben');
+        return;
+      }
       window.portal.navigate('#/wizard/2');
     });
   }
@@ -344,7 +352,7 @@ function renderStep2(draft) {
       <h3>Mengengerüst & Berechnung</h3>
       <div class="form-field">
         <label class="form-field__label" for="fteInput">Anzahl FTE <span class="form-field__required">*</span></label>
-        <input class="form-field__input" id="fteInput" type="number" min="1" max="2000" name="fte" value="${draft.fte}">
+        <input class="form-field__input" id="fteInput" type="number" inputmode="numeric" min="1" max="2000" name="fte" value="${draft.fte}">
         <p class="form-field__hint">Belegungsfaktor (Desk-Sharing) <strong>0.8</strong> — Bundes-Stammdatenvorgabe.</p>
       </div>
       <div id="calcBlock"></div>
@@ -554,7 +562,7 @@ function renderStep4(draft) {
       </div>
       <div class="form-field">
         <label class="form-field__label">4.10 Kostenerwartung gesamt (CHF) <span class="form-field__required">*</span></label>
-        <input class="form-field__input" type="number" name="g_kosten" value="${f.kosten || ''}" placeholder="z. B. 19200000">
+        <input class="form-field__input" type="number" inputmode="numeric" name="g_kosten" value="${f.kosten || ''}" placeholder="z. B. 19200000">
       </div>
     </div>
 

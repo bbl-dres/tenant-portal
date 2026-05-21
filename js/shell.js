@@ -217,6 +217,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                 <li role="presentation"><button class="language-switcher__option language-switcher__option--active" role="option" aria-selected="true" data-lang="DE" lang="de" onclick="window.portal.pickLang('DE')">DE</button></li>
                 <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="FR" lang="fr" onclick="window.portal.pickLang('FR')">FR</button></li>
                 <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="IT" lang="it" onclick="window.portal.pickLang('IT')">IT</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="EN" lang="en" onclick="window.portal.pickLang('EN')">EN</button></li>
               </ul>
             </div>
           </div>
@@ -272,7 +273,11 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                   aria-expanded="false"
                   aria-controls="mainNavigation"
                   onclick="window.portal.toggleBurger();">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <span class="burger__icon" aria-hidden="true">
+              <span class="burger__bar"></span>
+              <span class="burger__bar"></span>
+              <span class="burger__bar"></span>
+            </span>
           </button>
           <div class="main-navigation" id="mainNavigation">${navHtml}${mobileMetaHtml}</div>
         </div>
@@ -302,8 +307,10 @@ export function renderFooter() {
       <div class="footer-information">
         <div class="footer-information__inner">
           <div class="footer-information__col footer-information__col--brand">
-            <h3 class="footer-information__brand">BBL</h3>
-            <p class="footer-information__motto">Nachhaltig, partnerschaftlich und vorbildlich</p>
+            <h3 class="footer-information__brand">Über das BBL</h3>
+            <p class="footer-information__motto">
+              Bundesamt für Bauten und Logistik — nachhaltig, partnerschaftlich und vorbildlich.
+            </p>
             <p class="footer-information__prototype-warning" role="note">
               Diese Anwendung ist ein Prototyp. Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration.
             </p>
@@ -492,6 +499,10 @@ export function toggleLang(forceOpen) {
   }
 }
 export function pickLang(code) {
+  // a11y: update <html lang> so screen readers, hyphenation, and
+  // spell-check switch pronunciation/segmentation even before content
+  // translations land. eCH-0059 requirement; tracked as audit M-A3.
+  document.documentElement.lang = code.toLowerCase();
   document.querySelectorAll('.language-switcher__option').forEach(o => {
     const isActive = o.getAttribute('data-lang') === code;
     o.classList.toggle('language-switcher__option--active', isActive);
@@ -558,12 +569,52 @@ export function toggleSearch(open) {
     }
   }
 }
+// Click-outside collapses the open header search. Mirrors the language-
+// switcher / nav-menu UX: anything that opens via a button should also
+// close when the user clicks anywhere else.
+document.addEventListener('click', (e) => {
+  const el = document.getElementById('headerSearch');
+  if (!el || !el.classList.contains('open')) return;
+  if (e.target.closest('#headerSearch')) return;
+  toggleSearch(false);
+});
 
 
 // ── BURGER MENU (mobile nav toggle) ───────────────────────────────────────
 // Keep the visible icon and the aria-expanded state in sync. Returning
 // focus to the burger on close mirrors the language switcher behaviour
 // and keeps the keyboard user oriented.
+//
+// Also: body-scroll-lock via `.body--mobile-menu-is-open` (CD Bund pattern
+// from designsystem/css/foundations/global.postcss:34); force-close any
+// open nav-menu dropdown so the menu and a dropdown can't visually
+// overlap; install a focus trap so Tab can't escape the open menu into
+// the underlying page; restore focus to the burger on close.
+let _trapHandler = null;
+let _lastFocusBeforeMenu = null;
+function _installFocusTrap(container) {
+  _trapHandler = (e) => {
+    if (e.key !== 'Tab') return;
+    const focusables = container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+  document.addEventListener('keydown', _trapHandler);
+}
+function _removeFocusTrap() {
+  if (_trapHandler) document.removeEventListener('keydown', _trapHandler);
+  _trapHandler = null;
+}
 export function toggleBurger(forceOpen) {
   const nav = document.getElementById('mainNavigation');
   const btn = document.querySelector('.burger');
@@ -572,7 +623,34 @@ export function toggleBurger(forceOpen) {
   nav.classList.toggle('open', willOpen);
   btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
   btn.setAttribute('aria-label', willOpen ? 'Menü schliessen' : 'Menü öffnen');
+  document.body.classList.toggle('body--mobile-menu-is-open', willOpen);
+  if (willOpen) {
+    // Close every open nav-menu panel — keeps "Dienstleistungen" from
+    // floating over the mobile drop-down list at narrow widths.
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      toggleNavMenu(m.id.replace('navMenu-', ''), false);
+    });
+    _lastFocusBeforeMenu = document.activeElement;
+    _installFocusTrap(nav);
+    // Move focus to the first link in the menu so keyboard users land inside.
+    const firstLink = nav.querySelector('a, button');
+    if (firstLink) setTimeout(() => firstLink.focus(), 0);
+  } else {
+    _removeFocusTrap();
+    if (_lastFocusBeforeMenu === btn || !_lastFocusBeforeMenu) {
+      btn.focus();
+    } else if (_lastFocusBeforeMenu && document.body.contains(_lastFocusBeforeMenu)) {
+      _lastFocusBeforeMenu.focus();
+    }
+    _lastFocusBeforeMenu = null;
+  }
 }
+// Esc closes the open mobile menu — mirrors language-switcher / nav-menu UX.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const nav = document.getElementById('mainNavigation');
+  if (nav && nav.classList.contains('open')) toggleBurger(false);
+});
 
 
 // ── SHELL WRAPPER (mounts the chrome + reserves #page-body) ──────────────

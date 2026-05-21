@@ -2,24 +2,27 @@
    DESIGN TOKENS — CD Bund
    BBL Mieterportal Prototypes
 
-   Aligned with the official Swiss Federal Design System (swiss/designsystem)
-   v1.0.9. Values resolved from the live --color-primary-* tokens and
-   PostCSS sources. Trimmed for portal use; sister-project workspace-management
-   keeps the full token set.
+   Aligned with the official Swiss Federal Design System
+   (https://github.com/swiss/designsystem, MIT). Token values resolved from
+   the live --color-primary-* tokens and PostCSS sources. Trimmed for portal
+   use; sister-project workspace-management keeps the full token set.
 
-   Reference: https://github.com/swiss/designsystem (MIT)
+   Audit + remediation history: docs/design-system-audit.md and
+   docs/remediation-plan.md. DS upstream version pinned at the moment of
+   audit: `package.json#version` of the cloned designsystem repo.
    ========================================================================== */
 
 /* Noto Sans — federal CD typeface. `local()` first so installed
-   copies skip the network; `url()` fallback to bundled files so
-   Windows/macOS users without the font don't silently render in
-   Verdana. CD Bund convention from designsystem/css/foundations/
-   font-face.postcss (one family-per-face) is also possible but we
-   keep one family / two weights to minimise rule churn elsewhere. */
+   copies skip the network; then woff2 (preferred — ~190 KB / face)
+   then TTF fallback (~580 KB / face, kept for safety). CD Bund
+   convention from designsystem/css/foundations/font-face.postcss
+   (one family-per-face) is also possible but we keep one family /
+   two weights to minimise rule churn elsewhere. */
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans'), local('NotoSans-Regular'),
-       url('../assets/fonts/NotoSans-Regular.ttf') format('truetype');
+       url('../assets/fonts/NotoSans-Regular.woff2') format('woff2'),
+       url('../assets/fonts/NotoSans-Regular.ttf')   format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -27,7 +30,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Bold'), local('NotoSans-Bold'),
-       url('../assets/fonts/NotoSans-Bold.ttf') format('truetype');
+       url('../assets/fonts/NotoSans-Bold.woff2') format('woff2'),
+       url('../assets/fonts/NotoSans-Bold.ttf')   format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -35,7 +39,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Italic'), local('NotoSans-Italic'),
-       url('../assets/fonts/NotoSans-Italic.ttf') format('truetype');
+       url('../assets/fonts/NotoSans-Italic.woff2') format('woff2'),
+       url('../assets/fonts/NotoSans-Italic.ttf')   format('truetype');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -43,7 +48,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Bold Italic'), local('NotoSans-BoldItalic'),
-       url('../assets/fonts/NotoSans-BoldItalic.ttf') format('truetype');
+       url('../assets/fonts/NotoSans-BoldItalic.woff2') format('woff2'),
+       url('../assets/fonts/NotoSans-BoldItalic.ttf')   format('truetype');
   font-weight: 700;
   font-style: italic;
   font-display: swap;

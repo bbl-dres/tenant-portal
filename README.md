@@ -50,7 +50,7 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
 - ≈ 99 % aligned with [`swiss/designsystem`](https://github.com/swiss/designsystem) v1.0.9 — typography, color, layout, spacing, components.
 - Bundled Noto Sans (Regular / Bold / Italic / Bold-Italic).
 - WCAG 2.1 AA: skip-link, focus rings, `prefers-reduced-motion`, ARIA disclosure for dropdowns, semantic markup, contrast verified.
-- See [`docs/CD-AUDIT.md`](docs/CD-AUDIT.md) for the full gap analysis and resolved-vs-open items.
+- See [`docs/design-system-audit.md`](docs/design-system-audit.md) for the full gap analysis and resolved-vs-open items, and [`docs/remediation-plan.md`](docs/remediation-plan.md) for the step-by-step CD-alignment plan.
 
 ### Technical
 - **Hash-routed SPA** — no framework, no build step. ES modules.

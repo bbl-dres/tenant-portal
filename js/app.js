@@ -563,7 +563,7 @@ function renderInfoPage() {
                   <a class="page-with-toc__toc-link" href="#${it.id}"
                      onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
                     <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
-                    <svg class="page-with-toc__toc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+                    <svg class="page-with-toc__toc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
                   </a>
                 </li>
               `).join('')}
@@ -575,9 +575,10 @@ function renderInfoPage() {
 
     <section class="section section--alt contact-section" id="kontakt" aria-labelledby="kontakt-heading">
       <div class="container">
+        <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt für Bauten und Logistik</h2>
         <div class="contact-section__grid">
           <div class="contact-section__info">
-            <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt für Bauten und Logistik</h2>
+            <p class="contact-section__subheading">Abteilung Immobilienmanagement</p>
             <p class="contact-block__address">
               Fellerstrasse 21<br>
               CH&#8201;–&#8201;3027 Bern
@@ -600,7 +601,6 @@ function renderInfoPage() {
                 www.bbl.admin.ch
               </a>
             </p>
-            <p class="contact-block__lead"><strong>Abteilung Immobilienmanagement</strong></p>
             <p class="contact-block__note">
               Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
             </p>
@@ -797,7 +797,7 @@ function renderNewsDetail({ id }) {
         <p class="meta-info">
           <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
         </p>
-        <img class="news-detail__image" src="${n.image}" alt="">
+        <img class="news-detail__image" src="${n.image}" alt="" loading="lazy" decoding="async">
         <p class="news-detail__lead">${P.escapeHtml(n.lead)}</p>
         <p class="news-detail__footer">
           Quelle: ${P.escapeHtml(n.source)} · Verantwortlich: ${P.escapeHtml(n.responsible)} · Stand: ${P.formatDate(n.date)} · DE
@@ -838,7 +838,8 @@ function renderLanding() {
         </div>
         <figure class="hero__figure">
           <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&q=80"
-               alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien.">
+               alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien."
+               loading="lazy" decoding="async" width="1200" height="900">
         </figure>
       </div>
     </section>
@@ -871,7 +872,7 @@ function renderLanding() {
             <img class="video-thumb__image"
                  src="assets/images/Explain-Video.png"
                  alt=""
-                 loading="lazy">
+                 loading="lazy" decoding="async">
             <div class="video-thumb__header">
               <span class="video-thumb__logo" aria-hidden="true">
                 <img class="video-thumb__logo-inner" src="assets/swiss-logo-flag.svg" alt="">
@@ -1930,7 +1931,7 @@ function renderPagination({ current, totalPages, from, to, totalItems, entitySin
       <span class="pagination__count" aria-live="polite">${countText}</span>
       <a class="btn btn--outline btn--icon-only" href="${prevHref}" aria-label="Vorherige Seite"
          ${prevDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronLeft')}</a>
-      <input class="pagination__input" type="number"
+      <input class="pagination__input" type="number" inputmode="numeric"
              id="${id}" min="1" max="${totalPages}" value="${current}"
              aria-label="Seite auswählen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
@@ -2991,7 +2992,7 @@ function renderDownloads() {
       <button class="btn btn--outline btn--icon-only" type="button"
               data-step="-1" aria-label="Vorherige Seite"
               ${docState.page <= 1 ? 'disabled' : ''}>${P.icon('chevronLeft')}</button>
-      <input class="pagination__input" type="number"
+      <input class="pagination__input" type="number" inputmode="numeric"
              id="docPaginationInput" min="1" max="${totalPages}" value="${docState.page}"
              aria-label="Seite auswählen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
@@ -3120,7 +3121,7 @@ function renderRepairQuickForm() {
           </div>
           <div class="form-field">
             <label class="form-field__label">Kontakt für Rückfragen</label>
-            <input class="form-field__input" type="tel" name="phone" placeholder="+41 …" value="">
+            <input class="form-field__input" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+41 …" value="">
             <p class="form-field__hint">Nur ausfüllen, wenn ein anderer Kontakt als Ihr eIAM-Profil zuständig ist.</p>
           </div>
           <div class="wizard__sticky-footer">

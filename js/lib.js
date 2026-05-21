@@ -101,6 +101,49 @@ export function safeImageUrl(url) {
 }
 
 
+// ── FORM-FIELD ERROR HELPER ────────────────────────────────────────────────
+// Wires the visible `.form-field__error` text up to the input via
+// `aria-describedby` + `aria-invalid`, and toggles `.form-field--invalid`
+// on the field wrapper. Mirrors the eCH-0059 / WCAG 2.1 SC 3.3.1 expectation
+// that a screen reader announces the *reason* a field is invalid when
+// focus lands on it. Audit ref: M-E5, DS-V5.
+//
+// Usage:
+//   setFieldError(inputElement, 'Bitte Adresse eingeben');   // mark invalid
+//   setFieldError(inputElement, null);                       // clear
+//
+// The error span is created next to the input on demand and reused on
+// subsequent calls, so callers don't need to write any error markup.
+export function setFieldError(input, message) {
+  if (!input) return;
+  const wrapper = input.closest('.form-field') || input.parentElement;
+  if (!wrapper) return;
+  const errorId = input.id ? `${input.id}-error`
+                : input.name ? `${input.name}-error`
+                : `field-error-${Math.random().toString(36).slice(2, 8)}`;
+  let errorEl = wrapper.querySelector('.form-field__error');
+  if (message) {
+    if (!errorEl) {
+      errorEl = document.createElement('p');
+      errorEl.className = 'form-field__error';
+      errorEl.id = errorId;
+      errorEl.setAttribute('role', 'alert');
+      wrapper.appendChild(errorEl);
+    }
+    errorEl.textContent = message;
+    if (!errorEl.id) errorEl.id = errorId;
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', errorEl.id);
+    wrapper.classList.add('form-field--invalid');
+  } else {
+    if (errorEl) errorEl.remove();
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+    wrapper.classList.remove('form-field--invalid');
+  }
+}
+
+
 // ── STORAGE PRIMITIVES ─────────────────────────────────────────────────────
 // Wrapped because localStorage throws in Safari private mode, on quota,
 // and when storage is disabled by enterprise policy. Failures degrade
