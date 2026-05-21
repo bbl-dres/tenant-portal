@@ -563,7 +563,7 @@ function renderInfoPage() {
                   <a class="page-with-toc__toc-link" href="#${it.id}"
                      onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
                     <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
-                    <svg class="page-with-toc__toc-icon" aria-hidden="true" focusable="false"><use href="assets/icons/Reply.svg"/></svg>
+                    ${P.icon('return', 'page-with-toc__toc-icon')}
                   </a>
                 </li>
               `).join('')}
@@ -1818,7 +1818,7 @@ function renderPropertiesFilterPills({ view, query, category }) {
           <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
           <a class="filter-pill__remove" href="${hrefWithout(f.key)}"
              aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
-            <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons/Cancel.svg"/></svg>
+            ${P.icon('x', 'filter-pill__remove-icon')}
           </a>
         </span>
       `).join('')}
@@ -2405,10 +2405,50 @@ const USETYPE_LABEL_DE = {
 let _floorMap = null;
 let _floorPopup = null;  // active MapLibre Popup for the clicked room
 
-// useType → fill colour. Single source of truth, mirrored in the legend
-// swatches in styles.css. Pre-computed onto each feature property at
-// spacesFc construction time so the MapLibre paint spec stays trivial —
-// `['get', 'fillColor']` rather than a `match` expression.
+// useType → fill colour. MapLibre paint specs don't accept CSS
+// variables, so this map is the runtime source of truth for the floor
+// canvas. The four broad categories below are mirrored as
+// `--color-floor-{work,collab,infra,special}` tokens in tokens.css for
+// the static legend swatches — keep them in sync when palette changes.
+// Pre-computed onto each feature property at spacesFc construction time
+// so the MapLibre paint spec stays trivial — `['get', 'fillColor']`
+// rather than a `match` expression.
+//
+// useType is further grouped into a coarser "Nutzung" bucket for the
+// default legend: work / collab / infra / special. Used by
+// renderFloorLegend to aggregate Σ m² across rooms with related
+// useTypes (e.g. Office + OpenSpace + FocusRoom + MeetingRoom + … → work).
+const USETYPE_GROUP = {
+  Office: 'work', OpenSpace: 'work', FocusRoom: 'work', Reception: 'work',
+  MeetingRoom: 'collab', TrainingRoom: 'collab', Lounge: 'collab', Cafeteria: 'collab',
+  Corridor: 'infra', WC: 'infra', Kitchenette: 'infra', PrintRoom: 'infra',
+  Cloakroom: 'infra', TechnicalRoom: 'infra',
+  Storage: 'special', Archive: 'special', Lab: 'special',
+};
+const USETYPE_GROUP_LABEL = { work: 'Arbeitsplätze', collab: 'Zusammenarbeit', infra: 'Infrastruktur', special: 'Sonderräume' };
+const USETYPE_GROUP_FILL  = { work: '#BFDBFE',       collab: '#FDE68A',         infra: '#E5E7EB',        special: '#DDD6FE' };
+
+// SIA 416 categorisation — `siaCategory` is now a first-class field on
+// each Space (see docs/DATAMODEL.md § 3.3.1). Five buckets: HNF
+// (Hauptnutzfläche, main usable), NNF (Nebennutzfläche, secondary), VF
+// (Verkehrsfläche, circulation), FF (Funktionsfläche, function), TF
+// (Technikfläche, technical).
+//
+// Colours: **SIA 416 doesn't prescribe a palette** — it defines the
+// categorisation, not the visualisation. The Swiss official template
+// (IDC's `CHE_SIA_416_Modellplan_neutral_v1.xlsx`) is explicitly
+// neutral. The hues below are picked for visual distinguishability
+// only — five distinct Tailwind-200/300 tones at similar luminance,
+// no semantic loading. Swap them freely.
+const SIA_LABEL_DE = { HNF: 'Hauptnutzfläche (HNF)', NNF: 'Nebennutzfläche (NNF)', VF: 'Verkehrsfläche (VF)', FF: 'Funktionsfläche (FF)', TF: 'Technikfläche (TF)' };
+const SIA_FILL     = { HNF: '#BFDBFE',                 NNF: '#DDD6FE',                 VF: '#E5E7EB',           FF: '#FDE68A',           TF: '#FCD34D' };
+
+// Tenant palette — 6 distinct hues assigned at floor-load time to the
+// unique `occupierVe` values present on this floor. Wraps if there are
+// more than 6 VEs (rare; federal departments per floor are ~3-5).
+const TENANT_PALETTE = ['#BFDBFE', '#FCD34D', '#DDD6FE', '#FDA4AF', '#86EFAC', '#7DD3FC'];
+const TENANT_UNASSIGNED_FILL = '#F3F4F6';   // gray-100 for rooms with null occupierVe
+
 const USETYPE_FILL = {
   Office:        '#bfdbfe',
   OpenSpace:     '#bfdbfe',
@@ -2514,40 +2554,36 @@ function renderFloorDetail({ id, floorSlug }) {
           </div>
 
           <div class="floor-toolbar__group floor-toolbar__group--right">
-            <label class="floor-toolbar__label" for="floorViewMode">Ansicht</label>
+            <label class="floor-toolbar__label" for="floorViewMode">Einfärben</label>
             <select id="floorViewMode" class="input input--sm">
+              <option value="none">Keine</option>
               <option value="useType">Nutzung</option>
+              <option value="sia">SIA 416 Kategorie</option>
+              <option value="tenant">Mietende VE</option>
             </select>
             <button class="btn btn--bare btn--sm" type="button" id="floorFullscreenBtn" aria-label="Vollbild">${P.icon('maximize')}Vollbild</button>
           </div>
         </div>
 
-        <div class="floor-stage">
+        <div class="floor-viewer">
           <div id="floorCanvas" class="floor-canvas" aria-label="Interaktiver Grundriss"></div>
+          <ul class="floor-legend" id="floorLegend" aria-label="Legende"></ul>
         </div>
-
-        <ul class="floor-legend" aria-label="Legende">
-          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--work"></span>Arbeitsplätze</li>
-          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--collab"></span>Zusammenarbeit</li>
-          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--infra"></span>Infrastruktur</li>
-          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--special"></span>Sonderräume</li>
-          <li class="floor-legend__item"><span class="floor-legend__swatch floor-legend__swatch--mine"></span>${P.escapeHtml(userVe)}-Räume (rote Umrandung)</li>
-        </ul>
       </div>
     </section>
   `;
 
   initFloorCanvas(t, floor, spaces, userVe, initialSpaceId);
 
-  // Vollbild toggle — uses HTML5 Fullscreen API on the canvas container.
-  // After entering / leaving fullscreen the MapLibre canvas needs a resize
-  // tick so it reflows to the new dimensions.
+  // Vollbild toggle — fullscreens `.floor-viewer` so the legend stays
+  // visible inside the fullscreen surface. After enter/leave we resize
+  // the MapLibre canvas so it reflows to the new dimensions.
   const fsBtn = document.getElementById('floorFullscreenBtn');
-  const stage = document.querySelector('.floor-stage');
-  if (fsBtn && stage) {
+  const viewer = document.querySelector('.floor-viewer');
+  if (fsBtn && viewer) {
     fsBtn.addEventListener('click', () => {
       if (!document.fullscreenElement) {
-        stage.requestFullscreen?.().catch(() => {});
+        viewer.requestFullscreen?.().catch(() => {});
       } else {
         document.exitFullscreen?.();
       }
@@ -2573,25 +2609,119 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       geometry: floor.geometry,
       properties: { floorId: floor.floorId, name: floor.name }
     }]};
+    // Build the tenant→colour map for this floor: assign a palette
+    // entry per unique occupierVe (skipping null), wrapping if there
+    // are more VEs than palette slots. Rooms with no occupierVe get
+    // the dedicated "unassigned" fill so they're visually distinct
+    // rather than colliding with one of the assigned hues.
+    const tenantVes = [...new Set(spaces.map(s => s.occupierVe).filter(Boolean))].sort();
+    const tenantColors = Object.fromEntries(tenantVes.map((ve, i) => [ve, TENANT_PALETTE[i % TENANT_PALETTE.length]]));
+
     const spacesFc = { type: 'FeatureCollection', features: spaces.map(s => {
       const useLabel = USETYPE_LABEL_DE[s.useType] || s.useType;
-      // Pre-compose a three-line label (number / Nutzung / Fläche) and the
-      // fill colour. Pre-computing client-side keeps the MapLibre paint spec
-      // trivial (`['get', 'fillColor']` instead of a `match` expression) —
-      // useful both for performance and for spotting data issues quickly.
+      // Pre-compose a three-line label (number / Nutzung / Fläche) and
+      // a colour per view mode. Pre-computing client-side keeps the
+      // MapLibre paint spec trivial — the active layer reads e.g.
+      // `['get', 'fillUseType']` and we hot-swap which property name
+      // it reads via setPaintProperty when the user changes the mode.
       const label = `${s.name}\n${useLabel}\n${s.area} m²`;
-      const fillColor = USETYPE_FILL[s.useType] || '#ff66cc'; // bright pink = unmapped useType, visible in QA
+      // `siaCategory` is a first-class field on Space (docs/DATAMODEL.md
+      // § 3.3.1). Fallback to NNF if a future useType lands without a
+      // categorisation in the data — visible in QA as yellow tint.
+      const siaCat = s.siaCategory || 'NNF';
       return {
         type: 'Feature',
         geometry: s.geometry,
         properties: {
           spaceId: s.spaceId, floorId: s.floorId, name: s.name,
-          useType: s.useType, useLabel, area: s.area, label, fillColor,
+          useType: s.useType, useLabel, area: s.area, label,
           capacity: s.capacity, isBookable: s.isBookable,
           occupierVe: s.occupierVe, occupierDep: s.occupierDep,
+          siaCategory: siaCat,
+          // Per-mode pre-computed fills. The active layer reads one of
+          // these via `['get', 'fillUseType' | 'fillSia' | 'fillTenant']`.
+          // `none` mode short-circuits to the canvas background colour
+          // — handled in the change-listener, no fillNone property needed.
+          fillUseType: USETYPE_FILL[s.useType] || '#FF66CC',
+          fillSia:     SIA_FILL[siaCat]        || '#FF66CC',
+          fillTenant:  s.occupierVe ? tenantColors[s.occupierVe] : TENANT_UNASSIGNED_FILL,
         }
       };
     })};
+
+    // Active "Einfärben" mode — drives both the MapLibre fill
+    // expression and the legend rendering. Held in a closure so the
+    // change handler and the legend builder can both read/update it.
+    // Default `none` leaves rooms in a neutral canvas tint so the user
+    // sees an architectural-style floor plan first; they opt in to a
+    // colour coding by picking Nutzung / SIA 416 / Mietende VE.
+    let activeMode = 'none';
+    // `none` returns a flat white — rooms read as an architectural-style
+    // line drawing against the canvas bg, no semantic colour cues.
+    const NONE_FILL = '#FFFFFF';
+    const fillExprFor = (mode) => {
+      if (mode === 'none') return NONE_FILL;
+      return ['get',
+        mode === 'sia' ? 'fillSia' : mode === 'tenant' ? 'fillTenant' : 'fillUseType'
+      ];
+    };
+
+    // Group rooms by the active mode's category key, sum `area` per
+    // group, and render the legend with `<swatch> <label> · Σ m²`.
+    // Called once at map load and again on every mode change.
+    function renderLegend() {
+      const legendEl = document.getElementById('floorLegend');
+      if (!legendEl) return;
+      if (activeMode === 'none') { legendEl.innerHTML = ''; return; }
+      let groups; // { key → { label, fill, area } }
+      if (activeMode === 'sia') {
+        groups = {};
+        for (const s of spaces) {
+          const cat = s.siaCategory || 'NNF';
+          (groups[cat] ??= { label: SIA_LABEL_DE[cat], fill: SIA_FILL[cat], area: 0 }).area += s.area;
+        }
+      } else if (activeMode === 'tenant') {
+        groups = {};
+        for (const s of spaces) {
+          const key = s.occupierVe || '__none__';
+          const label = s.occupierVe || 'Nicht zugewiesen';
+          const fill  = s.occupierVe ? tenantColors[s.occupierVe] : TENANT_UNASSIGNED_FILL;
+          (groups[key] ??= { label, fill, area: 0 }).area += s.area;
+        }
+      } else { // useType — aggregate into the four broad buckets
+        groups = {};
+        for (const s of spaces) {
+          const grp = USETYPE_GROUP[s.useType] || 'special';
+          (groups[grp] ??= { label: USETYPE_GROUP_LABEL[grp], fill: USETYPE_GROUP_FILL[grp], area: 0 }).area += s.area;
+        }
+      }
+      legendEl.innerHTML = Object.values(groups)
+        .sort((a, b) => b.area - a.area)   // largest area first
+        .map(g => `
+          <li class="floor-legend__item">
+            <span class="floor-legend__swatch" style="background:${g.fill}"></span>
+            <span class="floor-legend__label">${P.escapeHtml(g.label)}</span>
+            <span class="floor-legend__area">${g.area.toLocaleString('de-CH')} m²</span>
+          </li>`).join('');
+    }
+
+    // Wire the Ansicht dropdown to update the paint expression + legend.
+    const viewModeSelect = document.getElementById('floorViewMode');
+    if (viewModeSelect) {
+      viewModeSelect.addEventListener('change', e => {
+        activeMode = e.target.value;
+        if (map.getLayer('rooms-fill')) {
+          map.setPaintProperty('rooms-fill', 'fill-color', fillExprFor(activeMode));
+        }
+        renderLegend();
+      });
+    }
+
+    // Render the legend immediately — it reads `spaces` (already in
+    // memory) and doesn't depend on MapLibre having finished loading.
+    // Without this the legend stays empty for the ~1-2 s the basemap
+    // CDN takes to respond.
+    renderLegend();
 
     const coords = floor.geometry.coordinates[0];
     const lngs = coords.map(c => c[0]);
@@ -2664,17 +2794,19 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       map.addSource('floor',  { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
 
-      // Room fills — colour is pre-computed onto each feature's `fillColor`
-      // property (see USETYPE_FILL above). The room polygons tile the entire
-      // floor (8 north + corridor + 8 south = full coverage), so a separate
-      // floor-fill underlay is redundant. Bright pink fallback flags any
-      // feature whose useType isn't in USETYPE_FILL.
+      // Room fills — colour is pre-computed onto each feature for all
+      // three view modes (`fillUseType` / `fillSia` / `fillTenant`).
+      // The active mode is picked here at load; the Ansicht dropdown's
+      // change handler updates the expression via `setPaintProperty`.
+      // The room polygons tile the entire floor (8 north + corridor +
+      // 8 south = full coverage), so a separate floor-fill underlay is
+      // redundant.
       map.addLayer({
         id: 'rooms-fill',
         type: 'fill',
         source: 'spaces',
         paint: {
-          'fill-color': ['coalesce', ['get', 'fillColor'], '#ff66cc'],
+          'fill-color': fillExprFor(activeMode),
           'fill-opacity': 1
         }
       });
@@ -2686,15 +2818,6 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         type: 'line',
         source: 'spaces',
         paint: { 'line-color': '#6b7280', 'line-width': 1.25 }
-      });
-
-      // "My VE" outlines (federal red).
-      map.addLayer({
-        id: 'rooms-mine-outline',
-        type: 'line',
-        source: 'spaces',
-        filter: ['==', ['get', 'occupierVe'], userVe],
-        paint: { 'line-color': '#D8232A', 'line-width': 2.5 }
       });
 
       // Selection outline — filter set on click. Starts hidden.
@@ -2933,7 +3056,7 @@ function renderDownloads() {
         <button class="filter-pill__remove" type="button"
                 aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
                 data-clear="${f.key}">
-          <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons/Cancel.svg"/></svg>
+          ${P.icon('x', 'filter-pill__remove-icon')}
         </button>
       </span>
     `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurücksetzen</button>`;

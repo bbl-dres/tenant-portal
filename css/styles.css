@@ -316,7 +316,7 @@
    alike. */
 .language-switcher__option:hover,
 .language-switcher__option:focus-visible {
-  background: #2563eb;
+  background: var(--color-lang-active);
   color: var(--color-white);
 }
 .language-switcher__option:focus-visible {
@@ -324,12 +324,12 @@
   outline-offset: -2px;
 }
 .language-switcher__option--active {
-  background: #2563eb;        /* blue-600 — currently-selected language */
+  background: var(--color-lang-active);
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
 }
 .language-switcher__option--active:hover {
-  background: #1d4ed8;        /* blue-700 — slightly darker on hover */
+  background: var(--color-lang-active-hover);
 }
 
 /* ── FEDERAL CHROME — BRAND BAR ─────────────────────────────────────────── */
@@ -662,7 +662,7 @@
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
-.main-navigation__chevron { width: var(--icon-xs); height: var(--icon-xs); margin-left: 6px; margin-right: 0; flex-shrink: 0; }
+.main-navigation__chevron { width: var(--icon-sm); height: var(--icon-sm); margin-left: 6px; margin-right: 0; flex-shrink: 0; }
 .main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__chevron {
   transform: rotate(180deg);
   transition: transform var(--transition-fast);
@@ -796,12 +796,18 @@
 /* Inline SVG chevron — replaces the previous `›` literal which
    relied on the system font. Now scales with the breadcrumb font-size
    and inherits text-muted via currentColor. */
+/* Breadcrumb separator — 10 px hardcoded (off the --icon-* scale).
+   The CD chevron glyph fills only ~17 % of its viewBox vertically, so
+   at our smallest token (--icon-xs = 16 px) the visible chevron is still
+   ~2.7 px tall — DS uses ~10 px declared for breadcrumb separators, which
+   reads as a proper "›" next to body-sm text. `vertical-align: middle`
+   centres the small icon with the surrounding x-height. */
 .breadcrumb__sep {
-  width: var(--icon-xs); height: var(--icon-xs);
+  width: 10px; height: 10px;
   margin: 0 var(--space-xs);
   color: var(--color-text-muted);
   display: inline-block;
-  vertical-align: -2px;
+  vertical-align: middle;
   flex-shrink: 0;
 }
 /* Breadcrumb is now an <ol> with schema.org/BreadcrumbList microdata.
@@ -1416,6 +1422,7 @@ figcaption {
   display: inline-block;
   width: var(--icon-xs);
   height: var(--icon-xs);
+  margin-right: 0;
   color: currentColor;
 }
 
@@ -3648,7 +3655,7 @@ body.body--mobile-menu-is-open {
   .hero-cta { grid-template-columns: 1fr 320px; }
 }
 .hero-cta__primary {
-  background: linear-gradient(135deg, var(--color-white) 0%, #FAE1E2 100%);
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-badge-red-bg) 100%);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
@@ -5293,18 +5300,21 @@ body.body--mobile-menu-is-open {
   background: var(--color-primary-700, var(--color-primary-600));
 }
 
-/* `.floor-stage` — the canvas surface only.  Room details live in a
-   MapLibre Popup anchored on the clicked polygon (see `.room-popup`),
-   not in a sidebar — gives the floor plan the full container width. */
-.floor-stage {
+/* `.floor-viewer` — wraps the canvas + legend so both stay visible when
+   the user enters fullscreen. Room details live in a MapLibre Popup
+   anchored on the clicked polygon (see `.room-popup`), not in a sidebar
+   — gives the floor plan the full container width. */
+.floor-viewer {
   margin-bottom: var(--space-md);
+  display: flex;
+  flex-direction: column;
 }
 
 .floor-canvas {
   width: 100%;
   height: 460px;
   min-height: 400px;
-  background: #fafafa;
+  background: var(--color-bg-canvas);
   border: 1px solid var(--color-secondary-100);
   border-radius: var(--radius);
   overflow: hidden;
@@ -5313,14 +5323,18 @@ body.body--mobile-menu-is-open {
 @media (min-width: 768px) { .floor-canvas { height: 560px; } }
 @media (min-width: 1280px) { .floor-canvas { height: 640px; } }
 
-/* When the `.floor-stage` enters native fullscreen, the canvas needs to
-   span the whole viewport — override the fixed heights. */
-.floor-stage:fullscreen,
-.floor-stage:-webkit-full-screen { background: var(--color-white); padding: 0; }
-.floor-stage:fullscreen .floor-canvas,
-.floor-stage:-webkit-full-screen .floor-canvas {
-  height: 100vh;
-  min-height: 100vh;
+/* When the `.floor-viewer` enters native fullscreen, the canvas grows
+   to fill the available height (viewport minus the legend strip) so
+   the legend stays visible inside the fullscreen surface. */
+.floor-viewer:fullscreen,
+.floor-viewer:-webkit-full-screen {
+  background: var(--color-white);
+  padding: var(--space-md);
+}
+.floor-viewer:fullscreen .floor-canvas,
+.floor-viewer:-webkit-full-screen .floor-canvas {
+  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
   border-radius: 0;
   border: 0;
 }
@@ -5392,18 +5406,18 @@ body.body--mobile-menu-is-open {
 }
 .room-popup__action:hover { color: var(--color-primary-700); text-decoration: underline; }
 
-/* `.floor-legend` — horizontal swatch row below the canvas. Each swatch
-   colour mirrors the MapLibre `match` expression for `rooms-fill` so the
-   key stays in sync with what the map renders. "Mine" swatch shows the
-   red outline treatment, not a fill, because that's how the canvas
-   distinguishes the tenant's rooms. */
+/* `.floor-legend` — horizontal swatch row below the canvas. Items are
+   built dynamically by `renderLegend()` in app.js: each entry has a
+   swatch, the category label, and Σ m² aggregated for that group on
+   the current floor. Sorted by area descending. Sits inside
+   `.floor-viewer` so it stays visible in fullscreen. */
 .floor-legend {
   list-style: none;
   margin: 0;
   padding: var(--space-sm) 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-md) var(--space-lg);
+  gap: var(--space-sm) var(--space-md);
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
@@ -5418,14 +5432,19 @@ body.body--mobile-menu-is-open {
   height: 16px;
   border-radius: 2px;
   border: 1px solid var(--color-secondary-200);
+  flex-shrink: 0;
 }
-.floor-legend__swatch--work    { background: #bfdbfe; }
-.floor-legend__swatch--collab  { background: #fde68a; }
-.floor-legend__swatch--infra   { background: #e5e7eb; }
-.floor-legend__swatch--special { background: #ddd6fe; }
-.floor-legend__swatch--mine {
-  background: var(--color-white);
-  border: 2px solid var(--color-primary-600);
+.floor-legend__label { color: var(--color-text-secondary); }
+.floor-legend__area {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+}
+/* Inside fullscreen the legend gets a touch more breathing room above
+   the bottom edge so it doesn't visually fuse with the viewport border. */
+.floor-viewer:fullscreen .floor-legend,
+.floor-viewer:-webkit-full-screen .floor-legend {
+  padding: var(--space-md) 0 var(--space-sm);
 }
 
 /* ── PRINT — floor-plan page ─────────────────────────────────────────────
@@ -5441,7 +5460,7 @@ body.body--mobile-menu-is-open {
   .floor-toolbar,
   .floor-drawer,
   footer { display: none !important; }
-  .floor-stage { grid-template-columns: 1fr; }
+  .floor-viewer { display: block; }
   .floor-canvas { height: 680px; border: 1px solid #999; page-break-inside: avoid; }
   .section { padding: 0 !important; }
 }

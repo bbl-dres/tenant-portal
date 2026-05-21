@@ -171,6 +171,30 @@
   --color-info:                #0F6B75;
   --color-info-light:          #CCFBF1;
 
+  /* ── LANGUAGE SWITCHER ────────────────────────────────────────────────
+     Tailwind blue-600 / blue-700 from the DS canonical pattern
+     (designsystem/app/tailwind.config.js:82). NOT the federal primary
+     red — the DS uses blue specifically for "currently-selected
+     language" to distinguish from primary-action red. */
+  --color-lang-active:         #2563EB;
+  --color-lang-active-hover:   #1D4ED8;
+
+  /* ── FLOOR-PLAN PALETTE (SIA 416 usage categories) ────────────────────
+     Same colours mirrored in js/app.js USETYPE_FILL — MapLibre paint
+     specs don't accept CSS variables, so the JS map is the runtime
+     source of truth for those layers; these tokens cover the static
+     legend swatches + any future room-detail panels. Tailwind palette
+     correspondence is documented inline. */
+  --color-floor-work:          #BFDBFE;   /* blue-200  — Arbeitsplätze */
+  --color-floor-collab:        #FDE68A;   /* yellow-200 — Zusammenarbeit */
+  --color-floor-infra:         #E5E7EB;   /* gray-200  — Infrastruktur */
+  --color-floor-special:       #DDD6FE;   /* violet-200 — Sonderräume */
+
+  /* Subtle off-white canvas background — slightly cooler than
+     `--color-bg-surface` so the floor-plan polygons read against a
+     neutral field. Also used by the MapLibre `floor-bg` layer. */
+  --color-bg-canvas:           #FAFAFA;
+
   /* ── BADGE PALETTE ────────────────────────────────────────────────────── */
   --color-badge-green-bg:      #D1FAE5;
   --color-badge-green-text:    #065F46;

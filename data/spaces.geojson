@@ -20,7 +20,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -62,7 +63,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -104,7 +106,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -146,7 +149,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -188,7 +192,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -230,7 +235,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -272,7 +278,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -314,7 +321,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -356,7 +364,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -398,7 +407,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -440,7 +450,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -482,7 +493,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -524,7 +536,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -566,7 +579,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -608,7 +622,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -650,7 +665,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -692,7 +708,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -734,7 +751,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -776,7 +794,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -818,7 +837,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -860,7 +880,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -902,7 +923,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -944,7 +966,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -986,7 +1009,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1028,7 +1052,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1070,7 +1095,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1112,7 +1138,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1154,7 +1181,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1196,7 +1224,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1238,7 +1267,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1280,7 +1310,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1322,7 +1353,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1364,7 +1396,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1406,7 +1439,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "GS UVEK"
+        "occupierDep": "GS UVEK",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1448,7 +1482,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1490,7 +1525,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1532,7 +1568,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1574,7 +1611,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1616,7 +1654,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1658,7 +1697,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1700,7 +1740,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1742,7 +1783,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1784,7 +1826,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1826,7 +1869,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1868,7 +1912,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1910,7 +1955,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1952,7 +1998,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -1994,7 +2041,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2036,7 +2084,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2078,7 +2127,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2120,7 +2170,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2162,7 +2213,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2204,7 +2256,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2246,7 +2299,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2288,7 +2342,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2330,7 +2385,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2372,7 +2428,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2414,7 +2471,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2456,7 +2514,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2498,7 +2557,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2540,7 +2600,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2582,7 +2643,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2624,7 +2686,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2666,7 +2729,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2708,7 +2772,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2750,7 +2815,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2792,7 +2858,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2834,7 +2901,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2876,7 +2944,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2918,7 +2987,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -2960,7 +3030,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3002,7 +3073,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3044,7 +3116,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3086,7 +3159,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3128,7 +3202,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3170,7 +3245,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3212,7 +3288,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3254,7 +3331,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3296,7 +3374,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3338,7 +3417,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3380,7 +3460,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3422,7 +3503,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3464,7 +3546,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3506,7 +3589,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3548,7 +3632,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3590,7 +3675,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3632,7 +3718,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3674,7 +3761,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3716,7 +3804,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3758,7 +3847,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3800,7 +3890,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3842,7 +3933,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3884,7 +3976,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3926,7 +4019,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -3968,7 +4062,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4010,7 +4105,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4052,7 +4148,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4094,7 +4191,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4136,7 +4234,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4178,7 +4277,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4220,7 +4320,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4262,7 +4363,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4304,7 +4406,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4346,7 +4449,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4388,7 +4492,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4430,7 +4535,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4472,7 +4578,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4514,7 +4621,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4556,7 +4664,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4598,7 +4707,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4640,7 +4750,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4682,7 +4793,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4724,7 +4836,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4766,7 +4879,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4808,7 +4922,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4850,7 +4965,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4892,7 +5008,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4934,7 +5051,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -4976,7 +5094,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAFU"
+        "occupierDep": "BAFU",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5018,7 +5137,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5060,7 +5180,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5102,7 +5223,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5144,7 +5266,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5186,7 +5309,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5228,7 +5352,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5270,7 +5395,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5312,7 +5438,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5354,7 +5481,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5396,7 +5524,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5438,7 +5567,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5480,7 +5610,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5522,7 +5653,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5564,7 +5696,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5606,7 +5739,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5648,7 +5782,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5690,7 +5825,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5732,7 +5868,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5774,7 +5911,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5816,7 +5954,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5858,7 +5997,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5900,7 +6040,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5942,7 +6083,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -5984,7 +6126,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6026,7 +6169,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6068,7 +6212,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6110,7 +6255,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6152,7 +6298,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6194,7 +6341,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6236,7 +6384,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6278,7 +6427,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6320,7 +6470,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6362,7 +6513,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6404,7 +6556,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ARE"
+        "occupierDep": "ARE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6446,7 +6599,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6488,7 +6642,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6530,7 +6685,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6572,7 +6728,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6614,7 +6771,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6656,7 +6814,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6698,7 +6857,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6740,7 +6900,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6782,7 +6943,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6824,7 +6986,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6866,7 +7029,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6908,7 +7072,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6950,7 +7115,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -6992,7 +7158,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7034,7 +7201,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7076,7 +7244,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7118,7 +7287,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7160,7 +7330,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7202,7 +7373,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7244,7 +7416,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7286,7 +7459,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7328,7 +7502,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7370,7 +7545,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7412,7 +7588,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7454,7 +7631,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7496,7 +7674,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7538,7 +7717,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7580,7 +7760,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7622,7 +7803,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7664,7 +7846,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7706,7 +7889,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7748,7 +7932,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7790,7 +7975,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7832,7 +8018,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7874,7 +8061,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7916,7 +8104,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -7958,7 +8147,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8000,7 +8190,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8042,7 +8233,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8084,7 +8276,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8126,7 +8319,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8168,7 +8362,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8210,7 +8405,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8252,7 +8448,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8294,7 +8491,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8336,7 +8534,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8378,7 +8577,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8420,7 +8620,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8462,7 +8663,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8504,7 +8706,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8546,7 +8749,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8588,7 +8792,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8630,7 +8835,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8672,7 +8878,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8714,7 +8921,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8756,7 +8964,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8798,7 +9007,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8840,7 +9050,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8882,7 +9093,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8924,7 +9136,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -8966,7 +9179,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9008,7 +9222,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9050,7 +9265,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9092,7 +9308,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9134,7 +9351,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9176,7 +9394,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9218,7 +9437,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9260,7 +9480,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAV"
+        "occupierDep": "BAV",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9302,7 +9523,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9344,7 +9566,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9386,7 +9609,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9428,7 +9652,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9470,7 +9695,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9512,7 +9738,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9554,7 +9781,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9596,7 +9824,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9638,7 +9867,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9680,7 +9910,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9722,7 +9953,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9764,7 +9996,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9806,7 +10039,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9848,7 +10082,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9890,7 +10125,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9932,7 +10168,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -9974,7 +10211,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10016,7 +10254,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10058,7 +10297,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10100,7 +10340,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10142,7 +10383,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10184,7 +10426,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10226,7 +10469,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10268,7 +10512,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10310,7 +10555,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10352,7 +10598,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10394,7 +10641,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10436,7 +10684,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10478,7 +10727,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10520,7 +10770,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10562,7 +10813,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10604,7 +10856,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10646,7 +10899,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10688,7 +10942,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10730,7 +10985,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10772,7 +11028,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10814,7 +11071,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10856,7 +11114,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10898,7 +11157,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10940,7 +11200,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -10982,7 +11243,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11024,7 +11286,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11066,7 +11329,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11108,7 +11372,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11150,7 +11415,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11192,7 +11458,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11234,7 +11501,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11276,7 +11544,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11318,7 +11587,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11360,7 +11630,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11402,7 +11673,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAZL"
+        "occupierDep": "BAZL",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11444,7 +11716,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11486,7 +11759,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11528,7 +11802,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11570,7 +11845,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11612,7 +11888,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11654,7 +11931,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11696,7 +11974,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11738,7 +12017,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11780,7 +12060,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11822,7 +12103,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11864,7 +12146,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11906,7 +12189,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11948,7 +12232,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -11990,7 +12275,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12032,7 +12318,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12074,7 +12361,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12116,7 +12404,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12158,7 +12447,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12200,7 +12490,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12242,7 +12533,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12284,7 +12576,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12326,7 +12619,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12368,7 +12662,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12410,7 +12705,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12452,7 +12748,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12494,7 +12791,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12536,7 +12834,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12578,7 +12877,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12620,7 +12920,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12662,7 +12963,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12704,7 +13006,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12746,7 +13049,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12788,7 +13092,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12830,7 +13135,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12872,7 +13178,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12914,7 +13221,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12956,7 +13264,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -12998,7 +13307,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13040,7 +13350,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13082,7 +13393,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13124,7 +13436,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13166,7 +13479,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13208,7 +13522,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13250,7 +13565,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13292,7 +13608,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13334,7 +13651,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13376,7 +13694,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13418,7 +13737,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13460,7 +13780,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13502,7 +13823,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13544,7 +13866,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BFE"
+        "occupierDep": "BFE",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13586,7 +13909,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13628,7 +13952,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13670,7 +13995,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13712,7 +14038,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13754,7 +14081,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13796,7 +14124,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13838,7 +14167,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13880,7 +14210,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13922,7 +14253,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -13964,7 +14296,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14006,7 +14339,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14048,7 +14382,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14090,7 +14425,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14132,7 +14468,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14174,7 +14511,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14216,7 +14554,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14258,7 +14597,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14300,7 +14640,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14342,7 +14683,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14384,7 +14726,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14426,7 +14769,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14468,7 +14812,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14510,7 +14855,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14552,7 +14898,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14594,7 +14941,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14636,7 +14984,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14678,7 +15027,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14720,7 +15070,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14762,7 +15113,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14804,7 +15156,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14846,7 +15199,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14888,7 +15242,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14930,7 +15285,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -14972,7 +15328,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "ASTRA"
+        "occupierDep": "ASTRA",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15014,7 +15371,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15056,7 +15414,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15098,7 +15457,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15140,7 +15500,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15182,7 +15543,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15224,7 +15586,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15266,7 +15629,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15308,7 +15672,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15350,7 +15715,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15392,7 +15758,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15434,7 +15801,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15476,7 +15844,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15518,7 +15887,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15560,7 +15930,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15602,7 +15973,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15644,7 +16016,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15686,7 +16059,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15728,7 +16102,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15770,7 +16145,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15812,7 +16188,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15854,7 +16231,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15896,7 +16274,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15938,7 +16317,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -15980,7 +16360,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16022,7 +16403,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16064,7 +16446,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16106,7 +16489,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16148,7 +16532,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16190,7 +16575,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16232,7 +16618,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16274,7 +16661,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16316,7 +16704,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16358,7 +16747,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16400,7 +16790,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16442,7 +16833,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16484,7 +16876,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16526,7 +16919,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16568,7 +16962,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16610,7 +17005,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16652,7 +17048,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16694,7 +17091,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16736,7 +17134,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16778,7 +17177,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16820,7 +17220,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16862,7 +17263,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16904,7 +17306,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16946,7 +17349,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -16988,7 +17392,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17030,7 +17435,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17072,7 +17478,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17114,7 +17521,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "BAKOM"
+        "occupierDep": "BAKOM",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17156,7 +17564,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17198,7 +17607,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17240,7 +17650,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17282,7 +17693,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17324,7 +17736,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17366,7 +17779,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17408,7 +17822,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17450,7 +17865,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17492,7 +17908,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17534,7 +17951,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17576,7 +17994,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17618,7 +18037,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17660,7 +18080,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17702,7 +18123,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17744,7 +18166,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17786,7 +18209,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17828,7 +18252,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17870,7 +18295,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17912,7 +18338,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17954,7 +18381,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -17996,7 +18424,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18038,7 +18467,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18080,7 +18510,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18122,7 +18553,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18164,7 +18596,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18206,7 +18639,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18248,7 +18682,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18290,7 +18725,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18332,7 +18768,8 @@
         "capacity": 1,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18374,7 +18811,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18416,7 +18854,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18458,7 +18897,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18500,7 +18940,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18542,7 +18983,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18584,7 +19026,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": null,
-        "occupierDep": null
+        "occupierDep": null,
+        "siaCategory": "VF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18626,7 +19069,8 @@
         "capacity": 2,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18668,7 +19112,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18710,7 +19155,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18752,7 +19198,8 @@
         "capacity": 20,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18794,7 +19241,8 @@
         "capacity": 8,
         "isBookable": true,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18836,7 +19284,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18878,7 +19327,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18920,7 +19370,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "TF"
       },
       "geometry": {
         "type": "Polygon",
@@ -18962,7 +19413,8 @@
         "capacity": 8,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19004,7 +19456,8 @@
         "capacity": 16,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19046,7 +19499,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "FF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19088,7 +19542,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19130,7 +19585,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19172,7 +19628,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19214,7 +19671,8 @@
         "capacity": 4,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "HNF"
       },
       "geometry": {
         "type": "Polygon",
@@ -19256,7 +19714,8 @@
         "capacity": 0,
         "isBookable": false,
         "occupierVe": "UVEK",
-        "occupierDep": "MeteoSchweiz"
+        "occupierDep": "MeteoSchweiz",
+        "siaCategory": "NNF"
       },
       "geometry": {
         "type": "Polygon",

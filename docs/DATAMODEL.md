@@ -450,12 +450,54 @@ object is most precisely a set of Spaces** (or a Floor, or a Building).
 | **name**         |       | string           | Room number (e.g. `EG.101`).                                          | **mandatory** | Name              | Raumnummer        |
 | **nameLong**     |       | string           | Long display name (e.g. `Empfang Erdgeschoss`).                        |               | Long Name         | Langname          |
 | **useType**      |       | string, enum     | Use category — see Appendix A.9.                                       | **mandatory** | Use Type          | Nutzungstyp       |
+| **siaCategory**  |       | string, enum     | SIA 416 area-category bucket: `HNF` / `NNF` / `VF` / `FF` / `TF`. Derived 1:1 from `useType` (see § 3.3.1 below); denormalised onto each Space for cheap legend grouping + paint-spec lookups. | **mandatory** | SIA 416 Category | SIA 416 Kategorie |
 | **area**         |       | number           | Room area in m² (SIA 416 HNF-relevant subset).                         | minimum: 0    | Area              | Fläche            |
 | **capacity**     |       | integer          | Maximum occupancy / workstations supported.                            | minimum: 0    | Capacity          | Kapazität         |
 | **isBookable**   |       | boolean          | Room is bookable (meeting rooms, focus rooms).                         |               | Bookable          | Buchbar           |
 | **geometry**     |       | GeoJSON Polygon  | Polygon of the room's footprint within the floor.                      | **mandatory** | Geometry          | Geometrie         |
 | **validFrom**    |       | string (date) | Valid from.                                                           |               | Valid From        | Gültig von        |
 | **validUntil**   |       | string (date) | Valid until.                                                          |               | Valid Until       | Gültig bis        |
+| extensionData    |       | object           | Reserved for future jurisdiction-specific classifications (DIN 277, IPMS, GEFMA 198 — see Appendix B). Not currently populated. |               | Extension Data    | Erweiterungsdaten |
+
+
+#### 3.3.1 SIA 416 categorisation — useType mapping + visualisation
+
+Each `useType` maps to exactly one **SIA 416** area category. The fixed
+`siaCategory` field above is the denormalised result of that mapping —
+stored on the Space rather than computed at runtime so legend grouping,
+MapLibre paint expressions, and reporting queries all read it as a
+first-class field.
+
+| SIA 416 code | Name (DE)                | Maps from `useType`                                                       |
+| ------------ | ------------------------ | -------------------------------------------------------------------------- |
+| **HNF**      | Hauptnutzfläche          | Office · OpenSpace · FocusRoom · MeetingRoom · Reception · TrainingRoom · Lounge · Cafeteria · Lab |
+| **NNF**      | Nebennutzfläche          | Storage · Archive · Kitchenette                                            |
+| **VF**       | Verkehrsfläche           | Corridor · Cloakroom                                                       |
+| **FF**       | Funktionsfläche          | WC · PrintRoom                                                             |
+| **TF**       | Technikfläche            | TechnicalRoom                                                              |
+
+> **On colour.** SIA 416 **does not prescribe a palette** — it defines
+> the *categorisation*, leaving visualisation to the planning tool. The
+> official Swiss template ships as
+> [`CHE_SIA_416_Modellplan_neutral_v1.xlsx`](https://www.idc.ch/fileadmin/user_upload/Daten/downloads/Solibri/Swisspackage/CHE_SIA_416_Modellplan_neutral_v1.xlsx)
+> from IDC — explicitly neutral. The portal's palette is picked purely
+> for visual distinguishability (five Tailwind-200/300 tones at similar
+> luminance, no semantic loading); swap them freely. The source of truth
+> is the `SIA_FILL` constant in [`js/app.js`](../js/app.js) —
+> MapLibre paint specs can't read CSS variables, so the JS map is
+> authoritative for the canvas, while `--color-floor-*` tokens in
+> [`css/tokens.css`](../css/tokens.css) cover any static swatches
+> outside the canvas.
+
+> **Why a fixed field, not an array of classifications.** Other
+> jurisdictions classify rooms differently (DIN 277 NUF/VF/TF, IPMS,
+> GEFMA 198, ArcGIS Indoors USE_TYPE). For a Swiss federal portal,
+> SIA 416 is the *canonical* classification and earns a first-class
+> column — matches the pattern used in
+> [`AreaMeasurement` § 3.4](#34-areameasurement-bemessung-planned) where
+> `areaType` + `standard` are fixed but `extensionData` is the
+> overflow slot. Future classification systems land in `extensionData`,
+> keyed by standard name.
 
 ### 3.4 AreaMeasurement (Bemessung) [Planned]
 
