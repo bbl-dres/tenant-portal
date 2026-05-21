@@ -969,7 +969,7 @@ function renderSubmitterHome() {
   const greeting = greetingFor(new Date().getHours());
 
   document.getElementById('page-body').innerHTML = `
-    <section class="section">
+    <section class="section section--alt">
       <div class="container">
         <p class="greeting-strip">
           ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
@@ -978,10 +978,6 @@ function renderSubmitterHome() {
             : `Sie haben derzeit keine offenen Anliegen.`}
           ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
         </p>
-      </div>
-    </section>
-    <section class="section section--alt">
-      <div class="container">
         <h2 class="h2 section-heading">Häufig genutzte Dienste</h2>
         <div class="card-grid">
           <a href="#/wizard/1" class="card--quick">
