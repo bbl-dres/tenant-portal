@@ -194,7 +194,7 @@
   min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__authorities:hover { background: var(--color-white-20); text-decoration: none; color: var(--color-white); }
-.top-bar__authorities svg { width: 12px; height: 12px; }
+.top-bar__authorities svg { width: var(--icon-sm); height: var(--icon-sm); }
 /* Demo / Prototype chip — sits in the top-bar right cluster beside the
    language switcher + user pill. Replaces a centred-red "Prototyp — nur
    zur Demonstration" line that competed visually with the language and
@@ -228,7 +228,7 @@
   font-size: var(--text-body-sm);
 }
 .top-bar__action:hover { background: var(--color-white-20); }
-.top-bar__action svg { width: 16px; height: 16px; }
+.top-bar__action svg { width: var(--icon-lg); height: var(--icon-lg); }
 
 /* Utility links in the dark top bar */
 .top-bar__link {
@@ -248,7 +248,7 @@
   min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__link:hover { background: rgba(255,255,255,0.12); color: var(--color-white); }
-.top-bar__link--user svg { width: 16px; height: 16px; }
+.top-bar__link--user svg { width: var(--icon-lg); height: var(--icon-lg); }
 .top-bar__sep {
   width: 1px;
   height: 18px;
@@ -274,7 +274,7 @@
   min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
 .top-bar__lang:hover { background: rgba(255,255,255,0.12); }
-.top-bar__lang svg { width: 12px; height: 12px; }
+.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); }
 
 .language-switcher__dropdown {
   position: absolute;
@@ -476,7 +476,7 @@
   transition: color var(--transition-fast), opacity var(--transition);
 }
 .header-search__toggle:hover { color: var(--color-primary); }
-.header-search__toggle svg { width: 18px; height: 18px; }
+.header-search__toggle svg { width: var(--icon-md); height: var(--icon-md); }
 .header-search.open .header-search__toggle { opacity: 0; pointer-events: none; }
 
 .header-search__form {
@@ -531,7 +531,7 @@
   cursor: pointer;
 }
 .header-search__submit:hover { color: var(--color-primary); }
-.header-search__submit svg { width: 18px; height: 18px; }
+.header-search__submit svg { width: var(--icon-base); height: var(--icon-base); }
 
 .top-header__action {
   background: transparent;
@@ -1147,7 +1147,7 @@
   transition: all var(--transition-fast);
   border-radius: var(--radius);
 }
-.arrow-btn svg { width: 20px; height: 20px; color: var(--color-primary); stroke: var(--color-primary); transition: color var(--transition-fast); }
+.arrow-btn svg { width: var(--icon-base); height: var(--icon-base); color: var(--color-primary); stroke: var(--color-primary); transition: color var(--transition-fast); }
 .card--quick:hover .arrow-btn { background: var(--color-primary); }
 .card--quick:hover .arrow-btn svg { color: var(--color-white); stroke: var(--color-white); }
 
@@ -1378,28 +1378,39 @@ figcaption {
 
 /* Inline icon — used by P.icon() helper, which emits
    `<svg class="inline-icon"><use href="assets/icons.svg#icon-name"/></svg>`.
-   Vertically centres a 16 px sprite glyph alongside body-sm text and adds a
+   Vertically centres a sprite glyph alongside body-sm text and adds a
    small trailing gap. Colour inherits from the parent via `currentColor`
-   (every symbol in the sprite uses `fill="currentColor"` or
-   `stroke="currentColor"` so glyphs match the surrounding text). */
+   (every symbol in the sprite uses `fill="currentColor"`).
+
+   Sizes are driven by the `--icon-*` tokens in tokens.css. The default
+   `.inline-icon` uses `--icon-base` (24 px declared, ~16 px visual after
+   CD's viewBox padding). Use the modifier classes to step up or down on
+   the DS scale — never write a bare `width: Npx` here. */
 .inline-icon {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  vertical-align: -3px;
+  width: var(--icon-base);
+  height: var(--icon-base);
+  vertical-align: -6px;
   margin-right: var(--space-xs);
   flex-shrink: 0;
   color: currentColor;
 }
-/* Per-component size overrides for sprite-rendered icons that previously
-   set an explicit `width="…"` attribute on the inlined SVG. */
-.btn--back .inline-icon       { width: 18px; height: 18px; margin-right: 0; }
-.contact-block__link .inline-icon { width: 18px; height: 18px; color: var(--color-primary); }
+.inline-icon--xs  { width: var(--icon-xs);  height: var(--icon-xs);  vertical-align: -3px; }
+.inline-icon--sm  { width: var(--icon-sm);  height: var(--icon-sm);  vertical-align: -5px; }
+.inline-icon--md  { width: var(--icon-md);  height: var(--icon-md);  vertical-align: -7px; }
+.inline-icon--lg  { width: var(--icon-lg);  height: var(--icon-lg);  vertical-align: -8px; }
+.inline-icon--xl  { width: var(--icon-xl);  height: var(--icon-xl);  vertical-align: -10px; }
+.inline-icon--2xl { width: var(--icon-2xl); height: var(--icon-2xl); vertical-align: -12px; }
+
+/* Per-component size overrides — pegged to the DS `--icon-md` tier for
+   button-adjacent icons. */
+.btn--back .inline-icon           { width: var(--icon-md); height: var(--icon-md); margin-right: 0; }
+.contact-block__link .inline-icon { width: var(--icon-md); height: var(--icon-md); color: var(--color-primary); }
 .contact-block__link:hover .inline-icon { color: var(--color-primary-hover); }
 .filter-pill__remove-icon {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
   color: currentColor;
 }
 
@@ -2015,7 +2026,7 @@ input[type="checkbox"]:focus-visible {
   width: var(--btn-min-h);
 }
 @media (min-width: 1280px) { .btn--icon-only { width: var(--btn-lg-min-h); } }
-.btn--icon-only .inline-icon { width: 18px; height: 18px; }
+.btn--icon-only .inline-icon { width: var(--icon-md); height: var(--icon-md); }
 /* Anchor variant of the pagination buttons — properties pagination uses
    <a href> so middle-click + back/forward + share links all work. */
 a.btn { text-decoration: none; }
@@ -2407,7 +2418,7 @@ a.btn[aria-disabled="true"] {
   min-width: 44px;
 }
 .share-bar__btn:hover { color: var(--color-primary); background: var(--color-bg-surface); }
-.share-bar__btn svg { width: 18px; height: 18px; }
+.share-bar__btn svg { width: var(--icon-md); height: var(--icon-md); }
 /* Hide the labels on phones — icons remain visible. The back link keeps
    its label always (the icon-alone affordance is too vague for "Zurück"). */
 .share-bar__btn span { display: none; }
@@ -2437,8 +2448,8 @@ a.btn[aria-disabled="true"] {
 .search-hero__field .inline-icon {
   position: absolute;
   left: var(--space-md);
-  width: 20px;
-  height: 20px;
+  width: var(--icon-base);
+  height: var(--icon-base);
   color: var(--color-text-secondary);
   pointer-events: none;
 }
@@ -2753,7 +2764,7 @@ a.btn[aria-disabled="true"] {
   list-style: none;
   margin-bottom: var(--space-xs);
 }
-.checklist__item .inline-icon { width: 18px; height: 18px; margin-right: 0; }
+.checklist__item .inline-icon { width: var(--icon-sm); height: var(--icon-sm); margin-right: 0; }
 .checklist__item--ok .inline-icon     { color: var(--color-success); }
 .checklist__item--warn .inline-icon   { color: var(--color-warning); }
 .checklist__item--danger .inline-icon { color: var(--color-danger); }
@@ -3146,8 +3157,8 @@ body.body--mobile-menu-is-open {
 }
 .page-with-toc__toc-label { min-width: 0; }
 .page-with-toc__toc-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
   flex-shrink: 0;
   color: var(--color-text-muted);
   transition: color var(--transition-fast), transform var(--transition-fast);
@@ -3919,7 +3930,7 @@ body.body--mobile-menu-is-open {
   color: var(--color-success);
   font-weight: var(--font-weight-regular);
 }
-.wizard__autosave .inline-icon { width: 14px; height: 14px; margin-right: 0; }
+.wizard__autosave .inline-icon { width: var(--icon-xs); height: var(--icon-xs); margin-right: 0; }
 .wizard__sticky-footer {
   position: sticky;
   bottom: 0;
@@ -4046,7 +4057,7 @@ body.body--mobile-menu-is-open {
   flex-shrink: 0;
   margin-top: 1px;
   margin-right: 0;
-  width: 16px; height: 16px;
+  width: var(--icon-xs); height: var(--icon-xs);
 }
 .calc-block__guardrail-warn  { background: var(--color-warning-light); color: var(--color-badge-yellow-text); }
 .calc-block__guardrail-block { background: var(--color-danger-light);  color: var(--color-badge-red-text); }
@@ -4135,7 +4146,7 @@ body.body--mobile-menu-is-open {
   cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
-.mark-button .inline-icon { width: 14px; height: 14px; margin-right: 0; flex-shrink: 0; }
+.mark-button .inline-icon { width: var(--icon-xs); height: var(--icon-xs); margin-right: 0; flex-shrink: 0; }
 .mark-button:hover { border-color: var(--color-border-input); background: var(--color-bg-surface); }
 .mark-button--active-ok      { background: var(--color-success); color: var(--color-white); border-color: var(--color-success); }
 .mark-button--active-nok     { background: var(--color-danger);  color: var(--color-white); border-color: var(--color-danger); }
@@ -4488,7 +4499,7 @@ body.body--mobile-menu-is-open {
 .property-toolbar__search .inline-icon {
   position: absolute;
   left: var(--space-sm);
-  width: 18px; height: 18px;
+  width: var(--icon-base); height: var(--icon-base);
   color: var(--color-text-secondary);
   pointer-events: none;
 }
@@ -4541,7 +4552,7 @@ body.body--mobile-menu-is-open {
   color: var(--color-white);
 }
 .view-toggle__btn--active:hover { background: var(--color-secondary-600); color: var(--color-white); }
-.view-toggle__btn .inline-icon { margin-right: 0; }
+.view-toggle__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); margin-right: 0; }
 @media (max-width: 640px) {
   .view-toggle__label { display: none; }
   .view-toggle__btn { padding: var(--space-sm) var(--space-md); }
@@ -4937,6 +4948,7 @@ body.body--mobile-menu-is-open {
   padding-inline: var(--space-sm);
   text-align: left;
 }
+.property-aside__actions .inline-icon { width: var(--icon-md); height: var(--icon-md); }
 
 /* `.contact-dl` — definition list inside the contacts card. Label above
    name, label is secondary text and name is semibold. Replaces a stack

@@ -3,11 +3,10 @@
   BBL Mieterportal — icon sprite
 
   Single source for every icon used in the portal chrome and views.
-  Mostly vendored from `swiss/designsystem` (filled-glyph CD style under
-  designsystem/app/assets/icons/*.svg, MIT). A small set is portal-drawn
-  for metaphors the federal set doesn't ship (paperclip, shield, ruler,
-  comment-dots, half-circle, square, return/enter arrow, decorative
-  data-quality dots).
+  Vendored from `swiss/designsystem` (filled-glyph CD style under
+  designsystem/app/assets/icons/*.svg, MIT). The pipeline `halfCircle`
+  in-progress indicator is portal-drawn as two filled paths (no stroke)
+  to keep glyph weight consistent with the rest of the CD set.
 
   Usage:
     <svg class="inline-icon" aria-hidden="true">
@@ -176,42 +175,31 @@
     <path fill="currentColor" d="m11.1384 15.4956a5.8703 5.8703 0 0 1 .26367-1.833 4.712 4.712 0 0 1 .99609-1.49121l1.2793-1.3164a2.951 2.951 0 0 0 .82031-1.98828 2.26657 2.26657 0 0 0 -.53711-1.60254 2.02378 2.02378 0 0 0 -1.5625-.58008 2.35265 2.35265 0 0 0 -1.60156.52734 1.78353 1.78353 0 0 0 -.60547 1.416h-1.80664a3.29377 3.29377 0 0 1 1.12793-2.5537 4.22054 4.22054 0 0 1 2.88574-.97168 3.9834 3.9834 0 0 1 2.876.98925 3.58713 3.58713 0 0 1 1.03027 2.71582 4.90855 4.90855 0 0 1 -1.582 3.36426l-1.06445 1.05274a3.28209 3.28209 0 0 0 -.71298 2.27148zm-.07813 3.10254a1.07693 1.07693 0 0 1 .26856-.74414 1.01381 1.01381 0 0 1 .7959-.30078 1.02774 1.02774 0 0 1 .80078.30078 1.06262 1.06262 0 0 1 .27343.74414 1.02719 1.02719 0 0 1 -.27343.73438 1.04432 1.04432 0 0 1 -.80078.291 1.03 1.03 0 0 1 -.7959-.291 1.04075 1.04075 0 0 1 -.26856-.73438z"/>
   </symbol>
 
-  <!-- ── Portal-drawn (metaphors DS doesn't ship — outlined Lucide-style) ── -->
+  <!-- ── Re-derived from DS sources (attachment / speech-bubble / reply)
+       and one portal-drawn half-circle for the pipeline indicator ──── -->
 
+  <!-- Attachment list bullet — DS `File.svg` (filled CD glyph). -->
   <symbol id="icon-attachment" viewBox="0 0 24 24">
-    <path d="m21 12-8.5 8.5a5 5 0 0 1 -7-7L14 5a3.5 3.5 0 1 1 5 5l-8.5 8.5a2 2 0 0 1 -3-3l7.5-7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path fill="currentColor" d="m9.77027 4.0835v.01709l-4.13127 5.68603h-.0235v10.88038h13.519v-16.5835zm0 1.29248v4.41064h-3.20484zm8.61425 14.541h-12.01904v-9.38036h4.15479v-5.70312h7.86425z"/>
   </symbol>
 
-  <symbol id="icon-shield" viewBox="0 0 24 24">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
-
-  <symbol id="icon-ruler" viewBox="0 0 24 24">
-    <path d="M21.3 8.7 8.7 21.3a1 1 0 0 1 -1.4 0L2.7 16.7a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="m7.5 10.5 2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <path d="m10.5 7.5 2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <path d="m13.5 4.5 2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <path d="m4.5 13.5 2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  </symbol>
-
+  <!-- Reviewer "OK mit Kommentar" mark — DS `SpeechBubble.svg`. -->
   <symbol id="icon-commentDots" viewBox="0 0 24 24">
-    <path d="M21 11.5a8.38 8.38 0 0 1 -.9 3.8 8.5 8.5 0 0 1 -7.6 4.7 8.38 8.38 0 0 1 -3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1 -.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path fill="currentColor" d="m7.38763 19.46794v-3.458h-3.32129v-10.39454h16.583v10.39453h-8.186zm-2.57129-4.208h3.32129v2.79l4.09424-2.79h7.668v-8.89454h-15.08353z"/>
   </symbol>
 
+  <!-- Pipeline in-progress indicator — half-filled circle. Two filled
+       paths (no stroke) so the glyph weight matches the surrounding
+       CD-filled icons. Portal-drawn; CD doesn't ship a half-circle. -->
   <symbol id="icon-halfCircle" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
-    <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>
+    <circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.25"/>
+    <path fill="currentColor" d="M12 3a9 9 0 0 1 0 18z"/>
   </symbol>
 
-  <symbol id="icon-square" viewBox="0 0 24 24">
-    <rect x="5" y="5" width="14" height="14" fill="currentColor"/>
-  </symbol>
-
-  <!-- TOC return / enter glyph — carriage-return arrow indicating "this
-       anchor jumps to the heading". Portal-specific; CD doesn't ship one. -->
+  <!-- TOC return / enter glyph — DS `Reply.svg` (filled carriage-return
+       arrow indicating "this anchor jumps to the heading"). -->
   <symbol id="icon-return" viewBox="0 0 24 24">
-    <polyline points="9 10 4 15 9 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M20 4v7a4 4 0 0 1 -4 4H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path fill="currentColor" d="m5.091 10.365 2.417-4.187-.649-.375-2.851 4.937 2.851 4.938.649-.375-2.417-4.188h11.809v7.644h.75v-8.394z"/>
   </symbol>
 
 </svg>

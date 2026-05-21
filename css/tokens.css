@@ -253,6 +253,21 @@
   --space-3xl:                 64px;
   --space-4xl:                 80px;
 
+  /* ── ICON SIZES ───────────────────────────────────────────────────────────
+     Declared px values, NOT visual. CD Bund glyphs leave ~33 % of the
+     24×24 viewBox as inner padding (e.g. User.svg glyph spans 7–17.5 on
+     x, 4.75–20.5 on y — visible glyph ≈ 67 % of the declared box). Sizes
+     below are one DS step UP from naive expectations so the label
+     matches what the user sees on screen, not what the SVG attribute
+     reads. Use these tokens for every icon — no bare px values. */
+  --icon-xs:                   16px;   /* visual ≈ 11 — pill close, autosave hints */
+  --icon-sm:                   20px;   /* visual ≈ 13 — compact / filter chips */
+  --icon-base:                 24px;   /* visual ≈ 16 — default inline with text */
+  --icon-md:                   28px;   /* visual ≈ 19 — button-adjacent, action lists */
+  --icon-lg:                   32px;   /* visual ≈ 21 — chrome (top-bar, nav) */
+  --icon-xl:                   40px;   /* visual ≈ 27 — modal close, hero, prominent */
+  --icon-2xl:                  48px;   /* visual ≈ 32 — heavy emphasis, illustration */
+
   /* ── LAYOUT ───────────────────────────────────────────────────────────── */
   --container-max-width:       1544px;
   --container-padding:         1rem;       /* 16px base; scales below */
