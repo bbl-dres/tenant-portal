@@ -1078,16 +1078,16 @@
   box-shadow: 0 0 0 2px var(--color-white), 0 0 0 5px var(--color-focus-dark);
   outline: none;
 }
-/* On dark surfaces (top-bar, footer, .section--dark) the global purple
-   focus ring is the same hue as Cabinet badges and can lose contrast
-   against navy. Add a thin white inner ring so the keyboard target stays
-   visible regardless of the underlying background. */
+/* On dark surfaces (top-bar, footer, .section--dark) the focus ring
+   switches to purple-300 (lighter) — matches CD spec
+   `*:focus-visible { ring-2 ring-purple-300 }`. Single 2px ring, no
+   white inner: keeps the focus indicator clean and CD-canonical. */
 .top-bar :focus-visible,
 .app-footer :focus-visible,
 .section--dark :focus-visible {
-  outline: 3px solid var(--color-focus-dark);
+  outline: 2px solid var(--color-focus-dark);
   outline-offset: 2px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
+  box-shadow: none;
 }
 
 /* ── CARDS ──────────────────────────────────────────────────────────────── */
@@ -3249,11 +3249,15 @@ body.body--mobile-menu-is-open {
 }
 .hero__figure {
   margin: 0;
-  overflow: hidden;
   border-radius: 0;            /* CD Bund: hero images are crisp-cornered */
-  aspect-ratio: 16 / 9;        /* federal lifecycle services (admin.ch,
-                                   bbl.admin.ch, swisstopo) use 16:9 hero
-                                   photos; 4:3 reads as magazine-masthead. */
+}
+/* Media wrapper holds the 16:9 aspect ratio + overflow clip so the
+   figcaption below can render freely (CD typography.postcss → figcaption
+   inherits .legend: text--xs, pt-2, text-text-500). Federal lifecycle
+   services (admin.ch, bbl.admin.ch, swisstopo) use 16:9 hero photos. */
+.hero__figure__media {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
 }
 .hero__figure img {
   width: 100%;

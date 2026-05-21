@@ -837,13 +837,16 @@ function renderLanding() {
           </div>
         </div>
         <figure class="hero__figure">
-          <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80"
-               srcset="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=600&ar=16:9&fit=crop&q=80 600w,
-                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80 1200w,
-                       https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=2400&ar=16:9&fit=crop&q=80 2400w"
-               sizes="(max-width: 1023px) 100vw, 50vw"
-               alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien."
-               loading="lazy" decoding="async" width="1200" height="675">
+          <div class="hero__figure__media">
+            <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80"
+                 srcset="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=600&ar=16:9&fit=crop&q=80 600w,
+                         https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80 1200w,
+                         https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=2400&ar=16:9&fit=crop&q=80 2400w"
+                 sizes="(max-width: 1023px) 100vw, 50vw"
+                 alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien."
+                 loading="lazy" decoding="async" width="1200" height="675">
+          </div>
+          <figcaption>Bundeshaus in Bern — eine der rund 2'700 Liegenschaften im BBL-Portfolio.</figcaption>
         </figure>
       </div>
     </section>
