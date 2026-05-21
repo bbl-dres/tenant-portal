@@ -2838,12 +2838,14 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       });
 
       // Room labels — three lines: room number, German useType label, area.
-      // Corridor is excluded to keep the central spine visually clean.
+      // Every space gets a label including corridors (Korridor) — they're
+      // valid rooms with their own spaceId, useType, area, and SIA
+      // category (VF). `text-allow-overlap: false` lets MapLibre
+      // self-hide any label that genuinely can't fit.
       map.addLayer({
         id: 'room-labels',
         type: 'symbol',
         source: 'spaces',
-        filter: ['!=', ['get', 'useType'], 'Corridor'],
         layout: {
           'text-field': ['get', 'label'],
           'text-font': ['Open Sans Regular'],
