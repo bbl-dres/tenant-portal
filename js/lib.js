@@ -186,10 +186,12 @@ export const ICONS = {
   // contact
   phone: 'Phone', envelope: 'Envelope', globe: 'Globe',
   // controls
-  check: 'Checkmark', x: 'Cancel', xMark: 'Cancel', xCircle: 'CancelCircle',
+  check: 'Checkmark', checkCircle: 'CheckmarkCircle',
+  x: 'Cancel', xMark: 'Cancel', xCircle: 'CancelCircle',
   alertTriangle: 'Warning',
   chevronLeft: 'ChevronLeft', chevronRight: 'ChevronRight',
   chevronUp: 'ChevronUp', chevronDown: 'ChevronDown',
+  arrowRight: 'ArrowRight',
   // content / actions
   document: 'File', attachment: 'File', video: 'Video',
   grid: 'Apps', list: 'List',
@@ -199,10 +201,15 @@ export const ICONS = {
   // portal-drawn (CD doesn't ship these)
   halfCircle: 'HalfCircle', sparkles: 'Sparkles',
 };
-export function icon(name) {
+// `icon(name)` → default `<svg class="inline-icon">…</svg>` sized via
+// the `--icon-base` token. Pass an extra class as the 2nd arg when a
+// caller needs an additional CSS hook (rotation animations on
+// nav-menu chevrons, margin tweaks on breadcrumb separators, etc.).
+export function icon(name, extraClass = '') {
   const file = ICONS[name];
   if (!file) return '';
-  return `<svg class="inline-icon" aria-hidden="true" focusable="false"><use href="assets/icons/${file}.svg"/></svg>`;
+  const cls = extraClass ? `inline-icon ${extraClass}` : 'inline-icon';
+  return `<svg class="${cls}" aria-hidden="true" focusable="false"><use href="assets/icons/${file}.svg"/></svg>`;
 }
 
 
@@ -346,7 +353,7 @@ export function renderStepIndicator(currentStep, steps) {
             ? 'step-indicator__step step-indicator__step--active'
             : 'step-indicator__step';
         const dotInner = confirmed
-          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
+          ? icon('check')
           : String(n);
         const ariaCurrent = active ? ' aria-current="step"' : '';
         return `

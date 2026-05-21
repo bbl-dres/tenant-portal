@@ -120,7 +120,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                 data-menu="${item.id}"
                 onclick="window.portal.toggleNavMenu('${item.id}')">
           ${item.label}
-          <svg class="main-navigation__chevron" viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" focusable="false"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+          ${icon('chevronDown', 'main-navigation__chevron')}
         </button>
       `;
     }
@@ -185,7 +185,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
              <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                ${i === a.length - 1
                  ? `<span aria-current="page" itemprop="name">${b.label}</span>`
-                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a><svg class="breadcrumb__sep" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>`}
+                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a>${icon('chevronRight', 'breadcrumb__sep')}`}
                <meta itemprop="position" content="${i + 1}">
              </li>
            `).join('')}
@@ -202,7 +202,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
           <a class="top-bar__authorities" href="https://www.admin.ch/de/bundesverwaltung"
              target="_blank" rel="noopener" title="Alle Schweizer Bundesbehörden (admin.ch)">
             <span>Alle Schweizer Bundesbehörden</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+            ${icon('external')}
           </a>
           <div class="top-bar__actions">
             <span class="top-bar__demo-chip" role="status" aria-label="Prototyp — nur zur Demonstration">Demo</span>
@@ -211,7 +211,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
               <button class="top-bar__lang" aria-label="Sprache wählen" aria-haspopup="listbox" aria-expanded="false"
                       onclick="window.portal.toggleLang()">
                 <span id="langCurrent">DE</span>
-                <svg viewBox="0 0 12 12" aria-hidden="true"><polyline points="2,4 6,8 10,4" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+                ${icon('chevronDown')}
               </button>
               <ul class="language-switcher__dropdown" role="listbox" aria-label="Sprache">
                 <li role="presentation"><button class="language-switcher__option language-switcher__option--active" role="option" aria-selected="true" data-lang="DE" lang="de" onclick="window.portal.pickLang('DE')">DE</button></li>

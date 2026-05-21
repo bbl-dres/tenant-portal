@@ -99,7 +99,7 @@ function openRoleMenu() {
         <button class="btn btn--outline btn--lg role-switch-btn ${isActive ? 'role-switch-btn--active' : ''}"
                 type="button" data-role="${r}" aria-pressed="${isActive}">
           ${isActive
-            ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>'
+            ? P.icon('check')
             : '<span class="role-switch-btn__spacer" aria-hidden="true"></span>'}
           <strong>${roleLabel(r)}</strong>
         </button>
@@ -275,7 +275,7 @@ function renderSearchResults() {
           <h3 class="search-results__title">${P.escapeHtml(title)}</h3>
           ${lead ? `<p class="search-results__lead">${P.escapeHtml(lead)}</p>` : ''}
         </div>
-        <svg class="search-results__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+        ${P.icon('chevronRight', 'search-results__arrow')}
       </a>
     </li>
   `;
@@ -830,7 +830,7 @@ function renderLanding() {
           </p>
           <div class="hero__cta">
             <button class="btn btn--filled btn--lg" type="button" onclick="window.portal.login()">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+              ${P.icon('external')}
               Anmelden mit eIAM
             </button>
             <a href="#/help" class="btn btn--outline btn--lg">Wie funktioniert das Portal?</a>
@@ -912,7 +912,7 @@ function renderLogin() {
         <div class="login-page">
           <div class="notification-banner notification-banner--warning notification-banner--page-top" role="status">
             <span class="notification-banner__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              ${P.icon('alertTriangle')}
             </span>
             <div class="notification-banner__wrapper">
               <p class="notification-banner__text">
@@ -1035,9 +1035,7 @@ function arrowBtn(extraClassOrOpts = 'card--quick__arrow-btn', maybeOpts = {}) {
   const extraClass = typeof extraClassOrOpts === 'string' ? extraClassOrOpts : (extraClassOrOpts.extraClass || 'card--quick__arrow-btn');
   const opts = typeof extraClassOrOpts === 'object' ? extraClassOrOpts : maybeOpts;
   const external = !!opts.external;
-  const glyph = external
-    ? `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m14.46 4.85v.75h4.171l-5.99 5.988.531.531 5.988-5.989v4.17h.75v-5.45z"/><path d="m18.118 19.151h-12.508v-12.508h4.701v-.75h-5.451v14.008h14.008v-5.451h-.75z"/></svg>`
-    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+  const glyph = external ? P.icon('external') : P.icon('arrowRight');
   return `
     <span class="arrow-btn ${extraClass}" aria-hidden="true">
       ${glyph}
@@ -1150,7 +1148,7 @@ function renderInboxEmptyState() {
   return `
     <div class="empty-state">
       <div class="empty-state__glyph" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M8 28v24a4 4 0 0 0 4 4h40a4 4 0 0 0 4-4V28"/><path d="M8 28l24 14L56 28"/><path d="M16 28V14a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v14"/></svg>
+        ${P.icon('envelope')}
       </div>
       <h2 class="empty-state__title">Noch keine Anträge</h2>
       <p class="empty-state__lead">Sie haben derzeit keine Anträge in Bearbeitung. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
@@ -1219,7 +1217,7 @@ function renderApplicationDetail({ id }) {
         ${a._isNew ? `
           <div class="notification-banner notification-banner--success app-detail__fresh-banner" role="status">
             <span class="notification-banner__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              ${P.icon('checkCircle')}
             </span>
             <div class="notification-banner__wrapper">
               <p class="notification-banner__text">
@@ -1478,7 +1476,7 @@ function renderQueue() {
         <div class="queue-stats" id="queueStats">
           <button class="queue-stats__toggle" type="button" aria-expanded="false" onclick="(function(b){var p=b.parentElement;var open=p.classList.toggle('queue-stats--open');b.setAttribute('aria-expanded', open?'true':'false');})(this)">
             <span class="queue-stats__toggle-label">
-              <svg class="queue-stats__chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+              ${P.icon('chevronRight', 'queue-stats__chevron')}
               Statistiken Ihres GS (Klick zum Aufklappen)
             </span>
             <span>Eingang 30 d: 8 · Ø Bearbeitung 4.2 d · Offene Auflagen 2 · Schnitt 96 %</span>
