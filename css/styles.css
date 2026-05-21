@@ -263,7 +263,9 @@
   background: transparent;
   border: none;
   color: inherit;
-  padding: var(--space-xs) var(--space-sm);
+  /* CD: chevron sits flush with the right edge of the switcher container —
+     visually aligning with the right edge of the dropdown panel below. */
+  padding: var(--space-xs) 0 var(--space-xs) var(--space-sm);
   display: inline-flex;
   gap: 6px;
   align-items: center;
@@ -275,7 +277,10 @@
   min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
 .top-bar__lang:hover { background: rgba(255,255,255,0.12); }
-.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); }
+/* CD ChevronDown.svg has ~19% inner whitespace on the right (path ends at
+   x=19.42 of the 24-unit viewBox). Pull the SVG ~4px right so the visible
+   glyph aligns with the right edge of the dropdown panel below. */
+.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); margin-right: -4px; }
 
 .language-switcher__dropdown {
   position: absolute;

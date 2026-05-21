@@ -992,7 +992,7 @@ function renderSubmitterHome() {
           </a>
           <a href="#/repair" class="card--quick">
             <p class="card--quick__title">Schaden melden</p>
-            <p class="card--quick__desc">Defekte Heizung, Wasserschaden, Beleuchtung oder Schliesssystem an BBL-IM melden.</p>
+            <p class="card--quick__desc">Defekte Heizung, Wasserschaden, Beleuchtung oder Schliesssystem an BBL Objektmanagement melden.</p>
             ${arrowBtn()}
           </a>
           <a href="#/downloads" class="card--quick">
@@ -3228,7 +3228,7 @@ function renderRepairQuickForm() {
       <div class="container container--reading">
         <h1 class="h1 section-heading">Schaden oder Störung melden</h1>
         <p class="section-intro">
-          Defekte Heizung, Wasserschaden, Beleuchtung, Schliesssystem: kurze Meldung — BBL-IM nimmt Kontakt auf und koordiniert die Behebung.
+          Defekte Heizung, Wasserschaden, Beleuchtung, Schliesssystem: kurze Meldung — BBL Objektmanagement nimmt Kontakt auf und koordiniert die Behebung.
         </p>
         <form class="card stack" onsubmit="event.preventDefault(); window.t3lite.submitRepair(this);">
           <div class="form-field">
@@ -3465,7 +3465,7 @@ window.t3lite = {
     const building = P.state.tenancies.find(t => t.id === data.get('building'));
     if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
     const ticketId = 'R-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
-    P.toast(`Schadensmeldung ${ticketId} an BBL-IM gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
+    P.toast(`Schadensmeldung ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
     setTimeout(() => P.navigate('#/properties/' + building.id), 800);
   },
   demoRole(role) {

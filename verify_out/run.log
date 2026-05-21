@@ -1,0 +1,77 @@
+=== STEP 1: Load landing page ===
+  title: BBL Mieterportal
+  screenshot → c:/Users/DavidRasner/Documents/GitHub/tenant-portal/verify_out/01_landing.png
+
+=== STEP 2: Bypass login via demoRole(LBO) ===
+  url after demoRole: http://localhost:8000/Documents/GitHub/tenant-portal/#/home
+  screenshot → c:/Users/DavidRasner/Documents/GitHub/tenant-portal/verify_out/02_after_login.png
+
+=== STEP 3: Navigate to #/properties (portfolio) ===
+  url: http://localhost:8000/Documents/GitHub/tenant-portal/#/properties
+  <img> count on page: 11
+    [0] visible=true complete=true nat=300x74 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/BundLogo.svg
+    [1] visible=true complete=true nat=960x689 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2010.jpg
+    [2] visible=true complete=true nat=767x345 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2011.jpg
+    [3] visible=true complete=true nat=960x708 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2012.jpg
+    [4] visible=true complete=true nat=960x616 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2013.jpg
+    [5] visible=true complete=true nat=960x640 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2014.jpg
+    [6] visible=true complete=true nat=960x719 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2015.jpg
+    [7] visible=true complete=true nat=1920x1080 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2016.jpg
+    [8] visible=true complete=true nat=960x639 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2017.jpg
+    [9] visible=true complete=true nat=952x635 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2018.jpg
+    [10] visible=true complete=true nat=1200x630 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2019.jpg
+  screenshot → c:/Users/DavidRasner/Documents/GitHub/tenant-portal/verify_out/03_properties_portfolio.png
+
+--- IMG requests at "/#/properties" (14 total so far) ---
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Apps.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/ChevronDown.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2011.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/List.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2010.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2012.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Map.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2013.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2014.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2015.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2016.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2017.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2018.jpg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2019.jpg
+
+=== STEP 4: Navigate to #/properties/T-2010-AA-01 (detail) ===
+  url: http://localhost:8000/Documents/GitHub/tenant-portal/#/properties/T-2010-AA-01
+  <img> count on page: 2
+    [0] visible=true complete=true nat=300x74 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/BundLogo.svg
+    [1] visible=true complete=true nat=960x689 src=http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2010.jpg
+  screenshot → c:/Users/DavidRasner/Documents/GitHub/tenant-portal/verify_out/04_property_detail_T-2010-AA-01.png
+
+--- IMG requests during /#/properties/T-2010-AA-01 (8) ---
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Share.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Download.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/File.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Printer.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Wrench.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Truck.svg
+  200  http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Sparkles.svg
+  200  https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/sprite.png
+
+=== STEP 5: Probe a wrong/typo path (negative probe) ===
+  title: BBL Mieterportal
+  body excerpt: Zum Inhalt springen Alle Schweizer Bundesbehörden DEMO Andrea Muster DE Bundesamt für Bauten und Logistik BBL Mieterportal Kontakt Hilfe Suche Dienstleistungen Liegenschaften Meine Anträge Arbeitsinstrumente und Informationen Start Liegenschaften Bundeshaus Nord Liegenschaft nicht gefunden. Über d
+  screenshot → c:/Users/DavidRasner/Documents/GitHub/tenant-portal/verify_out/05_property_detail_bogus_id.png
+
+=== SUMMARY ===
+  Total image responses observed: 22
+  Unsplash image responses:        0
+  Local /assets/images/buildings/: 10
+  Failed (>=400) image responses:  0
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2011.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2010.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2012.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2013.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2014.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2015.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2016.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2017.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2018.jpg
+    LOCAL OK  200 http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2019.jpg

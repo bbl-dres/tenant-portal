@@ -1,0 +1,134 @@
+[
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Apps.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "1745"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/ChevronDown.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "168"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2011.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "105186"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/List.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "380"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2010.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "202781"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2012.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "188402"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Map.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "382"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2013.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "155425"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2014.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "184612"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2015.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "196187"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2016.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "1062186"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2017.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "293074"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2018.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "102679"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/images/buildings/BLD-2019.jpg",
+    "status": 200,
+    "contentType": "image/jpeg",
+    "contentLength": "150185"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Share.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "686"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Download.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "244"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/File.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "260"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Printer.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "655"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Wrench.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "1186"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Truck.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "1000"
+  },
+  {
+    "url": "http://localhost:8000/Documents/GitHub/tenant-portal/assets/icons/Sparkles.svg",
+    "status": 200,
+    "contentType": "image/svg+xml",
+    "contentLength": "409"
+  },
+  {
+    "url": "https://tiles.basemaps.cartocdn.com/gl/positron-gl-style/sprite.png",
+    "status": 200,
+    "contentType": "image/png",
+    "contentLength": "217"
+  }
+]
