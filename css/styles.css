@@ -1535,6 +1535,10 @@ figcaption {
   font-weight: var(--font-weight-regular);
 }
 
+/* Legacy radio/checkbox group layout. Input rendering is handled by the
+   global `input[type="checkbox"]` / `input[type="radio"]` rule above
+   (DS appearance-none pattern); these classes only provide flex layout
+   for the label rows. */
 .radio-group, .checkbox-group {
   display: flex;
   flex-wrap: wrap;
@@ -1546,38 +1550,6 @@ figcaption {
   align-items: center;
   gap: var(--space-xs);
   cursor: pointer;
-}
-/* Same DS-aligned appearance-none rendering as `.option-group__item`
-   inputs — kept as a separate selector for the older damage-report /
-   wizard-step-1 markup that hasn't migrated to `.option-group`. */
-.radio-group input[type="radio"],
-.checkbox-group input[type="checkbox"] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  margin: 0;
-  background: var(--color-white);
-  border: 1px solid var(--color-border-input);
-  background-repeat: no-repeat;
-  background-position: center;
-  cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
-}
-.checkbox-group input[type="checkbox"] { border-radius: var(--radius-sm); }
-.radio-group    input[type="radio"]    { border-radius: 50%; }
-.radio-group    input[type="radio"]:checked,
-.checkbox-group input[type="checkbox"]:checked {
-  background-color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-}
-.checkbox-group input[type="checkbox"]:checked {
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='7' viewBox='0 0 10 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.20692 0.293031C9.39439 0.480558 9.49971 0.734866 9.49971 1.00003C9.49971 1.26519 9.39439 1.5195 9.20692 1.70703L4.20692 6.70703C4.01939 6.8945 3.76508 6.99982 3.49992 6.99982C3.23475 6.99982 2.98045 6.8945 2.79292 6.70703L0.792919 4.70703C0.610761 4.51843 0.509966 4.26583 0.512245 4.00363C0.514523 3.74143 0.619692 3.49062 0.8051 3.30521C0.990508 3.1198 1.24132 3.01463 1.50352 3.01236C1.76571 3.01008 2.01832 3.11087 2.20692 3.29303L3.49992 4.58603L7.79292 0.293031C7.98045 0.10556 8.23475 0.000244141 8.49992 0.000244141C8.76508 0.000244141 9.01939 0.10556 9.20692 0.293031Z' fill='white'/%3E%3C/svg%3E");
-}
-.radio-group input[type="radio"]:checked {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='6' cy='6' r='3' fill='white'/%3E%3C/svg%3E");
 }
 
 /* ── OPTION GROUP (radios / checkboxes) ──────────────────────────────────
@@ -1607,12 +1579,17 @@ figcaption {
   min-height: 28px;            /* touch-target hint */
   padding: 4px 0;
 }
-/* DS appearance-none checkbox / radio — ports
-   designsystem/css/components/input.postcss:80-152. Keeps visual fidelity
-   on Windows where the native control still renders in a 2007-era style
-   that `accent-color` alone can't override. Audit ref: DS-N1. */
-.option-group__item input[type="radio"],
-.option-group__item input[type="checkbox"] {
+/* DS appearance-none checkbox / radio — global rule, ports
+   designsystem/css/components/input.postcss:80-152. Type-selector scope
+   (not wrapper-class scope) so every checkbox / radio anywhere in the
+   app — wizard `.option-group__item`, `.radio-group`, `.checkbox-group`,
+   `.consent-check`, `.wizard__inline-toggle`, plain in-table selects,
+   inline labels — picks up the federal-rendered control. Keeps visual
+   fidelity on Windows where the native control still renders in a
+   2007-era style that `accent-color` alone can't override.
+   Audit ref: DS-N1. */
+input[type="radio"],
+input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -1627,27 +1604,30 @@ figcaption {
   cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
-.option-group__item input[type="checkbox"] {
-  border-radius: var(--radius-sm);
-}
-.option-group__item input[type="radio"] {
-  border-radius: 50%;
-}
-.option-group__item input[type="radio"]:checked,
-.option-group__item input[type="checkbox"]:checked {
+input[type="checkbox"] { border-radius: var(--radius-sm); }
+input[type="radio"]    { border-radius: 50%; }
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
   background-color: var(--color-text-primary);
   border-color: var(--color-text-primary);
 }
-.option-group__item input[type="checkbox"]:checked {
+input[type="checkbox"]:checked {
   background-image: url("data:image/svg+xml,%3Csvg width='10' height='7' viewBox='0 0 10 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.20692 0.293031C9.39439 0.480558 9.49971 0.734866 9.49971 1.00003C9.49971 1.26519 9.39439 1.5195 9.20692 1.70703L4.20692 6.70703C4.01939 6.8945 3.76508 6.99982 3.49992 6.99982C3.23475 6.99982 2.98045 6.8945 2.79292 6.70703L0.792919 4.70703C0.610761 4.51843 0.509966 4.26583 0.512245 4.00363C0.514523 3.74143 0.619692 3.49062 0.8051 3.30521C0.990508 3.1198 1.24132 3.01463 1.50352 3.01236C1.76571 3.01008 2.01832 3.11087 2.20692 3.29303L3.49992 4.58603L7.79292 0.293031C7.98045 0.10556 8.23475 0.000244141 8.49992 0.000244141C8.76508 0.000244141 9.01939 0.10556 9.20692 0.293031Z' fill='white'/%3E%3C/svg%3E");
 }
-.option-group__item input[type="radio"]:checked {
+input[type="radio"]:checked {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='6' cy='6' r='3' fill='white'/%3E%3C/svg%3E");
 }
-.option-group__item input[type="radio"]:disabled,
-.option-group__item input[type="checkbox"]:disabled {
+input[type="radio"]:disabled,
+input[type="checkbox"]:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+/* Focus ring inherits the global `:focus-visible` purple — explicit
+   here so the offset reads well against the small box. */
+input[type="radio"]:focus-visible,
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 .option-group__item:hover span { color: var(--color-text-primary); }
 .option-group__item:has(input:checked) span { font-weight: var(--font-weight-bold); }
@@ -2591,6 +2571,11 @@ a.btn[aria-disabled="true"] {
   transition: color var(--transition-fast);
 }
 .accordion__trigger:hover { color: var(--color-primary); }
+/* Chevron-down rendered as an SVG mask so it inherits `currentColor`
+   and doesn't depend on the user's font (the previous "▾" Unicode glyph
+   rendered inconsistently across Windows / macOS / Linux). Rotates
+   180deg on `.accordion__item--open` — DS pattern from
+   designsystem/css/components/accordion.postcss:50-57. */
 .accordion__icon {
   display: inline-flex;
   align-items: center;
@@ -2599,8 +2584,21 @@ a.btn[aria-disabled="true"] {
   height: 24px;
   transition: transform var(--transition);
   flex-shrink: 0;
+  color: currentColor;
 }
-.accordion__icon::before { content: "▾"; font-size: 14px; }
+.accordion__icon::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
 .accordion__item--open .accordion__icon { transform: rotate(180deg); }
 .accordion__panel {
   max-height: 0;
@@ -2704,40 +2702,45 @@ a.btn[aria-disabled="true"] {
   margin: 0;
   padding: 0;
 }
+/* CD Bund filter chip — DS `.tag-item` pattern from
+   designsystem/css/components/tag-item.postcss:7-67. Default: gray-200
+   pill, dark text, gray-300 on hover. Active: dark gray-800 fill with
+   white text, pointer-events:none (selection is final until another
+   chip is picked). Min-height tracks the DS button scale (44 / 48 / 52)
+   so chips meet WCAG 2.5.5 across breakpoints. */
 .tag-item {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  background: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
+  background: var(--color-gray-200);
+  border: 1px solid transparent;
   color: var(--color-text-primary);
   padding: 6px var(--space-md);
-  min-height: 34px;
+  min-height: var(--btn-min-h);          /* 44 px — DS pattern */
   border-radius: var(--radius-full);
   font-family: inherit;
   font-size: var(--text-body-sm);
   font-weight: var(--font-weight-regular);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
-.tag-item:hover { background: var(--color-bg-surface); border-color: var(--color-border-input); }
+@media (min-width: 1280px) { .tag-item { min-height: var(--btn-lg-min-h); } }
+.tag-item:hover { background: var(--color-gray-300); }
 .tag-item--active,
 .tag-item[aria-pressed="true"] {
-  background: var(--color-badge-red-bg);
-  border-color: var(--color-primary);
-  color: var(--color-primary-700);
+  background: var(--color-gray-800);
+  color: var(--color-white);
 }
 .tag-item--active:hover,
 .tag-item[aria-pressed="true"]:hover {
-  background: var(--color-badge-red-bg);
-  border-color: var(--color-primary-700);
+  background: var(--color-gray-900);
 }
 .tag-item__count {
   font-size: var(--text-body-xs);
   color: var(--color-text-muted);
 }
 .tag-item--active .tag-item__count,
-.tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-primary-700); }
+.tag-item[aria-pressed="true"] .tag-item__count { color: rgba(255,255,255,0.75); }
 
 /* Empty-state glyph slot — sized to host an inline SVG circle illustration.
    Replaces the previous emoji glyph (📭 / 📁 / …) which depended on the
@@ -4088,13 +4091,20 @@ body.body--mobile-menu-is-open {
   color: var(--color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 .tab--active,
 .tab[aria-selected="true"] {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
-.tab:hover { color: var(--color-text-primary); }
+/* CD Bund tab pattern: both `:hover` and `--active` paint the 3 px red
+   rail (designsystem/css/components/tab.postcss:62-65). Previous version
+   only changed colour on hover — divergence from DS. */
+.tab:hover {
+  color: var(--color-primary-600);
+  border-bottom-color: var(--color-primary);
+}
 /* When the tab itself receives keyboard focus, lift the outline slightly
    below the underline so both affordances are visible at once. */
 .tab:focus-visible {
@@ -4147,11 +4157,25 @@ body.body--mobile-menu-is-open {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-md);
+  font-family: inherit;
   font-size: var(--text-body-sm);
   cursor: pointer;
   color: var(--color-text-primary);
   font-weight: var(--font-weight-regular);
+  text-align: left;
 }
+.queue-stats__toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.queue-stats__chevron {
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+  color: var(--color-text-secondary);
+}
+.queue-stats--open .queue-stats__chevron { transform: rotate(90deg); }
 .queue-stats__body {
   display: none;
   margin-top: var(--space-md);
@@ -4246,7 +4270,10 @@ body.body--mobile-menu-is-open {
   flex: 1;
   justify-content: center;
 }
+/* Carousel pagination dot — 12 × 12 visual but with an invisible 44 × 44
+   hit slop via `::before` so taps don't miss on mobile (WCAG 2.5.5). */
 .news-section__dot {
+  position: relative;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -4256,8 +4283,17 @@ body.body--mobile-menu-is-open {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
+.news-section__dot::before {
+  content: '';
+  position: absolute;
+  inset: -16px;             /* 12 + 32 = 44 px clickable square */
+}
 .news-section__dot:hover { background: var(--color-gray-600); }
 .news-section__dot--active { background: var(--color-text-primary); }
+.news-section__dot:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
 .news-section__more {
   font-weight: var(--font-weight-bold);
   text-decoration: none;
@@ -4406,10 +4442,10 @@ body.body--mobile-menu-is-open {
 .view-toggle__btn:last-child { border-right: none; }
 .view-toggle__btn:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
 .view-toggle__btn--active {
-  background: var(--color-secondary-600);
+  background: var(--color-secondary-500);
   color: var(--color-white);
 }
-.view-toggle__btn--active:hover { background: var(--color-secondary-700); color: var(--color-white); }
+.view-toggle__btn--active:hover { background: var(--color-secondary-600); color: var(--color-white); }
 .view-toggle__btn .inline-icon { margin-right: 0; }
 @media (max-width: 640px) {
   .view-toggle__label { display: none; }

@@ -1461,8 +1461,11 @@ function renderQueue() {
         </div>
 
         <div class="queue-stats" id="queueStats">
-          <button class="queue-stats__toggle" onclick="document.getElementById('queueStats').classList.toggle('queue-stats--open');">
-            <span>▸ Statistiken Ihres GS (Klick zum Aufklappen)</span>
+          <button class="queue-stats__toggle" type="button" aria-expanded="false" onclick="(function(b){var p=b.parentElement;var open=p.classList.toggle('queue-stats--open');b.setAttribute('aria-expanded', open?'true':'false');})(this)">
+            <span class="queue-stats__toggle-label">
+              <svg class="queue-stats__chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+              Statistiken Ihres GS (Klick zum Aufklappen)
+            </span>
             <span>Eingang 30 d: 8 · Ø Bearbeitung 4.2 d · Offene Auflagen 2 · Schnitt 96 %</span>
           </button>
           <div class="queue-stats__body">
