@@ -108,7 +108,14 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
          Anmelden
        </button>`;
 
-  const navHtml = navItems.map((item, i) => {
+  // Per CD pattern (bbl.admin.ch / geo.admin.ch): "Start" is NOT a top-nav
+  // item. The federal logo at the top-left handles the "go home"
+  // affordance, and the breadcrumb starts with "Start" on every sub-page.
+  // The data still carries it (mobile burger menu + auth state checks),
+  // we just don't render it in the desktop nav row.
+  const desktopNavItems = navItems.filter(n => n.id !== 'start' && n.id !== 'home');
+
+  const navHtml = desktopNavItems.map((item, i) => {
     const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
     if (item.type === 'dropdown') {
       return `
@@ -178,17 +185,54 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
   // Schema.org BreadcrumbList microdata mirrors what bbl/admin.ch
   // serves publicly. Each entry is a ListItem with `position` (1-based)
   // and `name`; the anchor's `href` plays the `item` role.
+  //
+  // CD pattern: if a breadcrumb item corresponds to a top-level nav
+  // route (e.g. "Liegenschaften" → matches one of `navItems`), surface
+  // a small red-bordered chevron-down beside it. Clicking it opens a
+  // 300 px drawer showing the *peer* top-nav items so the user can hop
+  // sideways without going back through the menu. Matches what
+  // bbl.admin.ch / geo.admin.ch do on their breadcrumbs.
+  const flatNav = navItems.filter(n => n.type !== 'dropdown');
+  // Home (`#/` or `#/home`) is exempt — CD pattern shows "Startseite"
+  // bare, dropdown only on the next breadcrumb item that anchors a
+  // top-nav route. Matches bbl.admin.ch / geo.admin.ch.
+  function siblingsFor(item) {
+    if (!item.href) return null;
+    if (item.href === '#/' || item.href === '#/home') return null;
+    const match = flatNav.find(n => n.href === item.href || (item.href.startsWith(n.href + '/')));
+    if (!match) return null;
+    const peers = flatNav.filter(n => n !== match);
+    return peers.length > 0 ? { active: match, peers } : null;
+  }
   const breadcrumbHtml = breadcrumb.length
     ? `<nav class="breadcrumb" aria-label="Brotkrumen">
          <ol class="breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">
-           ${breadcrumb.map((b, i, a) => `
-             <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-               ${i === a.length - 1
+           ${breadcrumb.map((b, i, a) => {
+             const isLast = i === a.length - 1;
+             const sib = siblingsFor(b);
+             return `
+             <li class="breadcrumb__item ${sib ? 'breadcrumb__item--has-dropdown' : ''}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+               ${isLast
                  ? `<span aria-current="page" itemprop="name">${b.label}</span>`
-                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a>${icon('chevronRight', 'breadcrumb__sep')}`}
+                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a>`}
+               ${sib ? `
+                 <button class="breadcrumb__dropdown-icon" type="button"
+                         aria-label="Verwandte Bereiche zu ${b.label}"
+                         aria-haspopup="menu"
+                         aria-expanded="false"
+                         aria-controls="bcDropdown-${i}"
+                         onclick="window.portal.toggleBreadcrumbDropdown(${i})">
+                   ${icon('chevronDown')}
+                 </button>
+                 <ul class="breadcrumb__dropdown" id="bcDropdown-${i}" role="menu" hidden>
+                   <li class="breadcrumb__dropdown-active" role="menuitem"><span>${sib.active.label}</span></li>
+                   ${sib.peers.map(p => `<li role="none"><a role="menuitem" href="${p.href}">${p.label}</a></li>`).join('')}
+                 </ul>` : ''}
+               ${!isLast ? icon('chevronRight', 'breadcrumb__sep') : ''}
                <meta itemprop="position" content="${i + 1}">
              </li>
-           `).join('')}
+           `;
+           }).join('')}
          </ol>
        </nav>`
     : '';
@@ -349,22 +393,75 @@ export function renderFooter() {
 
 
 // ── NAV-MENU DROPDOWN (anchored under trigger word) ───────────────────────
+// Breadcrumb dropdown toggle — open/close the peer-list drawer attached
+// to a breadcrumb item that matches a top-nav route. Same close-on-Esc
+// / click-outside semantics as the nav-menu panels above.
+export function toggleBreadcrumbDropdown(index, force) {
+  const panel = document.getElementById('bcDropdown-' + index);
+  const trigger = document.querySelector(`[aria-controls="bcDropdown-${index}"]`);
+  if (!panel) return;
+  const isOpen = !panel.hasAttribute('hidden');
+  const next = (typeof force === 'boolean') ? force : !isOpen;
+  // Close any other open breadcrumb dropdowns first.
+  document.querySelectorAll('.breadcrumb__dropdown').forEach(p => p.setAttribute('hidden', ''));
+  document.querySelectorAll('.breadcrumb__dropdown-icon').forEach(t => t.setAttribute('aria-expanded', 'false'));
+  if (next) {
+    panel.removeAttribute('hidden');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// Lazy-creates the page-darkening overlay element that sits behind the
+// open nav-menu panel. DS pattern `.desktop-menu__overlay` — dark
+// gradient that softens the page below the nav while a dropdown is
+// open. Click-through closes the menu via the existing click-outside
+// handler since the overlay is rendered ABOVE page content but the
+// click bubbles up to document.
+function ensureNavOverlay() {
+  let overlay = document.querySelector('.main-navigation__overlay');
+  if (overlay) return overlay;
+  overlay = document.createElement('div');
+  overlay.className = 'main-navigation__overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.addEventListener('click', () => {
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      toggleNavMenu(id, false);
+    });
+  });
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
 // Click-outside + Esc closers + viewport-resize repositioner live as
 // module-load side effects below the function. The repositioner is
 // rAF-debounced so continuous-resize doesn't thrash layout.
 let _navMenuRaf = null;
 document.addEventListener('click', (e) => {
-  if (e.target.closest('.nav-menu, .main-navigation__link--has-menu')) return;
-  document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
-    const id = m.id.replace('navMenu-', '');
-    toggleNavMenu(id, false);
-  });
+  // Close nav menus on click outside.
+  if (!e.target.closest('.nav-menu, .main-navigation__link--has-menu')) {
+    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+      const id = m.id.replace('navMenu-', '');
+      toggleNavMenu(id, false);
+    });
+  }
+  // Close breadcrumb dropdowns on click outside.
+  if (!e.target.closest('.breadcrumb__dropdown, .breadcrumb__dropdown-icon')) {
+    document.querySelectorAll('.breadcrumb__dropdown:not([hidden])').forEach(p => {
+      const idx = p.id.replace('bcDropdown-', '');
+      toggleBreadcrumbDropdown(Number(idx), false);
+    });
+  }
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
     const id = m.id.replace('navMenu-', '');
     toggleNavMenu(id, false);
+  });
+  document.querySelectorAll('.breadcrumb__dropdown:not([hidden])').forEach(p => {
+    const idx = p.id.replace('bcDropdown-', '');
+    toggleBreadcrumbDropdown(Number(idx), false);
   });
 });
 window.addEventListener('resize', () => {
@@ -393,17 +490,25 @@ export function toggleNavMenu(id, force) {
   if (!panel) return;
   const isOpen = !panel.hasAttribute('hidden');
   const next = (typeof force === 'boolean') ? force : !isOpen;
-  // Close any other open nav menus
+  // Close any other open nav menus + drop the lift on their triggers.
   document.querySelectorAll('.nav-menu').forEach(m => {
     m.setAttribute('hidden', '');
     m.classList.remove('open');
   });
-  document.querySelectorAll('.main-navigation__link--has-menu').forEach(t => t.setAttribute('aria-expanded', 'false'));
+  document.querySelectorAll('.main-navigation__link--has-menu').forEach(t => {
+    t.setAttribute('aria-expanded', 'false');
+    t.classList.remove('main-navigation__link--clicked');
+  });
+  // Page overlay — dark-fade gradient behind the open panel (DS
+  // `.desktop-menu__overlay`). Hide unless we're about to open one.
+  const overlay = ensureNavOverlay();
+  overlay.classList.toggle('main-navigation__overlay--open', next);
   if (next) {
     panel.removeAttribute('hidden');
     panel.classList.add('open');
     if (trigger) {
       trigger.setAttribute('aria-expanded', 'true');
+      trigger.classList.add('main-navigation__link--clicked');
       // Anchor the dropdown panel under the trigger word, like swisstopo.
       // The .navbar is position:relative, so we offset from its left edge.
       const navbar = trigger.closest('.navbar');

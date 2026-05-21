@@ -37,7 +37,7 @@ renderShortcutOverlay, wireGlobalShortcuts,
 import { state, loadData } from './state.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
-  toggleNavMenu, toggleLang, pickLang, submitSearch, toggleSearch, toggleBurger,
+  toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, submitSearch, toggleSearch, toggleBurger,
   shell, publicNavItems, authNavItems, SERVICES_MENU,
 } from './shell.js';
 import {
@@ -151,7 +151,7 @@ window.portal = {
   renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
-  toast, modal, toggleSearch, toggleNavMenu, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
+  toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
   openRoleMenu, login, logout,
   statusBadge,
   formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,

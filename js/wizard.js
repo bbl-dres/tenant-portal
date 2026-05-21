@@ -186,11 +186,25 @@ function renderStep1(draft) {
     <div class="wizard__section">
       <h3>Standort</h3>
       <div class="form-field">
-        <label class="form-field__label">Adresse <span class="form-field__required">*</span></label>
-        <input class="form-field__input" name="address" placeholder="z. B. Eichweg 22, 3003 Bern" value="${escapeHtml(draft.address)}" autocomplete="off" list="bldList">
-        <datalist id="bldList">
-          ${state.buildings.map(b => `<option value="${escapeHtml(b.address)}">${escapeHtml(b.name)}</option>`).join('')}
-        </datalist>
+        <label class="form-field__label" for="wizAddressInput">Adresse <span class="form-field__required">*</span></label>
+        <div class="combobox" data-combobox>
+          <input class="form-field__input combobox__input" id="wizAddressInput" name="address"
+                 placeholder="z. B. Eichweg 22, 3003 Bern"
+                 value="${escapeHtml(draft.address)}"
+                 autocomplete="off"
+                 role="combobox"
+                 aria-autocomplete="list"
+                 aria-controls="wizAddressOptions"
+                 aria-expanded="false">
+          <ul class="combobox__list" id="wizAddressOptions" role="listbox" hidden>
+            ${state.buildings.map(b => `
+              <li class="combobox__option" role="option" data-value="${escapeHtml(b.address)}">
+                <span class="combobox__option-primary">${escapeHtml(b.address)}</span>
+                <span class="combobox__option-secondary">${escapeHtml(b.name)}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
       </div>
       <div id="sapInfo" class="wizard__sap-info"></div>
     </div>
@@ -222,13 +236,7 @@ function wireWizardStep(stepNum, draft) {
       }
     });
     const addr = body.querySelector('input[name="address"]');
-    addr.addEventListener('input', e => {
-      draft.address = e.target.value;
-      // Clear any pending error as soon as the user types something.
-      if (e.target.value) setFieldError(addr, null);
-      updateSapInfo(draft);
-      persistDraft(draft);
-    });
+    wireAddressCombobox(body, addr, draft);
     updateSapInfo(draft);
     body.querySelector('#nextStep').addEventListener('click', () => {
       if (!draft.address) {
@@ -244,6 +252,75 @@ function wireWizardStep(stepNum, draft) {
   if (stepNum === 3) wireStep3(draft);
   if (stepNum === 4) wireStep4(draft);
   if (stepNum === 5) wireStep5(draft);
+}
+
+// Custom address combobox — replaces the native `<datalist>` so the
+// suggestion list matches the input width + carries our typography.
+// Behaviour: open on focus, filter as you type, click-to-select, hide
+// on blur (after a small delay so the click registers first). The
+// underlying `<input>` keeps its normal change/input events so the
+// rest of the wizard (validation, draft persist, SAP info lookup)
+// doesn't care that the picker is custom.
+function wireAddressCombobox(scope, input, draft) {
+  const combobox = scope.querySelector('[data-combobox]');
+  const list = scope.querySelector('#wizAddressOptions');
+  if (!combobox || !list) return;
+  const allOptions = Array.from(list.querySelectorAll('.combobox__option'));
+
+  function filter(value) {
+    const q = value.trim().toLowerCase();
+    let visibleCount = 0;
+    for (const opt of allOptions) {
+      const match = !q || opt.dataset.value.toLowerCase().includes(q)
+                       || opt.textContent.toLowerCase().includes(q);
+      opt.hidden = !match;
+      if (match) visibleCount++;
+    }
+    return visibleCount;
+  }
+  function open() {
+    if (filter(input.value) === 0) return;
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  }
+  function close() {
+    list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+  }
+  function pick(value) {
+    input.value = value;
+    draft.address = value;
+    setFieldError(input, null);
+    updateSapInfo(draft);
+    persistDraft(draft);
+    close();
+    input.focus();
+  }
+
+  input.addEventListener('focus', open);
+  input.addEventListener('click', open);
+  input.addEventListener('input', e => {
+    draft.address = e.target.value;
+    if (e.target.value) setFieldError(input, null);
+    updateSapInfo(draft);
+    persistDraft(draft);
+    open();
+  });
+  // Use mousedown (not click) so we beat the input's blur — otherwise
+  // the list hides before the click handler can fire.
+  list.addEventListener('mousedown', e => {
+    const opt = e.target.closest('.combobox__option');
+    if (!opt) return;
+    e.preventDefault();   // keep focus on input
+    pick(opt.dataset.value);
+  });
+  input.addEventListener('blur', () => {
+    // Delay so a click on a list option still registers.
+    setTimeout(close, 150);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') close();
+  });
 }
 
 function updateSapInfo(draft) {
@@ -278,17 +355,17 @@ function updateSapInfo(draft) {
   draft.pipelineVariant = draft.ve === 'BK' ? 'bypass' : 'standard';
   const bkOk = match.assetKey.bk === state.referenceData.companyCode;
   draft.bk1086Ok = bkOk;
-  info.innerHTML = `
-    <div class="notification-banner notification-banner--${bkOk ? 'success' : 'danger'}">
-      <span class="notification-banner__icon" aria-hidden="true">${bkOk ? icon('check') : icon('alertTriangle')}</span>
+  // Successful match: state is captured silently — `draft.assetKey` and
+  // `draft.egid` flow into the application record + ePPM downstream.
+  // Surface only the actionable BK-mismatch case to the user, since
+  // they need to contact a different organisation in that branch.
+  info.innerHTML = bkOk ? '' : `
+    <div class="notification-banner notification-banner--danger">
+      <span class="notification-banner__icon" aria-hidden="true">${icon('alertTriangle')}</span>
       <div class="notification-banner__wrapper">
         <p class="notification-banner__text">
-          <strong>Erkannt:</strong>
-          SAP <code>${formatAssetKey(match.assetKey)}</code> · EGID <code>${match.egid}</code>
-          <span class="notification-banner__sub">${bkOk
-            ? 'BK 1086 = BBL-Portfolio — Antrag geht an BBL.'
-            : 'BK ≠ 1086 — Objekt gehört nicht zu BBL. Bitte zuständige Organisation kontaktieren.'
-          }</span>
+          <strong>Adresse nicht im BBL-Portfolio.</strong>
+          BK ${match.assetKey.bk} ≠ 1086 — bitte zuständige Organisation kontaktieren.
         </p>
       </div>
     </div>

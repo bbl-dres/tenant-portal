@@ -623,46 +623,82 @@
 }
 .main-navigation {
   display: flex;
-  gap: var(--space-lg);
+  gap: 0;
   flex-wrap: wrap;
+  /* Negative margin-left cancels the first nav-link's horizontal padding,
+     so its TEXT (not its outer edge) aligns with the container's left
+     edge — same X as the breadcrumb, page heading, and body text.
+     Mirrors DS `main-navigation.postcss:16` — `@apply -ml-4`. */
+  margin-left: calc(var(--space-md) * -1);
 }
+/* Per CD pattern (designsystem/css/navigations/main-navigation.postcss:29
+   — `& > ul > li > a { @apply lg:h-full lg:px-4 }`), each nav link has
+   horizontal padding rather than gap between items. When the `.clicked`
+   lift fires, the white background covers the full click area + this
+   padding, giving the lifted card a deliberate width instead of a thin
+   strip under just the label. */
 .main-navigation__link {
+  position: relative;
   text-decoration: none;
   color: var(--color-text-primary);
   font-size: var(--text-body-sm);
   font-weight: var(--font-weight-regular);
-  padding: var(--space-md) 0;
-  border-bottom: 3px solid transparent;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  padding: var(--space-md);
+  transition: color var(--transition-fast);
 }
-/* CD Bund pattern: hover + active both paint the 3 px red rail under the
-   link. Mirrors designsystem/css/navigations/main-navigation.postcss:46-49
-   where `&.active::after, &:hover::after { @apply bg-primary-500 }`. */
-.main-navigation__link:hover {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+/* CD Bund pattern: the 3 px red rail is rendered via `::after` and
+   inset by the link's horizontal padding so the bar's width matches
+   the text, NOT the full padded click area. Mirrors
+   designsystem/css/navigations/main-navigation.postcss:34-49 —
+   `&::after { @apply absolute right-4 bottom-0 left-4 h-[3px] }`
+   then `&.active::after, &:hover::after { @apply bg-primary-500 }`. */
+.main-navigation__link::after {
+  content: '';
+  position: absolute;
+  left: var(--space-md);
+  right: var(--space-md);
+  bottom: 0;
+  height: 3px;
+  background: transparent;
+  transition: background var(--transition-fast);
 }
-.main-navigation__link--active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+.main-navigation__link:hover { color: var(--color-primary); }
+.main-navigation__link:hover::after,
+.main-navigation__link--active::after,
+.main-navigation__link--has-menu[aria-expanded="true"]::after {
+  background: var(--color-primary);
 }
+.main-navigation__link--active { color: var(--color-primary); }
+
 .main-navigation__link--has-menu {
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
   font-family: inherit;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   font-weight: var(--font-weight-regular);
-  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 .main-navigation__link--has-menu:hover,
 .main-navigation__link--has-menu[aria-expanded="true"] {
   color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
 }
-.main-navigation__chevron { width: var(--icon-sm); height: var(--icon-sm); margin-left: 6px; margin-right: 0; flex-shrink: 0; }
+/* On desktop the CD pattern HIDES the dropdown indicator on nav-menu
+   triggers (the panel opens on click and lifts the trigger; no extra
+   chevron). See designsystem/css/navigations/main-navigation.postcss:58
+   — `& > ul > li > a > .icon { @apply hidden; }`. Kept visible at
+   narrow widths as a tactile cue for finger taps. Double-class
+   selector wins specificity over `.inline-icon { display: inline-block }`
+   declared later in the file. */
+.inline-icon.main-navigation__chevron {
+  width: var(--icon-sm); height: var(--icon-sm);
+  margin-left: 6px; margin-right: 0;
+  flex-shrink: 0;
+  display: none;
+}
+@media (max-width: 1023px) {
+  .inline-icon.main-navigation__chevron { display: inline-block; }
+}
 .main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__chevron {
   transform: rotate(180deg);
   transition: transform var(--transition-fast);
@@ -756,7 +792,45 @@
 }
 
 /* The navbar must establish positioning context for the dropdown */
-.navbar { position: relative; }
+.navbar { position: relative; z-index: 30; }
+
+/* Lift effect on the active nav-menu trigger — mirrors DS
+   `.main-navigation > ul > li > a.clicked` (postcss line 51-55). The
+   trigger gets a white background + heavy drop shadow + raised z-index
+   so it visually fuses with the dropdown panel below it. `clip-path`
+   crops the shadow's bottom edge so the seam between trigger and panel
+   reads as a single continuous "lifted card". */
+.main-navigation__link--clicked {
+  background: var(--color-white);
+  position: relative;
+  z-index: 31;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  clip-path: inset(-50px -50px -1px -50px);
+}
+
+/* Page overlay — dark gradient that fades from ~20 % black at the top
+   to transparent. Mirrors DS `.desktop-menu__overlay` (sections/
+   desktop-menu.postcss:41-54). Sits below the dropdown panel but above
+   the page content. Clicking it closes the open menu (handler in
+   shell.js `ensureNavOverlay`). */
+.main-navigation__overlay {
+  position: fixed;
+  top: var(--nav-height, 56px);   /* below the navbar */
+  left: 0; right: 0; bottom: 0;
+  /* Matches DS `bg-gradient-to-b from-text-900/20 via-text-900/20
+     to-transparent` — stays at 20 % opacity from 0 % through 50 %, then
+     fades to transparent at 100 %. Wider dark band than my earlier
+     30 %-stop gradient; matches the bbl.admin.ch reference. */
+  background: linear-gradient(to bottom, rgba(17, 24, 39, 0.20) 0%, rgba(17, 24, 39, 0.20) 50%, rgba(17, 24, 39, 0) 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  z-index: 25;
+}
+.main-navigation__overlay--open {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 @media (max-width: 640px) {
   .nav-menu {
@@ -796,18 +870,16 @@
 /* Inline SVG chevron — replaces the previous `›` literal which
    relied on the system font. Now scales with the breadcrumb font-size
    and inherits text-muted via currentColor. */
-/* Breadcrumb separator — 10 px hardcoded (off the --icon-* scale).
-   The CD chevron glyph fills only ~17 % of its viewBox vertically, so
-   at our smallest token (--icon-xs = 16 px) the visible chevron is still
-   ~2.7 px tall — DS uses ~10 px declared for breadcrumb separators, which
-   reads as a proper "›" next to body-sm text. `vertical-align: middle`
-   centres the small icon with the surrounding x-height. */
+/* Breadcrumb separator — em-based so it scales with the surrounding
+   `text-body-sm` size. 0.75em ≈ 10-11 px at our breadcrumb font-size,
+   matching the subtle "›" you see on bbl.admin.ch / geo.admin.ch.
+   `align-items: center` on `.breadcrumb__item` handles centring (the
+   item is a flexbox, so the previous `vertical-align: middle` was
+   ignored — that's why the chevron looked off-axis). */
 .breadcrumb__sep {
-  width: 10px; height: 10px;
+  width: 0.75em; height: 0.75em;
   margin: 0 var(--space-xs);
   color: var(--color-text-muted);
-  display: inline-block;
-  vertical-align: middle;
   flex-shrink: 0;
 }
 /* Breadcrumb is now an <ol> with schema.org/BreadcrumbList microdata.
@@ -818,12 +890,88 @@
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;       /* centre chevron with text */
   gap: 0;
 }
 .breadcrumb__item {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;       /* centre chevron with text */
+  position: relative;        /* anchor for the dropdown drawer */
+}
+
+/* Red-bordered chevron-down button next to a breadcrumb item that has
+   peer-level siblings. Mirrors DS `.breadcrumb__dropdown-icon`:
+   `w-[1.25em] h-[1.25em]`, `border border-primary-600`,
+   `text-primary-600`, `rounded-sm`. Chevron rotates 180° when the
+   drawer is open. */
+.breadcrumb__dropdown-icon {
+  margin: 0 var(--space-xs) 0 0;
+  padding: 0;
+  width: 1.25em;
+  height: 1.25em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-primary-600);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-600);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.breadcrumb__dropdown-icon:hover { background: var(--color-bg-alt); color: var(--color-primary-700); border-color: var(--color-primary-700); }
+.breadcrumb__dropdown-icon svg {
+  width: 0.9em; height: 0.9em;
+  transition: transform var(--transition-fast);
+  margin: 0;
+}
+.breadcrumb__dropdown-icon[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* Drawer — 300 px card below the breadcrumb item, white background +
+   heavy shadow, items as menu rows. Mirrors DS `.breadcrumb ul ul`
+   (sections/breadcrumb.postcss:93-113). Active item gets a red
+   left-bar (here the current page itself, shown disabled). */
+.breadcrumb__dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  z-index: 30;
+  margin: 0;
+  padding: var(--space-xs);
+  list-style: none;
+  width: 280px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.breadcrumb__dropdown[hidden] { display: none; }
+.breadcrumb__dropdown li { position: relative; }
+.breadcrumb__dropdown a,
+.breadcrumb__dropdown span {
+  display: block;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  border-radius: var(--radius);
+}
+.breadcrumb__dropdown a:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.breadcrumb__dropdown-active span {
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+.breadcrumb__dropdown-active::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 2px;
+  background: var(--color-primary-600);
+  border-radius: 1px;
 }
 
 /* ── HERO ───────────────────────────────────────────────────────────────── */
@@ -1609,6 +1757,44 @@ select.input,
   background-size: 20px 20px;
   padding-inline-end: calc(var(--space-sm) + 20px + var(--space-sm));
 }
+/* Custom combobox — replaces native `<datalist>` so the suggestion
+   popup matches the input width, our typography, and the rest of the
+   form. Wraps the input + a positioned `<ul>` below; the input keeps
+   the regular `.form-field__input` look. JS toggles `[hidden]` on
+   the list. */
+.combobox { position: relative; display: block; width: 100%; }
+.combobox__input { width: 100%; }
+.combobox__list {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 20;
+}
+.combobox__list[hidden] { display: none; }
+.combobox__option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.combobox__option:last-child { border-bottom: none; }
+.combobox__option:hover,
+.combobox__option--active { background: var(--color-bg-alt); }
+.combobox__option-primary   { font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+.combobox__option-secondary { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+
 .input--error { border-color: var(--color-danger); }
 .input--disabled,
 .input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--color-bg-alt); }
