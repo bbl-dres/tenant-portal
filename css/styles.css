@@ -1444,7 +1444,15 @@ figcaption {
 /* ── FORM FIELDS ──────────────────────────────────────────────────────────
    Form fields stack their parts (label / control / hint / error) with
    small gaps. The wizard-form-section parent supplies the larger gap
-   between fields so the page rhythm reads cleanly. */
+   between fields so the page rhythm reads cleanly.
+
+   Class naming: tenant uses BEM `.form-field*` (one outer flex column
+   with gap). DS canonical is a different architecture — `.form` >
+   `.form__group` > `.form__group__input` (inner wrapper + `space-y-2`).
+   See designsystem/css/components/form.postcss. The compatibility-alias
+   block at the end of this section (search "DS form-class aliases")
+   maps DS class names to the same visuals so Storybook copy-paste works
+   without rewriting tenant markup. Audit ref: DS-N3. */
 .form-field {
   display: flex;
   flex-direction: column;
@@ -1541,6 +1549,44 @@ figcaption {
   font-size: var(--text-body-xs);
   color: var(--color-danger);
   font-weight: var(--font-weight-regular);
+}
+
+/* ── DS form-class aliases (Storybook copy-paste compatibility) ──────────
+   These rules let markup written against the canonical DS
+   `<form class="form"><div class="form__group">…</div></form>` pattern
+   render correctly without being rewritten. The DS architecture differs
+   (inner wrapper div + `space-y-2` for vertical rhythm vs. tenant's
+   outer flex column + `gap`), but the visual outcome is the same. New
+   tenant code should keep using `.form-field*` for consistency; this
+   block is a shim, not a recommended target. Audit ref: DS-N3. Source:
+   designsystem/css/components/form.postcss. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);              /* DS `space-y-6` ≈ 24 px */
+}
+.form__group {
+  /* DS marker class — no visual rule. Tenant analog: `.form-field`. */
+}
+.form__group__legend {
+  margin-bottom: var(--space-sm);    /* DS `mb-2` ≈ 8 px */
+}
+.form__group__input,
+.form__group__select {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);              /* DS `space-y-2` ≈ 8 px */
+}
+.form__group__radio {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);              /* DS `gap-2` */
+  margin-bottom: var(--space-sm);    /* DS `mb-2` */
+}
+label + .form__group__radio { margin-top: var(--space-sm); }   /* DS `label + & { mt-2 }` */
+.form__group__checkbox {
+  margin-bottom: var(--space-sm);    /* DS `mb-2` */
 }
 
 /* Legacy radio/checkbox group layout. Input rendering is handled by the
