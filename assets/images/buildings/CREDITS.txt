@@ -1,0 +1,66 @@
+Building photos — sources and licenses
+=======================================
+
+BLD-2010  Bundeshaus Nord, Bern
+  Source:  Wikimedia Commons — File:Bundeshaus Nord und Nationalbank in Bern.jpg
+  Author:  Brutusaurus
+  License: CC BY-SA 4.0  https://creativecommons.org/licenses/by-sa/4.0/
+  URL:     https://commons.wikimedia.org/wiki/File:Bundeshaus_Nord_und_Nationalbank_in_Bern.jpg
+  Modification: downscaled to 960 px width.
+
+BLD-2011  BAFU Hauptsitz, Worblentalstrasse 68, Ittigen
+  Source:  Wikimedia Commons — File:BAFU W068 Nordosten.jpg
+  Author:  A. Buser
+  License: CC BY-SA 3.0 CH  https://creativecommons.org/licenses/by-sa/3.0/ch/
+  URL:     https://commons.wikimedia.org/wiki/File:BAFU_W068_Nordosten.jpg
+  Modification: downscaled to 960 px width.
+
+BLD-2012  ARE Hauptsitz, Worblentalstrasse 66, Ittigen
+  Source:  Wikimedia Commons — File:ARE Westen.jpg
+  Author:  A. Buser
+  License: CC BY-SA 3.0 CH  https://creativecommons.org/licenses/by-sa/3.0/ch/
+  URL:     https://commons.wikimedia.org/wiki/File:ARE_Westen.jpg
+  Modification: downscaled to 960 px width.
+
+BLD-2013  BAV Hauptsitz, Mühlestrasse 6, Ittigen
+  Source:  Wikimedia Commons — File:BAV Westen.jpg
+  Author:  A. Buser
+  License: CC BY-SA 3.0 CH  https://creativecommons.org/licenses/by-sa/3.0/ch/
+  URL:     https://commons.wikimedia.org/wiki/File:BAV_Westen.jpg
+  Modification: downscaled to 960 px width.
+
+BLD-2014  BAZL Hauptsitz, Mühlestrasse 2, Ittigen
+  Source:  Wikimedia Commons — File:ASTRA BAZL BFE Nordwesten.jpg
+  Author:  A. Buser
+  License: CC BY-SA 3.0 CH  https://creativecommons.org/licenses/by-sa/3.0/ch/
+  URL:     https://commons.wikimedia.org/wiki/File:ASTRA_BAZL_BFE_Nordwesten.jpg
+  Modification: downscaled to 960 px width.
+  Note: The depicted building hosts ASTRA / BAZL / BFE on adjacent floors.
+
+BLD-2015  BFE Hauptsitz, Pulverstrasse 13, Ittigen
+  Source:  Wikimedia Commons — File:BFE Südosten.jpg
+  Author:  A. Buser
+  License: CC BY-SA 3.0 CH  https://creativecommons.org/licenses/by-sa/3.0/ch/
+  URL:     https://commons.wikimedia.org/wiki/File:BFE_S%C3%BCdosten.jpg
+  Modification: downscaled to 960 px width.
+
+BLD-2016  ASTRA Filiale Zofingen
+  Source:  Bundesamt für Strassen (ASTRA) — admin.ch
+  URL:     https://www.astra.admin.ch/astra/de/home/das-astra/kontakt/filialen/zofingen.html
+  License: Swiss federal administration imagery — see admin.ch terms of use.
+
+BLD-2017  BAKOM Hauptsitz, Zukunftstrasse 44, Biel/Bienne
+  Source:  Wikimedia Commons — File:Bundesamt fuer Kommunikation, Biel 03 09.jpg
+  License: CC BY-SA 3.0  https://creativecommons.org/licenses/by-sa/3.0/
+  URL:     https://commons.wikimedia.org/wiki/File:Bundesamt_fuer_Kommunikation,_Biel_03_09.jpg
+  Modification: downscaled to 960 px width.
+
+BLD-2018  MeteoSchweiz Operation Center 1, Flughafen Zürich
+  Source:  MeteoSchweiz — admin.ch
+  URL:     https://www.meteoswiss.admin.ch/about-us/our-history.html
+  License: Swiss federal administration imagery — see admin.ch terms of use.
+
+BLD-2019  MeteoSvizzera Centro Regionale Sud, Locarno-Monti
+  Source:  MeteoSvizzera — admin.ch (blog post "90 anni di meteo a Locarno-Monti")
+  URL:     https://www.meteosvizzera.admin.ch/chi-siamo/meteosvizzera-blog/it/2025/05/90-anni-locarno-monti.html
+  License: Swiss federal administration imagery — see admin.ch terms of use.

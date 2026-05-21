@@ -25,7 +25,7 @@
         },
         "egid": "100123456",
         "portfolioCategory": "Administration Class I",
-        "image": "https://images.unsplash.com/photo-1684599243896-1e084b386da8?w=400"
+        "image": "assets/images/buildings/BLD-2010.jpg"
       }
     },
     {
@@ -52,7 +52,7 @@
         },
         "egid": "100234567",
         "portfolioCategory": "Administration Class II",
-        "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400"
+        "image": "assets/images/buildings/BLD-2011.jpg"
       }
     },
     {
@@ -79,7 +79,7 @@
         },
         "egid": "100345678",
         "portfolioCategory": "Administration Class II",
-        "image": "https://images.unsplash.com/photo-1576731753569-3e93a228048c?w=400"
+        "image": "assets/images/buildings/BLD-2012.jpg"
       }
     },
     {
@@ -106,7 +106,7 @@
         },
         "egid": "100456789",
         "portfolioCategory": "Administration Class II",
-        "image": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400"
+        "image": "assets/images/buildings/BLD-2013.jpg"
       }
     },
     {
@@ -133,7 +133,7 @@
         },
         "egid": "100567890",
         "portfolioCategory": "Administration Class II",
-        "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400"
+        "image": "assets/images/buildings/BLD-2014.jpg"
       }
     },
     {
@@ -160,7 +160,7 @@
         },
         "egid": "100678901",
         "portfolioCategory": "Administration Class II",
-        "image": "https://images.unsplash.com/photo-1621831337128-35676ca30868?w=400"
+        "image": "assets/images/buildings/BLD-2015.jpg"
       }
     },
     {
@@ -187,7 +187,7 @@
         },
         "egid": "100789012",
         "portfolioCategory": "Administration Class III",
-        "image": "https://images.unsplash.com/photo-1470075801209-17f9ec0cada6?w=400"
+        "image": "assets/images/buildings/BLD-2016.jpg"
       }
     },
     {
@@ -214,7 +214,7 @@
         },
         "egid": "100890123",
         "portfolioCategory": "Administration Class II",
-        "image": "https://images.unsplash.com/photo-1600531529272-023c4b821f14?w=400"
+        "image": "assets/images/buildings/BLD-2017.jpg"
       }
     },
     {
@@ -241,7 +241,7 @@
         },
         "egid": "100901234",
         "portfolioCategory": "Administration Class III",
-        "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400"
+        "image": "assets/images/buildings/BLD-2018.jpg"
       }
     },
     {
@@ -268,7 +268,7 @@
         },
         "egid": "101012345",
         "portfolioCategory": "Administration Class III",
-        "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400"
+        "image": "assets/images/buildings/BLD-2019.jpg"
       }
     }
   ]

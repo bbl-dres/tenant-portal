@@ -91,12 +91,14 @@ export const DOC_TYPE_LABEL = {
 
 // Safety guard for interpolating an image URL into a CSS `url(...)`
 // expression inside an inline `style="background-image:..."` attribute.
-// Returns an empty string for anything that isn't an http(s) URL (broken
-// image, never a CSS-injection vector), and replaces single / double
-// quotes that would otherwise break out of the surrounding string.
+// Accepts http(s) URLs and same-origin paths under `assets/` (used for
+// bundled building photos in data/buildings.geojson + data/tenancies.json).
+// Rejects everything else so the result is never a CSS-injection vector,
+// and replaces single / double quotes that would otherwise break out of
+// the surrounding string.
 export function safeImageUrl(url) {
   if (typeof url !== 'string') return '';
-  if (!/^https?:\/\//i.test(url)) return '';
+  if (!/^(https?:\/\/|assets\/)/i.test(url)) return '';
   return url.replace(/['"\\]/g, c => encodeURIComponent(c));
 }
 

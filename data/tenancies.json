@@ -33,7 +33,7 @@
       "flm": "Tobias Spiess"
     },
     "openIssues": 0,
-    "image": "https://images.unsplash.com/photo-1684599243896-1e084b386da8?w=600"
+    "image": "assets/images/buildings/BLD-2010.jpg"
   },
   {
     "tenancyId": "T-2011-AA-01",
@@ -69,7 +69,7 @@
       "flm": "Tobias Spiess"
     },
     "openIssues": 3,
-    "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600"
+    "image": "assets/images/buildings/BLD-2011.jpg"
   },
   {
     "tenancyId": "T-2012-AA-01",
@@ -105,7 +105,7 @@
       "flm": "Yvonne Egger"
     },
     "openIssues": 0,
-    "image": "https://images.unsplash.com/photo-1576731753569-3e93a228048c?w=600"
+    "image": "assets/images/buildings/BLD-2012.jpg"
   },
   {
     "tenancyId": "T-2013-AA-01",
@@ -141,7 +141,7 @@
       "flm": "Tobias Spiess"
     },
     "openIssues": 1,
-    "image": "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600"
+    "image": "assets/images/buildings/BLD-2013.jpg"
   },
   {
     "tenancyId": "T-2014-AA-01",
@@ -177,7 +177,7 @@
       "flm": "Yvonne Egger"
     },
     "openIssues": 0,
-    "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=600"
+    "image": "assets/images/buildings/BLD-2014.jpg"
   },
   {
     "tenancyId": "T-2015-AA-01",
@@ -213,7 +213,7 @@
       "flm": "Andrea Käser"
     },
     "openIssues": 1,
-    "image": "https://images.unsplash.com/photo-1621831337128-35676ca30868?w=600"
+    "image": "assets/images/buildings/BLD-2015.jpg"
   },
   {
     "tenancyId": "T-2016-AA-01",
@@ -249,7 +249,7 @@
       "flm": "Andrea Käser"
     },
     "openIssues": 0,
-    "image": "https://images.unsplash.com/photo-1470075801209-17f9ec0cada6?w=600"
+    "image": "assets/images/buildings/BLD-2016.jpg"
   },
   {
     "tenancyId": "T-2017-AA-01",
@@ -285,7 +285,7 @@
       "flm": "Tobias Spiess"
     },
     "openIssues": 2,
-    "image": "https://images.unsplash.com/photo-1600531529272-023c4b821f14?w=600"
+    "image": "assets/images/buildings/BLD-2017.jpg"
   },
   {
     "tenancyId": "T-2018-AA-01",
@@ -321,7 +321,7 @@
       "flm": "Andrea Käser"
     },
     "openIssues": 1,
-    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600"
+    "image": "assets/images/buildings/BLD-2018.jpg"
   },
   {
     "tenancyId": "T-2019-AA-01",
@@ -357,6 +357,6 @@
       "flm": "Yvonne Egger"
     },
     "openIssues": 0,
-    "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600"
+    "image": "assets/images/buildings/BLD-2019.jpg"
   }
 ]
