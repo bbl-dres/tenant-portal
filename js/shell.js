@@ -100,11 +100,11 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
   // Plain white text per CD pattern — not a red filled button.
   const authPill = state.user
     ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="Profil von ${state.user.name}">
-         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+         ${icon('user')}
          ${state.user.name}
        </a>`
     : `<button class="top-bar__link top-bar__link--user" type="button" onclick="window.portal.login()">
-         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+         ${icon('user')}
          Anmelden
        </button>`;
 
@@ -153,7 +153,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                 aria-label="Menü schliessen"
                 onclick="window.portal.toggleNavMenu('${item.id}', false)">
           <span>Schliessen</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          ${icon('x')}
         </button>
         <h2 class="nav-menu__heading">${item.label}</h2>
         <ul class="nav-menu__list">
@@ -247,7 +247,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                         aria-expanded="false" aria-controls="headerSearchForm"
                         onclick="window.portal.toggleSearch(true)">
                   <span>Suche</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                  ${icon('search')}
                 </button>
                 <form class="header-search__form" id="headerSearchForm" role="search" aria-label="Portal durchsuchen"
                       onsubmit="event.preventDefault(); window.portal.submitSearch(this);">
@@ -257,7 +257,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                          autocomplete="off"
                          onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
                   <button class="header-search__submit" type="submit" aria-label="Suchen">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                    ${icon('search')}
                   </button>
                 </form>
               </div>
@@ -302,7 +302,7 @@ export function renderFooter() {
     <footer class="app-footer" role="contentinfo">
       <button class="app-footer__top-btn" type="button" aria-label="Zum Seitenanfang"
               onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg>
+        ${icon('chevronUp')}
       </button>
       <div class="footer-information">
         <div class="footer-information__inner">
@@ -437,7 +437,7 @@ export function renderShareBar({ backTo = null, backLabel = null } = {}) {
   // already shows it visually.
   const back = backTo
     ? `<a class="btn btn--outline btn--back" href="${backTo}" aria-label="Zurück${backLabel ? ` zu ${backLabel}` : ''}">
-         <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+         ${icon('chevronLeft')}
          <span>Zurück</span>
        </a>`
     : '';
@@ -447,12 +447,12 @@ export function renderShareBar({ backTo = null, backLabel = null } = {}) {
       <div class="share-bar__actions">
         <button class="share-bar__btn" type="button" aria-label="Link kopieren"
                 onclick="window.portal.copyShareLink()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          ${icon('share')}
           <span>Teilen</span>
         </button>
         <button class="share-bar__btn" type="button" aria-label="Seite drucken"
                 onclick="window.print()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          ${icon('printer')}
           <span>Drucken</span>
         </button>
       </div>

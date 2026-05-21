@@ -1340,9 +1340,12 @@ figcaption {
    inline-icon doesn't bump into the text on smaller pills. */
 .pipeline__step .inline-icon { margin-right: 4px; }
 
-/* Inline icon — used by P.icon() helper. Vertically centres a 16px SVG
-   alongside body-sm text and adds a small trailing gap. Stroke colour is
-   inherited from the parent via currentColor. */
+/* Inline icon — used by P.icon() helper, which emits
+   `<svg class="inline-icon"><use href="assets/icons.svg#icon-name"/></svg>`.
+   Vertically centres a 16 px sprite glyph alongside body-sm text and adds a
+   small trailing gap. Colour inherits from the parent via `currentColor`
+   (every symbol in the sprite uses `fill="currentColor"` or
+   `stroke="currentColor"` so glyphs match the surrounding text). */
 .inline-icon {
   display: inline-block;
   width: 16px;
@@ -1350,6 +1353,18 @@ figcaption {
   vertical-align: -3px;
   margin-right: var(--space-xs);
   flex-shrink: 0;
+  color: currentColor;
+}
+/* Per-component size overrides for sprite-rendered icons that previously
+   set an explicit `width="…"` attribute on the inlined SVG. */
+.btn--back .inline-icon       { width: 18px; height: 18px; margin-right: 0; }
+.contact-block__link .inline-icon { width: 18px; height: 18px; color: var(--color-primary); }
+.contact-block__link:hover .inline-icon { color: var(--color-primary-hover); }
+.filter-pill__remove-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  color: currentColor;
 }
 
 /* ── STEP INDICATOR (wizard) ──────────────────────────────────────────────
@@ -1357,29 +1372,27 @@ figcaption {
    with gray-400 outline; active filled gray-400; confirmed filled green-500
    with a checkmark. Wraps with .step-indicator__label below each dot, plus
    a thin connector line between consecutive dots. */
+/* Single-row layout: each item is a flex row of [circle][label]. Items
+   sit on a wrap-flex parent so they collapse to one-per-row on narrow
+   screens. No connectors — DS canonical pattern doesn't ship them, and
+   the numbered circles plus bold-active label already communicate the
+   user's position in the flow. */
 .step-indicator {
   display: flex;
-  align-items: flex-start;
-  gap: 0;
-  margin-block: var(--space-md);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-lg);
+  margin-block: var(--space-lg) var(--space-xl);
   padding: 0;
   list-style: none;
-  flex-wrap: wrap;
-  row-gap: var(--space-md);
 }
 .step-indicator__item {
-  flex: 1 1 0;
-  min-width: 120px;
-  display: grid;
-  grid-template-columns: 36px 1fr;
-  grid-template-rows: 36px auto;
+  display: inline-flex;
   align-items: center;
-  column-gap: var(--space-sm);
-  position: relative;
+  gap: var(--space-sm);
+  min-width: 0;
 }
 .step-indicator__step {
-  grid-column: 1;
-  grid-row: 1;
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
@@ -1409,28 +1422,17 @@ figcaption {
 }
 .step-indicator__step--confirmed svg { width: 18px; height: 18px; }
 .step-indicator__label {
-  grid-column: 2;
-  grid-row: 1;
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   line-height: var(--line-height-snug);
+  white-space: nowrap;
 }
 .step-indicator__item[aria-current="step"] .step-indicator__label {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-bold);
 }
-.step-indicator__connector {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  height: 2px;
-  background: var(--color-gray-300);
-  margin-top: var(--space-xs);
-  margin-right: var(--space-sm);
-}
-.step-indicator__connector--confirmed { background: var(--color-success-bright); }
 @media (max-width: 640px) {
-  .step-indicator__item { min-width: 100%; }
-  .step-indicator__connector { display: none; }
+  .step-indicator__item { width: 100%; }
 }
 
 /* ── FORM FIELDS ──────────────────────────────────────────────────────────
@@ -3210,12 +3212,10 @@ body.body--mobile-menu-is-open {
   font-weight: var(--font-weight-regular);
 }
 .contact-block__link:hover { color: var(--color-primary-hover); text-decoration: underline; }
-.contact-block__icon {
-  width: 18px;
-  height: 18px;
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
+/* `.contact-block__icon` retired — icons now come from the sprite via
+   `icon('phone' | 'envelope' | 'globe')` and inherit sizing from the
+   `.contact-block__link .inline-icon` override declared with the rest
+   of the inline-icon rules above. */
 .contact-block__lead { margin: 0 0 var(--space-xs); }
 /* Secondary descriptive line under a `.contact-block__lead`. The `--last`
    variant drops the bottom margin for the trailing email line. */
@@ -3871,20 +3871,12 @@ body.body--mobile-menu-is-open {
 /* The legacy radio-group/checkbox-group descendants inside a wizard
    section also inherit the section's flex gap. */
 .wizard__section .form-field { gap: var(--space-xs); }
-.wizard__section--required-incomplete h3::after {
-  content: "Pflicht fehlt";
-  font-size: var(--text-body-xs);
-  background: var(--color-warning-light);
-  color: var(--color-badge-yellow-text);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-weight: normal;
-}
-.wizard__section--complete h3::after {
-  content: "✓";
-  color: var(--color-success);
-  font-weight: bold;
-}
+/* `.wizard__section--required-incomplete` / `.wizard__section--complete`
+   modifiers were declared here but never applied in markup — and the
+   `--complete` rule used a Unicode `✓` content glyph that renders
+   inconsistently across system fonts. Removed; if section-level
+   completion badges are wanted in future, reach for `.badge--warning`
+   / `.badge--success` in the markup instead of CSS-content. */
 
 /* Wizard step-2 used to be a two-column grid that cramped the radios on
    small laptops. Now always stacks — kept the class as a no-op so any

@@ -160,40 +160,34 @@ export function safeRemove(key) {
 
 
 // ── ICON SET ───────────────────────────────────────────────────────────────
-// Inline-SVG icon set. Single source for the small handful of icons used
-// across views — replaces ad-hoc emoji glyphs (📄/🎥/📎/🛠/…) so the UI
-// doesn't depend on the user's emoji font for visual chrome.
+// All portal icons live in a single sprite at `assets/icons.svg` — each
+// glyph exposed as a `<symbol id="icon-name">`. Consumers reference them
+// via `<svg><use href="assets/icons.svg#icon-name"/></svg>`. The sprite
+// is mostly vendored from `swiss/designsystem` (filled-glyph CD style,
+// MIT) with a handful of portal-drawn metaphors for icons DS doesn't
+// ship (attachment / shield / ruler / commentDots / halfCircle / square
+// / return). Audit reference: DS-T1.
+//
+// Sizing comes from `.inline-icon` (16 × 16 by default). Colour inherits
+// via `currentColor` on every path inside the symbol.
+//
+// The exported allow-list `ICONS` doubles as the sprite-ID inventory so
+// `icon(name)` can fall through silently for an unknown name (returns
+// '') and so callers can `Object.keys(ICONS)` in tests / docs.
 export const ICONS = {
-  document:   '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-  video:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
-  attachment: '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 12-8.5 8.5a5 5 0 0 1-7-7L14 5a3.5 3.5 0 1 1 5 5l-8.5 8.5a2 2 0 0 1-3-3l7.5-7.5"/></svg>',
-  shield:     '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-  ruler:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0L2.7 16.7a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/></svg>',
-  tool:       '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg>',
-  truck:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
-  sparkles:   '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 1.7L12 19l-1.9-6.3L4 11l6.1-2.2z"/></svg>',
-  download:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-  grid:       '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
-  list:       '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
-  map:        '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
-  search:     '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>',
-  chevronLeft: '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>',
-  chevronRight:'<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>',
-  x:          '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-  maximize:   '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
-  // Status glyphs — replace the previous text-character glyphs (✓ ✕ ◐ ◼ ❌ ⚠ ↻ 💬)
-  // in pipeline / wizard summary / detail cards. currentColor lets each
-  // icon inherit the colour of its containing pill/badge.
-  check:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>',
-  xMark:      '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-  halfCircle: '<svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>',
-  square:     '<svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" fill="currentColor"/></svg>',
-  alertTriangle: '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-  xCircle:    '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
-  refresh:    '<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
-  commentDots:'<svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+  document: 1, video: 1, attachment: 1, shield: 1, ruler: 1, tool: 1,
+  truck: 1, sparkles: 1, download: 1, grid: 1, list: 1, map: 1,
+  mapMarker: 1, search: 1, chevronLeft: 1, chevronRight: 1,
+  chevronUp: 1, chevronDown: 1, x: 1, xMark: 1, maximize: 1, check: 1,
+  halfCircle: 1, square: 1, alertTriangle: 1, xCircle: 1, refresh: 1,
+  commentDots: 1, user: 1, phone: 1, envelope: 1, globe: 1, share: 1,
+  printer: 1, external: 1, info: 1, help: 1, return: 1,
 };
-export function icon(name) { return ICONS[name] || ''; }
+export function icon(name) {
+  if (!ICONS[name]) return '';
+  return `<svg class="inline-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-${name}"/></svg>`;
+}
+
 
 
 // ── STATUS BADGE ───────────────────────────────────────────────────────────
@@ -316,10 +310,13 @@ export function renderPipeline(application) {
 }
 
 // Step indicator — mirrors designsystem css/components/step-indicator.postcss:
-// 36px circles, gray-400 outline → bg-gray-400 active → bg-green-500 confirmed.
-// Connectors between dots make the progression readable on wide screens.
+// 36 px circles, gray-400 outline → bg-gray-400 active → bg-green-500 confirmed.
+// DS canonical ships no connectors; the previous version did but placed them
+// on grid row 2 of each item, where they rendered as a stray "bottom border"
+// under every step instead of a horizontal line between dots. Removed —
+// numbered circles + bold label on the active step already communicate
+// progression clearly.
 export function renderStepIndicator(currentStep, steps) {
-  const lastIdx = steps.length - 1;
   return `
     <ol class="step-indicator" aria-label="Schritt-Anzeige">
       ${steps.map((label, i) => {
@@ -334,15 +331,11 @@ export function renderStepIndicator(currentStep, steps) {
         const dotInner = confirmed
           ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
           : String(n);
-        const connector = i < lastIdx
-          ? `<span class="step-indicator__connector ${confirmed ? 'step-indicator__connector--confirmed' : ''}" aria-hidden="true"></span>`
-          : '';
         const ariaCurrent = active ? ' aria-current="step"' : '';
         return `
           <li class="step-indicator__item"${ariaCurrent}>
             <span class="${stepCls}">${dotInner}</span>
             <span class="step-indicator__label">${label}</span>
-            ${connector}
           </li>
         `;
       }).join('')}
@@ -386,7 +379,7 @@ export function toast(message, variant = '') {
   close.className = 'toast__close';
   close.type = 'button';
   close.setAttribute('aria-label', 'Benachrichtigung schliessen');
-  close.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  close.innerHTML = icon('x');
   close.addEventListener('click', () => el.remove());
 
   el.append(msg, close);
@@ -452,7 +445,7 @@ export function modal({ title, body, actions = [], onClose = null, size = '' }) 
       <div class="modal__header">
         <h2 class="modal__title" id="${titleId}">${title}</h2>
         <button class="modal__close" type="button" aria-label="Schliessen">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          ${icon('x')}
         </button>
       </div>
       <div class="modal__body">${body}</div>

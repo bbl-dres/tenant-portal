@@ -563,7 +563,7 @@ function renderInfoPage() {
                   <a class="page-with-toc__toc-link" href="#${it.id}"
                      onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
                     <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
-                    <svg class="page-with-toc__toc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
+                    <svg class="page-with-toc__toc-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-return"/></svg>
                   </a>
                 </li>
               `).join('')}
@@ -585,19 +585,19 @@ function renderInfoPage() {
             </p>
             <p class="contact-block__row">
               <a class="contact-block__link" href="tel:+41584655000">
-                <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                ${P.icon('phone')}
                 +41 58 465 50 00
               </a>
             </p>
             <p class="contact-block__row">
               <a class="contact-block__link" href="mailto:info@bbl.admin.ch">
-                <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                ${P.icon('envelope')}
                 info@bbl.admin.ch
               </a>
             </p>
             <p class="contact-block__row">
               <a class="contact-block__link" href="https://www.bbl.admin.ch" target="_blank" rel="noopener">
-                <svg class="contact-block__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                ${P.icon('globe')}
                 www.bbl.admin.ch
               </a>
             </p>
@@ -687,14 +687,14 @@ function renderNewsSection(items = P.state.news, perPage = 3) {
         <div class="news-section__viewport">
           <button class="news-section__nav news-section__nav--prev" type="button" aria-label="Vorherige Nachrichten"
                   onclick="window.t3lite.newsPage(${page - 1})" ${prevDisabled ? 'disabled' : ''}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            ${P.icon('chevronLeft')}
           </button>
           <div class="news-section__track" id="newsTrack">
             ${visible.map(newsCard).join('')}
           </div>
           <button class="news-section__nav news-section__nav--next" type="button" aria-label="Nächste Nachrichten"
                   onclick="window.t3lite.newsPage(${page + 1})" ${nextDisabled ? 'disabled' : ''}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            ${P.icon('chevronRight')}
           </button>
         </div>
         <div class="news-section__footer">
@@ -1805,7 +1805,7 @@ function renderPropertiesFilterPills({ view, query, category }) {
           <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
           <a class="filter-pill__remove" href="${hrefWithout(f.key)}"
              aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-x"/></svg>
           </a>
         </span>
       `).join('')}
@@ -2912,7 +2912,7 @@ function renderDownloads() {
         <button class="filter-pill__remove" type="button"
                 aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
                 data-clear="${f.key}">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg class="filter-pill__remove-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#icon-x"/></svg>
         </button>
       </span>
     `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurücksetzen</button>`;
