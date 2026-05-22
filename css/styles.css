@@ -3920,7 +3920,7 @@ body.body--mobile-menu-is-open {
    edges), so contain-fit still leaves visible white around the shield.
    Solution: wrapper element (`.video-thumb__logo`) is the round white
    surface; inner `<img>` (`.video-thumb__logo-inner`) is sized
-   explicitly to 88 % so the shield path itself fills the circle's
+   explicitly to 74 % so the shield path itself fits inside the circle's
    visible area with a thin white ring — same proportions as the
    federal channel-avatar reference. */
 .video-thumb__logo {
@@ -3937,14 +3937,9 @@ body.body--mobile-menu-is-open {
 }
 @media (min-width: 1024px) { .video-thumb__logo { width: 40px; height: 40px; } }
 .video-thumb__logo-inner {
-  /* Height 92 % so the shield's pointed bottom + curved top sit
-     close to the circle's edges (the official admin.ch YouTube
-     channel-avatar ratio). Width is auto so the shield's aspect
-     ratio (40 × 44) is preserved — at this height the shield
-     renders ~33 px wide in a 40 px circle, leaving a thin white
-     ring on the sides. */
+  /* Inset the shield so the circular mask does not crop it. */
   width: auto;
-  height: 92%;
+  height: 74%;
   display: block;
   flex-shrink: 0;
 }
