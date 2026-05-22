@@ -183,6 +183,7 @@ export const ICONS = {
   search: 'Search', user: 'User', help: 'Help', info: 'Info',
   share: 'Share', printer: 'Printer', external: 'External',
   download: 'Download', maximize: 'Expand', refresh: 'Refresh',
+  spinner: 'Spinner',
   // contact
   phone: 'Phone', envelope: 'Envelope', globe: 'Globe',
   // controls

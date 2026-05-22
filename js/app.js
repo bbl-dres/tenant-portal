@@ -1913,7 +1913,9 @@ function renderListView(items) {
 function renderMapView(/* items */) {
   return `
     <div class="property-map">
-      <div class="property-map__canvas" id="propertiesMap" role="region" aria-label="Karte der Liegenschaften"></div>
+      <div class="property-map__canvas map-surface" id="propertiesMap" role="region" aria-label="Karte der Liegenschaften">
+        ${renderMapLoading('Karte wird geladen')}
+      </div>
     </div>
   `;
 }
@@ -1986,6 +1988,17 @@ function wirePaginationInput(inputId) {
 let _maplibreReady = null;
 let _propertiesMap = null;
 let _propertiesMarkers = [];
+function renderMapLoading(label = 'Karte wird geladen') {
+  return `
+    <div class="map-loading" role="status" aria-live="polite">
+      ${P.icon('spinner', 'map-loading__icon')}
+      <span class="sr-only">${label}</span>
+    </div>
+  `;
+}
+function clearMapLoading(container) {
+  container?.querySelector('.map-loading')?.remove();
+}
 function loadMapLibre() {
   if (_maplibreReady) return _maplibreReady;
   _maplibreReady = new Promise((resolve, reject) => {
@@ -2016,6 +2029,7 @@ function initPropertiesMap(items) {
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     _propertiesMap = map;
     map.on('load', () => {
+      clearMapLoading(container);
       const bounds = new maplibregl.LngLatBounds();
       items.forEach(t => {
         if (typeof t.lat !== 'number' || typeof t.lng !== 'number') return;
@@ -2300,7 +2314,9 @@ async function renderPropertyDetail({ id }) {
 
             <section class="property-section">
               <h2 class="h2 section-heading">Standort</h2>
-              <div id="propertyLocationMap" class="property-location-map" aria-label="Karte: Standort der Liegenschaft"></div>
+              <div id="propertyLocationMap" class="property-location-map map-surface" aria-label="Karte: Standort der Liegenschaft">
+                ${renderMapLoading('Standortkarte wird geladen')}
+              </div>
               <p class="property-location-meta">${P.escapeHtml(t.address)}${typeof t.lat === 'number' && typeof t.lng === 'number' ? ` · ${t.lat.toFixed(4)}°N, ${t.lng.toFixed(4)}°E` : ''}</p>
             </section>
           </div>
@@ -2364,6 +2380,7 @@ function initPropertyDetailMap(t) {
     _propertyDetailMap = map;
 
     map.on('load', () => {
+      clearMapLoading(container);
       const el = document.createElement('div');
       el.className = 'property-marker property-marker--static';
       el.setAttribute('aria-label', t.buildingName);
@@ -2625,7 +2642,9 @@ async function renderFloorDetail({ id, floorSlug }) {
         </div>
 
         <div class="floor-viewer">
-          <div id="floorCanvas" class="floor-canvas" aria-label="Interaktiver Grundriss"></div>
+          <div id="floorCanvas" class="floor-canvas map-surface" aria-label="Interaktiver Grundriss">
+            ${renderMapLoading('Grundriss wird geladen')}
+          </div>
           <ul class="floor-legend" id="floorLegend" aria-label="Legende"></ul>
         </div>
       </div>
@@ -2843,6 +2862,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     }
 
     map.on('load', () => {
+      clearMapLoading(container);
       // Strip every layer that came from positron so the basemap doesn't
       // bleed under the floor plan. We could hide them individually but a
       // sweep keeps this resilient to upstream style changes — we want
