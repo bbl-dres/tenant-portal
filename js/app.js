@@ -37,7 +37,7 @@ renderShortcutOverlay, wireGlobalShortcuts,
 import { state, loadData, loadSpatialData } from './state.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
-  toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, submitSearch, toggleSearch, toggleBurger,
+  toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, acceptCookieConsent, submitSearch, toggleSearch, toggleBurger,
   shell, publicNavItems, authNavItems, SERVICES_MENU,
 } from './shell.js';
 import {
@@ -151,7 +151,7 @@ window.portal = {
   renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
-  toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang,
+  toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent,
   openRoleMenu, login, logout,
   statusBadge,
   formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
@@ -972,6 +972,7 @@ function renderSubmitterHome() {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
+        <h1 class="sr-only">Startseite Mieterportal</h1>
         <p class="greeting-strip">
           ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
           ${userApps.length
@@ -1442,7 +1443,7 @@ function renderQueue() {
           <tbody>
             ${pageItems.map(a => `
               <tr data-app-id="${a.id}">
-                <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}"></td>
+                <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
                 <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
                 <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
                 <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(a.address)}</td>
@@ -1783,6 +1784,7 @@ function propertiesToolbar({ view, query, category, categories }) {
       <div class="property-toolbar__search">
         ${P.icon('search')}
         <input type="search" id="propertiesSearch" class="input property-toolbar__input"
+               aria-label="Liegenschaften suchen"
                placeholder="Suche Objekt, Adresse, SAP-WE, EGID, VE …"
                value="${P.escapeHtml(query)}" autocomplete="off">
         ${query ? `<button type="button" class="property-toolbar__clear" aria-label="Suche löschen" data-action="clear-search">${P.icon('x')}</button>` : ''}
@@ -2083,7 +2085,7 @@ function propertyCard(t, index = 99) {
       </div>
       <div class="card--property__body">
         <p class="card--property__sap">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
-        <h3 class="card--property__title">${P.escapeHtml(t.buildingName)}</h3>
+        <h2 class="card--property__title">${P.escapeHtml(t.buildingName)}</h2>
         <p class="card--property__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
         <div class="card--property__meta">
           <span>${t.hnf2} m² HNF2</span>
@@ -2428,7 +2430,48 @@ const USETYPE_GROUP = {
   Storage: 'special', Archive: 'special', Lab: 'special',
 };
 const USETYPE_GROUP_LABEL = { work: 'Arbeitsplätze', collab: 'Zusammenarbeit', infra: 'Infrastruktur', special: 'Sonderräume' };
-const USETYPE_GROUP_FILL  = { work: '#BFDBFE',       collab: '#FDE68A',         infra: '#E5E7EB',        special: '#DDD6FE' };
+const CD_COLOR_FALLBACKS = {
+  '--color-floor-work': '#BFDBFE',
+  '--color-floor-collab': '#FDE68A',
+  '--color-floor-infra': '#E5E7EB',
+  '--color-floor-special': '#DDD6FE',
+  '--color-floor-work-strong': '#93C5FD',
+  '--color-floor-collab-strong': '#FCD34D',
+  '--color-floor-infra-strong': '#D1D5DB',
+  '--color-floor-special-strong': '#C4B5FD',
+  '--color-floor-tenant-a': '#BFDBFE',
+  '--color-floor-tenant-b': '#FCD34D',
+  '--color-floor-tenant-c': '#DDD6FE',
+  '--color-floor-tenant-d': '#FDA4AF',
+  '--color-floor-tenant-e': '#86EFAC',
+  '--color-floor-tenant-f': '#7DD3FC',
+  '--color-floor-unassigned': '#F3F4F6',
+  '--color-floor-invalid': '#FEE2E2',
+  '--color-bg-canvas': '#FAFAFA',
+  '--color-map-outline': '#6B7280',
+  '--color-map-selection': '#801519',
+  '--color-map-text': '#1F2937',
+  '--color-white': '#FFFFFF',
+};
+
+function cdColor(tokenName, seen = new Set()) {
+  const styles = getComputedStyle(document.documentElement);
+  let value = styles.getPropertyValue(tokenName).trim();
+  if (!value) return CD_COLOR_FALLBACKS[tokenName] || CD_COLOR_FALLBACKS['--color-map-text'];
+  const varMatch = value.match(/^var\((--[^),\s]+)/);
+  if (varMatch && !seen.has(varMatch[1])) {
+    seen.add(varMatch[1]);
+    return cdColor(varMatch[1], seen);
+  }
+  return value;
+}
+
+const USETYPE_GROUP_FILL = {
+  work: cdColor('--color-floor-work'),
+  collab: cdColor('--color-floor-collab'),
+  infra: cdColor('--color-floor-infra'),
+  special: cdColor('--color-floor-special')
+};
 
 // SIA 416 categorisation — `siaCategory` is now a first-class field on
 // each Space (see docs/DATAMODEL.md § 3.3.1). Five buckets: HNF
@@ -2443,32 +2486,45 @@ const USETYPE_GROUP_FILL  = { work: '#BFDBFE',       collab: '#FDE68A',         
 // only — five distinct Tailwind-200/300 tones at similar luminance,
 // no semantic loading. Swap them freely.
 const SIA_LABEL_DE = { HNF: 'Hauptnutzfläche (HNF)', NNF: 'Nebennutzfläche (NNF)', VF: 'Verkehrsfläche (VF)', FF: 'Funktionsfläche (FF)', TF: 'Technikfläche (TF)' };
-const SIA_FILL     = { HNF: '#BFDBFE',                 NNF: '#DDD6FE',                 VF: '#E5E7EB',           FF: '#FDE68A',           TF: '#FCD34D' };
+const SIA_FILL = {
+  HNF: cdColor('--color-floor-work'),
+  NNF: cdColor('--color-floor-special'),
+  VF: cdColor('--color-floor-infra'),
+  FF: cdColor('--color-floor-collab'),
+  TF: cdColor('--color-floor-collab-strong')
+};
 
 // Tenant palette — 6 distinct hues assigned at floor-load time to the
 // unique `occupierVe` values present on this floor. Wraps if there are
 // more than 6 VEs (rare; federal departments per floor are ~3-5).
-const TENANT_PALETTE = ['#BFDBFE', '#FCD34D', '#DDD6FE', '#FDA4AF', '#86EFAC', '#7DD3FC'];
-const TENANT_UNASSIGNED_FILL = '#F3F4F6';   // gray-100 for rooms with null occupierVe
+const TENANT_PALETTE = [
+  cdColor('--color-floor-tenant-a'),
+  cdColor('--color-floor-tenant-b'),
+  cdColor('--color-floor-tenant-c'),
+  cdColor('--color-floor-tenant-d'),
+  cdColor('--color-floor-tenant-e'),
+  cdColor('--color-floor-tenant-f')
+];
+const TENANT_UNASSIGNED_FILL = cdColor('--color-floor-unassigned');   // gray-100 for rooms with null occupierVe
 
 const USETYPE_FILL = {
-  Office:        '#bfdbfe',
-  OpenSpace:     '#bfdbfe',
-  FocusRoom:     '#93c5fd',
-  Reception:     '#bfdbfe',
-  MeetingRoom:   '#fde68a',
-  TrainingRoom:  '#fde68a',
-  Lounge:        '#fde68a',
-  Cafeteria:     '#fcd34d',
-  Corridor:      '#e5e7eb',
-  WC:            '#d1d5db',
-  Kitchenette:   '#e5e7eb',
-  PrintRoom:     '#e5e7eb',
-  Cloakroom:     '#e5e7eb',
-  Storage:       '#ddd6fe',
-  Archive:       '#c4b5fd',
-  TechnicalRoom: '#d1d5db',
-  Lab:           '#ddd6fe',
+  Office:        cdColor('--color-floor-work'),
+  OpenSpace:     cdColor('--color-floor-work'),
+  FocusRoom:     cdColor('--color-floor-work-strong'),
+  Reception:     cdColor('--color-floor-work'),
+  MeetingRoom:   cdColor('--color-floor-collab'),
+  TrainingRoom:  cdColor('--color-floor-collab'),
+  Lounge:        cdColor('--color-floor-collab'),
+  Cafeteria:     cdColor('--color-floor-collab-strong'),
+  Corridor:      cdColor('--color-floor-infra'),
+  WC:            cdColor('--color-floor-infra-strong'),
+  Kitchenette:   cdColor('--color-floor-infra'),
+  PrintRoom:     cdColor('--color-floor-infra'),
+  Cloakroom:     cdColor('--color-floor-infra'),
+  Storage:       cdColor('--color-floor-special'),
+  Archive:       cdColor('--color-floor-special-strong'),
+  TechnicalRoom: cdColor('--color-floor-infra-strong'),
+  Lab:           cdColor('--color-floor-special'),
 };
 
 async function renderFloorDetail({ id, floorSlug }) {
@@ -2645,8 +2701,8 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
           // these via `['get', 'fillUseType' | 'fillSia' | 'fillTenant']`.
           // `none` mode short-circuits to the canvas background colour
           // — handled in the change-listener, no fillNone property needed.
-          fillUseType: USETYPE_FILL[s.useType] || '#FF66CC',
-          fillSia:     SIA_FILL[siaCat]        || '#FF66CC',
+          fillUseType: USETYPE_FILL[s.useType] || cdColor('--color-floor-invalid'),
+          fillSia:     SIA_FILL[siaCat]        || cdColor('--color-floor-invalid'),
           fillTenant:  s.occupierVe ? tenantColors[s.occupierVe] : TENANT_UNASSIGNED_FILL,
         }
       };
@@ -2661,7 +2717,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     let activeMode = 'none';
     // `none` returns a flat white — rooms read as an architectural-style
     // line drawing against the canvas bg, no semantic colour cues.
-    const NONE_FILL = '#FFFFFF';
+    const NONE_FILL = cdColor('--color-white');
     const fillExprFor = (mode) => {
       if (mode === 'none') return NONE_FILL;
       return ['get',
@@ -2792,7 +2848,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       // sweep keeps this resilient to upstream style changes — we want
       // only our floor + room polygons visible above a clean background.
       map.getStyle().layers.forEach(l => { try { map.removeLayer(l.id); } catch {} });
-      map.addLayer({ id: 'floor-bg', type: 'background', paint: { 'background-color': '#fafafa' } });
+      map.addLayer({ id: 'floor-bg', type: 'background', paint: { 'background-color': cdColor('--color-bg-canvas') } });
 
       map.addSource('floor',  { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
@@ -2820,7 +2876,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         id: 'rooms-outline',
         type: 'line',
         source: 'spaces',
-        paint: { 'line-color': '#6b7280', 'line-width': 1.25 }
+        paint: { 'line-color': cdColor('--color-map-outline'), 'line-width': 1.25 }
       });
 
       // Selection outline — filter set on click. Starts hidden.
@@ -2829,7 +2885,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         type: 'line',
         source: 'spaces',
         filter: ['==', ['get', 'spaceId'], '__none__'],
-        paint: { 'line-color': '#7f1d1d', 'line-width': 4 }
+        paint: { 'line-color': cdColor('--color-map-selection'), 'line-width': 4 }
       });
 
       // Floor outline — dark, on top.
@@ -2837,7 +2893,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         id: 'floor-outline',
         type: 'line',
         source: 'floor',
-        paint: { 'line-color': '#1F2937', 'line-width': 2 }
+        paint: { 'line-color': cdColor('--color-map-text'), 'line-width': 2 }
       });
 
       // Room labels — three lines: room number, German useType label, area.
@@ -2860,8 +2916,8 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
           'text-ignore-placement': false,
         },
         paint: {
-          'text-color': '#1F2937',
-          'text-halo-color': '#ffffff',
+          'text-color': cdColor('--color-map-text'),
+          'text-halo-color': cdColor('--color-white'),
           'text-halo-width': 1.2
         }
       });
@@ -3329,8 +3385,9 @@ function renderProfile() {
           <fieldset class="option-group">
             <legend class="sr-only">Sprache</legend>
             <label class="option-group__item"><input type="radio" name="lang" checked> <span>Deutsch</span></label>
-            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Français (Demo)</span></label>
-            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Italiano (Demo)</span></label>
+            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Français (noch nicht verfügbar)</span></label>
+            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Italiano (noch nicht verfügbar)</span></label>
+            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Rumantsch (nicht vorgesehen)</span></label>
           </fieldset>
         </div>
 

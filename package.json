@@ -7,6 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
+    "a11y:responsive": "node scripts/check-a11y-responsive.mjs",
+    "cd:check": "node scripts/check-cd-tokens.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

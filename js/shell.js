@@ -30,7 +30,37 @@
    ========================================================================== */
 
 import { state } from './state.js';
-import { toast, icon, renderShortcutOverlay } from './lib.js';
+import { toast, icon, renderShortcutOverlay, safeGet, safeSet } from './lib.js';
+
+const CONSENT_KEY = 'mp-cookie-consent';
+
+function renderConsentBanner() {
+  if (safeGet(CONSENT_KEY)) return '';
+  return `
+    <aside class="notification-banner notification-banner--info cookie-banner" id="cookieBanner" role="region" aria-label="Datenschutz und Cookies">
+      <span class="notification-banner__icon" aria-hidden="true">${icon('infoCircle')}</span>
+      <div class="notification-banner__wrapper">
+        <p class="notification-banner__text">
+          Dieses Portal speichert technisch notwendige Einstellungen lokal im Browser. Optionale Analyse-Cookies werden erst nach Zustimmung aktiviert.
+          <a href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklaerung</a>
+        </p>
+        <div class="notification-banner__actions">
+          <button class="btn btn--outline btn--sm" type="button" onclick="window.portal.acceptCookieConsent('necessary')">Nur notwendige</button>
+          <button class="btn btn--filled btn--sm" type="button" onclick="window.portal.acceptCookieConsent('all')">Alle akzeptieren</button>
+        </div>
+      </div>
+    </aside>
+  `;
+}
+
+export function acceptCookieConsent(mode = 'necessary') {
+  safeSet(CONSENT_KEY, JSON.stringify({
+    mode: mode === 'all' ? 'all' : 'necessary',
+    acceptedAt: new Date().toISOString()
+  }));
+  document.getElementById('cookieBanner')?.remove();
+  toast(mode === 'all' ? 'Cookie-Einstellungen gespeichert.' : 'Nur notwendige Cookies gespeichert.', 'success');
+}
 
 // ── NAV-MENU CONTENT (closed-set chrome data — not domain data) ───────────
 // Canonical service catalogue — all BBL services tenants can request.
@@ -244,6 +274,8 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
     : '';
 
   return `
+    ${renderConsentBanner()}
+
     <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
 
     <header class="site-header" role="banner">
@@ -265,9 +297,10 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
               </button>
               <ul class="language-switcher__dropdown" role="listbox" aria-label="Sprache">
                 <li role="presentation"><button class="language-switcher__option language-switcher__option--active" role="option" aria-selected="true" data-lang="DE" lang="de" onclick="window.portal.pickLang('DE')">DE</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="FR" lang="fr" onclick="window.portal.pickLang('FR')">FR</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="IT" lang="it" onclick="window.portal.pickLang('IT')">IT</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" data-lang="EN" lang="en" onclick="window.portal.pickLang('EN')">EN</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="FR" lang="fr" onclick="window.portal.pickLang('FR')">FR</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="IT" lang="it" onclick="window.portal.pickLang('IT')">IT</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="RM" lang="rm" onclick="window.portal.pickLang('RM')">RM</button></li>
+                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="EN" lang="en" onclick="window.portal.pickLang('EN')">EN</button></li>
               </ul>
             </div>
           </div>
@@ -367,7 +400,7 @@ export function renderFooter() {
       <div class="footer-information">
         <div class="footer-information__inner">
           <div class="footer-information__col footer-information__col--brand">
-            <h3 class="footer-information__brand">Über das BBL</h3>
+            <h2 class="footer-information__brand">Über das BBL</h2>
             <p class="footer-information__motto">
               Bundesamt für Bauten und Logistik — nachhaltig, partnerschaftlich und vorbildlich.
             </p>
@@ -377,7 +410,7 @@ export function renderFooter() {
           </div>
 
           <div class="footer-information__col footer-information__col--links">
-            <h3 class="footer-information__heading">Weitere Informationen</h3>
+            <h2 class="footer-information__heading">Weitere Informationen</h2>
             <ul class="footer-information__list">
               <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
               <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
@@ -386,7 +419,7 @@ export function renderFooter() {
           </div>
 
           <div class="footer-information__col footer-information__col--links">
-            <h3 class="footer-information__heading">Prototyp</h3>
+            <h2 class="footer-information__heading">Prototyp</h2>
             <ul class="footer-information__list">
               <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
               <li><a href="https://github.com/swiss/designsystem" target="_blank" rel="noopener">CD Bund <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
@@ -400,6 +433,8 @@ export function renderFooter() {
         <div class="app-footer__bottom-inner">
           <a class="app-footer__bottom-link" href="https://www.bkb.admin.ch/bkb/de/home/themen/agb.html" target="_blank" rel="noopener">Allgemeine Geschäftsbedingungen des Bundes</a>
           <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">Rechtliches</a>
+          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutz</a>
+          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/dokumentation/impressum.html" target="_blank" rel="noopener">Impressum</a>
           <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">Barrierefreiheit in der Bundesverwaltung</a>
         </div>
       </div>
@@ -629,6 +664,11 @@ export function toggleLang(forceOpen) {
   }
 }
 export function pickLang(code) {
+  if (code !== 'DE') {
+    toggleLang(false);
+    toast(`${code}-Lokalisation noch nicht implementiert - Anzeige bleibt auf DE.`, '');
+    return;
+  }
   // a11y: update <html lang> so screen readers, hyphenation, and
   // spell-check switch pronunciation/segmentation even before content
   // translations land. eCH-0059 requirement; tracked as audit M-A3.
@@ -641,9 +681,6 @@ export function pickLang(code) {
   const current = document.getElementById('langCurrent');
   if (current) current.textContent = code;
   toggleLang(false);
-  if (code !== 'DE') {
-    toast(`${code}-Lokalisation noch nicht implementiert — Anzeige bleibt auf DE.`, '');
-  }
 }
 
 // Click-outside + Esc close + Arrow-key navigation for the language
@@ -658,7 +695,7 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   const el = document.getElementById('langSwitch');
   if (!el || !el.classList.contains('open')) return;
-  const opts = Array.from(el.querySelectorAll('.language-switcher__option'));
+  const opts = Array.from(el.querySelectorAll('.language-switcher__option:not([aria-disabled="true"])'));
   const idx = opts.indexOf(document.activeElement);
   if (e.key === 'Escape') { e.preventDefault(); toggleLang(false); return; }
   if (e.key === 'ArrowDown') { e.preventDefault(); (opts[(idx + 1) % opts.length] || opts[0]).focus(); }

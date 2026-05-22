@@ -193,7 +193,23 @@
   /* Subtle off-white canvas background — slightly cooler than
      `--color-bg-surface` so the floor-plan polygons read against a
      neutral field. Also used by the MapLibre `floor-bg` layer. */
+  --color-floor-work-strong:   #93C5FD;   /* blue-300 */
+  --color-floor-collab-strong: #FCD34D;   /* yellow-300 */
+  --color-floor-infra-strong:  #D1D5DB;   /* gray-300 */
+  --color-floor-special-strong:#C4B5FD;   /* violet-300 */
+  --color-floor-tenant-a:      var(--color-floor-work);
+  --color-floor-tenant-b:      var(--color-floor-collab-strong);
+  --color-floor-tenant-c:      var(--color-floor-special);
+  --color-floor-tenant-d:      #FDA4AF;   /* red-300 */
+  --color-floor-tenant-e:      #86EFAC;   /* green-300 */
+  --color-floor-tenant-f:      #7DD3FC;   /* sky-300 */
+  --color-floor-unassigned:    var(--color-bg-alt);
+  --color-floor-invalid:       var(--color-danger-light);
+
   --color-bg-canvas:           #FAFAFA;
+  --color-map-outline:         var(--color-gray-500);
+  --color-map-selection:       var(--color-primary-900);
+  --color-map-text:            var(--color-gray-800);
 
   /* ── BADGE PALETTE ────────────────────────────────────────────────────── */
   --color-badge-green-bg:      #D1FAE5;

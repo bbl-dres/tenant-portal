@@ -312,6 +312,12 @@
   letter-spacing: 0.05em;
   min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
+.language-switcher__option[aria-disabled="true"] {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 /* CD canonical: hover + selected paint the option in Tailwind `blue-600`
    (#2563eb in designsystem/app/tailwind.config.js:82) with white text.
    Red is reserved for primary CTAs and brand-accent surfaces; the
@@ -324,6 +330,11 @@
 .language-switcher__option:focus-visible {
   background: var(--color-lang-active);
   color: var(--color-white);
+}
+.language-switcher__option[aria-disabled="true"]:hover,
+.language-switcher__option[aria-disabled="true"]:focus-visible {
+  background: transparent;
+  color: var(--color-text-muted);
 }
 .language-switcher__option:focus-visible {
   outline: 2px solid var(--color-focus);
@@ -2074,6 +2085,32 @@ input[type="checkbox"]:focus-visible {
 .notification-banner__wrapper { display: flex; flex: 1; gap: var(--space-md); align-items: center; }
 .notification-banner__text { margin: 0; flex: 1; }
 .notification-banner__actions { display: flex; gap: var(--space-sm); }
+.cookie-banner {
+  border-left: 0;
+  border-bottom: 1px solid var(--color-secondary-100);
+}
+.cookie-banner .notification-banner__wrapper {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+.cookie-banner .notification-banner__text a {
+  margin-left: var(--space-xs);
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .cookie-banner,
+  .cookie-banner .notification-banner__wrapper {
+    align-items: flex-start;
+  }
+  .cookie-banner .notification-banner__wrapper,
+  .cookie-banner .notification-banner__actions {
+    flex-direction: column;
+  }
+  .cookie-banner .notification-banner__actions,
+  .cookie-banner .notification-banner__actions .btn {
+    width: 100%;
+  }
+}
 /* Icon slot — CD Bund alert/info widgets carry a leading status icon to
    reinforce the colour signal (WCAG 1.4.1 "use of colour"). The icon is
    aria-hidden; the banner role/text carry the semantic meaning. */
@@ -2265,8 +2302,8 @@ input[type="checkbox"]:focus-visible {
   contain: inline-size;
 }
 .docs-table-wrap > .table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 920px;
 }
 .table--documents th,
 .table--documents td {
