@@ -344,6 +344,19 @@
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
 }
+.top-header__department-strip {
+  display: none;
+  background: var(--color-secondary-50);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.top-header__department-strip-inner {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-sm) var(--container-padding);
+  font-size: var(--text-body-sm);
+  line-height: var(--line-height-snug);
+}
 .top-header__inner {
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -378,14 +391,34 @@
 @media (min-width: 768px) {
   .top-header__left { align-items: flex-start; gap: var(--space-lg); }
 }
+/* Federal mark is split into two SVGs per CD spec
+   (designsystem/css/components/logo.postcss):
+     .logo__flag — always visible (the Swiss cross)
+     .logo__name — `hidden xl:block` (the 4-language federal name)
+   Below 1280 px (xl) only the flag shows; above, the name SVG appears
+   to its right inside the same wrapper. */
 .top-header__bundmark {
-  height: 40px;                   /* mobile base */
-  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
   flex-shrink: 0;
 }
-@media (min-width: 1024px) { .top-header__bundmark { height: 52px; } }
-@media (min-width: 1280px) { .top-header__bundmark { height: 60px; } }
-@media (min-width: 1920px) { .top-header__bundmark { height: 70px; } }
+.top-header__bundmark-flag {
+  display: block;
+  width: 30px;
+  height: 33px;
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) { .top-header__bundmark-flag { width: 32px; height: 34px; } }
+@media (min-width: 1920px) { .top-header__bundmark-flag { width: 40px; height: 44px; } }
+.top-header__bundmark-name {
+  display: none;
+  flex-shrink: 0;
+  width: 174px;
+  height: 50px;
+}
+@media (min-width: 1280px) { .top-header__bundmark-name { display: block; } }
+@media (min-width: 1920px) { .top-header__bundmark-name { width: 244px; height: 70px; } }
 
 .top-header__divider {
   width: 1px;
@@ -466,7 +499,7 @@
   display: flex;
   align-items: center;
   min-width: 80px;
-  height: 40px;
+  min-height: var(--btn-min-h);
 }
 .header-search__toggle {
   display: inline-flex;
@@ -478,6 +511,7 @@
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   padding: var(--space-xs) var(--space-sm);
+  min-height: var(--btn-min-h);
   cursor: pointer;
   transition: color var(--transition-fast), opacity var(--transition);
 }
@@ -491,6 +525,7 @@
   top: 0;
   display: flex;
   align-items: center;
+  min-height: var(--btn-min-h);
   overflow: hidden;
   width: 0;
   opacity: 0;
@@ -504,6 +539,7 @@
 }
 .header-search__input {
   width: 100%;
+  min-height: var(--btn-min-h);
   padding: var(--space-sm) calc(var(--space-xl) + 8px) var(--space-sm) var(--space-md);
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
@@ -527,13 +563,16 @@
 .header-search__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .header-search__submit {
   position: absolute;
-  right: 6px;
+  right: 0;
   background: transparent;
   border: none;
   padding: var(--space-xs);
+  min-width: var(--btn-min-h);
+  min-height: var(--btn-min-h);
   color: var(--color-text-secondary);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 .header-search__submit:hover { color: var(--color-primary); }
@@ -702,12 +741,23 @@
   flex-shrink: 0;
   display: none;
 }
-@media (max-width: 1023px) {
-  .inline-icon.main-navigation__chevron { display: inline-block; }
-}
 .main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__chevron {
   transform: rotate(180deg);
   transition: transform var(--transition-fast);
+}
+/* Mobile drill-down arrow at the right edge of every top-level nav item.
+   Hidden by default; surfaced below 1024 px via the responsive block
+   below. Mirrors the right-arrow pattern in CD's mobile menu
+   (designsystem/css/sections/mobile-menu.postcss
+    .mobile-menu-v2-navigation-item__has-children .icon — h-5 w-5). */
+.main-navigation__arrow {
+  display: none;
+  align-items: center;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+.main-navigation__arrow svg {
+  width: var(--icon-sm); height: var(--icon-sm);
 }
 
 /* ── NAV DROPDOWN PANEL (swisstopo "Dienstleistungen" pattern) ──────────
@@ -848,7 +898,10 @@
 /* ── BREADCRUMB ─────────────────────────────────────────────────────────── */
 /* CD Bund breadcrumb is flat on the page background (no grey strip), with
    chevron separators and an underlined current page. The full federal
-   variant adds per-level dropdowns; we ship the simpler flat form here. */
+   variant adds per-level dropdowns; we ship the simpler flat form here.
+   CD canonical: `hidden lg:block` (designsystem/css/sections/breadcrumb.postcss:9)
+   — breadcrumb is hidden below 1024 px on mobile/tablet, where the burger
+   menu serves as the primary back-navigation affordance. */
 .breadcrumb {
   /* `#root` is a flex column container. Without an explicit width, a flex
      child with only `max-width` can shrink to fit its content — the
@@ -911,7 +964,10 @@
    `text-primary-600`, `rounded-sm`. Chevron rotates 180° when the
    drawer is open. */
 .breadcrumb__dropdown-icon {
-  margin: 0 var(--space-xs) 0 0;
+  /* CD: `ml-2` = 8px gap between the breadcrumb link and the chevron
+     button (sections/breadcrumb.postcss). Right margin keeps the
+     chevronRight separator from crowding the button. */
+  margin: 0 var(--space-xs) 0 var(--space-sm);
   padding: 0;
   width: 1.25em;
   height: 1.25em;
@@ -1046,16 +1102,20 @@
 .btn--filled:hover { background: var(--color-secondary-600); }
 .btn--outline {
   background: transparent;
-  color: var(--color-text-primary);
-  border-color: var(--color-border-input);
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
 }
-.btn--outline:hover { background: var(--color-bg-alt); }
+.btn--outline:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+}
 .btn--bare {
   background: transparent;
   color: var(--color-text-primary);
 }
 .btn--bare:hover { background: var(--color-bg-alt); }
-.btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-xs); }
+.btn--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-xs); }
 .btn--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-xl); font-size: var(--text-body); }
 .btn[disabled], .btn--disabled {
   opacity: 0.5;
@@ -1768,7 +1828,7 @@ figcaption {
   border-color: var(--color-text-primary);
   box-shadow: 0 0 0 3px var(--color-focus-tint), var(--shadow-card);
 }
-.input--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
+.input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
 .input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-body); }
 
 /* Native `<select>` chevron — replaces the browser default (jammed
@@ -1922,8 +1982,8 @@ label + .form__group__radio { margin-top: var(--space-sm); }   /* DS `label + & 
   gap: var(--space-sm);
   font-size: var(--text-body);
   cursor: pointer;
-  min-height: 28px;            /* touch-target hint */
-  padding: 4px 0;
+  min-height: var(--btn-min-h);
+  padding: 6px 0;
 }
 /* DS appearance-none checkbox / radio — global rule, ports
    designsystem/css/components/input.postcss:80-152. Type-selector scope
@@ -2196,7 +2256,17 @@ input[type="checkbox"]:focus-visible {
 }
 .filter-pills__clear-all:hover { color: var(--color-primary); }
 .docs-table-wrap {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  contain: inline-size;
+}
+.docs-table-wrap > .table {
+  width: max-content;
+  min-width: 100%;
 }
 .table--documents th,
 .table--documents td {
@@ -2371,8 +2441,8 @@ a.btn[aria-disabled="true"] {
    dark/colored backgrounds). */
 .toast__close {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: var(--btn-min-h);
+  height: var(--btn-min-h);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2399,26 +2469,20 @@ a.btn[aria-disabled="true"] {
      --section-py-half. */
 }
 
-/* Back-to-top button — DS canonical `.back-to-top-btn--outline` pattern
-   (designsystem/css/components/back-to-top-btn.postcss:79-88). White
-   background, primary-600 border, primary-600 chevron. Sits anchored at
-   the top-right edge of the footer's dark band, overlapping the top so
-   half of the button reads against the page background and half against
-   the navy — matches the swisstopo / bbl.admin.ch reference. Square
-   shape with a small radius; size scales 44 → 48 → 64 px following the
-   DS responsive scale (`w-11 h-11`, `lg:w-12 lg:h-12`, `xl:w-16 xl:h-16`).
-   The wrapper-positioning trick from DS `.back-to-top-wrapper` would make
-   it sticky-on-scroll; we keep the simpler footer-anchored placement for
-   now (the portal isn't long-form enough to need sticky). */
-/* Back-to-top: DS pure-CSS pattern (designsystem/css/sections/
-   desktop-menu.postcss + carousel.postcss reference).
-   `.back-to-top-wrapper` is an `absolute`-positioned scroll-region
-   inside `#root`: starts at 80vh down the page and extends -22 px
-   PAST the bottom (overlapping the footer top by half a button
-   height). Inside, `.app-footer__top-btn` is `position: sticky` —
-   it floats at viewport bottom-right while the wrapper is in view,
-   then "lands" overlapping the footer when scroll reaches the end.
-   No JS needed. */
+/* Back-to-top — DS canonical `.back-to-top-btn--outline`
+   (designsystem/css/components/back-to-top-btn.postcss:79-88): white bg,
+   primary-600 border + chevron, square with small radius, 44→48→64 px
+   scale. Floats at viewport bottom-right while scrolling and "lands"
+   overlapping the footer top (half on page, half on navy) when scroll
+   reaches the end — matches the swisstopo / bbl.admin.ch reference.
+
+   Pure-CSS sticky pattern (no JS): `.back-to-top-wrapper` is
+   `position: absolute` inside `#root` (which is `position: relative`),
+   starting at 80vh and extending -22 px past the page bottom so it
+   overlaps the footer by half a button height. Inside, the button is
+   `position: sticky; top: calc(100vh - 64px)` — sticks to the viewport
+   bottom while the wrapper is in view, then lands at the wrapper's
+   bottom when scroll ends. */
 .back-to-top-wrapper {
   position: absolute;
   top: 80vh;
@@ -2649,11 +2713,9 @@ a.btn[aria-disabled="true"] {
 /* `.btn--back` — CD Bund back-button modifier. The federal canonical
    `.btn--outline` ships with primary-600 text + border (see
    `designsystem/css/components/btn.postcss`). Our portal's `.btn--outline`
-   was recoloured to neutral, so `.btn--back` reasserts the primary-red
-   federal styling locally to match the design system reference. Sized
-   like `.btn--sm` to keep the utility bar compact. */
+   stays primary-red and keeps a full touch target. */
 .btn--back {
-  min-height: var(--btn-sm-min-h);
+  min-height: var(--btn-min-h);
   padding: var(--space-xs) var(--space-md);
   gap: var(--space-xs);
   font-size: var(--text-body-sm);
@@ -3191,32 +3253,161 @@ body.body--mobile-menu-is-open {
    and `.mobile-menu` is `lg:hidden` in designsystem/css/sections/mobile-menu.postcss.
    So burger / vertical-list collapse engages everywhere below 1024 px. */
 @media (max-width: 1023.98px) {
-  .top-header { flex-wrap: wrap; }
-  .top-header__right { width: 100%; justify-content: flex-end; }
+  .top-bar__demo-chip,
+  .top-bar__link--user {
+    display: none;
+  }
+  .top-header__department-strip { display: block; }
+  .top-header__inner {
+    min-height: 78px;
+    padding-block: var(--space-md);
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
+  }
+  .top-header__left {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: var(--space-sm);
+  }
+  .top-header__bundmark-flag {
+    width: 30px;
+    height: 33px;
+  }
+  .top-header__divider {
+    display: block;
+    height: 48px;
+    align-self: center;
+  }
+  .top-header__dept {
+    display: block;
+    min-width: 0;
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-snug);
+    margin-top: 0;
+  }
+  .top-header__dept-sub { display: none; }
+  .top-header__right {
+    flex: 0 0 auto;
+    width: auto;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+  .top-header__actions {
+    gap: var(--space-sm);
+  }
+  .header-search {
+    min-width: var(--btn-min-h);
+  }
+  .header-search__toggle {
+    width: var(--btn-min-h);
+    padding: 0;
+    justify-content: center;
+  }
+  .header-search__toggle span {
+    display: none;
+  }
   .burger { display: inline-flex; }
-  .main-navigation { display: none; flex-direction: column; gap: 0; width: 100%; }
+  .burger[aria-expanded="true"] .burger__icon {
+    color: var(--color-primary-600);
+  }
+  /* CD `hidden lg:block` — breadcrumb is hidden on mobile/tablet. */
+  .breadcrumb { display: none; }
+  /* Burger now lives inside `.top-header__actions` (CD canonical),
+     so the navbar row only carries the slide-out main-navigation
+     drawer. Hide the empty navbar when no menu is open. */
+  .navbar { display: none; }
+  body.body--mobile-menu-is-open .top-bar,
+  body.body--mobile-menu-is-open .top-header__department-strip,
+  body.body--mobile-menu-is-open .top-header__left {
+    display: none;
+  }
+  body.body--mobile-menu-is-open .top-header {
+    position: relative;
+    z-index: var(--z-modal);
+  }
+  body.body--mobile-menu-is-open .top-header__inner {
+    min-height: 72px;
+    justify-content: flex-end;
+  }
+  body.body--mobile-menu-is-open .navbar {
+    display: block;
+    position: fixed;
+    inset: 72px 0 0;
+    z-index: calc(var(--z-modal) - 1);
+    overflow-y: auto;
+    background: var(--color-surface-dark);
+    border: 0;
+  }
+  body.body--mobile-menu-is-open .navbar__inner {
+    display: block;
+    min-height: 0;
+    padding: 0;
+    max-width: none;
+  }
+  .main-navigation { display: none; flex-direction: column; gap: 0; width: 100%; margin-left: 0; }
   .main-navigation.open { display: flex; }
-  .main-navigation__link { padding: var(--space-md); border-bottom: 1px solid var(--color-border); }
+  /* Each item becomes a full-width row: label left, drill-down arrow right.
+     Mirrors CD mobile-menu-v2 list pattern. */
+  .main-navigation__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: var(--space-md) var(--container-padding);
+    border-bottom: 1px solid var(--color-border);
+    width: 100%;
+    background: var(--color-white);
+    color: var(--color-text-primary);
+  }
+  .main-navigation__link::after {
+    display: none;
+  }
+  .main-navigation__link--active,
+  .main-navigation__link--has-menu[aria-expanded="true"] {
+    color: var(--color-text-primary);
+  }
+  body.body--mobile-menu-is-open .main-navigation__link,
+  body.body--mobile-menu-is-open .main-navigation__link:hover,
+  body.body--mobile-menu-is-open .main-navigation__link--active,
+  body.body--mobile-menu-is-open .main-navigation__link--has-menu[aria-expanded="true"] {
+    color: var(--color-text-primary);
+  }
+  .main-navigation__arrow { display: inline-flex; }
+  /* Desktop dropdown indicator (chevronDown) is redundant on mobile —
+     the right-arrow handles the affordance. Hide it. */
+  .inline-icon.main-navigation__chevron { display: none; }
   .header-search__input { width: 140px; }
   .top-header__meta { display: none; }
-  /* Surface meta links (Kontakt/Hilfe) that are hidden at this width
-     inside the burger menu so they remain reachable on mobile. */
+  /* Meta zone (Kontakt / Hilfe) — CD mobile pattern wraps utility links
+     in a dark-navy block at the foot of the menu, white text. Matches
+     designsystem/css/sections/mobile-menu.postcss `.top-bar-navigation--mobile
+     ul a { bg-secondary-500, text-white }`. */
   .main-navigation__mobile-meta {
     display: block;
-    border-top: 1px solid var(--color-border);
-    background: var(--color-bg-surface);
+    width: 100%;
+    background: var(--color-surface-dark);
   }
   .main-navigation__mobile-meta .main-navigation__link {
-    padding: var(--space-md);
-    border-bottom: 1px solid var(--color-border-light);
+    min-height: 56px;
+    padding: var(--space-md) var(--container-padding);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     font-weight: var(--font-weight-normal);
-    color: var(--color-text-secondary);
+    color: var(--color-white);
+    background: var(--color-surface-dark);
   }
+  body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link,
+  body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link:hover {
+    color: var(--color-white);
+  }
+  .main-navigation__mobile-meta .main-navigation__link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-white);
+  }
+  /* Meta links are terminal — no drill-down. Hide their right-arrow. */
+  .main-navigation__mobile-meta .main-navigation__arrow { display: none; }
 }
 @media (max-width: 768px) {
   .top-bar__authorities span { display: none; }
-  .top-header__dept { display: none; }
-  .top-header__divider { display: none; }
   .top-header__meta-nav { display: none; }
   .shortcut-overlay__grid { grid-template-columns: 1fr; }
 }
@@ -3265,13 +3456,6 @@ body.body--mobile-menu-is-open {
   object-fit: cover;
   display: block;
 }
-/* At <480 px the 4:3 hero photo crowds the CTA. The text + CTA pair is
-   the primary affordance; the photo is decorative. Hide on the smallest
-   screens (kept from 480 px up where it still adds value). */
-@media (max-width: 479px) {
-  .hero--split .hero__figure { display: none; }
-}
-
 /* ── INFO PAGE HEADER ────────────────────────────────────────────────────
    Header above the .page-with-toc layout on the Arbeitsinstrumente page.
    Replaces three inline-styled blocks. */
@@ -4028,12 +4212,22 @@ body.body--mobile-menu-is-open {
    action cell. Replaces ~10 inline style declarations across the
    downloads view. */
 .docs-filter-bar__select {
+  flex: 1 1 220px;
+  min-width: min(100%, 220px);
   min-height: var(--btn-min-h);
 }
 .docs-filter-bar__search {
-  flex: 1;
-  min-width: 200px;
+  flex: 2 1 260px;
+  min-width: min(100%, 200px);
   min-height: var(--btn-min-h);
+}
+.docs-filter-bar > .input { min-width: 0; }
+@media (max-width: 639.98px) {
+  .docs-filter-bar { flex-direction: column; }
+  .docs-filter-bar__select,
+  .docs-filter-bar__search {
+    width: 100%;
+  }
 }
 .table--documents .col-title   { width: 32%; }
 .table--documents .col-type    { width: 13%; }
@@ -4409,7 +4603,7 @@ body.body--mobile-menu-is-open {
      increasingly worked. Was 28 px; not strictly below WCAG 2.5.5 since
      mark-buttons sit in tight panels, but tablet ergonomics matter for
      BBL meeting-room review sessions. */
-  min-height: 36px;
+  min-height: var(--btn-min-h);
   padding: var(--space-xs) var(--space-sm);
   border: 1px solid var(--color-border);
   background: var(--color-white);
@@ -4523,7 +4717,8 @@ body.body--mobile-menu-is-open {
 .queue-stats__toggle {
   background: transparent;
   border: none;
-  padding: 0;
+  padding: var(--space-xs) 0;
+  min-height: var(--btn-min-h);
   display: flex;
   width: 100%;
   align-items: center;
@@ -5241,9 +5436,18 @@ body.body--mobile-menu-is-open {
   font-size: var(--text-body-sm);
 }
 
-/* Section block — left column of the property-detail two-column layout.
-   Replaces ad-hoc `style="margin-bottom: var(--space-2xl)"`. */
-.property-section { margin-bottom: var(--space-2xl); }
+/* Topic block — left column of the property-detail two-column layout.
+   Each block (Vertrag, Geschosse, Anträge, Dokumente, Standort) renders
+   as a white card on the surrounding `.section--alt` gray bg, matching
+   the DS card-on-alt pattern used elsewhere. */
+.property-section {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-lg);
+}
+.property-section:last-child { margin-bottom: 0; }
 
 /* Aside actions stack: each action button on its own row. All four use
    `.btn--bare` for visual consistency (the heading "Aktionen" already

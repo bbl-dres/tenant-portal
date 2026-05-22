@@ -158,20 +158,20 @@ function renderStep1(draft) {
     </p>
 
     <div class="wizard__section">
-      <h3>Antragstyp</h3>
-      <div class="radio-group">
-        <label><input type="radio" name="type" value="Grossantrag"  ${draft.type === 'Grossantrag'  ? 'checked' : ''}> Grossantrag</label>
-        <label><input type="radio" name="type" value="Kleinantrag"  ${draft.type === 'Kleinantrag'  ? 'checked' : ''}> Kleinantrag</label>
-        <label><input type="radio" name="type" value="Mobiliar"     ${draft.type === 'Mobiliar'     ? 'checked' : ''}> Mobiliar</label>
-      </div>
+      <fieldset class="option-group">
+        <legend class="form-field__label">Antragstyp</legend>
+        <label class="option-group__item"><input type="radio" name="type" value="Grossantrag"  ${draft.type === 'Grossantrag'  ? 'checked' : ''}> <span>Grossantrag</span></label>
+        <label class="option-group__item"><input type="radio" name="type" value="Kleinantrag"  ${draft.type === 'Kleinantrag'  ? 'checked' : ''}> <span>Kleinantrag</span></label>
+        <label class="option-group__item"><input type="radio" name="type" value="Mobiliar"     ${draft.type === 'Mobiliar'     ? 'checked' : ''}> <span>Mobiliar</span></label>
+      </fieldset>
       <p class="form-field__hint">Bei <strong>Grossantrag</strong> öffnet sich in Schritt 4 ein zusätzliches Detail-Formular.</p>
     </div>
 
     <div class="wizard__section">
       <h3>Verwaltungseinheit & Kontakte</h3>
       <div class="form-field">
-        <label class="form-field__label">Verwaltungseinheit (VE) <span class="form-field__required">*</span></label>
-        <select class="form-field__select" name="ve">
+        <label class="form-field__label" for="wizVe">Verwaltungseinheit (VE) <span class="form-field__required">*</span></label>
+        <select class="form-field__select" id="wizVe" name="ve">
           <option value="UVEK / BAFU">UVEK / BAFU</option>
           <option value="UVEK / BAV">UVEK / BAV</option>
           <option value="UVEK / SBB">UVEK / SBB</option>
@@ -381,9 +381,8 @@ function renderStep2(draft) {
     <div class="wizard__section">
       <h3>NAW-Klassifizierung (Arbeitsstil)</h3>
       <div class="form-field">
-        <label class="form-field__label">Schwerpunkt</label>
         <fieldset class="option-group">
-          <legend class="sr-only">Schwerpunkt</legend>
+          <legend class="form-field__label">Schwerpunkt</legend>
           <label class="option-group__item"><input type="radio" name="focus" value="Kollaborativ" ${draft.nawAnswers.focus === 'Kollaborativ' ? 'checked' : ''}> <span>Kollaborativ</span></label>
           <label class="option-group__item"><input type="radio" name="focus" value="Konzentriert" ${draft.nawAnswers.focus === 'Konzentriert' ? 'checked' : ''}> <span>Konzentriert</span></label>
           <label class="option-group__item"><input type="radio" name="focus" value="Mix"          ${draft.nawAnswers.focus === 'Mix'          ? 'checked' : ''}> <span>Mix</span></label>
@@ -396,27 +395,24 @@ function renderStep2(draft) {
         </select>
       </div>
       <div class="form-field">
-        <label class="form-field__label">Vertraulichkeit der Arbeit</label>
         <fieldset class="option-group">
-          <legend class="sr-only">Vertraulichkeit der Arbeit</legend>
+          <legend class="form-field__label">Vertraulichkeit der Arbeit</legend>
           <label class="option-group__item"><input type="radio" name="confidentiality" value="niedrig" ${draft.nawAnswers.confidentiality === 'niedrig' ? 'checked' : ''}> <span>niedrig</span></label>
           <label class="option-group__item"><input type="radio" name="confidentiality" value="mittel"  ${draft.nawAnswers.confidentiality === 'mittel'  ? 'checked' : ''}> <span>mittel</span></label>
           <label class="option-group__item"><input type="radio" name="confidentiality" value="hoch"    ${draft.nawAnswers.confidentiality === 'hoch'    ? 'checked' : ''}> <span>hoch</span></label>
         </fieldset>
       </div>
       <div class="form-field">
-        <label class="form-field__label">Publikumsverkehr</label>
         <fieldset class="option-group">
-          <legend class="sr-only">Publikumsverkehr</legend>
+          <legend class="form-field__label">Publikumsverkehr</legend>
           <label class="option-group__item"><input type="radio" name="publicContact" value="keiner"       ${draft.nawAnswers.publicContact === 'keiner'       ? 'checked' : ''}> <span>keiner</span></label>
           <label class="option-group__item"><input type="radio" name="publicContact" value="gelegentlich" ${draft.nawAnswers.publicContact === 'gelegentlich' ? 'checked' : ''}> <span>gelegentlich</span></label>
           <label class="option-group__item"><input type="radio" name="publicContact" value="regelmaessig" ${draft.nawAnswers.publicContact === 'regelmaessig' ? 'checked' : ''}> <span>regelmässig</span></label>
         </fieldset>
       </div>
       <div class="form-field">
-        <label class="form-field__label">Spezialausstattung</label>
         <fieldset class="option-group option-group--wrap">
-          <legend class="sr-only">Spezialausstattung</legend>
+          <legend class="form-field__label">Spezialausstattung</legend>
           <label class="option-group__item"><input type="checkbox" name="specials" value="Labor"            ${draft.nawAnswers.specials.includes('Labor')            ? 'checked' : ''}> <span>Labor</span></label>
           <label class="option-group__item"><input type="checkbox" name="specials" value="Werkstatt"        ${draft.nawAnswers.specials.includes('Werkstatt')        ? 'checked' : ''}> <span>Werkstatt</span></label>
           <label class="option-group__item"><input type="checkbox" name="specials" value="Sicherheitsbereich" ${draft.nawAnswers.specials.includes('Sicherheitsbereich') ? 'checked' : ''}> <span>Sicherheitsbereich</span></label>
@@ -596,16 +592,16 @@ function renderStep4(draft) {
     <div class="wizard__section">
       <h3>Sektion A · Bedarf & Zielzustand</h3>
       <div class="form-field">
-        <label class="form-field__label">4.1 Kurzbeschreibung <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Antrag"</span></label>
-        <textarea class="form-field__textarea" name="g_kurz" maxlength="500">${escapeHtml(f.kurz || '')}</textarea>
+        <label class="form-field__label" for="gKurz">4.1 Kurzbeschreibung <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Antrag"</span></label>
+        <textarea class="form-field__textarea" id="gKurz" name="g_kurz" maxlength="500">${escapeHtml(f.kurz || '')}</textarea>
       </div>
       <div class="form-field">
-        <label class="form-field__label">4.2 Defizite in der aktuellen Situation <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Defizit"</span></label>
-        <textarea class="form-field__textarea" name="g_defizit">${escapeHtml(f.defizit || '')}</textarea>
+        <label class="form-field__label" for="gDefizit">4.2 Defizite in der aktuellen Situation <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Defizit"</span></label>
+        <textarea class="form-field__textarea" id="gDefizit" name="g_defizit">${escapeHtml(f.defizit || '')}</textarea>
       </div>
       <div class="form-field">
-        <label class="form-field__label">4.4 Zielzustand / Operative Ziele <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Ziele/Soll"</span></label>
-        <textarea class="form-field__textarea" name="g_ziel">${escapeHtml(f.ziel || '')}</textarea>
+        <label class="form-field__label" for="gZiel">4.4 Zielzustand / Operative Ziele <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Ziele/Soll"</span></label>
+        <textarea class="form-field__textarea" id="gZiel" name="g_ziel">${escapeHtml(f.ziel || '')}</textarea>
         <p class="form-field__hint">v0.5: zusammengefasst aus den vorigen Feldern „Operative Ziele" und „Zielzustand".</p>
       </div>
     </div>
@@ -613,16 +609,16 @@ function renderStep4(draft) {
     <div class="wizard__section">
       <h3>Sektion B · Recht, Alternativen, Planung</h3>
       <div class="form-field">
-        <label class="form-field__label">4.3 Rechtsgrundlage <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Recht"</span></label>
-        <input class="form-field__input" type="text" name="g_recht" value="${escapeHtml(f.recht || '')}" placeholder="Verweis auf Upload aus Schritt 3 oder URL">
+        <label class="form-field__label" for="gRecht">4.3 Rechtsgrundlage <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Recht"</span></label>
+        <input class="form-field__input" id="gRecht" type="text" name="g_recht" value="${escapeHtml(f.recht || '')}" placeholder="Verweis auf Upload aus Schritt 3 oder URL">
       </div>
       <div class="form-field">
-        <label class="form-field__label">4.5 Geprüfte Alternativen <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Alt"</span></label>
-        <textarea class="form-field__textarea" name="g_alt">${escapeHtml(f.alt || '')}</textarea>
+        <label class="form-field__label" for="gAlt">4.5 Geprüfte Alternativen <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Alt"</span></label>
+        <textarea class="form-field__textarea" id="gAlt" name="g_alt">${escapeHtml(f.alt || '')}</textarea>
       </div>
       <div class="form-field">
-        <label class="form-field__label">4.8 Planungsabhängigkeiten <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Abhäng."</span></label>
-        <textarea class="form-field__textarea" name="g_abh">${escapeHtml(f.abh || '')}</textarea>
+        <label class="form-field__label" for="gAbh">4.8 Planungsabhängigkeiten <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Abhäng."</span></label>
+        <textarea class="form-field__textarea" id="gAbh" name="g_abh">${escapeHtml(f.abh || '')}</textarea>
       </div>
     </div>
 
@@ -631,15 +627,15 @@ function renderStep4(draft) {
       <div class="form-field">
         <label class="form-field__label">4.9 Terminplan <span class="form-field__required">*</span></label>
         <div class="date-grid">
-          <input class="form-field__input" type="date" name="g_termin_start" value="${f.terminStart || ''}" aria-label="Start">
-          <input class="form-field__input" type="date" name="g_termin_milestone" value="${f.terminMilestone || ''}" aria-label="Meilenstein">
-          <input class="form-field__input" type="date" name="g_termin_end" value="${f.terminEnd || ''}" aria-label="Ende">
+          <input class="form-field__input" type="date" name="g_termin_start" value="${f.terminStart || ''}" aria-label="Terminplan Start">
+          <input class="form-field__input" type="date" name="g_termin_milestone" value="${f.terminMilestone || ''}" aria-label="Terminplan Meilenstein">
+          <input class="form-field__input" type="date" name="g_termin_end" value="${f.terminEnd || ''}" aria-label="Terminplan Ende">
         </div>
         <p class="form-field__hint">Vorgeschlagene Termine basierend auf Investitionsvolumen: <button class="btn btn--bare btn--sm" type="button" onclick="window.t3lite.suggestDates()">Vorschlag übernehmen</button></p>
       </div>
       <div class="form-field">
-        <label class="form-field__label">4.10 Kostenerwartung gesamt (CHF) <span class="form-field__required">*</span></label>
-        <input class="form-field__input" type="number" inputmode="numeric" name="g_kosten" value="${f.kosten || ''}" placeholder="z. B. 19200000">
+        <label class="form-field__label" for="gKosten">4.10 Kostenerwartung gesamt (CHF) <span class="form-field__required">*</span></label>
+        <input class="form-field__input" id="gKosten" type="number" inputmode="numeric" name="g_kosten" value="${f.kosten || ''}" placeholder="z. B. 19200000">
       </div>
     </div>
 
@@ -647,8 +643,8 @@ function renderStep4(draft) {
       <h3>Sektion D · Nutzen-Kosten (optional, wenn WiBe vorhanden)</h3>
       <p class="form-field__hint">${draft.attachments && draft.attachments.some(a => /wibe/i.test(a.name)) ? `${icon('check')} WiBe.pdf erkannt — Feld optional.` : 'Keine WiBe-Datei hochgeladen — dieses Feld wird zur Pflicht.'}</p>
       <div class="form-field">
-        <label class="form-field__label">4.6 Nutzen-Kosten-Begründung</label>
-        <textarea class="form-field__textarea" name="g_nk">${escapeHtml(f.nk || '')}</textarea>
+        <label class="form-field__label" for="gNk">4.6 Nutzen-Kosten-Begründung</label>
+        <textarea class="form-field__textarea" id="gNk" name="g_nk">${escapeHtml(f.nk || '')}</textarea>
       </div>
     </div>
 

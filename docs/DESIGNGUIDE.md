@@ -227,7 +227,7 @@ glyphs should appear in user-facing markup.
 <header role="banner">
   <div class="top-bar">           dark navy, lang switcher, profile pill
     <span class="top-bar__prototype-notice">   centered red "Prototyp" label
-  <div class="top-header">        federal mark (BundLogo) + dept name + search
+  <div class="top-header">        federal mark (split flag + name SVGs, name hidden < xl) + dept name + search
   <nav class="navbar">            main navigation + dropdown menus
 <nav class="breadcrumb">          when supplied
 <main id="main">                  view content

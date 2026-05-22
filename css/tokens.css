@@ -399,8 +399,8 @@
 
 /* ── RESPONSIVE CONTAINER PADDING — matches kbob-fdk / CD Bund ──────────
    Steps: 16 → 28 → 36 → 40 → 48 → 64 px across sm/md/lg/xl/2xl/3xl. */
-@media (min-width: 640px)  { :root { --container-padding: 1.75rem; } }   /* 28 */
-@media (min-width: 768px)  { :root { --container-padding: 2.25rem; } }   /* 36 */
+@media (min-width: 480px)  { :root { --container-padding: 1.75rem; } }   /* 28 */
+@media (min-width: 640px)  { :root { --container-padding: 2.25rem; } }   /* 36 */
 @media (min-width: 1024px) { :root { --container-padding: 2.5rem; } }    /* 40 */
 @media (min-width: 1280px) { :root { --container-padding: 3rem; } }      /* 48 */
 @media (min-width: 1920px) { :root { --container-padding: 4rem; } }      /* 64 */
@@ -429,7 +429,7 @@
 /* `word-spacing: 0.0625em` matches CD Bund `typography.postcss` — a
    subtle widening that eases scanning of long German compound nouns
    (Verwaltungseinheit, Bundesamt, Liegenschaftsverwaltung). */
-html { font-size: 16px; -webkit-text-size-adjust: 100%; word-spacing: 0.0625em; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; word-spacing: 0.0625em; overflow-x: clip; }
 body {
   margin: 0;
   font-family: var(--font-family);
@@ -437,6 +437,7 @@ body {
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
   background: var(--color-bg-default);
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 img, svg { display: block; max-width: 100%; }

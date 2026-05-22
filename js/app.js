@@ -34,7 +34,7 @@ PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts,
 } from './lib.js';
-import { state, loadData } from './state.js';
+import { state, loadData, loadSpatialData } from './state.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
   toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, submitSearch, toggleSearch, toggleBurger,
@@ -145,7 +145,7 @@ function logout() {
 
 // ── EXPORT ───────────────────────────────────────────────────────────────
 window.portal = {
-  state, loadData,
+  state, loadData, loadSpatialData,
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
   registerRoute, navigate, handleHash,
   renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
@@ -797,7 +797,7 @@ function renderNewsDetail({ id }) {
         <p class="meta-info">
           <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
         </p>
-        <img class="news-detail__image" src="${n.image}" alt="" loading="lazy" decoding="async">
+        <img class="news-detail__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="1200" height="675">
         <p class="news-detail__lead">${P.escapeHtml(n.lead)}</p>
         <p class="news-detail__footer">
           Quelle: ${P.escapeHtml(n.source)} · Verantwortlich: ${P.escapeHtml(n.responsible)} · Stand: ${P.formatDate(n.date)} · DE
@@ -838,12 +838,10 @@ function renderLanding() {
         </div>
         <figure class="hero__figure">
           <div class="hero__figure__media">
-            <img src="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80"
-                 srcset="https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=600&ar=16:9&fit=crop&q=80 600w,
-                         https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=1200&ar=16:9&fit=crop&q=80 1200w,
-                         https://images.unsplash.com/photo-1662119429110-e771f0f72364?w=2400&ar=16:9&fit=crop&q=80 2400w"
+            <img src="assets/images/buildings/BLD-2010.jpg"
+                 srcset="assets/images/buildings/BLD-2010.jpg 960w"
                  sizes="(max-width: 1023px) 100vw, 50vw"
-                 alt="Bundeshaus in Bern — Sitz der Bundesversammlung und Symbol der durch BBL bewirtschafteten Bundesimmobilien."
+                 alt="Bundeshaus in Bern."
                  loading="lazy" decoding="async" width="1200" height="675">
           </div>
           <figcaption>Bundeshaus in Bern — eine der rund 2'700 Liegenschaften im BBL-Portfolio.</figcaption>
@@ -879,19 +877,19 @@ function renderLanding() {
             <img class="video-thumb__image"
                  src="assets/images/Explain-Video.png"
                  alt=""
-                 loading="lazy" decoding="async">
+                 loading="lazy" decoding="async" width="1280" height="720">
             <div class="video-thumb__header">
               <span class="video-thumb__logo" aria-hidden="true">
-                <img class="video-thumb__logo-inner" src="assets/swiss-logo-flag.svg" alt="">
+                <img class="video-thumb__logo-inner" src="assets/swiss-logo-flag.svg" alt="" width="40" height="44">
               </span>
               <div class="video-thumb__titles">
                 <p class="video-thumb__title">Mieterportal des Bundes</p>
                 <p class="video-thumb__author">Bundesamt für Bauten und Logistik</p>
               </div>
             </div>
-            <img class="video-thumb__play" src="assets/youtube-play.svg" alt="" aria-hidden="true">
+            <img class="video-thumb__play" src="assets/youtube-play.svg" alt="" aria-hidden="true" width="84" height="60">
             <span class="video-thumb__cta">
-              <img class="video-thumb__cta-icon" src="assets/youtube-play.svg" alt="" aria-hidden="true">
+              <img class="video-thumb__cta-icon" src="assets/youtube-play.svg" alt="" aria-hidden="true" width="24" height="24">
               <span>Watch on YouTube</span>
             </span>
           </a>
@@ -1107,10 +1105,11 @@ function renderInbox() {
             <input id="filterText" type="search" class="input filter-row__search" placeholder="Antrag oder Objekt suchen …" aria-label="Suche">
           </div>
 
-          <table class="table table--zebra table--rows-clickable" aria-label="Anträge">
+          <table class="table table--zebra table--rows-clickable">
+            <caption class="sr-only">Anträge mit Objekt, Typ, Einreichedatum und Status</caption>
             <thead>
               <tr>
-                <th>Antrag</th><th>Objekt</th><th>Typ</th><th>Eingereicht</th><th>Status</th>
+                <th scope="col">Antrag</th><th scope="col">Objekt</th><th scope="col">Typ</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
               </tr>
             </thead>
             <tbody id="inboxTbody">
@@ -1432,11 +1431,12 @@ function renderQueue() {
             <p class="page-header__sub">Anträge zur Prüfung in Ihrer Verwaltungseinheit</p>
           </div>
         </header>
-        <table class="table table--zebra table--rows-clickable table--compact" aria-label="Pendenzen">
+        <table class="table table--zebra table--rows-clickable table--compact">
+          <caption class="sr-only">Pendenzen mit Antragsteller, Objekt, Einreichedatum und Status</caption>
           <thead>
             <tr>
-              <th><input type="checkbox" id="selectAll" aria-label="Alle auswählen"></th>
-              <th>Antrag</th><th>Antragsteller</th><th>Objekt</th><th>Eingereicht</th><th>Status</th>
+              <th scope="col"><input type="checkbox" id="selectAll" aria-label="Alle auswählen"></th>
+              <th scope="col">Antrag</th><th scope="col">Antragsteller</th><th scope="col">Objekt</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -2110,10 +2110,11 @@ const PROPERTY_DOC_GROUPS = [
   { title: 'Historie & Korrespondenz',  types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
 ];
 
-function renderPropertyDetail({ id }) {
+async function renderPropertyDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
   if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
+  await P.loadSpatialData('data/');
   shell({ activeNav: 'properties', breadcrumb: [
     { href: '#/home', label: 'Start' },
     { href: '#/properties', label: 'Liegenschaften' },
@@ -2209,7 +2210,7 @@ function renderPropertyDetail({ id }) {
       </div>
     </section>
 
-    <section class="section">
+    <section class="section section--alt">
       <div class="container">
         <div class="property-layout">
           <div>
@@ -2470,10 +2471,11 @@ const USETYPE_FILL = {
   Lab:           '#ddd6fe',
 };
 
-function renderFloorDetail({ id, floorSlug }) {
+async function renderFloorDetail({ id, floorSlug }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
   if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
+  await P.loadSpatialData('data/');
 
   const buildingFloors = P.state.floors
     .filter(f => f.buildingId === t.buildingId)
@@ -2991,7 +2993,8 @@ function renderDownloads() {
         <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
 
         <div class="docs-table-wrap">
-          <table class="table table--zebra table--documents" aria-label="Dokumente">
+          <table class="table table--zebra table--documents">
+            <caption class="sr-only">Dokumente mit Typ, Liegenschaft, Format, Sprache und Download-Aktion</caption>
             <thead>
               <tr>
                 <th scope="col" class="col-title">Titel</th>
@@ -3235,14 +3238,14 @@ function renderRepairQuickForm() {
         </p>
         <form class="card stack" onsubmit="event.preventDefault(); window.t3lite.submitRepair(this);">
           <div class="form-field">
-            <label class="form-field__label">Liegenschaft <span class="form-field__required">*</span></label>
-            <select class="form-field__select" name="building">
+            <label class="form-field__label" for="repairBuilding">Liegenschaft <span class="form-field__required">*</span></label>
+            <select class="form-field__select" id="repairBuilding" name="building">
               ${P.state.tenancies.map(t => `<option value="${t.id}" ${presetTenancy && presetTenancy.id === t.id ? 'selected' : ''}>${P.escapeHtml(t.buildingName)} — ${P.escapeHtml(t.address)}</option>`).join('')}
             </select>
           </div>
           <div class="form-field">
-            <label class="form-field__label">Kategorie <span class="form-field__required">*</span></label>
-            <select class="form-field__select" name="category">
+            <label class="form-field__label" for="repairCategory">Kategorie <span class="form-field__required">*</span></label>
+            <select class="form-field__select" id="repairCategory" name="category">
               <option>Sanitär (Wasser, WC, Heizung)</option>
               <option>Elektrik & Beleuchtung</option>
               <option>Schliesssystem / Zutritt</option>
@@ -3251,27 +3254,25 @@ function renderRepairQuickForm() {
               <option>Sonstiges</option>
             </select>
           </div>
+          <fieldset class="form-field option-group">
+            <legend class="form-field__label">Dringlichkeit <span class="form-field__required">*</span></legend>
+            <label class="option-group__item"><input type="radio" name="urgency" value="low" checked> <span>Niedrig (Termin in 1–2 Wochen)</span></label>
+            <label class="option-group__item"><input type="radio" name="urgency" value="med"> <span>Mittel (innerhalb 48 h)</span></label>
+            <label class="option-group__item"><input type="radio" name="urgency" value="high"> <span>Hoch (gleicher Tag)</span></label>
+            <label class="option-group__item"><input type="radio" name="urgency" value="emergency"> <span>Notfall (sofort, mit Telefon)</span></label>
+          </fieldset>
           <div class="form-field">
-            <label class="form-field__label">Dringlichkeit <span class="form-field__required">*</span></label>
-            <div class="radio-group">
-              <label><input type="radio" name="urgency" value="low" checked> Niedrig (Termin in 1–2 Wochen)</label>
-              <label><input type="radio" name="urgency" value="med"> Mittel (innerhalb 48 h)</label>
-              <label><input type="radio" name="urgency" value="high"> Hoch (gleicher Tag)</label>
-              <label><input type="radio" name="urgency" value="emergency"> Notfall (sofort, mit Telefon)</label>
-            </div>
+            <label class="form-field__label" for="repairDescription">Beschreibung <span class="form-field__required">*</span></label>
+            <textarea class="form-field__textarea" id="repairDescription" name="desc" placeholder="Wo genau (Raum, Etage), seit wann, Auswirkungen …" required></textarea>
           </div>
           <div class="form-field">
-            <label class="form-field__label">Beschreibung <span class="form-field__required">*</span></label>
-            <textarea class="form-field__textarea" name="desc" placeholder="Wo genau (Raum, Etage), seit wann, Auswirkungen …" required></textarea>
-          </div>
-          <div class="form-field">
-            <label class="form-field__label">Foto (optional)</label>
-            <input class="form-field__input" type="file" name="photo">
+            <label class="form-field__label" for="repairPhoto">Foto (optional)</label>
+            <input class="form-field__input" id="repairPhoto" type="file" name="photo">
             <p class="form-field__hint">Hilfreich bei sichtbaren Schäden. Wird wie alle Anhänge auf Schadsoftware geprüft.</p>
           </div>
           <div class="form-field">
-            <label class="form-field__label">Kontakt für Rückfragen</label>
-            <input class="form-field__input" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+41 …" value="">
+            <label class="form-field__label" for="repairPhone">Kontakt für Rückfragen</label>
+            <input class="form-field__input" id="repairPhone" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+41 …" value="">
             <p class="form-field__hint">Nur ausfüllen, wenn ein anderer Kontakt als Ihr eIAM-Profil zuständig ist.</p>
           </div>
           <div class="wizard__sticky-footer">

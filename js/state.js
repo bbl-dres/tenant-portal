@@ -30,6 +30,7 @@ export const state = {
   downloads: null,             // loaded from data/downloads.json (UI download lists: regulations, strategies, training)
   floors: [],                  // loaded from data/floors.geojson (Floor entities per § 3.2)
   spaces: [],                  // loaded from data/spaces.geojson (Space entities per § 3.3)
+  spatialDataReady: null,      // lazy loader promise for floors/spaces
   page: 'home',                // current route id
   params: {},                  // route params
   draft: null,                 // current wizard draft
@@ -37,7 +38,7 @@ export const state = {
 };
 
 export async function loadData(basePath = 'data/') {
-  const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads, floorsFc, spacesFc] = await Promise.all([
+  const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads] = await Promise.all([
     fetch(basePath + 'applications.json').then(r => r.json()),
     fetch(basePath + 'reference-data.json').then(r => r.json()),
     fetch(basePath + 'users.json').then(r => r.json()),
@@ -46,8 +47,6 @@ export async function loadData(basePath = 'data/') {
     fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'documents.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'downloads.json').then(r => r.json()).catch(() => ({ regulations: [], strategies: [], training: [] })),
-    fetch(basePath + 'floors.geojson').then(r => r.json()).catch(() => ({ features: [] })),
-    fetch(basePath + 'spaces.geojson').then(r => r.json()).catch(() => ({ features: [] })),
   ]);
   state.applications = apps.map(a => ({ ...a, id: a.applicationId, type: a.applicationType, address: formatAddressLine(a) }));
   state.referenceData = reference;
@@ -57,12 +56,24 @@ export async function loadData(basePath = 'data/') {
   state.news = news.map(n => ({ ...n, id: n.newsId }));
   state.documents = documents.map(d => ({ ...d, id: d.documentId }));
   state.downloads = downloads;
+  loadSpatialData(basePath).catch(() => {});
+}
+
+export async function loadSpatialData(basePath = 'data/') {
+  if (state.spatialDataReady) return state.spatialDataReady;
+  state.spatialDataReady = Promise.all([
+    fetch(basePath + 'floors.geojson').then(r => r.json()).catch(() => ({ features: [] })),
+    fetch(basePath + 'spaces.geojson').then(r => r.json()).catch(() => ({ features: [] })),
+  ]).then(([floorsFc, spacesFc]) => {
   // Floors and Spaces stay as Feature objects so MapLibre can consume them as
   // GeoJSON directly. We mirror PK + geometry-bearing fields onto the feature
   // root for ergonomic access in render code (parallel to flattenFeature for
   // buildings, but here the geometry is the load-bearing payload).
   state.floors = (floorsFc.features || []).map(f => ({ ...f, id: f.properties.floorId, ...f.properties }));
   state.spaces = (spacesFc.features || []).map(f => ({ ...f, id: f.properties.spaceId, ...f.properties }));
+    return { floors: state.floors, spaces: state.spaces };
+  });
+  return state.spatialDataReady;
 }
 
 

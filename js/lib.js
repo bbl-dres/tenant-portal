@@ -238,11 +238,18 @@ export function attachmentLi(a) {
 // Maps the canonical Application.status enum (docs/DATAMODEL.md A.3) to a
 // styled German display badge. Used by the inbox, queue, and detail views.
 export function statusBadge(status) {
+  // Palette rationale:
+  //   info    (blue)   — neutral pipeline progress, no action needed
+  //   success (green)  — terminal positive state
+  //   orange           — call for user action (Rückfrage)
+  //   danger  (red)    — hard failure only; never used for warnings/info
+  //   warning (yellow) — caution states; not used for "in review" since
+  //                      that's normal flow, not something to worry about.
   const map = {
     'draft':         { cls: 'badge',                  label: 'Entwurf' },
     'submitted':     { cls: 'badge badge--info',      label: 'Eingereicht' },
-    'in_review_gs':  { cls: 'badge badge--warning',   label: 'in GS-Prüfung' },
-    'in_review_pfm': { cls: 'badge badge--warning',   label: 'in PFM-Prüfung' },
+    'in_review_gs':  { cls: 'badge badge--info',      label: 'in GS-Prüfung' },
+    'in_review_pfm': { cls: 'badge badge--info',      label: 'in PFM-Prüfung' },
     'approved':      { cls: 'badge badge--success',   label: 'genehmigt' },
     'in_project':    { cls: 'badge badge--info',      label: 'in ePPM' },
     'closed':        { cls: 'badge badge--success',   label: 'abgeschlossen' },

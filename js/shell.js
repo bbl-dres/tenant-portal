@@ -117,6 +117,11 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
 
   const navHtml = desktopNavItems.map((item, i) => {
     const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
+    // CD mobile pattern: every top-level nav item gets a right-arrow at
+    // the right edge as a tap affordance (sections/mobile-menu.postcss
+    // → .mobile-menu-v2-navigation-item__has-children .icon). Shown via
+    // CSS only at <1024 px; hidden on desktop.
+    const mobileArrow = `<span class="main-navigation__arrow" aria-hidden="true">${icon('chevronRight')}</span>`;
     if (item.type === 'dropdown') {
       return `
         <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
@@ -126,12 +131,13 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                 aria-controls="navMenu-${item.id}"
                 data-menu="${item.id}"
                 onclick="window.portal.toggleNavMenu('${item.id}')">
-          ${item.label}
+          <span class="main-navigation__label">${item.label}</span>
           ${icon('chevronDown', 'main-navigation__chevron')}
+          ${mobileArrow}
         </button>
       `;
     }
-    return `<a class="main-navigation__link ${activeCls}" href="${item.href}">${item.label}</a>`;
+    return `<a class="main-navigation__link ${activeCls}" href="${item.href}"><span class="main-navigation__label">${item.label}</span>${mobileArrow}</a>`;
   }).join('');
 
   // Mobile-only meta links rendered at the foot of the burger menu so
@@ -268,12 +274,18 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
         </div>
       </div>
 
+      <div class="top-header__department-strip" aria-hidden="true">
+        <div class="top-header__department-strip-inner">Bundesamt für Bauten und Logistik BBL</div>
+      </div>
+
       <div class="top-header">
         <div class="top-header__inner">
           <a class="top-header__left" href="#/"
              aria-label="Startseite — Bundesamt für Bauten und Logistik BBL · ${deptSub}">
-            <img class="top-header__bundmark" src="assets/BundLogo.svg"
-                 alt="Schweizerische Eidgenossenschaft · Confédération suisse · Confederazione Svizzera · Confederaziun svizra">
+            <span class="top-header__bundmark">
+              <img class="top-header__bundmark-flag" src="assets/swiss-logo-flag.svg" alt="" aria-hidden="true">
+              <img class="top-header__bundmark-name" src="assets/swiss-logo-name.svg" alt="" aria-hidden="true">
+            </span>
             <span class="top-header__divider" aria-hidden="true"></span>
             <span class="top-header__dept">
               <span class="top-header__dept-name"><strong>Bundesamt für Bauten und Logistik BBL</strong></span>
@@ -305,6 +317,20 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                   </button>
                 </form>
               </div>
+              <!-- CD pattern (components/burger.postcss): burger lives in
+                   the top-header right-side row, to the right of search,
+                   visible only below lg (1024 px). -->
+              <button class="burger" type="button"
+                      aria-label="Menü öffnen"
+                      aria-expanded="false"
+                      aria-controls="mainNavigation"
+                      onclick="window.portal.toggleBurger();">
+                <span class="burger__icon" aria-hidden="true">
+                  <span class="burger__bar"></span>
+                  <span class="burger__bar"></span>
+                  <span class="burger__bar"></span>
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -312,17 +338,6 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
 
       <nav class="navbar" aria-label="Hauptnavigation">
         <div class="navbar__inner">
-          <button class="burger" type="button"
-                  aria-label="Menü öffnen"
-                  aria-expanded="false"
-                  aria-controls="mainNavigation"
-                  onclick="window.portal.toggleBurger();">
-            <span class="burger__icon" aria-hidden="true">
-              <span class="burger__bar"></span>
-              <span class="burger__bar"></span>
-              <span class="burger__bar"></span>
-            </span>
-          </button>
           <div class="main-navigation" id="mainNavigation">${navHtml}${mobileMetaHtml}</div>
         </div>
         ${navMenus}
