@@ -50,7 +50,7 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
 - ≈ 99 % aligned with [`swiss/designsystem`](https://github.com/swiss/designsystem) v1.0.9 — typography, color, layout, spacing, components.
 - Bundled Noto Sans (Regular / Bold / Italic / Bold-Italic).
 - WCAG 2.1 AA: skip-link, focus rings, `prefers-reduced-motion`, ARIA disclosure for dropdowns, semantic markup, contrast verified.
-- See [`docs/design-system-audit.md`](docs/design-system-audit.md) for the full gap analysis and resolved-vs-open items, and [`docs/remediation-plan.md`](docs/remediation-plan.md) for the step-by-step CD-alignment plan.
+- See [`docs/DESIGNGUIDE.md`](docs/DESIGNGUIDE.md) for the implementation rules and [`docs/code-review.md`](docs/code-review.md) for the senior engineering readiness review.
 
 ### Technical
 - **Hash-routed SPA** — no framework, no build step. ES modules.
@@ -69,7 +69,7 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
 | Noto Sans | bundled | Federal canonical typeface |
 | JSON | static | Mock data (applications, buildings, tenancies (Mietverhältnisse), …) |
 
-No build tools, no package manager, no framework — pure static files.
+No build tools and no framework — the app itself is pure static files. `npm` is used only for local verification scripts.
 
 ## Getting Started
 
@@ -88,6 +88,16 @@ php -S localhost:8000
 
 Then open http://localhost:8000
 
+## Verification
+
+```bash
+npm ci
+npm test
+npm run a11y:responsive
+```
+
+`npm test` runs JavaScript syntax checks plus the CD/token guard. The responsive accessibility sweep is separate because it launches Playwright and takes longer.
+
 ## Project Structure
 
 ```
@@ -98,16 +108,15 @@ tenant-portal/
 ├── js/          # Router, shell, wizard, state, helpers (ES modules)
 ├── data/        # Static JSON / GeoJSON mocks (applications, buildings, tenancies, …)
 ├── docs/        # Requirements, data model, design guide, CD audit, research
-└── scripts/     # Local utility scripts
+└── scripts/     # Verification, data-generation, and research utilities
 ```
 
 ## Deployment
 
-**GitHub Pages:** Push to `main` deploys automatically.
+**GitHub Pages / static hosting:** The app can be served from GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static file server. If GitHub Pages deployment is enabled through repository settings, document that configuration alongside the handover notes.
 
 **Alternatives:** Netlify, Vercel, CloudFlare Pages, or any static file server.
 
 ## License
 
 Licensed under [MIT](https://opensource.org/licenses/MIT)
-

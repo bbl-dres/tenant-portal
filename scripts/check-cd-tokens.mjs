@@ -4,7 +4,14 @@ import process from 'node:process';
 
 const root = process.cwd();
 const tenantTokensPath = path.join(root, 'css', 'tokens.css');
+const stylesPath = path.join(root, 'css', 'styles.css');
 const appPath = path.join(root, 'js', 'app.js');
+const jsTemplatePaths = [
+  path.join(root, 'js', 'app.js'),
+  path.join(root, 'js', 'shell.js'),
+  path.join(root, 'js', 'wizard.js'),
+  path.join(root, 'js', 'lib.js'),
+];
 const dsRootCandidates = [
   process.env.SWISS_DESIGNSYSTEM_DIR,
   path.resolve(root, '..', 'designsystem'),
@@ -53,6 +60,39 @@ function hardcodedJsColorsOutsideFallbackBlock(appSource) {
   return hits;
 }
 
+function stripCssComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
+function stripLineComments(source) {
+  return source
+    .split(/\r?\n/)
+    .filter(line => !line.trim().startsWith('//'))
+    .join('\n');
+}
+
+function hardcodedCssColors(stylesSource) {
+  const source = stripCssComments(stylesSource);
+  const hits = [];
+  source.split(/\r?\n/).forEach((line, index) => {
+    const matches = [
+      ...line.matchAll(/#[0-9A-Fa-f]{3,8}\b/g),
+      ...line.matchAll(/\b(?:rgb|rgba|hsl|hsla)\(/gi),
+    ].map(match => match[0]);
+    if (matches.length) hits.push(`${index + 1}: ${matches.join(', ')}`);
+  });
+  return hits;
+}
+
+function inlineStyleAttributes(file, source) {
+  const cleaned = stripLineComments(source);
+  const hits = [];
+  cleaned.split(/\r?\n/).forEach((line, index) => {
+    if (/\bstyle\s*=/.test(line)) hits.push(`${path.relative(root, file)}:${index + 1}`);
+  });
+  return hits;
+}
+
 const failures = [];
 
 if (!dsTokensPath) {
@@ -70,6 +110,16 @@ if (!dsTokensPath) {
 const hardcodedJsColors = hardcodedJsColorsOutsideFallbackBlock(read(appPath));
 if (hardcodedJsColors.length) {
   failures.push(`Hardcoded JS colors outside CD_COLOR_FALLBACKS:\n${hardcodedJsColors.join('\n')}`);
+}
+
+const hardcodedCssColorHits = hardcodedCssColors(read(stylesPath));
+if (hardcodedCssColorHits.length) {
+  failures.push(`Hardcoded CSS colors outside css/tokens.css:\n${hardcodedCssColorHits.join('\n')}`);
+}
+
+const inlineStyleHits = jsTemplatePaths.flatMap(file => inlineStyleAttributes(file, read(file)));
+if (inlineStyleHits.length) {
+  failures.push(`Inline style attributes in JS templates:\n${inlineStyleHits.join('\n')}`);
 }
 
 if (failures.length) {

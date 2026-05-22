@@ -6,3 +6,10 @@ docs/BBL Requierements/
 
 # Per-machine Claude Code settings — not shared
 .claude/settings.local.json
+
+# Installed verification dependencies; recreate with `npm ci`.
+node_modules/
+
+# Local Playwright screenshots and comparison artifacts.
+verify_in/
+verify_out/

@@ -411,7 +411,7 @@ and IBPDI *Building*. Spatial hierarchy: Building → Floor (§ 3.2) → Space
 
 ### 3.2 Floor (Geschoss)
 
-**File:** [`data/floors.geojson`](../data/floors.geojson) — GeoJSON `FeatureCollection` of `Polygon` features carrying the floor outline. Populated for all 10 BBL buildings (27 floors total) via [`scripts/generate-floor-spaces.py`](../scripts/generate-floor-spaces.py).
+**File:** [`data/floors.geojson`](../data/floors.geojson) — GeoJSON `FeatureCollection` of `Polygon` features carrying the floor outline. Populated for all 10 BBL buildings (27 floors total) via [`scripts/data/generate-floor-spaces.py`](../scripts/data/generate-floor-spaces.py).
 
 A level within a Building. Required by the planned floor-plan viewer; also
 the granularity at which whole-storey leases (a frequent federal pattern —
@@ -435,7 +435,7 @@ the granularity at which whole-storey leases (a frequent federal pattern —
 
 ### 3.3 Space (Raum)
 
-**File:** [`data/spaces.geojson`](../data/spaces.geojson) — GeoJSON `FeatureCollection` of `Polygon` features. Populated for all 10 BBL buildings — 459 rooms across 27 floors (17 rooms per floor: 8 north, corridor, 8 south), generated via [`scripts/generate-floor-spaces.py`](../scripts/generate-floor-spaces.py).
+**File:** [`data/spaces.geojson`](../data/spaces.geojson) — GeoJSON `FeatureCollection` of `Polygon` features. Populated for all 10 BBL buildings — 459 rooms across 27 floors (17 rooms per floor: 8 north, corridor, 8 south), generated via [`scripts/data/generate-floor-spaces.py`](../scripts/data/generate-floor-spaces.py).
 
 A room — the smallest rentable unit. Borrows from ISO 16739 `IfcSpace`,
 IBPDI *Unit*, and ArcGIS Indoors *Unit*. **The Tenancy's actual rented

@@ -213,7 +213,7 @@ function renderStep1(draft) {
       <span class="wizard__counter">Schritt 1 / 5</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
       <a class="btn btn--outline" href="#/home">Abbrechen</a>
-      <button class="btn btn--filled" id="nextStep">Weiter → Fläche / NAW</button>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Fläche / NAW</button>
     </div>
   `;
 }
@@ -434,8 +434,8 @@ function renderStep2(draft) {
     <div class="wizard__sticky-footer">
       <span class="wizard__counter">Schritt 2 / 5</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
-      <a class="btn btn--outline" href="#/wizard/1">← Zurück</a>
-      <button class="btn btn--filled" id="nextStep">Weiter → Anhänge</button>
+      <a class="btn btn--outline" href="#/wizard/1">${icon('arrowLeft')}Zurück</a>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Anhänge</button>
     </div>
   `;
 }
@@ -536,8 +536,8 @@ function renderStep3(draft) {
     <div class="wizard__sticky-footer">
       <span class="wizard__counter">Schritt 3 / 5 · ${(draft.attachments || []).length} Dateien</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
-      <a class="btn btn--outline" href="#/wizard/2">← Zurück</a>
-      <button class="btn btn--filled" id="nextStep">Weiter → ${draft.type === 'Grossantrag' ? 'Detail' : 'Prüfen & Senden'}</button>
+      <a class="btn btn--outline" href="#/wizard/2">${icon('arrowLeft')}Zurück</a>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} ${draft.type === 'Grossantrag' ? 'Detail' : 'Prüfen & Senden'}</button>
     </div>
   `;
 }
@@ -579,8 +579,8 @@ function renderStep4(draft) {
       <p class="wizard__subtitle">Entfällt für Antragstyp "${draft.type}". Sie können direkt zu Schritt 5 weiter.</p>
       <div class="wizard__sticky-footer">
         <span class="wizard__counter">Schritt 4 (übersprungen)</span>
-        <a class="btn btn--outline" href="#/wizard/3">← Zurück</a>
-        <button class="btn btn--filled" id="nextStep">Weiter → Prüfen & Senden</button>
+        <a class="btn btn--outline" href="#/wizard/3">${icon('arrowLeft')}Zurück</a>
+        <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Prüfen & Senden</button>
       </div>
     `;
   }
@@ -592,15 +592,15 @@ function renderStep4(draft) {
     <div class="wizard__section">
       <h3>Sektion A · Bedarf & Zielzustand</h3>
       <div class="form-field">
-        <label class="form-field__label" for="gKurz">4.1 Kurzbeschreibung <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Antrag"</span></label>
+        <label class="form-field__label" for="gKurz">4.1 Kurzbeschreibung <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Antrag"</span></label>
         <textarea class="form-field__textarea" id="gKurz" name="g_kurz" maxlength="500">${escapeHtml(f.kurz || '')}</textarea>
       </div>
       <div class="form-field">
-        <label class="form-field__label" for="gDefizit">4.2 Defizite in der aktuellen Situation <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Defizit"</span></label>
+        <label class="form-field__label" for="gDefizit">4.2 Defizite in der aktuellen Situation <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Defizit"</span></label>
         <textarea class="form-field__textarea" id="gDefizit" name="g_defizit">${escapeHtml(f.defizit || '')}</textarea>
       </div>
       <div class="form-field">
-        <label class="form-field__label" for="gZiel">4.4 Zielzustand / Operative Ziele <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Ziele/Soll"</span></label>
+        <label class="form-field__label" for="gZiel">4.4 Zielzustand / Operative Ziele <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Ziele/Soll"</span></label>
         <textarea class="form-field__textarea" id="gZiel" name="g_ziel">${escapeHtml(f.ziel || '')}</textarea>
         <p class="form-field__hint">v0.5: zusammengefasst aus den vorigen Feldern „Operative Ziele" und „Zielzustand".</p>
       </div>
@@ -609,15 +609,15 @@ function renderStep4(draft) {
     <div class="wizard__section">
       <h3>Sektion B · Recht, Alternativen, Planung</h3>
       <div class="form-field">
-        <label class="form-field__label" for="gRecht">4.3 Rechtsgrundlage <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Recht"</span></label>
+        <label class="form-field__label" for="gRecht">4.3 Rechtsgrundlage <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Recht"</span></label>
         <input class="form-field__input" id="gRecht" type="text" name="g_recht" value="${escapeHtml(f.recht || '')}" placeholder="Verweis auf Upload aus Schritt 3 oder URL">
       </div>
       <div class="form-field">
-        <label class="form-field__label" for="gAlt">4.5 Geprüfte Alternativen <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Alt"</span></label>
+        <label class="form-field__label" for="gAlt">4.5 Geprüfte Alternativen <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Alt"</span></label>
         <textarea class="form-field__textarea" id="gAlt" name="g_alt">${escapeHtml(f.alt || '')}</textarea>
       </div>
       <div class="form-field">
-        <label class="form-field__label" for="gAbh">4.8 Planungsabhängigkeiten <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">→ ePPM "Abhäng."</span></label>
+        <label class="form-field__label" for="gAbh">4.8 Planungsabhängigkeiten <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Abhäng."</span></label>
         <textarea class="form-field__textarea" id="gAbh" name="g_abh">${escapeHtml(f.abh || '')}</textarea>
       </div>
     </div>
@@ -651,8 +651,8 @@ function renderStep4(draft) {
     <div class="wizard__sticky-footer">
       <span class="wizard__counter" id="grossCounter">0 / 7 Pflichtfelder ausgefüllt</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
-      <a class="btn btn--outline" href="#/wizard/3">← Zurück</a>
-      <button class="btn btn--filled" id="nextStep">Weiter → Prüfen & Senden</button>
+      <a class="btn btn--outline" href="#/wizard/3">${icon('arrowLeft')}Zurück</a>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Prüfen & Senden</button>
     </div>
   `;
 }
@@ -746,8 +746,8 @@ function renderStep5(draft) {
     <div class="wizard__sticky-footer">
       <span class="wizard__counter">Schritt 5 / 5</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
-      <a class="btn btn--outline" href="#/wizard/${draft.type === 'Grossantrag' ? '4' : '3'}">← Zurück</a>
-      <button class="btn btn--filled" id="submitBtn" ${(!allRequired || !hasAtt || (c && c.hardBlocked) || (draft.type === 'Grossantrag' && !grossOk)) ? 'disabled' : ''}>Einreichen →</button>
+      <a class="btn btn--outline" href="#/wizard/${draft.type === 'Grossantrag' ? '4' : '3'}">${icon('arrowLeft')}Zurück</a>
+      <button class="btn btn--filled" id="submitBtn" ${(!allRequired || !hasAtt || (c && c.hardBlocked) || (draft.type === 'Grossantrag' && !grossOk)) ? 'disabled' : ''}>Einreichen ${icon('arrowRight')}</button>
     </div>
   `;
 }

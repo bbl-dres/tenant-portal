@@ -412,17 +412,17 @@ export function renderFooter() {
           <div class="footer-information__col footer-information__col--links">
             <h2 class="footer-information__heading">Weitere Informationen</h2>
             <ul class="footer-information__list">
-              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
-              <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
-              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
 
           <div class="footer-information__col footer-information__col--links">
             <h2 class="footer-information__heading">Prototyp</h2>
             <ul class="footer-information__list">
-              <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
-              <li><a href="https://github.com/swiss/designsystem" target="_blank" rel="noopener">CD Bund <span class="footer-information__arrow" aria-hidden="true">→</span></a></li>
+              <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://github.com/swiss/designsystem" target="_blank" rel="noopener">CD Bund ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
 

@@ -1,20 +1,22 @@
 {
   "name": "tenant-portal",
   "version": "1.0.0",
+  "type": "module",
   "description": "<p align=\"center\">   <img src=\"assets/Social.jpg\" width=\"100%\" alt=\"BBL Federal Tenant Portal\"/> </p>",
-  "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
     "a11y:responsive": "node scripts/check-a11y-responsive.mjs",
     "cd:check": "node scripts/check-cd-tokens.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:unit": "node scripts/check-domain-units.mjs",
+    "test:syntax": "node scripts/check-js-syntax.mjs",
+    "test": "npm run test:syntax && npm run test:unit && npm run cd:check"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
+  "license": "MIT",
+  "devDependencies": {
     "playwright": "^1.60.0"
   }
 }

@@ -192,7 +192,7 @@ export const ICONS = {
   alertTriangle: 'Warning',
   chevronLeft: 'ChevronLeft', chevronRight: 'ChevronRight',
   chevronUp: 'ChevronUp', chevronDown: 'ChevronDown',
-  arrowRight: 'ArrowRight',
+  arrowLeft: 'ArrowLeft', arrowRight: 'ArrowRight',
   // content / actions
   document: 'File', attachment: 'File', video: 'Video',
   grid: 'Apps', list: 'List',
@@ -416,7 +416,7 @@ export function toast(message, variant = '') {
 
   el.append(msg, close);
   host.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 200ms'; }, 3500);
+  setTimeout(() => el.classList.add('toast--hiding'), 3500);
   setTimeout(() => el.remove(), 3800);
 }
 

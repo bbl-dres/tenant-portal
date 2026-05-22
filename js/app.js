@@ -1,13 +1,13 @@
 /* ==========================================================================
- APP.JS — BBL Mieterportal prototype, single-page app.
+ APP.JS â€” BBL Mieterportal prototype, single-page app.
 
  Hash-routed, no framework, no build step. Two namespaces share this file:
    - portal.*   federal chrome, router, state, formatters, helpers
                 (renderShell, renderPipeline, renderStepIndicator,
                  loadData, calcWizard, toast, modal, statusBadge,
-                 formatChf/Date, escapeHtml/escapeJs, …)
+                 formatChf/Date, escapeHtml/escapeJs, â€¦)
    - t3lite.*   inline-handler bridge for the views below
-                (newsPage, scrollToInfo, submitRepair, demoRole, …)
+                (newsPage, scrollToInfo, submitRepair, demoRole, â€¦)
 
  Routes:
    #/              landing (public) OR home (authenticated)
@@ -16,9 +16,9 @@
    #/wizard/:step  5-step demand wizard
    #/inbox         submitter inbox
    #/inbox/:id     application detail
-   #/queue         reviewer queue (GS-Prüfer/in)
+   #/queue         reviewer queue (GS-PrÃ¼fer/in)
    #/review/:id    reviewer split-pane
-   #/help · #/info · #/properties · #/downloads · #/news · #/search …
+   #/help Â· #/info Â· #/properties Â· #/downloads Â· #/news Â· #/search â€¦
  ========================================================================== */
 
 import {
@@ -47,12 +47,12 @@ import {
   calcWizard, deriveNawClass, ensureDraft, renderWizard, submitDraft,
 } from './wizard.js';
 
-// ── PERSISTENCE (localStorage) ──────────────────────────────────────────
+// â”€â”€ PERSISTENCE (localStorage) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── ROUTER (hash-based) ──────────────────────────────────────────────────
+// â”€â”€ ROUTER (hash-based) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const routes = [];
 function registerRoute(pattern, handler) {
-  // pattern: '#/wizard/:step' → regex
+  // pattern: '#/wizard/:step' â†’ regex
   const re = new RegExp('^' + pattern.replace(/:(\w+)/g, '(?<$1>[^/]+)') + '$');
   routes.push({ re, handler });
 }
@@ -65,7 +65,7 @@ function navigate(hash) {
 }
 function handleHash() {
   const full = location.hash || '#/';
-  // Strip a `?query` suffix before route matching — query params (view/q/page/…)
+  // Strip a `?query` suffix before route matching â€” query params (view/q/page/â€¦)
   // are read directly from `location.hash` inside the view handler.
   const qIdx = full.indexOf('?');
   const h = qIdx >= 0 ? full.slice(0, qIdx) : full;
@@ -79,12 +79,12 @@ function handleHash() {
   }
   // No match: render 404
   const app = document.getElementById('app');
-  if (app) app.innerHTML = `<div class="container section"><h1>Seite nicht gefunden</h1><p><a href="#/">Zurück zur Startseite</a></p></div>`;
+  if (app) app.innerHTML = `<div class="container section"><h1>Seite nicht gefunden</h1><p><a href="#/">ZurÃ¼ck zur Startseite</a></p></div>`;
 }
 
-// ── TOAST ────────────────────────────────────────────────────────────────
+// â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── ROLE CHOOSER (§2.1) ──────────────────────────────────────────────────
+// â”€â”€ ROLE CHOOSER (Â§2.1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openRoleMenu() {
   if (!state.user || state.user.roles.length < 2) {
     toast('Sie haben nur eine Rolle in diesem Profil.');
@@ -125,7 +125,7 @@ function openRoleMenu() {
   });
 }
 
-// ── LOGIN STUB ───────────────────────────────────────────────────────────
+// â”€â”€ LOGIN STUB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function login() {
   // For the prototype, log in as the first user with multiple roles (Andrea Muster).
   const user = state.users.find(u => u.roles.length > 1) || state.users[0];
@@ -143,7 +143,7 @@ function logout() {
   navigate('#/');
 }
 
-// ── EXPORT ───────────────────────────────────────────────────────────────
+// â”€â”€ EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.portal = {
   state, loadData, loadSpatialData,
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
@@ -158,14 +158,14 @@ window.portal = {
   PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 };
 
-// ── VIEWS ───────────────────────────────────────────────────────────────
+// â”€â”€ VIEWS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Per-route renderers. They use the helpers above via local alias `P`
-// (kept so the existing inline-handler call sites — window.portal.x —
+// (kept so the existing inline-handler call sites â€” window.portal.x â€”
 // keep working without rewriting every view).
 const P = window.portal;
 const root = document.getElementById('root');
 
-// ── BOOTSTRAP ────────────────────────────────────────────────────────────
+// â”€â”€ BOOTSTRAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 init();
 
 // Hashes that work for an unauthenticated visitor. Everything else is a
@@ -180,7 +180,7 @@ async function init() {
   // Deep-link auto-login: a user opening a shared URL like
   // `#/properties/T-2011-AA-01/floors/1OG` would otherwise be bounced to
   // `#/` because every detail handler does `if (!state.user) navigate('#/')`.
-  // In production this is where eIAM session restore happens — for the
+  // In production this is where eIAM session restore happens â€” for the
   // prototype we silently grant the first multi-role demo user so the
   // intended route renders directly. Toast + navigate() are skipped
   // because we want to land on the URL the user actually typed.
@@ -197,7 +197,7 @@ async function init() {
   P.handleHash();
 }
 
-// ── ROUTES ───────────────────────────────────────────────────────────────
+// â”€â”€ ROUTES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function registerRoutes() {
   P.registerRoute('#/',            renderRoot);
   P.registerRoute('#/login',       renderLogin);
@@ -217,15 +217,15 @@ function registerRoutes() {
   P.registerRoute('#/news',        renderNewsList);
   P.registerRoute('#/news/:id',    renderNewsDetail);
   P.registerRoute('#/services',    renderServicesOverview);
-  P.registerRoute('#/moves',       () => renderServiceStub('Umzug & Sonderreinigung', 'REQ-FA-006', 'Transport, Umzug innerhalb einer Liegenschaft und Sonderreinigungsanfragen werden in einer der nächsten Iterationen des Mieterportals freigeschaltet.'));
-  P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
-  P.registerRoute('#/training',    () => renderServiceStub('Schulungen', 'FUNC-LP-007', 'Aktuelle Schulungen wie „Mieterportal kompakt" (60 Min.) und Aufbaukurse sind hier verlinkt — Termin-Buchung folgt in v0.4.'));
-  // Arbeitsinstrumente und Informationen — single long-scroll page (public)
+  P.registerRoute('#/moves',       () => renderServiceStub('Umzug & Sonderreinigung', 'REQ-FA-006', 'Transport, Umzug innerhalb einer Liegenschaft und Sonderreinigungsanfragen werden in einer der nÃ¤chsten Iterationen des Mieterportals freigeschaltet.'));
+  P.registerRoute('#/mobiliar',    () => renderServiceStub('MÃ¶bel bestellen', 'REQ-FA-007', 'Der fÃ¶derale Mobiliar-Shop lÃ¤uft im Schwesterprojekt â€žArbeitsplatz-Management" â€” Sie werden in der Produktivversion direkt dorthin verknÃ¼pft.', 'https://bbl-dres.github.io/workspace-management/'));
+  P.registerRoute('#/training',    () => renderServiceStub('Schulungen', 'FUNC-LP-007', 'Aktuelle Schulungen wie â€žMieterportal kompakt" (60 Min.) und Aufbaukurse sind hier verlinkt â€” Termin-Buchung folgt in v0.4.'));
+  // Arbeitsinstrumente und Informationen â€” single long-scroll page (public)
   P.registerRoute('#/info',                renderInfoPage);
   P.registerRoute('#/search',              renderSearchResults);
 }
 
-// ── GLOBAL SEARCH RESULTS ────────────────────────────────────────────────
+// â”€â”€ GLOBAL SEARCH RESULTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CD Bund search-results pattern caps each origin-group at a small
 // number and offers a "view all in [origin]" link below. Less overwhelm
 // than one mega-list, lets the user pivot to the canonical paginated
@@ -285,21 +285,21 @@ function renderSearchResults() {
 
     <section class="section section--alt search-hero">
       <div class="container">
-        <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
+        <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` fÃ¼r â€ž${P.escapeHtml(query)}"` : ''}</h1>
         <form class="search-hero__form" role="search" aria-label="Portal durchsuchen"
               onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v);">
           <div class="search-hero__field">
             ${P.icon('search')}
             <input type="search" name="q" class="input search-hero__input"
                    value="${P.escapeHtml(query)}"
-                   placeholder="Suchbegriff eingeben …"
+                   placeholder="Suchbegriff eingeben â€¦"
                    aria-label="Suchbegriff"
                    autocomplete="off">
           </div>
           <button class="btn btn--filled" type="submit">Suchen</button>
         </form>
         ${query && total > 0
-          ? `<p class="search-hero__meta">${total} ${total === 1 ? 'Treffer' : 'Treffer'} in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>`
+          ? `<p class="search-hero__meta">${total} ${total === 1 ? 'Treffer' : 'Treffer'} in ${[matches.news.length && 'Aktuell', matches.applications.length && 'AntrÃ¤ge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>`
           : ''}
       </div>
     </section>
@@ -310,11 +310,11 @@ function renderSearchResults() {
           <p class="section-intro">Bitte geben Sie einen Suchbegriff oben ein.</p>
         ` : total === 0 ? `
           <div class="search-no-results">
-            <h2 class="h3 search-no-results__title">Die Suche nach <strong>„${P.escapeHtml(query)}"</strong> ergab keine Treffer.</h2>
+            <h2 class="h3 search-no-results__title">Die Suche nach <strong>â€ž${P.escapeHtml(query)}"</strong> ergab keine Treffer.</h2>
 
             <h3 class="h4 search-no-results__heading">Tipps zur Suche</h3>
             <ul class="search-no-results__list">
-              <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffs.</li>
+              <li>ÃœberprÃ¼fen Sie die Schreibweise Ihres Suchbegriffs.</li>
               <li>Verwenden Sie einen anderen oder allgemeineren Begriff.</li>
               <li>Versuchen Sie es mit weniger Suchbegriffen.</li>
               <li>Durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</li>
@@ -322,7 +322,7 @@ function renderSearchResults() {
 
             <h3 class="h4 search-no-results__heading">Hinweis</h3>
             <p class="search-no-results__hint">
-              Die Suche durchsucht aktuell Ihre Anträge, freigegebene Liegenschaften, News-Einträge und die Informationsseite. Erweiterte Suchfilter werden in einer späteren Iteration ergänzt.
+              Die Suche durchsucht aktuell Ihre AntrÃ¤ge, freigegebene Liegenschaften, News-EintrÃ¤ge und die Informationsseite. Erweiterte Suchfilter werden in einer spÃ¤teren Iteration ergÃ¤nzt.
             </p>
           </div>
         ` : `
@@ -335,26 +335,26 @@ function renderSearchResults() {
                   type: n.type || 'Aktuell',
                   meta: P.formatDate(n.date),
                   title: n.title,
-                  lead: n.lead.slice(0, 180) + (n.lead.length > 180 ? '…' : ''),
+                  lead: n.lead.slice(0, 180) + (n.lead.length > 180 ? 'â€¦' : ''),
                 })).join('')}
               </ul>
-              ${matches.news.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/news">${matches.news.length - SEARCH_GROUP_CAP} weitere in der News-Übersicht ansehen →</a></p>` : ''}
+              ${matches.news.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/news">${matches.news.length - SEARCH_GROUP_CAP} weitere in der News-Ãœbersicht ansehen ${P.icon('arrowRight')}</a></p>` : ''}
             </section>
           ` : ''}
 
           ${matches.applications.length ? `
             <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Anträge <span class="search-results__group-count">(${matches.applications.length})</span></h2>
+              <h2 class="h3 search-results__group-title">AntrÃ¤ge <span class="search-results__group-count">(${matches.applications.length})</span></h2>
               <ul class="search-results">
                 ${matches.applications.slice(0, SEARCH_GROUP_CAP).map(a => searchRow({
                   href: `#/inbox/${a.id}`,
                   type: a.type || 'Antrag',
                   meta: `Eingereicht ${P.formatDate(a.submittedAt)}`,
-                  title: `${a.id} — ${a.address}`,
+                  title: `${a.id} â€” ${a.address}`,
                   lead: '',
                 })).join('')}
               </ul>
-              ${matches.applications.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/inbox">${matches.applications.length - SEARCH_GROUP_CAP} weitere Anträge in der Inbox →</a></p>` : ''}
+              ${matches.applications.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/inbox">${matches.applications.length - SEARCH_GROUP_CAP} weitere AntrÃ¤ge in der Inbox ${P.icon('arrowRight')}</a></p>` : ''}
             </section>
           ` : ''}
 
@@ -367,10 +367,10 @@ function renderSearchResults() {
                   type: 'Liegenschaft',
                   meta: formatAssetKey(t.assetKey),
                   title: t.buildingName,
-                  lead: `${t.address} · ${t.hnf2} m² HNF2`,
+                  lead: `${t.address} Â· ${t.hnf2} mÂ² HNF2`,
                 })).join('')}
               </ul>
-              ${matches.properties.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/properties?q=${encodeURIComponent(query)}">${matches.properties.length - SEARCH_GROUP_CAP} weitere Liegenschaften im Portfolio →</a></p>` : ''}
+              ${matches.properties.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/properties?q=${encodeURIComponent(query)}">${matches.properties.length - SEARCH_GROUP_CAP} weitere Liegenschaften im Portfolio ${P.icon('arrowRight')}</a></p>` : ''}
             </section>
           ` : ''}
 
@@ -383,7 +383,7 @@ function renderSearchResults() {
                   type: 'Information',
                   meta: '',
                   title: it.label,
-                  lead: 'Abschnitt auf der Info-Seite öffnen.',
+                  lead: 'Abschnitt auf der Info-Seite Ã¶ffnen.',
                   onclick: `setTimeout(() => window.t3lite.scrollToInfo('${it.id}'), 100);`,
                 })).join('')}
               </ul>
@@ -395,7 +395,7 @@ function renderSearchResults() {
     </section>
   `;
 
-  // Move keyboard focus into the hero search field — most users land on
+  // Move keyboard focus into the hero search field â€” most users land on
   // this page intending to refine the query.
   setTimeout(() => {
     const input = document.querySelector('.search-hero__input');
@@ -408,16 +408,16 @@ function renderSearchResults() {
   }, 0);
 }
 
-// ── ARBEITSINSTRUMENTE UND INFORMATIONEN ─────────────────────────────────
+// â”€â”€ ARBEITSINSTRUMENTE UND INFORMATIONEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Single long-scroll page with a sticky Inhaltsverzeichnis on the right
 // (kbob-fdk Handbuch & Downloads pattern; armasuisse Immo-Portal layout).
-// Public — no login required.
+// Public â€” no login required.
 
 const INFO_TOC = [
-  { id: 'einfuehrung',   label: 'Einführung' },
-  { id: 'faq',           label: 'Häufige Fragen' },
-  { id: 'workflow',      label: 'Workflow erklärt' },
-  { id: 'naw',           label: 'NAW & Bürowelten' },
+  { id: 'einfuehrung',   label: 'EinfÃ¼hrung' },
+  { id: 'faq',           label: 'HÃ¤ufige Fragen' },
+  { id: 'workflow',      label: 'Workflow erklÃ¤rt' },
+  { id: 'naw',           label: 'NAW & BÃ¼rowelten' },
   { id: 'verordnungen',  label: 'Verordnungen, Weisungen und Vorgaben' },
   { id: 'strategien',    label: 'Strategien und Konzepte' },
   { id: 'schulungen',    label: 'Schulungen' },
@@ -437,11 +437,11 @@ function renderInfoPage() {
         <header class="info-page__header">
           <p class="meta-info">
             <span class="meta-info__item">Stand: ${P.formatDate(new Date().toISOString())}</span>
-            <span class="meta-info__item">Öffentlich · kein Login nötig</span>
+            <span class="meta-info__item">Ã–ffentlich Â· kein Login nÃ¶tig</span>
           </p>
           <h1 class="info-page__title">Arbeitsinstrumente und Informationen</h1>
           <p class="section-intro section-intro--tight">
-            Erklärungen, Merkblätter, Vorlagen und Schulungsmaterial rund um das Mieterportal.
+            ErklÃ¤rungen, MerkblÃ¤tter, Vorlagen und Schulungsmaterial rund um das Mieterportal.
           </p>
         </header>
 
@@ -449,46 +449,46 @@ function renderInfoPage() {
           <main class="page-with-toc__content">
 
             <article id="einfuehrung">
-              <h2>Einführung</h2>
-              <p>Das Bundesamt für Bauten und Logistik (BBL) bewirtschaftet als Eigentümervertretung rund 2'800 Liegenschaften der zivilen Bundesverwaltung — überwiegend Büroflächen in Bundeshäusern und Departementssitzen, dazu spezialisierte Objekte wie die Empfangs- und Verfahrenszentren des SEM. Die Liegenschaften des VBS (armasuisse Immobilien) und die Auslandvertretungen der EDA sind nicht Teil des BBL-Portfolios.</p>
-              <p>Das Mieterportal ist die zentrale digitale Anlaufstelle für die Verwaltungseinheiten als Mietende: Bedarfsmeldung, Schadensmeldung, Statusverfolgung und Zugriff auf Dokumente zu Ihren Liegenschaften. Die hier zusammengetragenen Informationen sind öffentlich zugänglich; für eigentliche Anträge ist eine Anmeldung mit dem föderalen eIAM-Konto erforderlich.</p>
+              <h2>EinfÃ¼hrung</h2>
+              <p>Das Bundesamt fÃ¼r Bauten und Logistik (BBL) bewirtschaftet als EigentÃ¼mervertretung rund 2'800 Liegenschaften der zivilen Bundesverwaltung â€” Ã¼berwiegend BÃ¼roflÃ¤chen in BundeshÃ¤usern und Departementssitzen, dazu spezialisierte Objekte wie die Empfangs- und Verfahrenszentren des SEM. Die Liegenschaften des VBS (armasuisse Immobilien) und die Auslandvertretungen der EDA sind nicht Teil des BBL-Portfolios.</p>
+              <p>Das Mieterportal ist die zentrale digitale Anlaufstelle fÃ¼r die Verwaltungseinheiten als Mietende: Bedarfsmeldung, Schadensmeldung, Statusverfolgung und Zugriff auf Dokumente zu Ihren Liegenschaften. Die hier zusammengetragenen Informationen sind Ã¶ffentlich zugÃ¤nglich; fÃ¼r eigentliche AntrÃ¤ge ist eine Anmeldung mit dem fÃ¶deralen eIAM-Konto erforderlich.</p>
             </article>
 
             <article id="faq">
-              <h2>Häufige Fragen</h2>
+              <h2>HÃ¤ufige Fragen</h2>
               <div class="accordion">
-                ${faqItem('Wer kann das Mieterportal nutzen?', 'Hauptnutzergruppe sind die Logistikbeauftragten (LBO) der Verwaltungseinheiten der zivilen Bundesverwaltung. Daneben haben Generalsekretariate (GS) sowie das Portfolio-Management des BBL Zugriff auf die jeweils zuständigen Sichten. Die Anmeldung erfolgt mit dem föderalen eIAM-Konto.')}
-                ${faqItem('Was bedeutet NAW?', 'NAW steht für „Neue Arbeitswelten" — die föderale Vorgabe für die Klassifizierung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; zusammen mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie die HNF2 und die Geschossfläche.')}
-                ${faqItem('Wer prüft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihres Departements. Die Bundeskanzlei nimmt selbst Generalsekretariats-Funktion wahr — Anträge aus der BK gehen daher ohne zusätzliche GS-Prüfung direkt an das BBL Portfolio-Management.')}
-                ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die angegebene Adresse noch nicht im SAP RE-FX-Stammdatensatz registriert ist — etwa weil ein Neubau- oder Anmietungsprojekt gerade erst geplant wird — aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem entgegengenommen; BBL legt die Wirtschaftseinheit (WE) im weiteren Verlauf an.')}
-                ${faqItem('Wie geht es nach der Genehmigung weiter?', 'Genehmigte Bedarfsmeldungen werden automatisch an SAP ePPM übergeben, wo die zugehörige Projektakte mit einer Bedarfsmeldungs-Nummer eröffnet wird. Sie erhalten eine Eingangsbestätigung sowie die ePPM-Nummer als Referenz für die weitere Korrespondenz.')}
-                ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeit hängt vom Antragstyp ab. Kleinanträge (z. B. punktuelle Anpassungen, Mobiliarbestellungen) werden in der Regel innerhalb von 10 Arbeitstagen entschieden, Grossanträge mit Projekteröffnung benötigen mehrere Wochen. Die konkrete Frist sehen Sie im Antragsdetail.')}
-                ${faqItem('Wer ist während der Bauphase mein Ansprechpartner?', 'Sobald der Antrag in ePPM überführt ist, übernimmt der BBL-Bauherrenvertretung / -Projektmanagement die Leitung. Im Portal sehen Sie die zuständige Kontaktperson in der Antragsdetail-Sicht. Die LBO bleibt während der gesamten Laufzeit die mieterseitige Anlaufstelle.')}
+                ${faqItem('Wer kann das Mieterportal nutzen?', 'Hauptnutzergruppe sind die Logistikbeauftragten (LBO) der Verwaltungseinheiten der zivilen Bundesverwaltung. Daneben haben Generalsekretariate (GS) sowie das Portfolio-Management des BBL Zugriff auf die jeweils zustÃ¤ndigen Sichten. Die Anmeldung erfolgt mit dem fÃ¶deralen eIAM-Konto.')}
+                ${faqItem('Was bedeutet NAW?', 'NAW steht fÃ¼r â€žNeue Arbeitswelten" â€” die fÃ¶derale Vorgabe fÃ¼r die Klassifizierung von BÃ¼roarbeitsplÃ¤tzen. Jede Klasse hat eine eigene mÂ²/FTE-Basis; zusammen mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie die HNF2 und die GeschossflÃ¤che.')}
+                ${faqItem('Wer prÃ¼ft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihres Departements. Die Bundeskanzlei nimmt selbst Generalsekretariats-Funktion wahr â€” AntrÃ¤ge aus der BK gehen daher ohne zusÃ¤tzliche GS-PrÃ¼fung direkt an das BBL Portfolio-Management.')}
+                ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die angegebene Adresse noch nicht im SAP RE-FX-Stammdatensatz registriert ist â€” etwa weil ein Neubau- oder Anmietungsprojekt gerade erst geplant wird â€” aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem entgegengenommen; BBL legt die Wirtschaftseinheit (WE) im weiteren Verlauf an.')}
+                ${faqItem('Wie geht es nach der Genehmigung weiter?', 'Genehmigte Bedarfsmeldungen werden automatisch an SAP ePPM Ã¼bergeben, wo die zugehÃ¶rige Projektakte mit einer Bedarfsmeldungs-Nummer erÃ¶ffnet wird. Sie erhalten eine EingangsbestÃ¤tigung sowie die ePPM-Nummer als Referenz fÃ¼r die weitere Korrespondenz.')}
+                ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeit hÃ¤ngt vom Antragstyp ab. KleinantrÃ¤ge (z. B. punktuelle Anpassungen, Mobiliarbestellungen) werden in der Regel innerhalb von 10 Arbeitstagen entschieden, GrossantrÃ¤ge mit ProjekterÃ¶ffnung benÃ¶tigen mehrere Wochen. Die konkrete Frist sehen Sie im Antragsdetail.')}
+                ${faqItem('Wer ist wÃ¤hrend der Bauphase mein Ansprechpartner?', 'Sobald der Antrag in ePPM Ã¼berfÃ¼hrt ist, Ã¼bernimmt der BBL-Bauherrenvertretung / -Projektmanagement die Leitung. Im Portal sehen Sie die zustÃ¤ndige Kontaktperson in der Antragsdetail-Sicht. Die LBO bleibt wÃ¤hrend der gesamten Laufzeit die mieterseitige Anlaufstelle.')}
               </div>
             </article>
 
             <article id="workflow">
-              <h2>Workflow erklärt</h2>
-              <p>Eine Bedarfsmeldung durchläuft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
+              <h2>Workflow erklÃ¤rt</h2>
+              <p>Eine Bedarfsmeldung durchlÃ¤uft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
               <ol>
-                <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Eingaben werden automatisch zwischengespeichert.</li>
-                <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat prüft die Angaben feldweise. Bei Rückfragen erhalten Sie einen kommentierten Auflagenkatalog zur Nachbearbeitung.</li>
-                <li><strong>Genehmigt → in ePPM</strong> — Die freigegebene Meldung wird automatisch an SAP ePPM übergeben. BBL-PFM eröffnet die Projektakte und vergibt eine Bedarfsmeldungs-Nummer.</li>
-                <li><strong>Abgeschlossen</strong> — Nach Umsetzung gilt die Akte als abgeschlossen. Die Historie bleibt im Mieterportal abrufbar.</li>
+                <li><strong>Entwurf</strong> â€” Sie erfassen den Bedarf im fÃ¼nfstufigen Wizard. Eingaben werden automatisch zwischengespeichert.</li>
+                <li><strong>Eingereicht â†’ in GS-PrÃ¼fung</strong> â€” Das Generalsekretariat prÃ¼ft die Angaben feldweise. Bei RÃ¼ckfragen erhalten Sie einen kommentierten Auflagenkatalog zur Nachbearbeitung.</li>
+                <li><strong>Genehmigt â†’ in ePPM</strong> â€” Die freigegebene Meldung wird automatisch an SAP ePPM Ã¼bergeben. BBL-PFM erÃ¶ffnet die Projektakte und vergibt eine Bedarfsmeldungs-Nummer.</li>
+                <li><strong>Abgeschlossen</strong> â€” Nach Umsetzung gilt die Akte als abgeschlossen. Die Historie bleibt im Mieterportal abrufbar.</li>
               </ol>
-              <p>Zwei Spezialfälle:</p>
+              <p>Zwei SpezialfÃ¤lle:</p>
               <ul>
-                <li><strong>Bundeskanzlei-Pfad</strong> — Anträge der BK werden ohne GS-Prüfung direkt dem BBL Portfolio-Management vorgelegt.</li>
-                <li><strong>Greenfield-Pfad</strong> — Wenn das Objekt noch keinen SAP RE-FX-Eintrag hat, ergänzt BBL vor der ePPM-Übergabe einen Schritt „Wirtschaftseinheit anlegen".</li>
+                <li><strong>Bundeskanzlei-Pfad</strong> â€” AntrÃ¤ge der BK werden ohne GS-PrÃ¼fung direkt dem BBL Portfolio-Management vorgelegt.</li>
+                <li><strong>Greenfield-Pfad</strong> â€” Wenn das Objekt noch keinen SAP RE-FX-Eintrag hat, ergÃ¤nzt BBL vor der ePPM-Ãœbergabe einen Schritt â€žWirtschaftseinheit anlegen".</li>
               </ul>
             </article>
 
             <article id="naw">
-              <h2>NAW & Bürowelten erklärt</h2>
-              <p>Die NAW-Klassen sind die föderale Vorgabe für die Flächenberechnung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
+              <h2>NAW & BÃ¼rowelten erklÃ¤rt</h2>
+              <p>Die NAW-Klassen sind die fÃ¶derale Vorgabe fÃ¼r die FlÃ¤chenberechnung von BÃ¼roarbeitsplÃ¤tzen. Jede Klasse hat eine eigene mÂ²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
               <table class="table">
                 <thead>
-                  <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
+                  <tr><th>NAW-Klasse</th><th>mÂ²/FTE HNF2</th><th>mÂ²/FTE GF</th><th>Beschreibung</th></tr>
                 </thead>
                 <tbody>
                   ${(P.state.referenceData?.nawClasses || []).map(nc => `
@@ -500,35 +500,35 @@ function renderInfoPage() {
 
             <article id="verordnungen">
               <h2>Verordnungen, Weisungen und Vorgaben</h2>
-              <p>Rechtsgrundlagen und föderale Vorgaben, die für die Bewirtschaftung von Bundes-Immobilien und die Einreichung von Bedarfsmeldungen massgebend sind.</p>
+              <p>Rechtsgrundlagen und fÃ¶derale Vorgaben, die fÃ¼r die Bewirtschaftung von Bundes-Immobilien und die Einreichung von Bedarfsmeldungen massgebend sind.</p>
               ${downloadList(P.state.downloads?.regulations || [])}
             </article>
 
             <article id="strategien">
               <h2>Strategien und Konzepte</h2>
-              <p>Übergeordnete Strategien des BBL und des Bundes, die das Mieterportal und die zugrunde liegenden Flächenentscheide prägen.</p>
+              <p>Ãœbergeordnete Strategien des BBL und des Bundes, die das Mieterportal und die zugrunde liegenden FlÃ¤chenentscheide prÃ¤gen.</p>
               ${downloadList(P.state.downloads?.strategies || [])}
               <p class="text-note">
-                <strong>Hinweis:</strong> Formulare und Checklisten werden direkt im Mieterportal geführt — separate Vorlagen-Downloads entfallen.
+                <strong>Hinweis:</strong> Formulare und Checklisten werden direkt im Mieterportal gefÃ¼hrt â€” separate Vorlagen-Downloads entfallen.
               </p>
             </article>
 
             <article id="schulungen">
               <h2>Ausbildung</h2>
-              <p>Hier finden Sie aktuelle Informationen zu den Ausbildungen rund um das Mieterportal des BBL. Logistikbeauftragte und weitere am Bedarfsprozess beteiligte Personen werden stufengerecht geschult und damit befähigt, ihre Rolle effizient wahrzunehmen.</p>
+              <p>Hier finden Sie aktuelle Informationen zu den Ausbildungen rund um das Mieterportal des BBL. Logistikbeauftragte und weitere am Bedarfsprozess beteiligte Personen werden stufengerecht geschult und damit befÃ¤higt, ihre Rolle effizient wahrzunehmen.</p>
 
               <h3>Anmeldungen Ausbildung Mieterportal</h3>
               <div class="accordion accordion--inset">
                 <div class="accordion__item accordion__item--open">
                   <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-                    <span>Für Ausbildungen anmelden</span>
+                    <span>FÃ¼r Ausbildungen anmelden</span>
                     <span class="accordion__icon" aria-hidden="true"></span>
                   </button>
                   <div class="accordion__panel">
                     <ul class="link-list">
                       <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Grundausbildung Mieterportal BBL</a></li>
                       <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Bedarfserfassung & NAW-Klassifizierung</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Greenfield- und Auslandfälle</a></li>
+                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Greenfield- und AuslandfÃ¤lle</a></li>
                       <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Reviewer GS / BBL-PFM</a></li>
                     </ul>
                   </div>
@@ -540,9 +540,9 @@ function renderInfoPage() {
                   </button>
                   <div class="accordion__panel">
                     <ul class="link-list">
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Mieterportal in fünf Minuten — Überblick</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Bedarfsmeldung Schritt für Schritt</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">NAW-Klassifizierung erklärt</a></li>
+                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Mieterportal in fÃ¼nf Minuten â€” Ãœberblick</a></li>
+                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Bedarfsmeldung Schritt fÃ¼r Schritt</a></li>
+                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">NAW-Klassifizierung erklÃ¤rt</a></li>
                       <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Greenfield-Pfad und Stammdatenanlage</a></li>
                     </ul>
                   </div>
@@ -575,13 +575,13 @@ function renderInfoPage() {
 
     <section class="section section--alt contact-section" id="kontakt" aria-labelledby="kontakt-heading">
       <div class="container">
-        <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt für Bauten und Logistik</h2>
+        <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt fÃ¼r Bauten und Logistik</h2>
         <div class="contact-section__grid">
           <div class="contact-section__info">
             <p class="contact-section__subheading">Abteilung Immobilienmanagement</p>
             <p class="contact-block__address">
               Fellerstrasse 21<br>
-              CH&#8201;–&#8201;3027 Bern
+              CH&#8201;â€“&#8201;3027 Bern
             </p>
             <p class="contact-block__row">
               <a class="contact-block__link" href="tel:+41584655000">
@@ -602,9 +602,9 @@ function renderInfoPage() {
               </a>
             </p>
             <p class="contact-block__note">
-              Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
+              FÃ¼r Fragen zum Mieterportal, zu Bedarfsmeldungen, zu FlÃ¤chenstandards (NAW) oder zur Ãœbergabe an SAP ePPM.
             </p>
-            <p class="contact-block__lead"><strong>BIT IT-Support — eIAM</strong></p>
+            <p class="contact-block__lead"><strong>BIT IT-Support â€” eIAM</strong></p>
             <p class="contact-block__note contact-block__note--last">
               <a href="mailto:service-desk@bit.admin.ch">service-desk@bit.admin.ch</a>
             </p>
@@ -639,11 +639,11 @@ function faqItem(question, answer) {
 
 function wireInfoScrollSpy() {
   // Scroll-spy watches the article anchors inside the TOC content column
-  // AND any top-level anchored section that the TOC lists — currently the
+  // AND any top-level anchored section that the TOC lists â€” currently the
   // `#kontakt` block was lifted out of the grid into its own
   // `.section--alt` (federal contact pattern, mirrors armasuisse Immo).
   // Build the watch list from `INFO_TOC` ids so adding a new entry there
-  // is enough — no need to keep this selector list in sync by hand.
+  // is enough â€” no need to keep this selector list in sync by hand.
   const targets = INFO_TOC
     .map(it => document.getElementById(it.id))
     .filter(Boolean);
@@ -666,8 +666,8 @@ function wireInfoScrollSpy() {
   targets.forEach(t => observer.observe(t));
 }
 
-// ── NEWS SECTION (swisstopo "Aktuell" carousel pattern) ─────────────────
-// 10 mock items in news.json → 4 pages of 3 (last page may be partial).
+// â”€â”€ NEWS SECTION (swisstopo "Aktuell" carousel pattern) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 10 mock items in news.json â†’ 4 pages of 3 (last page may be partial).
 // Module-scoped so paging survives re-renders without leaking to window.
 let newsPage = 0;
 function renderNewsSection(items = P.state.news, perPage = 3) {
@@ -692,7 +692,7 @@ function renderNewsSection(items = P.state.news, perPage = 3) {
           <div class="news-section__track" id="newsTrack">
             ${visible.map(newsCard).join('')}
           </div>
-          <button class="news-section__nav news-section__nav--next" type="button" aria-label="Nächste Nachrichten"
+          <button class="news-section__nav news-section__nav--next" type="button" aria-label="NÃ¤chste Nachrichten"
                   onclick="window.t3lite.newsPage(${page + 1})" ${nextDisabled ? 'disabled' : ''}>
             ${P.icon('chevronRight')}
           </button>
@@ -706,7 +706,7 @@ function renderNewsSection(items = P.state.news, perPage = 3) {
                       onclick="window.t3lite.newsPage(${i})"></button>
             `).join('')}
           </div>
-          <a class="news-section__more" href="#/news">Weitere News <span aria-hidden="true">→</span></a>
+          <a class="news-section__more" href="#/news">Weitere News ${P.icon('arrowRight')}</a>
         </div>
       </div>
     </section>
@@ -720,17 +720,17 @@ function newsCard(n) {
       <div class="card--profile__body">
         <p class="card--profile__date"><strong>${P.escapeHtml(n.type)}</strong> &nbsp;|&nbsp; ${P.formatDate(n.date)}</p>
         <h3 class="card--profile__title">${P.escapeHtml(n.title)}</h3>
-        <p class="card--profile__desc">${P.escapeHtml(n.lead.length > 160 ? n.lead.slice(0, 157) + '…' : n.lead)}</p>
+        <p class="card--profile__desc">${P.escapeHtml(n.lead.length > 160 ? n.lead.slice(0, 157) + 'â€¦' : n.lead)}</p>
       </div>
       ${arrowBtn('card--profile__arrow')}
     </a>
   `;
 }
 
-// ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
+// â”€â”€ NEWS LIST PAGE (swisstopo News-Ãœbersicht) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'News-Übersicht' }] });
+  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'News-Ãœbersicht' }] });
   const items = P.state.news || [];
   const params = parseHashQuery(location.hash);
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
@@ -742,8 +742,8 @@ function renderNewsList() {
     <section class="section">
       <div class="container container--narrow">
         <header class="news-list__header">
-          <p class="news-list__date">Veröffentlicht am ${P.formatDate(new Date().toISOString())}</p>
-          <h1 class="news-list__title">News-Übersicht</h1>
+          <p class="news-list__date">VerÃ¶ffentlicht am ${P.formatDate(new Date().toISOString())}</p>
+          <h1 class="news-list__title">News-Ãœbersicht</h1>
         </header>
         <ul class="news-list">
           ${pageItems.map(newsListRow).join('')}
@@ -787,20 +787,20 @@ function newsListRow(n) {
 function renderNewsDetail({ id }) {
   const n = P.state.news.find(x => x.id === id);
   if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/news', label: 'News-Übersicht' }, { label: n.title }] });
+  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/news', label: 'News-Ãœbersicht' }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
+    ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Ãœbersicht' })}
     <article class="section">
       <div class="container container--reading">
         <p class="overtitle">${P.escapeHtml(n.type)}</p>
         <h1 class="news-detail__title">${P.escapeHtml(n.title)}</h1>
         <p class="meta-info">
-          <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
+          <span class="meta-info__item">VerÃ¶ffentlicht am ${P.formatDate(n.date)}</span>
         </p>
         <img class="news-detail__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="1200" height="675">
         <p class="news-detail__lead">${P.escapeHtml(n.lead)}</p>
         <p class="news-detail__footer">
-          Quelle: ${P.escapeHtml(n.source)} · Verantwortlich: ${P.escapeHtml(n.responsible)} · Stand: ${P.formatDate(n.date)} · DE
+          Quelle: ${P.escapeHtml(n.source)} Â· Verantwortlich: ${P.escapeHtml(n.responsible)} Â· Stand: ${P.formatDate(n.date)} Â· DE
         </p>
       </div>
     </article>
@@ -815,9 +815,9 @@ function renderRoot() {
   }
 }
 
-// ── SHELL HELPERS ────────────────────────────────────────────────────────
+// â”€â”€ SHELL HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── 1. LANDING (public, T3-Lite §3.6.1) ──────────────────────────────────
+// â”€â”€ 1. LANDING (public, T3-Lite Â§3.6.1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderLanding() {
   const main = shell({ activeNav: 'start' });
   document.getElementById('page-body').innerHTML = `
@@ -826,7 +826,7 @@ function renderLanding() {
         <div>
           <h1 class="h1 hero__title">Bedarf anmelden, Status verfolgen, Dokumente herunterladen.</h1>
           <p class="hero__lead">
-            Die zentrale Anlaufstelle für Bundes-Mietende — Bürofläche, Empfangs­zentren, Auslandvertretungen.
+            Die zentrale Anlaufstelle fÃ¼r Bundes-Mietende â€” BÃ¼roflÃ¤che, EmpfangsÂ­zentren, Auslandvertretungen.
           </p>
           <div class="hero__cta">
             <button class="btn btn--filled btn--lg" type="button" onclick="window.portal.login()">
@@ -838,13 +838,13 @@ function renderLanding() {
         </div>
         <figure class="hero__figure">
           <div class="hero__figure__media">
-            <img src="assets/images/buildings/BLD-2010.jpg"
-                 srcset="assets/images/buildings/BLD-2010.jpg 960w"
+            <img src="assets/images/Bern Guisanplatz.JPG"
+                 srcset="assets/images/Bern Guisanplatz.JPG 960w"
                  sizes="(max-width: 1023px) 100vw, 50vw"
-                 alt="Bundeshaus in Bern."
+                 alt="Verwaltungszentrum am Guisanplatz in Bern."
                  loading="lazy" decoding="async" width="1200" height="675">
           </div>
-          <figcaption>Bundeshaus in Bern — eine der rund 2'700 Liegenschaften im BBL-Portfolio.</figcaption>
+          <figcaption>Bern Guisanplatz, Verwaltungszentrum &mdash; &copy; Rolf Siegenthaler</figcaption>
         </figure>
       </div>
     </section>
@@ -853,9 +853,9 @@ function renderLanding() {
       <div class="container">
         <div class="portfolio-stats__grid">
           <div><strong>~2'700</strong><span>Immobilien im Portfolio</span></div>
-          <div><strong>~6'500</strong><span>Mietverhältnisse</span></div>
-          <div><strong>~38'000</strong><span>Arbeitsplätze Bundes­verwaltung</span></div>
-          <div><strong>26</strong><span>Verwaltungs­einheiten</span></div>
+          <div><strong>~6'500</strong><span>MietverhÃ¤ltnisse</span></div>
+          <div><strong>~38'000</strong><span>ArbeitsplÃ¤tze BundesÂ­verwaltung</span></div>
+          <div><strong>26</strong><span>VerwaltungsÂ­einheiten</span></div>
         </div>
       </div>
     </section>
@@ -866,14 +866,14 @@ function renderLanding() {
           <div class="explainer-section__copy">
             <h2 class="h2 section-heading" id="explainerTitle">Mieterportal in 90 Sekunden</h2>
             <p class="section-intro">
-              Bedarfsmeldung, Statusverfolgung, Pläne und Dokumente — alles an einem Ort.
+              Bedarfsmeldung, Statusverfolgung, PlÃ¤ne und Dokumente â€” alles an einem Ort.
             </p>
-            <a href="#/help" class="btn btn--outline">Häufige Fragen ansehen</a>
+            <a href="#/help" class="btn btn--outline">HÃ¤ufige Fragen ansehen</a>
           </div>
           <a class="video-thumb"
              href="https://www.youtube.com/watch?v=rin3crkLpRk"
              target="_blank" rel="noopener noreferrer"
-             aria-label="Erklärvideo „Mieterportal des Bundes" auf YouTube öffnen">
+             aria-label="ErklÃ¤rvideo â€žMieterportal des Bundes" auf YouTube Ã¶ffnen">
             <img class="video-thumb__image"
                  src="assets/images/Explain-Video.png"
                  alt=""
@@ -884,7 +884,7 @@ function renderLanding() {
               </span>
               <div class="video-thumb__titles">
                 <p class="video-thumb__title">Mieterportal des Bundes</p>
-                <p class="video-thumb__author">Bundesamt für Bauten und Logistik</p>
+                <p class="video-thumb__author">Bundesamt fÃ¼r Bauten und Logistik</p>
               </div>
             </div>
             <img class="video-thumb__play" src="assets/youtube-play.svg" alt="" aria-hidden="true" width="84" height="60">
@@ -901,7 +901,7 @@ function renderLanding() {
   `;
 }
 
-// ── 2. LOGIN STUB ────────────────────────────────────────────────────────
+// â”€â”€ 2. LOGIN STUB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CD pattern: alt-surface section with a narrow centred container, a
 // warning banner with an inline icon, then a single card carrying the
 // login form. Replaces the previous inline-styled card.
@@ -917,28 +917,28 @@ function renderLogin() {
             </span>
             <div class="notification-banner__wrapper">
               <p class="notification-banner__text">
-                <strong>Prototyp-Anmeldung — kein echtes eIAM.</strong> Diese Seite simuliert den Login. Es wird keine Verbindung zu <code>login.eiam.admin.ch</code> hergestellt.
+                <strong>Prototyp-Anmeldung â€” kein echtes eIAM.</strong> Diese Seite simuliert den Login. Es wird keine Verbindung zu <code>login.eiam.admin.ch</code> hergestellt.
               </p>
             </div>
           </div>
           <div class="card">
             <h1 class="h2 login-page__title">Demo-Anmeldung</h1>
-            <p class="card__lead">In der Produktivversion würden Sie zu <code>login.eiam.admin.ch</code> umgeleitet. Im Prototyp melden Sie sich mit einem voreingestellten Demo-Konto an.</p>
+            <p class="card__lead">In der Produktivversion wÃ¼rden Sie zu <code>login.eiam.admin.ch</code> umgeleitet. Im Prototyp melden Sie sich mit einem voreingestellten Demo-Konto an.</p>
 
             <h2 class="login-page__subhead">Demo-Konto</h2>
             <dl class="login-page__dl">
               <dt>Name</dt><dd>Andrea Muster</dd>
               <dt>Verwaltung</dt><dd>UVEK / BAFU</dd>
-              <dt>Rollen</dt><dd>Logistikbeauftragte (LBO) · GS-Prüfer/in</dd>
+              <dt>Rollen</dt><dd>Logistikbeauftragte (LBO) Â· GS-PrÃ¼fer/in</dd>
             </dl>
 
             <button class="btn btn--filled btn--lg login-page__cta" type="button" onclick="window.portal.login()">Als Demo-Nutzerin anmelden</button>
 
             <p class="login-page__hint">
-              Für den Test der GS-Prüfer-Sicht: nach Login die URL <code>#/queue</code> aufrufen, oder direkt <a href="#/queue" onclick="window.t3lite.demoRole('GS-Reviewer'); return false;">hier die GS-Rolle aktivieren</a>.
+              FÃ¼r den Test der GS-PrÃ¼fer-Sicht: nach Login die URL <code>#/queue</code> aufrufen, oder direkt <a href="#/queue" onclick="window.t3lite.demoRole('GS-Reviewer'); return false;">hier die GS-Rolle aktivieren</a>.
             </p>
             <p class="login-page__hint login-page__hint--muted">
-              Hinweis: Die Produktivversion plant ab Dezember 2026 den schrittweisen Übergang von eIAM auf AGOV / E-ID.
+              Hinweis: Die Produktivversion plant ab Dezember 2026 den schrittweisen Ãœbergang von eIAM auf AGOV / E-ID.
             </p>
           </div>
         </div>
@@ -947,7 +947,7 @@ function renderLogin() {
   `;
 }
 
-// ── 3. AUTH HOME ─────────────────────────────────────────────────────────
+// â”€â”€ 3. AUTH HOME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderHome() {
   if (!P.state.user) { P.navigate('#/'); return; }
   const role = P.state.user.activeRole;
@@ -956,9 +956,9 @@ function renderHome() {
 }
 
 function renderSubmitterHome() {
-  // Home page = root. CD pattern: no breadcrumb on the landing page —
+  // Home page = root. CD pattern: no breadcrumb on the landing page â€”
   // a single "Start" item just restates the page title. Sub-pages get
-  // the `[Start, …, current]` chain as usual.
+  // the `[Start, â€¦, current]` chain as usual.
   const main = shell({ activeNav: 'home', breadcrumb: [] });
   const userApps = P.state.applications
     .filter(a => a.submitterId === P.state.user.id)
@@ -976,15 +976,15 @@ function renderSubmitterHome() {
         <p class="greeting-strip">
           ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
           ${userApps.length
-            ? `Sie haben <a href="#/inbox" class="greeting-strip__count"><strong>${userApps.length} offene Anliegen</strong></a>${rueckfrage ? `, <strong>${rueckfrage}</strong> mit Rückfrage` : ''}.`
+            ? `Sie haben <a href="#/inbox" class="greeting-strip__count"><strong>${userApps.length} offene Anliegen</strong></a>${rueckfrage ? `, <strong>${rueckfrage}</strong> mit RÃ¼ckfrage` : ''}.`
             : `Sie haben derzeit keine offenen Anliegen.`}
-          ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
+          ${draft ? `<span class="greeting-strip__draft"> Â· <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
         </p>
-        <h2 class="h2 section-heading">Häufig genutzte Dienste</h2>
+        <h2 class="h2 section-heading">HÃ¤ufig genutzte Dienste</h2>
         <div class="card-grid">
           <a href="#/wizard/1" class="card--quick">
             <p class="card--quick__title">Bedarf anmelden</p>
-            <p class="card--quick__desc">Unterbringung, Bürofläche oder Auslandvertretung in fünf Schritten erfassen.</p>
+            <p class="card--quick__desc">Unterbringung, BÃ¼roflÃ¤che oder Auslandvertretung in fÃ¼nf Schritten erfassen.</p>
             ${arrowBtn()}
           </a>
           <a href="#/properties" class="card--quick">
@@ -998,8 +998,8 @@ function renderSubmitterHome() {
             ${arrowBtn()}
           </a>
           <a href="#/downloads" class="card--quick">
-            <p class="card--quick__title">Pläne & Dokumente</p>
-            <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
+            <p class="card--quick__title">PlÃ¤ne & Dokumente</p>
+            <p class="card--quick__desc">Grundrisse, MerkblÃ¤tter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
             ${arrowBtn()}
           </a>
         </div>
@@ -1052,17 +1052,17 @@ function profileCard({ image, title, date, desc, role }) {
   `;
 }
 
-// ── 5. SUBMITTER INBOX ───────────────────────────────────────────────────
+// â”€â”€ 5. SUBMITTER INBOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const INBOX_PAGE_SIZE = 25;
 function renderInbox() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Meine Anträge' }] });
+  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Meine AntrÃ¤ge' }] });
   const role = P.state.user.activeRole;
   const apps = role === 'GS-Reviewer'
     ? P.state.applications.filter(a => a.submitterVe === P.state.user.ve)
     : P.state.applications.filter(a => a.submitterId === P.state.user.id);
 
-  // URL state: ?status=… (filter chips also write here on click) · ?page=N
+  // URL state: ?status=â€¦ (filter chips also write here on click) Â· ?page=N
   const params = parseHashQuery(location.hash);
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
   const totalPages = Math.max(1, Math.ceil(apps.length / INBOX_PAGE_SIZE));
@@ -1070,13 +1070,13 @@ function renderInbox() {
   const pageItems = apps.slice((safePage - 1) * INBOX_PAGE_SIZE, safePage * INBOX_PAGE_SIZE);
 
   // Build status filter chips dynamically from what's actually in the
-  // user's set, so we never show "Rückfrage" when there are no
+  // user's set, so we never show "RÃ¼ckfrage" when there are no
   // clarification items. Counts on each chip give an at-a-glance
   // distribution (DS tag-item pattern). Counts are derived from the
   // full apps array, not the paginated slice.
   const STATUS_LABELS = {
-    draft: 'Entwurf', submitted: 'Eingereicht', in_review_gs: 'in GS-Prüfung',
-    in_review_pfm: 'in PFM-Prüfung', clarification: 'Rückfrage',
+    draft: 'Entwurf', submitted: 'Eingereicht', in_review_gs: 'in GS-PrÃ¼fung',
+    in_review_pfm: 'in PFM-PrÃ¼fung', clarification: 'RÃ¼ckfrage',
     approved: 'genehmigt', in_project: 'in ePPM', closed: 'abgeschlossen', rejected: 'abgelehnt'
   };
   const counts = apps.reduce((o, a) => { o[a.status] = (o[a.status] || 0) + 1; return o; }, {});
@@ -1087,8 +1087,8 @@ function renderInbox() {
       <div class="container">
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">${role === 'GS-Reviewer' ? 'Anträge der VE' : 'Meine Anträge'}</h1>
-            <p class="page-header__sub">${apps.length} ${apps.length === 1 ? 'Antrag' : 'Anträge'} insgesamt</p>
+            <h1 class="h1 page-header__title">${role === 'GS-Reviewer' ? 'AntrÃ¤ge der VE' : 'Meine AntrÃ¤ge'}</h1>
+            <p class="page-header__sub">${apps.length} ${apps.length === 1 ? 'Antrag' : 'AntrÃ¤ge'} insgesamt</p>
           </div>
           <div class="page-header__actions">
             <a class="btn btn--filled btn--sm" href="#/wizard/1">+ Neuer Antrag</a>
@@ -1103,11 +1103,11 @@ function renderInbox() {
                 <li><button type="button" class="tag-item" data-status="${s}" aria-pressed="false">${STATUS_LABELS[s]} <span class="tag-item__count">${counts[s]}</span></button></li>
               `).join('')}
             </ul>
-            <input id="filterText" type="search" class="input filter-row__search" placeholder="Antrag oder Objekt suchen …" aria-label="Suche">
+            <input id="filterText" type="search" class="input filter-row__search" placeholder="Antrag oder Objekt suchen â€¦" aria-label="Suche">
           </div>
 
           <table class="table table--zebra table--rows-clickable">
-            <caption class="sr-only">Anträge mit Objekt, Typ, Einreichedatum und Status</caption>
+            <caption class="sr-only">AntrÃ¤ge mit Objekt, Typ, Einreichedatum und Status</caption>
             <thead>
               <tr>
                 <th scope="col">Antrag</th><th scope="col">Objekt</th><th scope="col">Typ</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
@@ -1117,7 +1117,7 @@ function renderInbox() {
               ${pageItems.map(rowHtml).join('')}
             </tbody>
           </table>
-          <p class="table-hint">Klicken Sie eine Zeile, um Details zu öffnen.</p>
+          <p class="table-hint">Klicken Sie eine Zeile, um Details zu Ã¶ffnen.</p>
 
           ${renderPagination({
             current: safePage,
@@ -1126,7 +1126,7 @@ function renderInbox() {
             to: Math.min(safePage * INBOX_PAGE_SIZE, apps.length),
             totalItems: apps.length,
             entitySingular: 'Antrag',
-            entityPlural: 'Anträge',
+            entityPlural: 'AntrÃ¤ge',
             hrefFor: (p) => '#/inbox' + (p > 1 ? '?page=' + p : ''),
             inputId: 'inboxPaginationInput',
           })}
@@ -1146,8 +1146,8 @@ function renderInboxEmptyState() {
       <div class="empty-state__glyph" aria-hidden="true">
         ${P.icon('envelope')}
       </div>
-      <h2 class="empty-state__title">Noch keine Anträge</h2>
-      <p class="empty-state__lead">Sie haben derzeit keine Anträge in Bearbeitung. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
+      <h2 class="empty-state__title">Noch keine AntrÃ¤ge</h2>
+      <p class="empty-state__lead">Sie haben derzeit keine AntrÃ¤ge in Bearbeitung. Beginnen Sie mit einer Bedarfsanmeldung, um BÃ¼roflÃ¤che, ÃœbernachtungsplÃ¤tze oder eine Auslandvertretung zu beantragen.</p>
       <div class="empty-state__cta">
         <a href="#/wizard/1" class="btn btn--filled">Bedarf anmelden</a>
         <a href="#/help" class="btn btn--bare">Wie funktioniert das Portal?</a>
@@ -1198,16 +1198,16 @@ function wireInboxFilters(apps) {
   filterText?.addEventListener('input', apply);
 }
 
-// ── 6. APPLICATION DETAIL (submitter view) ───────────────────────────────
+// â”€â”€ 6. APPLICATION DETAIL (submitter view) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderApplicationDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/inbox', label: 'Meine Anträge' }, { label: a.id }] });
+  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/inbox', label: 'Meine AntrÃ¤ge' }, { label: a.id }] });
   const tab = (location.hash.split('?tab=')[1] || 'daten');
 
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'Anträge' })}
+    ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'AntrÃ¤ge' })}
     <section class="section">
       <div class="container">
         ${a._isNew ? `
@@ -1218,18 +1218,18 @@ function renderApplicationDetail({ id }) {
             <div class="notification-banner__wrapper">
               <p class="notification-banner__text">
                 <strong>Ihr Antrag ${a.id} wurde erfolgreich eingereicht.</strong>
-                Sie erhalten in Kürze eine E-Mail-Bestätigung. Status: <em>${({ eingereicht: 'Eingereicht', in_gs_pruefung: 'in GS-Prüfung', in_pfm_pruefung: 'in PFM-Prüfung' })[a.status] || a.status}</em>.
+                Sie erhalten in KÃ¼rze eine E-Mail-BestÃ¤tigung. Status: <em>${({ eingereicht: 'Eingereicht', in_gs_pruefung: 'in GS-PrÃ¼fung', in_pfm_pruefung: 'in PFM-PrÃ¼fung' })[a.status] || a.status}</em>.
               </p>
             </div>
           </div>
         ` : ''}
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">${a.id} <span class="page-header__count">— ${P.escapeHtml(a.address)}</span></h1>
-            <p class="page-header__sub">Eingereicht ${P.formatDate(a.submittedAt)} · Typ ${a.type}</p>
+            <h1 class="h1 page-header__title">${a.id} <span class="page-header__count">â€” ${P.escapeHtml(a.address)}</span></h1>
+            <p class="page-header__sub">Eingereicht ${P.formatDate(a.submittedAt)} Â· Typ ${a.type}</p>
           </div>
           <div class="page-header__actions">
-            ${a.status === 'clarification' ? `<button class="btn btn--filled btn--sm" type="button" onclick="window.t3lite.startResubmit('${P.escapeJs(a.id)}')">${P.icon('refresh')} Auflagen erfüllen — Erneut einreichen</button>` : ''}
+            ${a.status === 'clarification' ? `<button class="btn btn--filled btn--sm" type="button" onclick="window.t3lite.startResubmit('${P.escapeJs(a.id)}')">${P.icon('refresh')} Auflagen erfÃ¼llen â€” Erneut einreichen</button>` : ''}
           </div>
         </header>
 
@@ -1237,7 +1237,7 @@ function renderApplicationDetail({ id }) {
 
         <div class="tabs" role="tablist" aria-label="Antrags-Tabs">
           ${tabBtn('daten',     'Daten',       tab)}
-          ${tabBtn('anhaenge',  'Anhänge',     tab)}
+          ${tabBtn('anhaenge',  'AnhÃ¤nge',     tab)}
           ${tabBtn('historie',  'Historie',    tab)}
           ${tabBtn('sap',       'SAP / ePPM',  tab)}
         </div>
@@ -1305,17 +1305,17 @@ function renderDetailTab(a, tab) {
   if (tab === 'anhaenge') {
     const items = a.attachments || [];
     if (items.length === 0) {
-      return `<p class="text-secondary">Keine Anhänge zu diesem Antrag.</p>`;
+      return `<p class="text-secondary">Keine AnhÃ¤nge zu diesem Antrag.</p>`;
     }
     return `
-      <ul class="attachment-list" aria-label="Anhänge zu diesem Antrag">
+      <ul class="attachment-list" aria-label="AnhÃ¤nge zu diesem Antrag">
         ${items.map(x => attachmentLi(x)).join('')}
       </ul>
-      <p class="table-hint">Klicken Sie ein Dokument, um es herunterzuladen. Anhänge bleiben für die Dauer der Aktenführung verfügbar.</p>
+      <p class="table-hint">Klicken Sie ein Dokument, um es herunterzuladen. AnhÃ¤nge bleiben fÃ¼r die Dauer der AktenfÃ¼hrung verfÃ¼gbar.</p>
     `;
   }
   if (tab === 'historie') {
-    // Map eventType → tone for the timeline dot. Aligned with the
+    // Map eventType â†’ tone for the timeline dot. Aligned with the
     // canonical Application history events from docs/DATAMODEL.md.
     const dotTone = (eventType) => {
       if (!eventType) return '';
@@ -1332,7 +1332,7 @@ function renderDetailTab(a, tab) {
             <span class="history-timeline__dot ${dotTone(h.eventType)}" aria-hidden="true"></span>
             <div class="history-timeline__body">
               <time class="history-timeline__time" datetime="${P.escapeHtml(h.ts)}">${new Date(h.ts).toLocaleString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
-              <p class="history-timeline__action"><strong>${P.escapeHtml(h.actor)}</strong> · ${P.escapeHtml(h.action)}</p>
+              <p class="history-timeline__action"><strong>${P.escapeHtml(h.actor)}</strong> Â· ${P.escapeHtml(h.action)}</p>
             </div>
           </li>
         `).join('')}
@@ -1345,13 +1345,13 @@ function renderDetailTab(a, tab) {
         <h3 class="card__title">SAP RE-FX Integration</h3>
         <dl class="sap-dl">
           ${a.assetKey ? `
-            <dt>Objekt-Schlüssel</dt>
+            <dt>Objekt-SchlÃ¼ssel</dt>
             <dd><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code></dd>
             <dt>EGID</dt>
             <dd><code>${a.egid}</code></dd>
           ` : `
-            <dt>Objekt-Schlüssel</dt>
-            <dd><span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben</dd>
+            <dt>Objekt-SchlÃ¼ssel</dt>
+            <dd><span class="badge badge--greenfield">Greenfield</span> â€” WE/Obj noch nicht vergeben</dd>
           `}
           ${a.projectNumber ? `
             <dt>Bedarfsmeldung (ePPM)</dt>
@@ -1368,27 +1368,27 @@ function renderDetailTab(a, tab) {
     <div class="card-grid">
       <div class="card">
         <h3 class="card__title">Antragsteller</h3>
-        <p class="card__inset">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || a.submitterId)}<br><span class="card__inset-meta">${a.submitterVe}${a.submitterDep ? ' · ' + a.submitterDep : ''}</span></p>
+        <p class="card__inset">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || a.submitterId)}<br><span class="card__inset-meta">${a.submitterVe}${a.submitterDep ? ' Â· ' + a.submitterDep : ''}</span></p>
       </div>
       <div class="card">
         <h3 class="card__title">Standort</h3>
-        <p class="card__inset">${P.escapeHtml(a.address)}<br>${a.assetKey ? `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · EGID <code>${a.egid}</code>` : '<span class="badge badge--greenfield">Greenfield</span>'}</p>
+        <p class="card__inset">${P.escapeHtml(a.address)}<br>${a.assetKey ? `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> Â· EGID <code>${a.egid}</code>` : '<span class="badge badge--greenfield">Greenfield</span>'}</p>
       </div>
       ${a.naw ? `
         <div class="card">
-          <h3 class="card__title">Flächenbedarf</h3>
-          <p class="card__inset">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} · AP ${a.workstations} · HNF2 ${a.hnf2} m² · GF ${a.gf} m²<br>UK ${P.formatChf(a.operatingCosts)} · Möblierung ${P.formatChf(a.furnitureBudget)}</p>
+          <h3 class="card__title">FlÃ¤chenbedarf</h3>
+          <p class="card__inset">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} Â· AP ${a.workstations} Â· HNF2 ${a.hnf2} mÂ² Â· GF ${a.gf} mÂ²<br>UK ${P.formatChf(a.operatingCosts)} Â· MÃ¶blierung ${P.formatChf(a.furnitureBudget)}</p>
         </div>
       ` : a.extensionData?.berths ? `
         <div class="card">
           <h3 class="card__title">SEM-Variante</h3>
-          <p class="card__inset">Schlafplätze: <strong>${a.extensionData.berths}</strong> (Familie ${a.extensionData.berthsFamily} · Einzel ${a.extensionData.berthsSingle} · Mehrbett ${a.extensionData.berthsShared})<br>Investitionspauschale ${P.formatChf(a.extensionData.investmentLumpSum)}</p>
+          <p class="card__inset">SchlafplÃ¤tze: <strong>${a.extensionData.berths}</strong> (Familie ${a.extensionData.berthsFamily} Â· Einzel ${a.extensionData.berthsSingle} Â· Mehrbett ${a.extensionData.berthsShared})<br>Investitionspauschale ${P.formatChf(a.extensionData.investmentLumpSum)}</p>
         </div>
       ` : ''}
       ${a.status === 'clarification' && a.conditions ? `
         <div class="card card--clarification">
-          <h3 class="card__title card__title--icon">${P.icon('refresh')} Rückfrage / Offene Auflagen</h3>
-          <p class="card__justification"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
+          <h3 class="card__title card__title--icon">${P.icon('refresh')} RÃ¼ckfrage / Offene Auflagen</h3>
+          <p class="card__justification"><strong>BegrÃ¼ndung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
           <ul class="auflagen-list">
             ${a.conditions.map((x, i) => `
               <li class="${x.done ? 'done' : ''}">
@@ -1404,13 +1404,13 @@ function renderDetailTab(a, tab) {
   `;
 }
 
-// ── 7. REVIEWER QUEUE (when activeRole = GS-Prüfer/in) ───────────────────
+// â”€â”€ 7. REVIEWER QUEUE (when activeRole = GS-PrÃ¼fer/in) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const QUEUE_PAGE_SIZE = 25;
 function renderQueue() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  // GS-Reviewer's landing page — no breadcrumb (same reasoning as the
+  // GS-Reviewer's landing page â€” no breadcrumb (same reasoning as the
   // LBO home: a single-item breadcrumb just restates the page title).
-  const main = shell({ activeNav: 'queue', breadcrumb: [], deptSub: 'Mieterportal · GS-Prüfer/in' });
+  const main = shell({ activeNav: 'queue', breadcrumb: [], deptSub: 'Mieterportal Â· GS-PrÃ¼fer/in' });
   const queue = P.state.applications.filter(a => {
     // Reviewers see all VE applications that are awaiting review
     return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
@@ -1429,21 +1429,21 @@ function renderQueue() {
         <header class="page-header">
           <div>
             <h1 class="h1 page-header__title">Ihre Pendenzen <span class="page-header__count">(${queue.length})</span></h1>
-            <p class="page-header__sub">Anträge zur Prüfung in Ihrer Verwaltungseinheit</p>
+            <p class="page-header__sub">AntrÃ¤ge zur PrÃ¼fung in Ihrer Verwaltungseinheit</p>
           </div>
         </header>
         <table class="table table--zebra table--rows-clickable table--compact">
           <caption class="sr-only">Pendenzen mit Antragsteller, Objekt, Einreichedatum und Status</caption>
           <thead>
             <tr>
-              <th scope="col"><input type="checkbox" id="selectAll" aria-label="Alle auswählen"></th>
+              <th scope="col"><input type="checkbox" id="selectAll" aria-label="Alle auswÃ¤hlen"></th>
               <th scope="col">Antrag</th><th scope="col">Antragsteller</th><th scope="col">Objekt</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
             ${pageItems.map(a => `
               <tr data-app-id="${a.id}">
-                <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
+                <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswÃ¤hlen"></td>
                 <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
                 <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
                 <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(a.address)}</td>
@@ -1478,11 +1478,11 @@ function renderQueue() {
               ${P.icon('chevronRight', 'queue-stats__chevron')}
               Statistiken Ihres GS (Klick zum Aufklappen)
             </span>
-            <span>Eingang 30 d: 8 · Ø Bearbeitung 4.2 d · Offene Auflagen 2 · Schnitt 96 %</span>
+            <span>Eingang 30 d: 8 Â· Ã˜ Bearbeitung 4.2 d Â· Offene Auflagen 2 Â· Schnitt 96 %</span>
           </button>
           <div class="queue-stats__body">
             <div class="queue-stats__tile"><div class="queue-stats__value">8</div><div class="queue-stats__label">Eingang 30 d</div></div>
-            <div class="queue-stats__tile"><div class="queue-stats__value">4.2 d</div><div class="queue-stats__label">Ø Bearbeitung</div></div>
+            <div class="queue-stats__tile"><div class="queue-stats__value">4.2 d</div><div class="queue-stats__label">Ã˜ Bearbeitung</div></div>
             <div class="queue-stats__tile"><div class="queue-stats__value">2</div><div class="queue-stats__label">Offene Auflagen</div></div>
             <div class="queue-stats__tile"><div class="queue-stats__value">96 %</div><div class="queue-stats__label">Schnitt zu BBL</div></div>
           </div>
@@ -1515,12 +1515,12 @@ function wireQueueShortcuts() {
   });
 }
 
-// ── 8. REVIEWER SPLIT-PANE (§9.1 / §2.5) ─────────────────────────────────
+// â”€â”€ 8. REVIEWER SPLIT-PANE (Â§9.1 / Â§2.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderReviewerSplit({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  const main = shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: 'Pendenzen' }, { label: a.id }], deptSub: 'Mieterportal · GS-Prüfer/in' });
+  const main = shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: 'Pendenzen' }, { label: a.id }], deptSub: 'Mieterportal Â· GS-PrÃ¼fer/in' });
 
   const initialMarks = a._marks || {};
 
@@ -1530,8 +1530,8 @@ function renderReviewerSplit({ id }) {
       <div class="container">
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">${a.id} — Prüfung</h1>
-            <p class="page-header__sub">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe}) · ${P.escapeHtml(a.address)}</p>
+            <h1 class="h1 page-header__title">${a.id} â€” PrÃ¼fung</h1>
+            <p class="page-header__sub">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe}) Â· ${P.escapeHtml(a.address)}</p>
           </div>
         </header>
         ${P.renderPipeline(a)}
@@ -1539,24 +1539,24 @@ function renderReviewerSplit({ id }) {
         <div class="reviewer-split">
           <div>
             <div class="card">
-              <h3 class="card__title">Formular (schreibgeschützt)</h3>
+              <h3 class="card__title">Formular (schreibgeschÃ¼tzt)</h3>
               <table class="table">
                 <tr><th>Antragstyp</th><td>${a.type}</td></tr>
                 <tr><th>VE / DEP</th><td>${a.submitterVe} ${a.submitterDep ? '/ ' + a.submitterDep : ''}</td></tr>
                 <tr><th>Adresse</th><td>${P.escapeHtml(a.address)}</td></tr>
-                ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · ${a.egid}</td></tr>` : ''}
+                ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> Â· ${a.egid}</td></tr>` : ''}
                 ${a.naw ? `<tr><th>NAW-Klasse</th><td>${a.naw.class} (Konfidenz ${Math.round((a.naw.confidence || 0) * 100)} %)</td></tr>` : ''}
                 ${a.fte ? `<tr><th>FTE / AP</th><td>${a.fte} / ${a.workstations}</td></tr>` : ''}
-                ${a.hnf2 ? `<tr><th>HNF2 / GF</th><td>${a.hnf2} m² / ${a.gf} m²</td></tr>` : ''}
+                ${a.hnf2 ? `<tr><th>HNF2 / GF</th><td>${a.hnf2} mÂ² / ${a.gf} mÂ²</td></tr>` : ''}
                 ${a.operatingCosts ? `<tr><th>UK-Kosten</th><td>${P.formatChf(a.operatingCosts)}</td></tr>` : ''}
-                ${a.extensionData?.berths ? `<tr><th>SEM Schlafplätze</th><td>${a.extensionData.berths} (Pauschale ${P.formatChf(a.extensionData.investmentLumpSum)})</td></tr>` : ''}
-                <tr><th>Anhänge</th><td>${(a.attachments || []).map(x => x.name).join(' · ') || 'keine'}</td></tr>
+                ${a.extensionData?.berths ? `<tr><th>SEM SchlafplÃ¤tze</th><td>${a.extensionData.berths} (Pauschale ${P.formatChf(a.extensionData.investmentLumpSum)})</td></tr>` : ''}
+                <tr><th>AnhÃ¤nge</th><td>${(a.attachments || []).map(x => x.name).join(' Â· ') || 'keine'}</td></tr>
               </table>
             </div>
           </div>
 
-          <aside class="reviewer-marks" aria-label="Prüfung">
-            <h3 class="reviewer-marks__heading">Prüfung pro Feld</h3>
+          <aside class="reviewer-marks" aria-label="PrÃ¼fung">
+            <h3 class="reviewer-marks__heading">PrÃ¼fung pro Feld</h3>
             ${['type', 've', 'address', 'naw', 'fte', 'hnf2', 'ukKosten', 'attachments'].map(field => `
               <div class="reviewer-marks__row">
                 <span>${fieldLabel(field)}</span>
@@ -1579,13 +1579,13 @@ function renderReviewerSplit({ id }) {
               </fieldset>
             </div>
             <div class="form-field">
-              <label class="form-field__label" for="reviewBegr">Begründung <span class="form-field__required">*</span> <span class="form-field__hint--inline">(VwVG Art. 35 — verpflichtend)</span></label>
+              <label class="form-field__label" for="reviewBegr">BegrÃ¼ndung <span class="form-field__required">*</span> <span class="form-field__hint--inline">(VwVG Art. 35 â€” verpflichtend)</span></label>
               <textarea class="form-field__textarea" id="reviewBegr"></textarea>
             </div>
 
             <div class="reviewer-marks__actions">
               <button class="btn btn--filled btn--sm" type="button" id="saveDecision">Entscheid speichern</button>
-              <button class="btn btn--outline btn--sm" type="button">An Antragsteller zurück</button>
+              <button class="btn btn--outline btn--sm" type="button">An Antragsteller zurÃ¼ck</button>
             </div>
           </aside>
         </div>
@@ -1598,7 +1598,7 @@ function renderReviewerSplit({ id }) {
 function fieldLabel(f) {
   return ({
     type: 'Antragstyp', ve: 'VE / DEP', address: 'Adresse', naw: 'NAW-Klasse',
-    fte: 'FTE / AP', hnf2: 'HNF2 / GF', ukKosten: 'UK-Kosten', attachments: 'Anhänge'
+    fte: 'FTE / AP', hnf2: 'HNF2 / GF', ukKosten: 'UK-Kosten', attachments: 'AnhÃ¤nge'
   })[f] || f;
 }
 
@@ -1620,16 +1620,16 @@ function wireReviewerSplit(a) {
   document.getElementById('saveDecision').addEventListener('click', () => {
     const dec = document.querySelector('input[name="decision"]:checked')?.value;
     const begr = document.getElementById('reviewBegr').value.trim();
-    if (!dec) { P.toast('Bitte Gesamtentscheid wählen.'); return; }
-    if (!begr) { P.toast('Bitte Begründung eintragen (Pflicht).'); return; }
+    if (!dec) { P.toast('Bitte Gesamtentscheid wÃ¤hlen.'); return; }
+    if (!begr) { P.toast('Bitte BegrÃ¼ndung eintragen (Pflicht).'); return; }
     a.history = a.history || [];
-    a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: `Entscheid: ${dec} — "${begr}"` });
+    a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: `Entscheid: ${dec} â€” "${begr}"` });
     if (dec === 'genehmigen') {
       a.status = 'approved';
       setTimeout(() => {
         a.status = 'in_project';
         a.projectNumber = 'BM-2026-00' + Math.floor(Math.random() * 900 + 100);
-        P.toast(`ePPM-Übergabe erfolgreich: ${a.projectNumber}`, 'success');
+        P.toast(`ePPM-Ãœbergabe erfolgreich: ${a.projectNumber}`, 'success');
       }, 2000);
     } else if (dec === 'auflage') {
       a.status = 'clarification';
@@ -1643,7 +1643,7 @@ function wireReviewerSplit(a) {
   });
 }
 
-// ── 9. LIEGENSCHAFTEN — Meine Immobilien (list) ──────────────────────────
+// â”€â”€ 9. LIEGENSCHAFTEN â€” Meine Immobilien (list) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderProperties() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'properties', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Liegenschaften' }] });
@@ -1653,14 +1653,14 @@ function renderProperties() {
     ? P.state.tenancies
     : P.state.tenancies.filter(t => t.ve === ve || t.dep === ve);
 
-  // URL state: ?view=gallery|list|map · ?q=… · ?cat=… · ?page=N
+  // URL state: ?view=gallery|list|map Â· ?q=â€¦ Â· ?cat=â€¦ Â· ?page=N
   const params = parseHashQuery(location.hash);
   const view = ['gallery','list','map'].includes(params.view) ? params.view : 'gallery';
   const query = (params.q || '').toLowerCase().trim();
   const category = (params.cat || '').trim();
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
 
-  // Available categories — derived from the actual data so the dropdown
+  // Available categories â€” derived from the actual data so the dropdown
   // never shows a value with zero matches.
   const categories = Array.from(new Set(allTenancies.map(t => t.portfolioCategory).filter(Boolean))).sort();
   const filtered = filterTenancies(allTenancies, query, category);
@@ -1674,11 +1674,11 @@ function renderProperties() {
       <div class="container">
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">Liegenschaften ${isBblView ? '(BBL-Sicht)' : 'Ihrer Verwaltungs­einheit'}</h1>
+            <h1 class="h1 page-header__title">Liegenschaften ${isBblView ? '(BBL-Sicht)' : 'Ihrer VerwaltungsÂ­einheit'}</h1>
             <p class="section-intro section-intro--tight">
               ${isBblView
-                ? 'Alle vom BBL verwalteten Mietverhältnisse weltweit.'
-                : `Mietverhältnisse Ihrer Verwaltungs­einheit <strong>${P.escapeHtml(ve)}</strong>.`
+                ? 'Alle vom BBL verwalteten MietverhÃ¤ltnisse weltweit.'
+                : `MietverhÃ¤ltnisse Ihrer VerwaltungsÂ­einheit <strong>${P.escapeHtml(ve)}</strong>.`
               }
             </p>
           </div>
@@ -1689,8 +1689,8 @@ function renderProperties() {
       <div class="container">
         ${allTenancies.length === 0 ? `
           <div class="empty-state">
-            <h2 class="empty-state__title">Keine Mietverhältnisse erfasst</h2>
-            <p class="empty-state__lead">Für Ihre Verwaltungs­einheit ist im BBL-Portfolio derzeit kein Mietverhältnis hinterlegt. Wenn das ein Fehler ist, kontaktieren Sie BBL-PFM.</p>
+            <h2 class="empty-state__title">Keine MietverhÃ¤ltnisse erfasst</h2>
+            <p class="empty-state__lead">FÃ¼r Ihre VerwaltungsÂ­einheit ist im BBL-Portfolio derzeit kein MietverhÃ¤ltnis hinterlegt. Wenn das ein Fehler ist, kontaktieren Sie BBL-PFM.</p>
             <div class="empty-state__cta">
               <a href="#/wizard/1" class="btn btn--filled">Bedarf anmelden</a>
               <a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener" class="btn btn--bare link--external">Kontakt BBL</a>
@@ -1702,10 +1702,10 @@ function renderProperties() {
 
           ${filtered.length === 0 ? `
             <div class="empty-state empty-state--inset">
-              <h2 class="empty-state__title">Keine Treffer${query ? ` für „${P.escapeHtml(query)}"` : ''}</h2>
+              <h2 class="empty-state__title">Keine Treffer${query ? ` fÃ¼r â€ž${P.escapeHtml(query)}"` : ''}</h2>
               <p class="empty-state__lead">Versuchen Sie es mit anderen Filtern.</p>
               <div class="empty-state__cta">
-                <a href="${buildPropertiesHash({ view, page: 1 })}" class="btn btn--outline">Filter zurücksetzen</a>
+                <a href="${buildPropertiesHash({ view, page: 1 })}" class="btn btn--outline">Filter zurÃ¼cksetzen</a>
               </div>
             </div>
           ` : `
@@ -1785,9 +1785,9 @@ function propertiesToolbar({ view, query, category, categories }) {
         ${P.icon('search')}
         <input type="search" id="propertiesSearch" class="input property-toolbar__input"
                aria-label="Liegenschaften suchen"
-               placeholder="Suche Objekt, Adresse, SAP-WE, EGID, VE …"
+               placeholder="Suche Objekt, Adresse, SAP-WE, EGID, VE â€¦"
                value="${P.escapeHtml(query)}" autocomplete="off">
-        ${query ? `<button type="button" class="property-toolbar__clear" aria-label="Suche löschen" data-action="clear-search">${P.icon('x')}</button>` : ''}
+        ${query ? `<button type="button" class="property-toolbar__clear" aria-label="Suche lÃ¶schen" data-action="clear-search">${P.icon('x')}</button>` : ''}
       </div>
       <select class="input property-toolbar__select" id="propertiesCategory" aria-label="Portfolio-Kategorie">
         <option value="">Alle Kategorien</option>
@@ -1820,12 +1820,12 @@ function renderPropertiesFilterPills({ view, query, category }) {
           <span class="filter-pill__label">${f.label}:</span>
           <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
           <a class="filter-pill__remove" href="${hrefWithout(f.key)}"
-             aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
+             aria-label="Filter â€ž${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
             ${P.icon('x', 'filter-pill__remove-icon')}
           </a>
         </span>
       `).join('')}
-      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, page: 1 })}">Alle Filter zurücksetzen</a>
+      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, page: 1 })}">Alle Filter zurÃ¼cksetzen</a>
     </div>
   `;
 }
@@ -1860,7 +1860,7 @@ function wirePropertiesToolbar(view) {
     const params = parseHashQuery(location.hash);
     location.hash = buildPropertiesHash({ view, q: '', cat: params.cat || '', page: 1 });
   });
-  // CD Bund pagination input — generic helper picks up the hrefFor
+  // CD Bund pagination input â€” generic helper picks up the hrefFor
   // closure stashed by renderPagination.
   wirePaginationInput();
 }
@@ -1892,7 +1892,7 @@ function renderListView(items) {
           ${items.map(t => `
             <tr onclick="location.hash='#/properties/${t.id}'" tabindex="0"
                 onkeydown="if(event.key==='Enter')location.hash='#/properties/${t.id}'"
-                aria-label="Mietverhältnis ${P.escapeHtml(t.buildingName)} öffnen">
+                aria-label="MietverhÃ¤ltnis ${P.escapeHtml(t.buildingName)} Ã¶ffnen">
               <td><code>${formatAssetKey(t.assetKey)}</code></td>
               <td>${t.egid}</td>
               <td><strong>${P.escapeHtml(t.buildingName)}</strong></td>
@@ -1920,19 +1920,19 @@ function renderMapView(/* items */) {
   `;
 }
 
-// CD Bund pagination — compact pattern from the federal design system
+// CD Bund pagination â€” compact pattern from the federal design system
 // (designsystem css/components/pagination.postcss, app/components/ch/components/Pagination.vue):
 //   [count] [chevron-left] [page-input] von X Seiten [chevron-right]
 // Anchor-based chevrons so middle-click + share + back/forward all work;
-// the page-input is an editable number field — submit on Enter or blur
+// the page-input is an editable number field â€” submit on Enter or blur
 // to jump directly to a page (the only scalable affordance at thousands
 // of pages, where a list of numbered buttons stops working).
-// Rendered unconditionally — federal data sets scale to thousands of
+// Rendered unconditionally â€” federal data sets scale to thousands of
 // records, so a persistent pagination footer is a load-bearing
-// affordance even when the current filter happens to return ≤ 1 page.
+// affordance even when the current filter happens to return â‰¤ 1 page.
 // Generic across routes: caller passes `hrefFor: (page) => string` to
 // build URLs, plus `entitySingular`/`entityPlural` for the count label
-// ("1 Antrag" / "1–12 von 247 Anträgen" / "Keine Anträge"). The de-CH
+// ("1 Antrag" / "1â€“12 von 247 AntrÃ¤gen" / "Keine AntrÃ¤ge"). The de-CH
 // thousands separator keeps four-digit totals legible (e.g. "1'247").
 // The hrefFor closure is stashed in a module-level Map keyed by
 // `inputId` so `wirePaginationInput` can navigate without round-tripping
@@ -1950,7 +1950,7 @@ function renderPagination({ current, totalPages, from, to, totalItems, entitySin
     ? `Keine ${entityPlural}`
     : totalItems === 1
       ? `1 ${entitySingular}`
-      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} ${entityPlural}`;
+      : `${fmt(from)}â€“${fmt(to)} von ${fmt(totalItems)} ${entityPlural}`;
   return `
     <nav class="pagination" role="navigation" aria-label="Seitennavigation">
       <span class="pagination__count" aria-live="polite">${countText}</span>
@@ -1958,9 +1958,9 @@ function renderPagination({ current, totalPages, from, to, totalItems, entitySin
          ${prevDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronLeft')}</a>
       <input class="pagination__input" type="number" inputmode="numeric"
              id="${id}" min="1" max="${totalPages}" value="${current}"
-             aria-label="Seite auswählen">
+             aria-label="Seite auswÃ¤hlen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
-      <a class="btn btn--outline btn--icon-only" href="${nextHref}" aria-label="Nächste Seite"
+      <a class="btn btn--outline btn--icon-only" href="${nextHref}" aria-label="NÃ¤chste Seite"
          ${nextDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronRight')}</a>
     </nav>
   `;
@@ -1984,7 +1984,7 @@ function wirePaginationInput(inputId) {
   });
 }
 
-// MapLibre GL — loaded on demand only when the map view is active.
+// MapLibre GL â€” loaded on demand only when the map view is active.
 let _maplibreReady = null;
 let _propertiesMap = null;
 let _propertiesMarkers = [];
@@ -2046,11 +2046,11 @@ function initPropertiesMap(items) {
             <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="320" height="120">
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
-              <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+              <p class="property-popup__meta">${formatAssetKey(t.assetKey)} Â· EGID ${t.egid}</p>
               <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>
-              <p class="property-popup__meta">${veLine} · ${P.escapeHtml(t.portfolioCategory)}</p>
-              <p class="property-popup__meta">${t.hnf2.toLocaleString('de-CH')} m² HNF2 · ${t.workstations} Arbeitsplätze</p>
-              <a class="property-popup__link" href="#/properties/${t.id}">Details öffnen →</a>
+              <p class="property-popup__meta">${veLine} Â· ${P.escapeHtml(t.portfolioCategory)}</p>
+              <p class="property-popup__meta">${t.hnf2.toLocaleString('de-CH')} mÂ² HNF2 Â· ${t.workstations} ArbeitsplÃ¤tze</p>
+              <a class="property-popup__link" href="#/properties/${t.id}">Details Ã¶ffnen ${P.icon('arrowRight')}</a>
             </div>
           </div>`);
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
@@ -2065,7 +2065,7 @@ function initPropertiesMap(items) {
   }).catch(err => {
     const container = document.getElementById('propertiesMap');
     if (container) {
-      container.innerHTML = `<div class="property-map__error"><p><strong>Karte nicht geladen.</strong></p><p>MapLibre konnte nicht initialisiert werden. Bitte verwenden Sie vorübergehend die Galerie- oder Listenansicht.</p></div>`;
+      container.innerHTML = `<div class="property-map__error"><p><strong>Karte nicht geladen.</strong></p><p>MapLibre konnte nicht initialisiert werden. Bitte verwenden Sie vorÃ¼bergehend die Galerie- oder Listenansicht.</p></div>`;
     }
     console.error(err);
   });
@@ -2088,7 +2088,7 @@ function propertyCard(t, index = 99) {
   const issuesBadge = t.openIssues > 0
     ? `<span class="badge badge--warning card--property__status">${t.openIssues} offen</span>`
     : `<span class="badge badge--success card--property__status card--property__status--quiet">ok</span>`;
-  // First 3 cards are above the fold on a 3-col desktop grid — eager-
+  // First 3 cards are above the fold on a 3-col desktop grid â€” eager-
   // load for faster LCP. Cards 4+ stay lazy.
   const imgLoading = index < 3 ? 'eager' : 'lazy';
   return `
@@ -2098,11 +2098,11 @@ function propertyCard(t, index = 99) {
         ${issuesBadge}
       </div>
       <div class="card--property__body">
-        <p class="card--property__sap">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+        <p class="card--property__sap">${formatAssetKey(t.assetKey)} Â· EGID ${t.egid}</p>
         <h2 class="card--property__title">${P.escapeHtml(t.buildingName)}</h2>
-        <p class="card--property__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
+        <p class="card--property__address">${P.escapeHtml(t.address)} Â· ${P.escapeHtml(t.floorLabel)}</p>
         <div class="card--property__meta">
-          <span>${t.hnf2} m² HNF2</span>
+          <span>${t.hnf2} mÂ² HNF2</span>
           <span>${t.workstations} AP</span>
           <span>${P.formatChf(t.yearlyCost)} / Jahr</span>
         </div>
@@ -2112,16 +2112,16 @@ function propertyCard(t, index = 99) {
   `;
 }
 
-// ── 10. LIEGENSCHAFTS-DETAIL ─────────────────────────────────────────────
+// â”€â”€ 10. LIEGENSCHAFTS-DETAIL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Document-type labels come from the canonical DOC_TYPE_LABEL map in lib.js
-// — shared with the downloads page so a Permit doesn't render as
+// â€” shared with the downloads page so a Permit doesn't render as
 // "Bewilligung" here and "Baubewilligung" there.
 
 // Property-detail Dokumente: four buckets by user intent (not by chronology).
 // Empty buckets are skipped at render time.
 const PROPERTY_DOC_GROUPS = [
-  { title: 'Mietvertrag & Anhänge',     types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
-  { title: 'Pläne als Dateien',         types: ['FloorPlan'],                       defaultOpen: false },
+  { title: 'Mietvertrag & AnhÃ¤nge',     types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
+  { title: 'PlÃ¤ne als Dateien',         types: ['FloorPlan'],                       defaultOpen: false },
   { title: 'Sicherheit & Betrieb',      types: ['Certificate', 'Manual', 'Permit'], defaultOpen: false },
   { title: 'Historie & Korrespondenz',  types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
 ];
@@ -2144,7 +2144,7 @@ async function renderPropertyDetail({ id }) {
   const restWarn = monthsToEnd <= 12;
 
   // Floors for this building, sorted by levelNumber. Empty for buildings
-  // that have no floors.geojson coverage yet — section is then hidden.
+  // that have no floors.geojson coverage yet â€” section is then hidden.
   const floors = P.state.floors
     .filter(f => f.buildingId === t.buildingId)
     .sort((a, b) => a.levelNumber - b.levelNumber);
@@ -2190,7 +2190,7 @@ async function renderPropertyDetail({ id }) {
         subtitle: DOC_TYPE_LABEL[d.type] || d.type,
         format:   d.format,
         size:     d.size,
-        languages: Array.isArray(d.languages) ? d.languages.map(l => l.toUpperCase()).join(' · ') : d.languages,
+        languages: Array.isArray(d.languages) ? d.languages.map(l => l.toUpperCase()).join(' Â· ') : d.languages,
         date:     d.issuedAt ? P.formatDate(d.issuedAt) : undefined,
       }));
       return `
@@ -2201,7 +2201,7 @@ async function renderPropertyDetail({ id }) {
           </summary>
           <div class="doc-group__body">
             ${downloadList(adapted)}
-            ${overflow > 0 ? `<p class="doc-group__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">… ${overflow} weitere im Dokumenten-Archiv anzeigen</a></p>` : ''}
+            ${overflow > 0 ? `<p class="doc-group__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">â€¦ ${overflow} weitere im Dokumenten-Archiv anzeigen</a></p>` : ''}
           </div>
         </details>
       `;
@@ -2214,7 +2214,7 @@ async function renderPropertyDetail({ id }) {
       <div class="container">
         <header class="property-header">
           <div class="property-header__body">
-            <p class="property-header__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+            <p class="property-header__meta">${formatAssetKey(t.assetKey)} Â· EGID ${t.egid}</p>
             <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
             <p class="property-header__address">${P.escapeHtml(t.address)}</p>
             <p class="property-header__chips">
@@ -2231,19 +2231,19 @@ async function renderPropertyDetail({ id }) {
         <div class="property-layout">
           <div>
             <section class="property-section">
-              <h2 class="h2 section-heading">Vertrag & Mengengerüst</h2>
+              <h2 class="h2 section-heading">Vertrag & MengengerÃ¼st</h2>
 
               <div class="property-stats">
                 <div class="property-stats__item">
                   <span class="property-stats__label">HNF2</span>
-                  <span class="property-stats__value">${t.hnf2.toLocaleString('de-CH')}<small> m²</small></span>
+                  <span class="property-stats__value">${t.hnf2.toLocaleString('de-CH')}<small> mÂ²</small></span>
                 </div>
                 <div class="property-stats__item">
                   <span class="property-stats__label">GF</span>
-                  <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
+                  <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> mÂ²</small></span>
                 </div>
                 <div class="property-stats__item">
-                  <span class="property-stats__label">Arbeitsplätze</span>
+                  <span class="property-stats__label">ArbeitsplÃ¤tze</span>
                   <span class="property-stats__value">${t.workstations}</span>
                 </div>
                 <div class="property-stats__item">
@@ -2255,22 +2255,22 @@ async function renderPropertyDetail({ id }) {
               <table class="table property-facts">
                 <tr><th>Mietende VE</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
                 <tr><th>PFM-Kategorie</th><td>${P.escapeHtml(t.portfolioCategory)}</td></tr>
-                <tr><th>Vertragsart</th><td>${t.leaseAuto ? '<span class="badge badge--success">automatisch verlängernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
-                <tr><th>Laufzeit</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)}</td></tr>
+                <tr><th>Vertragsart</th><td>${t.leaseAuto ? '<span class="badge badge--success">automatisch verlÃ¤ngernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
+                <tr><th>Laufzeit</th><td>${P.formatDate(t.leaseStart)} â€“ ${P.formatDate(t.leaseEnd)}</td></tr>
               </table>
             </section>
 
             <section class="property-section">
               <h2 class="h2 section-heading">Geschosse (${floors.length})</h2>
               ${floors.length === 0
-                ? `<p class="text-secondary">Für diese Liegenschaft liegt noch kein interaktiver Grundriss vor.</p>`
+                ? `<p class="text-secondary">FÃ¼r diese Liegenschaft liegt noch kein interaktiver Grundriss vor.</p>`
                 : `<table class="table table--zebra table--rows-clickable floor-list" aria-label="Geschosse mit interaktivem Grundriss">
                     <thead>
                       <tr>
                         <th scope="col">Etage</th>
-                        <th scope="col" class="floor-list__num">Räume</th>
+                        <th scope="col" class="floor-list__num">RÃ¤ume</th>
                         <th scope="col" class="floor-list__num">HNF2</th>
-                        <th scope="col" class="floor-list__num">Arbeitsplätze</th>
+                        <th scope="col" class="floor-list__num">ArbeitsplÃ¤tze</th>
                         <th scope="col" class="floor-list__num">Davon ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
                         <th scope="col" aria-hidden="true" class="floor-list__chevron-th"></th>
                       </tr>
@@ -2283,7 +2283,7 @@ async function renderPropertyDetail({ id }) {
                             ${f.isYourFloor ? ' <span class="badge badge--success">Ihr Standort</span>' : ''}
                           </td>
                           <td class="floor-list__num">${f.roomCount}</td>
-                          <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} m²</td>
+                          <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} mÂ²</td>
                           <td class="floor-list__num">${f.workstations}</td>
                           <td class="floor-list__num">${f.myVeCount}</td>
                           <td class="floor-list__chevron">${P.icon('chevronRight')}</td>
@@ -2294,10 +2294,10 @@ async function renderPropertyDetail({ id }) {
             </section>
 
             <section class="property-section">
-              <h2 class="h2 section-heading">Anträge zu dieser Liegenschaft (${related.length})</h2>
+              <h2 class="h2 section-heading">AntrÃ¤ge zu dieser Liegenschaft (${related.length})</h2>
               ${related.length === 0
-                ? `<p class="text-secondary">Keine offenen oder vergangenen Anträge zu dieser Liegenschaft.</p>`
-                : `<table class="table table--zebra table--rows-clickable" aria-label="Anträge zu dieser Liegenschaft">
+                ? `<p class="text-secondary">Keine offenen oder vergangenen AntrÃ¤ge zu dieser Liegenschaft.</p>`
+                : `<table class="table table--zebra table--rows-clickable" aria-label="AntrÃ¤ge zu dieser Liegenschaft">
                      <thead><tr><th scope="col">Antrag</th><th scope="col">Typ</th><th scope="col">Eingereicht</th><th scope="col">Status</th></tr></thead>
                      <tbody>
                        ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><strong>${a.id}</strong></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
@@ -2317,7 +2317,7 @@ async function renderPropertyDetail({ id }) {
               <div id="propertyLocationMap" class="property-location-map map-surface" aria-label="Karte: Standort der Liegenschaft">
                 ${renderMapLoading('Standortkarte wird geladen')}
               </div>
-              <p class="property-location-meta">${P.escapeHtml(t.address)}${typeof t.lat === 'number' && typeof t.lng === 'number' ? ` · ${t.lat.toFixed(4)}°N, ${t.lng.toFixed(4)}°E` : ''}</p>
+              <p class="property-location-meta">${P.escapeHtml(t.address)}${typeof t.lat === 'number' && typeof t.lng === 'number' ? ` Â· ${t.lat.toFixed(4)}Â°N, ${t.lng.toFixed(4)}Â°E` : ''}</p>
             </section>
           </div>
 
@@ -2343,7 +2343,7 @@ async function renderPropertyDetail({ id }) {
                   <dd>${P.escapeHtml(t.contacts.im)}</dd>
                 </div>
                 <div class="contact-dl__row">
-                  <dt>Flächenmanagement (FLM)</dt>
+                  <dt>FlÃ¤chenmanagement (FLM)</dt>
                   <dd>${P.escapeHtml(t.contacts.flm)}</dd>
                 </div>
               </dl>
@@ -2357,7 +2357,7 @@ async function renderPropertyDetail({ id }) {
   initPropertyDetailMap(t);
 }
 
-// `Standort` map on the property detail page — single marker on a positron
+// `Standort` map on the property detail page â€” single marker on a positron
 // basemap, centred on the building's lat/lng. WGS84 since the portfolio is
 // federal-wide and (eventually) overseas (FDFA missions). Lazy-initialised
 // MapLibre, torn down on route change.
@@ -2393,20 +2393,20 @@ function initPropertyDetailMap(t) {
     console.error('[property location map]', err);
     const container = document.getElementById('propertyLocationMap');
     if (container) {
-      container.innerHTML = '<p class="text-secondary" style="padding: var(--space-lg);">Karte konnte nicht geladen werden.</p>';
+      container.innerHTML = '<p class="property-map__error">Karte konnte nicht geladen werden.</p>';
     }
   });
 }
 
-// ── 10b. GESCHOSS-DETAIL — interaktiver Grundriss ────────────────────────
-// Space useType DE labels — canonical EN keys per docs/DATAMODEL.md A.9.
+// â”€â”€ 10b. GESCHOSS-DETAIL â€” interaktiver Grundriss â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Space useType DE labels â€” canonical EN keys per docs/DATAMODEL.md A.9.
 const USETYPE_LABEL_DE = {
-  Office:        'Büro',
+  Office:        'BÃ¼ro',
   MeetingRoom:   'Sitzungszimmer',
   OpenSpace:     'Open Space',
   FocusRoom:     'Fokusraum',
   Reception:     'Empfang',
-  Kitchenette:   'Teeküche',
+  Kitchenette:   'TeekÃ¼che',
   WC:            'WC',
   Corridor:      'Korridor',
   Storage:       'Lager',
@@ -2420,25 +2420,25 @@ const USETYPE_LABEL_DE = {
   Lab:           'Labor',
 };
 
-// MapLibre instance for the floor canvas — lazy-initialised, torn down on
-// route change. The "rooms-fill" useType→colour map is shared with the legend
+// MapLibre instance for the floor canvas â€” lazy-initialised, torn down on
+// route change. The "rooms-fill" useTypeâ†’colour map is shared with the legend
 // styling so a future palette change touches both ends.
 let _floorMap = null;
 let _floorPopup = null;  // active MapLibre Popup for the clicked room
 
-// useType → fill colour. MapLibre paint specs don't accept CSS
+// useType â†’ fill colour. MapLibre paint specs don't accept CSS
 // variables, so this map is the runtime source of truth for the floor
 // canvas. The four broad categories below are mirrored as
 // `--color-floor-{work,collab,infra,special}` tokens in tokens.css for
-// the static legend swatches — keep them in sync when palette changes.
+// the static legend swatches â€” keep them in sync when palette changes.
 // Pre-computed onto each feature property at spacesFc construction time
-// so the MapLibre paint spec stays trivial — `['get', 'fillColor']`
+// so the MapLibre paint spec stays trivial â€” `['get', 'fillColor']`
 // rather than a `match` expression.
 //
 // useType is further grouped into a coarser "Nutzung" bucket for the
 // default legend: work / collab / infra / special. Used by
-// renderFloorLegend to aggregate Σ m² across rooms with related
-// useTypes (e.g. Office + OpenSpace + FocusRoom + MeetingRoom + … → work).
+// renderFloorLegend to aggregate Î£ mÂ² across rooms with related
+// useTypes (e.g. Office + OpenSpace + FocusRoom + MeetingRoom + â€¦ â†’ work).
 const USETYPE_GROUP = {
   Office: 'work', OpenSpace: 'work', FocusRoom: 'work', Reception: 'work',
   MeetingRoom: 'collab', TrainingRoom: 'collab', Lounge: 'collab', Cafeteria: 'collab',
@@ -2446,7 +2446,7 @@ const USETYPE_GROUP = {
   Cloakroom: 'infra', TechnicalRoom: 'infra',
   Storage: 'special', Archive: 'special', Lab: 'special',
 };
-const USETYPE_GROUP_LABEL = { work: 'Arbeitsplätze', collab: 'Zusammenarbeit', infra: 'Infrastruktur', special: 'Sonderräume' };
+const USETYPE_GROUP_LABEL = { work: 'ArbeitsplÃ¤tze', collab: 'Zusammenarbeit', infra: 'Infrastruktur', special: 'SonderrÃ¤ume' };
 const CD_COLOR_FALLBACKS = {
   '--color-floor-work': '#BFDBFE',
   '--color-floor-collab': '#FDE68A',
@@ -2489,20 +2489,26 @@ const USETYPE_GROUP_FILL = {
   infra: cdColor('--color-floor-infra'),
   special: cdColor('--color-floor-special')
 };
+const USETYPE_GROUP_SWATCH = {
+  work: 'floor-legend__swatch--use-work',
+  collab: 'floor-legend__swatch--use-collab',
+  infra: 'floor-legend__swatch--use-infra',
+  special: 'floor-legend__swatch--use-special'
+};
 
-// SIA 416 categorisation — `siaCategory` is now a first-class field on
-// each Space (see docs/DATAMODEL.md § 3.3.1). Five buckets: HNF
-// (Hauptnutzfläche, main usable), NNF (Nebennutzfläche, secondary), VF
-// (Verkehrsfläche, circulation), FF (Funktionsfläche, function), TF
-// (Technikfläche, technical).
+// SIA 416 categorisation â€” `siaCategory` is now a first-class field on
+// each Space (see docs/DATAMODEL.md Â§ 3.3.1). Five buckets: HNF
+// (HauptnutzflÃ¤che, main usable), NNF (NebennutzflÃ¤che, secondary), VF
+// (VerkehrsflÃ¤che, circulation), FF (FunktionsflÃ¤che, function), TF
+// (TechnikflÃ¤che, technical).
 //
-// Colours: **SIA 416 doesn't prescribe a palette** — it defines the
+// Colours: **SIA 416 doesn't prescribe a palette** â€” it defines the
 // categorisation, not the visualisation. The Swiss official template
 // (IDC's `CHE_SIA_416_Modellplan_neutral_v1.xlsx`) is explicitly
 // neutral. The hues below are picked for visual distinguishability
-// only — five distinct Tailwind-200/300 tones at similar luminance,
+// only â€” five distinct Tailwind-200/300 tones at similar luminance,
 // no semantic loading. Swap them freely.
-const SIA_LABEL_DE = { HNF: 'Hauptnutzfläche (HNF)', NNF: 'Nebennutzfläche (NNF)', VF: 'Verkehrsfläche (VF)', FF: 'Funktionsfläche (FF)', TF: 'Technikfläche (TF)' };
+const SIA_LABEL_DE = { HNF: 'HauptnutzflÃ¤che (HNF)', NNF: 'NebennutzflÃ¤che (NNF)', VF: 'VerkehrsflÃ¤che (VF)', FF: 'FunktionsflÃ¤che (FF)', TF: 'TechnikflÃ¤che (TF)' };
 const SIA_FILL = {
   HNF: cdColor('--color-floor-work'),
   NNF: cdColor('--color-floor-special'),
@@ -2510,8 +2516,15 @@ const SIA_FILL = {
   FF: cdColor('--color-floor-collab'),
   TF: cdColor('--color-floor-collab-strong')
 };
+const SIA_SWATCH = {
+  HNF: 'floor-legend__swatch--sia-hnf',
+  NNF: 'floor-legend__swatch--sia-nnf',
+  VF: 'floor-legend__swatch--sia-vf',
+  FF: 'floor-legend__swatch--sia-ff',
+  TF: 'floor-legend__swatch--sia-tf'
+};
 
-// Tenant palette — 6 distinct hues assigned at floor-load time to the
+// Tenant palette â€” 6 distinct hues assigned at floor-load time to the
 // unique `occupierVe` values present on this floor. Wraps if there are
 // more than 6 VEs (rare; federal departments per floor are ~3-5).
 const TENANT_PALETTE = [
@@ -2521,6 +2534,14 @@ const TENANT_PALETTE = [
   cdColor('--color-floor-tenant-d'),
   cdColor('--color-floor-tenant-e'),
   cdColor('--color-floor-tenant-f')
+];
+const TENANT_SWATCH = [
+  'floor-legend__swatch--tenant-a',
+  'floor-legend__swatch--tenant-b',
+  'floor-legend__swatch--tenant-c',
+  'floor-legend__swatch--tenant-d',
+  'floor-legend__swatch--tenant-e',
+  'floor-legend__swatch--tenant-f'
 ];
 const TENANT_UNASSIGNED_FILL = cdColor('--color-floor-unassigned');   // gray-100 for rooms with null occupierVe
 
@@ -2561,7 +2582,7 @@ async function renderFloorDetail({ id, floorSlug }) {
       { href: `#/properties/${t.id}`, label: t.buildingName },
       { label: floorSlug }
     ]});
-    document.getElementById('page-body').innerHTML = '<div class="container section"><p>Für dieses Geschoss liegt noch kein interaktiver Grundriss vor.</p></div>';
+    document.getElementById('page-body').innerHTML = '<div class="container section"><p>FÃ¼r dieses Geschoss liegt noch kein interaktiver Grundriss vor.</p></div>';
     return;
   }
 
@@ -2587,7 +2608,7 @@ async function renderFloorDetail({ id, floorSlug }) {
   const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
   const restWarn = monthsToEnd <= 12;
 
-  // Pre-select a room from ?space=… on the hash
+  // Pre-select a room from ?space=â€¦ on the hash
   const queryStr = (location.hash.split('?')[1] || '');
   const initialSpaceId = new URLSearchParams(queryStr).get('space');
 
@@ -2597,7 +2618,7 @@ async function renderFloorDetail({ id, floorSlug }) {
       <div class="container">
         <header class="property-header">
           <div class="property-header__body">
-            <p class="property-header__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+            <p class="property-header__meta">${formatAssetKey(t.assetKey)} Â· EGID ${t.egid}</p>
             <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
             <p class="property-header__address">${P.escapeHtml(t.address)}</p>
             <p class="property-header__chips">
@@ -2613,7 +2634,7 @@ async function renderFloorDetail({ id, floorSlug }) {
       <div class="container">
         <header class="floor-header">
           <h2 class="h2 floor-header__title">Geschoss ${P.escapeHtml(floor.name)}</h2>
-          <p class="floor-header__kpis">${rooms.length} Räume · ${totalArea.toLocaleString('de-CH')} m² HNF2 · ${workstations} Arbeitsplätze</p>
+          <p class="floor-header__kpis">${rooms.length} RÃ¤ume Â· ${totalArea.toLocaleString('de-CH')} mÂ² HNF2 Â· ${workstations} ArbeitsplÃ¤tze</p>
         </header>
         <div class="floor-toolbar">
           <div class="floor-toolbar__group">
@@ -2630,7 +2651,7 @@ async function renderFloorDetail({ id, floorSlug }) {
           </div>
 
           <div class="floor-toolbar__group floor-toolbar__group--right">
-            <label class="floor-toolbar__label" for="floorViewMode">Einfärben</label>
+            <label class="floor-toolbar__label" for="floorViewMode">EinfÃ¤rben</label>
             <select id="floorViewMode" class="input input--sm">
               <option value="none">Keine</option>
               <option value="useType">Nutzung</option>
@@ -2653,7 +2674,7 @@ async function renderFloorDetail({ id, floorSlug }) {
 
   initFloorCanvas(t, floor, spaces, userVe, initialSpaceId);
 
-  // Vollbild toggle — fullscreens `.floor-viewer` so the legend stays
+  // Vollbild toggle â€” fullscreens `.floor-viewer` so the legend stays
   // visible inside the fullscreen surface. After enter/leave we resize
   // the MapLibre canvas so it reflows to the new dimensions.
   const fsBtn = document.getElementById('floorFullscreenBtn');
@@ -2670,7 +2691,7 @@ async function renderFloorDetail({ id, floorSlug }) {
 }
 
 // Resize the floor map whenever the fullscreen state of any element flips.
-// Bound once at module load — re-binding inside renderFloorDetail would
+// Bound once at module load â€” re-binding inside renderFloorDetail would
 // double-fire on every route hit.
 document.addEventListener('fullscreenchange', () => {
   if (_floorMap) setTimeout(() => { try { _floorMap.resize(); } catch {} }, 60);
@@ -2687,25 +2708,26 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       geometry: floor.geometry,
       properties: { floorId: floor.floorId, name: floor.name }
     }]};
-    // Build the tenant→colour map for this floor: assign a palette
+    // Build the tenantâ†’colour map for this floor: assign a palette
     // entry per unique occupierVe (skipping null), wrapping if there
     // are more VEs than palette slots. Rooms with no occupierVe get
     // the dedicated "unassigned" fill so they're visually distinct
     // rather than colliding with one of the assigned hues.
     const tenantVes = [...new Set(spaces.map(s => s.occupierVe).filter(Boolean))].sort();
     const tenantColors = Object.fromEntries(tenantVes.map((ve, i) => [ve, TENANT_PALETTE[i % TENANT_PALETTE.length]]));
+    const tenantSwatches = Object.fromEntries(tenantVes.map((ve, i) => [ve, TENANT_SWATCH[i % TENANT_SWATCH.length]]));
 
     const spacesFc = { type: 'FeatureCollection', features: spaces.map(s => {
       const useLabel = USETYPE_LABEL_DE[s.useType] || s.useType;
-      // Pre-compose a three-line label (number / Nutzung / Fläche) and
+      // Pre-compose a three-line label (number / Nutzung / FlÃ¤che) and
       // a colour per view mode. Pre-computing client-side keeps the
-      // MapLibre paint spec trivial — the active layer reads e.g.
+      // MapLibre paint spec trivial â€” the active layer reads e.g.
       // `['get', 'fillUseType']` and we hot-swap which property name
       // it reads via setPaintProperty when the user changes the mode.
-      const label = `${s.name}\n${useLabel}\n${s.area} m²`;
+      const label = `${s.name}\n${useLabel}\n${s.area} mÂ²`;
       // `siaCategory` is a first-class field on Space (docs/DATAMODEL.md
-      // § 3.3.1). Fallback to NNF if a future useType lands without a
-      // categorisation in the data — visible in QA as yellow tint.
+      // Â§ 3.3.1). Fallback to NNF if a future useType lands without a
+      // categorisation in the data â€” visible in QA as yellow tint.
       const siaCat = s.siaCategory || 'NNF';
       return {
         type: 'Feature',
@@ -2719,7 +2741,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
           // Per-mode pre-computed fills. The active layer reads one of
           // these via `['get', 'fillUseType' | 'fillSia' | 'fillTenant']`.
           // `none` mode short-circuits to the canvas background colour
-          // — handled in the change-listener, no fillNone property needed.
+          // â€” handled in the change-listener, no fillNone property needed.
           fillUseType: USETYPE_FILL[s.useType] || cdColor('--color-floor-invalid'),
           fillSia:     SIA_FILL[siaCat]        || cdColor('--color-floor-invalid'),
           fillTenant:  s.occupierVe ? tenantColors[s.occupierVe] : TENANT_UNASSIGNED_FILL,
@@ -2727,14 +2749,14 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       };
     })};
 
-    // Active "Einfärben" mode — drives both the MapLibre fill
+    // Active "EinfÃ¤rben" mode â€” drives both the MapLibre fill
     // expression and the legend rendering. Held in a closure so the
     // change handler and the legend builder can both read/update it.
     // Default `none` leaves rooms in a neutral canvas tint so the user
     // sees an architectural-style floor plan first; they opt in to a
     // colour coding by picking Nutzung / SIA 416 / Mietende VE.
     let activeMode = 'none';
-    // `none` returns a flat white — rooms read as an architectural-style
+    // `none` returns a flat white â€” rooms read as an architectural-style
     // line drawing against the canvas bg, no semantic colour cues.
     const NONE_FILL = cdColor('--color-white');
     const fillExprFor = (mode) => {
@@ -2745,41 +2767,41 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     };
 
     // Group rooms by the active mode's category key, sum `area` per
-    // group, and render the legend with `<swatch> <label> · Σ m²`.
+    // group, and render the legend with `<swatch> <label> Â· Î£ mÂ²`.
     // Called once at map load and again on every mode change.
     function renderLegend() {
       const legendEl = document.getElementById('floorLegend');
       if (!legendEl) return;
       if (activeMode === 'none') { legendEl.innerHTML = ''; return; }
-      let groups; // { key → { label, fill, area } }
+      let groups; // { key â†’ { label, fill, area } }
       if (activeMode === 'sia') {
         groups = {};
         for (const s of spaces) {
           const cat = s.siaCategory || 'NNF';
-          (groups[cat] ??= { label: SIA_LABEL_DE[cat], fill: SIA_FILL[cat], area: 0 }).area += s.area;
+          (groups[cat] ??= { label: SIA_LABEL_DE[cat], swatchClass: SIA_SWATCH[cat], area: 0 }).area += s.area;
         }
       } else if (activeMode === 'tenant') {
         groups = {};
         for (const s of spaces) {
           const key = s.occupierVe || '__none__';
           const label = s.occupierVe || 'Nicht zugewiesen';
-          const fill  = s.occupierVe ? tenantColors[s.occupierVe] : TENANT_UNASSIGNED_FILL;
-          (groups[key] ??= { label, fill, area: 0 }).area += s.area;
+          const swatchClass = s.occupierVe ? tenantSwatches[s.occupierVe] : 'floor-legend__swatch--unassigned';
+          (groups[key] ??= { label, swatchClass, area: 0 }).area += s.area;
         }
-      } else { // useType — aggregate into the four broad buckets
+      } else { // useType â€” aggregate into the four broad buckets
         groups = {};
         for (const s of spaces) {
           const grp = USETYPE_GROUP[s.useType] || 'special';
-          (groups[grp] ??= { label: USETYPE_GROUP_LABEL[grp], fill: USETYPE_GROUP_FILL[grp], area: 0 }).area += s.area;
+          (groups[grp] ??= { label: USETYPE_GROUP_LABEL[grp], swatchClass: USETYPE_GROUP_SWATCH[grp], area: 0 }).area += s.area;
         }
       }
       legendEl.innerHTML = Object.values(groups)
         .sort((a, b) => b.area - a.area)   // largest area first
         .map(g => `
           <li class="floor-legend__item">
-            <span class="floor-legend__swatch" style="background:${g.fill}"></span>
+            <span class="floor-legend__swatch ${g.swatchClass}"></span>
             <span class="floor-legend__label">${P.escapeHtml(g.label)}</span>
-            <span class="floor-legend__area">${g.area.toLocaleString('de-CH')} m²</span>
+            <span class="floor-legend__area">${g.area.toLocaleString('de-CH')} mÂ²</span>
           </li>`).join('');
     }
 
@@ -2795,7 +2817,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       });
     }
 
-    // Render the legend immediately — it reads `spaces` (already in
+    // Render the legend immediately â€” it reads `spaces` (already in
     // memory) and doesn't depend on MapLibre having finished loading.
     // Without this the legend stays empty for the ~1-2 s the basemap
     // CDN takes to respond.
@@ -2804,7 +2826,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     const coords = floor.geometry.coordinates[0];
     const lngs = coords.map(c => c[0]);
     const lats = coords.map(c => c[1]);
-    // Centroid as the average of the polygon vertices — good enough for
+    // Centroid as the average of the polygon vertices â€” good enough for
     // the simple rectangular floors used in the mock data.
     const centerLng = lngs.reduce((s, v) => s + v, 0) / lngs.length;
     const centerLat = lats.reduce((s, v) => s + v, 0) / lats.length;
@@ -2821,12 +2843,12 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       zoom: 18.5,
       attributionControl: false,
       // Cap at 20. Above this, MapLibre's internal geojson vector-tile
-      // pipeline behaves inconsistently with our small room polygons —
+      // pipeline behaves inconsistently with our small room polygons â€”
       // matches the `fitBounds maxZoom: 20` below so the user can never
       // manually scroll back into the broken range.
       maxZoom: 20,
       preserveDrawingBuffer: true,
-      // Keep the floor plan oriented like architectural drawings — north up,
+      // Keep the floor plan oriented like architectural drawings â€” north up,
       // no rotation gestures. Pinch-zoom and pan stay enabled so users can
       // get close to dense room clusters on a big floor.
       pitchWithRotate: false,
@@ -2865,7 +2887,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       clearMapLoading(container);
       // Strip every layer that came from positron so the basemap doesn't
       // bleed under the floor plan. We could hide them individually but a
-      // sweep keeps this resilient to upstream style changes — we want
+      // sweep keeps this resilient to upstream style changes â€” we want
       // only our floor + room polygons visible above a clean background.
       map.getStyle().layers.forEach(l => { try { map.removeLayer(l.id); } catch {} });
       map.addLayer({ id: 'floor-bg', type: 'background', paint: { 'background-color': cdColor('--color-bg-canvas') } });
@@ -2873,7 +2895,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       map.addSource('floor',  { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
 
-      // Room fills — colour is pre-computed onto each feature for all
+      // Room fills â€” colour is pre-computed onto each feature for all
       // three view modes (`fillUseType` / `fillSia` / `fillTenant`).
       // The active mode is picked here at load; the Ansicht dropdown's
       // change handler updates the expression via `setPaintProperty`.
@@ -2890,7 +2912,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         }
       });
 
-      // Default room outlines — darker / thicker than before for a more
+      // Default room outlines â€” darker / thicker than before for a more
       // legible "every cell is a room" grid feel.
       map.addLayer({
         id: 'rooms-outline',
@@ -2899,7 +2921,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         paint: { 'line-color': cdColor('--color-map-outline'), 'line-width': 1.25 }
       });
 
-      // Selection outline — filter set on click. Starts hidden.
+      // Selection outline â€” filter set on click. Starts hidden.
       map.addLayer({
         id: 'rooms-selected',
         type: 'line',
@@ -2908,7 +2930,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         paint: { 'line-color': cdColor('--color-map-selection'), 'line-width': 4 }
       });
 
-      // Floor outline — dark, on top.
+      // Floor outline â€” dark, on top.
       map.addLayer({
         id: 'floor-outline',
         type: 'line',
@@ -2916,8 +2938,8 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         paint: { 'line-color': cdColor('--color-map-text'), 'line-width': 2 }
       });
 
-      // Room labels — three lines: room number, German useType label, area.
-      // Every space gets a label including corridors (Korridor) — they're
+      // Room labels â€” three lines: room number, German useType label, area.
+      // Every space gets a label including corridors (Korridor) â€” they're
       // valid rooms with their own spaceId, useType, area, and SIA
       // category (VF). `text-allow-overlap: false` lets MapLibre
       // self-hide any label that genuinely can't fit.
@@ -2967,7 +2989,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       if (initialSpaceId) {
         const initial = spaces.find(s => s.spaceId === initialSpaceId);
         if (initial) {
-          // Anchor on the polygon's centre — average of its vertices.
+          // Anchor on the polygon's centre â€” average of its vertices.
           const ring = initial.geometry.coordinates[0];
           const cx = ring.reduce((s, c) => s + c[0], 0) / ring.length;
           const cy = ring.reduce((s, c) => s + c[1], 0) / ring.length;
@@ -2984,23 +3006,23 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
   });
 }
 
-// HTML for the room info popup — anchored to the click point on the floor
+// HTML for the room info popup â€” anchored to the click point on the floor
 // canvas (map-style). Replaces the prior right-side drawer. Compact: room
 // number, useType, key facts, and the single most-likely follow-up action
 // (Schadensmeldung). Other actions belong on the property-level page.
 function buildRoomPopupHtml(t, floor, space) {
   const useLabel = USETYPE_LABEL_DE[space.useType] || space.useType;
-  const subtitle = `${P.escapeHtml(useLabel)}${space.capacity > 0 ? ` · ${space.capacity} ${space.capacity === 1 ? 'Platz' : 'Plätze'}` : ''}`;
+  const subtitle = `${P.escapeHtml(useLabel)}${space.capacity > 0 ? ` Â· ${space.capacity} ${space.capacity === 1 ? 'Platz' : 'PlÃ¤tze'}` : ''}`;
   const occupier = space.occupierVe
     ? `${P.escapeHtml(space.occupierVe)}${space.occupierDep ? ' / ' + P.escapeHtml(space.occupierDep) : ''}`
-    : '<span class="text-secondary">Gemeinschaftsfläche</span>';
+    : '<span class="text-secondary">GemeinschaftsflÃ¤che</span>';
   const repairHref = `#/repair?building=${encodeURIComponent(t.buildingId)}&floor=${encodeURIComponent(floor.floorId)}&space=${encodeURIComponent(space.spaceId)}`;
   return `
     <div class="room-popup">
       <p class="room-popup__title">${P.escapeHtml(space.name)}</p>
       <p class="room-popup__subtitle">${subtitle}</p>
       <dl class="room-popup__facts">
-        <div class="room-popup__row"><dt>Fläche</dt><dd>${space.area} m²</dd></div>
+        <div class="room-popup__row"><dt>FlÃ¤che</dt><dd>${space.area} mÂ²</dd></div>
         <div class="room-popup__row"><dt>Belegt</dt><dd>${occupier}</dd></div>
         <div class="room-popup__row"><dt>Buchbar</dt><dd>${space.isBookable ? 'ja' : 'nein'}</dd></div>
       </dl>
@@ -3009,15 +3031,15 @@ function buildRoomPopupHtml(t, floor, space) {
   `;
 }
 
-// ── 11. DOWNLOADS — paginated Document table (§ 6.2) ─────────────────────
+// â”€â”€ 11. DOWNLOADS â€” paginated Document table (Â§ 6.2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Document-type DE labels come from the canonical DOC_TYPE_LABEL map in
-// lib.js — shared with the property-detail Dokumente groups so labels
+// lib.js â€” shared with the property-detail Dokumente groups so labels
 // don't diverge between the two surfaces.
 const DOCUMENT_PAGE_SIZE = 25;
 
 function documentLinkedLabel(d) {
   const ref = (d.linkedTo || [])[0];
-  if (!ref) return '—';
+  if (!ref) return 'â€”';
   if (ref.entityType === 'Building') {
     const b = P.state.buildings.find(x => x.buildingId === ref.entityId);
     return b ? b.name : ref.entityId;
@@ -3031,7 +3053,7 @@ function documentLinkedLabel(d) {
 
 function renderDownloads() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'downloads', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Pläne & Dokumente' }] });
+  shell({ activeNav: 'downloads', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'PlÃ¤ne & Dokumente' }] });
 
   // Filter + page state persisted in URL hash query (back/forward + shareable).
   const docState = { type: '', building: '', q: '', page: 1 };
@@ -3044,9 +3066,9 @@ function renderDownloads() {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
-        <h1 class="h1 section-heading">Pläne & Dokumente</h1>
+        <h1 class="h1 section-heading">PlÃ¤ne & Dokumente</h1>
         <p class="section-intro">
-          Alle für <strong>${P.escapeHtml(P.state.user.ve)}</strong> freigegebenen Dokumente plus öffentliche Merkblätter.
+          Alle fÃ¼r <strong>${P.escapeHtml(P.state.user.ve)}</strong> freigegebenen Dokumente plus Ã¶ffentliche MerkblÃ¤tter.
         </p>
 
         <div class="docs-filter-bar">
@@ -3061,7 +3083,7 @@ function renderDownloads() {
               `<option value="${b.buildingId}" ${docState.building === b.buildingId ? 'selected' : ''}>${P.escapeHtml(b.name)}</option>`).join('')}
           </select>
           <input class="input docs-filter-bar__search" type="search" id="filterDocText"
-                 placeholder="Titel oder Liegenschaft suchen …"
+                 placeholder="Titel oder Liegenschaft suchen â€¦"
                  value="${P.escapeHtml(docState.q)}"
                  aria-label="Suche">
         </div>
@@ -3075,9 +3097,9 @@ function renderDownloads() {
               <tr>
                 <th scope="col" class="col-title">Titel</th>
                 <th scope="col" class="col-type">Typ</th>
-                <th scope="col" class="col-linked">Verknüpft mit</th>
+                <th scope="col" class="col-linked">VerknÃ¼pft mit</th>
                 <th scope="col" class="col-format">Format</th>
-                <th scope="col" class="col-size">Grösse</th>
+                <th scope="col" class="col-size">GrÃ¶sse</th>
                 <th scope="col" class="col-lang">Sprache</th>
                 <th scope="col" class="col-date">Stand</th>
                 <th scope="col" class="col-action"><span class="sr-only">Aktion</span></th>
@@ -3136,12 +3158,12 @@ function renderDownloads() {
         <span class="filter-pill__label">${f.label}:</span>
         <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
         <button class="filter-pill__remove" type="button"
-                aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
+                aria-label="Filter â€ž${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
                 data-clear="${f.key}">
           ${P.icon('x', 'filter-pill__remove-icon')}
         </button>
       </span>
-    `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurücksetzen</button>`;
+    `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurÃ¼cksetzen</button>`;
     pills.querySelectorAll('[data-clear]').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.getAttribute('data-clear');
@@ -3179,7 +3201,7 @@ function renderDownloads() {
 
     const tbody = document.getElementById('docTableBody');
     if (slice.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Keine Treffer für die aktuellen Filter.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Keine Treffer fÃ¼r die aktuellen Filter.</td></tr>`;
     } else {
       tbody.innerHTML = slice.map(d => `
         <tr>
@@ -3193,7 +3215,7 @@ function renderDownloads() {
           <td class="docs-table__linked">${P.escapeHtml(documentLinkedLabel(d))}</td>
           <td><code>${P.escapeHtml(d.format || '')}</code></td>
           <td>${P.escapeHtml(d.size || '')}</td>
-          <td>${P.escapeHtml((d.languages || []).join(' · ').toUpperCase())}</td>
+          <td>${P.escapeHtml((d.languages || []).join(' Â· ').toUpperCase())}</td>
           <td>${P.escapeHtml(d.issuedAt || '')}</td>
           <td class="docs-table__action">
             <a href="#" class="docs-table__download" aria-label="Herunterladen: ${P.escapeHtml(d.title)}"
@@ -3203,10 +3225,10 @@ function renderDownloads() {
       `).join('');
     }
 
-    // CD Bund pagination — same compact pattern as #/properties (chevron-left
+    // CD Bund pagination â€” same compact pattern as #/properties (chevron-left
     // + page-number input + "von X Seiten" + chevron-right). See
     // designsystem/css/components/pagination.postcss. Rendered unconditionally
-    // (federal lists scale — the count line is the load-bearing scale cue).
+    // (federal lists scale â€” the count line is the load-bearing scale cue).
     const pag = document.getElementById('docPagination');
     const fmt = (n) => n.toLocaleString('de-CH');
     const from = total === 0 ? 0 : start + 1;
@@ -3215,7 +3237,7 @@ function renderDownloads() {
       ? 'Keine Dokumente'
       : total === 1
         ? '1 Dokument'
-        : `${fmt(from)}–${fmt(to)} von ${fmt(total)} Dokumenten`;
+        : `${fmt(from)}â€“${fmt(to)} von ${fmt(total)} Dokumenten`;
     pag.innerHTML = `
       <span class="pagination__count" aria-live="polite">${countText}</span>
       <button class="btn btn--outline btn--icon-only" type="button"
@@ -3223,10 +3245,10 @@ function renderDownloads() {
               ${docState.page <= 1 ? 'disabled' : ''}>${P.icon('chevronLeft')}</button>
       <input class="pagination__input" type="number" inputmode="numeric"
              id="docPaginationInput" min="1" max="${totalPages}" value="${docState.page}"
-             aria-label="Seite auswählen">
+             aria-label="Seite auswÃ¤hlen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
       <button class="btn btn--outline btn--icon-only" type="button"
-              data-step="1" aria-label="Nächste Seite"
+              data-step="1" aria-label="NÃ¤chste Seite"
               ${docState.page >= totalPages ? 'disabled' : ''}>${P.icon('chevronRight')}</button>
     `;
     pag.querySelectorAll('button[data-step]').forEach(btn => {
@@ -3296,7 +3318,7 @@ function downloadList(items) {
   `;
 }
 
-// ── 12. SCHADENSMELDUNG (REQ-FA-005 stub) ────────────────────────────────
+// â”€â”€ 12. SCHADENSMELDUNG (REQ-FA-005 stub) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderRepairQuickForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'home', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Schadensmeldung' }] });
@@ -3308,48 +3330,48 @@ function renderRepairQuickForm() {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
-        <h1 class="h1 section-heading">Schaden oder Störung melden</h1>
+        <h1 class="h1 section-heading">Schaden oder StÃ¶rung melden</h1>
         <p class="section-intro">
-          Defekte Heizung, Wasserschaden, Beleuchtung, Schliesssystem: kurze Meldung — BBL Objektmanagement nimmt Kontakt auf und koordiniert die Behebung.
+          Defekte Heizung, Wasserschaden, Beleuchtung, Schliesssystem: kurze Meldung â€” BBL Objektmanagement nimmt Kontakt auf und koordiniert die Behebung.
         </p>
         <form class="card stack" onsubmit="event.preventDefault(); window.t3lite.submitRepair(this);">
           <div class="form-field">
             <label class="form-field__label" for="repairBuilding">Liegenschaft <span class="form-field__required">*</span></label>
             <select class="form-field__select" id="repairBuilding" name="building">
-              ${P.state.tenancies.map(t => `<option value="${t.id}" ${presetTenancy && presetTenancy.id === t.id ? 'selected' : ''}>${P.escapeHtml(t.buildingName)} — ${P.escapeHtml(t.address)}</option>`).join('')}
+              ${P.state.tenancies.map(t => `<option value="${t.id}" ${presetTenancy && presetTenancy.id === t.id ? 'selected' : ''}>${P.escapeHtml(t.buildingName)} â€” ${P.escapeHtml(t.address)}</option>`).join('')}
             </select>
           </div>
           <div class="form-field">
             <label class="form-field__label" for="repairCategory">Kategorie <span class="form-field__required">*</span></label>
             <select class="form-field__select" id="repairCategory" name="category">
-              <option>Sanitär (Wasser, WC, Heizung)</option>
+              <option>SanitÃ¤r (Wasser, WC, Heizung)</option>
               <option>Elektrik & Beleuchtung</option>
               <option>Schliesssystem / Zutritt</option>
               <option>Aufzug</option>
-              <option>Klima & Lüftung</option>
+              <option>Klima & LÃ¼ftung</option>
               <option>Sonstiges</option>
             </select>
           </div>
           <fieldset class="form-field option-group">
             <legend class="form-field__label">Dringlichkeit <span class="form-field__required">*</span></legend>
-            <label class="option-group__item"><input type="radio" name="urgency" value="low" checked> <span>Niedrig (Termin in 1–2 Wochen)</span></label>
+            <label class="option-group__item"><input type="radio" name="urgency" value="low" checked> <span>Niedrig (Termin in 1â€“2 Wochen)</span></label>
             <label class="option-group__item"><input type="radio" name="urgency" value="med"> <span>Mittel (innerhalb 48 h)</span></label>
             <label class="option-group__item"><input type="radio" name="urgency" value="high"> <span>Hoch (gleicher Tag)</span></label>
             <label class="option-group__item"><input type="radio" name="urgency" value="emergency"> <span>Notfall (sofort, mit Telefon)</span></label>
           </fieldset>
           <div class="form-field">
             <label class="form-field__label" for="repairDescription">Beschreibung <span class="form-field__required">*</span></label>
-            <textarea class="form-field__textarea" id="repairDescription" name="desc" placeholder="Wo genau (Raum, Etage), seit wann, Auswirkungen …" required></textarea>
+            <textarea class="form-field__textarea" id="repairDescription" name="desc" placeholder="Wo genau (Raum, Etage), seit wann, Auswirkungen â€¦" required></textarea>
           </div>
           <div class="form-field">
             <label class="form-field__label" for="repairPhoto">Foto (optional)</label>
             <input class="form-field__input" id="repairPhoto" type="file" name="photo">
-            <p class="form-field__hint">Hilfreich bei sichtbaren Schäden. Wird wie alle Anhänge auf Schadsoftware geprüft.</p>
+            <p class="form-field__hint">Hilfreich bei sichtbaren SchÃ¤den. Wird wie alle AnhÃ¤nge auf Schadsoftware geprÃ¼ft.</p>
           </div>
           <div class="form-field">
-            <label class="form-field__label" for="repairPhone">Kontakt für Rückfragen</label>
-            <input class="form-field__input" id="repairPhone" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+41 …" value="">
-            <p class="form-field__hint">Nur ausfüllen, wenn ein anderer Kontakt als Ihr eIAM-Profil zuständig ist.</p>
+            <label class="form-field__label" for="repairPhone">Kontakt fÃ¼r RÃ¼ckfragen</label>
+            <input class="form-field__input" id="repairPhone" type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="+41 â€¦" value="">
+            <p class="form-field__hint">Nur ausfÃ¼llen, wenn ein anderer Kontakt als Ihr eIAM-Profil zustÃ¤ndig ist.</p>
           </div>
           <div class="wizard__sticky-footer">
             <a class="btn btn--outline" href="#/home">Abbrechen</a>
@@ -3361,7 +3383,7 @@ function renderRepairQuickForm() {
   `;
 }
 
-// ── 13. PROFILE / EINSTELLUNGEN ──────────────────────────────────────────
+// â”€â”€ 13. PROFILE / EINSTELLUNGEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderProfile() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Profil' }] });
@@ -3372,41 +3394,41 @@ function renderProfile() {
         <h1 class="h1 section-heading">Mein Profil</h1>
 
         <div class="card profile-page__card">
-          <h2 class="card__title">Identität (über eIAM)</h2>
+          <h2 class="card__title">IdentitÃ¤t (Ã¼ber eIAM)</h2>
           <dl class="profile-dl">
             <dt>Name</dt><dd>${P.escapeHtml(u.name)}</dd>
             <dt>E-Mail</dt><dd>${P.escapeHtml(u.email)}</dd>
             <dt>eIAM-Subjekt-ID</dt><dd><code>${u.id}</code></dd>
-            <dt>Verwaltungs­einheit</dt><dd>${P.escapeHtml(u.ve)}${u.dep ? ' / ' + P.escapeHtml(u.dep) : ''}</dd>
+            <dt>VerwaltungsÂ­einheit</dt><dd>${P.escapeHtml(u.ve)}${u.dep ? ' / ' + P.escapeHtml(u.dep) : ''}</dd>
             <dt>Aktive Rolle</dt><dd><strong>${P.roleLabel(u.activeRole)}</strong></dd>
-            <dt>Weitere Rollen</dt><dd>${u.roles.filter(r => r !== u.activeRole).map(P.roleLabel).join(' · ') || '—'}</dd>
+            <dt>Weitere Rollen</dt><dd>${u.roles.filter(r => r !== u.activeRole).map(P.roleLabel).join(' Â· ') || 'â€”'}</dd>
           </dl>
           <p class="profile-page__note">
-            Diese Daten kommen aus dem föderalen eIAM-Verzeichnis und können hier nicht geändert werden. Änderungen über Ihre VE-Administration.
+            Diese Daten kommen aus dem fÃ¶deralen eIAM-Verzeichnis und kÃ¶nnen hier nicht geÃ¤ndert werden. Ã„nderungen Ã¼ber Ihre VE-Administration.
           </p>
         </div>
 
         <div class="card profile-page__card">
           <h2 class="card__title">Benachrichtigungen</h2>
-          <p class="card__lead">Per E-Mail, sobald sich der Status Ihrer Anträge ändert.</p>
+          <p class="card__lead">Per E-Mail, sobald sich der Status Ihrer AntrÃ¤ge Ã¤ndert.</p>
           <fieldset class="option-group">
             <legend class="sr-only">Benachrichtigungs-Einstellungen</legend>
-            <label class="option-group__item"><input type="checkbox" checked> <span>Statuswechsel meiner Anträge</span></label>
-            <label class="option-group__item"><input type="checkbox" checked> <span>Rückfragen / Auflagen vom GS</span></label>
+            <label class="option-group__item"><input type="checkbox" checked> <span>Statuswechsel meiner AntrÃ¤ge</span></label>
+            <label class="option-group__item"><input type="checkbox" checked> <span>RÃ¼ckfragen / Auflagen vom GS</span></label>
             <label class="option-group__item"><input type="checkbox" checked> <span>Wartungsfenster & Systemmeldungen</span></label>
-            <label class="option-group__item"><input type="checkbox"> <span>Tägliche Zusammenfassung statt Einzel-E-Mails</span></label>
+            <label class="option-group__item"><input type="checkbox"> <span>TÃ¤gliche Zusammenfassung statt Einzel-E-Mails</span></label>
           </fieldset>
           <button class="btn btn--outline btn--sm profile-page__save" type="button" onclick="window.portal.toast('Einstellungen gespeichert', 'success')">Einstellungen speichern</button>
         </div>
 
         <div class="card profile-page__card">
           <h2 class="card__title">Sprache</h2>
-          <p class="card__lead">Wird in Inhalten und Benachrichtigungen verwendet, wo verfügbar.</p>
+          <p class="card__lead">Wird in Inhalten und Benachrichtigungen verwendet, wo verfÃ¼gbar.</p>
           <fieldset class="option-group">
             <legend class="sr-only">Sprache</legend>
             <label class="option-group__item"><input type="radio" name="lang" checked> <span>Deutsch</span></label>
-            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Français (noch nicht verfügbar)</span></label>
-            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Italiano (noch nicht verfügbar)</span></label>
+            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>FranÃ§ais (noch nicht verfÃ¼gbar)</span></label>
+            <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Italiano (noch nicht verfÃ¼gbar)</span></label>
             <label class="option-group__item"><input type="radio" name="lang" disabled> <span>Rumantsch (nicht vorgesehen)</span></label>
           </fieldset>
         </div>
@@ -3417,7 +3439,7 @@ function renderProfile() {
   `;
 }
 
-// ── SERVICES OVERVIEW (linked from the nav dropdown "Übersicht") ────────
+// â”€â”€ SERVICES OVERVIEW (linked from the nav dropdown "Ãœbersicht") â”€â”€â”€â”€â”€â”€â”€â”€
 function renderServicesOverview() {
   shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'Dienstleistungen' }] });
   document.getElementById('page-body').innerHTML = `
@@ -3425,7 +3447,7 @@ function renderServicesOverview() {
       <div class="container">
         <h1 class="h1 section-heading">Dienstleistungen des Mieterportals</h1>
         <p class="section-intro">
-          BBL bewirtschaftet die Immobilien der Bundesverwaltung. Über das Mieterportal stellen Bundes-Mietende die folgenden Anfragen direkt — geführt, dokumentiert, übergabefähig an SAP ePPM.
+          BBL bewirtschaftet die Immobilien der Bundesverwaltung. Ãœber das Mieterportal stellen Bundes-Mietende die folgenden Anfragen direkt â€” gefÃ¼hrt, dokumentiert, Ã¼bergabefÃ¤hig an SAP ePPM.
         </p>
       </div>
     </section>
@@ -3450,10 +3472,10 @@ function renderServicesOverview() {
   `;
 }
 
-// ── GENERIC SERVICE STUB (for roadmap services not yet implemented) ─────
+// â”€â”€ GENERIC SERVICE STUB (for roadmap services not yet implemented) â”€â”€â”€â”€â”€
 // Placeholder for services that aren't wired up yet in the prototype.
 // The `reqId` argument is preserved on the function signature so call
-// sites don't change, but the value is no longer surfaced to users —
+// sites don't change, but the value is no longer surfaced to users â€”
 // it stays in code comments / commit history for traceability.
 function renderServiceStub(title, _reqId, lead, externalUrl) {
   shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: title }] });
@@ -3464,31 +3486,31 @@ function renderServiceStub(title, _reqId, lead, externalUrl) {
         <p class="service-stub__lead">${P.escapeHtml(lead)}</p>
         <div class="service-stub__actions">
           ${externalUrl ? `<a href="${externalUrl}" target="_blank" rel="noopener" class="btn btn--filled link--external">Zum Schwesterprojekt</a>` : ''}
-          <a href="#/services" class="btn btn--outline">${P.icon('chevronLeft')} Zurück zur Übersicht</a>
+          <a href="#/services" class="btn btn--outline">${P.icon('chevronLeft')} ZurÃ¼ck zur Ãœbersicht</a>
         </div>
         <p class="service-stub__hint">
-          Diese Funktion wird in einer der nächsten Iterationen freigeschaltet.
+          Diese Funktion wird in einer der nÃ¤chsten Iterationen freigeschaltet.
         </p>
       </div>
     </section>
   `;
 }
 
-// ── 14. HELP STUB ────────────────────────────────────────────────────────
+// â”€â”€ 14. HELP STUB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderHelp() {
   const main = shell({ activeNav: 'help', breadcrumb: [{ label: 'Hilfe' }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
-        <h1>Häufige Fragen</h1>
+        <h1>HÃ¤ufige Fragen</h1>
         <div class="accordion">
           <div class="accordion__item">
             <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
               <span>Wie melde ich einen Bedarf an?</span><span class="accordion__icon"></span>
             </button>
             <div class="accordion__panel">
-              <p>Klicken Sie auf der Startseite „Bedarf anmelden →". Sie werden durch fünf Schritte geführt: Basisangaben, Flächenbedarf (NAW-Klassifizierung), Anhänge, ggf. Detail-Felder für Grossanträge, abschliessend Prüfen & Senden.</p>
-              <p>Tipp: Drücken Sie <kbd>?</kbd> für eine Übersicht aller Tastatur-Kurzbefehle.</p>
+              <p>Klicken Sie auf der Startseite â€žBedarf anmelden â†’". Sie werden durch fÃ¼nf Schritte gefÃ¼hrt: Basisangaben, FlÃ¤chenbedarf (NAW-Klassifizierung), AnhÃ¤nge, ggf. Detail-Felder fÃ¼r GrossantrÃ¤ge, abschliessend PrÃ¼fen & Senden.</p>
+              <p>Tipp: DrÃ¼cken Sie <kbd>?</kbd> fÃ¼r eine Ãœbersicht aller Tastatur-Kurzbefehle.</p>
             </div>
           </div>
           <div class="accordion__item">
@@ -3496,23 +3518,23 @@ function renderHelp() {
               <span>Was bedeutet die NAW-Klasse?</span><span class="accordion__icon"></span>
             </button>
             <div class="accordion__panel">
-              <p>NAW = <em>Neue Arbeitswelten</em>. Die Klassifizierung beschreibt den Arbeitsstil Ihres Teams (Kollaborativ, Konzentriert, Hybrid, Labor) und bestimmt die m²/FTE-Basis (Standardwert 12 m²/FTE HNF2 für Kollaborativ-Standard). Der Belegungsfaktor 0.8 ist eine fixe Bundesvorgabe.</p>
+              <p>NAW = <em>Neue Arbeitswelten</em>. Die Klassifizierung beschreibt den Arbeitsstil Ihres Teams (Kollaborativ, Konzentriert, Hybrid, Labor) und bestimmt die mÂ²/FTE-Basis (Standardwert 12 mÂ²/FTE HNF2 fÃ¼r Kollaborativ-Standard). Der Belegungsfaktor 0.8 ist eine fixe Bundesvorgabe.</p>
             </div>
           </div>
           <div class="accordion__item">
             <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-              <span>Greenfield-Pfad — was ist das?</span><span class="accordion__icon"></span>
+              <span>Greenfield-Pfad â€” was ist das?</span><span class="accordion__icon"></span>
             </button>
             <div class="accordion__panel">
-              <p>Wenn die von Ihnen eingegebene Adresse nicht im Bundes-Stammdatensatz registriert ist (z. B. eine neue Auslandvertretung), aktiviert das Portal den Greenfield-Modus. Sie können den Antrag trotzdem einreichen — BBL-IM legt die Wirtschaftseinheit (WE) und Objektnummer im Anschluss an die Genehmigung an, danach erfolgt die ePPM-Übergabe.</p>
+              <p>Wenn die von Ihnen eingegebene Adresse nicht im Bundes-Stammdatensatz registriert ist (z. B. eine neue Auslandvertretung), aktiviert das Portal den Greenfield-Modus. Sie kÃ¶nnen den Antrag trotzdem einreichen â€” BBL-IM legt die Wirtschaftseinheit (WE) und Objektnummer im Anschluss an die Genehmigung an, danach erfolgt die ePPM-Ãœbergabe.</p>
             </div>
           </div>
           <div class="accordion__item">
             <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-              <span>BK-Bypass (Bundeskanzlei) — wann?</span><span class="accordion__icon"></span>
+              <span>BK-Bypass (Bundeskanzlei) â€” wann?</span><span class="accordion__icon"></span>
             </button>
             <div class="accordion__panel">
-              <p>Die Bundeskanzlei (BK) hat kein Generalsekretariat. Anträge der BK überspringen daher den GS-Schritt und werden direkt an BBL Portfolio-Management geroutet. Das System erkennt dies automatisch und passt die Status-Pipeline an.</p>
+              <p>Die Bundeskanzlei (BK) hat kein Generalsekretariat. AntrÃ¤ge der BK Ã¼berspringen daher den GS-Schritt und werden direkt an BBL Portfolio-Management geroutet. Das System erkennt dies automatisch und passt die Status-Pipeline an.</p>
             </div>
           </div>
         </div>
@@ -3521,7 +3543,7 @@ function renderHelp() {
   `;
 }
 
-// ── EXTERNAL API (used by inline event handlers) ─────────────────────────
+// â”€â”€ EXTERNAL API (used by inline event handlers) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.t3lite = {
   newsPage(p) {
     const total = Math.max(1, Math.ceil((P.state.news || []).length / 3));
@@ -3544,7 +3566,7 @@ window.t3lite = {
   submitRepair(form) {
     const data = new FormData(form);
     const building = P.state.tenancies.find(t => t.id === data.get('building'));
-    if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
+    if (!building) { P.toast('Bitte Liegenschaft wÃ¤hlen.'); return; }
     const ticketId = 'R-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
     P.toast(`Schadensmeldung ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
     setTimeout(() => P.navigate('#/properties/' + building.id), 800);
@@ -3552,12 +3574,12 @@ window.t3lite = {
   demoRole(role) {
     // Convenience: log in as a demo user whose roles include the requested
     // role. Different profile cards demo different personas (LBO,
-    // GS-Reviewer, BBL-PFM, Auditor) — pick the matching user from users.json.
+    // GS-Reviewer, BBL-PFM, Auditor) â€” pick the matching user from users.json.
     const candidate = P.state.users.find(u => u.roles.includes(role));
-    if (!candidate) { P.toast('Demo-Profil für ' + role + ' nicht vorhanden.'); return; }
+    if (!candidate) { P.toast('Demo-Profil fÃ¼r ' + role + ' nicht vorhanden.'); return; }
     P.state.user = { ...candidate, activeRole: role };
     P.persistRole(role);
-    P.toast(`Angemeldet als ${candidate.name} — Rolle ${P.roleLabel(role)}`, 'success');
+    P.toast(`Angemeldet als ${candidate.name} â€” Rolle ${P.roleLabel(role)}`, 'success');
     const landing = {
       'LBO':           '#/home',
       'GS-Reviewer':   '#/queue',
@@ -3602,12 +3624,12 @@ window.t3lite = {
   },
   openBatchApprove() {
     const sel = Array.from(document.querySelectorAll('.rowSel:checked')).map(c => c.value);
-    if (!sel.length) { P.toast('Bitte mindestens einen Antrag auswählen.'); return; }
+    if (!sel.length) { P.toast('Bitte mindestens einen Antrag auswÃ¤hlen.'); return; }
     let body = `
-      <p>Sie genehmigen ${sel.length} Anträge. Pro Antrag ist eine schriftliche Begründung erforderlich (VwVG Art. 35).</p>
+      <p>Sie genehmigen ${sel.length} AntrÃ¤ge. Pro Antrag ist eine schriftliche BegrÃ¼ndung erforderlich (VwVG Art. 35).</p>
       <div class="form-field">
         <label class="form-field__label">Optionaler Vorschlagstext (nicht voreingestellt)</label>
-        <textarea class="form-field__textarea" id="batchTemplate" placeholder="z. B. Formal vollständig, Rechtsgrundlage geprüft, keine Auflagen."></textarea>
+        <textarea class="form-field__textarea" id="batchTemplate" placeholder="z. B. Formal vollstÃ¤ndig, Rechtsgrundlage geprÃ¼ft, keine Auflagen."></textarea>
         <label class="batch-approve__copy-toggle"><input type="checkbox" id="copyTpl"> Als Vorschlag in alle Felder einsetzen (Default: off)</label>
       </div>
       <hr class="rule">
@@ -3617,13 +3639,13 @@ window.t3lite = {
       if (!a) return;
       body += `
         <div class="form-field batch-approve__field">
-          <label class="form-field__label">${a.id} — ${P.escapeHtml(a.address)}</label>
-          <textarea class="form-field__textarea batchBegr" data-id="${a.id}" placeholder="Begründung … (Pflicht)"></textarea>
+          <label class="form-field__label">${a.id} â€” ${P.escapeHtml(a.address)}</label>
+          <textarea class="form-field__textarea batchBegr" data-id="${a.id}" placeholder="BegrÃ¼ndung â€¦ (Pflicht)"></textarea>
         </div>
       `;
     });
     body += `
-      <label><input type="checkbox" id="batchConfirm"> Ich bestätige, dass jede Begründung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
+      <label><input type="checkbox" id="batchConfirm"> Ich bestÃ¤tige, dass jede BegrÃ¼ndung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
     `;
     const m = P.modal({
       title: 'Bulk genehmigen', body, size: 'lg',
@@ -3631,14 +3653,14 @@ window.t3lite = {
         { label: 'Abbrechen', variant: 'btn--outline' },
         { label: 'Genehmigen', variant: 'btn--filled', onClick: () => {
           const begrs = Array.from(document.querySelectorAll('.batchBegr')).map(t => ({ id: t.getAttribute('data-id'), text: t.value.trim() }));
-          if (begrs.some(b => !b.text)) { P.toast('Alle Begründungen sind Pflicht.'); return false; }
-          if (!document.getElementById('batchConfirm').checked) { P.toast('Bitte die Bestätigung ankreuzen.'); return false; }
+          if (begrs.some(b => !b.text)) { P.toast('Alle BegrÃ¼ndungen sind Pflicht.'); return false; }
+          if (!document.getElementById('batchConfirm').checked) { P.toast('Bitte die BestÃ¤tigung ankreuzen.'); return false; }
           // Server-side identical-text check
           const counts = {};
           begrs.forEach(b => counts[b.text] = (counts[b.text] || 0) + 1);
           const duplicate = Object.entries(counts).find(([, n]) => n >= 3);
           if (duplicate) {
-            P.toast('3+ Begründungen identisch — bitte präzisieren oder erläutern, warum identische Begründung sachlich passend ist.', 'danger');
+            P.toast('3+ BegrÃ¼ndungen identisch â€” bitte prÃ¤zisieren oder erlÃ¤utern, warum identische BegrÃ¼ndung sachlich passend ist.', 'danger');
             return false;
           }
           begrs.forEach(b => {
@@ -3646,9 +3668,9 @@ window.t3lite = {
             if (!a) return;
             a.status = 'approved';
             a.history = a.history || [];
-            a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: 'Bulk-genehmigt — "' + b.text + '"' });
+            a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: 'Bulk-genehmigt â€” "' + b.text + '"' });
           });
-          P.toast(`${begrs.length} Anträge genehmigt.`, 'success');
+          P.toast(`${begrs.length} AntrÃ¤ge genehmigt.`, 'success');
           P.handleHash();
         }}
       ]
@@ -3668,10 +3690,10 @@ window.t3lite = {
   },
   startResubmit(appId) {
     P.modal({
-      title: 'Auflagen erfüllen & Erneut einreichen',
+      title: 'Auflagen erfÃ¼llen & Erneut einreichen',
       body: `
-        <p>In diesem Prototyp simulieren wir die erneute Einreichung. Auflagen werden als erfüllt markiert, der Status wechselt zurück zu „Eingereicht", und der GS wird benachrichtigt.</p>
-        <p class="modal__meta">Die Antrags-ID ${appId} bleibt erhalten; die Historie zeichnet die Resubmission als Statusübergang auf.</p>
+        <p>In diesem Prototyp simulieren wir die erneute Einreichung. Auflagen werden als erfÃ¼llt markiert, der Status wechselt zurÃ¼ck zu â€žEingereicht", und der GS wird benachrichtigt.</p>
+        <p class="modal__meta">Die Antrags-ID ${appId} bleibt erhalten; die Historie zeichnet die Resubmission als StatusÃ¼bergang auf.</p>
       `,
       actions: [
         { label: 'Abbrechen', variant: 'btn--outline' },
@@ -3680,7 +3702,7 @@ window.t3lite = {
           if (a) {
             a.conditions?.forEach(x => x.done = true);
             a.status = 'submitted';
-            a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: 'Resubmission nach Auflagenerfüllung' });
+            a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: 'Resubmission nach AuflagenerfÃ¼llung' });
             P.toast('Antrag erneut eingereicht.', 'success');
             P.handleHash();
           }
