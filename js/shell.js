@@ -829,7 +829,8 @@ export function shell({ activeNav = '', breadcrumb = [], deptSub = 'Mieterportal
                  +   renderShell({ deptSub, activeNav, breadcrumb, navItems })
                  +   '<div id="page-body"></div>'
                  +   '<div class="back-to-top-wrapper" aria-hidden="true">'
-                 +     `<a class="app-footer__top-btn" href="#main" aria-label="Zum Seitenanfang">${icon('chevronUp')}</a>`
+                 +     `<a class="app-footer__top-btn" href="#" aria-label="Zum Seitenanfang"
+                          onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });">${icon('chevronUp')}</a>`
                  +   '</div>'
                  + '</div>'
                  + renderFooter()

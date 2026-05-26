@@ -541,6 +541,11 @@ mark {
   }
 }
 
+/* DS canonical (designsystem/css/components/back-to-top-btn.postcss:5-9):
+   smooth scroll for the back-to-top button + any in-page anchor jumps.
+   Overridden to `auto` by the reduced-motion block above. */
+html { scroll-behavior: smooth; }
+
 /* Skip-link (NFA-CD-004) */
 .skip-to-content {
   position: absolute;

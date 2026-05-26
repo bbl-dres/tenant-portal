@@ -738,6 +738,16 @@
 }
 .main-navigation__link--active { color: var(--color-primary); }
 
+/* CD Bund: only ONE red underscore at a time. When a dropdown is
+   open, the trigger owns the indicator (`[aria-expanded="true"]::after`);
+   the active route's underscore must be suppressed so the UI doesn't
+   present two competing "active" cues. `:has()` lets us scope this to
+   the moment any sibling trigger is expanded — once the dropdown
+   closes, the active-route underscore returns automatically. */
+.main-navigation:has(.main-navigation__link--has-menu[aria-expanded="true"]) .main-navigation__link--active::after {
+  background: transparent;
+}
+
 .main-navigation__link--has-menu {
   background: transparent;
   border: none;
