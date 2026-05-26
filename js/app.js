@@ -2085,7 +2085,7 @@ function propertyCard(t, index = 99) {
   // all-green portfolio doesn't look like every card is shouting "ok".
   const issuesBadge = t.openIssues > 0
     ? `<span class="badge badge--warning card--property__status">${t.openIssues} offen</span>`
-    : `<span class="badge badge--success card--property__status card--property__status--quiet">ok</span>`;
+    : `<span class="badge badge--success card--property__status card--property__status--quiet">keine Anträge</span>`;
   // First 3 cards are above the fold on a 3-col desktop grid — eager-
   // load for faster LCP. Cards 4+ stay lazy.
   const imgLoading = index < 3 ? 'eager' : 'lazy';
