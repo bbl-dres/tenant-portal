@@ -391,11 +391,6 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
 // Barrierefreiheit, plus a back-to-top button anchored top-right.
 export function renderFooter() {
   return `
-    <div class="back-to-top-wrapper" aria-hidden="true">
-      <a class="app-footer__top-btn" href="#main" aria-label="Zum Seitenanfang">
-        ${icon('chevronUp')}
-      </a>
-    </div>
     <footer class="app-footer" role="contentinfo">
       <div class="footer-information">
         <div class="footer-information__inner">
@@ -826,8 +821,17 @@ document.addEventListener('keydown', (e) => {
 export function shell({ activeNav = '', breadcrumb = [], deptSub = 'Mieterportal' } = {}) {
   const root = document.getElementById('root');
   const navItems = state.user ? authNavItems() : publicNavItems();
-  root.innerHTML = renderShell({ deptSub, activeNav, breadcrumb, navItems })
-                 + '<div id="page-body"></div>'
+  // `.page-container` is the positioning context for `.back-to-top-wrapper`
+  // — it ends at the footer top so the wrapper's negative `bottom` extends
+  // INTO the footer area (sibling below), not past the document. See the
+  // back-to-top CSS block in styles.css for the sticky mechanism.
+  root.innerHTML = '<div class="page-container">'
+                 +   renderShell({ deptSub, activeNav, breadcrumb, navItems })
+                 +   '<div id="page-body"></div>'
+                 +   '<div class="back-to-top-wrapper" aria-hidden="true">'
+                 +     `<a class="app-footer__top-btn" href="#main" aria-label="Zum Seitenanfang">${icon('chevronUp')}</a>`
+                 +   '</div>'
+                 + '</div>'
                  + renderFooter()
                  + renderShortcutOverlay();
   return document.getElementById('main');

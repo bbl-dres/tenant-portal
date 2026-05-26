@@ -30,9 +30,21 @@
 /* ── LAYOUT ─────────────────────────────────────────────────────────────── */
 /* Sticky-footer scaffold: #root spans at least the viewport and #page-body
    absorbs any leftover space, so short pages (e.g. Liegenschaften with a
-   single card) still push the footer to the bottom edge. */
+   single card) still push the footer to the bottom edge.
+
+   `.page-container` wraps everything above the footer and is the
+   positioning context for `.back-to-top-wrapper`. Keeping the wrapper
+   inside `.page-container` (rather than `#root`) means its negative
+   `bottom` extends INTO the footer area (the next sibling) instead of
+   past the document — otherwise the wrapper's overflow inflates the
+   body scroll height and produces a white strip below the footer. */
 #root {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.page-container {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   position: relative;     /* containing block for .back-to-top-wrapper */
@@ -2514,30 +2526,35 @@ a.btn[aria-disabled="true"] {
    (designsystem/css/components/back-to-top-btn.postcss:79-88): white bg,
    primary-600 border + chevron, square with small radius, 44→48→64 px
    scale. Floats at viewport bottom-right while scrolling and "lands"
-   overlapping the footer top (half on page, half on navy) when scroll
-   reaches the end — matches the swisstopo / bbl.admin.ch reference.
+   anchored at the top-right corner of `.footer-information` — the
+   button sits INSIDE the navy footer with its top edge flush against
+   the footer's top.
 
    Pure-CSS sticky pattern (no JS): `.back-to-top-wrapper` is
-   `position: absolute` inside `#root` (which is `position: relative`),
-   starting at 80vh and extending -22 px past the page bottom so it
-   overlaps the footer by half a button height. Inside, the button is
-   `position: sticky; top: calc(100vh - 64px)` — sticks to the viewport
-   bottom while the wrapper is in view, then lands at the wrapper's
-   bottom when scroll ends. */
+   `position: absolute` inside `.page-container` (which is the wrapper
+   above the footer, `position: relative`), starting at 80vh and
+   extending one button height past `.page-container`'s bottom — so the
+   wrapper's bottom sits one button height INTO the footer area
+   (footer is the next sibling). Inside, the button is
+   `position: sticky; top: calc(100vh - 64px)` — sticks to the
+   viewport bottom while the wrapper is in view, then lands at the
+   wrapper's bottom (= button top edge flush with footer top, anchored
+   at the top-right corner of `.footer-information`) when scroll ends. */
 .back-to-top-wrapper {
   position: absolute;
   top: 80vh;
-  right: var(--container-padding);
-  bottom: -22px;
+  right: 0;                 /* flush with right edge of `.footer-information` (full-width) */
+  bottom: -44px;            /* = button height — sinks button fully into footer top */
   width: 44px;
+  line-height: 0;           /* kill inline-baseline descender below the inline-flex button */
   pointer-events: none;
   z-index: 5;
 }
 @media (min-width: 1024px) {
-  .back-to-top-wrapper { bottom: -24px; width: 48px; }
+  .back-to-top-wrapper { bottom: -48px; width: 48px; }
 }
 @media (min-width: 1280px) {
-  .back-to-top-wrapper { bottom: -32px; width: 64px; }
+  .back-to-top-wrapper { bottom: -64px; width: 64px; }
 }
 .app-footer__top-btn {
   position: sticky;
