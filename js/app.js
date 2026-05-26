@@ -1675,7 +1675,7 @@ function renderProperties() {
         <header class="page-header">
           <div>
             <h1 class="h1 page-header__title">Liegenschaften ${isBblView ? '(BBL-Sicht)' : 'Ihrer Verwaltungs­einheit'}</h1>
-            <p class="section-intro section-intro--tight">
+            <p class="page-header__sub">
               ${isBblView
                 ? 'Alle vom BBL verwalteten Mietverhältnisse weltweit.'
                 : `Mietverhältnisse Ihrer Verwaltungs­einheit <strong>${P.escapeHtml(ve)}</strong>.`
@@ -1683,10 +1683,7 @@ function renderProperties() {
             </p>
           </div>
         </header>
-      </div>
-    </section>
-    <section class="section section--alt">
-      <div class="container">
+
         ${allTenancies.length === 0 ? `
           <div class="empty-state">
             <h2 class="empty-state__title">Keine Mietverhältnisse erfasst</h2>
@@ -1734,6 +1731,7 @@ function renderProperties() {
   if (view === 'map') initPropertiesMap(filtered);
   wirePropertiesToolbar(view);
 }
+
 
 // Parse `?key=value&key2=value2` out of a hash like `#/properties?view=list&q=eich&page=2`.
 function parseHashQuery(hash) {
