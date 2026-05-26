@@ -5343,7 +5343,6 @@ body.body--mobile-menu-is-open {
 .card--property__status--quiet {
   background: var(--color-white-85);
   color: var(--color-success);
-  font-weight: var(--font-weight-bold);
 }
 .card--property__body {
   padding: var(--space-md) var(--space-lg) var(--space-lg);
