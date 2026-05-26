@@ -2526,35 +2526,43 @@ a.btn[aria-disabled="true"] {
    (designsystem/css/components/back-to-top-btn.postcss:79-88): white bg,
    primary-600 border + chevron, square with small radius, 44→48→64 px
    scale. Floats at viewport bottom-right while scrolling and "lands"
-   anchored at the top-right corner of `.footer-information` — the
-   button sits INSIDE the navy footer with its top edge flush against
-   the footer's top.
+   in the top-right corner of `.footer-information` with the DS
+   canonical constant margins — 12 px right / 12 px top at base & lg,
+   16 px right / 16 px top at xl (≥1280).
 
    Pure-CSS sticky pattern (no JS): `.back-to-top-wrapper` is
    `position: absolute` inside `.page-container` (which is the wrapper
    above the footer, `position: relative`), starting at 80vh and
-   extending one button height past `.page-container`'s bottom — so the
-   wrapper's bottom sits one button height INTO the footer area
-   (footer is the next sibling). Inside, the button is
+   extending `-3.5rem / -4rem / -5rem` past `.page-container`'s
+   bottom — i.e. into the footer area (the next sibling) by 56/64/80
+   px. With a 44/48/64 px button, that leaves a 12/16/16 px margin
+   between the button's top and the footer top. Inside, the button is
    `position: sticky; top: calc(100vh - 64px)` — sticks to the
    viewport bottom while the wrapper is in view, then lands at the
-   wrapper's bottom (= button top edge flush with footer top, anchored
-   at the top-right corner of `.footer-information`) when scroll ends. */
+   wrapper's bottom (= DS canonical landing in the footer's top-right
+   corner) when scroll ends. Right offset matches the DS:
+   `right-3` (12 px) → `1rem` (16 px) at xl. */
 .back-to-top-wrapper {
   position: absolute;
   top: 80vh;
-  right: 0;                 /* flush with right edge of `.footer-information` (full-width) */
-  bottom: -44px;            /* = button height — sinks button fully into footer top */
+  right: 0.75rem;           /* DS: right-3 = 12 px */
+  bottom: -3.5rem;          /* DS: -56 px — sinks into footer, leaves 12 px top margin (44 px btn) */
   width: 44px;
-  line-height: 0;           /* kill inline-baseline descender below the inline-flex button */
   pointer-events: none;
   z-index: 5;
 }
 @media (min-width: 1024px) {
-  .back-to-top-wrapper { bottom: -48px; width: 48px; }
+  .back-to-top-wrapper {
+    bottom: -4rem;          /* DS: -64 px — 16 px top margin (48 px btn) */
+    width: 48px;
+  }
 }
 @media (min-width: 1280px) {
-  .back-to-top-wrapper { bottom: -64px; width: 64px; }
+  .back-to-top-wrapper {
+    right: 1rem;            /* DS: 16 px */
+    bottom: -5rem;          /* DS: -80 px — 16 px top margin (64 px btn) */
+    width: 64px;
+  }
 }
 .app-footer__top-btn {
   position: sticky;
