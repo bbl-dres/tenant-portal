@@ -757,10 +757,14 @@
   align-items: center;
   font-weight: var(--font-weight-regular);
 }
-.main-navigation__link--has-menu:hover,
-.main-navigation__link--has-menu[aria-expanded="true"] {
+.main-navigation__link--has-menu:hover {
   color: var(--color-primary);
 }
+/* When the dropdown is open, the trigger keeps the default text color —
+   the red underscore (`::after`), rotated chevron, and `--clicked` lift
+   already signal the open state. Tinting the label red on top of those
+   cues felt over-emphasised and made the open trigger compete with the
+   active-route indicator. */
 /* On desktop the CD pattern HIDES the dropdown indicator on nav-menu
    triggers (the panel opens on click and lifts the trigger; no extra
    chevron). See designsystem/css/navigations/main-navigation.postcss:58
