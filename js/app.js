@@ -2981,6 +2981,22 @@ document.addEventListener('fullscreenchange', () => {
   if (_floorMap) setTimeout(() => { try { _floorMap.resize(); } catch {} }, 60);
 });
 
+// Centroid of a polygon's outer ring (drops the closing vertex) — one label
+// point per room. A point sits in exactly one vector tile, so room labels no
+// longer duplicate on wide polygons (e.g. a full-width corridor) that straddle
+// an internal tile boundary.
+function polygonLabelPoint(geometry) {
+  if (!geometry) return null;
+  const ring = geometry.type === 'MultiPolygon'
+    ? (geometry.coordinates[0] || [])[0]
+    : geometry.coordinates && geometry.coordinates[0];
+  if (!ring || !ring.length) return null;
+  const last = ring.length - 1;
+  const pts = (ring[0][0] === ring[last][0] && ring[0][1] === ring[last][1]) ? ring.slice(0, -1) : ring;
+  let x = 0, y = 0;
+  for (const p of pts) { x += p[0]; y += p[1]; }
+  return [x / pts.length, y / pts.length];
+}
 function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
   loadMapLibre().then(maplibregl => {
     const container = document.getElementById('floorCanvas');
@@ -3032,6 +3048,18 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
         }
       };
     })};
+
+    // Labels live on their own POINT source — one per room at its centroid.
+    // MapLibre tiles GeoJSON internally and a symbol layer over a polygon
+    // places an anchor per tile the polygon covers, so a wide room straddling
+    // a tile boundary gets labelled twice. A point sits in one tile → one label.
+    const labelFc = {
+      type: 'FeatureCollection',
+      features: spacesFc.features.map(f => {
+        const pt = polygonLabelPoint(f.geometry);
+        return pt ? { type: 'Feature', geometry: { type: 'Point', coordinates: pt }, properties: { label: f.properties.label } } : null;
+      }).filter(Boolean)
+    };
 
     // Active "Einfärben" mode — drives both the MapLibre fill
     // expression and the legend rendering. Held in a closure so the
@@ -3178,6 +3206,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
 
       map.addSource('floor',  { type: 'geojson', data: floorFc });
       map.addSource('spaces', { type: 'geojson', data: spacesFc });
+      map.addSource('space-labels', { type: 'geojson', data: labelFc });
 
       // Room fills — colour is pre-computed onto each feature for all
       // three view modes (`fillUseType` / `fillSia` / `fillTenant`).
@@ -3223,14 +3252,14 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
       });
 
       // Room labels — three lines: room number, German useType label, area.
-      // Every space gets a label including corridors (Korridor) — they're
-      // valid rooms with their own spaceId, useType, area, and SIA
-      // category (VF). `text-allow-overlap: false` lets MapLibre
-      // self-hide any label that genuinely can't fit.
+      // Sourced from the dedicated point layer (`space-labels`, one point per
+      // room centroid) so wide polygons label exactly once. Every space gets a
+      // label including corridors (Korridor). `text-allow-overlap: false` lets
+      // MapLibre self-hide any label that genuinely can't fit.
       map.addLayer({
         id: 'room-labels',
         type: 'symbol',
-        source: 'spaces',
+        source: 'space-labels',
         layout: {
           'text-field': ['get', 'label'],
           'text-font': ['Open Sans Regular'],
