@@ -2036,7 +2036,10 @@ function initPropertiesMap(items) {
         el.type = 'button';
         el.setAttribute('aria-label', t.buildingName);
         el.dataset.id = t.id;
-        el.innerHTML = '<span class="property-marker__pin"></span>';
+        // Object-id label (buildingId, e.g. "BLD-2010") above the pin. Marked
+        // aria-hidden because the button already exposes the building name as
+        // its aria-label — otherwise screen readers would announce both.
+        el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(t.buildingId)}</span><span class="property-marker__pin"></span>`;
         el.addEventListener('click', () => focusPropertyOnMap(t.id));
         const veLine = `${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}`;
         const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' }).setHTML(`
@@ -2059,6 +2062,15 @@ function initPropertiesMap(items) {
       if (_propertiesMarkers.length > 0) {
         map.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 0 });
       }
+      // The buildingId labels turn into overlapping noise at the
+      // Switzerland-wide overview, so reveal them only once the user has
+      // zoomed in past LABEL_MIN_ZOOM. A single class toggle on the
+      // container cascades to every label — no per-marker loop per frame.
+      const LABEL_MIN_ZOOM = 10;
+      const syncMarkerLabels = () =>
+        container.classList.toggle('property-map--labels-hidden', map.getZoom() < LABEL_MIN_ZOOM);
+      map.on('zoom', syncMarkerLabels);
+      syncMarkerLabels();
     });
   }).catch(err => {
     const container = document.getElementById('propertiesMap');
