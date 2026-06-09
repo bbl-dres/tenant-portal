@@ -2292,7 +2292,10 @@ function initPropertiesMap(items) {
           .setLngLat([t.lng, t.lat])
           .setHTML(`
           <div class="property-popup">
-            <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="288" height="112">
+            <div class="property-popup__media">
+              <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="288" height="112">
+              <span class="property-popup__id">${P.escapeHtml(t.buildingId)}</span>
+            </div>
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
               <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>

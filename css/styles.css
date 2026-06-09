@@ -5565,15 +5565,29 @@ body.docviewer-open { overflow: hidden; }
 /* Full-width "Details öffnen" CTA at the foot of the map info panel. Uses
    the standard .btn .btn--filled chrome; only the width is local. */
 .property-popup__cta { width: 100%; }
-/* Banner image — full-bleed to the popup edges; confirms which building the
-   pin belongs to before the user commits to the detail page. */
-.property-popup__image {
-  display: block;
+/* Banner media — full-bleed to the popup edges. Hosts two overlays: the
+   building-id chip (top-left) and MapLibre's close button (top-right). */
+.property-popup__media {
+  position: relative;
   width: calc(100% + var(--space-md) * 2);
   height: 112px;
   margin: calc(-1 * var(--space-md)) calc(-1 * var(--space-md)) var(--space-sm);
-  object-fit: cover;
+  overflow: hidden;
   background-color: var(--color-bg-alt);
+}
+.property-popup__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Building-id chip — dark scrim so it reads on any photo; mirrors the id
+   shown on the marker label above the pin. */
+.property-popup__id {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  padding: 2px var(--space-xs);
+  background: var(--color-black-45);
+  color: var(--color-white);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-sm);
 }
 .property-popup__body { display: block; }
 
@@ -5586,20 +5600,19 @@ body.docviewer-open { overflow: hidden; }
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
-/* Close button sits over the photo — give it a contrasting pill so it reads
-   on any image. */
+/* Close button — overlaid on the photo top-right as a dark scrim circle so it
+   reads on any image (mirrors the id chip top-left); red on hover. */
 .property-map-popup .maplibregl-popup-close-button {
   width: 26px; height: 26px;
-  top: 6px; right: 6px;
+  top: var(--space-sm); right: var(--space-sm);
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
   font-size: 18px; line-height: 1;
-  color: var(--color-text-primary);
-  background: var(--color-white-90);
-  box-shadow: var(--shadow-sm);
-  transition: background var(--transition-fast), color var(--transition-fast);
+  color: var(--color-white);
+  background: var(--color-black-45);
+  transition: background var(--transition-fast);
 }
-.property-map-popup .maplibregl-popup-close-button:hover { background: var(--color-white); color: var(--color-primary); }
+.property-map-popup .maplibregl-popup-close-button:hover { background: var(--color-primary); }
 
 /* Small screens: a tethered bubble gets clipped on a short map, so dock the
    popup as a bottom card spanning the map width. Overrides MapLibre's inline
@@ -5616,7 +5629,7 @@ body.docviewer-open { overflow: hidden; }
   }
   .property-map-popup .maplibregl-popup-content { width: 100%; max-width: none !important; }
   .property-map-popup .maplibregl-popup-tip { display: none !important; }
-  .property-map-popup .property-popup__image { height: 96px; }
+  .property-map-popup .property-popup__media { height: 96px; }
 }
 
 /* `.property-location-map` — Standort map at the bottom of the property
