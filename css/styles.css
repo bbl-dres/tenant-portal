@@ -5560,24 +5560,64 @@ body.docviewer-open { overflow: hidden; }
   .docviewer__comments { position: absolute; right: 0; top: 0; bottom: 0; flex-basis: 88vw; box-shadow: var(--shadow-lg); }
   .docviewer__heading-icon { display: none; }
 }
-.property-popup__title { margin: 0 0 4px; font-weight: var(--font-weight-bold); font-size: var(--text-body); }
-.property-popup__meta  { margin: 0 0 2px; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+.property-popup__title { margin: 0 0 2px; font-weight: var(--font-weight-bold); font-size: var(--text-body); line-height: var(--line-height-snug); }
+.property-popup__meta  { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
 /* Full-width "Details öffnen" CTA at the foot of the map info panel. Uses
-   the standard .btn .btn--filled chrome; only the width + top gap are local. */
-.property-popup__cta { width: 100%; margin-top: var(--space-sm); }
-/* Banner image at the top of the portfolio-map popup — confirms which
-   building the user is hovering on before they commit to the click. */
+   the standard .btn .btn--filled chrome; only the width is local. */
+.property-popup__cta { width: 100%; }
+/* Banner image — full-bleed to the popup edges; confirms which building the
+   pin belongs to before the user commits to the detail page. */
 .property-popup__image {
   display: block;
   width: calc(100% + var(--space-md) * 2);
-  height: 120px;
+  height: 112px;
   margin: calc(-1 * var(--space-md)) calc(-1 * var(--space-md)) var(--space-sm);
   object-fit: cover;
   background-color: var(--color-bg-alt);
-  border-top-left-radius: var(--radius);
-  border-top-right-radius: var(--radius);
 }
 .property-popup__body { display: block; }
+
+/* Portfolio-map popup chrome (scoped via the `property-map-popup` className).
+   Padding matches the image's negative-margin bleed; content is clipped so
+   the photo fills the rounded top edge cleanly. */
+.property-map-popup .maplibregl-popup-content {
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+/* Close button sits over the photo — give it a contrasting pill so it reads
+   on any image. */
+.property-map-popup .maplibregl-popup-close-button {
+  width: 26px; height: 26px;
+  top: 6px; right: 6px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 18px; line-height: 1;
+  color: var(--color-text-primary);
+  background: var(--color-white-90);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.property-map-popup .maplibregl-popup-close-button:hover { background: var(--color-white); color: var(--color-primary); }
+
+/* Small screens: a tethered bubble gets clipped on a short map, so dock the
+   popup as a bottom card spanning the map width. Overrides MapLibre's inline
+   transform (CSS !important beats inline) and drops the tail. */
+@media (max-width: 640px) {
+  .property-map-popup.maplibregl-popup {
+    max-width: none !important;
+    width: auto !important;
+    left: var(--space-sm) !important;
+    right: var(--space-sm) !important;
+    bottom: var(--space-sm) !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  .property-map-popup .maplibregl-popup-content { width: 100%; max-width: none !important; }
+  .property-map-popup .maplibregl-popup-tip { display: none !important; }
+  .property-map-popup .property-popup__image { height: 96px; }
+}
 
 /* `.property-location-map` — Standort map at the bottom of the property
    detail page. Single marker centred on the building. Uses MapLibre +

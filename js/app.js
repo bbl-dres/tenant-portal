@@ -2279,23 +2279,23 @@ function initPropertiesMap(items) {
         // aria-hidden because the button already exposes the building name as
         // its aria-label — otherwise screen readers would announce both.
         el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(t.buildingId)}</span><span class="property-marker__pin"></span>`;
-        el.addEventListener('click', () => focusPropertyOnMap(t.id));
-        const veLine = `${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}`;
-        // Compact info panel: thumbnail + key attributes + a "Details" CTA.
-        // Managed manually (NOT via marker.setPopup) — setPopup adds its own
-        // click-to-toggle listener which, combined with our marker click
-        // handler below, would double-toggle and leave the panel closed.
-        const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' })
+        // stopPropagation: markers live inside MapLibre's canvas container, so
+        // without it the click bubbles up and fires a map `click` — whose
+        // default closeOnClick would instantly dismiss the popup we just opened.
+        // (A click on the empty basemap still closes it, which is what we want.)
+        el.addEventListener('click', (e) => { e.stopPropagation(); focusPropertyOnMap(t.id); });
+        // Compact info panel — deliberately minimal: photo, name, location and
+        // a CTA to the detail page (the technical attributes live there).
+        // Managed manually (NOT via marker.setPopup) so our click handler owns
+        // open/close. `className` scopes the chrome + small-screen placement.
+        const popup = new maplibregl.Popup({ offset: 18, closeButton: true, maxWidth: '288px', className: 'property-map-popup' })
           .setLngLat([t.lng, t.lat])
           .setHTML(`
           <div class="property-popup">
-            <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="320" height="120">
+            <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="288" height="112">
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
-              <p class="property-popup__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
               <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>
-              <p class="property-popup__meta">${veLine} · ${P.escapeHtml(t.portfolioCategory)}</p>
-              <p class="property-popup__meta">${t.hnf2.toLocaleString('de-CH')} m² HNF2 · ${t.workstations} Arbeitsplätze</p>
               <a class="btn btn--filled btn--sm property-popup__cta" href="#/properties/${t.id}">Details öffnen ${P.icon('arrowRight')}</a>
             </div>
           </div>`);
