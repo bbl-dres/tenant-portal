@@ -2303,10 +2303,10 @@ function initPropertiesMap(items) {
         el.type = 'button';
         el.setAttribute('aria-label', t.buildingName);
         el.dataset.id = t.id;
-        // Object-id label (buildingId, e.g. "BLD-2010") above the pin. Marked
-        // aria-hidden because the button already exposes the building name as
-        // its aria-label — otherwise screen readers would announce both.
-        el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(t.buildingId)}</span><span class="property-marker__pin"></span>`;
+        // SAP asset-key label (bk/we/obj, e.g. "1086/2010/AA") above the pin.
+        // Marked aria-hidden because the button already exposes the building
+        // name as its aria-label — otherwise screen readers would announce both.
+        el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(formatAssetKey(t.assetKey))}</span><span class="property-marker__pin"></span>`;
         // stopPropagation: markers live inside MapLibre's canvas container, so
         // without it the click bubbles up and fires a map `click` — whose
         // default closeOnClick would instantly dismiss the popup we just opened.
@@ -2322,7 +2322,7 @@ function initPropertiesMap(items) {
           <div class="property-popup">
             <div class="property-popup__media">
               <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="288" height="112">
-              <span class="property-popup__id">${P.escapeHtml(t.buildingId)}</span>
+              <span class="property-popup__id">${P.escapeHtml(formatAssetKey(t.assetKey))}</span>
             </div>
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
@@ -2432,16 +2432,16 @@ function propertyCard(t, index = 99) {
 // Property-detail Dokumente: four buckets by user intent (not by chronology).
 // Empty buckets are skipped at render time.
 const PROPERTY_DOC_GROUPS = [
-  { title: 'Mietvertrag & Anhänge',     types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
-  { title: 'Pläne als Dateien',         types: ['FloorPlan'],                       defaultOpen: false },
-  { title: 'Sicherheit & Betrieb',      types: ['Certificate', 'Manual', 'Permit'], defaultOpen: false },
-  { title: 'Historie & Korrespondenz',  types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
+  { titleKey: 'prop.docGroup.lease',   types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
+  { titleKey: 'prop.docGroup.plans',   types: ['FloorPlan'],                       defaultOpen: false },
+  { titleKey: 'prop.docGroup.safety',  types: ['Certificate', 'Manual', 'Permit'], defaultOpen: false },
+  { titleKey: 'prop.docGroup.history', types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
 ];
 
 async function renderPropertyDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
-  if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
+  if (!t) { document.getElementById('page-body').innerHTML = `<div class="container section"><p>${P.t('prop.notFound')}</p></div>`; return; }
   await P.loadSpatialData('data/');
   shell({ activeNav: 'properties', breadcrumb: [
     { href: '#/home', label: P.t('nav.start') },
@@ -2500,7 +2500,7 @@ async function renderPropertyDetail({ id }) {
       const adapted = visible.map(d => ({
         id:       d.id,
         title:    d.title,
-        subtitle: DOC_TYPE_LABEL[d.type] || d.type,
+        subtitle: P.t('doctype.' + d.type),
         format:   d.format,
         size:     d.size,
         languages: Array.isArray(d.languages) ? d.languages.map(l => l.toUpperCase()).join(' · ') : d.languages,
@@ -2509,12 +2509,12 @@ async function renderPropertyDetail({ id }) {
       return `
         <details class="doc-group" ${g.defaultOpen ? 'open' : ''}>
           <summary class="doc-group__summary">
-            <span class="doc-group__title">${P.escapeHtml(g.title)}</span>
+            <span class="doc-group__title">${P.escapeHtml(P.t(g.titleKey))}</span>
             <span class="doc-group__count">${items.length}</span>
           </summary>
           <div class="doc-group__body">
             ${downloadList(adapted)}
-            ${overflow > 0 ? `<p class="doc-group__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">… ${overflow} weitere im Dokumenten-Archiv anzeigen</a></p>` : ''}
+            ${overflow > 0 ? `<p class="doc-group__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">… ${P.t('prop.docsMore', { n: overflow })}</a></p>` : ''}
           </div>
         </details>
       `;
@@ -2522,7 +2522,7 @@ async function renderPropertyDetail({ id }) {
     .join('');
 
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar({ backTo: '#/properties', backLabel: 'Liegenschaften' })}
+    ${P.renderShareBar({ backTo: '#/properties', backLabel: P.t('nav.properties') })}
     <section class="section section--py-tight">
       <div class="container">
         <header class="property-header">
@@ -2531,7 +2531,7 @@ async function renderPropertyDetail({ id }) {
             <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
             <p class="property-header__address">${P.escapeHtml(t.address)}</p>
             <p class="property-header__chips">
-              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
+              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">${P.t('prop.restTerm', { n: monthsToEnd })}</span>
             </p>
           </div>
           <img class="property-header__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="140">
@@ -2544,7 +2544,7 @@ async function renderPropertyDetail({ id }) {
         <div class="property-layout">
           <div>
             <section class="property-section">
-              <h2 class="h2 section-heading">Vertrag & Mengengerüst</h2>
+              <h2 class="h2 section-heading">${P.t('prop.contractSection')}</h2>
 
               <div class="property-stats">
                 <div class="property-stats__item">
@@ -2556,35 +2556,35 @@ async function renderPropertyDetail({ id }) {
                   <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
                 </div>
                 <div class="property-stats__item">
-                  <span class="property-stats__label">Arbeitsplätze</span>
+                  <span class="property-stats__label">${P.t('prop.workstations')}</span>
                   <span class="property-stats__value">${t.workstations}</span>
                 </div>
                 <div class="property-stats__item">
-                  <span class="property-stats__label">Mietkosten / Jahr</span>
+                  <span class="property-stats__label">${P.t('prop.yearlyCost')}</span>
                   <span class="property-stats__value">${P.formatChf(t.yearlyCost)}</span>
                 </div>
               </div>
 
               <table class="table property-facts">
-                <tr><th>Mietende VE</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
-                <tr><th>PFM-Kategorie</th><td>${P.escapeHtml(t.portfolioCategory)}</td></tr>
-                <tr><th>Vertragsart</th><td>${t.leaseAuto ? '<span class="badge badge--success">automatisch verlängernd</span>' : '<span class="badge badge--warning">Festlaufzeit</span>'}</td></tr>
-                <tr><th>Laufzeit</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)}</td></tr>
+                <tr><th>${P.t('prop.tenantVe')}</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
+                <tr><th>${P.t('prop.pfmCategory')}</th><td>${P.escapeHtml(t.portfolioCategory)}</td></tr>
+                <tr><th>${P.t('prop.leaseType')}</th><td>${t.leaseAuto ? `<span class="badge badge--success">${P.t('prop.autoRenew')}</span>` : `<span class="badge badge--warning">${P.t('prop.fixedTerm')}</span>`}</td></tr>
+                <tr><th>${P.t('prop.term')}</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)}</td></tr>
               </table>
             </section>
 
             <section class="property-section">
-              <h2 class="h2 section-heading">Geschosse (${floors.length})</h2>
+              <h2 class="h2 section-heading">${P.t('prop.floorsSection')} (${floors.length})</h2>
               ${floors.length === 0
-                ? `<p class="text-secondary">Für diese Liegenschaft liegt noch kein interaktiver Grundriss vor.</p>`
+                ? `<p class="text-secondary">${P.t('prop.noFloors')}</p>`
                 : `<table class="table table--zebra table--rows-clickable floor-list" aria-label="Geschosse mit interaktivem Grundriss">
                     <thead>
                       <tr>
-                        <th scope="col">Etage</th>
-                        <th scope="col" class="floor-list__num">Räume</th>
+                        <th scope="col">${P.t('prop.floor')}</th>
+                        <th scope="col" class="floor-list__num">${P.t('prop.rooms')}</th>
                         <th scope="col" class="floor-list__num">HNF2</th>
-                        <th scope="col" class="floor-list__num">Arbeitsplätze</th>
-                        <th scope="col" class="floor-list__num">Davon ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
+                        <th scope="col" class="floor-list__num">${P.t('prop.workstations')}</th>
+                        <th scope="col" class="floor-list__num">${P.t('prop.ofWhich')} ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
                         <th scope="col" aria-hidden="true" class="floor-list__chevron-th"></th>
                       </tr>
                     </thead>
@@ -2593,7 +2593,7 @@ async function renderPropertyDetail({ id }) {
                         <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
                           <td>
                             <strong>${P.escapeHtml(f.name)}</strong>
-                            ${f.isYourFloor ? ' <span class="badge badge--success">Ihr Standort</span>' : ''}
+                            ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
                           </td>
                           <td class="floor-list__num">${f.roomCount}</td>
                           <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} m²</td>
@@ -2607,11 +2607,11 @@ async function renderPropertyDetail({ id }) {
             </section>
 
             <section class="property-section">
-              <h2 class="h2 section-heading">Anträge zu dieser Liegenschaft (${related.length})</h2>
+              <h2 class="h2 section-heading">${P.t('prop.appsSection')} (${related.length})</h2>
               ${related.length === 0
-                ? `<p class="text-secondary">Keine offenen oder vergangenen Anträge zu dieser Liegenschaft.</p>`
-                : `<table class="table table--zebra table--rows-clickable" aria-label="Anträge zu dieser Liegenschaft">
-                     <thead><tr><th scope="col">Antrag</th><th scope="col">Typ</th><th scope="col">Eingereicht</th><th scope="col">Status</th></tr></thead>
+                ? `<p class="text-secondary">${P.t('prop.noApps')}</p>`
+                : `<table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.appsSection')}">
+                     <thead><tr><th scope="col">${P.t('prop.application')}</th><th scope="col">${P.t('prop.type')}</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th></tr></thead>
                      <tbody>
                        ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><strong>${a.id}</strong></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
                      </tbody>
@@ -2619,16 +2619,16 @@ async function renderPropertyDetail({ id }) {
             </section>
 
             <section class="property-section">
-              <h2 class="h2 section-heading">Dokumente zu dieser Liegenschaft (${linkedDocs.length})</h2>
+              <h2 class="h2 section-heading">${P.t('prop.docsSection')} (${linkedDocs.length})</h2>
               ${linkedDocs.length === 0
-                ? `<p class="text-secondary">Keine Dokumente zu dieser Liegenschaft hinterlegt.</p>`
+                ? `<p class="text-secondary">${P.t('prop.noDocs')}</p>`
                 : `<div class="doc-groups">${docGroupHtml}</div>`}
             </section>
 
             <section class="property-section">
-              <h2 class="h2 section-heading">Standort</h2>
-              <div id="propertyLocationMap" class="property-location-map map-surface" aria-label="Karte: Standort der Liegenschaft">
-                ${renderMapLoading('Standortkarte wird geladen')}
+              <h2 class="h2 section-heading">${P.t('prop.location')}</h2>
+              <div id="propertyLocationMap" class="property-location-map map-surface" aria-label="${P.t('prop.location')}">
+                ${renderMapLoading(P.t('prop.mapLoading'))}
               </div>
               <p class="property-location-meta">${P.escapeHtml(t.address)}${typeof t.lat === 'number' && typeof t.lng === 'number' ? ` · ${t.lat.toFixed(4)}°N, ${t.lng.toFixed(4)}°E` : ''}</p>
             </section>
@@ -2636,27 +2636,27 @@ async function renderPropertyDetail({ id }) {
 
           <aside class="property-aside">
             <div class="card property-aside__card">
-              <h3 class="card__title">Aktionen</h3>
+              <h3 class="card__title">${P.t('prop.actions')}</h3>
               <div class="property-aside__actions">
-                <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.icon('tool')}Schaden / Reparatur melden</a>
-                <a href="#/wizard/1" class="btn btn--bare">${P.icon('document')}Bedarf zu dieser Liegenschaft</a>
-                <a href="#/moves?building=${t.buildingId}" class="btn btn--bare">${P.icon('truck')}Umzug anmelden</a>
-                <a href="#/cleaning?building=${t.buildingId}" class="btn btn--bare">${P.icon('sparkles')}Sonderreinigung anfragen</a>
+                <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.icon('tool')}${P.t('prop.actionRepair')}</a>
+                <a href="#/wizard/1" class="btn btn--bare">${P.icon('document')}${P.t('prop.actionRequest')}</a>
+                <a href="#/moves?building=${t.buildingId}" class="btn btn--bare">${P.icon('truck')}${P.t('prop.actionMove')}</a>
+                <a href="#/cleaning?building=${t.buildingId}" class="btn btn--bare">${P.icon('sparkles')}${P.t('prop.actionCleaning')}</a>
               </div>
             </div>
             <div class="card">
-              <h3 class="card__title">Ansprechpersonen BBL</h3>
+              <h3 class="card__title">${P.t('prop.contactsTitle')}</h3>
               <dl class="contact-dl">
                 <div class="contact-dl__row">
-                  <dt>Portfolio-Management</dt>
+                  <dt>${P.t('prop.contactPfm')}</dt>
                   <dd>${P.escapeHtml(t.contacts.pfm)}</dd>
                 </div>
                 <div class="contact-dl__row">
-                  <dt>Immobilien-Management</dt>
+                  <dt>${P.t('prop.contactIm')}</dt>
                   <dd>${P.escapeHtml(t.contacts.im)}</dd>
                 </div>
                 <div class="contact-dl__row">
-                  <dt>Flächenmanagement (FLM)</dt>
+                  <dt>${P.t('prop.contactFlm')}</dt>
                   <dd>${P.escapeHtml(t.contacts.flm)}</dd>
                 </div>
               </dl>
@@ -2697,10 +2697,10 @@ function initPropertyDetailMap(t) {
       const el = document.createElement('div');
       el.className = 'property-marker property-marker--static';
       el.setAttribute('aria-label', t.buildingName);
-      // Same building-id label as the portfolio map — but view-only here:
+      // Same SAP asset-key label as the portfolio map — but view-only here:
       // the static marker has pointer-events:none (no select) and no popup,
       // and this single-building map never hides the label by zoom.
-      el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(t.buildingId)}</span><span class="property-marker__pin"></span>`;
+      el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(formatAssetKey(t.assetKey))}</span><span class="property-marker__pin"></span>`;
       new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([t.lng, t.lat])
         .addTo(map);
@@ -2709,7 +2709,7 @@ function initPropertyDetailMap(t) {
     console.error('[property location map]', err);
     const container = document.getElementById('propertyLocationMap');
     if (container) {
-      container.innerHTML = '<p class="property-map__error">Karte konnte nicht geladen werden.</p>';
+      container.innerHTML = `<p class="property-map__error">${P.t('prop.mapError')}</p>`;
     }
   });
 }
@@ -2942,7 +2942,7 @@ async function renderFloorDetail({ id, floorSlug }) {
             <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
             <p class="property-header__address">${P.escapeHtml(t.address)}</p>
             <p class="property-header__chips">
-              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">Restlaufzeit ~${monthsToEnd} Monate</span>
+              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">${P.t('prop.restTerm', { n: monthsToEnd })}</span>
             </p>
           </div>
           <img class="property-header__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="140">

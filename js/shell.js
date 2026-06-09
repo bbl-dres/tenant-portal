@@ -601,24 +601,24 @@ export function renderShareBar({ backTo = null, backLabel = null } = {}) {
   // stays in `aria-label` for screen-reader context; the breadcrumb above
   // already shows it visually.
   const back = backTo
-    ? `<a class="btn btn--outline btn--back" href="${backTo}" aria-label="Zurück${backLabel ? ` zu ${backLabel}` : ''}">
+    ? `<a class="btn btn--outline btn--back" href="${backTo}" aria-label="${t('btn.back')}${backLabel ? ' – ' + escapeHtml(backLabel) : ''}">
          ${icon('chevronLeft')}
-         <span>Zurück</span>
+         <span>${t('btn.back')}</span>
        </a>`
     : '';
   return `
-    <div class="share-bar" role="toolbar" aria-label="Seite-Aktionen">
+    <div class="share-bar" role="toolbar" aria-label="${t('sharebar.label')}">
       ${back}
       <div class="share-bar__actions">
-        <button class="share-bar__btn" type="button" aria-label="Link kopieren"
+        <button class="share-bar__btn" type="button" aria-label="${t('btn.copyLink')}"
                 onclick="window.portal.copyShareLink()">
           ${icon('share')}
-          <span>Teilen</span>
+          <span>${t('btn.share')}</span>
         </button>
-        <button class="share-bar__btn" type="button" aria-label="Seite drucken"
+        <button class="share-bar__btn" type="button" aria-label="${t('btn.print')}"
                 onclick="window.print()">
           ${icon('printer')}
-          <span>Drucken</span>
+          <span>${t('btn.print')}</span>
         </button>
       </div>
     </div>
