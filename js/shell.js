@@ -81,7 +81,6 @@ export const SERVICES_MENU = {
     { href: '#/moves',     label: 'Umzug',                   desc: 'Umzug innerhalb oder zwischen Liegenschaften' },
     { href: '#/cleaning',  label: 'Sonderreinigung',         desc: 'Grund-, Bau- und Spezialreinigung' },
     { href: 'https://bbl-dres.github.io/workspace-management/', label: 'Möbel bestellen', desc: 'Standard- und Spezialmobiliar', external: true },
-    { href: '#/training',  label: 'Schulungen',              desc: '„Mieterportal kompakt" und weitere' },
   ]
 };
 
@@ -184,7 +183,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
   const mobileMetaHtml = `
     <div class="main-navigation__mobile-meta" aria-label="Meta-Navigation (mobil)">
       <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
-      <a class="main-navigation__link" href="#/help">Hilfe</a>
+      <a class="main-navigation__link" href="#/info">Hilfe</a>
     </div>
   `;
 
@@ -336,7 +335,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
           <div class="top-header__right">
             <nav class="top-header__meta" aria-label="Meta-Navigation">
               <a class="top-header__meta-link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
-              <a class="top-header__meta-link" href="#/help">Hilfe</a>
+              <a class="top-header__meta-link" href="#/info">Hilfe</a>
             </nav>
             <div class="top-header__actions">
               <div class="header-search" id="headerSearch">

@@ -18,7 +18,7 @@
    #/inbox/:id     application detail
    #/queue         reviewer queue (GS-Prüfer/in)
    #/review/:id    reviewer split-pane
-   #/help · #/info · #/properties · #/downloads · #/news · #/search …
+   #/info · #/properties · #/downloads · #/news · #/search …
  ========================================================================== */
 
 import {
@@ -207,7 +207,6 @@ function registerRoutes() {
   P.registerRoute('#/inbox/:id',   renderApplicationDetail);
   P.registerRoute('#/queue',       renderQueue);
   P.registerRoute('#/review/:id',  renderReviewerSplit);
-  P.registerRoute('#/help',        renderHelp);
   P.registerRoute('#/properties',  renderProperties);
   P.registerRoute('#/properties/:id', renderPropertyDetail);
   P.registerRoute('#/properties/:id/floors/:floorSlug', renderFloorDetail);
@@ -220,7 +219,6 @@ function registerRoutes() {
   P.registerRoute('#/moves',       renderMoveForm);
   P.registerRoute('#/cleaning',    renderCleaningForm);
   P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
-  P.registerRoute('#/training',    () => renderServiceStub('Schulungen', 'FUNC-LP-007', 'Aktuelle Schulungen wie „Mieterportal kompakt" (60 Min.) und Aufbaukurse sind hier verlinkt — Termin-Buchung folgt in v0.4.'));
   // Arbeitsinstrumente und Informationen — single long-scroll page (public)
   P.registerRoute('#/info',                renderInfoPage);
   P.registerRoute('#/search',              renderSearchResults);
@@ -834,7 +832,7 @@ function renderLanding() {
               ${P.icon('external')}
               Anmelden mit eIAM
             </button>
-            <a href="#/help" class="btn btn--outline btn--lg">Wie funktioniert das Portal?</a>
+            <a href="#/info" class="btn btn--outline btn--lg" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">Wie funktioniert das Portal?</a>
           </div>
         </div>
         <figure class="hero__figure">
@@ -869,7 +867,7 @@ function renderLanding() {
             <p class="section-intro">
               Bedarfsmeldung, Statusverfolgung, Pläne und Dokumente — alles an einem Ort.
             </p>
-            <a href="#/help" class="btn btn--outline">Häufige Fragen ansehen</a>
+            <a href="#/info" class="btn btn--outline" onclick="setTimeout(() => window.t3lite.scrollToInfo('faq'), 100);">Häufige Fragen ansehen</a>
           </div>
           <a class="video-thumb"
              href="https://www.youtube.com/watch?v=rin3crkLpRk"
@@ -1151,7 +1149,7 @@ function renderInboxEmptyState() {
       <p class="empty-state__lead">Sie haben derzeit keine Anträge in Bearbeitung. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
       <div class="empty-state__cta">
         <a href="#/wizard/1" class="btn btn--filled">Bedarf anmelden</a>
-        <a href="#/help" class="btn btn--bare">Wie funktioniert das Portal?</a>
+        <a href="#/info" class="btn btn--bare" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">Wie funktioniert das Portal?</a>
       </div>
     </div>
   `;
@@ -2470,6 +2468,7 @@ async function renderPropertyDetail({ id }) {
       const visible = items.slice(0, 6);
       const overflow = items.length - visible.length;
       const adapted = visible.map(d => ({
+        id:       d.id,
         title:    d.title,
         subtitle: DOC_TYPE_LABEL[d.type] || d.type,
         format:   d.format,
@@ -3623,11 +3622,17 @@ function renderDownloads() {
 function downloadList(items) {
   return `
     <ul class="download-list">
-      ${items.map(it => `
+      ${items.map(it => {
+        // Items carrying a document `id` open the same preview viewer as the
+        // downloads page (1:1); plain lists (regulations, strategies, training
+        // modules) keep the simulated-download toast.
+        const action = it.id
+          ? `window.t3lite.openDocViewer('${P.escapeJs(it.id)}'); return false;`
+          : `window.portal.toast('Download simuliert: ${P.escapeJs(it.title)}'); return false;`;
+        return `
         <li class="download-list__item">
-          <a class="download-list__link" href="#"
-             onclick="window.portal.toast('Download simuliert: ${P.escapeJs(it.title)}'); return false;">
-            <span class="download-list__icon">${P.icon('download')}</span>
+          <a class="download-list__link" href="#" onclick="${action}">
+            <span class="download-list__icon">${P.icon(it.id ? 'document' : 'download')}</span>
             <div class="download-list__body">
               <p class="download-list__title">${P.escapeHtml(it.title)}</p>
               ${it.subtitle ? `<p class="download-list__subtitle">${P.escapeHtml(it.subtitle)}</p>` : ''}
@@ -3639,8 +3644,8 @@ function downloadList(items) {
               </p>
             </div>
           </a>
-        </li>
-      `).join('')}
+        </li>`;
+      }).join('')}
     </ul>
   `;
 }
@@ -3945,6 +3950,11 @@ function renderServicesOverview() {
             <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
             ${arrowBtn()}
           </a>
+          <a href="#/info" class="card--quick" onclick="setTimeout(() => window.t3lite.scrollToInfo('schulungen'), 100);">
+            <p class="card--quick__title">Schulungen</p>
+            <p class="card--quick__desc">Kurse, Lernvideos und Unterlagen im Bereich „Ausbildung".</p>
+            ${arrowBtn()}
+          </a>
         </div>
       </div>
     </section>
@@ -3970,53 +3980,6 @@ function renderServiceStub(title, _reqId, lead, externalUrl) {
         <p class="service-stub__hint">
           Diese Funktion wird in einer der nächsten Iterationen freigeschaltet.
         </p>
-      </div>
-    </section>
-  `;
-}
-
-// ── 14. HELP STUB ────────────────────────────────────────────────────────
-function renderHelp() {
-  const main = shell({ activeNav: 'help', breadcrumb: [{ label: 'Hilfe' }] });
-  document.getElementById('page-body').innerHTML = `
-    <section class="section">
-      <div class="container">
-        <h1>Häufige Fragen</h1>
-        <div class="accordion">
-          <div class="accordion__item">
-            <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-              <span>Wie melde ich einen Bedarf an?</span><span class="accordion__icon"></span>
-            </button>
-            <div class="accordion__panel">
-              <p>Klicken Sie auf der Startseite „Bedarf anmelden →". Sie werden durch fünf Schritte geführt: Basisangaben, Flächenbedarf (NAW-Klassifizierung), Anhänge, ggf. Detail-Felder für Grossanträge, abschliessend Prüfen & Senden.</p>
-              <p>Tipp: Drücken Sie <kbd>?</kbd> für eine Übersicht aller Tastatur-Kurzbefehle.</p>
-            </div>
-          </div>
-          <div class="accordion__item">
-            <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-              <span>Was bedeutet die NAW-Klasse?</span><span class="accordion__icon"></span>
-            </button>
-            <div class="accordion__panel">
-              <p>NAW = <em>Neue Arbeitswelten</em>. Die Klassifizierung beschreibt den Arbeitsstil Ihres Teams (Kollaborativ, Konzentriert, Hybrid, Labor) und bestimmt die m²/FTE-Basis (Standardwert 12 m²/FTE HNF2 für Kollaborativ-Standard). Der Belegungsfaktor 0.8 ist eine fixe Bundesvorgabe.</p>
-            </div>
-          </div>
-          <div class="accordion__item">
-            <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-              <span>Greenfield-Pfad — was ist das?</span><span class="accordion__icon"></span>
-            </button>
-            <div class="accordion__panel">
-              <p>Wenn die von Ihnen eingegebene Adresse nicht im Bundes-Stammdatensatz registriert ist (z. B. eine neue Auslandvertretung), aktiviert das Portal den Greenfield-Modus. Sie können den Antrag trotzdem einreichen — BBL-IM legt die Wirtschaftseinheit (WE) und Objektnummer im Anschluss an die Genehmigung an, danach erfolgt die ePPM-Übergabe.</p>
-            </div>
-          </div>
-          <div class="accordion__item">
-            <button class="accordion__trigger" onclick="this.parentElement.classList.toggle('accordion__item--open')">
-              <span>BK-Bypass (Bundeskanzlei) — wann?</span><span class="accordion__icon"></span>
-            </button>
-            <div class="accordion__panel">
-              <p>Die Bundeskanzlei (BK) hat kein Generalsekretariat. Anträge der BK überspringen daher den GS-Schritt und werden direkt an BBL Portfolio-Management geroutet. Das System erkennt dies automatisch und passt die Status-Pipeline an.</p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   `;
