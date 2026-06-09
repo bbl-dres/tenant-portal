@@ -88,9 +88,11 @@ function handleHash() {
       return;
     }
   }
-  // No match: render 404
-  const app = document.getElementById('app');
-  if (app) app.innerHTML = `<div class="container section"><h1>Seite nicht gefunden</h1><p><a href="#/">Zurück zur Startseite</a></p></div>`;
+  // No match: render a 404 through the shell so it has chrome. (The old code
+  // targeted a nonexistent `#app`; the mount point is `#page-body`.)
+  shell({ breadcrumb: [{ href: '#/', label: t('nav.start') }, { label: t('error.notFound') }] });
+  const body = document.getElementById('page-body');
+  if (body) body.innerHTML = `<section class="section"><div class="container"><h1 class="h1 section-heading">${t('error.notFound')}</h1><p><a class="link" href="#/">${t('error.backHome')}</a></p></div></section>`;
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────────
@@ -186,7 +188,16 @@ init();
 const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info']);
 
 async function init() {
-  await P.loadData('data/');
+  try {
+    await P.loadData('data/');
+  } catch (err) {
+    // A required data file failed to load — render a static fallback rather
+    // than throwing out of init() and leaving a blank page. i18n may not have
+    // loaded, so this message is hardcoded German (the default language).
+    console.error('[init] data load failed', err);
+    if (root) root.innerHTML = '<div class="container section" role="alert"><h1 class="h1">Daten konnten nicht geladen werden</h1><p>Bitte laden Sie die Seite neu. Besteht das Problem weiterhin, kontaktieren Sie den BBL-Support.</p></div>';
+    return;
+  }
   P.wireGlobalShortcuts();
   registerRoutes();
   // Deep-link auto-login: a user opening a shared URL like
@@ -244,8 +255,9 @@ function registerRoutes() {
 const SEARCH_GROUP_CAP = 10;
 function renderSearchResults() {
   shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('bc.search') }] });
-  const q = (location.hash.split('?q=')[1] || '').replace(/^=/, '');
-  const query = decodeURIComponent(q || '').toLowerCase().trim();
+  // parseHashQuery splits on `&`, so it isolates `q` from the injected `lang`
+  // param (a naive split('?q=') would capture "eichweg&lang=de").
+  const query = (parseHashQuery(location.hash).q || '').toLowerCase().trim();
 
   const matches = {
     news:        [],
@@ -531,7 +543,7 @@ function renderInfoPage() {
               <h3>Anmeldungen Ausbildung Mieterportal</h3>
               <div class="accordion accordion--inset">
                 <div class="accordion__item accordion__item--open">
-                  <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+                  <button class="accordion__trigger" type="button" aria-expanded="true" onclick="this.setAttribute('aria-expanded', this.parentElement.classList.toggle('accordion__item--open'))">
                     <span>Für Ausbildungen anmelden</span>
                     <span class="accordion__icon" aria-hidden="true"></span>
                   </button>
@@ -545,7 +557,7 @@ function renderInfoPage() {
                   </div>
                 </div>
                 <div class="accordion__item">
-                  <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+                  <button class="accordion__trigger" type="button" aria-expanded="false" onclick="this.setAttribute('aria-expanded', this.parentElement.classList.toggle('accordion__item--open'))">
                     <span>Lernvideos</span>
                     <span class="accordion__icon" aria-hidden="true"></span>
                   </button>
@@ -639,7 +651,7 @@ function renderInfoPage() {
 function faqItem(question, answer) {
   return `
     <div class="accordion__item">
-      <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+      <button class="accordion__trigger" type="button" aria-expanded="false" onclick="this.setAttribute('aria-expanded', this.parentElement.classList.toggle('accordion__item--open'))">
         <span>${P.escapeHtml(question)}</span>
         <span class="accordion__icon" aria-hidden="true"></span>
       </button>
@@ -1215,7 +1227,7 @@ function renderApplicationDetail({ id }) {
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
   const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/inbox', label: P.t('nav.inbox') }, { label: a.id }] });
-  const tab = (location.hash.split('?tab=')[1] || 'daten');
+  const tab = parseHashQuery(location.hash).tab || 'daten';
 
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'Anträge' })}
@@ -1229,7 +1241,7 @@ function renderApplicationDetail({ id }) {
             <div class="notification-banner__wrapper">
               <p class="notification-banner__text">
                 <strong>Ihr Antrag ${a.id} wurde erfolgreich eingereicht.</strong>
-                Sie erhalten in Kürze eine E-Mail-Bestätigung. Status: <em>${({ eingereicht: 'Eingereicht', in_gs_pruefung: 'in GS-Prüfung', in_pfm_pruefung: 'in PFM-Prüfung' })[a.status] || a.status}</em>.
+                Sie erhalten in Kürze eine E-Mail-Bestätigung. Status: <em>${({ submitted: 'Eingereicht', in_review_gs: 'in GS-Prüfung', in_review_pfm: 'in PFM-Prüfung' })[a.status] || a.status}</em>.
               </p>
             </div>
           </div>
@@ -1508,6 +1520,7 @@ function renderQueue() {
   wireQueueShortcuts();
 }
 
+let _queueKeydownHandler = null;
 function wireQueueShortcuts() {
   const rows = Array.from(document.querySelectorAll('tbody tr[data-app-id]'));
   let idx = -1;
@@ -1517,13 +1530,17 @@ function wireQueueShortcuts() {
     const r = rows[idx];
     if (r) { r.style.outline = '3px solid var(--color-focus)'; r.scrollIntoView({ block: 'nearest' }); }
   };
-  document.addEventListener('keydown', e => {
+  // Remove the previous handler so revisiting #/queue doesn't stack listeners
+  // (each closing over a now-detached `rows` — drew multiple outlines + leaked).
+  if (_queueKeydownHandler) document.removeEventListener('keydown', _queueKeydownHandler);
+  _queueKeydownHandler = (e) => {
     if (e.target.matches('input, textarea, select')) return;
     if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); focus(idx + 1); }
     if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); focus(idx - 1); }
     if ((e.key === 'Enter' || e.key === 'o') && rows[idx]) { e.preventDefault(); location.hash = '#/review/' + rows[idx].getAttribute('data-app-id'); }
     if (e.key === 'x' && rows[idx]) { const cb = rows[idx].querySelector('.rowSel'); if (cb) cb.checked = !cb.checked; }
-  });
+  };
+  document.addEventListener('keydown', _queueKeydownHandler);
 }
 
 // ── 8. REVIEWER SPLIT-PANE (§9.1 / §2.5) ─────────────────────────────────
@@ -1782,7 +1799,8 @@ function buildPropertiesHash({ view, q, cat, page }) {
   if (q)           parts.push('q='    + encodeURIComponent(q));
   if (cat)         parts.push('cat='  + encodeURIComponent(cat));
   if (page && page > 1) parts.push('page=' + page);
-  return '#/properties' + (parts.length ? '?' + parts.join('&') : '');
+  parts.push('lang=' + state.lang);   // keep the active language in shareable URLs
+  return '#/properties?' + parts.join('&');
 }
 
 function filterTenancies(list, q, cat) {
@@ -3149,7 +3167,12 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, initialColor)
         // zoom/popup state), and carry it onto the floor-switcher links so it
         // survives a level change.
         const base = `#/properties/${t.id}/floors/${floorSlug}`;
-        history.replaceState(null, '', activeMode === 'none' ? base : `${base}?color=${activeMode}`);
+        const cur = parseHashQuery(location.hash);
+        const qp = new URLSearchParams();
+        if (cur.space) qp.set('space', cur.space);   // preserve a deep-linked room
+        if (activeMode !== 'none') qp.set('color', activeMode);
+        qp.set('lang', state.lang);                  // keep the active language
+        history.replaceState(null, '', `${base}?${qp.toString()}`);
         document.querySelectorAll('.floor-switcher__chip').forEach(a => {
           const href = a.getAttribute('href').split('?')[0];
           a.setAttribute('href', activeMode === 'none' ? href : `${href}?color=${activeMode}`);
@@ -3614,7 +3637,8 @@ function renderDownloads() {
     if (docState.building) qp.set('building', docState.building);
     if (docState.q)        qp.set('q', docState.q);
     if (docState.page > 1) qp.set('page', docState.page);
-    const newHash = '#/downloads' + (qp.toString() ? '?' + qp.toString() : '');
+    qp.set('lang', state.lang);   // keep the active language in shareable URLs
+    const newHash = '#/downloads?' + qp.toString();
     if (location.hash !== newHash) history.replaceState(null, '', newHash);
   }
 

@@ -125,9 +125,9 @@ export function renderWizard({ step }) {
     return;
   }
   const main = shell({ activeNav: 'wizard', breadcrumb: [
-    { href: '#/home', label: 'Start' },
-    { href: '#/wizard/1', label: 'Bedarf anmelden' },
-    { label: `Schritt ${stepNum}` }
+    { href: '#/home', label: t('nav.start') },
+    { href: '#/wizard/1', label: t('services.request') },
+    { label: t('wizard.stepN', { n: stepNum }) }
   ]});
   const draft = ensureDraft();
 
@@ -178,7 +178,7 @@ function renderStep1(draft) {
       <h3>Verwaltungseinheit & Kontakte</h3>
       <div class="form-field">
         <label class="form-field__label" for="wizVe">Verwaltungseinheit (VE) <span class="form-field__required">*</span></label>
-        <select class="form-field__select" id="wizVe" name="ve">
+        <select class="form-field__select" id="wizVe" name="ve" aria-required="true">
           <option value="UVEK / BAFU">UVEK / BAFU</option>
           <option value="UVEK / BAV">UVEK / BAV</option>
           <option value="UVEK / SBB">UVEK / SBB</option>
@@ -202,7 +202,8 @@ function renderStep1(draft) {
                  role="combobox"
                  aria-autocomplete="list"
                  aria-controls="wizAddressOptions"
-                 aria-expanded="false">
+                 aria-expanded="false"
+                 aria-required="true">
           <ul class="combobox__list" id="wizAddressOptions" role="listbox" hidden>
             ${state.buildings.map(b => `
               <li class="combobox__option" role="option" data-value="${escapeHtml(b.address)}">
@@ -432,7 +433,7 @@ function renderStep2(draft) {
       <h3>Mengengerüst & Berechnung</h3>
       <div class="form-field">
         <label class="form-field__label" for="fteInput">Anzahl FTE <span class="form-field__required">*</span></label>
-        <input class="form-field__input" id="fteInput" type="number" inputmode="numeric" min="1" max="2000" name="fte" value="${draft.fte}">
+        <input class="form-field__input" id="fteInput" type="number" inputmode="numeric" min="1" max="2000" name="fte" value="${draft.fte}" aria-required="true">
         <p class="form-field__hint">Belegungsfaktor (Desk-Sharing) <strong>0.8</strong> — Bundes-Stammdatenvorgabe.</p>
       </div>
       <div id="calcBlock"></div>
@@ -599,15 +600,15 @@ function renderStep4(draft) {
       <h3>Sektion A · Bedarf & Zielzustand</h3>
       <div class="form-field">
         <label class="form-field__label" for="gKurz">4.1 Kurzbeschreibung <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Antrag"</span></label>
-        <textarea class="form-field__textarea" id="gKurz" name="g_kurz" maxlength="500">${escapeHtml(f.kurz || '')}</textarea>
+        <textarea class="form-field__textarea" id="gKurz" name="g_kurz" maxlength="500" aria-required="true">${escapeHtml(f.kurz || '')}</textarea>
       </div>
       <div class="form-field">
         <label class="form-field__label" for="gDefizit">4.2 Defizite in der aktuellen Situation <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Defizit"</span></label>
-        <textarea class="form-field__textarea" id="gDefizit" name="g_defizit">${escapeHtml(f.defizit || '')}</textarea>
+        <textarea class="form-field__textarea" id="gDefizit" name="g_defizit" aria-required="true">${escapeHtml(f.defizit || '')}</textarea>
       </div>
       <div class="form-field">
         <label class="form-field__label" for="gZiel">4.4 Zielzustand / Operative Ziele <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Ziele/Soll"</span></label>
-        <textarea class="form-field__textarea" id="gZiel" name="g_ziel">${escapeHtml(f.ziel || '')}</textarea>
+        <textarea class="form-field__textarea" id="gZiel" name="g_ziel" aria-required="true">${escapeHtml(f.ziel || '')}</textarea>
         <p class="form-field__hint">v0.5: zusammengefasst aus den vorigen Feldern „Operative Ziele" und „Zielzustand".</p>
       </div>
     </div>
@@ -616,15 +617,15 @@ function renderStep4(draft) {
       <h3>Sektion B · Recht, Alternativen, Planung</h3>
       <div class="form-field">
         <label class="form-field__label" for="gRecht">4.3 Rechtsgrundlage <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Recht"</span></label>
-        <input class="form-field__input" id="gRecht" type="text" name="g_recht" value="${escapeHtml(f.recht || '')}" placeholder="Verweis auf Upload aus Schritt 3 oder URL">
+        <input class="form-field__input" id="gRecht" type="text" name="g_recht" value="${escapeHtml(f.recht || '')}" placeholder="Verweis auf Upload aus Schritt 3 oder URL" aria-required="true">
       </div>
       <div class="form-field">
         <label class="form-field__label" for="gAlt">4.5 Geprüfte Alternativen <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Alt"</span></label>
-        <textarea class="form-field__textarea" id="gAlt" name="g_alt">${escapeHtml(f.alt || '')}</textarea>
+        <textarea class="form-field__textarea" id="gAlt" name="g_alt" aria-required="true">${escapeHtml(f.alt || '')}</textarea>
       </div>
       <div class="form-field">
         <label class="form-field__label" for="gAbh">4.8 Planungsabhängigkeiten <span class="form-field__required">*</span> <span class="eppm-tab ${f._eppmToggle ? 'eppm-tab--visible' : ''}">${icon('arrowRight', 'eppm-tab__icon')} ePPM "Abhäng."</span></label>
-        <textarea class="form-field__textarea" id="gAbh" name="g_abh">${escapeHtml(f.abh || '')}</textarea>
+        <textarea class="form-field__textarea" id="gAbh" name="g_abh" aria-required="true">${escapeHtml(f.abh || '')}</textarea>
       </div>
     </div>
 
@@ -641,7 +642,7 @@ function renderStep4(draft) {
       </div>
       <div class="form-field">
         <label class="form-field__label" for="gKosten">4.10 Kostenerwartung gesamt (CHF) <span class="form-field__required">*</span></label>
-        <input class="form-field__input" id="gKosten" type="number" inputmode="numeric" name="g_kosten" value="${f.kosten || ''}" placeholder="z. B. 19200000">
+        <input class="form-field__input" id="gKosten" type="number" inputmode="numeric" name="g_kosten" value="${f.kosten || ''}" placeholder="z. B. 19200000" aria-required="true">
       </div>
     </div>
 
@@ -810,7 +811,7 @@ function renderStep5(draft) {
 function section(title, summary, open) {
   return `
     <div class="accordion__item ${open ? 'accordion__item--open' : ''}">
-      <button class="accordion__trigger" type="button" onclick="this.parentElement.classList.toggle('accordion__item--open')">
+      <button class="accordion__trigger" type="button" aria-expanded="${open ? 'true' : 'false'}" onclick="this.setAttribute('aria-expanded', this.parentElement.classList.toggle('accordion__item--open'))">
         <span>${title}</span>
         <span class="accordion__icon"></span>
       </button>

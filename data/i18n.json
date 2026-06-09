@@ -110,9 +110,13 @@
   "wizard.step4": { "de": "Detail (Grossantrag)", "fr": "Détail (grande demande)", "it": "Dettaglio (grande richiesta)", "en": "Detail (major request)" },
   "wizard.step5": { "de": "Prüfen & Senden", "fr": "Vérifier et envoyer", "it": "Verifica e invio", "en": "Review & submit" },
   "wizard.title": { "de": "Bedarf anmelden", "fr": "Annoncer un besoin", "it": "Notificare un fabbisogno", "en": "Submit a request" },
+  "wizard.stepN": { "de": "Schritt {n}", "fr": "Étape {n}", "it": "Passo {n}", "en": "Step {n}" },
 
   "bc.search":   { "de": "Suchergebnisse", "fr": "Résultats de recherche", "it": "Risultati della ricerca", "en": "Search results" },
   "bc.news":     { "de": "News-Übersicht", "fr": "Actualités", "it": "Notizie", "en": "News" },
   "bc.repair":   { "de": "Schadensmeldung", "fr": "Signalement de dommage", "it": "Segnalazione di danno", "en": "Damage report" },
-  "bc.profile":  { "de": "Profil", "fr": "Profil", "it": "Profilo", "en": "Profile" }
+  "bc.profile":  { "de": "Profil", "fr": "Profil", "it": "Profilo", "en": "Profile" },
+
+  "error.notFound": { "de": "Seite nicht gefunden", "fr": "Page introuvable", "it": "Pagina non trovata", "en": "Page not found" },
+  "error.backHome": { "de": "Zurück zur Startseite", "fr": "Retour à l'accueil", "it": "Torna alla home", "en": "Back to home" }
 }

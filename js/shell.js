@@ -30,7 +30,7 @@
    ========================================================================== */
 
 import { state, t, setLang, LANGS } from './state.js';
-import { toast, icon, renderShortcutOverlay, safeGet, safeSet } from './lib.js';
+import { toast, icon, renderShortcutOverlay, safeGet, safeSet, escapeHtml } from './lib.js';
 
 const CONSENT_KEY = 'mp-cookie-consent';
 
@@ -38,7 +38,7 @@ function renderConsentBanner() {
   if (safeGet(CONSENT_KEY)) return '';
   return `
     <aside class="notification-banner notification-banner--info cookie-banner" id="cookieBanner" role="region" aria-label="Datenschutz und Cookies">
-      <span class="notification-banner__icon" aria-hidden="true">${icon('infoCircle')}</span>
+      <span class="notification-banner__icon" aria-hidden="true">${icon('info')}</span>
       <div class="notification-banner__wrapper">
         <p class="notification-banner__text">
           Dieses Portal speichert technisch notwendige Einstellungen lokal im Browser. Optionale Analyse-Cookies werden erst nach Zustimmung aktiviert.
@@ -135,9 +135,9 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
   // Anmelden lives in the top-bar (dark utility bar), not the brand bar.
   // Plain white text per CD pattern — not a red filled button.
   const authPill = state.user
-    ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="${t('top.profileAria', { name: state.user.name })}">
+    ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="${t('top.profileAria', { name: escapeHtml(state.user.name) })}">
          ${icon('user')}
-         ${state.user.name}
+         ${escapeHtml(state.user.name)}
        </a>`
     : `<button class="top-bar__link top-bar__link--user" type="button" onclick="window.portal.login()">
          ${icon('user')}
@@ -304,7 +304,7 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
               <ul class="language-switcher__dropdown" role="listbox" aria-label="${t('lang.label')}">
                 ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en'], ['RM', 'rm', true]].map(([code, lang, disabled]) => {
                   const isActive = !disabled && state.lang === lang;
-                  return `<li role="presentation"><button class="language-switcher__option${isActive ? ' language-switcher__option--active' : ''}" role="option" aria-selected="${isActive}"${disabled ? ' aria-disabled="true"' : ''} data-lang="${code}" lang="${lang}" onclick="window.portal.pickLang('${code}')">${code}</button></li>`;
+                  return `<li role="presentation"><button class="language-switcher__option${isActive ? ' language-switcher__option--active' : ''}" role="option" aria-selected="${isActive}"${disabled ? ' aria-disabled="true" tabindex="-1"' : ''} data-lang="${code}" lang="${lang}" onclick="window.portal.pickLang('${code}')">${code}</button></li>`;
                 }).join('')}
               </ul>
             </div>
