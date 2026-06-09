@@ -2762,7 +2762,7 @@ a.btn[aria-disabled="true"] {
    than a second footer band. */
 .app-footer__bottom {
   background: var(--color-surface-darker);
-  padding: var(--space-sm) var(--container-padding);
+  padding-block: var(--space-sm);
 }
 @media (min-width: 1024px) {
   .app-footer__bottom { padding-block: var(--space-md); }
@@ -2770,6 +2770,7 @@ a.btn[aria-disabled="true"] {
 .app-footer__bottom-inner {
   max-width: var(--container-max-width);
   margin: 0 auto;
+  padding-inline: var(--container-padding);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xl);
@@ -3191,22 +3192,63 @@ a.btn[aria-disabled="true"] {
    `margin-bottom: var(--space-lg)` spacing. */
 .app-detail__fresh-banner { margin-bottom: var(--space-lg); }
 
-/* Wizard step-5 / pre-submission checklist. Each list item carries an
-   inline-icon at the front; the modifier colours the icon to match the
-   semantic state (ok / warn / danger). The text itself remains
-   text-primary so the meaning is colour-independent (WCAG 1.4.1). */
-.checklist__item {
+/* Wizard step-5 pre-submission validation summary. A bordered card with an
+   overall verdict line (submit-readiness) above a divided list of checks.
+   Each row carries a status chip; labels stay text-primary so meaning is
+   colour-independent (WCAG 1.4.1) — the chip + the verdict carry the state. */
+.checklist {
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  overflow: hidden;
+}
+.checklist__verdict {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  list-style: none;
-  margin-bottom: var(--space-xs);
+  gap: var(--space-sm);
+  margin: 0;
+  padding: var(--space-sm) var(--space-md);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body-sm);
 }
-.checklist__item .inline-icon { width: var(--icon-sm); height: var(--icon-sm); margin-right: 0; }
-.checklist__item--ok .inline-icon     { color: var(--color-success); }
-.checklist__item--warn .inline-icon   { color: var(--color-warning); }
-.checklist__item--danger .inline-icon { color: var(--color-danger); }
-.checklist__item--danger { color: var(--color-badge-red-text); }
+.checklist__verdict-icon { display: inline-flex; }
+.checklist__verdict-icon .inline-icon { width: var(--icon-base); height: var(--icon-base); }
+.checklist__verdict--ok     { background: var(--color-badge-green-bg);  color: var(--color-badge-green-text); }
+.checklist__verdict--ok .inline-icon     { color: var(--color-success); }
+.checklist__verdict--warn   { background: var(--color-badge-orange-bg); color: var(--color-badge-orange-text); }
+.checklist__verdict--warn .inline-icon   { color: var(--color-warning); }
+.checklist__verdict--danger { background: var(--color-badge-red-bg);    color: var(--color-badge-red-text); }
+.checklist__verdict--danger .inline-icon { color: var(--color-danger); }
+
+.checklist__list { margin: 0; padding: 0; list-style: none; }
+.checklist__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  list-style: none;
+  margin: 0;
+  border-top: 1px solid var(--color-border-light);
+}
+.checklist__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+}
+.checklist__icon .inline-icon { width: var(--icon-sm); height: var(--icon-sm); margin: 0; }
+.checklist__item--ok .checklist__icon     { background: var(--color-badge-green-bg); }
+.checklist__item--ok .checklist__icon .inline-icon     { color: var(--color-success); }
+.checklist__item--warn .checklist__icon   { background: var(--color-badge-orange-bg); }
+.checklist__item--warn .checklist__icon .inline-icon   { color: var(--color-warning); }
+.checklist__item--danger .checklist__icon { background: var(--color-badge-red-bg); }
+.checklist__item--danger .checklist__icon .inline-icon { color: var(--color-danger); }
+.checklist__body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.checklist__label { font-weight: var(--font-weight-bold); font-size: var(--text-body-sm); color: var(--color-text-primary); }
+.checklist__detail { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
 
 /* ── FILTER ROW + FILTER CHIPS (DS tag-item pattern) ─────────────────────
    `.filter-row` is the horizontal toolbar shell holding chips + the text

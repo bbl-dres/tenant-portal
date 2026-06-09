@@ -48,6 +48,12 @@ export function calcWizard(fields) {
     deskSharingFactor: ds,
     fte, arbeitsplaetze,
     hnf2, gf, ukKosten, moeblierung,
+    // Canonical aliases the wizard review (step 5), the step-2 calc detail,
+    // and submitDraft read. Without these `c.operatingCosts` was undefined
+    // and formatChf(undefined) threw — blanking the step-5 page.
+    workstations:   arbeitsplaetze,
+    operatingCosts: ukKosten,
+    furnitureBudget: moeblierung,
     ukProM2Gf, betriebskostenProM2Gf, hardBlockMultiplier,
     overBudget: ukProM2Gf > betriebskostenProM2Gf,
     overBudgetPercent: ukProM2Gf > 0 ? Math.round((ukProM2Gf / betriebskostenProM2Gf - 1) * 100) : 0,
@@ -705,18 +711,67 @@ function renderStep5(draft) {
     && draft.grossantrag.terminStart && draft.grossantrag.kosten
   );
   const hasAtt = (draft.attachments || []).length > 0;
+
+  // Pre-submission checks → structured rows (status · label · detail) plus an
+  // overall verdict so the submit-readiness is clear at a glance.
+  // Bare glyphs only — the coloured chip / verdict tint supplies the circle,
+  // so every status icon reads at the same weight (no baked-in ring).
+  const STATUS_ICON = { ok: 'check', warn: 'alertTriangle', danger: 'x' };
+  const checks = [
+    {
+      status: allRequired ? 'ok' : 'warn',
+      label: 'Pflichtfelder Basis & Fläche',
+      detail: allRequired ? 'Basis- und Flächenangaben vollständig.' : 'Adresse, FTE oder NAW-Klasse fehlt noch.',
+    },
+    {
+      status: hasAtt ? 'ok' : 'warn',
+      label: hasAtt ? `Anhänge (${draft.attachments.length})` : 'Anhänge fehlen',
+      detail: hasAtt ? 'Belege sind angehängt.' : 'Mindestens ein Beleg (WiBe / Rechtsgrundlage) ist erforderlich.',
+    },
+    draft.type === 'Grossantrag' ? {
+      status: grossOk ? 'ok' : 'warn',
+      label: 'Grossantrag-Pflichtfelder',
+      detail: grossOk ? 'Alle Detail-Felder ausgefüllt.' : 'Detail-Felder in Schritt 4 noch unvollständig.',
+    } : null,
+    (c && c.overBudget) ? {
+      status: c.hardBlocked ? 'danger' : 'warn',
+      label: `Betriebskosten ${c.ukProM2Gf} CHF/m² GF`,
+      detail: c.hardBlocked
+        ? 'Über dem Hard-Limit (+20 %) — Einreichung blockiert.'
+        : `+${c.overBudgetPercent} % über Vorgabe — Begründung empfohlen.`,
+    } : null,
+  ].filter(Boolean);
+
+  const canSubmit = allRequired && hasAtt && !(c && c.hardBlocked) && !(draft.type === 'Grossantrag' && !grossOk);
+  const verdict = !canSubmit
+    ? { tone: 'danger', icon: 'x',             label: 'Einreichung noch nicht möglich' }
+    : checks.some(x => x.status !== 'ok')
+      ? { tone: 'warn',  icon: 'alertTriangle', label: 'Einreichung möglich — Hinweise beachten' }
+      : { tone: 'ok',    icon: 'check',         label: 'Bereit zum Senden' };
+
   return `
     <h2 class="wizard__title">Prüfen & Senden</h2>
     <p class="wizard__subtitle">Antrags-ID: <strong>${draft.id}</strong></p>
 
     <div class="wizard__section">
       <h3>Validierungs-Übersicht</h3>
-      <ul class="checklist">
-        <li class="checklist__item ${allRequired ? 'checklist__item--ok' : 'checklist__item--warn'}">${allRequired ? icon('check') : icon('alertTriangle')} Pflichtfelder Basis & Fläche</li>
-        <li class="checklist__item ${hasAtt ? 'checklist__item--ok' : 'checklist__item--warn'}">${hasAtt ? icon('check') : icon('alertTriangle')} Anhänge ${hasAtt ? `(${draft.attachments.length})` : 'fehlen'}</li>
-        ${draft.type === 'Grossantrag' ? `<li class="checklist__item ${grossOk ? 'checklist__item--ok' : 'checklist__item--warn'}">${grossOk ? icon('check') : icon('alertTriangle')} Grossantrag-Pflichtfelder</li>` : ''}
-        ${c && c.overBudget ? `<li class="checklist__item ${c.hardBlocked ? 'checklist__item--danger' : 'checklist__item--warn'}">${c.hardBlocked ? icon('xCircle') : icon('alertTriangle')} Betriebskosten ${c.ukProM2Gf} CHF/m² GF ${c.hardBlocked ? '> +20 % — Einreichung blockiert' : `+${c.overBudgetPercent} % über Vorgabe — Begründung empfohlen`}</li>` : ''}
-      </ul>
+      <div class="checklist">
+        <p class="checklist__verdict checklist__verdict--${verdict.tone}">
+          <span class="checklist__verdict-icon" aria-hidden="true">${icon(verdict.icon)}</span>
+          ${verdict.label}
+        </p>
+        <ul class="checklist__list">
+          ${checks.map(ch => `
+            <li class="checklist__item checklist__item--${ch.status}">
+              <span class="checklist__icon" aria-hidden="true">${icon(STATUS_ICON[ch.status])}</span>
+              <span class="checklist__body">
+                <span class="checklist__label">${escapeHtml(ch.label)}</span>
+                <span class="checklist__detail">${escapeHtml(ch.detail)}</span>
+              </span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
     </div>
 
     <div class="accordion">

@@ -13,7 +13,8 @@
 
 // ── FORMATTERS ─────────────────────────────────────────────────────────────
 export function formatChf(n) {
-  return 'CHF ' + n.toLocaleString('de-CH');
+  if (n == null || Number.isNaN(Number(n))) return 'CHF –';
+  return 'CHF ' + Number(n).toLocaleString('de-CH');
 }
 export function formatDate(iso) {
   if (!iso) return '';
