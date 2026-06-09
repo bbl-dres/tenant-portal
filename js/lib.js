@@ -182,8 +182,8 @@ export const ICONS = {
   // chrome / interactive
   search: 'Search', user: 'User', help: 'Help', info: 'Info',
   share: 'Share', printer: 'Printer', external: 'External',
-  download: 'Download', maximize: 'Expand', refresh: 'Refresh',
-  home: 'Home',
+  download: 'Download', upload: 'Upload', maximize: 'Expand', refresh: 'Refresh',
+  home: 'Home', plus: 'Plus', minus: 'Minus', compress: 'Compress',
   spinner: 'Spinner',
   // contact
   phone: 'Phone', envelope: 'Envelope', globe: 'Globe',

@@ -3488,7 +3488,7 @@ function renderDownloads() {
         <tr>
           <td>
             <a href="#" class="docs-table__title-link"
-               onclick="window.portal.toast('Download simuliert: ${P.escapeJs(d.title)}'); return false;">
+               onclick="window.t3lite.openDocViewer('${P.escapeJs(d.id)}'); return false;">
               ${P.icon('document')}<span>${P.escapeHtml(d.title)}</span>
             </a>
           </td>
@@ -3967,6 +3967,289 @@ function renderHelp() {
 }
 
 // ── EXTERNAL API (used by inline event handlers) ─────────────────────────
+// ── DOCUMENT VIEWER (Confluence-style preview) ───────────────────────────
+// Full-screen dark overlay opened from a downloads row. Content is mocked
+// (the prototype ships no real binaries): three page templates — text,
+// floor-plan schematic, certificate — chosen by document type. Supports
+// multi-page vertical scroll, width-based zoom, drag-to-pan, a mock
+// comments panel, and simulated download/upload. CD-aligned: chrome uses
+// the federal dark navy tokens; no raw colours (the CD guard forbids them).
+
+// Stable pseudo-random integer from a document id — keeps page counts and
+// mock labels identical across re-opens.
+function docHash(id) {
+  let h = 2166136261;
+  const s = String(id || '');
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mockPageCount(doc) {
+  const h = docHash(doc.documentId || doc.id);
+  switch (doc.type) {
+    case 'FloorPlan':            return 1 + (h % 2);   // 1–2
+    case 'Certificate':
+    case 'Permit':               return 1;             // 1
+    case 'Manual':               return 4 + (h % 7);   // 4–10
+    case 'Lease':                return 3 + (h % 4);   // 3–6
+    case 'WiBe':
+    case 'LegalBasis':
+    case 'Regulation':           return 2 + (h % 4);   // 2–5
+    default:                     return 1 + (h % 3);   // 1–3
+  }
+}
+
+// German administrative filler — federal tone, deterministically composed.
+const DOC_FILLER = [
+  'Die vorliegende Dokumentation beschreibt die für das Mietverhältnis massgeblichen Rahmenbedingungen gemäss den Vorgaben des Bundesamtes für Bauten und Logistik.',
+  'Sämtliche Angaben beziehen sich auf den zum Ausstellungszeitpunkt gültigen Stand der Bewirtschaftung und sind im Kontext der einschlägigen Verordnungen des Bundes zu lesen.',
+  'Abweichungen von den hier festgehaltenen Festlegungen bedürfen der schriftlichen Zustimmung der zuständigen Stelle des BBL sowie der betroffenen Verwaltungseinheit.',
+  'Die Flächen sind nach SIA 416 ermittelt; massgebend für die Verrechnung ist die Hauptnutzfläche (HNF2) gemäss dem geltenden Flächenmanagement des Bundes.',
+  'Wartungs- und Unterhaltsarbeiten werden durch das Objektmanagement koordiniert und den Mietenden rechtzeitig angekündigt, sofern Betriebsabläufe betroffen sind.',
+  'Im Übrigen gelten die allgemeinen Bestimmungen des Bundes über die Unterbringung der zivilen Bundesverwaltung sowie die jeweils geltenden Weisungen.',
+  'Die Klassifizierung der Arbeitsplätze erfolgt nach dem Modell der Neuen Arbeitswelten unter Berücksichtigung des vorgegebenen Belegungsfaktors.',
+];
+function docFiller(seed, sentences) {
+  const out = [];
+  for (let i = 0; i < sentences; i++) out.push(DOC_FILLER[(seed + i) % DOC_FILLER.length]);
+  return out.join(' ');
+}
+const DOC_CREST = '<img class="docpage__crest" src="assets/swiss-logo-flag.svg" alt="" aria-hidden="true">';
+function docPageFooter(doc, n, total) {
+  return `<footer class="docpage__footer">
+    <span>${P.escapeHtml(doc.documentId || doc.id || '')}</span>
+    <span>BBL Mieterportal · Mock-Vorschau</span>
+    <span>Seite ${n} / ${total}</span>
+  </footer>`;
+}
+function docPageText(doc, n, total) {
+  const seed = docHash(doc.documentId || doc.id) + n;
+  const paras = Array.from({ length: 4 }, (_, i) => `<p class="docpage__p">${docFiller(seed + i * 2, 3)}</p>`).join('');
+  return `
+    <article class="docpage docpage--text">
+      ${n === 1 ? `
+        <header class="docpage__letterhead">
+          ${DOC_CREST}
+          <span class="docpage__org">Schweizerische Eidgenossenschaft<br>Bundesamt für Bauten und Logistik BBL</span>
+        </header>
+        <h1 class="docpage__title">${P.escapeHtml(doc.title)}</h1>
+        <dl class="docpage__metagrid">
+          <div><dt>Typ</dt><dd>${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)}</dd></div>
+          <div><dt>Format</dt><dd>${P.escapeHtml(doc.format || '')}</dd></div>
+          <div><dt>Ausgestellt</dt><dd>${P.escapeHtml(doc.issuedAt || '—')}</dd></div>
+          <div><dt>Sprachen</dt><dd>${P.escapeHtml((doc.languages || []).join(' · ').toUpperCase() || '—')}</dd></div>
+        </dl>
+      ` : `<h2 class="docpage__subtitle">${P.escapeHtml(doc.title)} — Fortsetzung</h2>`}
+      ${paras}
+      ${docPageFooter(doc, n, total)}
+    </article>`;
+}
+function docPageCertificate(doc, n, total) {
+  const kind = doc.type === 'Permit' ? 'Bewilligung' : 'Zertifikat';
+  return `
+    <article class="docpage docpage--cert">
+      ${DOC_CREST}
+      <p class="docpage__cert-org">Schweizerische Eidgenossenschaft · Bundesamt für Bauten und Logistik BBL</p>
+      <p class="docpage__cert-kicker">${kind}</p>
+      <h1 class="docpage__cert-title">${P.escapeHtml(doc.title)}</h1>
+      <p class="docpage__cert-body">Hiermit wird bestätigt, dass die vorstehend bezeichnete Liegenschaft die Anforderungen gemäss den massgebenden Vorgaben des Bundes erfüllt. Diese ${kind} ist Bestandteil der Objektdokumentation im Mieterportal des Bundes.</p>
+      <p class="docpage__cert-place">Bern, ${P.escapeHtml(doc.issuedAt || '—')}</p>
+      <div class="docpage__cert-sign">
+        <span class="docpage__cert-name">BBL Portfolio-Management</span>
+        <span class="docpage__seal" aria-hidden="true"><span>BBL · BUND</span></span>
+      </div>
+      ${docPageFooter(doc, n, total)}
+    </article>`;
+}
+const PLAN_ROOMS = ['Büro', 'Sitzung', 'Lager', 'Technik', 'Archiv', 'Teeküche', 'Empfang', 'Flur'];
+function docPagePlan(doc, n, total) {
+  const h = docHash((doc.documentId || doc.id) + ':' + n);
+  const room = (i) => P.escapeHtml(PLAN_ROOMS[(h + i) % PLAN_ROOMS.length]);
+  return `
+    <article class="docpage docpage--plan">
+      <svg class="docpage__plan" viewBox="0 0 420 594" role="img" aria-label="Schematischer Grundriss (Mock-Vorschau)">
+        <rect class="plan-sheet" x="2" y="2" width="416" height="590"/>
+        <g class="plan-north" transform="translate(372,52)">
+          <line x1="0" y1="14" x2="0" y2="-14"/><line x1="0" y1="-14" x2="-5" y2="-6"/><line x1="0" y1="-14" x2="5" y2="-6"/>
+          <text class="plan-label" x="0" y="30">N</text>
+        </g>
+        <rect class="plan-wall" x="34" y="40" width="300" height="300"/>
+        <line class="plan-wall" x1="34" y1="190" x2="334" y2="190"/>
+        <line class="plan-wall" x1="150" y1="40"  x2="150" y2="190"/>
+        <line class="plan-wall" x1="244" y1="40"  x2="244" y2="190"/>
+        <line class="plan-wall" x1="184" y1="190" x2="184" y2="340"/>
+        <line class="plan-wall" x1="184" y1="265" x2="334" y2="265"/>
+        <rect class="plan-room" x="44"  y="50"  width="96"  height="130"/><text class="plan-label" x="92"  y="118">${room(0)}</text>
+        <rect class="plan-room" x="160" y="50"  width="74"  height="130"/><text class="plan-label" x="197" y="118">${room(1)}</text>
+        <rect class="plan-room" x="254" y="50"  width="70"  height="130"/><text class="plan-label" x="289" y="118">${room(2)}</text>
+        <rect class="plan-room" x="44"  y="200" width="130" height="130"/><text class="plan-label" x="109" y="268">${room(3)}</text>
+        <rect class="plan-room" x="194" y="200" width="130" height="55"/> <text class="plan-label" x="259" y="231">${room(4)}</text>
+        <rect class="plan-room" x="194" y="275" width="130" height="55"/> <text class="plan-label" x="259" y="306">${room(5)}</text>
+        <rect class="plan-titleblock" x="34" y="384" width="300" height="86"/>
+        <text class="plan-title" x="46" y="410">${P.escapeHtml(doc.title)}</text>
+        <text class="plan-meta"  x="46" y="432">Massstab 1:100 · ${P.escapeHtml(doc.issuedAt || '—')}</text>
+        <text class="plan-meta"  x="46" y="452">${P.escapeHtml(doc.documentId || doc.id || '')} · Mock-Vorschau</text>
+      </svg>
+    </article>`;
+}
+function docPageHTML(doc, n, total) {
+  if (doc.type === 'FloorPlan') return docPagePlan(doc, n, total);
+  if (doc.type === 'Certificate' || doc.type === 'Permit') return docPageCertificate(doc, n, total);
+  return docPageText(doc, n, total);
+}
+
+// Mock comment threads for the side panel.
+const DOC_COMMENTS = [
+  { who: 'Andrea Meier', ve: 'GS UVEK', when: 'vor 2 Tagen', text: 'Bitte prüfen, ob die Flächenangabe auf Seite 1 noch dem aktuellen Stand entspricht.' },
+  { who: 'Lars Hofmann', ve: 'BBL-PFM', when: 'vor 1 Tag', text: 'Stimmt mit dem SAP-Stammblatt überein — Freigabe aus PFM-Sicht erteilt.' },
+  { who: 'Nadine Frey', ve: 'BBL Objektmanagement', when: 'vor 4 Std.', text: 'Aktualisierte Version nach der Begehung folgt nächste Woche.' },
+];
+function docCommentsHTML() {
+  const initials = (name) => name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+  return DOC_COMMENTS.map(c => `
+    <li class="docviewer__comment">
+      <span class="docviewer__avatar" aria-hidden="true">${P.escapeHtml(initials(c.who))}</span>
+      <div class="docviewer__comment-body">
+        <p class="docviewer__comment-head"><strong>${P.escapeHtml(c.who)}</strong> <span>${P.escapeHtml(c.ve)} · ${P.escapeHtml(c.when)}</span></p>
+        <p class="docviewer__comment-text">${P.escapeHtml(c.text)}</p>
+      </div>
+    </li>`).join('');
+}
+
+function openDocumentViewer(doc) {
+  if (!doc) return;
+  const opener = document.activeElement;
+  const total = mockPageCount(doc);
+  const pages = Array.from({ length: total }, (_, i) => docPageHTML(doc, i + 1, total)).join('');
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'docviewer';
+  backdrop.setAttribute('role', 'dialog');
+  backdrop.setAttribute('aria-modal', 'true');
+  backdrop.setAttribute('aria-label', 'Dokumentvorschau: ' + (doc.title || ''));
+  backdrop.innerHTML = `
+    <div class="docviewer__bar">
+      <div class="docviewer__heading">
+        ${P.icon('document', 'docviewer__heading-icon')}
+        <div class="docviewer__heading-text">
+          <p class="docviewer__title">${P.escapeHtml(doc.title)}</p>
+          <p class="docviewer__sub">${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span></p>
+        </div>
+      </div>
+      <div class="docviewer__actions">
+        <button class="docviewer__btn" type="button" data-act="download" aria-label="Herunterladen" title="Herunterladen">${P.icon('download')}</button>
+        <button class="docviewer__btn" type="button" data-act="upload" aria-label="Neue Version hochladen" title="Neue Version hochladen">${P.icon('upload')}</button>
+        <button class="docviewer__btn" type="button" data-act="comments" aria-label="Kommentare anzeigen" title="Kommentare" aria-pressed="false">${P.icon('commentDots')}</button>
+        <button class="docviewer__btn docviewer__btn--close" type="button" data-act="close" aria-label="Vorschau schliessen" title="Schliessen">${P.icon('x')}</button>
+      </div>
+    </div>
+    <div class="docviewer__main">
+      <div class="docviewer__stage" tabindex="0" aria-label="Dokumentseiten">
+        <div class="docviewer__pages">${pages}</div>
+      </div>
+      <aside class="docviewer__comments" aria-label="Kommentare" hidden>
+        <h2 class="docviewer__comments-title">Kommentare</h2>
+        <ul class="docviewer__comments-list">${docCommentsHTML()}</ul>
+        <div class="docviewer__comments-add">
+          <textarea class="form-field__textarea" rows="2" placeholder="Kommentar hinzufügen … (Demo)" aria-label="Kommentar hinzufügen"></textarea>
+          <button class="btn btn--filled btn--sm" type="button" data-act="comment-send">Senden</button>
+        </div>
+      </aside>
+    </div>
+    <div class="docviewer__toolbar" role="group" aria-label="Zoom-Steuerung">
+      <button class="docviewer__zoom" type="button" data-act="zoom-out" aria-label="Verkleinern" title="Verkleinern">${P.icon('minus')}</button>
+      <button class="docviewer__zoom docviewer__zoom--reset" type="button" data-act="zoom-reset" aria-label="Zoom zurücksetzen" title="Zurücksetzen"><span data-zoom-readout>100%</span></button>
+      <button class="docviewer__zoom" type="button" data-act="zoom-in" aria-label="Vergrössern" title="Vergrössern">${P.icon('plus')}</button>
+    </div>`;
+  document.body.appendChild(backdrop);
+  document.body.classList.add('docviewer-open');
+
+  const stage = backdrop.querySelector('.docviewer__stage');
+  const pagesEl = backdrop.querySelector('.docviewer__pages');
+  const readout = backdrop.querySelector('[data-zoom-readout]');
+  const indicator = backdrop.querySelector('[data-page-indicator]');
+  const commentsEl = backdrop.querySelector('.docviewer__comments');
+  const commentsBtn = backdrop.querySelector('[data-act="comments"]');
+
+  // Width-based zoom: scaling the page width (not a CSS transform) keeps the
+  // stage natively scrollable in both axes, so pan + multi-page scroll work
+  // without extra layout maths. baseW fits the page to the stage initially.
+  const baseW = Math.max(280, Math.min(840, stage.clientWidth - 56));
+  let zoom = 1;
+  function applyZoom() {
+    zoom = Math.max(0.5, Math.min(3, Math.round(zoom * 100) / 100));
+    pagesEl.style.setProperty('--docpage-w', Math.round(baseW * zoom) + 'px');
+    readout.textContent = Math.round(zoom * 100) + '%';
+  }
+  applyZoom();
+
+  // Drag-to-pan (and scroll multi-page) via native scroll offsets.
+  let panning = false, px = 0, py = 0, sl = 0, st = 0;
+  stage.addEventListener('pointerdown', e => {
+    if (e.target.closest('button, a, textarea, input')) return;
+    panning = true; px = e.clientX; py = e.clientY; sl = stage.scrollLeft; st = stage.scrollTop;
+    stage.classList.add('docviewer__stage--grabbing');
+    try { stage.setPointerCapture(e.pointerId); } catch {}
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!panning) return;
+    stage.scrollLeft = sl - (e.clientX - px);
+    stage.scrollTop  = st - (e.clientY - py);
+  });
+  const endPan = () => { panning = false; stage.classList.remove('docviewer__stage--grabbing'); };
+  stage.addEventListener('pointerup', endPan);
+  stage.addEventListener('pointercancel', endPan);
+
+  // Page indicator follows the page nearest the viewport centre.
+  let raf = null;
+  stage.addEventListener('scroll', () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      const ps = stage.querySelectorAll('.docpage');
+      const mid = stage.scrollTop + stage.clientHeight / 2;
+      let idx = 0;
+      ps.forEach((p, i) => { if (p.offsetTop <= mid) idx = i; });
+      indicator.textContent = `Seite ${idx + 1} / ${total}`;
+    });
+  });
+
+  function close() {
+    document.removeEventListener('keydown', onKeydown, true);
+    backdrop.remove();
+    document.body.classList.remove('docviewer-open');
+    if (opener && typeof opener.focus === 'function') { try { opener.focus(); } catch {} }
+  }
+  function onKeydown(e) {
+    const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('textarea, input');
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (!typing && (e.key === '+' || e.key === '=')) { e.preventDefault(); zoom += 0.25; applyZoom(); return; }
+    if (!typing && (e.key === '-' || e.key === '_')) { e.preventDefault(); zoom -= 0.25; applyZoom(); return; }
+    if (!typing && e.key === '0') { e.preventDefault(); zoom = 1; applyZoom(); return; }
+    if (e.key !== 'Tab') return;
+    const f = Array.from(backdrop.querySelectorAll('button, a[href], textarea, input, [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener('keydown', onKeydown, true);
+
+  backdrop.querySelector('[data-act="close"]').addEventListener('click', close);
+  backdrop.querySelector('[data-act="download"]').addEventListener('click', () => P.toast('Download simuliert: ' + doc.title, 'success'));
+  backdrop.querySelector('[data-act="upload"]').addEventListener('click', () => P.toast('Neue Version hochladen — simuliert.'));
+  backdrop.querySelector('[data-act="comment-send"]').addEventListener('click', () => P.toast('Kommentar gespeichert (Demo).', 'success'));
+  commentsBtn.addEventListener('click', () => {
+    const open = backdrop.classList.toggle('docviewer--comments-open');
+    commentsBtn.setAttribute('aria-pressed', String(open));
+    commentsEl.hidden = !open;
+  });
+  backdrop.querySelector('[data-act="zoom-in"]').addEventListener('click', () => { zoom += 0.25; applyZoom(); });
+  backdrop.querySelector('[data-act="zoom-out"]').addEventListener('click', () => { zoom -= 0.25; applyZoom(); });
+  backdrop.querySelector('[data-act="zoom-reset"]').addEventListener('click', () => { zoom = 1; applyZoom(); });
+
+  setTimeout(() => { try { stage.focus(); } catch {} }, 0);
+}
+
 window.t3lite = {
   newsPage(p) {
     const total = Math.max(1, Math.ceil((P.state.news || []).length / 3));
@@ -3985,6 +4268,10 @@ window.t3lite = {
     const offset = 160;
     const top = target.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top, behavior: 'smooth' });
+  },
+  openDocViewer(id) {
+    const doc = (P.state.documents || []).find(d => d.id === id);
+    if (doc) openDocumentViewer(doc);
   },
   submitRepair(form) {
     const data = new FormData(form);
