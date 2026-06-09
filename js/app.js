@@ -217,7 +217,8 @@ function registerRoutes() {
   P.registerRoute('#/news',        renderNewsList);
   P.registerRoute('#/news/:id',    renderNewsDetail);
   P.registerRoute('#/services',    renderServicesOverview);
-  P.registerRoute('#/moves',       () => renderServiceStub('Umzug & Sonderreinigung', 'REQ-FA-006', 'Transport, Umzug innerhalb einer Liegenschaft und Sonderreinigungsanfragen werden in einer der nächsten Iterationen des Mieterportals freigeschaltet.'));
+  P.registerRoute('#/moves',       renderMoveForm);
+  P.registerRoute('#/cleaning',    renderCleaningForm);
   P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
   P.registerRoute('#/training',    () => renderServiceStub('Schulungen', 'FUNC-LP-007', 'Aktuelle Schulungen wie „Mieterportal kompakt" (60 Min.) und Aufbaukurse sind hier verlinkt — Termin-Buchung folgt in v0.4.'));
   // Arbeitsinstrumente und Informationen — single long-scroll page (public)
@@ -2012,6 +2013,28 @@ function loadMapLibre() {
   });
   return _maplibreReady;
 }
+// Custom MapLibre control: a single "reset to full extent" button.
+// NavigationControl ships zoom in / out but no home/reset affordance, which
+// users asked for to get back to the portfolio overview after panning away.
+function makeMapHomeControl(onReset) {
+  return {
+    onAdd() {
+      const wrap = document.createElement('div');
+      wrap.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'map-home-btn';
+      btn.setAttribute('aria-label', 'Kartenansicht zurücksetzen');
+      btn.title = 'Ansicht zurücksetzen';
+      btn.innerHTML = P.icon('home');
+      btn.addEventListener('click', onReset);
+      wrap.appendChild(btn);
+      this._wrap = wrap;
+      return wrap;
+    },
+    onRemove() { this._wrap?.remove(); },
+  };
+}
 function initPropertiesMap(items) {
   loadMapLibre().then(maplibregl => {
     const container = document.getElementById('propertiesMap');
@@ -2071,6 +2094,17 @@ function initPropertiesMap(items) {
         container.classList.toggle('property-map--labels-hidden', map.getZoom() < LABEL_MIN_ZOOM);
       map.on('zoom', syncMarkerLabels);
       syncMarkerLabels();
+      // "Home" button — fly back to the full portfolio extent (the same
+      // fit-bounds used on first paint), or the Switzerland-wide default
+      // when there are no markers to frame.
+      const resetMapView = () => {
+        if (_propertiesMarkers.length > 0) {
+          map.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 600 });
+        } else {
+          map.flyTo({ center: [8.2275, 46.8182], zoom: 7, duration: 600 });
+        }
+      };
+      map.addControl(makeMapHomeControl(resetMapView), 'top-right');
     });
   }).catch(err => {
     const container = document.getElementById('propertiesMap');
@@ -2337,8 +2371,8 @@ async function renderPropertyDetail({ id }) {
               <div class="property-aside__actions">
                 <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.icon('tool')}Schaden / Reparatur melden</a>
                 <a href="#/wizard/1" class="btn btn--bare">${P.icon('document')}Bedarf zu dieser Liegenschaft</a>
-                <button class="btn btn--bare" type="button" onclick="window.portal.toast('Umzug-Workflow noch nicht implementiert')">${P.icon('truck')}Umzug anmelden</button>
-                <button class="btn btn--bare" type="button" onclick="window.portal.toast('Sonderreinigung noch nicht implementiert')">${P.icon('sparkles')}Sonderreinigung anfragen</button>
+                <a href="#/moves?building=${t.buildingId}" class="btn btn--bare">${P.icon('truck')}Umzug anmelden</a>
+                <a href="#/cleaning?building=${t.buildingId}" class="btn btn--bare">${P.icon('sparkles')}Sonderreinigung anfragen</a>
               </div>
             </div>
             <div class="card">
@@ -3348,7 +3382,7 @@ function renderRepairQuickForm() {
           <div class="form-field">
             <label class="form-field__label" for="repairBuilding">Liegenschaft <span class="form-field__required">*</span></label>
             <select class="form-field__select" id="repairBuilding" name="building">
-              ${P.state.tenancies.map(t => `<option value="${t.id}" ${presetTenancy && presetTenancy.id === t.id ? 'selected' : ''}>${P.escapeHtml(t.buildingName)} — ${P.escapeHtml(t.address)}</option>`).join('')}
+              ${tenancyOptions(presetTenancy?.id)}
             </select>
           </div>
           <div class="form-field">
@@ -3386,6 +3420,148 @@ function renderRepairQuickForm() {
           <div class="wizard__sticky-footer">
             <a class="btn btn--outline" href="#/home">Abbrechen</a>
             <button type="submit" class="btn btn--filled">Schadensmeldung senden</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  `;
+}
+
+// Shared <option> list of all tenancies for the service-request building
+// pickers (Schadensmeldung / Umzug / Sonderreinigung). `presetId` pre-selects
+// a building when the form was opened from a property page (?building=…).
+function tenancyOptions(presetId) {
+  return P.state.tenancies
+    .map(t => `<option value="${t.id}"${t.id === presetId ? ' selected' : ''}>${P.escapeHtml(t.buildingName)} — ${P.escapeHtml(t.address)}</option>`)
+    .join('');
+}
+// Resolve the ?building=BLD-xxxx query param to a tenancy id, so a form
+// opened from a property page lands on that building pre-selected.
+function presetTenancyId() {
+  const buildingId = new URLSearchParams(location.hash.split('?')[1] || '').get('building');
+  return P.state.tenancies.find(t => t.buildingId === buildingId)?.id;
+}
+
+// ── 12b. UMZUG (REQ-FA-006 — moving service) ─────────────────────────────
+// Split out of the former combined "Umzug & Sonderreinigung" stub: moving
+// and special cleaning are unrelated services with different intake fields,
+// so each gets its own form + dropdown entry. Mockup only — submit just
+// confirms with a toast and routes back to the building.
+function renderMoveForm() {
+  if (!P.state.user) { P.navigate('#/'); return; }
+  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: 'Umzug' }] });
+  document.getElementById('page-body').innerHTML = `
+    <section class="section">
+      <div class="container container--reading">
+        <h1 class="h1 section-heading">Umzug anmelden</h1>
+        <p class="section-intro">
+          Umzug einzelner Arbeitsplätze, eines Teams oder einer ganzen Organisationseinheit — innerhalb einer Liegenschaft oder an einen anderen Standort. BBL Objektmanagement koordiniert Logistik, Möbel- und IT-Umzug.
+        </p>
+        <form class="card stack" onsubmit="event.preventDefault(); window.t3lite.submitMove(this);">
+          <div class="form-field">
+            <label class="form-field__label" for="moveBuilding">Aktuelle Liegenschaft <span class="form-field__required">*</span></label>
+            <select class="form-field__select" id="moveBuilding" name="building">${tenancyOptions(presetTenancyId())}</select>
+          </div>
+          <fieldset class="form-field option-group">
+            <legend class="form-field__label">Art des Umzugs <span class="form-field__required">*</span></legend>
+            <label class="option-group__item"><input type="radio" name="moveType" value="internal" checked> <span>Innerhalb derselben Liegenschaft</span></label>
+            <label class="option-group__item"><input type="radio" name="moveType" value="external"> <span>In eine andere Liegenschaft</span></label>
+            <label class="option-group__item"><input type="radio" name="moveType" value="single"> <span>Einzelne Arbeitsplätze / Möbel</span></label>
+          </fieldset>
+          <div class="form-field">
+            <label class="form-field__label" for="moveFrom">Von (Etage / Raum)</label>
+            <input class="form-field__input" id="moveFrom" name="from" placeholder="z. B. 2. OG, Raum 214">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="moveTo">Nach (Etage / Raum / Zieladresse)</label>
+            <input class="form-field__input" id="moveTo" name="to" placeholder="z. B. 4. OG, Raum 410 — oder neue Adresse">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="moveCount">Anzahl Arbeitsplätze <span class="form-field__required">*</span></label>
+            <input class="form-field__input" id="moveCount" name="count" type="number" min="1" value="1" inputmode="numeric" required>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="moveDate">Wunschtermin <span class="form-field__required">*</span></label>
+            <input class="form-field__input" id="moveDate" name="date" type="date" required>
+            <p class="form-field__hint">BBL bestätigt den Termin nach Prüfung der Logistik.</p>
+          </div>
+          <fieldset class="form-field option-group">
+            <legend class="form-field__label">Zusätzlich benötigt</legend>
+            <label class="option-group__item"><input type="checkbox" name="it"> <span>IT- und Telefonie-Umzug (Geräte, Telefonie, Netzwerk)</span></label>
+            <label class="option-group__item"><input type="checkbox" name="furniture"> <span>Möbeltransport / -montage</span></label>
+            <label class="option-group__item"><input type="checkbox" name="disposal"> <span>Entsorgung / Aktenvernichtung</span></label>
+          </fieldset>
+          <div class="form-field">
+            <label class="form-field__label" for="moveNotes">Bemerkungen</label>
+            <textarea class="form-field__textarea" id="moveNotes" name="notes" placeholder="Besonderheiten: Tresore, Grossgeräte, Zugangsbeschränkungen, gewünschte Etappierung …"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="movePhone">Kontakt für Rückfragen</label>
+            <input class="form-field__input" id="movePhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+41 …">
+          </div>
+          <div class="wizard__sticky-footer">
+            <a class="btn btn--outline" href="#/services">Abbrechen</a>
+            <button type="submit" class="btn btn--filled">Umzug anfragen</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  `;
+}
+
+// ── 12c. SONDERREINIGUNG (REQ-FA-006 — special-cleaning service) ─────────
+function renderCleaningForm() {
+  if (!P.state.user) { P.navigate('#/'); return; }
+  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: 'Sonderreinigung' }] });
+  document.getElementById('page-body').innerHTML = `
+    <section class="section">
+      <div class="container container--reading">
+        <h1 class="h1 section-heading">Sonderreinigung anfragen</h1>
+        <p class="section-intro">
+          Reinigung ausserhalb des regulären Unterhalts: Grundreinigung, Bauschlussreinigung, Spezial- und Anlassreinigungen. Die wiederkehrende Standardreinigung ist bereits Teil Ihres Mietverhältnisses.
+        </p>
+        <form class="card stack" onsubmit="event.preventDefault(); window.t3lite.submitCleaning(this);">
+          <div class="form-field">
+            <label class="form-field__label" for="cleanBuilding">Liegenschaft <span class="form-field__required">*</span></label>
+            <select class="form-field__select" id="cleanBuilding" name="building">${tenancyOptions(presetTenancyId())}</select>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="cleanType">Art der Reinigung <span class="form-field__required">*</span></label>
+            <select class="form-field__select" id="cleanType" name="type">
+              <option>Grundreinigung</option>
+              <option>Bauschlussreinigung (nach Umbau)</option>
+              <option>Teppich- / Polsterreinigung</option>
+              <option>Fassaden- / Glasreinigung</option>
+              <option>Graffiti-Entfernung</option>
+              <option>Desinfektion / Hygienereinigung</option>
+              <option>Anlass- / Sonderreinigung</option>
+              <option>Sonstiges</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="cleanArea">Bereich <span class="form-field__required">*</span></label>
+            <input class="form-field__input" id="cleanArea" name="area" placeholder="z. B. 3. OG Sitzungszimmer, Eingangshalle, Tiefgarage" required>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="cleanSize">Ungefähre Fläche (m²)</label>
+            <input class="form-field__input" id="cleanSize" name="size" type="number" min="0" inputmode="numeric" placeholder="optional">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="cleanDate">Wunschtermin <span class="form-field__required">*</span></label>
+            <input class="form-field__input" id="cleanDate" name="date" type="date" required>
+            <p class="form-field__hint">Sonderreinigungen finden in der Regel ausserhalb der Bürozeiten statt.</p>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="cleanDesc">Beschreibung <span class="form-field__required">*</span></label>
+            <textarea class="form-field__textarea" id="cleanDesc" name="desc" placeholder="Art der Verschmutzung, Zugang, Besonderheiten (empfindliche Oberflächen, Sicherheitsbereich …)" required></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="cleanPhone">Kontakt für Rückfragen</label>
+            <input class="form-field__input" id="cleanPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+41 …">
+          </div>
+          <div class="wizard__sticky-footer">
+            <a class="btn btn--outline" href="#/services">Abbrechen</a>
+            <button type="submit" class="btn btn--filled">Sonderreinigung anfragen</button>
           </div>
         </form>
       </div>
@@ -3579,6 +3755,22 @@ window.t3lite = {
     if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
     const ticketId = 'R-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
     P.toast(`Schadensmeldung ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
+    setTimeout(() => P.navigate('#/properties/' + building.id), 800);
+  },
+  submitMove(form) {
+    const data = new FormData(form);
+    const building = P.state.tenancies.find(t => t.id === data.get('building'));
+    if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
+    const ticketId = 'U-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
+    P.toast(`Umzugsanfrage ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.flm)}).`, 'success');
+    setTimeout(() => P.navigate('#/properties/' + building.id), 800);
+  },
+  submitCleaning(form) {
+    const data = new FormData(form);
+    const building = P.state.tenancies.find(t => t.id === data.get('building'));
+    if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
+    const ticketId = 'SR-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
+    P.toast(`Reinigungsanfrage ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
     setTimeout(() => P.navigate('#/properties/' + building.id), 800);
   },
   demoRole(role) {

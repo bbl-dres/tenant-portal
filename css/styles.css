@@ -5272,6 +5272,19 @@ body.body--mobile-menu-is-open {
   pointer-events: none;
 }
 .property-map--labels-hidden .property-marker__label { display: none; }
+/* "Home"/reset button injected as a custom MapLibre control next to the
+   zoom +/- group. Inherits the maplibregl-ctrl-group button chrome (29px
+   box, hover, focus); we only need to centre the icon inside it. */
+.map-home-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-home-btn .inline-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-primary);
+}
 .property-popup__title { margin: 0 0 4px; font-weight: var(--font-weight-bold); font-size: var(--text-body); }
 .property-popup__meta  { margin: 0 0 2px; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
 .property-popup__link  { display: inline-flex; align-items: center; gap: var(--space-xs); margin-top: var(--space-sm); font-size: var(--text-body-sm); color: var(--color-primary); font-weight: var(--font-weight-bold); text-decoration: none; }
