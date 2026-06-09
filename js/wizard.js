@@ -213,7 +213,7 @@ function renderStep1(draft) {
       <span class="wizard__counter">Schritt 1 / 5</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
       <a class="btn btn--outline" href="#/home">Abbrechen</a>
-      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Fläche / NAW</button>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')}</button>
     </div>
   `;
 }
@@ -435,7 +435,7 @@ function renderStep2(draft) {
       <span class="wizard__counter">Schritt 2 / 5</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
       <a class="btn btn--outline" href="#/wizard/1">${icon('arrowLeft')}Zurück</a>
-      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Anhänge</button>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')}</button>
     </div>
   `;
 }
@@ -527,7 +527,6 @@ function renderStep3(draft) {
       <h3>Dateien hochladen</h3>
       <p class="form-field__hint">Erlaubt: PDF, DOCX, XLSX, JPG, PNG · max. 25 MB · max. 10 Dateien · jede Datei wird auf Schadsoftware geprüft.</p>
       <input class="wizard__file-picker" type="file" id="filePicker" multiple>
-      <button class="btn btn--outline btn--sm" type="button" onclick="window.t3lite.fakeUpload()">Beispieldateien hochladen (Demo)</button>
       <ul class="attachment-list wizard__attachment-list" id="attachmentList">
         ${(draft.attachments || []).map((a, i) => attachmentLi(a, i)).join('')}
       </ul>
@@ -537,7 +536,7 @@ function renderStep3(draft) {
       <span class="wizard__counter">Schritt 3 / 5 · ${(draft.attachments || []).length} Dateien</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
       <a class="btn btn--outline" href="#/wizard/2">${icon('arrowLeft')}Zurück</a>
-      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} ${draft.type === 'Grossantrag' ? 'Detail' : 'Prüfen & Senden'}</button>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')}</button>
     </div>
   `;
 }
@@ -580,7 +579,7 @@ function renderStep4(draft) {
       <div class="wizard__sticky-footer">
         <span class="wizard__counter">Schritt 4 (übersprungen)</span>
         <a class="btn btn--outline" href="#/wizard/3">${icon('arrowLeft')}Zurück</a>
-        <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Prüfen & Senden</button>
+        <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')}</button>
       </div>
     `;
   }
@@ -652,7 +651,7 @@ function renderStep4(draft) {
       <span class="wizard__counter" id="grossCounter">0 / 7 Pflichtfelder ausgefüllt</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
       <a class="btn btn--outline" href="#/wizard/3">${icon('arrowLeft')}Zurück</a>
-      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')} Prüfen & Senden</button>
+      <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')}</button>
     </div>
   `;
 }

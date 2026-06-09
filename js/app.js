@@ -3889,6 +3889,11 @@ function renderServicesOverview() {
               </a>
             `;
           }).join('')}
+          <a href="#/properties" class="card--quick">
+            <p class="card--quick__title">Liegenschaften</p>
+            <p class="card--quick__desc">Von Ihrer Verwaltungseinheit belegte Liegenschaften — Galerie, Liste und Karte.</p>
+            ${arrowBtn()}
+          </a>
         </div>
       </div>
     </section>
