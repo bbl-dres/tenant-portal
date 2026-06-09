@@ -1645,14 +1645,58 @@ function wireReviewerSplit(a) {
 }
 
 // ── 9. LIEGENSCHAFTEN — Meine Immobilien (list) ──────────────────────────
+// Role-scoped tenancy list for the properties surface: BBL roles see the
+// whole portfolio; tenant roles see only their own VE's Mietverhältnisse.
+// Extracted so the live search preview can re-filter without re-deriving it.
+function getScopedTenancies() {
+  if (!P.state.user) return [];
+  const ve = P.state.user.ve;
+  const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
+  return isBblView ? P.state.tenancies : P.state.tenancies.filter(t => t.ve === ve || t.dep === ve);
+}
+
+// Inner HTML for the #propertiesResults region (everything below the toolbar
+// + filter pills). Shared by the initial render and the live search preview
+// so a typed preview is pixel-identical to the committed render. Map view
+// returns the canvas; initPropertiesMap wires it up separately.
+function propertiesResultsHTML(view, filtered, page, query, category) {
+  if (filtered.length === 0) {
+    return `
+      <div class="empty-state empty-state--inset">
+        <h2 class="empty-state__title">Keine Treffer${query ? ` für „${P.escapeHtml(query)}"` : ''}</h2>
+        <p class="empty-state__lead">Versuchen Sie es mit anderen Filtern.</p>
+        <div class="empty-state__cta">
+          <a href="${buildPropertiesHash({ view, page: 1 })}" class="btn btn--outline">Filter zurücksetzen</a>
+        </div>
+      </div>`;
+  }
+  if (view === 'map') return renderMapView(filtered);
+  const perPage = view === 'gallery' ? 12 : 25;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const pageItems = filtered.slice((safePage - 1) * perPage, safePage * perPage);
+  return `
+    <div class="property-view property-view--${view}">
+      ${view === 'gallery' ? renderGalleryView(pageItems) : renderListView(pageItems)}
+    </div>
+    ${renderPagination({
+      current: safePage,
+      totalPages,
+      from: (safePage - 1) * perPage + 1,
+      to: Math.min(safePage * perPage, filtered.length),
+      totalItems: filtered.length,
+      entitySingular: 'Liegenschaft',
+      entityPlural: 'Liegenschaften',
+      hrefFor: (p) => buildPropertiesHash({ view, q: query, cat: category, page: p }),
+    })}`;
+}
+
 function renderProperties() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'properties', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Liegenschaften' }] });
   const ve = P.state.user.ve;
   const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
-  const allTenancies = isBblView
-    ? P.state.tenancies
-    : P.state.tenancies.filter(t => t.ve === ve || t.dep === ve);
+  const allTenancies = getScopedTenancies();
 
   // URL state: ?view=gallery|list|map · ?q=… · ?cat=… · ?page=N
   const params = parseHashQuery(location.hash);
@@ -1668,7 +1712,6 @@ function renderProperties() {
   const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
   const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
-  const pageItems = view === 'map' ? filtered : filtered.slice((safePage - 1) * perPage, safePage * perPage);
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -1698,32 +1741,9 @@ function renderProperties() {
           ${propertiesToolbar({ view, query, category, categories })}
           ${renderPropertiesFilterPills({ view, query, category })}
 
-          ${filtered.length === 0 ? `
-            <div class="empty-state empty-state--inset">
-              <h2 class="empty-state__title">Keine Treffer${query ? ` für „${P.escapeHtml(query)}"` : ''}</h2>
-              <p class="empty-state__lead">Versuchen Sie es mit anderen Filtern.</p>
-              <div class="empty-state__cta">
-                <a href="${buildPropertiesHash({ view, page: 1 })}" class="btn btn--outline">Filter zurücksetzen</a>
-              </div>
-            </div>
-          ` : `
-            <div class="property-view property-view--${view}">
-              ${view === 'gallery' ? renderGalleryView(pageItems) : ''}
-              ${view === 'list'    ? renderListView(pageItems)    : ''}
-              ${view === 'map'     ? renderMapView(filtered)      : ''}
-            </div>
-
-            ${view !== 'map' ? renderPagination({
-              current: safePage,
-              totalPages,
-              from: filtered.length === 0 ? 0 : (safePage - 1) * perPage + 1,
-              to: Math.min(safePage * perPage, filtered.length),
-              totalItems: filtered.length,
-              entitySingular: 'Liegenschaft',
-              entityPlural: 'Liegenschaften',
-              hrefFor: (page) => buildPropertiesHash({ view, q: query, cat: category, page }),
-            }) : ''}
-          `}
+          <div id="propertiesResults">
+            ${propertiesResultsHTML(view, filtered, safePage, query, category)}
+          </div>
         `}
       </div>
     </section>
@@ -1783,10 +1803,13 @@ function propertiesToolbar({ view, query, category, categories }) {
       <div class="property-toolbar__search">
         ${P.icon('search')}
         <input type="search" id="propertiesSearch" class="input property-toolbar__input"
-               aria-label="Liegenschaften suchen"
-               placeholder="Suche Objekt, Adresse, SAP-WE, EGID, VE …"
-               value="${P.escapeHtml(query)}" autocomplete="off">
+               aria-label="Liegenschaften und Orte suchen"
+               placeholder="Suche Objekt, Adresse, EGID, VE oder Ort …"
+               value="${P.escapeHtml(query)}" autocomplete="off"
+               role="combobox" aria-autocomplete="list"
+               aria-controls="propertiesSearchOptions" aria-expanded="false">
         ${query ? `<button type="button" class="property-toolbar__clear" aria-label="Suche löschen" data-action="clear-search">${P.icon('x')}</button>` : ''}
+        <ul class="combobox__list" id="propertiesSearchOptions" role="listbox" aria-label="Vorschläge" hidden></ul>
       </div>
       <select class="input property-toolbar__select" id="propertiesCategory" aria-label="Portfolio-Kategorie">
         <option value="">Alle Kategorien</option>
@@ -1830,18 +1853,7 @@ function renderPropertiesFilterPills({ view, query, category }) {
 }
 
 function wirePropertiesToolbar(view) {
-  const input = document.getElementById('propertiesSearch');
-  if (input) {
-    let t = null;
-    input.addEventListener('input', e => {
-      clearTimeout(t);
-      const value = e.target.value;
-      t = setTimeout(() => {
-        const params = parseHashQuery(location.hash);
-        location.hash = buildPropertiesHash({ view, q: value.trim(), cat: params.cat || '', page: 1 });
-      }, 220);
-    });
-  }
+  wirePropertiesSearchCombobox(view);
   const catSelect = document.getElementById('propertiesCategory');
   if (catSelect) catSelect.addEventListener('change', e => {
     const params = parseHashQuery(location.hash);
@@ -1862,6 +1874,207 @@ function wirePropertiesToolbar(view) {
   // CD Bund pagination input — generic helper picks up the hrefFor
   // closure stashed by renderPagination.
   wirePaginationInput();
+}
+
+// Live preview filter — narrows the visible results AS YOU TYPE without
+// committing to the URL (the "soft filter" half of the search UX). Gallery /
+// list re-render the #propertiesResults region (page 1); map view just
+// toggles property-marker visibility so the basemap isn't torn down per
+// keystroke. The hard filter (URL + pills) only commits on Enter / pick.
+function previewPropertiesFilter(view) {
+  const input = document.getElementById('propertiesSearch');
+  if (!input) return;
+  const queryRaw = input.value.trim();
+  const query = queryRaw.toLowerCase();
+  const category = document.getElementById('propertiesCategory')?.value || '';
+  const filtered = filterTenancies(getScopedTenancies(), query, category);
+  if (view === 'map') {
+    const ids = new Set(filtered.map(t => t.id));
+    _propertiesMarkers.forEach(m => { m.el.style.display = ids.has(m.id) ? '' : 'none'; });
+    return;
+  }
+  const results = document.getElementById('propertiesResults');
+  if (results) {
+    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, category);
+    wirePaginationInput();
+  }
+}
+
+// swisstopo location origins → short German labels for the suggestion's
+// secondary line (geo.admin.ch SearchServer `origin` field).
+const SWISSTOPO_ORIGIN_LABEL = {
+  address: 'Adresse', gg25: 'Gemeinde', district: 'Bezirk', kantone: 'Kanton',
+  zipcode: 'PLZ', gazetteer: 'Ort', parcel: 'Parzelle',
+};
+// Strip the HTML markup geo.admin.ch wraps around its labels (<b>, <i>) and
+// decode entities — read as text only, never re-injected as HTML.
+function stripHtml(s) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = s || '';
+  return (tmp.textContent || '').replace(/\s+/g, ' ').trim();
+}
+// Query the public geo.admin.ch SearchServer for locations. No API key; sr=4326
+// gives WGS84 lat/lon ready for MapLibre. Degrades to [] on any failure
+// (offline, CORS, abort) so the DB suggestions + demo never break.
+async function fetchSwisstopo(query) {
+  if (!query || query.length < 2) return [];
+  try {
+    _swisstopoController?.abort();
+    _swisstopoController = new AbortController();
+    const url = 'https://api3.geo.admin.ch/rest/services/ech/SearchServer'
+      + '?type=locations&sr=4326&limit=6&searchText=' + encodeURIComponent(query);
+    const res = await fetch(url, { signal: _swisstopoController.signal });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || [])
+      .map(r => ({
+        label: stripHtml(r.attrs?.label),
+        origin: r.attrs?.origin || '',
+        lng: r.attrs?.lon,
+        lat: r.attrs?.lat,
+      }))
+      .filter(r => r.label && typeof r.lng === 'number' && typeof r.lat === 'number');
+  } catch {
+    return [];
+  }
+}
+
+// Combobox controller for the properties search field. One input, two jobs:
+// soft live-filter (previewPropertiesFilter) + a grouped suggestion dropdown
+// (DB Liegenschaften → detail view, swisstopo Orte → map locator pin).
+function wirePropertiesSearchCombobox(view) {
+  const input = document.getElementById('propertiesSearch');
+  const list = document.getElementById('propertiesSearchOptions');
+  if (!input || !list) return;
+  let dbItems = [], locItems = [], remotePending = false, activeIndex = -1;
+  let tFilter = null, tRemote = null;
+
+  const optionEls = () => Array.from(list.querySelectorAll('.combobox__option'));
+  const open = () => { list.hidden = false; input.setAttribute('aria-expanded', 'true'); };
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; };
+
+  function render() {
+    const parts = [];
+    if (dbItems.length) {
+      parts.push('<li class="combobox__group" role="presentation">Liegenschaften</li>');
+      dbItems.forEach(t => parts.push(
+        `<li class="combobox__option" role="option" data-kind="property" data-id="${P.escapeHtml(t.id)}">
+          <span class="combobox__option-primary">${P.escapeHtml(t.buildingName)}</span>
+          <span class="combobox__option-secondary">${P.escapeHtml(t.address)} · ${formatAssetKey(t.assetKey)}</span>
+        </li>`));
+    }
+    if (remotePending) {
+      parts.push('<li class="combobox__group" role="presentation">Orte · swisstopo</li>');
+      parts.push(`<li class="combobox__hint" role="presentation">${P.icon('spinner', 'combobox__spinner')} Orte werden gesucht …</li>`);
+    } else if (locItems.length) {
+      parts.push('<li class="combobox__group" role="presentation">Orte · swisstopo</li>');
+      locItems.forEach(l => parts.push(
+        `<li class="combobox__option combobox__option--location" role="option" data-kind="location" data-lng="${l.lng}" data-lat="${l.lat}" data-label="${P.escapeHtml(l.label)}">
+          <span class="combobox__option-primary">${P.icon('mapMarker')} ${P.escapeHtml(l.label)}</span>
+          <span class="combobox__option-secondary">${P.escapeHtml(SWISSTOPO_ORIGIN_LABEL[l.origin] || 'swisstopo')}</span>
+        </li>`));
+    }
+    if (!parts.length) { list.innerHTML = ''; close(); return; }
+    list.innerHTML = parts.join('');
+    activeIndex = -1;
+    open();
+  }
+
+  function refreshDb() {
+    const q = input.value.trim().toLowerCase();
+    const cat = document.getElementById('propertiesCategory')?.value || '';
+    dbItems = q ? filterTenancies(getScopedTenancies(), q, cat).slice(0, 6) : [];
+  }
+  async function refreshRemote() {
+    const q = input.value.trim();
+    if (q.length < 2) { locItems = []; remotePending = false; render(); return; }
+    const results = await fetchSwisstopo(q);
+    if (input.value.trim() !== q) return;   // a newer keystroke superseded this
+    locItems = results;
+    remotePending = false;
+    render();
+  }
+
+  function pick(opt) {
+    close();
+    if (opt.dataset.kind === 'property') {
+      P.navigate('#/properties/' + opt.dataset.id);
+      return;
+    }
+    const lng = parseFloat(opt.dataset.lng), lat = parseFloat(opt.dataset.lat);
+    const label = opt.dataset.label || '';
+    if (view === 'map' && _propertiesMap) {
+      input.value = '';
+      _propertiesMarkers.forEach(m => { m.el.style.display = ''; });   // un-filter property pins
+      dropLocatorPin(lng, lat, label);
+    } else {
+      // Switch to map view, then drop the pin once the map has loaded.
+      _pendingLocator = { lng, lat, label };
+      location.hash = buildPropertiesHash({ view: 'map', cat: document.getElementById('propertiesCategory')?.value || '' });
+    }
+  }
+
+  function commit() {
+    close();
+    location.hash = buildPropertiesHash({ view, q: input.value.trim(), cat: document.getElementById('propertiesCategory')?.value || '', page: 1 });
+  }
+
+  function moveActive(delta) {
+    const opts = optionEls();
+    if (!opts.length) return;
+    if (list.hidden) open();
+    activeIndex = Math.max(0, Math.min(opts.length - 1, activeIndex + delta));
+    opts.forEach((o, i) => o.classList.toggle('combobox__option--active', i === activeIndex));
+    opts[activeIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  input.addEventListener('input', () => {
+    locItems = [];                                              // drop stale place results
+    remotePending = input.value.trim().length >= 2;
+    clearTimeout(tFilter);
+    tFilter = setTimeout(() => { previewPropertiesFilter(view); refreshDb(); render(); }, 140);
+    clearTimeout(tRemote);
+    tRemote = setTimeout(refreshRemote, 320);
+  });
+  // mousedown (not click) so the pick beats the input's blur-close.
+  list.addEventListener('mousedown', e => {
+    const opt = e.target.closest('.combobox__option');
+    if (!opt) return;
+    e.preventDefault();
+    pick(opt);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown')      { e.preventDefault(); moveActive(+1); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); moveActive(-1); }
+    else if (e.key === 'Enter') {
+      const opts = optionEls();
+      if (activeIndex >= 0 && opts[activeIndex]) { e.preventDefault(); pick(opts[activeIndex]); }
+      else { e.preventDefault(); commit(); }
+    } else if (e.key === 'Escape')  { close(); }
+  });
+  input.addEventListener('blur', () => setTimeout(close, 150));
+  // Open the dropdown again if the user re-focuses a non-empty field.
+  input.addEventListener('focus', () => { if (dbItems.length || locItems.length) render(); });
+}
+
+// Drop the single transient swisstopo locator pin on the portfolio map and
+// fly to it. Distinct from the red property teardrop (secondary-colour pin)
+// so a "place" never reads as a portfolio object. Replaces any prior pin.
+function dropLocatorPin(lng, lat, label) {
+  if (!_propertiesMap) return;
+  loadMapLibre().then(maplibregl => {
+    if (!_propertiesMap) return;
+    if (_locatorMarker) { _locatorMarker.remove(); _locatorMarker = null; }
+    const el = document.createElement('div');
+    el.className = 'locator-marker';
+    el.innerHTML = '<span class="locator-marker__pin"></span>';
+    const popup = new maplibregl.Popup({ offset: 26, closeButton: true, maxWidth: '260px' })
+      .setHTML(`<div class="locator-popup"><p class="locator-popup__label">${P.escapeHtml(label)}</p><p class="locator-popup__meta">swisstopo · Standort</p></div>`);
+    _locatorMarker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([lng, lat]).setPopup(popup).addTo(_propertiesMap);
+    _propertiesMap.flyTo({ center: [lng, lat], zoom: 14, duration: 800 });
+    _locatorMarker.togglePopup();
+  });
 }
 
 function renderGalleryView(items) {
@@ -1987,6 +2200,9 @@ function wirePaginationInput(inputId) {
 let _maplibreReady = null;
 let _propertiesMap = null;
 let _propertiesMarkers = [];
+let _locatorMarker = null;        // single transient swisstopo location pin
+let _pendingLocator = null;       // {lng,lat,label} to drop after switching to map view
+let _swisstopoController = null;  // aborts the previous in-flight swisstopo request
 function renderMapLoading(label = 'Karte wird geladen') {
   return `
     <div class="map-loading" role="status" aria-live="polite">
@@ -2040,7 +2256,7 @@ function initPropertiesMap(items) {
     const container = document.getElementById('propertiesMap');
     if (!container) return;
     // Tear down previous instance if the user toggled views without leaving the route
-    if (_propertiesMap) { try { _propertiesMap.remove(); } catch {} _propertiesMap = null; _propertiesMarkers = []; }
+    if (_propertiesMap) { try { _propertiesMap.remove(); } catch {} _propertiesMap = null; _propertiesMarkers = []; _locatorMarker = null; }
     const map = new maplibregl.Map({
       container,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -2065,7 +2281,13 @@ function initPropertiesMap(items) {
         el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(t.buildingId)}</span><span class="property-marker__pin"></span>`;
         el.addEventListener('click', () => focusPropertyOnMap(t.id));
         const veLine = `${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}`;
-        const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' }).setHTML(`
+        // Compact info panel: thumbnail + key attributes + a "Details" CTA.
+        // Managed manually (NOT via marker.setPopup) — setPopup adds its own
+        // click-to-toggle listener which, combined with our marker click
+        // handler below, would double-toggle and leave the panel closed.
+        const popup = new maplibregl.Popup({ offset: 22, closeButton: true, maxWidth: '320px' })
+          .setLngLat([t.lng, t.lat])
+          .setHTML(`
           <div class="property-popup">
             <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="320" height="120">
             <div class="property-popup__body">
@@ -2074,12 +2296,15 @@ function initPropertiesMap(items) {
               <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>
               <p class="property-popup__meta">${veLine} · ${P.escapeHtml(t.portfolioCategory)}</p>
               <p class="property-popup__meta">${t.hnf2.toLocaleString('de-CH')} m² HNF2 · ${t.workstations} Arbeitsplätze</p>
-              <a class="property-popup__link" href="#/properties/${t.id}">Details öffnen ${P.icon('arrowRight')}</a>
+              <a class="btn btn--filled btn--sm property-popup__cta" href="#/properties/${t.id}">Details öffnen ${P.icon('arrowRight')}</a>
             </div>
           </div>`);
+        // Clear the active-pin highlight when the panel is dismissed (X button
+        // or click on empty map).
+        popup.on('close', () => el.classList.remove('property-marker--active'));
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([t.lng, t.lat]).setPopup(popup).addTo(map);
-        _propertiesMarkers.push({ id: t.id, marker, el });
+          .setLngLat([t.lng, t.lat]).addTo(map);
+        _propertiesMarkers.push({ id: t.id, marker, el, popup });
         bounds.extend([t.lng, t.lat]);
       });
       if (_propertiesMarkers.length > 0) {
@@ -2105,6 +2330,13 @@ function initPropertiesMap(items) {
         }
       };
       map.addControl(makeMapHomeControl(resetMapView), 'top-right');
+      // A swisstopo location picked from gallery/list view switched us here —
+      // drop its locator pin now that the map is ready, then consume it.
+      if (_pendingLocator) {
+        const loc = _pendingLocator;
+        _pendingLocator = null;
+        dropLocatorPin(loc.lng, loc.lat, loc.label);
+      }
     });
   }).catch(err => {
     const container = document.getElementById('propertiesMap');
@@ -2117,11 +2349,16 @@ function initPropertiesMap(items) {
 function focusPropertyOnMap(id) {
   const entry = _propertiesMarkers.find(m => m.id === id);
   if (!entry || !_propertiesMap) return;
-  _propertiesMarkers.forEach(m => m.el.classList.remove('property-marker--active'));
+  // One active marker + one open info panel at a time: clear the others.
+  _propertiesMarkers.forEach(m => {
+    m.el.classList.remove('property-marker--active');
+    if (m !== entry) m.popup.remove();
+  });
   entry.el.classList.add('property-marker--active');
   const lngLat = entry.marker.getLngLat();
   _propertiesMap.flyTo({ center: [lngLat.lng, lngLat.lat], zoom: Math.max(_propertiesMap.getZoom(), 13), duration: 600 });
-  entry.marker.togglePopup();
+  // Open (not toggle) so a second click re-centres without hiding the panel.
+  if (!entry.popup.isOpen()) entry.popup.addTo(_propertiesMap);
 }
 
 function propertyCard(t, index = 99) {

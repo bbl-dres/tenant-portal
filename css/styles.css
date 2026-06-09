@@ -1095,7 +1095,7 @@
 }
 .hero--wide .hero__title { max-width: 26ch; }
 .hero__lead {
-  font-size: var(--text-h3);
+  font-size: var(--text-h4);
   color: var(--color-text-secondary);
   max-width: 60ch;
   margin: 0 0 var(--space-xl);
@@ -5309,10 +5309,75 @@ body.body--mobile-menu-is-open {
   height: 18px;
   color: var(--color-text-primary);
 }
+
+/* Properties search combobox dropdown — grouped suggestions (DB
+   Liegenschaften + swisstopo Orte). Placed after the toolbar rules so the
+   icon resets below win source order over `.property-toolbar__search
+   .inline-icon` (which absolutely-positions the search glyph). */
+.combobox__group {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.combobox__hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.combobox__option--location .combobox__option-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+/* Reset icons living inside the dropdown so they flow inline (the toolbar's
+   own search icon stays absolutely positioned as a direct child). */
+.property-toolbar__search .combobox__list .inline-icon {
+  position: static;
+  left: auto;
+  width: var(--icon-base);
+  height: var(--icon-base);
+}
+.property-toolbar__search .combobox__option--location .inline-icon {
+  color: var(--color-secondary-600);
+  flex-shrink: 0;
+}
+.combobox__spinner { animation: map-loading-spin var(--transition-slow) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .combobox__spinner { animation: none; } }
+
+/* swisstopo locator pin — a secondary-colour teardrop, deliberately unlike
+   the red property markers so a searched "place" never reads as a portfolio
+   object. Single transient pin, managed by dropLocatorPin. */
+.locator-marker {
+  display: inline-flex;
+  width: 22px; height: 28px;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+.locator-marker__pin {
+  display: block;
+  width: 16px; height: 16px;
+  background: var(--color-secondary-600);
+  border: 2px solid var(--color-white);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: var(--shadow-property-marker);
+}
+.locator-popup__label { margin: 0 0 2px; font-weight: var(--font-weight-bold); font-size: var(--text-body-sm); }
+.locator-popup__meta { margin: 0; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
 .property-popup__title { margin: 0 0 4px; font-weight: var(--font-weight-bold); font-size: var(--text-body); }
 .property-popup__meta  { margin: 0 0 2px; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
-.property-popup__link  { display: inline-flex; align-items: center; gap: var(--space-xs); margin-top: var(--space-sm); font-size: var(--text-body-sm); color: var(--color-primary); font-weight: var(--font-weight-bold); text-decoration: none; }
-.property-popup__link:hover { text-decoration: underline; }
+/* Full-width "Details öffnen" CTA at the foot of the map info panel. Uses
+   the standard .btn .btn--filled chrome; only the width + top gap are local. */
+.property-popup__cta { width: 100%; margin-top: var(--space-sm); }
 /* Banner image at the top of the portfolio-map popup — confirms which
    building the user is hovering on before they commit to the click. */
 .property-popup__image {
