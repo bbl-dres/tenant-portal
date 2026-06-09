@@ -2892,9 +2892,13 @@ async function renderFloorDetail({ id, floorSlug }) {
   const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
   const restWarn = monthsToEnd <= 12;
 
-  // Pre-select a room from ?space=… on the hash
+  // Pre-select a room from ?space=… and the "Einfärben" colour mode from
+  // ?color=… on the hash. The colour mode persists across level switches.
   const queryStr = (location.hash.split('?')[1] || '');
-  const initialSpaceId = new URLSearchParams(queryStr).get('space');
+  const params = new URLSearchParams(queryStr);
+  const initialSpaceId = params.get('space');
+  const colorMode = ['none', 'useType', 'sia', 'tenant'].includes(params.get('color')) ? params.get('color') : 'none';
+  const colorQuery = colorMode !== 'none' ? `?color=${colorMode}` : '';
 
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: `#/properties/${t.id}`, backLabel: t.buildingName })}
@@ -2928,7 +2932,7 @@ async function renderFloorDetail({ id, floorSlug }) {
                 const slug = f.floorId.replace(t.buildingId + '-', '');
                 const isActive = f.floorId === floor.floorId;
                 return `<a class="floor-switcher__chip${isActive ? ' floor-switcher__chip--active' : ''}"
-                          href="#/properties/${t.id}/floors/${slug}"
+                          href="#/properties/${t.id}/floors/${slug}${colorQuery}"
                           ${isActive ? 'aria-current="page"' : ''}>${P.escapeHtml(f.name)}</a>`;
               }).join('')}
             </div>
@@ -2937,10 +2941,10 @@ async function renderFloorDetail({ id, floorSlug }) {
           <div class="floor-toolbar__group floor-toolbar__group--right">
             <label class="floor-toolbar__label" for="floorViewMode">Einfärben</label>
             <select id="floorViewMode" class="input input--sm">
-              <option value="none">Keine</option>
-              <option value="useType">Nutzung</option>
-              <option value="sia">SIA 416 Kategorie</option>
-              <option value="tenant">Mietende VE</option>
+              <option value="none"${colorMode === 'none' ? ' selected' : ''}>Keine</option>
+              <option value="useType"${colorMode === 'useType' ? ' selected' : ''}>Nutzung</option>
+              <option value="sia"${colorMode === 'sia' ? ' selected' : ''}>SIA 416 Kategorie</option>
+              <option value="tenant"${colorMode === 'tenant' ? ' selected' : ''}>Mietende VE</option>
             </select>
             <button class="btn btn--bare btn--sm" type="button" id="floorFullscreenBtn" aria-label="Vollbild">${P.icon('maximize')}Vollbild</button>
           </div>
@@ -2956,7 +2960,7 @@ async function renderFloorDetail({ id, floorSlug }) {
     </section>
   `;
 
-  initFloorCanvas(t, floor, spaces, userVe, initialSpaceId);
+  initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, colorMode);
 
   // Vollbild toggle — fullscreens `.floor-viewer` so the legend stays
   // visible inside the fullscreen surface. After enter/leave we resize
@@ -2997,7 +3001,7 @@ function polygonLabelPoint(geometry) {
   for (const p of pts) { x += p[0]; y += p[1]; }
   return [x / pts.length, y / pts.length];
 }
-function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
+function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, initialColor) {
   loadMapLibre().then(maplibregl => {
     const container = document.getElementById('floorCanvas');
     if (!container) return;
@@ -3067,7 +3071,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     // Default `none` leaves rooms in a neutral canvas tint so the user
     // sees an architectural-style floor plan first; they opt in to a
     // colour coding by picking Nutzung / SIA 416 / Mietende VE.
-    let activeMode = 'none';
+    let activeMode = ['none', 'useType', 'sia', 'tenant'].includes(initialColor) ? initialColor : 'none';
     // `none` returns a flat white — rooms read as an architectural-style
     // line drawing against the canvas bg, no semantic colour cues.
     const NONE_FILL = cdColor('--color-white');
@@ -3118,6 +3122,7 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
     }
 
     // Wire the Ansicht dropdown to update the paint expression + legend.
+    const floorSlug = floor.floorId.replace(t.buildingId + '-', '');
     const viewModeSelect = document.getElementById('floorViewMode');
     if (viewModeSelect) {
       viewModeSelect.addEventListener('change', e => {
@@ -3126,6 +3131,15 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId) {
           map.setPaintProperty('rooms-fill', 'fill-color', fillExprFor(activeMode));
         }
         renderLegend();
+        // Persist the choice in the URL without a re-render (replaceState keeps
+        // zoom/popup state), and carry it onto the floor-switcher links so it
+        // survives a level change.
+        const base = `#/properties/${t.id}/floors/${floorSlug}`;
+        history.replaceState(null, '', activeMode === 'none' ? base : `${base}?color=${activeMode}`);
+        document.querySelectorAll('.floor-switcher__chip').forEach(a => {
+          const href = a.getAttribute('href').split('?')[0];
+          a.setAttribute('href', activeMode === 'none' ? href : `${href}?color=${activeMode}`);
+        });
       });
     }
 
@@ -3924,6 +3938,11 @@ function renderServicesOverview() {
           <a href="#/properties" class="card--quick">
             <p class="card--quick__title">Liegenschaften</p>
             <p class="card--quick__desc">Von Ihrer Verwaltungseinheit belegte Liegenschaften — Galerie, Liste und Karte.</p>
+            ${arrowBtn()}
+          </a>
+          <a href="#/downloads" class="card--quick">
+            <p class="card--quick__title">Pläne & Dokumente</p>
+            <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
             ${arrowBtn()}
           </a>
         </div>

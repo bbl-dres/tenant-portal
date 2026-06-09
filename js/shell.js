@@ -81,7 +81,6 @@ export const SERVICES_MENU = {
     { href: '#/moves',     label: 'Umzug',                   desc: 'Umzug innerhalb oder zwischen Liegenschaften' },
     { href: '#/cleaning',  label: 'Sonderreinigung',         desc: 'Grund-, Bau- und Spezialreinigung' },
     { href: 'https://bbl-dres.github.io/workspace-management/', label: 'Möbel bestellen', desc: 'Standard- und Spezialmobiliar', external: true },
-    { href: '#/downloads', label: 'Pläne & Dokumente',       desc: 'Grundrisse, Merkblätter, Schulungen' },
     { href: '#/training',  label: 'Schulungen',              desc: '„Mieterportal kompakt" und weitere' },
   ]
 };
@@ -90,6 +89,11 @@ export const SERVICES_MENU = {
 // page at #/info with sticky TOC. Pattern: armasuisse Immo-Portal +
 // kbob-fdk "Handbuch & Downloads".
 const INFO_LINK = { id: 'info', href: '#/info', label: 'Arbeitsinstrumente und Informationen' };
+
+// Pläne & Dokumente — promoted from the Dienstleistungen dropdown to a
+// top-level nav item: it's a browse/reference archive (same tier as
+// Liegenschaften and the Info page), not a request action.
+const DOWNLOADS_LINK = { id: 'downloads', href: '#/downloads', label: 'Pläne & Dokumente' };
 
 export function publicNavItems() {
   return [
@@ -105,6 +109,7 @@ export function authNavItems() {
       { id: 'queue', href: '#/queue', label: 'Pendenzen' },
       { id: 'inbox', href: '#/inbox', label: 'Anträge der VE' },
       SERVICES_MENU,
+      DOWNLOADS_LINK,
       INFO_LINK,
     ];
   }
@@ -113,6 +118,7 @@ export function authNavItems() {
       { id: 'home',       href: '#/home',       label: 'Start' },
       SERVICES_MENU,
       { id: 'properties', href: '#/properties', label: 'Liegenschaften' },
+      DOWNLOADS_LINK,
       { id: 'inbox',      href: '#/inbox',      label: 'Meine Anträge' },
       INFO_LINK,
     ];
@@ -120,6 +126,7 @@ export function authNavItems() {
   return [
     { id: 'home', href: '#/home', label: 'Start' },
     SERVICES_MENU,
+    DOWNLOADS_LINK,
     INFO_LINK,
   ];
 }
