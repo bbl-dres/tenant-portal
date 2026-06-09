@@ -34,11 +34,11 @@ PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts,
 } from './lib.js';
-import { state, loadData, loadSpatialData } from './state.js';
+import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
   toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, acceptCookieConsent, submitSearch, toggleSearch, toggleBurger,
-  shell, publicNavItems, authNavItems, SERVICES_MENU,
+  shell, publicNavItems, authNavItems, servicesMenu,
 } from './shell.js';
 import {
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
@@ -69,6 +69,17 @@ function handleHash() {
   // are read directly from `location.hash` inside the view handler.
   const qIdx = full.indexOf('?');
   const h = qIdx >= 0 ? full.slice(0, qIdx) : full;
+  // Language is a URL parameter and the source of truth: apply `?lang` when
+  // present, otherwise re-inject the active language so every view's URL keeps
+  // it (shareable + consistent across navigation). replaceState avoids a loop.
+  const params = new URLSearchParams(qIdx >= 0 ? full.slice(qIdx + 1) : '');
+  const urlLang = params.get('lang');
+  if (urlLang && LANGS.includes(urlLang)) {
+    if (urlLang !== state.lang) setLang(urlLang);
+  } else {
+    params.set('lang', state.lang);
+    history.replaceState(null, '', h + '?' + params.toString());
+  }
   for (const { re, handler } of routes) {
     const m = h.match(re);
     if (m) {
@@ -110,7 +121,7 @@ function openRoleMenu() {
   const m = modal({
     title: 'Rolle wechseln',
     body,
-    actions: [{ label: 'Abbrechen', variant: 'btn--outline' }]
+    actions: [{ label: P.t('btn.cancel'), variant: 'btn--outline' }]
   });
   document.querySelectorAll('[data-role]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -155,6 +166,7 @@ window.portal = {
   openRoleMenu, login, logout,
   statusBadge,
   formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
+  t, setLang, LANGS,
   PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 };
 
@@ -231,7 +243,7 @@ function registerRoutes() {
 // surface (inbox / properties / news) when they want to keep digging.
 const SEARCH_GROUP_CAP = 10;
 function renderSearchResults() {
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'Suchergebnisse' }] });
+  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('bc.search') }] });
   const q = (location.hash.split('?q=')[1] || '').replace(/^=/, '');
   const query = decodeURIComponent(q || '').toLowerCase().trim();
 
@@ -425,8 +437,8 @@ const INFO_TOC = [
 
 function renderInfoPage() {
   shell({ activeNav: 'info', breadcrumb: [
-    { href: '#/', label: 'Start' },
-    { label: 'Arbeitsinstrumente und Informationen' }
+    { href: '#/', label: P.t('nav.start') },
+    { label: P.t('nav.info') }
   ]});
 
   document.getElementById('page-body').innerHTML = `
@@ -729,7 +741,7 @@ function newsCard(n) {
 // ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
 const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'News-Übersicht' }] });
+  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('bc.news') }] });
   const items = P.state.news || [];
   const params = parseHashQuery(location.hash);
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
@@ -786,7 +798,7 @@ function newsListRow(n) {
 function renderNewsDetail({ id }) {
   const n = P.state.news.find(x => x.id === id);
   if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/news', label: 'News-Übersicht' }, { label: n.title }] });
+  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <article class="section">
@@ -823,16 +835,16 @@ function renderLanding() {
     <section class="hero hero--wide hero--split">
       <div class="hero__inner hero__inner--split">
         <div>
-          <h1 class="h1 hero__title">Bedarf anmelden, Status verfolgen, Dokumente herunterladen.</h1>
+          <h1 class="h1 hero__title">${P.t('landing.title')}</h1>
           <p class="hero__lead">
-            Die zentrale Anlaufstelle für Bundes-Mietende — Bürofläche, Empfangs­zentren, Auslandvertretungen.
+            ${P.t('landing.lead')}
           </p>
           <div class="hero__cta">
             <button class="btn btn--filled btn--lg" type="button" onclick="window.portal.login()">
               ${P.icon('external')}
-              Anmelden mit eIAM
+              ${P.t('landing.ctaLogin')}
             </button>
-            <a href="#/info" class="btn btn--outline btn--lg" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">Wie funktioniert das Portal?</a>
+            <a href="#/info" class="btn btn--outline btn--lg" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">${P.t('landing.ctaHow')}</a>
           </div>
         </div>
         <figure class="hero__figure">
@@ -851,10 +863,10 @@ function renderLanding() {
     <section class="portfolio-stats">
       <div class="container">
         <div class="portfolio-stats__grid">
-          <div><strong>~2'700</strong><span>Immobilien im Portfolio</span></div>
-          <div><strong>~6'500</strong><span>Mietverhältnisse</span></div>
-          <div><strong>~38'000</strong><span>Arbeitsplätze Bundes­verwaltung</span></div>
-          <div><strong>26</strong><span>Verwaltungs­einheiten</span></div>
+          <div><strong>~2'700</strong><span>${P.t('landing.stat.properties')}</span></div>
+          <div><strong>~6'500</strong><span>${P.t('landing.stat.tenancies')}</span></div>
+          <div><strong>~38'000</strong><span>${P.t('landing.stat.workstations')}</span></div>
+          <div><strong>26</strong><span>${P.t('landing.stat.units')}</span></div>
         </div>
       </div>
     </section>
@@ -863,11 +875,11 @@ function renderLanding() {
       <div class="container">
         <div class="explainer-section__grid">
           <div class="explainer-section__copy">
-            <h2 class="h2 section-heading" id="explainerTitle">Mieterportal in 90 Sekunden</h2>
+            <h2 class="h2 section-heading" id="explainerTitle">${P.t('landing.explainer.title')}</h2>
             <p class="section-intro">
-              Bedarfsmeldung, Statusverfolgung, Pläne und Dokumente — alles an einem Ort.
+              ${P.t('landing.explainer.lead')}
             </p>
-            <a href="#/info" class="btn btn--outline" onclick="setTimeout(() => window.t3lite.scrollToInfo('faq'), 100);">Häufige Fragen ansehen</a>
+            <a href="#/info" class="btn btn--outline" onclick="setTimeout(() => window.t3lite.scrollToInfo('faq'), 100);">${P.t('landing.explainer.cta')}</a>
           </div>
           <a class="video-thumb"
              href="https://www.youtube.com/watch?v=rin3crkLpRk"
@@ -979,7 +991,7 @@ function renderSubmitterHome() {
             : `Sie haben derzeit keine offenen Anliegen.`}
           ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
         </p>
-        <h2 class="h2 section-heading">Häufig genutzte Dienste</h2>
+        <h2 class="h2 section-heading">${P.t('home.services')}</h2>
         <div class="card-grid">
           <a href="#/wizard/1" class="card--quick">
             <p class="card--quick__title">Bedarf anmelden</p>
@@ -1004,7 +1016,7 @@ function renderSubmitterHome() {
         </div>
         <p class="section-cta">
           <a class="section-cta__link" href="#/services">
-            Alle Dienstleistungen ansehen ${P.icon('arrowRight', 'section-cta__icon')}
+            ${P.t('home.allServices')} ${P.icon('arrowRight', 'section-cta__icon')}
           </a>
         </p>
       </div>
@@ -1015,9 +1027,9 @@ function renderSubmitterHome() {
 }
 
 function greetingFor(hour) {
-  if (hour < 11) return 'Guten Morgen';
-  if (hour < 18) return 'Guten Tag';
-  return 'Guten Abend';
+  if (hour < 11) return P.t('home.greeting.morning');
+  if (hour < 18) return P.t('home.greeting.day');
+  return P.t('home.greeting.evening');
 }
 
 /* `extraClass` positions the affordance per consumer (`card--quick__arrow-btn`
@@ -1055,7 +1067,7 @@ function profileCard({ image, title, date, desc, role }) {
 const INBOX_PAGE_SIZE = 25;
 function renderInbox() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Meine Anträge' }] });
+  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.inbox') }] });
   const role = P.state.user.activeRole;
   const apps = role === 'GS-Reviewer'
     ? P.state.applications.filter(a => a.submitterVe === P.state.user.ve)
@@ -1086,11 +1098,11 @@ function renderInbox() {
       <div class="container">
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">${role === 'GS-Reviewer' ? 'Anträge der VE' : 'Meine Anträge'}</h1>
+            <h1 class="h1 page-header__title">${role === 'GS-Reviewer' ? P.t('nav.inboxVe') : P.t('inbox.title')}</h1>
             <p class="page-header__sub">${apps.length} ${apps.length === 1 ? 'Antrag' : 'Anträge'} insgesamt</p>
           </div>
           <div class="page-header__actions">
-            <a class="btn btn--filled btn--sm" href="#/wizard/1">+ Neuer Antrag</a>
+            <a class="btn btn--filled btn--sm" href="#/wizard/1">+ ${P.t('inbox.new')}</a>
           </div>
         </header>
 
@@ -1202,7 +1214,7 @@ function renderApplicationDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/inbox', label: 'Meine Anträge' }, { label: a.id }] });
+  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/inbox', label: P.t('nav.inbox') }, { label: a.id }] });
   const tab = (location.hash.split('?tab=')[1] || 'daten');
 
   document.getElementById('page-body').innerHTML = `
@@ -1409,7 +1421,7 @@ function renderQueue() {
   if (!P.state.user) { P.navigate('#/'); return; }
   // GS-Reviewer's landing page — no breadcrumb (same reasoning as the
   // LBO home: a single-item breadcrumb just restates the page title).
-  const main = shell({ activeNav: 'queue', breadcrumb: [], deptSub: 'Mieterportal · GS-Prüfer/in' });
+  const main = shell({ activeNav: 'queue', breadcrumb: [], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
   const queue = P.state.applications.filter(a => {
     // Reviewers see all VE applications that are awaiting review
     return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
@@ -1519,7 +1531,7 @@ function renderReviewerSplit({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  const main = shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: 'Pendenzen' }, { label: a.id }], deptSub: 'Mieterportal · GS-Prüfer/in' });
+  const main = shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: P.t('nav.queue') }, { label: a.id }], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
 
   const initialMarks = a._marks || {};
 
@@ -1691,7 +1703,7 @@ function propertiesResultsHTML(view, filtered, page, query, category) {
 
 function renderProperties() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'properties', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Liegenschaften' }] });
+  shell({ activeNav: 'properties', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.properties') }] });
   const ve = P.state.user.ve;
   const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
   const allTenancies = getScopedTenancies();
@@ -1716,7 +1728,7 @@ function renderProperties() {
       <div class="container">
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">Liegenschaften ${isBblView ? '(BBL-Sicht)' : 'Ihrer Verwaltungs­einheit'}</h1>
+            <h1 class="h1 page-header__title">${P.t('props.title')}${isBblView ? ' (BBL)' : ''}</h1>
             <p class="page-header__sub">
               ${isBblView
                 ? 'Alle vom BBL verwalteten Mietverhältnisse weltweit.'
@@ -1802,7 +1814,7 @@ function propertiesToolbar({ view, query, category, categories }) {
         ${P.icon('search')}
         <input type="search" id="propertiesSearch" class="input property-toolbar__input"
                aria-label="Liegenschaften und Orte suchen"
-               placeholder="Suche Objekt, Adresse, EGID, VE oder Ort …"
+               placeholder="${P.t('props.searchPlaceholder')}"
                value="${P.escapeHtml(query)}" autocomplete="off"
                role="combobox" aria-autocomplete="list"
                aria-controls="propertiesSearchOptions" aria-expanded="false">
@@ -1810,13 +1822,13 @@ function propertiesToolbar({ view, query, category, categories }) {
         <ul class="combobox__list" id="propertiesSearchOptions" role="listbox" aria-label="Vorschläge" hidden></ul>
       </div>
       <select class="input property-toolbar__select" id="propertiesCategory" aria-label="Portfolio-Kategorie">
-        <option value="">Alle Kategorien</option>
+        <option value="">${P.t('props.allCategories')}</option>
         ${categories.map(c => `<option value="${P.escapeHtml(c)}" ${category === c ? 'selected' : ''}>${P.escapeHtml(c)}</option>`).join('')}
       </select>
       <div class="view-toggle" role="group" aria-label="Ansicht wechseln">
-        ${tab('gallery', 'Galerie', 'grid')}
-        ${tab('list',    'Liste',   'list')}
-        ${tab('map',     'Karte',   'map')}
+        ${tab('gallery', P.t('props.view.gallery'), 'grid')}
+        ${tab('list',    P.t('props.view.list'),    'list')}
+        ${tab('map',     P.t('props.view.map'),     'map')}
       </div>
     </div>
   `;
@@ -2414,8 +2426,8 @@ async function renderPropertyDetail({ id }) {
   if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
   await P.loadSpatialData('data/');
   shell({ activeNav: 'properties', breadcrumb: [
-    { href: '#/home', label: 'Start' },
-    { href: '#/properties', label: 'Liegenschaften' },
+    { href: '#/home', label: P.t('nav.start') },
+    { href: '#/properties', label: P.t('nav.properties') },
     { label: t.buildingName }
   ]});
 
@@ -2667,7 +2679,10 @@ function initPropertyDetailMap(t) {
       const el = document.createElement('div');
       el.className = 'property-marker property-marker--static';
       el.setAttribute('aria-label', t.buildingName);
-      el.innerHTML = '<span class="property-marker__pin"></span>';
+      // Same building-id label as the portfolio map — but view-only here:
+      // the static marker has pointer-events:none (no select) and no popup,
+      // and this single-building map never hides the label by zoom.
+      el.innerHTML = `<span class="property-marker__label" aria-hidden="true">${P.escapeHtml(t.buildingId)}</span><span class="property-marker__pin"></span>`;
       new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([t.lng, t.lat])
         .addTo(map);
@@ -2860,8 +2875,8 @@ async function renderFloorDetail({ id, floorSlug }) {
   const floor = buildingFloors.find(f => f.floorId === `${t.buildingId}-${floorSlug}`);
   if (!floor) {
     shell({ activeNav: 'properties', breadcrumb: [
-      { href: '#/home', label: 'Start' },
-      { href: '#/properties', label: 'Liegenschaften' },
+      { href: '#/home', label: P.t('nav.start') },
+      { href: '#/properties', label: P.t('nav.properties') },
       { href: `#/properties/${t.id}`, label: t.buildingName },
       { label: floorSlug }
     ]});
@@ -2870,8 +2885,8 @@ async function renderFloorDetail({ id, floorSlug }) {
   }
 
   shell({ activeNav: 'properties', breadcrumb: [
-    { href: '#/home', label: 'Start' },
-    { href: '#/properties', label: 'Liegenschaften' },
+    { href: '#/home', label: P.t('nav.start') },
+    { href: '#/properties', label: P.t('nav.properties') },
     { href: `#/properties/${t.id}`, label: t.buildingName },
     { label: floor.name }
   ]});
@@ -3379,7 +3394,7 @@ function documentLinkedLabel(d) {
 
 function renderDownloads() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'downloads', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Pläne & Dokumente' }] });
+  shell({ activeNav: 'downloads', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.downloads') }] });
 
   // Filter + page state persisted in URL hash query (back/forward + shareable).
   const docState = { type: '', building: '', q: '', page: 1 };
@@ -3392,24 +3407,24 @@ function renderDownloads() {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
-        <h1 class="h1 section-heading">Pläne & Dokumente</h1>
+        <h1 class="h1 section-heading">${P.t('downloads.title')}</h1>
         <p class="section-intro">
           Alle für <strong>${P.escapeHtml(P.state.user.ve)}</strong> freigegebenen Dokumente plus öffentliche Merkblätter.
         </p>
 
         <div class="docs-filter-bar">
           <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
-            <option value="">Alle Typen</option>
+            <option value="">${P.t('downloads.allTypes')}</option>
             ${Object.entries(DOC_TYPE_LABEL).map(([v, l]) =>
               `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${l}</option>`).join('')}
           </select>
           <select class="input docs-filter-bar__select" id="filterDocBuilding" aria-label="Liegenschaft">
-            <option value="">Alle Liegenschaften</option>
+            <option value="">${P.t('downloads.allProperties')}</option>
             ${P.state.buildings.map(b =>
               `<option value="${b.buildingId}" ${docState.building === b.buildingId ? 'selected' : ''}>${P.escapeHtml(b.name)}</option>`).join('')}
           </select>
           <input class="input docs-filter-bar__search" type="search" id="filterDocText"
-                 placeholder="Titel oder Liegenschaft suchen …"
+                 placeholder="${P.t('downloads.searchPlaceholder')}"
                  value="${P.escapeHtml(docState.q)}"
                  aria-label="Suche">
         </div>
@@ -3653,7 +3668,7 @@ function downloadList(items) {
 // ── 12. SCHADENSMELDUNG (REQ-FA-005 stub) ────────────────────────────────
 function renderRepairQuickForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'home', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Schadensmeldung' }] });
+  shell({ activeNav: 'home', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('bc.repair') }] });
 
   const params = new URLSearchParams((location.hash.split('?')[1] || ''));
   const presetBuildingId = params.get('building');
@@ -3737,7 +3752,7 @@ function presetTenancyId() {
 // confirms with a toast and routes back to the building.
 function renderMoveForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: 'Umzug' }] });
+  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/services', label: P.t('nav.services') }, { label: P.t('services.move') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -3800,7 +3815,7 @@ function renderMoveForm() {
 // ── 12c. SONDERREINIGUNG (REQ-FA-006 — special-cleaning service) ─────────
 function renderCleaningForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: 'Sonderreinigung' }] });
+  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/services', label: P.t('nav.services') }, { label: P.t('services.cleaning') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -3860,7 +3875,7 @@ function renderCleaningForm() {
 // ── 13. PROFILE / EINSTELLUNGEN ──────────────────────────────────────────
 function renderProfile() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: 'Start' }, { label: 'Profil' }] });
+  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('bc.profile') }] });
   const u = P.state.user;
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -3915,11 +3930,11 @@ function renderProfile() {
 
 // ── SERVICES OVERVIEW (linked from the nav dropdown "Übersicht") ────────
 function renderServicesOverview() {
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { label: 'Dienstleistungen' }] });
+  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('nav.services') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
-        <h1 class="h1 section-heading">Dienstleistungen des Mieterportals</h1>
+        <h1 class="h1 section-heading">${P.t('services.title')}</h1>
         <p class="section-intro">
           BBL bewirtschaftet die Immobilien der Bundesverwaltung. Über das Mieterportal stellen Bundes-Mietende die folgenden Anfragen direkt — geführt, dokumentiert, übergabefähig an SAP ePPM.
         </p>
@@ -3928,7 +3943,7 @@ function renderServicesOverview() {
     <section class="section section--alt">
       <div class="container">
         <div class="card-grid">
-          ${SERVICES_MENU.items.slice(1).map(svc => {
+          ${servicesMenu().items.slice(1).map(svc => {
             const ext = svc.external === true;
             const cls = ext ? 'card--quick link--external' : 'card--quick';
             const attrs = ext ? ' target="_blank" rel="noopener"' : '';
@@ -3941,18 +3956,18 @@ function renderServicesOverview() {
             `;
           }).join('')}
           <a href="#/properties" class="card--quick">
-            <p class="card--quick__title">Liegenschaften</p>
-            <p class="card--quick__desc">Von Ihrer Verwaltungseinheit belegte Liegenschaften — Galerie, Liste und Karte.</p>
+            <p class="card--quick__title">${P.t('nav.properties')}</p>
+            <p class="card--quick__desc">${P.t('services.properties.desc')}</p>
             ${arrowBtn()}
           </a>
           <a href="#/downloads" class="card--quick">
-            <p class="card--quick__title">Pläne & Dokumente</p>
-            <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
+            <p class="card--quick__title">${P.t('nav.downloads')}</p>
+            <p class="card--quick__desc">${P.t('services.downloads.desc')}</p>
             ${arrowBtn()}
           </a>
           <a href="#/info" class="card--quick" onclick="setTimeout(() => window.t3lite.scrollToInfo('schulungen'), 100);">
-            <p class="card--quick__title">Schulungen</p>
-            <p class="card--quick__desc">Kurse, Lernvideos und Unterlagen im Bereich „Ausbildung".</p>
+            <p class="card--quick__title">${P.t('services.training')}</p>
+            <p class="card--quick__desc">${P.t('services.training.desc')}</p>
             ${arrowBtn()}
           </a>
         </div>
@@ -3967,7 +3982,7 @@ function renderServicesOverview() {
 // sites don't change, but the value is no longer surfaced to users —
 // it stays in code comments / commit history for traceability.
 function renderServiceStub(title, _reqId, lead, externalUrl) {
-  shell({ breadcrumb: [{ href: '#/', label: 'Start' }, { href: '#/services', label: 'Dienstleistungen' }, { label: title }] });
+  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { href: '#/services', label: P.t('nav.services') }, { label: title }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -4395,7 +4410,7 @@ window.t3lite = {
     const m = P.modal({
       title: 'Bulk genehmigen', body, size: 'lg',
       actions: [
-        { label: 'Abbrechen', variant: 'btn--outline' },
+        { label: P.t('btn.cancel'), variant: 'btn--outline' },
         { label: 'Genehmigen', variant: 'btn--filled', onClick: () => {
           const begrs = Array.from(document.querySelectorAll('.batchBegr')).map(t => ({ id: t.getAttribute('data-id'), text: t.value.trim() }));
           if (begrs.some(b => !b.text)) { P.toast('Alle Begründungen sind Pflicht.'); return false; }
@@ -4441,7 +4456,7 @@ window.t3lite = {
         <p class="modal__meta">Die Antrags-ID ${appId} bleibt erhalten; die Historie zeichnet die Resubmission als Statusübergang auf.</p>
       `,
       actions: [
-        { label: 'Abbrechen', variant: 'btn--outline' },
+        { label: P.t('btn.cancel'), variant: 'btn--outline' },
         { label: 'Erneut einreichen', variant: 'btn--filled', onClick: () => {
           const a = P.state.applications.find(x => x.id === appId);
           if (a) {

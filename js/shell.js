@@ -29,7 +29,7 @@
        router module is a future refactor.
    ========================================================================== */
 
-import { state } from './state.js';
+import { state, t, setLang, LANGS } from './state.js';
 import { toast, icon, renderShortcutOverlay, safeGet, safeSet } from './lib.js';
 
 const CONSENT_KEY = 'mp-cookie-consent';
@@ -70,79 +70,78 @@ export function acceptCookieConsent(mode = 'necessary') {
 // Services (login required) — appear only in authenticated nav.
 // Exported so #/services can also render this list as a card grid via
 // `renderServicesOverview` in app.js without duplicating the catalogue.
-export const SERVICES_MENU = {
-  id: 'services',
-  label: 'Dienstleistungen',
-  type: 'dropdown',
-  items: [
-    { href: '#/services',  label: 'Übersicht',               desc: 'Alle Dienstleistungen im Überblick' },
-    { href: '#/wizard/1',  label: 'Bedarf anmelden',         desc: 'Unterbringung, Büro, Auslandvertretung' },
-    { href: '#/repair',    label: 'Schaden melden',          desc: 'Reparaturen, Sanitär, Schliesssystem' },
-    { href: '#/moves',     label: 'Umzug',                   desc: 'Umzug innerhalb oder zwischen Liegenschaften' },
-    { href: '#/cleaning',  label: 'Sonderreinigung',         desc: 'Grund-, Bau- und Spezialreinigung' },
-    { href: 'https://bbl-dres.github.io/workspace-management/', label: 'Möbel bestellen', desc: 'Standard- und Spezialmobiliar', external: true },
-  ]
-};
+// A function (not a const) so labels translate against the active language at
+// render time. Also consumed by #/services (renderServicesOverview in app.js).
+export function servicesMenu() {
+  return {
+    id: 'services',
+    label: t('nav.services'),
+    type: 'dropdown',
+    items: [
+      { href: '#/services',  label: t('services.overview'),  desc: t('services.overview.desc') },
+      { href: '#/wizard/1',  label: t('services.request'),   desc: t('services.request.desc') },
+      { href: '#/repair',    label: t('services.repair'),    desc: t('services.repair.desc') },
+      { href: '#/moves',     label: t('services.move'),      desc: t('services.move.desc') },
+      { href: '#/cleaning',  label: t('services.cleaning'),  desc: t('services.cleaning.desc') },
+      { href: 'https://bbl-dres.github.io/workspace-management/', label: t('services.furniture'), desc: t('services.furniture.desc'), external: true },
+    ],
+  };
+}
 
-// Arbeitsinstrumente und Informationen (public, always visible) — single
-// page at #/info with sticky TOC. Pattern: armasuisse Immo-Portal +
-// kbob-fdk "Handbuch & Downloads".
-const INFO_LINK = { id: 'info', href: '#/info', label: 'Arbeitsinstrumente und Informationen' };
-
-// Pläne & Dokumente — promoted from the Dienstleistungen dropdown to a
-// top-level nav item: it's a browse/reference archive (same tier as
-// Liegenschaften and the Info page), not a request action.
-const DOWNLOADS_LINK = { id: 'downloads', href: '#/downloads', label: 'Pläne & Dokumente' };
-
+// Nav items are built per render so labels follow the active language.
+// Arbeitsinstrumente / Pläne & Dokumente are inlined here for the same reason.
 export function publicNavItems() {
   return [
-    { id: 'start', href: '#/', label: 'Start' },
-    INFO_LINK,
+    { id: 'start', href: '#/', label: t('nav.start') },
+    { id: 'info', href: '#/info', label: t('nav.info') },
   ];
 }
 
 export function authNavItems() {
   const role = state.user.activeRole;
+  const downloads = { id: 'downloads', href: '#/downloads', label: t('nav.downloads') };
+  const info = { id: 'info', href: '#/info', label: t('nav.info') };
   if (role === 'GS-Reviewer') {
     return [
-      { id: 'queue', href: '#/queue', label: 'Pendenzen' },
-      { id: 'inbox', href: '#/inbox', label: 'Anträge der VE' },
-      SERVICES_MENU,
-      DOWNLOADS_LINK,
-      INFO_LINK,
+      { id: 'queue', href: '#/queue', label: t('nav.queue') },
+      { id: 'inbox', href: '#/inbox', label: t('nav.inboxVe') },
+      servicesMenu(),
+      downloads,
+      info,
     ];
   }
   if (role === 'LBO' || !role) {
     return [
-      { id: 'home',       href: '#/home',       label: 'Start' },
-      SERVICES_MENU,
-      { id: 'properties', href: '#/properties', label: 'Liegenschaften' },
-      DOWNLOADS_LINK,
-      { id: 'inbox',      href: '#/inbox',      label: 'Meine Anträge' },
-      INFO_LINK,
+      { id: 'home',       href: '#/home',       label: t('nav.start') },
+      servicesMenu(),
+      { id: 'properties', href: '#/properties', label: t('nav.properties') },
+      downloads,
+      { id: 'inbox',      href: '#/inbox',      label: t('nav.inbox') },
+      info,
     ];
   }
   return [
-    { id: 'home', href: '#/home', label: 'Start' },
-    SERVICES_MENU,
-    DOWNLOADS_LINK,
-    INFO_LINK,
+    { id: 'home', href: '#/home', label: t('nav.start') },
+    servicesMenu(),
+    downloads,
+    info,
   ];
 }
 
 
 // ── FEDERAL SHELL ──────────────────────────────────────────────────────────
-export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcrumb = [], navItems = [] } = {}) {
+export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], navItems = [] } = {}) {
+  const sub = deptSub || t('org.portal');
   // Anmelden lives in the top-bar (dark utility bar), not the brand bar.
   // Plain white text per CD pattern — not a red filled button.
   const authPill = state.user
-    ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="Profil von ${state.user.name}">
+    ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="${t('top.profileAria', { name: state.user.name })}">
          ${icon('user')}
          ${state.user.name}
        </a>`
     : `<button class="top-bar__link top-bar__link--user" type="button" onclick="window.portal.login()">
          ${icon('user')}
-         Anmelden
+         ${t('top.login')}
        </button>`;
 
   // Per CD pattern (bbl.admin.ch / geo.admin.ch): "Start" is NOT a top-nav
@@ -182,8 +181,8 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
   // hidden at narrow widths.
   const mobileMetaHtml = `
     <div class="main-navigation__mobile-meta" aria-label="Meta-Navigation (mobil)">
-      <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
-      <a class="main-navigation__link" href="#/info">Hilfe</a>
+      <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
+      <a class="main-navigation__link" href="#/info">${t('nav.help')}</a>
     </div>
   `;
 
@@ -289,25 +288,24 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
       <div class="top-bar">
         <div class="top-bar__inner">
           <a class="top-bar__authorities" href="https://www.admin.ch/de/bundesverwaltung"
-             target="_blank" rel="noopener" title="Alle Schweizer Bundesbehörden (admin.ch)">
-            <span>Alle Schweizer Bundesbehörden</span>
+             target="_blank" rel="noopener" title="${t('top.allAuthorities')} (admin.ch)">
+            <span>${t('top.allAuthorities')}</span>
             ${icon('external')}
           </a>
           <div class="top-bar__actions">
-            <span class="top-bar__demo-chip" role="status" aria-label="Prototyp — nur zur Demonstration">Demo</span>
+            <span class="top-bar__demo-chip" role="status" aria-label="${t('top.demoAria')}">${t('top.demo')}</span>
             ${authPill}
             <div class="language-switcher" id="langSwitch">
-              <button class="top-bar__lang" aria-label="Sprache wählen" aria-haspopup="listbox" aria-expanded="false"
+              <button class="top-bar__lang" aria-label="${t('lang.choose')}" aria-haspopup="listbox" aria-expanded="false"
                       onclick="window.portal.toggleLang()">
-                <span id="langCurrent">DE</span>
+                <span id="langCurrent">${state.lang.toUpperCase()}</span>
                 ${icon('chevronDown')}
               </button>
-              <ul class="language-switcher__dropdown" role="listbox" aria-label="Sprache">
-                <li role="presentation"><button class="language-switcher__option language-switcher__option--active" role="option" aria-selected="true" data-lang="DE" lang="de" onclick="window.portal.pickLang('DE')">DE</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="FR" lang="fr" onclick="window.portal.pickLang('FR')">FR</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="IT" lang="it" onclick="window.portal.pickLang('IT')">IT</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="RM" lang="rm" onclick="window.portal.pickLang('RM')">RM</button></li>
-                <li role="presentation"><button class="language-switcher__option" role="option" aria-selected="false" aria-disabled="true" data-lang="EN" lang="en" onclick="window.portal.pickLang('EN')">EN</button></li>
+              <ul class="language-switcher__dropdown" role="listbox" aria-label="${t('lang.label')}">
+                ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en'], ['RM', 'rm', true]].map(([code, lang, disabled]) => {
+                  const isActive = !disabled && state.lang === lang;
+                  return `<li role="presentation"><button class="language-switcher__option${isActive ? ' language-switcher__option--active' : ''}" role="option" aria-selected="${isActive}"${disabled ? ' aria-disabled="true"' : ''} data-lang="${code}" lang="${lang}" onclick="window.portal.pickLang('${code}')">${code}</button></li>`;
+                }).join('')}
               </ul>
             </div>
           </div>
@@ -315,27 +313,27 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
       </div>
 
       <div class="top-header__department-strip" aria-hidden="true">
-        <div class="top-header__department-strip-inner">Bundesamt für Bauten und Logistik BBL</div>
+        <div class="top-header__department-strip-inner">${t('org.bbl')}</div>
       </div>
 
       <div class="top-header">
         <div class="top-header__inner">
           <a class="top-header__left" href="#/"
-             aria-label="Startseite — Bundesamt für Bauten und Logistik BBL · ${deptSub}">
+             aria-label="${t('nav.start')} — ${t('org.bbl')} · ${sub}">
             <span class="top-header__bundmark">
               <img class="top-header__bundmark-flag" src="assets/swiss-logo-flag.svg" alt="" aria-hidden="true">
               <img class="top-header__bundmark-name" src="assets/swiss-logo-name.svg" alt="" aria-hidden="true">
             </span>
             <span class="top-header__divider" aria-hidden="true"></span>
             <span class="top-header__dept">
-              <span class="top-header__dept-name"><strong>Bundesamt für Bauten und Logistik BBL</strong></span>
-              <span class="top-header__dept-sub">${deptSub}</span>
+              <span class="top-header__dept-name"><strong>${t('org.bbl')}</strong></span>
+              <span class="top-header__dept-sub">${sub}</span>
             </span>
           </a>
           <div class="top-header__right">
             <nav class="top-header__meta" aria-label="Meta-Navigation">
-              <a class="top-header__meta-link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt</a>
-              <a class="top-header__meta-link" href="#/info">Hilfe</a>
+              <a class="top-header__meta-link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
+              <a class="top-header__meta-link" href="#/info">${t('nav.help')}</a>
             </nav>
             <div class="top-header__actions">
               <div class="header-search" id="headerSearch">
@@ -349,7 +347,7 @@ export function renderShell({ deptSub = 'Mieterportal', activeNav = '', breadcru
                       onsubmit="event.preventDefault(); window.portal.submitSearch(this);">
                   <input class="header-search__input" id="headerSearchInput" type="search"
                          name="q"
-                         placeholder="Suchbegriff eingeben" aria-label="Suchbegriff eingeben"
+                         placeholder="${t('top.searchPlaceholder')}" aria-label="${t('top.searchPlaceholder')}"
                          autocomplete="off"
                          onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
                   <button class="header-search__submit" type="submit" aria-label="Suchen">
@@ -402,7 +400,7 @@ export function renderFooter() {
       <div class="footer-information">
         <div class="footer-information__inner">
           <div class="footer-information__col footer-information__col--brand">
-            <h2 class="footer-information__brand">Über das BBL</h2>
+            <h2 class="footer-information__brand">${t('footer.about')}</h2>
             <p class="footer-information__motto">
               Bundesamt für Bauten und Logistik — nachhaltig, partnerschaftlich und vorbildlich.
             </p>
@@ -412,7 +410,7 @@ export function renderFooter() {
           </div>
 
           <div class="footer-information__col footer-information__col--links">
-            <h2 class="footer-information__heading">Weitere Informationen</h2>
+            <h2 class="footer-information__heading">${t('footer.moreInfo')}</h2>
             <ul class="footer-information__list">
               <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen ${icon('arrowRight', 'footer-information__arrow')}</a></li>
               <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
@@ -421,7 +419,7 @@ export function renderFooter() {
           </div>
 
           <div class="footer-information__col footer-information__col--links">
-            <h2 class="footer-information__heading">Prototyp</h2>
+            <h2 class="footer-information__heading">${t('footer.prototype')}</h2>
             <ul class="footer-information__list">
               <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub ${icon('arrowRight', 'footer-information__arrow')}</a></li>
               <li><a href="https://github.com/swiss/designsystem" target="_blank" rel="noopener">CD Bund ${icon('arrowRight', 'footer-information__arrow')}</a></li>
@@ -433,11 +431,11 @@ export function renderFooter() {
 
       <div class="app-footer__bottom">
         <div class="app-footer__bottom-inner">
-          <a class="app-footer__bottom-link" href="https://www.bkb.admin.ch/bkb/de/home/themen/agb.html" target="_blank" rel="noopener">Allgemeine Geschäftsbedingungen des Bundes</a>
-          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">Rechtliches</a>
-          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutz</a>
-          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/dokumentation/impressum.html" target="_blank" rel="noopener">Impressum</a>
-          <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">Barrierefreiheit in der Bundesverwaltung</a>
+          <a class="app-footer__bottom-link" href="https://www.bkb.admin.ch/bkb/de/home/themen/agb.html" target="_blank" rel="noopener">${t('footer.terms')}</a>
+          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">${t('footer.legalShort')}</a>
+          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">${t('footer.privacy')}</a>
+          <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/dokumentation/impressum.html" target="_blank" rel="noopener">${t('footer.imprint')}</a>
+          <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">${t('footer.accessibilityFull')}</a>
         </div>
       </div>
     </footer>
@@ -666,23 +664,19 @@ export function toggleLang(forceOpen) {
   }
 }
 export function pickLang(code) {
-  if (code !== 'DE') {
-    toggleLang(false);
-    toast(`${code}-Lokalisation noch nicht implementiert - Anzeige bleibt auf DE.`, '');
-    return;
-  }
-  // a11y: update <html lang> so screen readers, hyphenation, and
-  // spell-check switch pronunciation/segmentation even before content
-  // translations land. eCH-0059 requirement; tracked as audit M-A3.
-  document.documentElement.lang = code.toLowerCase();
-  document.querySelectorAll('.language-switcher__option').forEach(o => {
-    const isActive = o.getAttribute('data-lang') === code;
-    o.classList.toggle('language-switcher__option--active', isActive);
-    o.setAttribute('aria-selected', isActive ? 'true' : 'false');
-  });
-  const current = document.getElementById('langCurrent');
-  if (current) current.textContent = code;
+  const lang = String(code).toLowerCase();
   toggleLang(false);
+  // RM (Rumantsch) is shown but not localised; ignore it and any no-op pick.
+  if (!LANGS.includes(lang) || lang === state.lang) return;
+  setLang(lang);   // persist + <html lang> (eCH-0059 a11y)
+  // Write the choice into the URL (?lang) — the source of truth. The resulting
+  // hashchange re-renders the current route in the new language.
+  const full = location.hash || '#/';
+  const qIdx = full.indexOf('?');
+  const route = qIdx >= 0 ? full.slice(0, qIdx) : full;
+  const params = new URLSearchParams(qIdx >= 0 ? full.slice(qIdx + 1) : '');
+  params.set('lang', lang);
+  location.hash = route + '?' + params.toString();
 }
 
 // Click-outside + Esc close + Arrow-key navigation for the language
@@ -825,7 +819,7 @@ document.addEventListener('keydown', (e) => {
 // ── SHELL WRAPPER (mounts the chrome + reserves #page-body) ──────────────
 // Called by every route renderer. Returns the <main> element so the
 // renderer can use it for focus management.
-export function shell({ activeNav = '', breadcrumb = [], deptSub = 'Mieterportal' } = {}) {
+export function shell({ activeNav = '', breadcrumb = [], deptSub = '' } = {}) {
   const root = document.getElementById('root');
   const navItems = state.user ? authNavItems() : publicNavItems();
   // `.page-container` is the positioning context for `.back-to-top-wrapper`

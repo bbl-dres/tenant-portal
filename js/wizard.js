@@ -14,7 +14,7 @@
    (window.t3lite.saveDraft / fakeUpload / suggestDates) lives in app.js.
    ========================================================================== */
 
-import { state, persistDraft, loadDraft, clearDraft } from './state.js';
+import { state, persistDraft, loadDraft, clearDraft, t } from './state.js';
 import {
   escapeHtml, escapeJs, formatChf, icon, toast, modal,
   renderStepIndicator, formatAssetKey, attachmentLi,
@@ -87,7 +87,8 @@ export function deriveNawClass(answers) {
 
 
 // ── 4. WIZARD ────────────────────────────────────────────────────────────
-const WIZARD_STEPS = ['Basis', 'Fläche / NAW', 'Anhänge', 'Detail (Grossantrag)', 'Prüfen & Senden'];
+// Step-indicator labels — a function so they translate at render time.
+const wizardSteps = () => [t('wizard.step1'), t('wizard.step2'), t('wizard.step3'), t('wizard.step4'), t('wizard.step5')];
 
 export function ensureDraft() {
   if (!state.draft) {
@@ -133,7 +134,7 @@ export function renderWizard({ step }) {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--narrow">
-        ${renderStepIndicator(stepNum, WIZARD_STEPS)}
+        ${renderStepIndicator(stepNum, wizardSteps())}
         <div class="wizard" id="wizardBody">
           ${renderWizardStep(stepNum, draft)}
         </div>

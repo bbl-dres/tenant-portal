@@ -20,6 +20,8 @@ import { formatAddressLine, flattenFeature, safeGet, safeSet, safeRemove } from 
 
 export const state = {
   user: null,                  // { id, name, ve, roles, activeRole }
+  lang: 'de',                  // active UI language (de | fr | it | en)
+  i18n: {},                    // loaded from data/i18n.json: key → { de, fr, it, en }
   applications: [],            // loaded from data/applications.json
   referenceData: null,         // loaded from data/reference-data.json
   buildings: [],               // loaded from data/buildings.json
@@ -38,7 +40,7 @@ export const state = {
 };
 
 export async function loadData(basePath = 'data/') {
-  const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads] = await Promise.all([
+  const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads, i18n] = await Promise.all([
     fetch(basePath + 'applications.json').then(r => r.json()),
     fetch(basePath + 'reference-data.json').then(r => r.json()),
     fetch(basePath + 'users.json').then(r => r.json()),
@@ -47,6 +49,7 @@ export async function loadData(basePath = 'data/') {
     fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'documents.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'downloads.json').then(r => r.json()).catch(() => ({ regulations: [], strategies: [], training: [] })),
+    fetch(basePath + 'i18n.json').then(r => r.json()).catch(() => ({})),
   ]);
   state.applications = apps.map(a => ({ ...a, id: a.applicationId, type: a.applicationType, address: formatAddressLine(a) }));
   state.referenceData = reference;
@@ -56,7 +59,34 @@ export async function loadData(basePath = 'data/') {
   state.news = news.map(n => ({ ...n, id: n.newsId }));
   state.documents = documents.map(d => ({ ...d, id: d.documentId }));
   state.downloads = downloads;
+  state.i18n = i18n || {};
+  state.lang = loadLang() || 'de';
+  try { document.documentElement.lang = state.lang; } catch {}
   loadSpatialData(basePath).catch(() => {});
+}
+
+// ── I18N ────────────────────────────────────────────────────────────────────
+export const LANGS = ['de', 'fr', 'it', 'en'];
+// Translate a key to the active language. Fallback chain: active → de → the
+// key itself, so a missing translation degrades to German (never blank), and
+// content not yet keyed simply stays as the hardcoded German in the template.
+// Optional `vars` interpolates `{name}` placeholders.
+export function t(key, vars) {
+  const entry = state.i18n && state.i18n[key];
+  let str = entry ? (entry[state.lang] ?? entry.de ?? key) : key;
+  if (vars) for (const k in vars) str = str.split('{' + k + '}').join(vars[k]);
+  return str;
+}
+export function loadLang() {
+  const raw = safeGet('mp-lang');
+  return LANGS.includes(raw) ? raw : null;
+}
+// Persist + apply a language. Re-rendering is the caller's job (pickLang).
+export function setLang(lang) {
+  if (!LANGS.includes(lang)) return;
+  state.lang = lang;
+  safeSet('mp-lang', lang);
+  try { document.documentElement.lang = lang; } catch {}
 }
 
 export async function loadSpatialData(basePath = 'data/') {
