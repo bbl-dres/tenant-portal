@@ -2431,6 +2431,15 @@ function propertyCard(t, index = 99) {
 
 // Property-detail Dokumente: four buckets by user intent (not by chronology).
 // Empty buckets are skipped at render time.
+// Contact names link to the public federal staff directory (Staatskalender).
+// Demo: every name points at the BBL organisation landing page. In production
+// each person would resolve to their own Staatskalender id — possibly looked
+// up via the federal IAM directory. https://www.staatskalender.admin.ch
+const STAATSKALENDER_ORG_URL = 'https://www.staatskalender.admin.ch/organization/20010028';
+function staffLink(name) {
+  return `<a class="link link--external" href="${STAATSKALENDER_ORG_URL}" target="_blank" rel="noopener">${P.escapeHtml(name || '')}</a>`;
+}
+
 const PROPERTY_DOC_GROUPS = [
   { titleKey: 'prop.docGroup.lease',   types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
   { titleKey: 'prop.docGroup.plans',   types: ['FloorPlan'],                       defaultOpen: false },
@@ -2649,15 +2658,15 @@ async function renderPropertyDetail({ id }) {
               <dl class="contact-dl">
                 <div class="contact-dl__row">
                   <dt>${P.t('prop.contactPfm')}</dt>
-                  <dd>${P.escapeHtml(t.contacts.pfm)}</dd>
+                  <dd>${staffLink(t.contacts.pfm)}</dd>
                 </div>
                 <div class="contact-dl__row">
                   <dt>${P.t('prop.contactIm')}</dt>
-                  <dd>${P.escapeHtml(t.contacts.im)}</dd>
+                  <dd>${staffLink(t.contacts.im)}</dd>
                 </div>
                 <div class="contact-dl__row">
                   <dt>${P.t('prop.contactFlm')}</dt>
-                  <dd>${P.escapeHtml(t.contacts.flm)}</dd>
+                  <dd>${staffLink(t.contacts.flm)}</dd>
                 </div>
               </dl>
             </div>

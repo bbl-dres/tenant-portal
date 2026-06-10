@@ -167,9 +167,9 @@
   --color-warning:             #F59E0B;
   --color-warning-light:       #FEF3C7;
   --color-danger:              #D8232A;
-  --color-danger-light:        #FEE2E2;
+  --color-danger-light:        #FAE1E2;   /* CD red-100 (was stock-Tailwind #FEE2E2) */
   --color-info:                #0F6B75;
-  --color-info-light:          #CCFBF1;
+  --color-info-light:          #CBFBF8;   /* CD teal-100 (was stock-Tailwind #CCFBF1) */
 
   /* ── LANGUAGE SWITCHER ────────────────────────────────────────────────
      Tailwind blue-600 / blue-700 from the DS canonical pattern
@@ -357,9 +357,9 @@
   --radius-full:               9999px;
 
   /* ── SHADOWS ──────────────────────────────────────────────────────────── */
-  --shadow-sm:                 0 1px 2px 0 rgba(0,0,0,0.04);
-  --shadow:                    0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06);
-  --shadow-lg:                 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-sm:                 0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow:                    0 1px 2px 0 rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.08);
+  --shadow-lg:                 0 2px 6px -1px rgba(0,0,0,0.06), 0 5px 20px -3px rgba(0,0,0,0.08);
   --shadow-dropdown:           0 8px 20px -4px var(--color-black-40);
   --shadow-nav-menu:           0 12px 32px -8px rgba(15, 23, 42, 0.18),
                                0 2px 4px var(--color-black-04);
@@ -383,16 +383,14 @@
   --z-docviewer:               400;
 
   /* ── CARD SHADOW ──────────────────────────────────────────────────────
-     DS canonical `.card--default { @apply shadow-lg }` (Tailwind
-     shadow-lg geometry: 10/15/-3 + 4/6/-4). Strong enough that white
-     cards lift visibly on a white section (e.g. `/home`'s Häufig
-     genutzte Dienste); also reads cleanly on gray (`--alt`) sections
-     where the section bg adds extra separation. Hover bumps to
-     `shadow-2xl` proportions for a tactile lift. */
-  --shadow-card:               0 10px 15px -3px rgba(15, 23, 42, 0.10),
-                               0 4px 6px -4px rgba(15, 23, 42, 0.08);
-  --shadow-card-hover:         0 25px 50px -12px rgba(15, 23, 42, 0.20),
-                               0 8px 16px -6px rgba(15, 23, 42, 0.10);
+     CD canonical: `.card--default { shadow-lg }`, hover → `shadow-2xl`.
+     Values taken verbatim from the DS Tailwind config — a soft, wide,
+     neutral-black shadow (NOT stock-Tailwind geometry, and NOT slate-tinted
+     as before). This is the federal card lift on white + `--alt` sections. */
+  --shadow-card:               0 2px 6px -1px rgba(0, 0, 0, 0.06),
+                               0 5px 20px -3px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover:         0 10px 20px 0 rgba(0, 0, 0, 0.06),
+                               1px 10px 70px -8px rgba(0, 0, 0, 0.13);
 }
 
 /* ── RESPONSIVE TYPE SCALE — matches CD Bund text--Nxl scaling ───────────

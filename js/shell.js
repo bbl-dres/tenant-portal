@@ -413,7 +413,7 @@ export function renderFooter() {
             <h2 class="footer-information__heading">${t('footer.moreInfo')}</h2>
             <ul class="footer-information__list">
               <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://www.bbl.admin.ch/bbl/de/home/themen/e-rechnung.html" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/de/e-rechnung" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
               <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
@@ -610,15 +610,13 @@ export function renderShareBar({ backTo = null, backLabel = null } = {}) {
     <div class="share-bar" role="toolbar" aria-label="${t('sharebar.label')}">
       ${back}
       <div class="share-bar__actions">
-        <button class="share-bar__btn" type="button" aria-label="${t('btn.copyLink')}"
-                onclick="window.portal.copyShareLink()">
-          ${icon('share')}
-          <span>${t('btn.share')}</span>
-        </button>
         <button class="share-bar__btn" type="button" aria-label="${t('btn.print')}"
                 onclick="window.print()">
           ${icon('printer')}
-          <span>${t('btn.print')}</span>
+        </button>
+        <button class="share-bar__btn" type="button" aria-label="${t('btn.copyLink')}"
+                onclick="window.portal.copyShareLink()">
+          ${icon('share')}
         </button>
       </div>
     </div>
