@@ -925,12 +925,9 @@
   pointer-events: auto;
 }
 
-@media (max-width: 640px) {
-  .nav-menu {
-    width: calc(100vw - 24px);
-    left: 12px !important;
-  }
-}
+/* Below lg the panel is no longer a floating card — it renders as an
+   in-drawer accordion (see the mobile-nav rules in the RESPONSIVE block
+   at the end of this file). */
 
 /* ── BREADCRUMB ─────────────────────────────────────────────────────────── */
 /* CD Bund breadcrumb is flat on the page background (no grey strip), with
@@ -2175,6 +2172,16 @@ input[type="checkbox"]:focus-visible {
 
 /* ── TABLE ──────────────────────────────────────────────────────────────── */
 .table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); }
+/* `.table-wrapper` — DS pattern (designsystem css/components/table.postcss):
+   a multi-column table keeps its natural min-content width and scrolls
+   horizontally INSIDE the wrapper on narrow viewports. Without it the
+   table widens its grid/flex column past the viewport and `.container`'s
+   `overflow-x: clip` silently cuts the right edge off. Wrap any table
+   whose columns can't all fit a 360 px screen. */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .table th,
 .table td {
   padding: var(--space-sm) var(--space-md);
@@ -3526,6 +3533,41 @@ body.body--mobile-menu-is-open {
   /* Desktop dropdown indicator (chevronDown) is redundant on mobile —
      the right-arrow handles the affordance. Hide it. */
   .inline-icon.main-navigation__chevron { display: none; }
+  /* Sub-menu panels (Dienstleistungen) become in-drawer accordions:
+     static flow directly under their trigger row (the markup places
+     each panel right after its trigger), full width, no floating-card
+     chrome. The desktop card heading + Schliessen button are redundant
+     here — the trigger row itself labels and toggles the group. */
+  .nav-menu {
+    position: static;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    animation: none;
+  }
+  .nav-menu__close,
+  .nav-menu__heading { display: none; }
+  .nav-menu__inner { padding: 0; }
+  .nav-menu__item { border-top: 0; }
+  .nav-menu__item:last-child { border-bottom: 0; }
+  .nav-menu__item--active::before { left: var(--space-xs); }
+  .nav-menu__link {
+    padding: var(--space-md) var(--container-padding) var(--space-md) calc(var(--container-padding) + var(--space-md));
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: var(--color-bg-surface);
+  }
+  /* Open trigger row: drop the desktop "lifted card" effect (white bg +
+     shadow + clip-path) — meaningless inside the flat drawer list —
+     and rotate the drill-down arrow to point at the open accordion. */
+  .main-navigation__link--clicked {
+    box-shadow: none;
+    clip-path: none;
+    background: var(--color-white);
+  }
+  .main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__arrow svg {
+    transform: rotate(90deg);
+  }
   .header-search__input { width: 140px; }
   .top-header__meta { display: none; }
   /* Meta zone (Kontakt / Hilfe) — CD mobile pattern wraps utility links
@@ -4375,6 +4417,10 @@ body.body--mobile-menu-is-open {
   .docs-filter-bar__select,
   .docs-filter-bar__search {
     width: 100%;
+    /* The row-layout `flex: 1 1 220px/260px` basis applies to HEIGHT once
+       the bar stacks as a column — without this reset every control
+       balloons into a 220–260 px tall box. */
+    flex: 0 0 auto;
   }
 }
 .table--documents .col-title   { width: 32%; }
@@ -5860,7 +5906,9 @@ body.docviewer-open { overflow: hidden; }
    strong type contrast that lets the four numbers read at a glance. */
 .property-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* minmax(0, 1fr) — not bare 1fr — so a long value (CHF 1'140'000)
+     wraps inside its cell instead of widening the track past the card. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md);
   margin: 0 0 var(--space-lg);
   padding: var(--space-md) 0;
@@ -5868,7 +5916,7 @@ body.docviewer-open { overflow: hidden; }
   border-bottom: 1px solid var(--color-secondary-100);
 }
 @media (min-width: 768px) {
-  .property-stats { grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); }
+  .property-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
 }
 .property-stats__item {
   display: flex;
@@ -5897,6 +5945,11 @@ body.docviewer-open { overflow: hidden; }
   width: 180px;
   font-weight: var(--font-weight-normal);
   color: var(--color-text-secondary);
+}
+/* On phones the fixed 180 px label column + value min-content exceeds the
+   card width; let the label column size to its content and wrap instead. */
+@media (max-width: 767.98px) {
+  .property-facts th { width: 35%; }
 }
 
 /* `.floor-list` — table variant on the property-detail page listing the
@@ -5979,6 +6032,11 @@ body.docviewer-open { overflow: hidden; }
   margin-bottom: var(--space-lg);
 }
 .property-section:last-child { margin-bottom: 0; }
+/* Phones: --space-xl card padding twice eats ~20 % of a 360 px viewport;
+   tighten so the stat strip and tables get usable width. */
+@media (max-width: 640px) {
+  .property-section { padding: var(--space-lg) var(--space-md); }
+}
 
 /* Aside actions stack: each action button on its own row. All four use
    `.btn--bare` for visual consistency (the heading "Aktionen" already
@@ -6028,6 +6086,11 @@ body.docviewer-open { overflow: hidden; }
   grid-template-columns: 1fr;
   gap: var(--space-xl);
 }
+/* Grid items default to min-width:auto, so a wide table inside the main
+   column would force the track — and every card sharing it — past the
+   viewport (then clipped by `.container`). min-width:0 keeps the columns
+   at track size; overflowing tables scroll via `.table-wrapper` instead. */
+.property-layout > * { min-width: 0; }
 @media (min-width: 1024px) {
   .property-layout { grid-template-columns: 1fr 320px; align-items: start; }
   .property-aside { position: sticky; top: var(--space-md); }

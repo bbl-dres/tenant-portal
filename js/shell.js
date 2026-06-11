@@ -151,43 +151,12 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
   // we just don't render it in the desktop nav row.
   const desktopNavItems = navItems.filter(n => n.id !== 'start' && n.id !== 'home');
 
-  const navHtml = desktopNavItems.map((item, i) => {
-    const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
-    // CD mobile pattern: every top-level nav item gets a right-arrow at
-    // the right edge as a tap affordance (sections/mobile-menu.postcss
-    // → .mobile-menu-v2-navigation-item__has-children .icon). Shown via
-    // CSS only at <1024 px; hidden on desktop.
-    const mobileArrow = `<span class="main-navigation__arrow" aria-hidden="true">${icon('chevronRight')}</span>`;
-    if (item.type === 'dropdown') {
-      return `
-        <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
-                type="button"
-                aria-expanded="false"
-                aria-haspopup="menu"
-                aria-controls="navMenu-${item.id}"
-                data-menu="${item.id}"
-                onclick="window.portal.toggleNavMenu('${item.id}')">
-          <span class="main-navigation__label">${item.label}</span>
-          ${icon('chevronDown', 'main-navigation__chevron')}
-          ${mobileArrow}
-        </button>
-      `;
-    }
-    return `<a class="main-navigation__link ${activeCls}" href="${item.href}"><span class="main-navigation__label">${item.label}</span>${mobileArrow}</a>`;
-  }).join('');
-
-  // Mobile-only meta links rendered at the foot of the burger menu so
-  // Kontakt / Hilfe stay reachable when the top-header meta nav is
-  // hidden at narrow widths.
-  const mobileMetaHtml = `
-    <div class="main-navigation__mobile-meta" aria-label="Meta-Navigation (mobil)">
-      <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
-      <a class="main-navigation__link" href="#/info">${t('nav.help')}</a>
-    </div>
-  `;
-
   // Dropdown panels (CD Bund pattern: constrained card under the trigger,
-  // single-line label rows, red left-bar on the active route).
+  // single-line label rows, red left-bar on the active route). Rendered
+  // directly AFTER their trigger inside .main-navigation so the mobile
+  // drawer can show them as in-flow accordions under the trigger row;
+  // on desktop they're position:absolute against .navbar, so their place
+  // in the flow doesn't matter there.
   const currentHash = location.hash || '#/';
   const isActiveSub = (href) => {
     if (href === '#/services')  return currentHash === '#/services';
@@ -195,7 +164,7 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     if (href === '#/downloads') return currentHash.startsWith('#/downloads');
     return currentHash === href || currentHash.startsWith(href + '/');
   };
-  const navMenus = navItems.filter(i => i.type === 'dropdown').map(item => `
+  const renderNavMenuPanel = (item) => `
     <div class="nav-menu" id="navMenu-${item.id}" role="region" aria-label="${item.label}" hidden>
       <div class="nav-menu__inner">
         <button class="nav-menu__close" type="button"
@@ -222,7 +191,43 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
         </ul>
       </div>
     </div>
-  `).join('');
+  `;
+
+  const navHtml = desktopNavItems.map((item, i) => {
+    const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
+    // CD mobile pattern: every top-level nav item gets a right-arrow at
+    // the right edge as a tap affordance (sections/mobile-menu.postcss
+    // → .mobile-menu-v2-navigation-item__has-children .icon). Shown via
+    // CSS only at <1024 px; hidden on desktop.
+    const mobileArrow = `<span class="main-navigation__arrow" aria-hidden="true">${icon('chevronRight')}</span>`;
+    if (item.type === 'dropdown') {
+      return `
+        <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
+                type="button"
+                aria-expanded="false"
+                aria-haspopup="menu"
+                aria-controls="navMenu-${item.id}"
+                data-menu="${item.id}"
+                onclick="window.portal.toggleNavMenu('${item.id}')">
+          <span class="main-navigation__label">${item.label}</span>
+          ${icon('chevronDown', 'main-navigation__chevron')}
+          ${mobileArrow}
+        </button>
+        ${renderNavMenuPanel(item)}
+      `;
+    }
+    return `<a class="main-navigation__link ${activeCls}" href="${item.href}"><span class="main-navigation__label">${item.label}</span>${mobileArrow}</a>`;
+  }).join('');
+
+  // Mobile-only meta links rendered at the foot of the burger menu so
+  // Kontakt / Hilfe stay reachable when the top-header meta nav is
+  // hidden at narrow widths.
+  const mobileMetaHtml = `
+    <div class="main-navigation__mobile-meta" aria-label="Meta-Navigation (mobil)">
+      <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
+      <a class="main-navigation__link" href="#/info">${t('nav.help')}</a>
+    </div>
+  `;
 
   // Schema.org BreadcrumbList microdata mirrors what bbl/admin.ch
   // serves publicly. Each entry is a ListItem with `position` (1-based)
@@ -378,7 +383,6 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
         <div class="navbar__inner">
           <div class="main-navigation" id="mainNavigation">${navHtml}${mobileMetaHtml}</div>
         </div>
-        ${navMenus}
       </nav>
     </header>
 
@@ -779,24 +783,45 @@ function _removeFocusTrap() {
 export function toggleBurger(forceOpen) {
   const nav = document.getElementById('mainNavigation');
   const btn = document.querySelector('.burger');
-  if (!nav || !btn) return;
+  if (!nav || !btn) {
+    // Chrome was re-rendered while the drawer was open: the nav node is
+    // gone, but the scroll-lock class and focus trap live on <body> /
+    // document and must not leak into the new page.
+    document.body.classList.remove('body--mobile-menu-is-open');
+    _removeFocusTrap();
+    return;
+  }
   const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !nav.classList.contains('open');
   nav.classList.toggle('open', willOpen);
   btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
   btn.setAttribute('aria-label', willOpen ? 'Menü schliessen' : 'Menü öffnen');
   document.body.classList.toggle('body--mobile-menu-is-open', willOpen);
+  // Close every open nav-menu panel on BOTH transitions — on open it keeps
+  // "Dienstleistungen" from floating over the drawer list; on close it
+  // resets the accordion + page overlay so they don't reappear stale the
+  // next time the drawer opens without a route change in between.
+  document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
+    toggleNavMenu(m.id.replace('navMenu-', ''), false);
+  });
+  // The CSS pins the open drawer at `inset: 72px 0 0` — correct only when
+  // the brand bar sits flush at the viewport top. The cookie-consent
+  // banner (or any other content above the header) pushes it down, which
+  // would leave the brand bar floating over the drawer list and stealing
+  // its clicks. Measure the real bottom edge instead — same trick
+  // toggleNavMenu uses for the page overlay.
+  const navbarEl = document.querySelector('.navbar');
   if (willOpen) {
-    // Close every open nav-menu panel — keeps "Dienstleistungen" from
-    // floating over the mobile drop-down list at narrow widths.
-    document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
-      toggleNavMenu(m.id.replace('navMenu-', ''), false);
-    });
+    const topHeader = document.querySelector('.top-header');
+    if (navbarEl && topHeader) {
+      navbarEl.style.top = Math.max(0, topHeader.getBoundingClientRect().bottom) + 'px';
+    }
     _lastFocusBeforeMenu = document.activeElement;
     _installFocusTrap(nav);
     // Move focus to the first link in the menu so keyboard users land inside.
     const firstLink = nav.querySelector('a, button');
     if (firstLink) setTimeout(() => firstLink.focus(), 0);
   } else {
+    if (navbarEl) navbarEl.style.top = '';
     _removeFocusTrap();
     if (_lastFocusBeforeMenu === btn || !_lastFocusBeforeMenu) {
       btn.focus();
@@ -811,6 +836,24 @@ document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   const nav = document.getElementById('mainNavigation');
   if (nav && nav.classList.contains('open')) toggleBurger(false);
+});
+// Choosing any link inside the open drawer closes it. Links navigate via
+// hashchange and the chrome re-renders, but `body--mobile-menu-is-open`
+// and the focus trap live outside #root and survive the re-render —
+// without this, the dead full-screen drawer stays fixed over the new
+// page with scrolling locked. Delegated so it covers top-level links,
+// nav-menu sub-links and the mobile meta links alike, including links
+// to the CURRENT route (which fire no hashchange / re-render at all).
+document.addEventListener('click', (e) => {
+  if (!document.body.classList.contains('body--mobile-menu-is-open')) return;
+  if (e.target.closest('#mainNavigation a[href]')) toggleBurger(false);
+});
+// Safety net for navigations that bypass the click path while the drawer
+// is open (browser back/forward, programmatic hash changes). Runs before
+// app.js's router listener (this module loads first), so the old DOM is
+// still present and the close path can clean up normally.
+window.addEventListener('hashchange', () => {
+  if (document.body.classList.contains('body--mobile-menu-is-open')) toggleBurger(false);
 });
 
 

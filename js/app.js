@@ -2586,7 +2586,7 @@ async function renderPropertyDetail({ id }) {
               <h2 class="h2 section-heading">${P.t('prop.floorsSection')} (${floors.length})</h2>
               ${floors.length === 0
                 ? `<p class="text-secondary">${P.t('prop.noFloors')}</p>`
-                : `<table class="table table--zebra table--rows-clickable floor-list" aria-label="Geschosse mit interaktivem Grundriss">
+                : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable floor-list" aria-label="Geschosse mit interaktivem Grundriss">
                     <thead>
                       <tr>
                         <th scope="col">${P.t('prop.floor')}</th>
@@ -2612,19 +2612,19 @@ async function renderPropertyDetail({ id }) {
                         </tr>
                       `).join('')}
                     </tbody>
-                  </table>`}
+                  </table></div>`}
             </section>
 
             <section class="property-section">
               <h2 class="h2 section-heading">${P.t('prop.appsSection')} (${related.length})</h2>
               ${related.length === 0
                 ? `<p class="text-secondary">${P.t('prop.noApps')}</p>`
-                : `<table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.appsSection')}">
+                : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.appsSection')}">
                      <thead><tr><th scope="col">${P.t('prop.application')}</th><th scope="col">${P.t('prop.type')}</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th></tr></thead>
                      <tbody>
                        ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><strong>${a.id}</strong></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
                      </tbody>
-                   </table>`}
+                   </table></div>`}
             </section>
 
             <section class="property-section">

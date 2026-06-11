@@ -8,6 +8,9 @@
   },
   "scripts": {
     "a11y:responsive": "node scripts/check-a11y-responsive.mjs",
+    "verify:mobile-nav": "node scripts/verify/check-mobile-nav.mjs",
+    "verify:mobile-layouts": "node scripts/verify/check-mobile-layouts.mjs",
+    "verify:mobile": "npm run verify:mobile-nav && npm run verify:mobile-layouts",
     "cd:check": "node scripts/check-cd-tokens.mjs",
     "test:unit": "node scripts/check-domain-units.mjs",
     "test:syntax": "node scripts/check-js-syntax.mjs",
