@@ -1129,6 +1129,7 @@ function renderInbox() {
             <input id="filterText" type="search" class="input filter-row__search" placeholder="Antrag oder Objekt suchen …" aria-label="Suche">
           </div>
 
+          <div class="table-wrapper">
           <table class="table table--zebra table--rows-clickable">
             <caption class="sr-only">Anträge mit Objekt, Typ, Einreichedatum und Status</caption>
             <thead>
@@ -1140,6 +1141,7 @@ function renderInbox() {
               ${pageItems.map(rowHtml).join('')}
             </tbody>
           </table>
+          </div>
           <p class="table-hint">Klicken Sie eine Zeile, um Details zu öffnen.</p>
 
           ${renderPagination({

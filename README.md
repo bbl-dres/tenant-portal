@@ -98,17 +98,30 @@ npm run a11y:responsive
 
 `npm test` runs JavaScript syntax checks plus the CD/token guard. The responsive accessibility sweep is separate because it launches Playwright and takes longer.
 
+Targeted Playwright UI checks live in `scripts/verify/` — run them all with `npm run verify:all`, or individually: `verify:mobile-nav` (burger-menu behaviour), `verify:mobile-layouts` (horizontal-overflow / control-sizing regressions at phone widths), `verify:header-chrome` (split logo, breadcrumb, burger placement across breakpoints), `verify:property-images` (local building photos, no stock hosts, no broken images). Screenshots land in `verify_out/` (gitignored).
+
 ## Project Structure
 
 ```
 tenant-portal/
-├── index.html   # SPA entry — mounts #root, loads js/app.js as module
-├── assets/      # Images, logos, bundled Noto Sans fonts
-├── css/         # Design tokens (CD Bund) + app stylesheet
-├── js/          # Router, shell, wizard, state, helpers (ES modules)
-├── data/        # Static JSON / GeoJSON mocks (applications, buildings, tenancies, …)
-├── docs/        # Requirements, data model, design guide, CD audit, research
-└── scripts/     # Verification, data-generation, and research utilities
+├── index.html             # SPA entry — mounts #root, loads js/app.js as module
+├── assets/                # Logos, social previews, shared graphics
+│   ├── fonts/             # Bundled Noto Sans (Regular / Bold / Italics)
+│   ├── icons/             # SVG icon set
+│   ├── images/            # Page imagery
+│   │   ├── buildings/     # Property photos (portfolio + detail views)
+│   │   └── market-screening/  # Competitor screenshots from the market research
+│   └── operators/         # Operator / federal branding graphics
+├── css/                   # Design tokens (CD Bund) + app stylesheet
+├── js/                    # Router, shell, wizard, state, helpers (ES modules)
+├── data/                  # Static JSON / GeoJSON mocks (applications, buildings, tenancies, …)
+├── docs/                  # Requirements, data model, design guide, CD audit, research
+├── scripts/               # Dev-only utilities (nothing here ships with the app)
+│   ├── data/              # GeoJSON generation + geocoding (Python, run-once generators)
+│   ├── research/          # BBL source-document conversion (Python)
+│   └── verify/            # All checks: npm test (syntax, units, CD tokens) + Playwright (verify:*, a11y:responsive)
+└── .github/
+    └── workflows/         # CI — syntax, domain units, CD token guard, a11y sweep
 ```
 
 ## Deployment

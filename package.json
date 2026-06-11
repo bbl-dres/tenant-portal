@@ -7,13 +7,16 @@
     "doc": "docs"
   },
   "scripts": {
-    "a11y:responsive": "node scripts/check-a11y-responsive.mjs",
+    "a11y:responsive": "node scripts/verify/check-a11y-responsive.mjs",
     "verify:mobile-nav": "node scripts/verify/check-mobile-nav.mjs",
     "verify:mobile-layouts": "node scripts/verify/check-mobile-layouts.mjs",
     "verify:mobile": "npm run verify:mobile-nav && npm run verify:mobile-layouts",
-    "cd:check": "node scripts/check-cd-tokens.mjs",
-    "test:unit": "node scripts/check-domain-units.mjs",
-    "test:syntax": "node scripts/check-js-syntax.mjs",
+    "verify:header-chrome": "node scripts/verify/check-header-chrome.mjs",
+    "verify:property-images": "node scripts/verify/check-property-images.mjs",
+    "verify:all": "npm run verify:mobile && npm run verify:header-chrome && npm run verify:property-images",
+    "cd:check": "node scripts/verify/check-cd-tokens.mjs",
+    "test:unit": "node scripts/verify/check-domain-units.mjs",
+    "test:syntax": "node scripts/verify/check-js-syntax.mjs",
     "test": "npm run test:syntax && npm run test:unit && npm run cd:check"
   },
   "keywords": [],

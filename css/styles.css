@@ -5752,7 +5752,9 @@ body.docviewer-open { overflow: hidden; }
 /* Existing card grid (gallery view) */
 .property-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  /* min(100%, 320px): the 320 px floor must never exceed the container,
+     or cards overflow + get clipped on viewports ≤ 352 px. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: var(--space-lg);
 }
 .card--property {

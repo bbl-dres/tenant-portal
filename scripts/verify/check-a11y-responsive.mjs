@@ -1,51 +1,10 @@
 import { chromium } from 'playwright';
-import { createServer } from 'node:http';
-import { createReadStream, existsSync, mkdirSync } from 'node:fs';
-import { extname, join, normalize, relative, resolve } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { startServer } from './lib.mjs';
 
-const root = resolve(process.cwd());
-const outDir = join(root, 'verify_out', 'a11y-responsive');
+const outDir = join(process.cwd(), 'verify_out', 'a11y-responsive');
 mkdirSync(outDir, { recursive: true });
-
-const mime = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf',
-  '.geojson': 'application/geo+json; charset=utf-8'
-};
-
-function startServer() {
-  const server = createServer((req, res) => {
-    const url = new URL(req.url || '/', 'http://127.0.0.1');
-    const pathname = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
-    const filePath = normalize(join(root, pathname));
-    if (!filePath.startsWith(root) || relative(root, filePath).startsWith('..')) {
-      res.writeHead(403);
-      res.end('Forbidden');
-      return;
-    }
-    if (!existsSync(filePath)) {
-      res.writeHead(404);
-      res.end('Not found');
-      return;
-    }
-    res.writeHead(200, { 'Content-Type': mime[extname(filePath).toLowerCase()] || 'application/octet-stream' });
-    createReadStream(filePath).pipe(res);
-  });
-  return new Promise((resolveServer) => {
-    server.listen(0, '127.0.0.1', () => {
-      const { port } = server.address();
-      resolveServer({ server, baseUrl: `http://127.0.0.1:${port}` });
-    });
-  });
-}
 
 const viewports = [
   { label: '320', width: 320, height: 760 },

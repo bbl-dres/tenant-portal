@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { state } from '../js/state.js';
+import { state } from '../../js/state.js';
 
 globalThis.document = {
   addEventListener() {},
@@ -14,7 +14,7 @@ globalThis.window = {
   portal: {},
 };
 
-const { calcWizard, deriveNawClass } = await import('../js/wizard.js');
+const { calcWizard, deriveNawClass } = await import('../../js/wizard.js');
 
 state.referenceData = {
   nawClasses: [
