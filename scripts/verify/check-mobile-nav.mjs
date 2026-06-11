@@ -14,20 +14,28 @@
 //
 // Run: npm run verify:mobile-nav
 import { chromium } from 'playwright';
-import { startServer, makeReporter } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
-const { check, finish } = makeReporter('check-mobile-nav');
+const reporter = makeReporter('check-mobile-nav');
+const { check } = reporter;
 const browser = await chromium.launch();
 
-try {
+// NB: this is one stateful sequence on a single page — when something
+// fails, debug the FIRST failure; later results may be cascade noise.
+await run(reporter, async () => {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  // Deterministic drawer-state waits (the body class flips in toggleBurger).
+  const drawerOpen = () => page.waitForFunction(
+    () => document.body.classList.contains('body--mobile-menu-is-open'), null, { timeout: 5000 });
+  const drawerClosed = () => page.waitForFunction(
+    () => !document.body.classList.contains('body--mobile-menu-is-open'), null, { timeout: 5000 });
 
   // ── Drawer opens below the real header bottom (consent banner visible) ──
   await page.goto(`${baseUrl}/#/home?lang=de`);
   await page.waitForSelector('.burger', { timeout: 10000 });
   await page.click('.burger');
-  await page.waitForTimeout(300);
+  await drawerOpen();
   check('drawer opens (scroll lock + visible navbar)', await page.evaluate(() =>
     document.body.classList.contains('body--mobile-menu-is-open') &&
     getComputedStyle(document.querySelector('.navbar')).display !== 'none'));
@@ -41,7 +49,8 @@ try {
 
   // ── Clicking a top-level item closes the drawer and navigates ──────────
   await page.click('#mainNavigation a[href="#/properties"]');
-  await page.waitForTimeout(400);
+  await drawerClosed();
+  await waitForRoute(page, '#/properties');
   check('drawer closes after nav click', await page.evaluate(() =>
     !document.body.classList.contains('body--mobile-menu-is-open')));
   check('navigated to target route', (await page.evaluate(() => location.hash)).startsWith('#/properties'));
@@ -50,17 +59,20 @@ try {
 
   // ── Same-route click (no hashchange, no re-render) still closes ────────
   await page.click('.burger');
-  await page.waitForTimeout(300);
+  await drawerOpen();
   await page.click('#mainNavigation a[href="#/properties"]');
-  await page.waitForTimeout(400);
+  await drawerClosed();
   check('drawer closes on same-route click', await page.evaluate(() =>
     !document.body.classList.contains('body--mobile-menu-is-open')));
 
   // ── Sub-menu accordion inside the drawer ────────────────────────────────
   await page.click('.burger');
-  await page.waitForTimeout(300);
+  await drawerOpen();
   await page.click('button[data-menu="services"]');
-  await page.waitForTimeout(300);
+  await page.waitForFunction(() => {
+    const p = document.getElementById('navMenu-services');
+    return p && !p.hidden;
+  }, null, { timeout: 5000 });
   const panel = await page.evaluate(() => {
     const p = document.getElementById('navMenu-services');
     if (!p || p.hidden) return null;
@@ -73,24 +85,25 @@ try {
     JSON.stringify(panel));
 
   await page.click('#navMenu-services a[href="#/repair"]');
-  await page.waitForTimeout(400);
+  await drawerClosed();
+  await waitForRoute(page, '#/repair');
   check('drawer closes after sub-link click', await page.evaluate(() =>
     !document.body.classList.contains('body--mobile-menu-is-open')));
   check('sub-link navigated', (await page.evaluate(() => location.hash)).startsWith('#/repair'));
 
   // ── Esc closes the drawer ───────────────────────────────────────────────
   await page.click('.burger');
-  await page.waitForTimeout(300);
+  await drawerOpen();
   await page.keyboard.press('Escape');
-  await page.waitForTimeout(200);
+  await drawerClosed();
   check('Esc closes the drawer', await page.evaluate(() =>
     !document.body.classList.contains('body--mobile-menu-is-open')));
 
   // ── History back while drawer is open (hashchange safety net) ──────────
   await page.click('.burger');
-  await page.waitForTimeout(300);
+  await drawerOpen();
   await page.goBack();
-  await page.waitForTimeout(400);
+  await drawerClosed();
   check('drawer cleaned up after history back', await page.evaluate(() =>
     !document.body.classList.contains('body--mobile-menu-is-open')));
 
@@ -99,7 +112,10 @@ try {
   await page.goto(`${baseUrl}/#/home?lang=de`);
   await page.waitForSelector('button[data-menu="services"]', { timeout: 10000 });
   await page.click('button[data-menu="services"]');
-  await page.waitForTimeout(300);
+  await page.waitForFunction(() => {
+    const p = document.getElementById('navMenu-services');
+    return p && !p.hidden;
+  }, null, { timeout: 5000 });
   const desk = await page.evaluate(() => {
     const p = document.getElementById('navMenu-services');
     if (!p || p.hidden) return null;
@@ -112,12 +128,13 @@ try {
       dTop: Math.round(r.top - trig.bottom)
     };
   });
+  // Width as a sanity range, not the exact CSS constant (480 px today) —
+  // a deliberate design tweak shouldn't fail the behavioural check.
   check('desktop dropdown floats anchored under trigger',
-    !!desk && desk.position === 'absolute' && desk.width === 480 &&
+    !!desk && desk.position === 'absolute' && desk.width >= 360 && desk.width <= 560 &&
     Math.abs(desk.dLeft) < 8 && Math.abs(desk.dTop) < 8,
     JSON.stringify(desk));
-} finally {
+}, async () => {
   await browser.close();
   server.close();
-}
-finish();
+});

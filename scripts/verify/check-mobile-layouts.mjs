@@ -11,13 +11,14 @@
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright';
-import { startServer, makeReporter } from './lib.mjs';
+import { startServer, makeReporter, loginAs, run, waitForRoute } from './lib.mjs';
 
 const outDir = join(process.cwd(), 'verify_out', 'mobile-layouts');
 mkdirSync(outDir, { recursive: true });
 
 const VIEWPORTS = [320, 375, 390];
-// Deep links auto-login (app.js init), so authenticated routes work directly.
+// Routes default to the LBO (tenant) role; entries with `role` switch the
+// demo session first. Keep same-role routes adjacent — switching re-renders.
 const ROUTES = [
   { label: 'home', hash: '#/home' },
   { label: 'properties', hash: '#/properties' },
@@ -25,28 +26,31 @@ const ROUTES = [
   { label: 'downloads', hash: '#/downloads' },
   { label: 'repair', hash: '#/repair' },
   { label: 'inbox', hash: '#/inbox' },
+  { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' },
 ];
 
 const { server, baseUrl } = await startServer();
-const { check, finish } = makeReporter('check-mobile-layouts');
+const reporter = makeReporter('check-mobile-layouts');
+const { check } = reporter;
 const browser = await chromium.launch();
 
-try {
+await run(reporter, async () => {
   for (const width of VIEWPORTS) {
     const page = await browser.newPage({ viewport: { width, height: 844 } });
-    // Accept consent once so the banner doesn't shift layout measurements,
-    // and log in as LBO — same flow as scripts/check-a11y-responsive.mjs.
-    // (Deep-link auto-login only runs at page load; subsequent hash
-    // navigations on a logged-out session bounce to #/.)
-    await page.goto(`${baseUrl}/#/`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => window.portal?.acceptCookieConsent?.('necessary'));
-    await page.evaluate(() => window.t3lite.demoRole('LBO'));
-    await page.waitForTimeout(350);
+    // Consent + login via the shared seam — the banner must not shift
+    // layout measurements, and hash navigations on a logged-out session
+    // would bounce every authenticated route back to #/.
+    await loginAs(page, baseUrl, 'LBO');
+    let currentRole = 'LBO';
 
     for (const route of ROUTES) {
+      const role = route.role || 'LBO';
+      if (role !== currentRole) {
+        await page.evaluate((r) => window.t3lite.demoRole(r), role);
+        currentRole = role;
+      }
       await page.goto(`${baseUrl}/${route.hash}?lang=de`);
-      await page.waitForSelector('#page-body section, #page-body .section', { timeout: 10000 });
-      await page.waitForTimeout(600);
+      await waitForRoute(page, route.hash);
 
       const res = await page.evaluate(() => {
         const vw = document.documentElement.clientWidth;
@@ -88,8 +92,7 @@ try {
     }
     await page.close();
   }
-} finally {
+}, async () => {
   await browser.close();
   server.close();
-}
-finish();
+});

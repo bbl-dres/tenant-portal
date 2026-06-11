@@ -5,7 +5,6 @@ import process from 'node:process';
 const root = process.cwd();
 const tokensPath = path.join(root, 'css', 'tokens.css');
 const stylesPath = path.join(root, 'css', 'styles.css');
-const appPath = path.join(root, 'js', 'app.js');
 const jsTemplatePaths = [
   path.join(root, 'js', 'app.js'),
   path.join(root, 'js', 'shell.js'),
@@ -28,6 +27,10 @@ function assertTokenDeclared(tokensSource, name, failures) {
   }
 }
 
+// Scans every JS template file, not only app.js — a rogue hex color in
+// shell.js/wizard.js/lib.js is just as much a CD violation. The
+// CD_COLOR_FALLBACKS escape hatch only exists in app.js; for the other
+// files the block simply never matches.
 function hardcodedJsColorsOutsideFallbackBlock(appSource) {
   const lines = appSource.split(/\r?\n/);
   let insideFallbacks = false;
@@ -87,7 +90,10 @@ for (const family of ['primary', 'secondary']) {
   }
 }
 
-const hardcodedJsColors = hardcodedJsColorsOutsideFallbackBlock(read(appPath));
+const hardcodedJsColors = jsTemplatePaths.flatMap(file => {
+  const rel = path.relative(root, file);
+  return hardcodedJsColorsOutsideFallbackBlock(read(file)).map(hit => `${rel}:${hit}`);
+});
 if (hardcodedJsColors.length) {
   failures.push(`Hardcoded JS colors outside CD_COLOR_FALLBACKS:\n${hardcodedJsColors.join('\n')}`);
 }

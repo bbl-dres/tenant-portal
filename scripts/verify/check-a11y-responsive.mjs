@@ -85,7 +85,19 @@ async function checkPage(page, scope) {
       }));
     const smallTargets = interactive
       .filter(el => {
-        if (el.closest('p, .rich-text, .footer__links, .app-footer__bottom')) return false;
+        // Exclusions: links in running text + footer, plus DOCUMENTED
+        // WAIVERS (decision 2026-06, revisit for the MVP — note the 44 px
+        // target size is WCAG 2.5.5/AAA; the portal commits to 2.1 AA):
+        //  - CD Bund patterns whose canonical size is <44 px: top-bar
+        //    utility links, header meta links, news dots/links,
+        //    breadcrumb chevrons, `.btn--sm`, inline `.link` text links.
+        //  - table content: dense data rows (.table--compact) are a
+        //    deliberate reviewer-surface trade-off; rows are clickable.
+        //  - MapLibre's own controls/attribution (third-party widget).
+        //  - radio/checkbox inputs wrapped in a <label> — the label is
+        //    the real tap target, the 18 px input is a false positive.
+        if (el.closest('p, .rich-text, .footer__links, .app-footer__bottom, .top-bar, .top-header__meta, .news-section__dots, .breadcrumb, table, .maplibregl-ctrl, label')) return false;
+        if (el.classList.contains('btn--sm') || el.classList.contains('link') || el.classList.contains('news-section__more')) return false;
         const r = el.getBoundingClientRect();
         return r.width < 44 || r.height < 44;
       })
@@ -259,7 +271,7 @@ try {
       await checkPage(page, scope);
       if (viewport.width < 1024 && flow.label === 'home') await checkMobileMenu(page, scope);
       if (viewport.width >= 1024 && flow.label === 'home') await checkRoleModal(page, scope);
-      if (['320', '375', '768', '1024', '1440'].includes(viewport.label) && ['home', 'property-detail', 'downloads'].includes(flow.label)) {
+      if (['home', 'property-detail', 'downloads'].includes(flow.label)) {
         await page.screenshot({ path: join(outDir, `${scope}.png`), fullPage: false });
       }
       await context.close();

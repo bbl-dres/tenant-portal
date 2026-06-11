@@ -24,12 +24,10 @@
 import {
 // formatters + escapers
 formatChf, formatDate, escapeHtml, escapeJs, safeImageUrl,
-formatAddressLine, formatAssetKey, flattenFeature, roleLabel,
+formatAssetKey, roleLabel,
 DOC_TYPE_LABEL,
-// storage primitives
-safeGet, safeSet, safeRemove,
 // UI primitives
-toast, modal, ICONS, icon, statusBadge, attachmentLi,
+toast, modal, icon, statusBadge, attachmentLi,
 PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts,
@@ -38,13 +36,13 @@ import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js'
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
   toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, acceptCookieConsent, submitSearch, toggleSearch, toggleBurger,
-  shell, publicNavItems, authNavItems, servicesMenu,
+  shell, servicesMenu,
 } from './shell.js';
 import {
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
 } from './state.js';
 import {
-  calcWizard, deriveNawClass, ensureDraft, renderWizard, submitDraft,
+  calcWizard, deriveNawClass, ensureDraft, renderWizard, refreshAttachmentList,
 } from './wizard.js';
 
 // ── PERSISTENCE (localStorage) ──────────────────────────────────────────
@@ -63,7 +61,17 @@ function navigate(hash) {
     location.hash = hash;
   }
 }
-function handleHash() {
+// Readiness hook for the Playwright checks (scripts/verify/*): stamps the
+// route the router just FINISHED handling onto #page-body, so tests can
+// `waitForFunction` on it instead of sleeping. Semantics: "handleHash
+// completed for this hash" — a handler that redirects (e.g. auth gate →
+// navigate('#/')) still stamps its own hash first; the redirect then
+// re-renders and re-stamps.
+function markRouteRendered(route) {
+  const body = document.getElementById('page-body');
+  if (body) body.dataset.route = route;
+}
+async function handleHash() {
   const full = location.hash || '#/';
   // Strip a `?query` suffix before route matching — query params (view/q/page/…)
   // are read directly from `location.hash` inside the view handler.
@@ -84,7 +92,8 @@ function handleHash() {
     const m = h.match(re);
     if (m) {
       state.params = m.groups || {};
-      handler(state.params);
+      await handler(state.params);
+      markRouteRendered(h);
       return;
     }
   }
@@ -93,6 +102,7 @@ function handleHash() {
   shell({ breadcrumb: [{ href: '#/', label: t('nav.start') }, { label: t('error.notFound') }] });
   const body = document.getElementById('page-body');
   if (body) body.innerHTML = `<section class="section"><div class="container"><h1 class="h1 section-heading">${t('error.notFound')}</h1><p><a class="link" href="#/">${t('error.backHome')}</a></p></div></section>`;
+  markRouteRendered(h);
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────────
@@ -842,7 +852,7 @@ function renderRoot() {
 
 // ── 1. LANDING (public, T3-Lite §3.6.1) ──────────────────────────────────
 function renderLanding() {
-  const main = shell({ activeNav: 'start' });
+  shell({ activeNav: 'start' });
   document.getElementById('page-body').innerHTML = `
     <section class="hero hero--wide hero--split">
       <div class="hero__inner hero__inner--split">
@@ -903,16 +913,16 @@ function renderLanding() {
                  loading="lazy" decoding="async" width="1280" height="720">
             <div class="video-thumb__header">
               <span class="video-thumb__logo" aria-hidden="true">
-                <img class="video-thumb__logo-inner" src="assets/swiss-logo-flag.svg" alt="" width="40" height="44">
+                <img class="video-thumb__logo-inner" src="assets/swiss-logo-flag.svg" alt="" loading="lazy" decoding="async" width="40" height="44">
               </span>
               <div class="video-thumb__titles">
                 <p class="video-thumb__title">Mieterportal des Bundes</p>
                 <p class="video-thumb__author">Bundesamt für Bauten und Logistik</p>
               </div>
             </div>
-            <img class="video-thumb__play" src="assets/youtube-play.svg" alt="" aria-hidden="true" width="84" height="60">
+            <img class="video-thumb__play" src="assets/youtube-play.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" width="84" height="60">
             <span class="video-thumb__cta">
-              <img class="video-thumb__cta-icon" src="assets/youtube-play.svg" alt="" aria-hidden="true" width="24" height="24">
+              <img class="video-thumb__cta-icon" src="assets/youtube-play.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" width="24" height="24">
               <span>Watch on YouTube</span>
             </span>
           </a>
@@ -929,7 +939,7 @@ function renderLanding() {
 // warning banner with an inline icon, then a single card carrying the
 // login form. Replaces the previous inline-styled card.
 function renderLogin() {
-  const main = shell();
+  shell();
   document.getElementById('page-body').innerHTML = `
     <section class="section section--alt">
       <div class="container">
@@ -982,7 +992,7 @@ function renderSubmitterHome() {
   // Home page = root. CD pattern: no breadcrumb on the landing page —
   // a single "Start" item just restates the page title. Sub-pages get
   // the `[Start, …, current]` chain as usual.
-  const main = shell({ activeNav: 'home', breadcrumb: [] });
+  shell({ activeNav: 'home', breadcrumb: [] });
   const userApps = P.state.applications
     .filter(a => a.submitterId === P.state.user.id)
     .filter(a => !['closed', 'rejected'].includes(a.status));
@@ -1061,25 +1071,11 @@ function arrowBtn(extraClassOrOpts = 'card--quick__arrow-btn', maybeOpts = {}) {
   `;
 }
 
-function profileCard({ image, title, date, desc, role }) {
-  return `
-    <a href="#" class="card--profile" onclick="event.preventDefault(); window.t3lite.demoRole('${role}');">
-      <img class="card--profile__image" src="${safeImageUrl(image)}" alt="" loading="lazy" decoding="async" width="400" height="200">
-      <div class="card--profile__body">
-        <p class="card--profile__date">${P.escapeHtml(date)}</p>
-        <h3 class="card--profile__title">${P.escapeHtml(title)}</h3>
-        <p class="card--profile__desc">${P.escapeHtml(desc)}</p>
-      </div>
-      ${arrowBtn('card--profile__arrow')}
-    </a>
-  `;
-}
-
 // ── 5. SUBMITTER INBOX ───────────────────────────────────────────────────
 const INBOX_PAGE_SIZE = 25;
 function renderInbox() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.inbox') }] });
+  shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.inbox') }] });
   const role = P.state.user.activeRole;
   const apps = role === 'GS-Reviewer'
     ? P.state.applications.filter(a => a.submitterVe === P.state.user.ve)
@@ -1228,7 +1224,7 @@ function renderApplicationDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  const main = shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/inbox', label: P.t('nav.inbox') }, { label: a.id }] });
+  shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/inbox', label: P.t('nav.inbox') }, { label: a.id }] });
   const tab = parseHashQuery(location.hash).tab || 'daten';
 
   document.getElementById('page-body').innerHTML = `
@@ -1435,7 +1431,7 @@ function renderQueue() {
   if (!P.state.user) { P.navigate('#/'); return; }
   // GS-Reviewer's landing page — no breadcrumb (same reasoning as the
   // LBO home: a single-item breadcrumb just restates the page title).
-  const main = shell({ activeNav: 'queue', breadcrumb: [], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
+  shell({ activeNav: 'queue', breadcrumb: [], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
   const queue = P.state.applications.filter(a => {
     // Reviewers see all VE applications that are awaiting review
     return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
@@ -1457,6 +1453,7 @@ function renderQueue() {
             <p class="page-header__sub">Anträge zur Prüfung in Ihrer Verwaltungseinheit</p>
           </div>
         </header>
+        <div class="table-wrapper">
         <table class="table table--zebra table--rows-clickable table--compact">
           <caption class="sr-only">Pendenzen mit Antragsteller, Objekt, Einreichedatum und Status</caption>
           <thead>
@@ -1478,6 +1475,7 @@ function renderQueue() {
             `).join('') || `<tr><td colspan="6" class="table-empty">Keine offenen Pendenzen.</td></tr>`}
           </tbody>
         </table>
+        </div>
 
         ${renderPagination({
           current: safePage,
@@ -1550,7 +1548,7 @@ function renderReviewerSplit({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.applications.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  const main = shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: P.t('nav.queue') }, { label: a.id }], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
+  shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: P.t('nav.queue') }, { label: a.id }], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
 
   const initialMarks = a._marks || {};
 
@@ -2810,12 +2808,6 @@ function cdColor(tokenName, seen = new Set()) {
   return value;
 }
 
-const USETYPE_GROUP_FILL = {
-  work: cdColor('--color-floor-work'),
-  collab: cdColor('--color-floor-collab'),
-  infra: cdColor('--color-floor-infra'),
-  special: cdColor('--color-floor-special')
-};
 const USETYPE_GROUP_SWATCH = {
   work: 'floor-legend__swatch--use-work',
   collab: 'floor-legend__swatch--use-collab',
@@ -4130,7 +4122,7 @@ function docPageCertificate(doc, n, total) {
     </article>`;
 }
 const PLAN_ROOMS = ['Büro', 'Sitzung', 'Lager', 'Technik', 'Archiv', 'Teeküche', 'Empfang', 'Flur'];
-function docPagePlan(doc, n, total) {
+function docPagePlan(doc, n, _total) {
   const h = docHash((doc.documentId || doc.id) + ':' + n);
   const room = (i) => P.escapeHtml(PLAN_ROOMS[(h + i) % PLAN_ROOMS.length]);
   return `
@@ -4442,7 +4434,7 @@ window.t3lite = {
     body += `
       <label><input type="checkbox" id="batchConfirm"> Ich bestätige, dass jede Begründung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
     `;
-    const m = P.modal({
+    P.modal({
       title: 'Bulk genehmigen', body, size: 'lg',
       actions: [
         { label: P.t('btn.cancel'), variant: 'btn--outline' },

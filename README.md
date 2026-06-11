@@ -92,13 +92,16 @@ Then open http://localhost:8000
 
 ```bash
 npm ci
-npm test
-npm run a11y:responsive
+npm test             # fast static + unit checks (no browser)
+npm run verify:all   # Playwright browser checks (UI regressions + a11y sweep)
 ```
 
-`npm test` runs JavaScript syntax checks plus the CD/token guard. The responsive accessibility sweep is separate because it launches Playwright and takes longer.
+Two layers, both run by CI on every push:
 
-Targeted Playwright UI checks live in `scripts/verify/` — run them all with `npm run verify:all`, or individually: `verify:mobile-nav` (burger-menu behaviour), `verify:mobile-layouts` (horizontal-overflow / control-sizing regressions at phone widths), `verify:header-chrome` (split logo, breadcrumb, burger placement across breakpoints), `verify:property-images` (local building photos, no stock hosts, no broken images). Screenshots land in `verify_out/` (gitignored).
+- **`npm test`** — ESLint (correctness rules, no style bikeshedding), domain unit checks (wizard maths, the `escapeHtml`/`escapeJs` XSS guards, locale formatters) and the CD Bund token guard (no rogue colors or inline styles outside `css/tokens.css`).
+- **`npm run verify:all`** — the Playwright checks in `scripts/verify/`, individually runnable: `verify:mobile-nav` (burger-menu behaviour), `verify:mobile-layouts` (horizontal-overflow / control-sizing at phone widths, incl. the reviewer queue), `verify:header-chrome` (split logo, breadcrumb, burger placement across breakpoints), `verify:property-images` (all imagery same-origin, nothing broken), `verify:a11y` (responsive accessibility sweep: landmarks, names, headings, focus management). JSON reports and screenshots land in `verify_out/` (gitignored, uploaded as a CI artifact).
+
+The browser checks wait on a render marker (`#page-body[data-route]`, stamped by the router after each render) instead of sleeping, which keeps them deterministic.
 
 ## Project Structure
 
@@ -119,7 +122,7 @@ tenant-portal/
 ├── scripts/               # Dev-only utilities (nothing here ships with the app)
 │   ├── data/              # GeoJSON generation + geocoding (Python, run-once generators)
 │   ├── research/          # BBL source-document conversion (Python)
-│   └── verify/            # All checks: npm test (syntax, units, CD tokens) + Playwright (verify:*, a11y:responsive)
+│   └── verify/            # Unit/CD checks (npm test) + Playwright browser checks (npm run verify:all)
 └── .github/
     └── workflows/         # CI — syntax, domain units, CD token guard, a11y sweep
 ```

@@ -1,21 +1,21 @@
 // Property image data-quality checks (Playwright).
 //
-// Successor to the retired verify_property_images.mjs one-shot: the
-// portfolio and property-detail views must render LOCAL building photos
-// (assets/images/buildings/), never stock-photo hosts (Unsplash et al.),
-// and every same-origin image must actually resolve (no 404s) and decode
-// (no broken <img>). External map-tile hosts (MapLibre basemap) are out
-// of scope and ignored.
+// Successor to the retired verify_property_images.mjs one-shot. The
+// invariant: ALL imagery ships with the repo — every image must be
+// same-origin (allowlist: the MapLibre basemap tile host), so a stray
+// Unsplash/CDN URL fails regardless of which host it is. Same-origin
+// images must also resolve (no 404s) and decode (no broken <img>).
 //
 // Run: npm run verify:property-images
 import { chromium } from 'playwright';
-import { startServer, makeReporter } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
-const { check, finish } = makeReporter('check-property-images');
+const reporter = makeReporter('check-property-images');
+const { check } = reporter;
 const browser = await chromium.launch();
 
-try {
+await run(reporter, async () => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
   const imgResponses = [];
@@ -32,15 +32,20 @@ try {
     // repeated images are served from memory cache and emit no response
     // events — per-view source checks therefore read the DOM, while the
     // response log is only used for session-wide host/status assertions.
-    await page.goto(`${baseUrl}/${hash}?lang=de`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1200);
+    await page.goto(`${baseUrl}/${hash}?lang=de`);
+    await waitForRoute(page, hash);
+    // Image loads trail the render — wait for the network to go quiet.
+    await page.waitForLoadState('networkidle');
 
     const imgs = await page.$$eval('img', (els) =>
       els.filter(i => i.offsetWidth > 0)
          .map(i => ({ src: i.currentSrc || i.src, broken: i.complete && i.naturalWidth === 0 })));
-    const stockImgs = imgs.filter(i => /unsplash|pexels|pixabay|picsum/i.test(i.src));
-    check(`${hash}: no stock-photo <img> sources`, stockImgs.length === 0,
-      stockImgs.map(i => i.src.slice(0, 120)).join(', '));
+    // Allowlist, not denylist: anything not served by us (or the basemap
+    // tile host) is a foreign dependency, whatever the hostname.
+    const foreign = imgs.filter(i =>
+      !i.src.startsWith(baseUrl) && !/^https:\/\/([a-z0-9]+\.)?basemaps\.cartocdn\.com\//.test(i.src));
+    check(`${hash}: all <img> sources same-origin (basemap excepted)`, foreign.length === 0,
+      foreign.map(i => i.src.slice(0, 120)).join(', '));
     const localBuildings = imgs.filter(i => /\/assets\/images\/buildings\//i.test(i.src));
     check(`${hash}: local building photos rendered`, localBuildings.length > 0,
       `${localBuildings.length} <img>`);
@@ -50,14 +55,14 @@ try {
   }
 
   // Session-wide network assertions across both views.
-  const stockResp = imgResponses.filter(r => /unsplash|pexels|pixabay|picsum/i.test(r.url));
-  check('session: no stock-photo hosts requested', stockResp.length === 0,
-    stockResp.map(r => r.url).join(', '));
+  const foreignResp = imgResponses.filter(r =>
+    !r.url.startsWith(baseUrl) && !/^https:\/\/([a-z0-9]+\.)?basemaps\.cartocdn\.com\//.test(r.url));
+  check('session: no foreign image hosts requested (basemap excepted)', foreignResp.length === 0,
+    foreignResp.map(r => r.url.slice(0, 120)).join(', '));
   const failed = imgResponses.filter(r => r.url.startsWith(baseUrl) && r.status >= 400);
   check('session: no failed same-origin image requests', failed.length === 0,
     failed.map(r => `${r.status} ${r.url}`).join(', '));
-} finally {
+}, async () => {
   await browser.close();
   server.close();
-}
-finish();
+});

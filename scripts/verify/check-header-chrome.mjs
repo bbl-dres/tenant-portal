@@ -12,10 +12,11 @@
 //
 // Run: npm run verify:header-chrome
 import { chromium } from 'playwright';
-import { startServer, makeReporter } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
-const { check, finish } = makeReporter('check-header-chrome');
+const reporter = makeReporter('check-header-chrome');
+const { check } = reporter;
 const browser = await chromium.launch();
 
 // Expectations per viewport width. `name` = federal wordmark image.
@@ -27,12 +28,12 @@ const CASES = [
   { width: 1440, name: true,  breadcrumb: true,  burger: false, navbar: true },
 ];
 
-try {
+await run(reporter, async () => {
   for (const c of CASES) {
     const page = await browser.newPage({ viewport: { width: c.width, height: 900 } });
     // Property detail has a breadcrumb; deep link auto-logs-in at load.
-    await page.goto(`${baseUrl}/#/properties/T-2010-AA-01?lang=de`, { waitUntil: 'networkidle' });
-    await page.waitForSelector('.property-stats', { timeout: 10000 });
+    await page.goto(`${baseUrl}/#/properties/T-2010-AA-01?lang=de`);
+    await waitForRoute(page, '#/properties/T-2010-AA-01');
 
     const m = await page.evaluate(() => {
       const vis = (sel) => {
@@ -69,8 +70,7 @@ try {
     }
     await page.close();
   }
-} finally {
+}, async () => {
   await browser.close();
   server.close();
-}
-finish();
+});

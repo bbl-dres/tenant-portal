@@ -193,7 +193,7 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     </div>
   `;
 
-  const navHtml = desktopNavItems.map((item, i) => {
+  const navHtml = desktopNavItems.map((item) => {
     const activeCls = item.id === activeNav ? 'main-navigation__link--active' : '';
     // CD mobile pattern: every top-level nav item gets a right-arrow at
     // the right edge as a tap affordance (sections/mobile-menu.postcss

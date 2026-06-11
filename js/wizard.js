@@ -16,8 +16,8 @@
 
 import { state, persistDraft, loadDraft, clearDraft, t } from './state.js';
 import {
-  escapeHtml, escapeJs, formatChf, icon, toast, modal,
-  renderStepIndicator, formatAssetKey, attachmentLi,
+  escapeHtml, formatChf, icon, toast,
+  renderStepIndicator, attachmentLi,
   setFieldError,
 } from './lib.js';
 import { shell } from './shell.js';
@@ -124,7 +124,7 @@ export function renderWizard({ step }) {
     window.portal.navigate('#/queue');
     return;
   }
-  const main = shell({ activeNav: 'wizard', breadcrumb: [
+  shell({ activeNav: 'wizard', breadcrumb: [
     { href: '#/home', label: t('nav.start') },
     { href: '#/wizard/1', label: t('services.request') },
     { label: t('wizard.stepN', { n: stepNum }) }
@@ -573,7 +573,8 @@ function wireStep3(draft) {
   });
 }
 
-function refreshAttachmentList(draft) {
+// Exported: app.js's t3lite.fakeUpload demo stub re-renders the list too.
+export function refreshAttachmentList(draft) {
   const ul = document.getElementById('attachmentList');
   if (ul) ul.innerHTML = (draft.attachments || []).map((a, i) => attachmentLi(a, i)).join('');
 }
