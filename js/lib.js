@@ -197,6 +197,7 @@ export const ICONS = {
   arrowLeft: 'ArrowLeft', arrowRight: 'ArrowRight',
   // content / actions
   document: 'File', attachment: 'File', video: 'Video',
+  image: 'Image', trash: 'Trash', link: 'Link',
   grid: 'Apps', list: 'List',
   map: 'Map', mapMarker: 'MapMarker',
   tool: 'Wrench', truck: 'Truck',

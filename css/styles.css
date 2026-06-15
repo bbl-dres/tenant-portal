@@ -5470,16 +5470,28 @@ body.body--mobile-menu-is-open {
    certificate). All colours via tokens. Opened from a downloads row.
    ════════════════════════════════════════════════════════════════════════ */
 body.docviewer-open { overflow: hidden; }
+/* `html { overflow-x: clip }` (tokens.css) makes the root non-visible, which
+   stops the body overflow lock above from propagating to the viewport — so a
+   long underlying page would keep its own window scrollbar next to the
+   viewer's. Lock the root too while a viewer/gallery is open, leaving the
+   fixed overlay as the single scroll container. */
+html:has(body.docviewer-open) { overflow: hidden; }
 .docviewer {
   position: fixed;
   inset: 0;
   z-index: var(--z-docviewer);
-  display: flex;
-  flex-direction: column;
+  /* The viewer itself is the single scroll container: one page-level
+     scrollbar spanning the full viewport height, the bar sticky on top of
+     the scrolling pages, the surface stretching to the whole document
+     (Confluence-style). Horizontal scroll only appears when zoomed wider
+     than the viewport. */
+  overflow: auto;
   background: var(--color-secondary-900);
 }
 .docviewer__bar {
-  flex: 0 0 auto;
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5513,14 +5525,14 @@ body.docviewer-open { overflow: hidden; }
 .docviewer__btn--close:hover { background: var(--color-primary); }
 .docviewer__btn .inline-icon { width: 20px; height: 20px; }
 
-.docviewer__main { flex: 1 1 auto; display: flex; min-height: 0; }
+/* Plain block that grows with the pages — the viewer scrolls, not this. The
+   nav chevrons + comments rail are pinned (position: fixed) so they stay put
+   while the document scrolls underneath. */
+.docviewer__main { background: var(--color-secondary-800); }
+.docviewer__docnum { white-space: nowrap; }
 .docviewer__stage {
-  flex: 1 1 auto;
-  overflow: auto;
   padding: var(--space-xl) var(--space-md);
-  background: var(--color-secondary-800);
   cursor: grab;
-  scrollbar-width: thin;
 }
 .docviewer__stage--grabbing { cursor: grabbing; }
 .docviewer__stage:focus-visible { outline: 2px solid var(--color-white-40); outline-offset: -2px; }
@@ -5601,9 +5613,10 @@ body.docviewer-open { overflow: hidden; }
 .docpage__plan .plan-title { fill: var(--color-text-primary); font-size: 13px; font-weight: var(--font-weight-bold); font-family: var(--font-family); }
 .docpage__plan .plan-meta { fill: var(--color-text-secondary); font-size: 11px; font-family: var(--font-family); }
 
-/* Floating zoom toolbar */
+/* Floating zoom toolbar — pinned to the viewport (the viewer scrolls). */
 .docviewer__toolbar {
-  position: absolute; bottom: var(--space-lg); left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: var(--space-lg); left: 50%; transform: translateX(-50%);
+  z-index: 5;
   display: flex; align-items: center; gap: var(--space-xs);
   padding: var(--space-xs);
   background: var(--color-secondary-900);
@@ -5623,12 +5636,18 @@ body.docviewer-open { overflow: hidden; }
 .docviewer__zoom .inline-icon { width: 18px; height: 18px; }
 .docviewer__zoom--reset { min-width: 56px; font-variant-numeric: tabular-nums; }
 
-/* Comments side panel */
+/* Comments side panel — fixed right rail below the sticky bar, with its own
+   scroll, so it stays put while the document scrolls. `--docviewer-bar-h` is
+   measured in JS (the bar height is responsive). */
 .docviewer__comments {
-  flex: 0 0 320px; max-width: 80vw;
+  position: fixed;
+  top: var(--docviewer-bar-h, 56px); right: 0; bottom: 0;
+  width: 320px; max-width: 80vw;
+  z-index: 6;
   display: flex; flex-direction: column;
   background: var(--color-white);
   border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
   overflow-y: auto;
 }
 .docviewer__comments[hidden] { display: none; }
@@ -5646,10 +5665,196 @@ body.docviewer-open { overflow: hidden; }
 .docviewer__comment-text { margin: 0; font-size: var(--text-body-sm); color: var(--color-text-secondary); line-height: var(--line-height-snug); }
 .docviewer__comments-add { padding: var(--space-md); border-top: 1px solid var(--color-border-light); display: flex; flex-direction: column; gap: var(--space-sm); }
 
+/* Share popover — light card anchored under the share button (coords set in
+   JS). Sits above the bar/comments so it's never clipped. */
+.docviewer-share {
+  position: fixed;
+  z-index: 7;
+  width: 340px;
+  max-width: calc(100vw - 2 * var(--space-md));
+  padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-sm);
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-dropdown);
+}
+.docviewer-share__title { margin: 0; font-size: var(--text-body); font-weight: var(--font-weight-bold); }
+.docviewer-share__hint { margin: 0; font-size: var(--text-body-xs); color: var(--color-text-secondary); line-height: var(--line-height-snug); }
+.docviewer-share__row { display: flex; gap: var(--space-xs); align-items: stretch; }
+.docviewer-share__input {
+  flex: 1 1 auto; min-width: 0;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.docviewer-share__input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.docviewer-share__copy { flex: 0 0 auto; white-space: nowrap; }
+.docviewer-share__copy .inline-icon { width: 16px; height: 16px; }
+.docviewer-share__mail {
+  display: inline-flex; align-items: center; gap: var(--space-xs);
+  font-size: var(--text-body-sm); color: var(--color-primary);
+  text-decoration: none;
+}
+.docviewer-share__mail:hover { text-decoration: underline; }
+.docviewer-share__mail .inline-icon { width: 16px; height: 16px; }
+
 @media (max-width: 640px) {
-  .docviewer__comments { position: absolute; right: 0; top: 0; bottom: 0; flex-basis: 88vw; box-shadow: var(--shadow-lg); }
+  .docviewer__comments { width: 88vw; }
   .docviewer__heading-icon { display: none; }
 }
+
+/* ── Side nav chevrons (shared by the document viewer + image gallery) ──────
+   Circular, translucent-white buttons pinned to the vertical centre of the
+   stage. Hidden when there is only one item; the doc viewer also hides them
+   while the comments panel is open so they don't overlap it. */
+.docviewer__nav,
+.gallery__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px;
+  background: var(--color-white-12);
+  border: none; border-radius: var(--radius-full);
+  color: var(--color-white); cursor: pointer;
+  transition: background var(--transition-fast);
+  z-index: 2;
+}
+.docviewer__nav:hover,
+.gallery__nav:hover { background: var(--color-white-25); }
+.docviewer__nav:focus-visible,
+.gallery__nav:focus-visible { outline: 2px solid var(--color-white); outline-offset: 2px; }
+.docviewer__nav .inline-icon,
+.gallery__nav .inline-icon { width: 24px; height: 24px; }
+.docviewer__nav[hidden],
+.gallery__nav[hidden] { display: none; }
+.docviewer__nav--prev,
+.gallery__nav--prev { left: var(--space-md); }
+.docviewer__nav--next,
+.gallery__nav--next { right: var(--space-md); }
+/* The viewer scrolls, so its chevrons must be pinned to the viewport (the
+   gallery doesn't scroll, so it keeps the shared `absolute`). */
+.docviewer__nav { position: fixed; }
+.docviewer--comments-open .docviewer__nav { display: none; }
+
+/* ── Image gallery (lightbox) — mirrors the .docviewer chrome ──────────────
+   Dark full-screen surface: image name top-left, download/upload/delete
+   top-right, centred image with side chevrons, bottom-centre thumbnail
+   strip. Chevrons + thumbnails appear only with 2+ images. */
+.gallery {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-docviewer);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-secondary-900);
+}
+.gallery__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-secondary-900);
+  border-bottom: 1px solid var(--color-white-12);
+}
+.gallery__heading { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.gallery__heading-icon { color: var(--color-white-65); flex: 0 0 auto; }
+.gallery__heading-text { min-width: 0; }
+.gallery__name {
+  margin: 0;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gallery__sub { margin: 0; color: var(--color-white-65); font-size: var(--text-body-xs); font-variant-numeric: tabular-nums; }
+.gallery__actions { display: flex; align-items: center; gap: var(--space-xs); flex: 0 0 auto; }
+.gallery__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  background: none; border: none; border-radius: var(--radius);
+  color: var(--color-white); cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.gallery__btn:hover { background: var(--color-white-12); }
+.gallery__btn:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
+.gallery__btn:disabled { opacity: 0.4; cursor: default; }
+.gallery__btn:disabled:hover { background: none; }
+.gallery__btn--close:hover { background: var(--color-primary); }
+.gallery__btn .inline-icon { width: 20px; height: 20px; }
+
+.gallery__main {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: var(--space-lg) var(--space-md);
+}
+.gallery__stage {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+.gallery__image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.gallery__image[hidden] { display: none; }
+.gallery__empty { margin: 0; color: var(--color-white-65); font-size: var(--text-body-sm); text-align: center; }
+.gallery__empty[hidden] { display: none; }
+
+.gallery__thumbs {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: safe center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-secondary-900);
+  border-top: 1px solid var(--color-white-12);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.gallery__thumbs[hidden] { display: none; }
+.gallery__thumb {
+  flex: 0 0 auto;
+  width: 84px; height: 56px;
+  padding: 0;
+  background: var(--color-secondary-800);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--transition-fast), border-color var(--transition-fast);
+}
+.gallery__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gallery__thumb:hover { opacity: 0.85; }
+.gallery__thumb:focus-visible { outline: 2px solid var(--color-white); outline-offset: 2px; opacity: 1; }
+.gallery__thumb--active { opacity: 1; border-color: var(--color-white); }
+
+@media (max-width: 640px) {
+  .gallery__thumb { width: 64px; height: 44px; }
+  .gallery__heading-icon { display: none; }
+}
+
 .property-popup__title { margin: 0 0 2px; font-weight: var(--font-weight-bold); font-size: var(--text-body); line-height: var(--line-height-snug); }
 .property-popup__meta  { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
 /* Full-width "Details öffnen" CTA at the foot of the map info panel. Uses
@@ -5885,21 +6090,66 @@ body.docviewer-open { overflow: hidden; }
   gap: var(--space-sm);
   flex-wrap: wrap;
 }
-.property-header__image {
+/* The building photo is a button that opens the image gallery (lightbox).
+   The wrapper carries the sizing; the image fills it. A hover/focus hint
+   (expand icon + image count) overlays the bottom-right corner. */
+.property-header__media {
+  position: relative;
   display: block;
   width: 100%;
   height: 140px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background-color: var(--color-bg-alt);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+.property-header__media[disabled] { cursor: default; }
+.property-header__media:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.property-header__image {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   background-color: var(--color-bg-alt);
-  border-radius: var(--radius);
 }
+/* Persistent affordance: a pill in the bottom-right corner of the thumbnail
+   signalling that the photo is clickable and opens a gallery ("Galerie"),
+   plus the image count when more than one is available. Always visible (not
+   hover-gated) so the affordance is discoverable at a glance; the button's
+   aria-label carries the same information for assistive technology. */
+.property-header__media-badge {
+  position: absolute;
+  right: var(--space-xs);
+  bottom: var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-black-70);
+  color: var(--color-white);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-fast);
+}
+.property-header__media-icon { width: 15px; height: 15px; flex: 0 0 auto; }
+.property-header__media-count { font-variant-numeric: tabular-nums; }
+.property-header__media-count::before { content: '·'; margin-right: 5px; opacity: 0.75; }
+.property-header__media:hover .property-header__media-badge,
+.property-header__media:focus-visible .property-header__media-badge { background: var(--color-black-75); }
+.property-header__media[disabled] .property-header__media-badge { display: none; }
 @media (min-width: 768px) {
   .property-header { flex-direction: row; align-items: center; gap: var(--space-xl); }
   .property-header__body { flex: 1; min-width: 0; }
-  .property-header__image { width: 240px; height: 140px; flex-shrink: 0; }
+  .property-header__media { width: 240px; height: 140px; flex-shrink: 0; }
 }
 @media (min-width: 1280px) {
-  .property-header__image { width: 280px; height: 160px; }
+  .property-header__media { width: 280px; height: 160px; }
 }
 
 /* `.property-stats` — 4-up numeric strip above the contractual facts

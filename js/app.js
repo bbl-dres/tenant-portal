@@ -2447,6 +2447,228 @@ const PROPERTY_DOC_GROUPS = [
   { titleKey: 'prop.docGroup.history', types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
 ];
 
+// ── PROPERTY IMAGE GALLERY ────────────────────────────────────────────────
+// Resolves a gallery image source. Static building photos go through the
+// shared `safeImageUrl` allow-list (assets/ or http[s]); session uploads are
+// `data:` URLs read locally via FileReader, which `safeImageUrl` rejects, so
+// they are passed through as-is (the file came from the user's own picker and
+// is only ever assigned to an <img>.src, never reflected into markup).
+function galleryImgSrc(s) {
+  if (typeof s !== 'string') return '';
+  if (/^data:image\//i.test(s)) return s;
+  return safeImageUrl(s);
+}
+
+// Clickable building-photo thumbnail in the property/floor header. Seeds the
+// per-tenancy gallery on first use and renders a button that opens the
+// lightbox; degrades to a disabled button when the property has no photo.
+function propertyHeaderMedia(t) {
+  if (!Array.isArray(t.gallery)) {
+    // Seeded once from the single building photo. Uploads/deletes via the
+    // lightbox mutate this array, which lives on the tenancy object so it
+    // survives route re-renders within the session (not persisted to disk,
+    // like the rest of the prototype's mutations).
+    t.gallery = t.image ? [{ src: t.image, name: t.buildingName + ' — Aussenansicht' }] : [];
+  }
+  const count = t.gallery.length;
+  const src = count ? galleryImgSrc(t.gallery[0].src) : '';
+  return `
+    <button type="button" class="property-header__media" data-gallery-open aria-haspopup="dialog"
+            title="Bildergalerie öffnen" aria-label="Bildergalerie öffnen${count > 1 ? ` (${count} Bilder)` : ''}"${count ? '' : ' disabled'}>
+      <img class="property-header__image" src="${src}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="160">
+      <span class="property-header__media-badge" aria-hidden="true">
+        ${P.icon('image', 'property-header__media-icon')}
+        <span class="property-header__media-label">Galerie</span>
+        <span class="property-header__media-count" data-gallery-count${count > 1 ? '' : ' hidden'}>${count}</span>
+      </span>
+    </button>`;
+}
+
+function wirePropertyGallery(t) {
+  const btn = document.querySelector('[data-gallery-open]');
+  if (btn) btn.addEventListener('click', () => openImageGallery(t));
+}
+
+// Dark full-screen image lightbox — styled to match the document viewer
+// (`.docviewer`). Image name top-left, download/upload/delete top-right,
+// side chevrons + a bottom-centre thumbnail strip (both shown only with 2+
+// images). Upload reads files locally (FileReader → data URL); delete and
+// upload mutate `t.gallery`, and the header thumbnail/count are kept in sync.
+function openImageGallery(t, startIndex = 0) {
+  const list = t.gallery;
+  if (!Array.isArray(list) || !list.length) return;
+  const opener = document.activeElement;
+  let idx = Math.max(0, Math.min(list.length - 1, startIndex));
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'gallery';
+  backdrop.setAttribute('role', 'dialog');
+  backdrop.setAttribute('aria-modal', 'true');
+  backdrop.setAttribute('aria-label', 'Bildergalerie: ' + (t.buildingName || ''));
+  backdrop.innerHTML = `
+    <div class="gallery__bar">
+      <div class="gallery__heading">
+        ${P.icon('image', 'gallery__heading-icon')}
+        <div class="gallery__heading-text">
+          <p class="gallery__name" data-gallery-name></p>
+          <p class="gallery__sub" data-gallery-counter></p>
+        </div>
+      </div>
+      <div class="gallery__actions">
+        <button class="gallery__btn" type="button" data-act="download" aria-label="Herunterladen" title="Herunterladen">${P.icon('download')}</button>
+        <button class="gallery__btn" type="button" data-act="upload" aria-label="Bild hochladen" title="Bild hochladen">${P.icon('upload')}</button>
+        <button class="gallery__btn" type="button" data-act="delete" aria-label="Bild löschen" title="Bild löschen">${P.icon('trash')}</button>
+        <button class="gallery__btn gallery__btn--close" type="button" data-act="close" aria-label="Galerie schliessen" title="Schliessen">${P.icon('x')}</button>
+      </div>
+    </div>
+    <div class="gallery__main">
+      <button class="gallery__nav gallery__nav--prev" type="button" data-act="prev" aria-label="Vorheriges Bild" title="Vorheriges Bild">${P.icon('chevronLeft')}</button>
+      <div class="gallery__stage">
+        <img class="gallery__image" alt="" decoding="async">
+        <p class="gallery__empty" hidden>Keine Bilder vorhanden. Laden Sie ein Bild hoch.</p>
+      </div>
+      <button class="gallery__nav gallery__nav--next" type="button" data-act="next" aria-label="Nächstes Bild" title="Nächstes Bild">${P.icon('chevronRight')}</button>
+    </div>
+    <div class="gallery__thumbs" aria-label="Bildauswahl" data-gallery-thumbs></div>
+    <input type="file" accept="image/*" class="gallery__file" multiple hidden>`;
+  document.body.appendChild(backdrop);
+  document.body.classList.add('docviewer-open');   // reuse the body scroll-lock
+
+  const nameEl     = backdrop.querySelector('[data-gallery-name]');
+  const counterEl  = backdrop.querySelector('[data-gallery-counter]');
+  const mainImg    = backdrop.querySelector('.gallery__image');
+  const emptyEl    = backdrop.querySelector('.gallery__empty');
+  const thumbsEl   = backdrop.querySelector('[data-gallery-thumbs]');
+  const prevBtn    = backdrop.querySelector('[data-act="prev"]');
+  const nextBtn    = backdrop.querySelector('[data-act="next"]');
+  const deleteBtn  = backdrop.querySelector('[data-act="delete"]');
+  const downloadBtn = backdrop.querySelector('[data-act="download"]');
+  const fileInput  = backdrop.querySelector('.gallery__file');
+
+  // Keep the underlying header thumbnail + count chip in sync after an
+  // upload/delete, so closing the lightbox lands on a consistent header
+  // without a full route re-render.
+  function syncHeader() {
+    const btn = document.querySelector('[data-gallery-open]');
+    if (!btn) return;
+    const img = btn.querySelector('.property-header__image');
+    if (img && list.length) img.src = galleryImgSrc(list[0].src);
+    const chip = btn.querySelector('[data-gallery-count]');
+    if (chip) { chip.textContent = String(list.length); chip.hidden = list.length < 2; }
+    btn.setAttribute('aria-label', 'Bildergalerie öffnen' + (list.length > 1 ? ` (${list.length} Bilder)` : ''));
+    btn.disabled = list.length === 0;
+  }
+
+  function render() {
+    const multi = list.length > 1;
+    prevBtn.hidden = !multi;
+    nextBtn.hidden = !multi;
+    thumbsEl.hidden = !multi;
+
+    if (!list.length) {
+      mainImg.hidden = true; mainImg.removeAttribute('src');
+      emptyEl.hidden = false;
+      nameEl.textContent = '';
+      counterEl.textContent = 'Keine Bilder';
+      deleteBtn.disabled = true; downloadBtn.disabled = true;
+      thumbsEl.innerHTML = '';
+      syncHeader();
+      return;
+    }
+    if (idx >= list.length) idx = list.length - 1;
+    const entry = list[idx];
+    deleteBtn.disabled = false; downloadBtn.disabled = false;
+    emptyEl.hidden = true;
+    mainImg.hidden = false;
+    mainImg.src = galleryImgSrc(entry.src);
+    mainImg.alt = entry.name || '';
+    nameEl.textContent = entry.name || '';
+    counterEl.textContent = `${idx + 1} / ${list.length}`;
+
+    thumbsEl.innerHTML = '';
+    if (multi) {
+      list.forEach((im, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'gallery__thumb' + (i === idx ? ' gallery__thumb--active' : '');
+        b.setAttribute('aria-label', `Bild ${i + 1}${im.name ? ': ' + im.name : ''}`);
+        if (i === idx) b.setAttribute('aria-current', 'true');
+        const tImg = document.createElement('img');
+        tImg.src = galleryImgSrc(im.src); tImg.alt = ''; tImg.loading = 'lazy'; tImg.decoding = 'async';
+        b.appendChild(tImg);
+        b.addEventListener('click', () => { idx = i; render(); });
+        thumbsEl.appendChild(b);
+      });
+      const active = thumbsEl.querySelector('.gallery__thumb--active');
+      if (active) active.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+    syncHeader();
+  }
+
+  function go(delta) {
+    if (list.length < 2) return;
+    idx = (idx + delta + list.length) % list.length;
+    render();
+  }
+
+  function close() {
+    document.removeEventListener('keydown', onKeydown, true);
+    backdrop.remove();
+    document.body.classList.remove('docviewer-open');
+    if (opener && typeof opener.focus === 'function') { try { opener.focus(); } catch {} }
+  }
+
+  function onKeydown(e) {
+    const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('textarea, input');
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (!typing && e.key === 'ArrowLeft')  { e.preventDefault(); go(-1); return; }
+    if (!typing && e.key === 'ArrowRight') { e.preventDefault(); go(1);  return; }
+    if (e.key !== 'Tab') return;
+    const f = Array.from(backdrop.querySelectorAll('button:not([hidden]):not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  prevBtn.addEventListener('click', () => go(-1));
+  nextBtn.addEventListener('click', () => go(1));
+  downloadBtn.addEventListener('click', () => { if (list[idx]) P.toast('Download simuliert: ' + (list[idx].name || 'Bild'), 'success'); });
+  deleteBtn.addEventListener('click', () => {
+    if (!list.length) return;
+    const removed = list.splice(idx, 1)[0];
+    if (idx >= list.length) idx = Math.max(0, list.length - 1);
+    P.toast('Bild gelöscht (Demo)' + (removed && removed.name ? ': ' + removed.name : ''), 'success');
+    render();
+  });
+  backdrop.querySelector('[data-act="upload"]').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    const files = Array.from(fileInput.files || []).filter(f => /^image\//.test(f.type));
+    fileInput.value = '';
+    if (!files.length) return;
+    const firstNew = list.length;
+    let pending = files.length;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        list.push({ src: reader.result, name: file.name });
+        if (--pending === 0) {
+          idx = firstNew;
+          render();
+          P.toast(files.length === 1 ? 'Bild hinzugefügt (Demo).' : `${files.length} Bilder hinzugefügt (Demo).`, 'success');
+        }
+      };
+      reader.onerror = () => { if (--pending === 0) render(); };
+      reader.readAsDataURL(file);
+    });
+  });
+  backdrop.querySelector('[data-act="close"]').addEventListener('click', close);
+
+  document.addEventListener('keydown', onKeydown, true);
+  render();
+  setTimeout(() => { try { backdrop.querySelector('[data-act="close"]').focus(); } catch {} }, 0);
+}
+
 async function renderPropertyDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
@@ -2543,7 +2765,7 @@ async function renderPropertyDetail({ id }) {
               <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">${P.t('prop.restTerm', { n: monthsToEnd })}</span>
             </p>
           </div>
-          <img class="property-header__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="140">
+          ${propertyHeaderMedia(t)}
         </header>
       </div>
     </section>
@@ -2676,6 +2898,7 @@ async function renderPropertyDetail({ id }) {
     </section>
   `;
 
+  wirePropertyGallery(t);
   initPropertyDetailMap(t);
 }
 
@@ -2948,7 +3171,7 @@ async function renderFloorDetail({ id, floorSlug }) {
               <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">${P.t('prop.restTerm', { n: monthsToEnd })}</span>
             </p>
           </div>
-          <img class="property-header__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="140">
+          ${propertyHeaderMedia(t)}
         </header>
       </div>
     </section>
@@ -2995,6 +3218,7 @@ async function renderFloorDetail({ id, floorSlug }) {
     </section>
   `;
 
+  wirePropertyGallery(t);
   initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, colorMode);
 
   // Vollbild toggle — fullscreens `.floor-viewer` so the legend stays
@@ -3429,14 +3653,22 @@ function renderDownloads() {
   docState.building = initial.get('building') || '';
   docState.q        = initial.get('q')        || '';
   docState.page     = parseInt(initial.get('page') || '1', 10);
+  // Deep link from the viewer's share popover (`?doc=<id>`): open that
+  // document once the table is rendered. Captured before applyDocState()
+  // rewrites the hash (which drops the one-shot `doc` param).
+  const sharedDocId = initial.get('doc');
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
-        <h1 class="h1 section-heading">${P.t('downloads.title')}</h1>
-        <p class="section-intro">
-          Alle für <strong>${P.escapeHtml(P.state.user.ve)}</strong> freigegebenen Dokumente plus öffentliche Merkblätter.
-        </p>
+        <header class="page-header">
+          <div>
+            <h1 class="h1 page-header__title">${P.t('downloads.title')}</h1>
+            <p class="page-header__sub">
+              Alle für <strong>${P.escapeHtml(P.state.user.ve)}</strong> freigegebenen Dokumente plus öffentliche Merkblätter.
+            </p>
+          </div>
+        </header>
 
         <div class="docs-filter-bar">
           <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
@@ -3573,7 +3805,7 @@ function renderDownloads() {
       tbody.innerHTML = slice.map(d => `
         <tr>
           <td>
-            <a href="#" class="docs-table__title-link"
+            <a href="#" class="docs-table__title-link" data-doc-id="${P.escapeHtml(d.id)}"
                onclick="window.t3lite.openDocViewer('${P.escapeJs(d.id)}'); return false;">
               ${P.icon('document')}<span>${P.escapeHtml(d.title)}</span>
             </a>
@@ -3656,6 +3888,12 @@ function renderDownloads() {
   });
 
   applyDocState();
+
+  if (sharedDocId && (P.state.documents || []).some(d => d.id === sharedDocId)) {
+    // Defer so the table (with its `data-doc-id` triggers) exists — the bridge
+    // builds the viewer's prev/next context from it.
+    setTimeout(() => window.t3lite.openDocViewer(sharedDocId), 0);
+  }
 }
 
 // Federal-CD download list (kbob.admin.ch / armasuisse Immo-Portal pattern).
@@ -3673,7 +3911,7 @@ function downloadList(items) {
           : `window.portal.toast('Download simuliert: ${P.escapeJs(it.title)}'); return false;`;
         return `
         <li class="download-list__item">
-          <a class="download-list__link" href="#" onclick="${action}">
+          <a class="download-list__link" href="#"${it.id ? ` data-doc-id="${P.escapeHtml(it.id)}"` : ''} onclick="${action}">
             <span class="download-list__icon">${P.icon(it.id ? 'document' : 'download')}</span>
             <div class="download-list__body">
               <p class="download-list__title">${P.escapeHtml(it.title)}</p>
@@ -4176,37 +4414,183 @@ function docCommentsHTML() {
     </li>`).join('');
 }
 
-function openDocumentViewer(doc) {
+// Full-screen document preview. `siblings` (optional) is an ordered list of
+// the documents currently available in the view the user opened this from
+// (the downloads table page, or a property's linked-document groups) — when
+// it holds more than one entry, left/right chevrons + a "Dokument X / Y"
+// indicator let the user page through them without leaving the viewer. The
+// chrome (backdrop, key handler, close) persists across navigation; only the
+// per-document content is re-mounted, so switching is a content swap, not a
+// teardown.
+function openDocumentViewer(doc, siblings) {
   if (!doc) return;
   const opener = document.activeElement;
-  const total = mockPageCount(doc);
-  const pages = Array.from({ length: total }, (_, i) => docPageHTML(doc, i + 1, total)).join('');
+  const docKey = d => d.documentId || d.id;
+  const list = (Array.isArray(siblings) && siblings.length) ? siblings : [doc];
+  let pos = list.findIndex(d => docKey(d) === docKey(doc));
+  if (pos < 0) pos = 0;
 
   const backdrop = document.createElement('div');
   backdrop.className = 'docviewer';
   backdrop.setAttribute('role', 'dialog');
   backdrop.setAttribute('aria-modal', 'true');
-  backdrop.setAttribute('aria-label', 'Dokumentvorschau: ' + (doc.title || ''));
-  backdrop.innerHTML = `
+  document.body.appendChild(backdrop);
+  document.body.classList.add('docviewer-open');
+
+  // Refs reassigned by mount() each time a (new) document is rendered.
+  let stage, pagesEl, readout, indicator, commentsEl, commentsBtn, total, baseW;
+  // Width-based zoom: scaling the page width (not a CSS transform) keeps the
+  // stage natively scrollable in both axes, so pan + multi-page scroll work
+  // without extra layout maths. baseW fits the page to the stage initially.
+  let zoom = 1;
+  function applyZoom() {
+    zoom = Math.max(0.5, Math.min(3, Math.round(zoom * 100) / 100));
+    if (pagesEl) pagesEl.style.setProperty('--docpage-w', Math.round(baseW * zoom) + 'px');
+    if (readout) readout.textContent = Math.round(zoom * 100) + '%';
+  }
+
+  function close() {
+    closeShare();
+    document.removeEventListener('keydown', onKeydown, true);
+    backdrop.remove();
+    document.body.classList.remove('docviewer-open');
+    if (opener && typeof opener.focus === 'function') { try { opener.focus(); } catch {} }
+  }
+
+  // ── Share popover (Confluence-style "share this document") ──────────────
+  // A light popover anchored under the share button, offering a deep link
+  // that reopens the document (#/downloads?doc=…), a copy button and an
+  // e-mail shortcut. Appended to the backdrop; torn down on remount/close.
+  function buildShareUrl(d) {
+    return `${location.origin + location.pathname}#/downloads?doc=${encodeURIComponent(docKey(d))}&lang=${P.state.lang}`;
+  }
+  function shareEl() { return backdrop.querySelector('.docviewer-share'); }
+  function closeShare() {
+    const el = shareEl();
+    if (el) el.remove();
+    document.removeEventListener('pointerdown', onSharePointer, true);
+    const btn = backdrop.querySelector('[data-act="share"]');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+  function onSharePointer(e) {
+    const el = shareEl();
+    if (!el) return;
+    if (el.contains(e.target) || e.target.closest('[data-act="share"]')) return;
+    closeShare();
+  }
+  function copyShareUrl(url, btn) {
+    const ok = () => {
+      P.toast('Link kopiert.', 'success');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = `${P.icon('check')} Kopiert`;
+        setTimeout(() => { if (btn.isConnected) btn.innerHTML = orig; }, 1500);
+      }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(ok).catch(() => fallbackCopyShare(url, ok));
+    } else { fallbackCopyShare(url, ok); }
+  }
+  function fallbackCopyShare(text, ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.setProperty('position', 'fixed'); ta.style.setProperty('opacity', '0');
+      backdrop.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); ta.remove(); ok();
+    } catch { P.toast('Kopieren nicht möglich — Link manuell kopieren.'); }
+  }
+  function openShare(btn) {
+    closeShare();
+    const d = list[pos];
+    const url = buildShareUrl(d);
+    const mail = `mailto:?subject=${encodeURIComponent('Dokument: ' + (d.title || ''))}&body=${encodeURIComponent((d.title || '') + '\n' + url)}`;
+    const pop = document.createElement('div');
+    pop.className = 'docviewer-share';
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-label', 'Dokument teilen');
+    pop.innerHTML = `
+      <p class="docviewer-share__title">Dokument teilen</p>
+      <p class="docviewer-share__hint">Jede Person mit Zugriff auf das Mieterportal kann das Dokument über diesen Link öffnen.</p>
+      <div class="docviewer-share__row">
+        <input class="docviewer-share__input" type="text" readonly aria-label="Freigabe-Link">
+        <button class="btn btn--filled btn--sm docviewer-share__copy" type="button" data-share-copy>${P.icon('link')} Kopieren</button>
+      </div>
+      <a class="docviewer-share__mail" href="${mail}" data-share-email>${P.icon('envelope')} Per E-Mail teilen</a>`;
+    backdrop.appendChild(pop);
+    // Anchor under the share button, right-aligned to it.
+    const r = btn.getBoundingClientRect();
+    pop.style.setProperty('top', (r.bottom + 8) + 'px');
+    pop.style.setProperty('right', Math.max(8, window.innerWidth - r.right) + 'px');
+    btn.setAttribute('aria-expanded', 'true');
+    const input = pop.querySelector('.docviewer-share__input');
+    input.value = url;
+    const copyBtn = pop.querySelector('[data-share-copy]');
+    copyBtn.addEventListener('click', () => copyShareUrl(url, copyBtn));
+    pop.querySelector('[data-share-email]').addEventListener('click', () => closeShare());
+    setTimeout(() => { try { input.focus(); input.select(); } catch {} }, 0);
+    // Outside-click closes (deferred so the opening click doesn't immediately close it).
+    setTimeout(() => document.addEventListener('pointerdown', onSharePointer, true), 0);
+  }
+
+  // Wrap-around navigation between sibling documents; the "Dokument X / Y"
+  // indicator keeps the position legible even when wrapping.
+  function go(delta) {
+    if (list.length < 2) return;
+    pos = (pos + delta + list.length) % list.length;
+    mount();
+    try { stage.focus(); } catch {}
+  }
+  function onKeydown(e) {
+    const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('textarea, input');
+    if (e.key === 'Escape') {
+      // A first Esc dismisses the share popover; a second closes the viewer.
+      if (shareEl()) { e.preventDefault(); closeShare(); const sb = backdrop.querySelector('[data-act="share"]'); if (sb) sb.focus(); return; }
+      e.preventDefault(); close(); return;
+    }
+    if (!typing && (e.key === '+' || e.key === '=')) { e.preventDefault(); zoom += 0.25; applyZoom(); return; }
+    if (!typing && (e.key === '-' || e.key === '_')) { e.preventDefault(); zoom -= 0.25; applyZoom(); return; }
+    if (!typing && e.key === '0') { e.preventDefault(); zoom = 1; applyZoom(); return; }
+    if (!typing && e.key === 'ArrowLeft'  && list.length > 1) { e.preventDefault(); go(-1); return; }
+    if (!typing && e.key === 'ArrowRight' && list.length > 1) { e.preventDefault(); go(1);  return; }
+    if (e.key !== 'Tab') return;
+    const f = Array.from(backdrop.querySelectorAll('button, a[href], textarea, input, [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  function mount() {
+    closeShare();   // tear down any popover before the innerHTML reset
+    const doc = list[pos];
+    const hasSiblings = list.length > 1;
+    total = mockPageCount(doc);
+    const pages = Array.from({ length: total }, (_, i) => docPageHTML(doc, i + 1, total)).join('');
+    backdrop.setAttribute('aria-label', 'Dokumentvorschau: ' + (doc.title || ''));
+    backdrop.innerHTML = `
     <div class="docviewer__bar">
       <div class="docviewer__heading">
         ${P.icon('document', 'docviewer__heading-icon')}
         <div class="docviewer__heading-text">
           <p class="docviewer__title">${P.escapeHtml(doc.title)}</p>
-          <p class="docviewer__sub">${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span></p>
+          <p class="docviewer__sub">${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span>${hasSiblings ? ` · <span class="docviewer__docnum">Dokument ${pos + 1} / ${list.length}</span>` : ''}</p>
         </div>
       </div>
       <div class="docviewer__actions">
         <button class="docviewer__btn" type="button" data-act="download" aria-label="Herunterladen" title="Herunterladen">${P.icon('download')}</button>
         <button class="docviewer__btn" type="button" data-act="upload" aria-label="Neue Version hochladen" title="Neue Version hochladen">${P.icon('upload')}</button>
+        <button class="docviewer__btn" type="button" data-act="share" aria-label="Dokument teilen" title="Teilen" aria-haspopup="dialog" aria-expanded="false">${P.icon('share')}</button>
         <button class="docviewer__btn" type="button" data-act="comments" aria-label="Kommentare anzeigen" title="Kommentare" aria-pressed="false">${P.icon('commentDots')}</button>
         <button class="docviewer__btn docviewer__btn--close" type="button" data-act="close" aria-label="Vorschau schliessen" title="Schliessen">${P.icon('x')}</button>
       </div>
     </div>
     <div class="docviewer__main">
+      ${hasSiblings ? `<button class="docviewer__nav docviewer__nav--prev" type="button" data-act="prev" aria-label="Vorheriges Dokument" title="Vorheriges Dokument">${P.icon('chevronLeft')}</button>` : ''}
       <div class="docviewer__stage" tabindex="0" aria-label="Dokumentseiten">
         <div class="docviewer__pages">${pages}</div>
       </div>
+      ${hasSiblings ? `<button class="docviewer__nav docviewer__nav--next" type="button" data-act="next" aria-label="Nächstes Dokument" title="Nächstes Dokument">${P.icon('chevronRight')}</button>` : ''}
       <aside class="docviewer__comments" aria-label="Kommentare" hidden>
         <h2 class="docviewer__comments-title">Kommentare</h2>
         <ul class="docviewer__comments-list">${docCommentsHTML()}</ul>
@@ -4221,93 +4605,78 @@ function openDocumentViewer(doc) {
       <button class="docviewer__zoom docviewer__zoom--reset" type="button" data-act="zoom-reset" aria-label="Zoom zurücksetzen" title="Zurücksetzen"><span data-zoom-readout>100%</span></button>
       <button class="docviewer__zoom" type="button" data-act="zoom-in" aria-label="Vergrössern" title="Vergrössern">${P.icon('plus')}</button>
     </div>`;
-  document.body.appendChild(backdrop);
-  document.body.classList.add('docviewer-open');
 
-  const stage = backdrop.querySelector('.docviewer__stage');
-  const pagesEl = backdrop.querySelector('.docviewer__pages');
-  const readout = backdrop.querySelector('[data-zoom-readout]');
-  const indicator = backdrop.querySelector('[data-page-indicator]');
-  const commentsEl = backdrop.querySelector('.docviewer__comments');
-  const commentsBtn = backdrop.querySelector('[data-act="comments"]');
+    stage = backdrop.querySelector('.docviewer__stage');
+    pagesEl = backdrop.querySelector('.docviewer__pages');
+    readout = backdrop.querySelector('[data-zoom-readout]');
+    indicator = backdrop.querySelector('[data-page-indicator]');
+    commentsEl = backdrop.querySelector('.docviewer__comments');
+    commentsBtn = backdrop.querySelector('[data-act="comments"]');
 
-  // Width-based zoom: scaling the page width (not a CSS transform) keeps the
-  // stage natively scrollable in both axes, so pan + multi-page scroll work
-  // without extra layout maths. baseW fits the page to the stage initially.
-  const baseW = Math.max(280, Math.min(840, stage.clientWidth - 56));
-  let zoom = 1;
-  function applyZoom() {
-    zoom = Math.max(0.5, Math.min(3, Math.round(zoom * 100) / 100));
-    pagesEl.style.setProperty('--docpage-w', Math.round(baseW * zoom) + 'px');
-    readout.textContent = Math.round(zoom * 100) + '%';
-  }
-  applyZoom();
+    // Pin the comments rail below the sticky bar (its height is responsive).
+    const barEl = backdrop.querySelector('.docviewer__bar');
+    backdrop.style.setProperty('--docviewer-bar-h', barEl.offsetHeight + 'px');
 
-  // Drag-to-pan (and scroll multi-page) via native scroll offsets.
-  let panning = false, px = 0, py = 0, sl = 0, st = 0;
-  stage.addEventListener('pointerdown', e => {
-    if (e.target.closest('button, a, textarea, input')) return;
-    panning = true; px = e.clientX; py = e.clientY; sl = stage.scrollLeft; st = stage.scrollTop;
-    stage.classList.add('docviewer__stage--grabbing');
-    try { stage.setPointerCapture(e.pointerId); } catch {}
-  });
-  stage.addEventListener('pointermove', e => {
-    if (!panning) return;
-    stage.scrollLeft = sl - (e.clientX - px);
-    stage.scrollTop  = st - (e.clientY - py);
-  });
-  const endPan = () => { panning = false; stage.classList.remove('docviewer__stage--grabbing'); };
-  stage.addEventListener('pointerup', endPan);
-  stage.addEventListener('pointercancel', endPan);
+    baseW = Math.max(280, Math.min(840, backdrop.clientWidth - 56));
+    zoom = 1;
+    applyZoom();
 
-  // Page indicator follows the page nearest the viewport centre.
-  let raf = null;
-  stage.addEventListener('scroll', () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => {
-      raf = null;
-      const ps = stage.querySelectorAll('.docpage');
-      const mid = stage.scrollTop + stage.clientHeight / 2;
-      let idx = 0;
-      ps.forEach((p, i) => { if (p.offsetTop <= mid) idx = i; });
-      indicator.textContent = `Seite ${idx + 1} / ${total}`;
+    // Drag-to-pan scrolls the viewer itself (handy when zoomed wider than the
+    // viewport); the wheel and the page-level scrollbar work as usual too.
+    let panning = false, px = 0, py = 0, sl = 0, st = 0;
+    stage.addEventListener('pointerdown', e => {
+      if (e.target.closest('button, a, textarea, input')) return;
+      panning = true; px = e.clientX; py = e.clientY; sl = backdrop.scrollLeft; st = backdrop.scrollTop;
+      stage.classList.add('docviewer__stage--grabbing');
+      try { stage.setPointerCapture(e.pointerId); } catch {}
     });
-  });
+    stage.addEventListener('pointermove', e => {
+      if (!panning) return;
+      backdrop.scrollLeft = sl - (e.clientX - px);
+      backdrop.scrollTop  = st - (e.clientY - py);
+    });
+    const endPan = () => { panning = false; stage.classList.remove('docviewer__stage--grabbing'); };
+    stage.addEventListener('pointerup', endPan);
+    stage.addEventListener('pointercancel', endPan);
 
-  function close() {
-    document.removeEventListener('keydown', onKeydown, true);
-    backdrop.remove();
-    document.body.classList.remove('docviewer-open');
-    if (opener && typeof opener.focus === 'function') { try { opener.focus(); } catch {} }
+    // Page indicator follows the page nearest the viewport centre. The viewer
+    // is the scroller now, so measure each page against the window.
+    let raf = null;
+    backdrop.addEventListener('scroll', () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        const ps = backdrop.querySelectorAll('.docpage');
+        const mid = window.innerHeight / 2;
+        let idx = 0;
+        ps.forEach((p, i) => { if (p.getBoundingClientRect().top <= mid) idx = i; });
+        indicator.textContent = `Seite ${idx + 1} / ${total}`;
+      });
+    });
+
+    backdrop.querySelector('[data-act="close"]').addEventListener('click', close);
+    backdrop.querySelector('[data-act="share"]').addEventListener('click', () => {
+      shareEl() ? closeShare() : openShare(backdrop.querySelector('[data-act="share"]'));
+    });
+    backdrop.querySelector('[data-act="download"]').addEventListener('click', () => P.toast('Download simuliert: ' + doc.title, 'success'));
+    backdrop.querySelector('[data-act="upload"]').addEventListener('click', () => P.toast('Neue Version hochladen — simuliert.'));
+    backdrop.querySelector('[data-act="comment-send"]').addEventListener('click', () => P.toast('Kommentar gespeichert (Demo).', 'success'));
+    commentsBtn.addEventListener('click', () => {
+      const open = backdrop.classList.toggle('docviewer--comments-open');
+      commentsBtn.setAttribute('aria-pressed', String(open));
+      commentsEl.hidden = !open;
+    });
+    backdrop.querySelector('[data-act="zoom-in"]').addEventListener('click', () => { zoom += 0.25; applyZoom(); });
+    backdrop.querySelector('[data-act="zoom-out"]').addEventListener('click', () => { zoom -= 0.25; applyZoom(); });
+    backdrop.querySelector('[data-act="zoom-reset"]').addEventListener('click', () => { zoom = 1; applyZoom(); });
+    const prevBtn = backdrop.querySelector('[data-act="prev"]');
+    const nextBtn = backdrop.querySelector('[data-act="next"]');
+    if (prevBtn) prevBtn.addEventListener('click', () => go(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => go(1));
   }
-  function onKeydown(e) {
-    const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('textarea, input');
-    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
-    if (!typing && (e.key === '+' || e.key === '=')) { e.preventDefault(); zoom += 0.25; applyZoom(); return; }
-    if (!typing && (e.key === '-' || e.key === '_')) { e.preventDefault(); zoom -= 0.25; applyZoom(); return; }
-    if (!typing && e.key === '0') { e.preventDefault(); zoom = 1; applyZoom(); return; }
-    if (e.key !== 'Tab') return;
-    const f = Array.from(backdrop.querySelectorAll('button, a[href], textarea, input, [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
+
   document.addEventListener('keydown', onKeydown, true);
-
-  backdrop.querySelector('[data-act="close"]').addEventListener('click', close);
-  backdrop.querySelector('[data-act="download"]').addEventListener('click', () => P.toast('Download simuliert: ' + doc.title, 'success'));
-  backdrop.querySelector('[data-act="upload"]').addEventListener('click', () => P.toast('Neue Version hochladen — simuliert.'));
-  backdrop.querySelector('[data-act="comment-send"]').addEventListener('click', () => P.toast('Kommentar gespeichert (Demo).', 'success'));
-  commentsBtn.addEventListener('click', () => {
-    const open = backdrop.classList.toggle('docviewer--comments-open');
-    commentsBtn.setAttribute('aria-pressed', String(open));
-    commentsEl.hidden = !open;
-  });
-  backdrop.querySelector('[data-act="zoom-in"]').addEventListener('click', () => { zoom += 0.25; applyZoom(); });
-  backdrop.querySelector('[data-act="zoom-out"]').addEventListener('click', () => { zoom -= 0.25; applyZoom(); });
-  backdrop.querySelector('[data-act="zoom-reset"]').addEventListener('click', () => { zoom = 1; applyZoom(); });
-
+  mount();
   setTimeout(() => { try { stage.focus(); } catch {} }, 0);
 }
 
@@ -4331,8 +4700,23 @@ window.t3lite = {
     window.scrollTo({ top, behavior: 'smooth' });
   },
   openDocViewer(id) {
-    const doc = (P.state.documents || []).find(d => d.id === id);
-    if (doc) openDocumentViewer(doc);
+    const docs = P.state.documents || [];
+    const doc = docs.find(d => d.id === id);
+    if (!doc) return;
+    // Navigation context = the documents currently shown in the view this was
+    // opened from (downloads table page or property doc-groups), in DOM order.
+    // Collected from the `data-doc-id` triggers so the viewer's chevrons page
+    // through exactly the list the user was looking at. Falls back to the lone
+    // document when no such list is present.
+    const seen = new Set();
+    const siblings = [];
+    document.querySelectorAll('[data-doc-id]').forEach(el => {
+      const did = el.getAttribute('data-doc-id');
+      if (!did || seen.has(did)) return;
+      const d = docs.find(dd => dd.id === did);
+      if (d) { seen.add(did); siblings.push(d); }
+    });
+    openDocumentViewer(doc, siblings.length ? siblings : [doc]);
   },
   submitRepair(form) {
     const data = new FormData(form);
