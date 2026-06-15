@@ -1867,6 +1867,23 @@ figcaption {
 .input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
 .input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-body); }
 
+/* ── Search field ─────────────────────────────────────────────────────────
+   Reusable filter-as-you-type field: a leading (left) magnifier glyph + an
+   `.input`. The single source of truth for every in-page search box — the
+   inbox filter, the downloads filter bar, the properties toolbar and the
+   search-results hero all compose it, so the affordance is identical
+   everywhere. The glyph is decorative (`pointer-events: none`); the input
+   keeps full `.input` styling plus left room for the glyph. */
+.search-field { position: relative; display: flex; align-items: center; }
+.search-field__icon {
+  position: absolute;
+  left: var(--space-sm);
+  width: var(--icon-base); height: var(--icon-base);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+.search-field__input { width: 100%; min-width: 0; padding-left: 38px; }
+
 /* Native `<select>` chevron — replaces the browser default (jammed
    against the right edge) with `assets/icons/ChevronDown.svg`
    positioned with breathing room. `appearance: none` strips the OS
@@ -2249,7 +2266,10 @@ input[type="checkbox"]:focus-visible {
    - .table--documents: medium-density list-view; title column uses an icon
      prefix and a hover affordance via .docs-table__title-link.
    - .pagination: shared component, reusable by any future paginated table. */
-.docs-filter-bar {
+/* Shared horizontal filter-toolbar layout (downloads bar + inbox row). The
+   `.property-toolbar` is grid-based and keeps its own rule. */
+.docs-filter-bar,
+.filter-row {
   display: flex;
   gap: var(--space-md);
   flex-wrap: wrap;
@@ -2877,26 +2897,9 @@ a.btn[aria-disabled="true"] {
   align-items: stretch;
   max-width: 720px;
 }
-.search-hero__field {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-.search-hero__field .inline-icon {
-  position: absolute;
-  left: var(--space-md);
-  width: var(--icon-base);
-  height: var(--icon-base);
-  color: var(--color-text-secondary);
-  pointer-events: none;
-}
-.search-hero__input {
-  width: 100%;
-  padding-left: 48px;
-  font-size: var(--text-body);
-  background: var(--color-white);
-}
+/* Hero variant of .search-field — just stretches to fill the form row.
+   (Sizing/background come from .input; the leading icon from .search-field.) */
+.search-hero__field { flex: 1; }
 .search-hero__meta {
   margin: var(--space-lg) 0 0;
   color: var(--color-text-secondary);
@@ -3266,17 +3269,10 @@ a.btn[aria-disabled="true"] {
    uses the brand-tinted surface. Chips are real <button>s so keyboard
    users can activate them; selected state is `aria-pressed="true"` and
    styled with `.tag-item--active`. */
-.filter-row {
-  display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: var(--space-md);
-}
-.filter-row__search {
-  flex: 1 1 220px;
+.filter-row { align-items: center; }   /* shared layout above; this is the only delta */
+.filter-row__search {   /* composes .search-field; leads the toolbar */
+  flex: 0 1 340px;
   min-width: 220px;
-  min-height: var(--btn-min-h);
 }
 .filter-chips {
   display: flex;
@@ -4406,10 +4402,9 @@ body.body--mobile-menu-is-open {
   min-width: min(100%, 220px);
   min-height: var(--btn-min-h);
 }
-.docs-filter-bar__search {
+.docs-filter-bar__search {   /* composes .search-field; leads the bar */
   flex: 2 1 260px;
   min-width: min(100%, 200px);
-  min-height: var(--btn-min-h);
 }
 .docs-filter-bar > .input { min-width: 0; }
 @media (max-width: 639.98px) {
@@ -5188,27 +5183,13 @@ body.body--mobile-menu-is-open {
       "toggle";
   }
 }
-.property-toolbar__search {
-  grid-area: search;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+.property-toolbar__search { grid-area: search; }   /* composes .search-field */
 .property-toolbar__select {
   grid-area: filter;
   min-width: 200px;
 }
-.property-toolbar__search .inline-icon {
-  position: absolute;
-  left: var(--space-sm);
-  width: var(--icon-base); height: var(--icon-base);
-  color: var(--color-text-secondary);
-  pointer-events: none;
-}
 .property-toolbar__input {
-  width: 100%;
-  padding-left: 38px;
-  padding-right: 38px;
+  padding-right: 38px;   /* room for the clear button (× on the right) */
 }
 .property-toolbar__clear {
   position: absolute;
@@ -5401,9 +5382,9 @@ body.body--mobile-menu-is-open {
 }
 
 /* Properties search combobox dropdown — grouped suggestions (DB
-   Liegenschaften + swisstopo Orte). Placed after the toolbar rules so the
-   icon resets below win source order over `.property-toolbar__search
-   .inline-icon` (which absolutely-positions the search glyph). */
+   Liegenschaften + swisstopo Orte). The search glyph carries its own
+   `.search-field__icon` class, so dropdown icons (plain `.inline-icon`) are
+   unaffected and need no positioning reset. */
 .combobox__group {
   padding: var(--space-xs) var(--space-md);
   font-size: var(--text-body-xs);
@@ -5426,14 +5407,6 @@ body.body--mobile-menu-is-open {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-}
-/* Reset icons living inside the dropdown so they flow inline (the toolbar's
-   own search icon stays absolutely positioned as a direct child). */
-.property-toolbar__search .combobox__list .inline-icon {
-  position: static;
-  left: auto;
-  width: var(--icon-base);
-  height: var(--icon-base);
 }
 .property-toolbar__search .combobox__option--location .inline-icon {
   color: var(--color-secondary-600);

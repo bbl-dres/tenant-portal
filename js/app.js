@@ -321,9 +321,9 @@ function renderSearchResults() {
         <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
         <form class="search-hero__form" role="search" aria-label="Portal durchsuchen"
               onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v);">
-          <div class="search-hero__field">
-            ${P.icon('search')}
-            <input type="search" name="q" class="input search-hero__input"
+          <div class="search-field search-hero__field">
+            ${P.icon('search', 'search-field__icon')}
+            <input type="search" name="q" class="input search-field__input"
                    value="${P.escapeHtml(query)}"
                    placeholder="Suchbegriff eingeben …"
                    aria-label="Suchbegriff"
@@ -431,7 +431,7 @@ function renderSearchResults() {
   // Move keyboard focus into the hero search field — most users land on
   // this page intending to refine the query.
   setTimeout(() => {
-    const input = document.querySelector('.search-hero__input');
+    const input = document.querySelector('.search-hero__field .search-field__input');
     if (input) {
       input.focus();
       // Place caret at end without selecting all
@@ -1116,13 +1116,16 @@ function renderInbox() {
 
         ${apps.length === 0 ? renderInboxEmptyState() : `
           <div class="filter-row" role="search">
+            <div class="search-field filter-row__search">
+              ${P.icon('search', 'search-field__icon')}
+              <input id="filterText" type="search" class="input search-field__input" placeholder="Antrag oder Objekt suchen …" aria-label="Suche">
+            </div>
             <ul class="filter-chips" role="group" aria-label="Status-Filter">
               <li><button type="button" class="tag-item tag-item--active" data-status="" aria-pressed="true">Alle <span class="tag-item__count">${apps.length}</span></button></li>
               ${presentStatuses.map(s => `
                 <li><button type="button" class="tag-item" data-status="${s}" aria-pressed="false">${STATUS_LABELS[s]} <span class="tag-item__count">${counts[s]}</span></button></li>
               `).join('')}
             </ul>
-            <input id="filterText" type="search" class="input filter-row__search" placeholder="Antrag oder Objekt suchen …" aria-label="Suche">
           </div>
 
           <div class="table-wrapper">
@@ -1828,9 +1831,9 @@ function propertiesToolbar({ view, query, category, categories }) {
     </button>`;
   return `
     <div class="property-toolbar">
-      <div class="property-toolbar__search">
-        ${P.icon('search')}
-        <input type="search" id="propertiesSearch" class="input property-toolbar__input"
+      <div class="search-field property-toolbar__search">
+        ${P.icon('search', 'search-field__icon')}
+        <input type="search" id="propertiesSearch" class="input search-field__input property-toolbar__input"
                aria-label="Liegenschaften und Orte suchen"
                placeholder="${P.t('props.searchPlaceholder')}"
                value="${P.escapeHtml(query)}" autocomplete="off"
@@ -2178,32 +2181,46 @@ function renderMapView(/* items */) {
 // `inputId` so `wirePaginationInput` can navigate without round-tripping
 // the URL through a fragile data-attribute template.
 const _paginationHrefBuilders = new Map();
-function renderPagination({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, hrefFor, inputId }) {
-  const id = inputId || 'paginationInput';
-  _paginationHrefBuilders.set(id, hrefFor);
-  const prevHref = hrefFor(Math.max(1, current - 1));
-  const nextHref = hrefFor(Math.min(totalPages, current + 1));
-  const prevDisabled = current <= 1;
-  const nextDisabled = current >= totalPages;
+// ONE definition of the CD Bund compact pagination markup (count line ·
+// chevron-prev · page input · "von X Seiten" · chevron-next), shared by every
+// paginated surface so the look + pluralisation never diverge. `nav` selects
+// the control mechanism:
+//   { kind: 'link', hrefFor }  → <a href> prev/next  (hash-navigated lists)
+//   { kind: 'button' }         → <button data-step> prev/next (in-place lists)
+function paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, entityPluralDative, inputId, nav }) {
   const fmt = (n) => n.toLocaleString('de-CH');
+  // German dative plural for the "von X …" count (e.g. Dokumente → Dokumenten);
+  // defaults to the nominative plural for nouns that don't decline (Liegenschaften).
+  const dative = entityPluralDative || entityPlural;
   const countText = totalItems === 0
     ? `Keine ${entityPlural}`
     : totalItems === 1
       ? `1 ${entitySingular}`
-      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} ${entityPlural}`;
+      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} ${dative}`;
+  const ctrl = (step, disabled, label, iconName) => nav.kind === 'link'
+    ? `<a class="btn btn--outline btn--icon-only" href="${nav.hrefFor(step < 0 ? Math.max(1, current - 1) : Math.min(totalPages, current + 1))}" aria-label="${label}"
+         ${disabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon(iconName)}</a>`
+    : `<button class="btn btn--outline btn--icon-only" type="button" data-step="${step}" aria-label="${label}"
+              ${disabled ? 'disabled' : ''}>${P.icon(iconName)}</button>`;
   return `
     <nav class="pagination" role="navigation" aria-label="Seitennavigation">
       <span class="pagination__count" aria-live="polite">${countText}</span>
-      <a class="btn btn--outline btn--icon-only" href="${prevHref}" aria-label="Vorherige Seite"
-         ${prevDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronLeft')}</a>
+      ${ctrl(-1, current <= 1, 'Vorherige Seite', 'chevronLeft')}
       <input class="pagination__input" type="number" inputmode="numeric"
-             id="${id}" min="1" max="${totalPages}" value="${current}"
+             id="${inputId}" min="1" max="${totalPages}" value="${current}"
              aria-label="Seite auswählen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
-      <a class="btn btn--outline btn--icon-only" href="${nextHref}" aria-label="Nächste Seite"
-         ${nextDisabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon('chevronRight')}</a>
+      ${ctrl(1, current >= totalPages, 'Nächste Seite', 'chevronRight')}
     </nav>
   `;
+}
+
+// Hash-navigated pagination (properties, …): the shell with <a href> controls,
+// plus the hrefFor closure registered for `wirePaginationInput`.
+function renderPagination({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, hrefFor, inputId }) {
+  const id = inputId || 'paginationInput';
+  _paginationHrefBuilders.set(id, hrefFor);
+  return paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, inputId: id, nav: { kind: 'link', hrefFor } });
 }
 
 // Wire the page-input field to navigate on Enter / blur. Looks up the
@@ -3671,6 +3688,13 @@ function renderDownloads() {
         </header>
 
         <div class="docs-filter-bar">
+          <div class="search-field docs-filter-bar__search">
+            ${P.icon('search', 'search-field__icon')}
+            <input class="input search-field__input" type="search" id="filterDocText"
+                   placeholder="${P.t('downloads.searchPlaceholder')}"
+                   value="${P.escapeHtml(docState.q)}"
+                   aria-label="Suche">
+          </div>
           <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
             <option value="">${P.t('downloads.allTypes')}</option>
             ${Object.entries(DOC_TYPE_LABEL).map(([v, l]) =>
@@ -3681,10 +3705,6 @@ function renderDownloads() {
             ${P.state.buildings.map(b =>
               `<option value="${b.buildingId}" ${docState.building === b.buildingId ? 'selected' : ''}>${P.escapeHtml(b.name)}</option>`).join('')}
           </select>
-          <input class="input docs-filter-bar__search" type="search" id="filterDocText"
-                 placeholder="${P.t('downloads.searchPlaceholder')}"
-                 value="${P.escapeHtml(docState.q)}"
-                 aria-label="Suche">
         </div>
 
         <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
@@ -3708,7 +3728,7 @@ function renderDownloads() {
           </table>
         </div>
 
-        <div class="pagination" id="docPagination" role="navigation" aria-label="Seitennavigation"></div>
+        <div id="docPagination"></div>   <!-- mount; paginationShell renders the <nav class="pagination"> -->
       </div>
     </section>
   `;
@@ -3824,32 +3844,19 @@ function renderDownloads() {
       `).join('');
     }
 
-    // CD Bund pagination — same compact pattern as #/properties (chevron-left
-    // + page-number input + "von X Seiten" + chevron-right). See
-    // designsystem/css/components/pagination.postcss. Rendered unconditionally
-    // (federal lists scale — the count line is the load-bearing scale cue).
+    // In-place pagination (the live text filter must not full-re-render per
+    // keystroke) — same shared markup as #/properties via paginationShell,
+    // wired to re-render the table rather than hash-navigate.
     const pag = document.getElementById('docPagination');
-    const fmt = (n) => n.toLocaleString('de-CH');
     const from = total === 0 ? 0 : start + 1;
     const to   = Math.min(start + DOCUMENT_PAGE_SIZE, total);
-    const countText = total === 0
-      ? 'Keine Dokumente'
-      : total === 1
-        ? '1 Dokument'
-        : `${fmt(from)}–${fmt(to)} von ${fmt(total)} Dokumenten`;
-    pag.innerHTML = `
-      <span class="pagination__count" aria-live="polite">${countText}</span>
-      <button class="btn btn--outline btn--icon-only" type="button"
-              data-step="-1" aria-label="Vorherige Seite"
-              ${docState.page <= 1 ? 'disabled' : ''}>${P.icon('chevronLeft')}</button>
-      <input class="pagination__input" type="number" inputmode="numeric"
-             id="docPaginationInput" min="1" max="${totalPages}" value="${docState.page}"
-             aria-label="Seite auswählen">
-      <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
-      <button class="btn btn--outline btn--icon-only" type="button"
-              data-step="1" aria-label="Nächste Seite"
-              ${docState.page >= totalPages ? 'disabled' : ''}>${P.icon('chevronRight')}</button>
-    `;
+    pag.innerHTML = paginationShell({
+      current: docState.page, totalPages,
+      from, to, totalItems: total,
+      entitySingular: 'Dokument', entityPlural: 'Dokumente', entityPluralDative: 'Dokumenten',
+      inputId: 'docPaginationInput',
+      nav: { kind: 'button' },
+    });
     pag.querySelectorAll('button[data-step]').forEach(btn => {
       btn.addEventListener('click', () => {
         docState.page = Math.max(1, Math.min(totalPages, docState.page + parseInt(btn.dataset.step, 10)));

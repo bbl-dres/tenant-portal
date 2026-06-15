@@ -28,6 +28,35 @@ await run(reporter, async () => {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await loginAs(page, baseUrl, 'LBO');
 
+  // ── 0. Search-field consistency across the filter toolbars ─────────────
+  // Every in-page search box composes the shared `.search-field` (leading
+  // left magnifier + `.input`), so the affordance is identical everywhere.
+  for (const [hash, label, required] of [['#/downloads', 'downloads', true], ['#/properties', 'properties', true], ['#/inbox', 'inbox', false]]) {
+    await page.goto(`${baseUrl}/${hash}?lang=de`);
+    await waitForRoute(page, hash);
+    const sf = await page.evaluate(() => {
+      const field = document.querySelector('#page-body .search-field');
+      if (!field) return null;
+      const icon = field.querySelector('.search-field__icon');
+      const input = field.querySelector('.search-field__input');
+      if (!icon || !input) return { ok: false };
+      const ir = icon.getBoundingClientRect(), pr = input.getBoundingClientRect();
+      return { ok: true, leading: ir.left < pr.left + pr.width / 2 && ir.left >= pr.left - 2 };
+    });
+    if (!sf && !required) { check(`${label}: no filter toolbar rendered (skipped)`, true); continue; }
+    check(`${label}: search uses shared .search-field with a leading icon`, !!sf && sf.ok && sf.leading, JSON.stringify(sf));
+  }
+
+  // The search-results hero composes the same component and auto-focuses.
+  await page.goto(`${baseUrl}/#/search?q=bafu&lang=de`);
+  await waitForRoute(page, '#/search');
+  await page.waitForTimeout(80);
+  const heroFocused = await page.evaluate(() => {
+    const f = document.querySelector('.search-hero__field.search-field .search-field__input');
+    return !!f && document.activeElement === f;
+  });
+  check('search results: hero uses .search-field and auto-focuses', heroFocused);
+
   // ── 1. Document viewer — page between available documents ──────────────
   await page.goto(`${baseUrl}/#/downloads?lang=de`);
   await waitForRoute(page, '#/downloads');
@@ -44,6 +73,22 @@ await run(reporter, async () => {
   });
   check('downloads: uses the canonical .page-header pattern', header.pageHeader);
   check('downloads: no legacy section-heading/section-intro header', !header.legacy);
+
+  // Pagination uses the shared paginationShell markup; downloads keeps its
+  // in-place (button) mechanism. Verify the nav rendered + a page advance.
+  check('downloads: pagination renders the shared .pagination nav',
+    await page.locator('#docPagination nav.pagination').count() === 1);
+  const maxPages = Number(await page.locator('#docPaginationInput').getAttribute('max'));
+  if (maxPages > 1) {
+    await page.locator('#docPagination button[data-step="1"]').click();
+    await page.waitForTimeout(80);
+    check('downloads: in-place pagination advances to page 2',
+      (await page.locator('#docPaginationInput').inputValue()) === '2');
+    await page.locator('#docPagination button[data-step="-1"]').click();   // reset for later steps
+    await page.waitForTimeout(80);
+  } else {
+    check('downloads: single page — pagination advance skipped', true);
+  }
 
   await page.locator('[data-doc-id]').first().click();
   await page.waitForSelector('.docviewer', { timeout: 10000 });
