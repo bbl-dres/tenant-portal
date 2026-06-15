@@ -67,9 +67,24 @@ function navigate(hash) {
 // completed for this hash" — a handler that redirects (e.g. auth gate →
 // navigate('#/')) still stamps its own hash first; the redirect then
 // re-renders and re-stamps.
+let _lastRenderedPath = null;
 function markRouteRendered(route) {
   const body = document.getElementById('page-body');
   if (body) body.dataset.route = route;
+  // A new page (the route PATH changed, not just a ?query / lang / filter
+  // update) starts at the top, like a real navigation — hash routing doesn't
+  // reset scroll on its own. Same-path query changes (filters, pagination,
+  // view toggle, language) keep the scroll position. Compatible with the
+  // `scrollToInfo` deep-link pattern: this fires at render time, the smooth
+  // scroll-to-section fires ~100 ms later and wins.
+  if (route !== _lastRenderedPath) {
+    _lastRenderedPath = route;
+    // Jump instantly to the top. `behavior: 'instant'` overrides the
+    // `html { scroll-behavior: smooth }` token — which otherwise animates even
+    // a direct scrollTop assignment, gliding the long page up over ~½ s.
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
+    catch { window.scrollTo(0, 0); }
+  }
 }
 async function handleHash() {
   const full = location.hash || '#/';

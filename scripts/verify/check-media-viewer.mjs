@@ -57,6 +57,27 @@ await run(reporter, async () => {
   });
   check('search results: hero uses .search-field and auto-focuses', heroFocused);
 
+  // Browser-tab favicon = the CD Bund flag.
+  const favicon = await page.evaluate(() => document.querySelector('link[rel~="icon"]')?.getAttribute('href'));
+  check('browser tab favicon is the CD Bund flag', favicon === 'assets/swiss-logo-flag.svg', favicon || '(none)');
+
+  // Scroll-to-top on route (path) change — hash routing doesn't reset scroll.
+  // Use the long-form info page as the tall "before" surface. Scroll via
+  // direct scrollTop (instant — `scrollTo` would be smooth-animated here).
+  const scrollTop = () => page.evaluate(() => (document.scrollingElement || document.documentElement).scrollTop);
+  await page.goto(`${baseUrl}/#/info?lang=de`);
+  await waitForRoute(page, '#/info');
+  await page.waitForFunction(() => (document.scrollingElement || document.documentElement).scrollHeight > 2000, null, { timeout: 5000 });
+  await page.mouse.move(640, 450);     // wheel = user scroll (no lingering smooth animation, unlike scrollTo)
+  await page.mouse.wheel(0, 3000);
+  await page.waitForTimeout(200);
+  const beforeY = await scrollTop();
+  await page.evaluate(() => { location.hash = '#/downloads'; });
+  await waitForRoute(page, '#/downloads');
+  await page.waitForTimeout(150);
+  const afterY = await scrollTop();
+  check('navigating to a new route scrolls to top', beforeY > 100 && afterY === 0, `before=${beforeY} after=${afterY}`);
+
   // ── 1. Document viewer — page between available documents ──────────────
   await page.goto(`${baseUrl}/#/downloads?lang=de`);
   await waitForRoute(page, '#/downloads');

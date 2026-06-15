@@ -422,7 +422,7 @@
    to its right inside the same wrapper. */
 .top-header__bundmark {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;   /* CD: flag top-aligns with the name SVG (DS .logo items-start), not centred against it */
   gap: var(--space-sm);
   flex-shrink: 0;
 }
