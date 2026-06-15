@@ -439,7 +439,7 @@ export function renderFooter() {
           <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">${t('footer.legalShort')}</a>
           <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">${t('footer.privacy')}</a>
           <a class="app-footer__bottom-link" href="https://www.admin.ch/gov/de/start/dokumentation/impressum.html" target="_blank" rel="noopener">${t('footer.imprint')}</a>
-          <a class="app-footer__bottom-link" href="https://www.edi.admin.ch/edi/de/home/fachstellen/ebgb/recht/schweiz/barrierefreie-bundesverwaltung.html" target="_blank" rel="noopener">${t('footer.accessibilityFull')}</a>
+          <a class="app-footer__bottom-link" href="https://www.ebgb.admin.ch/de/barrierefreiheit-in-der-bundesverwaltung" target="_blank" rel="noopener">${t('footer.accessibilityFull')}</a>
         </div>
       </div>
     </footer>

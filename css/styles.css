@@ -2801,7 +2801,7 @@ a.btn[aria-disabled="true"] {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xl);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body-xs);   /* CD: footer-navigation strip is text--xs (was text--sm — one size too large) */
 }
 @media (min-width: 1024px) {
   .app-footer__bottom-inner { gap: var(--space-2xl); }

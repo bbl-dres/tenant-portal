@@ -61,6 +61,31 @@ await run(reporter, async () => {
   const favicon = await page.evaluate(() => document.querySelector('link[rel~="icon"]')?.getAttribute('href'));
   check('browser tab favicon is the CD Bund flag', favicon === 'assets/swiss-logo-flag.svg', favicon || '(none)');
 
+  // Federal mark: the flag top-aligns with the 4-language name SVG (CD), not
+  // centred against it. (Name is visible at this 1280px width.)
+  const logoAlign = await page.evaluate(() => {
+    const flag = document.querySelector('.top-header__bundmark-flag');
+    const name = document.querySelector('.top-header__bundmark-name');
+    if (!flag || !name) return { skip: true };
+    const f = flag.getBoundingClientRect(), n = name.getBoundingClientRect();
+    return { nameVisible: n.width > 0, dy: Math.abs(f.top - n.top) };
+  });
+  check('header logo: flag top-aligns with the name SVG',
+    logoAlign.skip || !logoAlign.nameVisible || logoAlign.dy <= 4, JSON.stringify(logoAlign));
+
+  // Footer bottom strip: CD text--xs size + the accessibility link target.
+  const footer = await page.evaluate(() => {
+    const inner = document.querySelector('.app-footer__bottom-inner');
+    const a11y = document.querySelector('.app-footer__bottom-link[href*="barrierefreiheit"]');
+    const root = document.documentElement;
+    const xs = getComputedStyle(root).getPropertyValue('--text-body-xs').trim();
+    const remPx = parseFloat(getComputedStyle(root).fontSize) || 16;
+    const xsPx = xs.endsWith('rem') ? parseFloat(xs) * remPx : parseFloat(xs);
+    return { fontPx: inner ? parseFloat(getComputedStyle(inner).fontSize) : null, xsPx, href: a11y?.getAttribute('href') };
+  });
+  check('footer bottom strip uses CD text--xs size', footer.fontPx != null && Math.abs(footer.fontPx - footer.xsPx) < 0.6, JSON.stringify(footer));
+  check('footer accessibility link uses the EBGB URL', footer.href === 'https://www.ebgb.admin.ch/de/barrierefreiheit-in-der-bundesverwaltung', footer.href);
+
   // Scroll-to-top on route (path) change — hash routing doesn't reset scroll.
   // Use the long-form info page as the tall "before" surface. Scroll via
   // direct scrollTop (instant — `scrollTo` would be smooth-animated here).
