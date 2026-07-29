@@ -12,7 +12,7 @@
 //
 // Run: npm run verify:header-chrome
 import { chromium } from 'playwright';
-import { startServer, makeReporter, run, waitForRoute } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute, suppressPrototypeNotice } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
 const reporter = makeReporter('check-header-chrome');
@@ -31,6 +31,7 @@ const CASES = [
 await run(reporter, async () => {
   for (const c of CASES) {
     const page = await browser.newPage({ viewport: { width: c.width, height: 900 } });
+    await suppressPrototypeNotice(page);
     // Property detail has a breadcrumb; deep link auto-logs-in at load.
     await page.goto(`${baseUrl}/#/properties/T-2010-AA-01?lang=de`);
     await waitForRoute(page, '#/properties/T-2010-AA-01');

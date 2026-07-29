@@ -61,10 +61,12 @@ ramp values for component use; never `#hex` a color inside a component.
 | `--text-body-sm`  | 0.875                                          |
 | `--text-body-xs`  | 0.75                                           |
 
-Scale **approximates** DS's `.text--Nxl` responsive chain but starts one
-step smaller across the breakpoints (e.g. base `--text-h1` 1.625 vs DS
-`.h1`/`text--3xl` 1.875). Body text doesn't scale at `xl`/`3xl` — see
-[CD-AUDIT.md §12.3](CD-AUDIT.md) for the deep-dive.
+Scale **matches** DS's `.text--Nxl` responsive chain (verified 2026-07):
+`--text-h1` → `.text--3xl` (26/32/40/48 across base/lg/xl/3xl), `--text-h2`
+→ `.text--2xl`, `--text-h3` → `.text--xl`, `--text-h4` → `.text--lg`; body
+→ `.text--base` (16/16/18/20). The earlier "one step smaller / 1.875" note
+was stale — DS overrides `text-3xl` to 1.625 rem. See
+[CD-GAP-ANALYSIS.md](CD-GAP-ANALYSIS.md).
 
 Font family: **Noto Sans** — CD Bund's canonical typeface. We bundle
 all four faces (regular + bold + italic + bold-italic) from
@@ -113,11 +115,12 @@ Components default to `var(--radius)` (3 px). Pills use `--radius-full`.
 
 ### 2.7 Shadows
 
-Three depths: `--shadow-sm`, `--shadow`, `--shadow-lg`, plus a portal-specific
-`--shadow-card / --shadow-card-hover` pair tuned softer than CD's `shadow-lg`
-(see [CD-AUDIT.md §1.5](CD-AUDIT.md) for the rationale). DS Tailwind config
-ships 7 box-shadow tokens (`sm`, default, `md`, `lg`, `xl`, `2xl`, `none`);
-we use the subset we actually need.
+Three depths: `--shadow-sm`, `--shadow`, `--shadow-lg`, plus a
+`--shadow-card / --shadow-card-hover` pair that now equals DS `shadow-lg` /
+`shadow-2xl` **verbatim** — the "softer than DS" tuning from earlier audits
+was reconciled away (see [CD-GAP-ANALYSIS.md](CD-GAP-ANALYSIS.md) §5). DS
+Tailwind config ships 7 box-shadow tokens (`sm`, default, `md`, `lg`, `xl`,
+`2xl`, `none`); we use the subset we actually need.
 
 ## 3. Components — what we ship
 
@@ -136,14 +139,14 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.pipeline`          | (no DS equivalent)                        | portal-specific status sequence                                      |
 | `.form-field`        | `form.postcss`                            | layout shell for label / input / hint / error                        |
 | `.input`, `.input--{sm,lg,error,disabled}` | `input.postcss`             | standalone input visuals — reusable outside `.form-field`            |
-| `.table`, `.table--{zebra,rows-clickable,caps}` | `table.postcss`     | basic + zebra + hover-pointer + uppercase-headers (default is sentence-case) |
+| `.table`, `.table--{zebra,rows-clickable,caps,compact}` | `table.postcss` | DS contained-object look (outer border + shadow); `--compact` drops both. Headers are sentence-case + bold (DS default is uppercase — see §5.10); `--caps` restores the DS uppercase look |
 | `.table-hint`, `.table-empty` | (layout helpers)                  | helper paragraph below a table / centred empty-row cell              |
 | `.tag-item[--active]`, `.filter-row`, `.filter-chips` | `tag-item.postcss` | DS filter chip (pill, 34 px tall, `aria-pressed`); chip group inside a toolbar |
 | `.page-header[__title/__sub/__actions/__count]` | (layout-only)   | H1 + side-actions row used on inbox / queue / detail; replaces ad-hoc inline flex blocks |
 | `.section-intro[--tight]` | (layout-only)                        | lead paragraph under a section-heading — `max-width: 60ch`, secondary text |
 | `.login-page[__title/__subhead/__dl/__cta/__hint(--muted)]` | (block) | narrow centred form layout for login / contact pages                |
 | `.role-switch-btn[--active]` | (block)                            | full-width modal-stack button; carries `aria-pressed`                 |
-| `.notification-banner__icon` | extension on `.notification-banner` | leading icon slot for info/warning/danger/success banners            |
+| `.notification__icon`, `.notification-banner__icon` | `notification.postcss` | leading status icon; portal addition on the banner (DS ships none there) so colour is never the only signal |
 | `.queue-actions`     | (layout-only)                             | bulk-action toolbar below the reviewer queue table                    |
 | `.checklist__item[--ok/--warn/--danger]` | (block)               | wizard step-5 pre-submission checklist with colour-tinted inline-icon prefixes |
 | `.eppm-tab[--visible]` | (block)                                 | auxiliary ePPM-mapping label next to a wizard field; hidden by default |
@@ -153,7 +156,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.card--clarification` | (block)                                | full-row Rückfrage / Auflagen card with warning left-rail              |
 | `.card__justification` | (layout-only)                          | reviewer's reason paragraph inside a clarification card                |
 | `.card__title--icon` | (block)                                   | card title with a leading inline-icon                                  |
-| `.notification-banner__sub` | (block)                            | secondary line inside a notification-banner__text                      |
+| `.notification__sub`, `.notification-banner__sub` | (block)     | quieter secondary line inside a `__text` / `__content` slot            |
 | `.pipeline__step--pending` | (block)                             | dimmed pipeline step (replaces inline `opacity:0.5`)                   |
 | `.mark-button[--active-{ok,nok,comment}]` | (block)              | reviewer field-mark pill (28 px tall, hosts inline-icon + label)       |
 | `.breadcrumb__list`, `.breadcrumb__item` | (layout-only)         | `<ol>`/`<li>` shells used by the new schema.org BreadcrumbList markup  |
@@ -177,7 +180,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.checklist`, `.consent-check`, `.batch-approve__*` | (block)      | wizard step-5 validation list + bulk-approve modal                      |
 | `.rule`              | utility                                   | soft horizontal rule separator inside panels and modals                 |
 | `.modal__meta`, `.form-field__hint--inline`, `.reviewer-marks__actions`, `.app-detail__correlation` | (helpers) | per-view one-off helpers                                |
-| `.notification-banner--page-top` | (modifier)                     | extra bottom margin when a banner sits at the top of a page body        |
+| `.notification--page-top` | (modifier)                            | extra bottom margin when a notification sits at the top of a page body  |
 | `.main-navigation__chevron` | (block)                            | dropdown trigger chevron (rotates on open)                              |
 | `.service-stub__{lead,actions,hint}` | (block)                  | placeholder page for services not yet wired up (no requirements ID on UI) |
 | `.info-page__{header,title}` | (block)                          | Arbeitsinstrumente long-form page header                                |
@@ -201,7 +204,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.legend`, `figcaption` | `typography.postcss`                   | image caption — body-xs, gray-500, top padding                       |
 | `.meta-info`         | (semantic analogue)                       | small secondary text above page headings; replaces uppercase eyebrow |
 | `.card__title`       | `card.postcss`                            | bold body-size heading for card-internal sub-titles                  |
-| `.alert-banner`      | `alert-banner.postcss`                    | CSS shipped; **not used** — see §5 (prototype notice stays inline)   |
+| `.alert-banner`      | `alert-banner.postcss`                    | CSS shipped; **not used** — the prototype notice uses `.notification-banner--fixed` instead (see §5) |
 | `.section-heading`   | (layout-only modifier)                    | adds extra bottom margin; compose with `.h1`/`.h2` for size          |
 | `.badge--{verified,stale,manual,unchecked,greenfield,llm}` | (portal-specific) | data-quality dots — pure CSS, no emoji (see §6)                |
 
@@ -252,12 +255,16 @@ size | date` metadata strip. Whole row is one clickable link.
 
 ## 5. Intentional deviations from CD-Bund
 
-1. **Softer card shadows** — `--shadow-card` is softer than DS `shadow-lg`.
-   Quieter aesthetic for a dense admin UI; cards shouldn't feel "floating"
-   when stacked in a property grid.
+> A full, prioritised gap analysis lives in
+> [CD-GAP-ANALYSIS.md](CD-GAP-ANALYSIS.md) (2026-07). Items 1, 2 and 8 below
+> were **resolved** in that pass and are kept only as an audit trail.
 
-2. **Wider button padding** — `var(--space-lg)` (24 px) vs DS `px-4` (16 px).
-   Better visual balance in form-heavy wizard pages.
+1. ~~**Softer card shadows**~~ **— RESOLVED (now DS-aligned).**
+   `--shadow-card` / `--shadow-card-hover` now equal DS `shadow-lg` /
+   `shadow-2xl` verbatim. No longer a deviation.
+
+2. ~~**Wider button padding**~~ **— RESOLVED (now DS-aligned).**
+   `.btn` uses `var(--space-md)` (16 px) = DS `px-4`. No longer a deviation.
 
 3. **Single-level breadcrumb** — DS supports hierarchical dropdowns per level;
    we render flat. Admin tool paths are flat; hierarchical breadcrumbs add noise.
@@ -275,18 +282,48 @@ size | date` metadata strip. Whole row is one clickable link.
    Kept as a portal-specific hero variant.
 
 7. **`.alert-banner` not used** — DS specifies a full-bleed colored alert
-   banner above the shell. For the prototype warning we keep the **inline red
-   text in the top-bar centre** (less vertical real estate; aligns with
-   bbl.admin.ch).
+   banner above the shell. The prototype disclaimer instead uses the DS
+   `NotificationBanner` in its `--fixed` variant, pinned to the bottom edge —
+   the same component DS uses for cookie consent, which is what this notice
+   is: a one-per-session acknowledgement. The permanent, always-visible
+   prototype signal stays the **`Prototyp` chip in the top bar** (no vertical
+   real estate; aligns with bbl.admin.ch).
 
-8. **Mobile menu** — current implementation is a plain `display:none → flex`
-   toggle on the main navigation. DS provides a full-screen overlay with
-   animated entry; flagged for a follow-up pass.
+8. **Mobile menu** — the burger opens a fixed **full-screen overlay** with
+   focus-trap, body-scroll-lock and Esc-close, and the drawer foot carries
+   the **account** (login / profile / logout) and **language** controls (CD
+   meta-nav pattern) that the hidden top-bar hosts on desktop. The one
+   remaining gap vs DS is the open/close fade + per-level slide animation.
 
 9. **No build step** — we are vanilla HTML/CSS/JS while DS is Tailwind +
    PostCSS. Tokens are hand-translated from `app/tailwind.config.js` and
    `css/skins/default.postcss`. When DS changes, [`css/tokens.css`](../css/tokens.css) must be
    reviewed.
+
+10. **Sentence-case, bold table headers** — DS `table.postcss` defaults
+    `thead th` to **uppercase**, regular weight, `text-700`. We use
+    sentence-case + bold for scannability in dense reviewer queues; the DS
+    uppercase look is available via `.table--caps`.
+
+11. **Static-px icon scale** — `--icon-*` are fixed px, not the DS
+    responsive `.icon--*` (which bump one step at `md`/`lg`). The portal's
+    inline icons sit with body text and don't need to grow with the
+    viewport; sizing stays predictable across breakpoints.
+
+12. **3 px focus outline on light surfaces** — DS uses a 2 px `ring`; we use
+    a 3 px `outline` + 2 px offset (WCAG 2.4.11-favourable, thicker target).
+    On dark chrome the ring switches **colour** (purple-300) at the same
+    thickness. Consistent one-thickness rule.
+
+13. **`.overtitle` restyle** — uppercase + `0.06em` tracking + `text-500`
+    recolour vs the DS `overtitle` (`secondary-100`, no transform). The
+    recolour keeps the kicker legible on light card surfaces; the
+    transform/tracking is a deliberate eyebrow treatment.
+
+14. **Neutral gray default badge** — the base `.badge` uses the neutral
+    `gray-200` tint rather than DS `.badge--gray`'s blue-gray `secondary-100`,
+    for calmer status dots in dense data tables. (`.badge--warning` now
+    aliases orange per DS; `.badge--yellow` is available for a yellow status.)
 
 ## 5a. Naming-collision register
 
@@ -299,7 +336,7 @@ Document them here so copy-paste from `swiss/designsystem` doesn't surprise.
 | `.toast` | Animated message inside a `.toast-host` region. | Wrapped as `.toast__message.active`. No `.toast-host` concept. | Markup shapes differ. |
 | `.card--flat` | Borderless, no shadow. | Bottom-bordered list-item variant. | Two visually different looks under the same name. |
 | `.card--highlight` | (Modifier defined but currently unused after recent edit.) | Secondary-300 backplate behind the card. | Low — we no longer apply it. |
-| `.notification-banner` | Only the `--danger/--warning/--success` colour variants live in our CSS. | Full DS includes `__wrapper` + header/body grid. | Subset usage — not a collision per se. |
+| `.notification-banner` | Full DS translation: composes with `.notification` exactly as `NotificationBanner.vue` does. `__text` is an alias of DS `__infos`; `--danger` an alias of DS `--error`. | Same. | None — DS markup pastes in unchanged. |
 
 ## 5b. Pattern-composition rules (DS-aligned)
 

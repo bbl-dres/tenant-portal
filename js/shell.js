@@ -30,23 +30,105 @@
    ========================================================================== */
 
 import { state, t, setLang, LANGS } from './state.js';
-import { toast, icon, renderShortcutOverlay, safeGet, safeSet, escapeHtml } from './lib.js';
+import { toast, icon, renderShortcutOverlay, safeGet, safeSet, safeSessionGet, safeSessionSet, escapeHtml } from './lib.js';
 
+// ── PROTOTYPE NOTICE ──────────────────────────────────────────────────────
+// CD Bund `NotificationBanner` in its fixed variant — the same component the
+// federal design system uses for the cookie-consent popup
+// (designsystem/app/components/ch/components/NotificationBanner.vue +
+// css/components/notification-banner.postcss `.notification-banner--fixed`).
+// Here it carries the prototype disclaimer instead of a consent question.
+//
+// Scope is deliberately SESSION, not localStorage: the disclaimer must greet
+// every new visit, and it is emitted from renderShell — which every route
+// mounts — so a bookmarked deep link (#/properties/T-2010-AA-01/floors/1OG)
+// shows it just like the landing page does. Dismissal then holds for the rest
+// of the session, across navigation.
+const PROTOTYPE_NOTICE_KEY = 'mp-prototype-notice';
 const CONSENT_KEY = 'mp-cookie-consent';
+
+// In-memory mirror of the sessionStorage flag. Without it, a browser with
+// storage disabled (private mode, enterprise policy) would re-show the notice
+// on every single route render — annoying rather than fail-safe.
+let prototypeNoticeDismissed = false;
+
+function prototypeNoticeAcknowledged() {
+  return prototypeNoticeDismissed || safeSessionGet(PROTOTYPE_NOTICE_KEY) === '1';
+}
+
+function renderPrototypeNotice() {
+  if (prototypeNoticeAcknowledged()) return '';
+  return `
+    <aside class="notification-banner notification-banner--fixed notification notification--warning prototype-notice"
+           id="prototypeNotice" role="region" aria-labelledby="prototypeNoticeTitle">
+      <div class="notification-banner__wrapper">
+        <span class="notification-banner__icon" aria-hidden="true">${icon('alertTriangle')}</span>
+        <p class="notification-banner__text">
+          <strong id="prototypeNoticeTitle">${t('proto.title')}</strong> ${t('proto.text')}
+        </p>
+        <div class="notification-banner__actions">
+          <button class="btn btn--outline btn--sm" type="button" id="prototypeNoticeAck"
+                  onclick="window.portal.dismissPrototypeNotice()">${t('proto.ack')} ${icon('check')}</button>
+        </div>
+      </div>
+    </aside>
+  `;
+}
+
+export function dismissPrototypeNotice() {
+  prototypeNoticeDismissed = true;
+  safeSessionSet(PROTOTYPE_NOTICE_KEY, '1');
+  document.getElementById('prototypeNotice')?.remove();
+  syncPrototypeNoticeOffset();
+  // The cookie banner is held back while the disclaimer is up (see
+  // renderConsentBanner) so a first-time visitor never faces two stacked
+  // consent bars. Surface it now, in the slot renderShell would have used.
+  const consent = renderConsentBanner();
+  if (consent) document.querySelector('.page-container')?.insertAdjacentHTML('afterbegin', consent);
+}
+
+// The notice is `position: fixed` at the bottom edge, so it would otherwise
+// cover the last footer row and any toast. Publishing its measured height as
+// a custom property lets CSS reserve the space (see `.prototype-notice` in
+// styles.css) without hardcoding a per-breakpoint guess — the text wraps to
+// two or three lines on phones.
+let _noticeResizeObserver = null;
+function publishNoticeHeight() {
+  const el = document.getElementById('prototypeNotice');
+  document.documentElement.style.setProperty('--prototype-notice-h', el ? el.offsetHeight + 'px' : '0px');
+}
+function syncPrototypeNoticeOffset() {
+  const el = document.getElementById('prototypeNotice');
+  document.body.classList.toggle('body--prototype-notice', !!el);
+  publishNoticeHeight();
+  // Measuring once at render time is not enough: that happens before Noto Sans
+  // has swapped in, and the fallback face wraps the copy to a different number
+  // of lines. Observing the element re-publishes the height on the font swap,
+  // on rotation and on any reflow — the bar is re-created by every route
+  // render, so re-observe each time.
+  if (!el) { _noticeResizeObserver?.disconnect(); return; }
+  if (typeof ResizeObserver !== 'function') return;   // resize listener covers it
+  _noticeResizeObserver ??= new ResizeObserver(publishNoticeHeight);
+  _noticeResizeObserver.disconnect();
+  _noticeResizeObserver.observe(el);
+}
+window.addEventListener('resize', syncPrototypeNoticeOffset);
 
 function renderConsentBanner() {
   if (safeGet(CONSENT_KEY)) return '';
+  // Sequenced behind the prototype disclaimer — see dismissPrototypeNotice.
+  if (!prototypeNoticeAcknowledged()) return '';
   return `
-    <aside class="notification-banner notification-banner--info cookie-banner" id="cookieBanner" role="region" aria-label="Datenschutz und Cookies">
-      <span class="notification-banner__icon" aria-hidden="true">${icon('info')}</span>
+    <aside class="notification-banner notification notification--info cookie-banner" id="cookieBanner" role="region" aria-label="Datenschutz und Cookies">
       <div class="notification-banner__wrapper">
+        <span class="notification-banner__icon" aria-hidden="true">${icon('info')}</span>
         <p class="notification-banner__text">
           Dieses Portal speichert technisch notwendige Einstellungen lokal im Browser. Optionale Analyse-Cookies werden erst nach Zustimmung aktiviert.
           <a href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklaerung</a>
         </p>
         <div class="notification-banner__actions">
-          <button class="btn btn--outline btn--sm" type="button" onclick="window.portal.acceptCookieConsent('necessary')">Nur notwendige</button>
-          <button class="btn btn--filled btn--sm" type="button" onclick="window.portal.acceptCookieConsent('all')">Alle akzeptieren</button>
+          <button class="btn btn--bare btn--sm" type="button" onclick="window.portal.acceptCookieConsent('necessary')">Nur notwendige ${icon('x')}</button>
+          <button class="btn btn--outline btn--sm" type="button" onclick="window.portal.acceptCookieConsent('all')">Alle akzeptieren ${icon('check')}</button>
         </div>
       </div>
     </aside>
@@ -220,12 +302,32 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
   }).join('');
 
   // Mobile-only meta links rendered at the foot of the burger menu so
-  // Kontakt / Hilfe stay reachable when the top-header meta nav is
-  // hidden at narrow widths.
+  // Kontakt / Hilfe — and, critically, the ACCOUNT + LANGUAGE controls —
+  // stay reachable when the top-bar (which hosts them on desktop) is
+  // hidden below 1024 px. Without this an authenticated phone user has no
+  // chrome path to profile/logout, and no interior route offers a login.
+  // CD Bund keeps meta navigation (account + language) at the foot of the
+  // burger drawer (sections/mobile-menu.postcss / MobileMenu.vue).
+  const mobileAccountHtml = state.user
+    ? `<a class="main-navigation__link main-navigation__mobile-meta-account" href="#/profile" aria-label="${t('top.profileAria', { name: escapeHtml(state.user.name) })}">${icon('user')}<span>${escapeHtml(state.user.name)}</span></a>
+       <button class="main-navigation__link main-navigation__mobile-meta-account" type="button" onclick="window.portal.logout()">${icon('logout')}<span>${t('top.logout')}</span></button>`
+    : `<button class="main-navigation__link main-navigation__mobile-meta-account" type="button" onclick="window.portal.login()">${icon('login')}<span>${t('top.login')}</span></button>`;
+
+  const mobileLangHtml = `
+    <div class="main-navigation__mobile-lang" role="group" aria-label="${t('top.language')}">
+      ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en']].map(([code, lang]) => {
+        const isActive = state.lang === lang;
+        return `<button class="main-navigation__mobile-lang-btn${isActive ? ' main-navigation__mobile-lang-btn--active' : ''}" type="button" lang="${lang}" aria-pressed="${isActive}" onclick="window.portal.pickLang('${code}')">${code}</button>`;
+      }).join('')}
+    </div>
+  `;
+
   const mobileMetaHtml = `
     <div class="main-navigation__mobile-meta" aria-label="Meta-Navigation (mobil)">
+      ${mobileAccountHtml}
       <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
       <a class="main-navigation__link" href="#/info">${t('nav.help')}</a>
+      ${mobileLangHtml}
     </div>
   `;
 
@@ -285,6 +387,7 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     : '';
 
   return `
+    ${renderPrototypeNotice()}
     ${renderConsentBanner()}
 
     <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
@@ -877,5 +980,8 @@ export function shell({ activeNav = '', breadcrumb = [], deptSub = '' } = {}) {
                  + '</div>'
                  + renderFooter()
                  + renderShortcutOverlay();
+  // Measure after the markup is live — the notice is re-created by every
+  // route render, and its height drives the bottom spacing reserved in CSS.
+  syncPrototypeNoticeOffset();
   return document.getElementById('main');
 }

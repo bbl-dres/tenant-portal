@@ -14,7 +14,7 @@
 //
 // Run: npm run verify:mobile-nav
 import { chromium } from 'playwright';
-import { startServer, makeReporter, run, waitForRoute } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute, suppressPrototypeNotice } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
 const reporter = makeReporter('check-mobile-nav');
@@ -25,6 +25,9 @@ const browser = await chromium.launch();
 // fails, debug the FIRST failure; later results may be cascade noise.
 await run(reporter, async () => {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  // Case 2 below needs the cookie banner to actually render at the top of the
+  // page; it is sequenced behind the prototype disclaimer, so clear that first.
+  await suppressPrototypeNotice(page);
   // Deterministic drawer-state waits (the body class flips in toggleBurger).
   const drawerOpen = () => page.waitForFunction(
     () => document.body.classList.contains('body--mobile-menu-is-open'), null, { timeout: 5000 });

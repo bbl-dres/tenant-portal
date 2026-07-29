@@ -69,12 +69,28 @@ export function makeReporter(name) {
   return { check, finish };
 }
 
-// Log in via the prototype's demo hook and accept the consent banner so
-// it can't shift layout or intercept clicks. This is the ONLY place test
-// code touches the auth stub — when eIAM replaces window.t3lite.demoRole
-// in the MVP, this function is the single seam to update.
+// Pre-acknowledge the session-scoped prototype disclaimer, before the first
+// navigation, for the checks that are NOT about it. Without this every script
+// would measure a viewport with a fixed bottom bar in it — and the cookie
+// banner, which is sequenced behind the disclaimer, would never render (which
+// check-mobile-nav specifically depends on). Accepts a Page or a
+// BrowserContext; both expose addInitScript. Mirrors PROTOTYPE_NOTICE_KEY in
+// js/shell.js. check-prototype-notice.mjs is the one script that skips it.
+export async function suppressPrototypeNotice(pageOrContext) {
+  await pageOrContext.addInitScript(() => {
+    try { sessionStorage.setItem('mp-prototype-notice', '1'); } catch { /* storage disabled */ }
+  });
+}
+
+// Log in via the prototype's demo hook and clear both first-visit banners
+// (prototype disclaimer, then cookie consent — the consent bar only renders
+// once the disclaimer is gone) so neither can shift layout or intercept
+// clicks. This is the ONLY place test code touches the auth stub — when eIAM
+// replaces window.t3lite.demoRole in the MVP, this function is the single
+// seam to update. check-prototype-notice.mjs deliberately skips this helper.
 export async function loginAs(page, baseUrl, role = 'LBO') {
   await page.goto(`${baseUrl}/#/`, { waitUntil: 'networkidle' });
+  await page.evaluate(() => window.portal?.dismissPrototypeNotice?.());
   await page.evaluate(() => window.portal?.acceptCookieConsent?.('necessary'));
   if (role) {
     await page.evaluate((r) => window.t3lite.demoRole(r), role);
