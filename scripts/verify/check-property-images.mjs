@@ -8,7 +8,7 @@
 //
 // Run: npm run verify:property-images
 import { chromium } from 'playwright';
-import { startServer, makeReporter, run, waitForRoute } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute, suppressPrototypeNotice } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
 const reporter = makeReporter('check-property-images');
@@ -17,6 +17,7 @@ const browser = await chromium.launch();
 
 await run(reporter, async () => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await suppressPrototypeNotice(page);
 
   const imgResponses = [];
   page.on('response', (resp) => {

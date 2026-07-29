@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { startServer } from './lib.mjs';
+import { startServer, suppressPrototypeNotice } from './lib.mjs';
 
 const outDir = join(process.cwd(), 'verify_out', 'a11y-responsive');
 mkdirSync(outDir, { recursive: true });
@@ -258,6 +258,10 @@ try {
         deviceScaleFactor: 1,
         reducedMotion: 'reduce'
       });
+      // The prototype disclaimer gets its own a11y coverage in
+      // check-prototype-notice.mjs; suppress it here so the sweep measures the
+      // steady-state page rather than a first-visit one.
+      await suppressPrototypeNotice(context);
       const page = await context.newPage();
       const scope = `${flow.label}@${viewport.label}`;
       page.on('pageerror', err => addFailure(scope, 'Page error', { error: err.message }));

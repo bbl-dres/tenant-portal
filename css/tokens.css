@@ -56,8 +56,12 @@
 }
 /* Fallback font with metric overrides — keeps line-box heights stable
    between the system fallback (Verdana) and the loaded Noto Sans, so
-   the page doesn't reflow when the web font swaps in. Values copied
-   from designsystem/css/foundations/font-face.postcss:37-44. */
+   the page doesn't reflow when the web font swaps in. Values track
+   designsystem/css/foundations/font-face.postcss:37-44, with ONE
+   deliberate divergence: `descent-override` is 25% here vs the DS
+   source's -25%. A negative descent-override is invalid CSS (the
+   declaration is ignored), so the positive value is the working
+   equivalent — not a verbatim copy. */
 @font-face {
   font-family: 'Fallback-NotoSans';
   src: local('Verdana');
@@ -170,6 +174,30 @@
   --color-danger-light:        #FAE1E2;   /* CD red-100 (was stock-Tailwind #FEE2E2) */
   --color-info:                #0F6B75;
   --color-info-light:          #CBFBF8;   /* CD teal-100 (was stock-Tailwind #CCFBF1) */
+
+  /* ── NOTIFICATION VARIANTS (CD Bund `notification.postcss`) ───────────
+     The DS tints each notification variant with a `-50` stop and colours the
+     text with a `-700`/`-800` stop from that same ramp
+     (designsystem/css/components/notification.postcss + the ramps in
+     app/tailwind.config.js). Deliberately a SEPARATE set from the portal's
+     `--color-info` / `--color-warning` semantic tokens: those drive badges,
+     pipelines and status chips, and two of them diverge from the DS
+     notification palette on purpose — the portal's info is federal teal
+     while the DS notification info is blue, and the portal's warning is
+     amber while the DS is orange. Splitting them lets the component match
+     upstream exactly without re-tinting the whole status vocabulary. */
+  --color-notification-bg:           #F9FAFB;   /* gray-50 (DS default) */
+  --color-notification-info-bg:      #EFF6FF;   /* blue-50 */
+  --color-notification-info-text:    #1D4ED8;   /* blue-700 */
+  --color-notification-success-bg:   #ECFDF5;   /* green-50 */
+  --color-notification-success-text: #065F46;   /* green-800 */
+  --color-notification-warning-bg:   #FFF7ED;   /* orange-50 */
+  --color-notification-warning-text: #9A3412;   /* orange-800 */
+  --color-notification-error-bg:     #FFEDEE;   /* red-50 (CD red, not stock Tailwind) */
+  --color-notification-error-text:   #99191E;   /* red-800 */
+  --color-notification-alert-bg:     #801519;   /* red-900 — inverted variant */
+  --color-notification-hint-bg:      #F0F4F7;   /* secondary-50 */
+  --color-notification-hint-text:    #374151;   /* text-700 */
 
   /* ── LANGUAGE SWITCHER ────────────────────────────────────────────────
      Tailwind blue-600 / blue-700 from the DS canonical pattern
@@ -332,6 +360,10 @@
   --container-max-width:       1544px;
   --container-padding:         1rem;       /* 16px base; scales below */
   --grid-gutter:               1.25rem;
+  /* CD Bund `.gap--responsive` (grids.postcss): gap-5 → gap-16 across the
+     breakpoint cascade (20/28/36/40/48/64 px). Single source of truth for
+     responsive grid gutters so page rhythm stops varying per-grid. */
+  --gap-responsive:            1.25rem;    /* 20px base; scales below */
   --sidebar-width:             280px;
 
   /* ── COMPONENT DIMENSIONS ─────────────────────────────────────────────── */
@@ -369,6 +401,11 @@
   --shadow-property-marker:    0 2px 4px var(--color-black-25);
   --shadow-property-status:    0 1px 2px var(--color-black-15);
   --shadow-sticky-edge:        0 -4px 8px -4px var(--color-black-04);
+  /* Tailwind `shadow-2xl`, the elevation the DS puts on its fixed
+     notification banner. Same value as `--shadow-nav-trigger`; kept under its
+     own name so the two can drift apart without one silently restyling the
+     other. */
+  --shadow-2xl:                0 25px 50px -12px var(--color-black-25);
   --filter-shadow-video-play:  drop-shadow(0 2px 6px var(--color-black-35));
 
   /* ── TRANSITIONS ──────────────────────────────────────────────────────── */
@@ -377,6 +414,9 @@
   --transition-slow:           320ms ease;
 
   /* ── Z-INDEX SCALE ────────────────────────────────────────────────────── */
+  /* Fixed notification banner (prototype disclaimer) — above page chrome,
+     below toasts so a confirmation message is never hidden behind it. */
+  --z-notice:                   90;
   --z-toast:                   100;
   --z-modal:                   200;
   --z-shortcut-overlay:        300;
@@ -450,9 +490,29 @@
 @media (min-width: 1280px) { :root { --container-padding: 3rem; } }      /* 48 */
 @media (min-width: 1920px) { :root { --container-padding: 4rem; } }      /* 64 */
 
+/* ── RESPONSIVE GRID GUTTER — CD Bund `.gap--responsive` cascade ─────────
+   gap-5 xs:gap-7 sm:gap-9 lg:gap-10 xl:gap-12 3xl:gap-16. */
+@media (min-width: 480px)  { :root { --gap-responsive: 1.75rem; } }      /* 28 */
+@media (min-width: 640px)  { :root { --gap-responsive: 2.25rem; } }      /* 36 */
+@media (min-width: 1024px) { :root { --gap-responsive: 2.5rem; } }       /* 40 */
+@media (min-width: 1280px) { :root { --gap-responsive: 3rem; } }         /* 48 */
+@media (min-width: 1920px) { :root { --gap-responsive: 4rem; } }         /* 64 */
+
 /* ── RESPONSIVE TOP-BAR HEIGHT — CD Bund pattern (44/48/52 px) ──────── */
 @media (min-width: 1280px) { :root { --topbar-height: 50px; } }
 @media (min-width: 1920px) { :root { --topbar-height: 56px; } }
+
+/* ── RESPONSIVE NAV HEIGHT — CD Bund main-navigation scales the nav row
+   with the rest of the chrome (56 → 64 → 80 px). The top-bar and brand
+   bar already scale at these widths; without this the nav read short. */
+@media (min-width: 1280px) { :root { --nav-height: 64px; } }
+@media (min-width: 1920px) { :root { --nav-height: 80px; } }
+
+/* ── RESPONSIVE CONTAINER CAP — CD Bund `container.3xl` = 1676 px. Below
+   3xl the cap is the 2xl value (1544 px); on ≥1920 px federal-workstation
+   monitors the DS widens content to 1676 px. Padding + section-py already
+   cascade to 1920, so the max-width now matches that cascade. */
+@media (min-width: 1920px) { :root { --container-max-width: 1676px; } }
 
 /* ── RESPONSIVE SECTION PADDING — CD Bund .container--py canonical scale
    py-14 lg:py-20 3xl:py-32 (56 → 80 → 80 → 128 px across base / lg / 2xl / 3xl).
@@ -491,6 +551,9 @@ button { font-family: inherit; cursor: pointer; }
    prevents descender collisions and matches federal sites. */
 a { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; }
 a:hover { color: var(--color-link-hover); }
+/* CD Bund `link.postcss` darkens body links on BOTH hover and focus
+   (`hover:text-primary-800 focus:text-primary-800`). */
+a:focus-visible { color: var(--color-link-hover); }
 
 /* `mark` — CD Bund `typography.postcss` uses `bg-primary-200` (light
    red) instead of the browser-default lurid yellow. Used by search-hit
@@ -515,10 +578,17 @@ mark {
   margin: 0 0 var(--space-sm);
 }
 
-/* Focus ring (federal eCH-0059) */
+/* Focus ring (federal eCH-0059). `z-index` mirrors CD Bund
+   `global.postcss` (`*:focus-visible { … z-10 }`) so a focused,
+   already-positioned control (sticky back-to-top, absolutely-positioned
+   card actions) stacks its ring above later-painted neighbours instead of
+   being occluded. No `position` is forced here — that would break sticky /
+   fixed focusables — so on static elements this is inert, exactly as the
+   DS `z-10` is. */
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+  z-index: 10;
 }
 
 /* ── REDUCED MOTION — WCAG 2.1 SC 2.3.3 / SC 2.2.2 ─────────────────────
@@ -545,18 +615,34 @@ mark {
    Overridden to `auto` by the reduced-motion block above. */
 html { scroll-behavior: smooth; }
 
-/* Skip-link (NFA-CD-004) */
+/* CD Bund `global.postcss`: `[id] { @apply scroll-mt-8 }` — every id target
+   reserves 32px of scroll-margin so anchor jumps / deep-links don't tuck the
+   heading under the sticky federal chrome. Component overrides that need more
+   (e.g. `.page-with-toc` articles at 160px) are more specific and still win. */
+[id] { scroll-margin-top: var(--space-xl); }
+
+/* Skip-link (NFA-CD-004) — CD Bund federal skip-to-content pill
+   (designsystem/css/foundations/global.postcss:63-73): horizontally
+   centred, secondary-900 fill, white 2 px border + shadow, slid out of
+   view with `translateY(-200%)` and sliding in on focus. Stays in the
+   DOM/tab order (it is the first focusable element) instead of the old
+   `left:-9999px` park. The reduced-motion block above neutralises the
+   slide transition. */
 .skip-to-content {
   position: absolute;
-  left: -9999px;
-  top: 0;
   z-index: 1000;
-  padding: var(--space-md);
-  background: var(--color-text-primary);
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-200%);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-secondary-900);
   color: var(--color-text-inverse);
+  border: 2px solid var(--color-white);
+  box-shadow: var(--shadow);
   text-decoration: none;
+  transition: transform var(--transition);
 }
-.skip-to-content:focus {
-  left: var(--space-md);
-  top: var(--space-md);
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  transform: translateX(-50%) translateY(0);
 }

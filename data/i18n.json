@@ -2,9 +2,15 @@
   "lang.choose":        { "de": "Sprache wählen", "fr": "Choisir la langue", "it": "Scegliere la lingua", "en": "Select language" },
   "lang.label":         { "de": "Sprache", "fr": "Langue", "it": "Lingua", "en": "Language" },
 
-  "top.demo":           { "de": "Demo", "fr": "Démo", "it": "Demo", "en": "Demo" },
+  "top.demo":           { "de": "Prototyp", "fr": "Prototype", "it": "Prototipo", "en": "Prototype" },
   "top.demoAria":       { "de": "Prototyp — nur zur Demonstration", "fr": "Prototype — à des fins de démonstration uniquement", "it": "Prototipo — solo a scopo dimostrativo", "en": "Prototype — for demonstration only" },
+
+  "proto.title":        { "de": "Diese Anwendung ist ein Prototyp.", "fr": "Cette application est un prototype.", "it": "Questa applicazione è un prototipo.", "en": "This application is a prototype." },
+  "proto.text":         { "de": "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.", "fr": "La présentation, les fonctionnalités et les contenus servent exclusivement à des fins de démonstration; les données utilisées sont fictives ou accessibles au public.", "it": "La presentazione, le funzionalità e i contenuti servono esclusivamente a scopo dimostrativo; i dati utilizzati sono fittizi o accessibili al pubblico.", "en": "Layout, functionality and content serve demonstration purposes only; the data used is fictional or publicly available." },
+  "proto.ack":          { "de": "Verstanden", "fr": "Compris", "it": "Ho capito", "en": "Understood" },
   "top.login":          { "de": "Anmelden", "fr": "Se connecter", "it": "Accedi", "en": "Log in" },
+  "top.logout":         { "de": "Abmelden", "fr": "Se déconnecter", "it": "Esci", "en": "Log out" },
+  "top.language":       { "de": "Sprache", "fr": "Langue", "it": "Lingua", "en": "Language" },
   "top.profileAria":    { "de": "Profil von {name}", "fr": "Profil de {name}", "it": "Profilo di {name}", "en": "Profile of {name}" },
   "top.allAuthorities": { "de": "Alle Schweizer Bundesbehörden", "fr": "Toutes les autorités fédérales suisses", "it": "Tutte le autorità federali svizzere", "en": "All Swiss federal authorities" },
   "top.search":         { "de": "Suchen", "fr": "Rechercher", "it": "Cerca", "en": "Search" },

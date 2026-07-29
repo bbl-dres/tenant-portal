@@ -160,6 +160,15 @@ export function safeSet(key, value) {
 export function safeRemove(key) {
   try { localStorage.removeItem(key); } catch { /* nothing to do */ }
 }
+// Session-scoped twins. Used for state that must reset on every new visit
+// rather than persist forever — currently the prototype disclaimer, which
+// has to greet each new session (see renderPrototypeNotice in shell.js).
+export function safeSessionGet(key) {
+  try { return sessionStorage.getItem(key); } catch { return null; }
+}
+export function safeSessionSet(key, value) {
+  try { sessionStorage.setItem(key, value); } catch { /* quota or disabled */ }
+}
 
 
 // ── ICON SET ───────────────────────────────────────────────────────────────
@@ -182,6 +191,7 @@ export function safeRemove(key) {
 export const ICONS = {
   // chrome / interactive
   search: 'Search', user: 'User', help: 'Help', info: 'Info',
+  login: 'Login', logout: 'Logout',
   share: 'Share', printer: 'Printer', external: 'External',
   download: 'Download', upload: 'Upload', maximize: 'Expand', refresh: 'Refresh',
   home: 'Home', plus: 'Plus', minus: 'Minus', compress: 'Compress',
@@ -397,11 +407,30 @@ function ensureToastHost() {
   }
   return host;
 }
+// Status glyph per variant so success / error / … are distinguishable by
+// SHAPE, not colour alone (WCAG 1.4.1) — mirrors the CD Bund floating
+// Notification, which always carries a status icon. Default (no variant)
+// gets the neutral info glyph.
+const TOAST_ICON = {
+  success: 'checkCircle',
+  danger: 'xCircle',
+  error: 'xCircle',
+  warning: 'alertTriangle',
+  info: 'info',
+};
 export function toast(message, variant = '') {
   const host = ensureToastHost();
   const el = document.createElement('div');
   el.className = 'toast' + (variant ? ' toast--' + variant : '');
-  el.setAttribute('role', 'status');
+  // Danger/error announce assertively; everything else politely.
+  el.setAttribute('role', variant === 'danger' || variant === 'error' ? 'alert' : 'status');
+
+  // Leading status icon — decorative (the role + text carry the meaning),
+  // but its shape is the non-colour signal that satisfies WCAG 1.4.1.
+  const iconEl = document.createElement('span');
+  iconEl.className = 'toast__icon';
+  iconEl.setAttribute('aria-hidden', 'true');
+  iconEl.innerHTML = icon(TOAST_ICON[variant] || 'info');
 
   // Message + close affordance — CD `toast-message` ships a dismiss
   // button so users who need more reading time aren't forced to wait
@@ -417,7 +446,7 @@ export function toast(message, variant = '') {
   close.innerHTML = icon('x');
   close.addEventListener('click', () => el.remove());
 
-  el.append(msg, close);
+  el.append(iconEl, msg, close);
   host.appendChild(el);
   setTimeout(() => el.classList.add('toast--hiding'), 3500);
   setTimeout(() => el.remove(), 3800);
@@ -438,6 +467,7 @@ export function modal({ title, body, actions = [], onClose = null, size = '' }) 
     : null;
   _modalSeq += 1;
   const titleId = 'modalTitle-' + _modalSeq;
+  const bodyId = 'modalBody-' + _modalSeq;
 
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop';
@@ -476,14 +506,14 @@ export function modal({ title, body, actions = [], onClose = null, size = '' }) 
   backdrop.addEventListener('click', e => { if (e.target === backdrop) close(); });
   const sizeCls = size ? ` modal--${size}` : '';
   backdrop.innerHTML = `
-    <div class="modal${sizeCls}" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
+    <div class="modal${sizeCls}" role="dialog" aria-modal="true" aria-labelledby="${titleId}" aria-describedby="${bodyId}">
       <div class="modal__header">
         <h2 class="modal__title" id="${titleId}">${title}</h2>
         <button class="modal__close" type="button" aria-label="Schliessen">
           ${icon('x')}
         </button>
       </div>
-      <div class="modal__body">${body}</div>
+      <div class="modal__body" id="${bodyId}">${body}</div>
       <div class="modal__footer">
         ${actions.map((a, i) => `<button class="btn ${a.variant || 'btn--outline'}" type="button" data-action="${i}">${a.label}</button>`).join('')}
       </div>

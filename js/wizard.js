@@ -343,9 +343,10 @@ function updateSapInfo(draft) {
       draft.assetKey = null;
       draft.egid = null;
       info.innerHTML = `
-        <div class="notification-banner notification-banner--warning">
-          <div class="notification-banner__wrapper">
-            <p class="notification-banner__text">
+        <div class="notification notification--warning">
+          <span class="notification__icon" aria-hidden="true">${icon('info')}</span>
+          <div class="notification__content">
+            <p>
               <strong>Greenfield erkannt:</strong> Adresse nicht im Bundes-Stammdatensatz.
               Sie können den Antrag trotzdem einreichen. BBL legt die WE im Anschluss an die Genehmigung an.
             </p>
@@ -368,10 +369,10 @@ function updateSapInfo(draft) {
   // Surface only the actionable BK-mismatch case to the user, since
   // they need to contact a different organisation in that branch.
   info.innerHTML = bkOk ? '' : `
-    <div class="notification-banner notification-banner--danger">
-      <span class="notification-banner__icon" aria-hidden="true">${icon('alertTriangle')}</span>
-      <div class="notification-banner__wrapper">
-        <p class="notification-banner__text">
+    <div class="notification notification--danger">
+      <span class="notification__icon" aria-hidden="true">${icon('alertTriangle')}</span>
+      <div class="notification__content">
+        <p>
           <strong>Adresse nicht im BBL-Portfolio.</strong>
           BK ${match.assetKey.bk} ≠ 1086 — bitte zuständige Organisation kontaktieren.
         </p>

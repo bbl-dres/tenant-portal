@@ -30,10 +30,12 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
   <img src="assets/Preview1.JPG" width="90%"/>
 </p>
 
-<p align="center">
-  <img src="assets/Preview2.JPG" width="45%" style="vertical-align: top;"/>
-  <img src="assets/Preview3.JPG" width="45%" style="vertical-align: top;"/>
-</p>
+<table align="center" width="90%">
+  <tr>
+    <td width="50%"><img src="assets/Preview2.JPG" width="100%"/></td>
+    <td width="50%"><img src="assets/Preview3.JPG" width="100%"/></td>
+  </tr>
+</table>
 
 ## Features
 
@@ -45,6 +47,9 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
 - **Plans & Documents (Pläne & Dokumente)** — paginated documents page with type / building / text filters, simulated downloads.
 - **News + Info** — long-form info page with sticky TOC scroll-spy, news overview + detail, search across all entities.
 - **Role switching** — tenant (LBO), GS reviewer, BBL Portfolio Management (BBL-PFM), BBL Campus, Auditor. Each role gets a tailored nav + landing.
+
+### Prototype disclosure
+- **Session-scoped prototype notice** — the CD Bund `NotificationBanner` in its fixed variant (the component the design system uses for cookie consent) carries the disclaimer that this is a prototype and that the data is fictional or publicly available. It is emitted by the shell, so a bookmarked deep link discloses it just like the landing page, and it returns for every new session rather than being dismissed once and forever. The cookie banner is sequenced behind it so a first-time visitor never faces two stacked bars.
 
 ### Federal Corporate Design (CD Bund) alignment
 - ≈ 99 % aligned with [`swiss/designsystem`](https://github.com/swiss/designsystem) v1.0.9 — typography, color, layout, spacing, components.
@@ -99,7 +104,7 @@ npm run verify:all   # Playwright browser checks (UI regressions + a11y sweep)
 Two layers, both run by CI on every push:
 
 - **`npm test`** — ESLint (correctness rules, no style bikeshedding), domain unit checks (wizard maths, the `escapeHtml`/`escapeJs` XSS guards, locale formatters) and the CD Bund token guard (no rogue colors or inline styles outside `css/tokens.css`).
-- **`npm run verify:all`** — the Playwright checks in `scripts/verify/`, individually runnable: `verify:mobile-nav` (burger-menu behaviour), `verify:mobile-layouts` (horizontal-overflow / control-sizing at phone widths, incl. the reviewer queue), `verify:header-chrome` (split logo, breadcrumb, burger placement across breakpoints), `verify:property-images` (all imagery same-origin, nothing broken), `verify:media-viewer` (document preview: prev/next navigation, single-scroll model with sticky header, share popover + `?doc=` deep link; property image gallery: open, upload, navigate, delete, header-badge sync; plus cross-view UI consistency — the shared `.search-field` and the `.page-header` pattern), `verify:a11y` (responsive accessibility sweep: landmarks, names, headings, focus management). JSON reports and screenshots land in `verify_out/` (gitignored, uploaded as a CI artifact).
+- **`npm run verify:all`** — the Playwright checks in `scripts/verify/`, individually runnable: `verify:mobile-nav` (burger-menu behaviour), `verify:mobile-layouts` (horizontal-overflow / control-sizing at phone widths, incl. the reviewer queue), `verify:header-chrome` (split logo, breadcrumb, burger placement across breakpoints), `verify:property-images` (all imagery same-origin, nothing broken), `verify:media-viewer` (document preview: prev/next navigation, single-scroll model with sticky header, share popover + `?doc=` deep link; property image gallery: open, upload, navigate, delete, header-badge sync; plus cross-view UI consistency — the shared `.search-field` and the `.page-header` pattern), `verify:prototype-notice` (the prototype disclaimer: shows on any deep-linked URL, returns each session, CD class composition, reserved space + toast stacking, four-language copy, phone layout), `verify:a11y` (responsive accessibility sweep: landmarks, names, headings, focus management). JSON reports and screenshots land in `verify_out/` (gitignored, uploaded as a CI artifact).
 
 The browser checks wait on a render marker (`#page-body[data-route]`, stamped by the router after each render) instead of sleeping, which keeps them deterministic.
 

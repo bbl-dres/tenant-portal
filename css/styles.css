@@ -1153,10 +1153,28 @@
 .btn--lg { min-height: 48px; padding: var(--space-md) var(--space-xl); font-size: var(--text-h4); }
 @media (min-width: 1280px) { .btn--sm { min-height: 40px; } .btn--lg { min-height: 52px; } }
 @media (min-width: 1920px) { .btn--sm { min-height: 44px; } .btn--lg { min-height: 56px; } }
+/* DS flat disabled fills (btn.postcss) instead of `opacity`, which makes a
+   disabled navy button translucent (page bleeds through, shadow fades).
+   Filled → solid secondary-200 / white text; outline & bare → muted
+   secondary-300. Base rule handles the variant-less case. */
 .btn[disabled], .btn--disabled {
-  opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+  color: var(--color-secondary-300);
+}
+.btn--filled[disabled], .btn--filled.btn--disabled {
+  background: var(--color-secondary-200);
+  border-color: var(--color-secondary-200);
+  color: var(--color-white);
+}
+.btn--outline[disabled], .btn--outline.btn--disabled {
+  background: transparent;
+  color: var(--color-secondary-300);
+  border-color: var(--color-secondary-200);
+}
+.btn--bare[disabled], .btn--bare.btn--disabled {
+  background: transparent;
+  color: var(--color-secondary-300);
 }
 /* Explicit focus ring on buttons. The global :focus-visible already covers
    the keyboard-only case, but a 3 px purple outline on a navy filled
@@ -1218,17 +1236,20 @@
   border-radius: 2px;
 }
 .card--flat { box-shadow: none; border-color: var(--color-secondary-200); }
-.card__title { margin: 0; font-size: var(--text-h4); font-weight: var(--font-weight-bold); }
+/* Canonical card title. DS `card.postcss` `.card__title` is
+   `text-lg xl:text-xl 3xl:text-2xl` bold (18/20/24 px) — never below 18 px.
+   `--text-h4` (18/18/20/22) meets that floor. This is the SINGLE
+   `.card__title` size rule; the former duplicate lower in this file that
+   forced `--text-body` (16 px) was removed. */
+.card__title { margin: 0 0 var(--space-sm); font-size: var(--text-h4); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
 .card__lead { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
 .card__footer { margin-top: auto; padding-top: var(--space-md); border-top: 1px solid var(--color-border-light); display: flex; gap: var(--space-sm); justify-content: space-between; }
 
 .card-grid {
   display: grid;
-  gap: var(--space-lg);
+  gap: var(--gap-responsive);   /* CD `.gap--responsive` cascade — was an ad-hoc 24→32→48 jump */
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
-@media (min-width: 1024px) { .card-grid { gap: var(--space-xl); } }
-@media (min-width: 1280px) { .card-grid { gap: var(--space-2xl); } }
 
 /* "Alle X ansehen →" CTA placed below a preview card-grid (e.g. /home
    shows 4 services + this link to /services). Right-aligned like DS
@@ -1441,7 +1462,7 @@
    responsibility (size/weight vs. spacing/max-width). */
 .h1 { font-size: var(--text-h1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); letter-spacing: var(--tracking-tight); }
 .h2 { font-size: var(--text-h2); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); letter-spacing: var(--tracking-tight); }
-.h3 { font-size: var(--text-h3); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
+.h3 { font-size: var(--text-h3); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }  /* DS `.text--xl` applies leading-tight (1.25) */
 .h4 { font-size: var(--text-h4); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
 .h5 { font-size: var(--text-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
 
@@ -1511,15 +1532,11 @@ figcaption {
   font-size: var(--text-body-sm);
 }
 
-/* Card-internal heading — used as the only title inside a plain .card.
-   Aligns with DS .card__title shape (bold body-size text) but sized for
-   the inset/aside use case where it sits at the top of a card. */
-.card__title {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--space-sm);
-  color: var(--color-text-primary);
-}
+/* (The former duplicate `.card__title` size override lived here. It forced
+   `--text-body` (16 px), silently overriding the canonical rule above and
+   dropping every card title below the DS 18 px floor. Removed — the single
+   source of truth is the `.card__title` rule near the top of the CARDS
+   section.) */
 
 /* CD Bund `meta-info` — publication metadata strip above an H1
    (typically "Webartikel | 23. Februar 2022" or
@@ -1566,9 +1583,16 @@ figcaption {
 }
 .badge--success { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
 .badge--info    { background: var(--color-badge-blue-bg);  color: var(--color-badge-blue-text); }
-.badge--warning { background: var(--color-badge-yellow-bg); color: var(--color-badge-yellow-text); }
-.badge--danger  { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
+/* CD Bund `badge.postcss` makes `.badge--warning` an ALIAS of `.badge--orange`
+   (bg-orange-100 / text-orange-800). The portal's warning states (open issues,
+   lease expiry, fixed-term) are genuine attention states, so orange is the
+   correct hue and keeps "warning" a single colour across badge, notification
+   and pipeline. `.badge--yellow` remains available for a distinct yellow
+   status if one is ever needed (mirrors DS `.badge--yellow`). */
+.badge--warning,
 .badge--orange  { background: var(--color-badge-orange-bg); color: var(--color-badge-orange-text); }
+.badge--danger  { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
+.badge--yellow  { background: var(--color-badge-yellow-bg); color: var(--color-badge-yellow-text); }
 
 /* Data-quality glyph badges (from §0.3).
    DESIGNGUIDE §6 forbids emoji in user-visible markup; previously these
@@ -1694,7 +1718,7 @@ figcaption {
    left edge while the text sits flush against the right padding. */
 .btn--back .inline-icon           { width: var(--icon-md); height: var(--icon-md); margin-right: 0; margin-inline-start: -4px; }
 .contact-block__link .inline-icon { width: var(--icon-md); height: var(--icon-md); color: var(--color-primary); }
-.contact-block__link:hover .inline-icon { color: var(--color-primary-hover); }
+.contact-block__link:hover .inline-icon { color: var(--color-link-hover); }
 .filter-pill__remove-icon {
   display: inline-block;
   width: var(--icon-xs);
@@ -1862,7 +1886,11 @@ figcaption {
 .form-field__select:focus {
   outline: none;
   border-color: var(--color-text-primary);
-  box-shadow: 0 0 0 3px var(--color-focus-tint), var(--shadow-card);
+  /* CD: solid purple-500 ring (DS `ring-2 ring-purple-500`) instead of the
+     former 25%-opacity tint, which was borderline for the WCAG 2.4.11 3:1
+     non-text focus-indicator contrast. The darkened border stays as a
+     secondary cue. */
+  box-shadow: 0 0 0 2px var(--color-focus);
 }
 .input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
 .input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-body); }
@@ -1897,11 +1925,22 @@ select.input,
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background-image: url("../assets/icons/ChevronDown.svg");
-  background-position: right var(--space-sm) center;
-  background-repeat: no-repeat;
-  background-size: 20px 20px;
-  padding-inline-end: calc(var(--space-sm) + 20px + var(--space-sm));
+  /* CD Bund select — reproduces the DS `.select__icon` segmented look
+     (field │ ▾, designsystem/css/components/select.postcss) WITHOUT a
+     wrapper element: two background layers — the chevron glyph, plus a
+     full-height 1 px divider drawn as a `linear-gradient` at the left edge
+     of the ~44 px chevron column, matching the DS `border-left`. */
+  background-image:
+    url("../assets/icons/ChevronDown.svg"),
+    linear-gradient(var(--color-border-input), var(--color-border-input));
+  background-repeat: no-repeat, no-repeat;
+  background-position:
+    right var(--space-md) center,
+    right 44px top;
+  background-size:
+    20px 20px,
+    1px 100%;
+  padding-inline-end: calc(44px + var(--space-md));
 }
 /* Custom combobox — replaces native `<datalist>` so the suggestion
    popup matches the input width, our typography, and the rest of the
@@ -1943,8 +1982,18 @@ select.input,
 .combobox__option-secondary { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
 
 .input--error { border-color: var(--color-danger); }
+/* DS flat disabled input (input.postcss `[disabled]` → bg-text-50 /
+   text-text-400 / border-text-300) instead of opacity. */
 .input--disabled,
-.input:disabled { opacity: 0.6; cursor: not-allowed; background: var(--color-bg-alt); }
+.input:disabled,
+.form-field__input:disabled,
+.form-field__textarea:disabled,
+.form-field__select:disabled {
+  cursor: not-allowed;
+  background: var(--color-bg-surface);
+  color: var(--color-gray-400);
+  border-color: var(--color-gray-300);
+}
 .form-field__textarea { min-height: 90px; resize: vertical; }
 .form-field--invalid .form-field__input,
 .form-field--invalid .form-field__textarea,
@@ -2098,97 +2147,226 @@ input[type="checkbox"]:focus-visible {
 .option-group__item:hover span { color: var(--color-text-primary); }
 .option-group__item:has(input:checked) span { font-weight: var(--font-weight-bold); }
 
-/* ── INFO BANNERS ───────────────────────────────────────────────────────── */
-.notification-banner {
-  padding: var(--space-md) var(--container-padding);
-  background: var(--color-info-light);
-  color: var(--color-info);
-  border-left: 4px solid var(--color-info);
-  font-size: var(--text-body-sm);
+/* ── NOTIFICATION ─────────────────────────────────────────────────────────
+   Translation of designsystem/css/components/notification.postcss and
+   notification-banner.postcss. The two compose exactly as upstream's
+   NotificationBanner.vue composes them — `.notification` is the standalone
+   card, `.notification-banner` layers full-bleed bar geometry on top:
+
+     <div class="notification notification--info">…</div>
+     <div class="notification-banner notification notification--info">…</div>
+
+   Deliberate deviations from upstream, all local:
+     • Elevation uses the portal's `--shadow-*` scale rather than raw Tailwind
+       values (see the shadow block in tokens.css).
+     • `__text` / `__actions` / `__sub` are portal element names kept for the
+       existing call sites; `__infos` is the DS name for the same slot and is
+       styled identically, so DS markup pastes in unchanged.
+     • `--danger` is retained as an alias of the DS `--error`, because the
+       portal's badge and pipeline vocabulary says "danger" everywhere else.
+     • The portal puts a status icon in its banners (upstream's banner has
+       none) to satisfy WCAG 1.4.1 — colour is never the only signal.        */
+.notification {
+  position: relative;
   display: flex;
-  gap: var(--space-md);
-  align-items: center;
+  padding: var(--space-sm);                     /* DS p-2 */
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  background: var(--color-notification-bg);     /* DS bg-gray-50 */
 }
-.notification-banner--warning {
-  background: var(--color-warning-light);
-  color: var(--color-badge-yellow-text);
-  border-left-color: var(--color-warning);
-}
-.notification-banner--danger {
-  background: var(--color-danger-light);
-  color: var(--color-badge-red-text);
-  border-left-color: var(--color-danger);
-}
-.notification-banner--success {
-  background: var(--color-success-light);
-  color: var(--color-success);
-  border-left-color: var(--color-success);
-}
-/* `--info` — federal teal-tinted variant. CD Bund `Notification` ships
-   an info variant alongside success/warning/danger. */
-.notification-banner--info {
-  background: var(--color-info-light);
-  color: var(--color-info);
-  border-left-color: var(--color-info);
-}
-.notification-banner__wrapper { display: flex; flex: 1; gap: var(--space-md); align-items: center; }
-.notification-banner__text { margin: 0; flex: 1; }
-.notification-banner__actions { display: flex; gap: var(--space-sm); }
-.cookie-banner {
-  border-left: 0;
-  border-bottom: 1px solid var(--color-secondary-100);
-}
-.cookie-banner .notification-banner__wrapper {
-  max-width: var(--container-max-width);
-  margin: 0 auto;
-}
-.cookie-banner .notification-banner__text a {
-  margin-left: var(--space-xs);
-  white-space: nowrap;
-}
-@media (max-width: 767px) {
-  .cookie-banner,
-  .cookie-banner .notification-banner__wrapper {
-    align-items: flex-start;
-  }
-  .cookie-banner .notification-banner__wrapper,
-  .cookie-banner .notification-banner__actions {
-    flex-direction: column;
-  }
-  .cookie-banner .notification-banner__actions,
-  .cookie-banner .notification-banner__actions .btn {
-    width: 100%;
-  }
-}
-/* Icon slot — CD Bund alert/info widgets carry a leading status icon to
-   reinforce the colour signal (WCAG 1.4.1 "use of colour"). The icon is
-   aria-hidden; the banner role/text carry the semantic meaning. */
+@media (min-width: 480px)  { .notification { padding: var(--space-md); } }   /* DS xs:p-4 */
+@media (min-width: 1024px) { .notification { padding: var(--space-lg); } }   /* DS lg:p-6 */
+@media (min-width: 1544px) { .notification { padding: var(--space-xl); } }   /* DS 2xl:p-8 */
+
+/* Upstream forces links and buttons inside a notification to inherit the
+   variant's text colour, so the tinted surface stays legible whatever the
+   variant. That is why the DS banner uses `outline`/`bare` buttons — a filled
+   button would lose its own foreground here. */
+.notification a,
+.notification .btn { color: currentColor; border-color: currentColor; }
+.notification a { text-decoration: underline; text-underline-offset: 2px; }
+.notification a:hover,
+.notification .btn:hover { color: currentColor; filter: brightness(0.5); }
+
+.notification--info    { background: var(--color-notification-info-bg);    color: var(--color-notification-info-text); }
+.notification--success { background: var(--color-notification-success-bg); color: var(--color-notification-success-text); }
+.notification--warning { background: var(--color-notification-warning-bg); color: var(--color-notification-warning-text); }
+.notification--error,
+.notification--danger  { background: var(--color-notification-error-bg);   color: var(--color-notification-error-text); }
+.notification--hint    { background: var(--color-notification-hint-bg);    color: var(--color-notification-hint-text); }
+/* `--alert` is upstream's inverted, highest-urgency variant and deliberately
+   overrides `--error` when both are present. */
+.notification--alert   { background: var(--color-notification-alert-bg);   color: var(--color-white); }
+
+/* Icon slot — DS `h-10 w-10 mr-3 flex-shrink-0 fill-current`. The glyph is
+   aria-hidden; the element's role and text carry the meaning. */
+.notification__icon,
 .notification-banner__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+  margin-right: var(--space-sm);
   flex-shrink: 0;
 }
-.notification-banner__icon svg { width: var(--icon-base); height: var(--icon-base); }
+.notification__icon svg,
+.notification-banner__icon svg { width: 100%; height: 100%; fill: currentColor; }
 
-/* Sub-line inside a notification-banner__text — a quieter, smaller line
-   below the main message (e.g. "BK 1086 = BBL-Portfolio …" rationale).
-   Replaces the previous inline `style="font-size:var(--text-body-xs)"`
-   on a wrapping <span>. */
+.notification__content { min-width: 0; margin-block: 10px; }                /* DS my-2.5 */
+@media (min-width: 1280px) { .notification__content { margin-block: var(--space-sm); } }
+.notification__content > p { margin: 0; overflow-wrap: break-word; }
+.notification__content > *:first-child { margin-bottom: var(--space-xs); }
+.notification__header { display: flex; align-items: center; width: 100%; }
+.notification__header .notification__title { margin-bottom: 0; }
+.notification--with-title { display: block; }
+.notification--with-title .notification__content-offset { margin-left: 3.3rem; }
+.notification__close { position: absolute; top: 0; right: 0; }
+.notification__close svg { width: var(--icon-lg); height: var(--icon-lg); }
+
+/* ── NOTIFICATION BANNER ──────────────────────────────────────────────────
+   DS: `px-0`, responsive vertical padding, `text--sm`, `shadow-none` — the
+   bar itself is full-bleed and `__wrapper` is the container that holds the
+   content to the page grid. */
+.notification-banner {
+  display: block;
+  padding: var(--space-md) 0;                   /* DS py-4 */
+  border-radius: 0;
+  box-shadow: none;
+  font-size: var(--text-body-sm);
+}
+@media (min-width: 640px)  { .notification-banner { padding-block: var(--space-xl); } }  /* DS sm:py-8 */
+@media (min-width: 1024px) { .notification-banner { padding-block: var(--space-2xl); } } /* DS lg:py-10 */
+.notification-banner__wrapper {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+/* DS: the wrapper only becomes a row at lg, where the actions move to the
+   right edge and the copy keeps the remaining width. */
+@media (min-width: 1024px) {
+  .notification-banner__wrapper {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .notification-banner__actions { margin-left: var(--space-lg); }           /* DS lg:ml-6 */
+}
+.notification-banner__text,
+.notification-banner__infos { margin: 0; flex: 1; overflow-wrap: break-word; }
+.notification-banner__actions { display: flex; gap: var(--space-sm); flex-shrink: 0; }
+.notification-banner__actions .btn { white-space: nowrap; }
+/* A 40 px glyph is right for the standalone card but dominates a compact
+   `text--sm` bar, where it sits beside one or two lines of copy. The wrapper
+   supplies the gap, so the DS's own `mr-3` would double it. */
+.notification-banner__icon { width: var(--icon-lg); height: var(--icon-lg); margin-right: 0; }
+/* Below lg the DS wrapper is a plain column, which is right for its own
+   icon-less banner but would strand the portal's status glyph on a line of its
+   own. Wrap instead: icon + copy share the first row, the actions take the
+   full width beneath. */
+@media (max-width: 1023px) {
+  .notification-banner__wrapper {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .notification-banner__text,
+  .notification-banner__infos { flex: 1 1 0; min-width: 0; }
+  .notification-banner__actions { flex-basis: 100%; }
+}
+/* The consent bar sits above the header rather than at the viewport edge, so
+   it needs a closing rule against the chrome below it. */
+.cookie-banner { border-bottom: 1px solid var(--color-secondary-100); }
+.cookie-banner .notification-banner__text a {
+  margin-left: var(--space-xs);
+  white-space: nowrap;
+}
+
+/* Sub-line inside a `__text` / `__content` slot — a quieter, smaller line
+   below the main message (e.g. a "BK 1086 = BBL-Portfolio …" rationale).
+   Portal addition; the DS has no equivalent element. */
+.notification__sub,
 .notification-banner__sub {
   display: block;
   margin-top: var(--space-xs);
   font-size: var(--text-body-xs);
 }
-/* `.notification-banner--page-top` — banner sitting at the top of a page
+/* DS `.notification-banner--fixed`: `fixed right-0 bottom-0 left-0 w-screen`
+   + `border-t border-white` + `shadow-2xl`. Upstream uses it for the
+   cookie-consent popup; the portal reuses it for the prototype disclaimer. */
+.notification-banner--fixed {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-notice);
+  border-top: 1px solid var(--color-white);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* ── PROTOTYPE NOTICE ─────────────────────────────────────────────────────
+   Session-scoped disclaimer shown once per visit on whatever URL the user
+   opens (bookmarks land on deep routes, so the notice rides in renderShell
+   rather than on the landing page). Markup in js/shell.js.
+
+   `--prototype-notice-h` is published by syncPrototypeNoticeOffset() from the
+   measured banner height: the bar overlays the document, so the page reserves
+   exactly that much bottom space and the toast host rides above it. Both fall
+   back to 0px, which is the dismissed state. */
+/* The DS banner scales to py-10 at lg, which suits a one-off consent bar on a
+   marketing page but is too tall for a bar that greets every session of a
+   dense application. Held at the sm step. */
+.prototype-notice { padding-block: var(--space-md); }
+@media (min-width: 640px) { .prototype-notice { padding-block: var(--space-lg); } }
+body.body--prototype-notice #root {
+  padding-bottom: var(--prototype-notice-h, 0px);
+}
+body.body--prototype-notice .toast-host {
+  bottom: calc(var(--space-lg) + var(--prototype-notice-h, 0px));
+}
+/* Below lg the DS wrapper is a column (see the base rules above): the action
+   becomes a full-width tap target under the copy. */
+@media (max-width: 1023px) {
+  .prototype-notice .notification-banner__actions,
+  .prototype-notice .notification-banner__actions .btn { width: 100%; }
+  .prototype-notice .notification-banner__actions .btn { justify-content: center; }
+  /* The disclaimer is the taller element on a phone; cap it so it can never
+     swallow the viewport, and let the text scroll inside if it must. */
+  .prototype-notice { max-height: 60vh; overflow-y: auto; }
+}
+/* At lg the wrapper is a row — centre the copy against the action. */
+@media (min-width: 1024px) {
+  .prototype-notice .notification-banner__wrapper { align-items: center; }
+}
+/* A disclaimer about the on-screen prototype has no meaning on paper, and the
+   fixed position would stamp it onto every printed page. */
+@media print {
+  .prototype-notice { display: none !important; }
+  body.body--prototype-notice #root { padding-bottom: 0; }
+}
+
+/* `.notification--page-top` — notification sitting at the top of a page
    body (login, application-detail success message). Adds bottom margin
    so the next section breathes. Replaces inline `style="margin-bottom: var(--space-lg);"`. */
-.notification-banner--page-top { margin-bottom: var(--space-lg); }
+.notification--page-top { margin-bottom: var(--space-lg); }
 
 /* ── TABLE ──────────────────────────────────────────────────────────────── */
-.table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); }
+/* CD Bund `table.postcss` renders a table as a CONTAINED object: an outer
+   `border border-text-200` + `shadow` around the whole table, not just
+   free-floating underlined rows. `.table--compact` strips both (DS parity)
+   for data-dense reviewer surfaces. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+}
 /* `.table-wrapper` — DS pattern (designsystem css/components/table.postcss):
    a multi-column table keeps its natural min-content width and scrolls
    horizontally INSIDE the wrapper on narrow viewports. Without it the
@@ -2201,7 +2379,7 @@ input[type="checkbox"]:focus-visible {
 }
 .table th,
 .table td {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-md);                      /* CD: py-4 (16px) — was 8px, ~half DS */
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
@@ -2210,11 +2388,12 @@ input[type="checkbox"]:focus-visible {
 .table--zebra tbody tr:nth-child(even) td { background: var(--color-bg-surface); }
 .table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
 
-/* DS table headers are sentence-case by default; uppercase is an opt-in
-   variant (designsystem css/components/table.postcss .table--caps). The
-   marketing-eyebrow look was here as a leftover and made reviewer queues
-   harder to scan. Add `.table--caps` on the <table> to restore the old
-   uppercase look when the table really is index-style. */
+/* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
+   defaults `thead th` to UPPERCASE (regular weight, text-700). The portal
+   uses sentence-case + bold headers instead, a deliberate scannability
+   choice for dense reviewer queues where an all-caps eyebrow reads as
+   noise. `.table--caps` opts back into the DS uppercase look for
+   index-style tables. */
 .table th {
   background: var(--color-bg-alt);
   font-weight: var(--font-weight-bold);
@@ -2241,7 +2420,9 @@ input[type="checkbox"]:focus-visible {
 .table--compact td {
   padding: var(--space-xs) var(--space-sm);
 }
-.table--compact { font-size: var(--text-body-sm); }
+/* DS `.table--compact { @apply border-0 shadow-none }` — dense surfaces
+   drop the contained-object border + shadow. */
+.table--compact { font-size: var(--text-body-sm); border: 0; box-shadow: none; }
 
 /* Small helpers used alongside .table — kept here so future tables can
    share them without re-introducing inline styles in views. */
@@ -2469,13 +2650,19 @@ a.btn[aria-disabled="true"] {
 /* Modal — base + DS-aligned size modifiers (.modal--sm/md/lg/auto).
    Default (.modal alone) is medium 600 px; combine with --sm/--lg/--auto for
    narrower forms, wider bulk-approve views, or fit-content sizing. */
+/* CD Bund modal: the CARD is capped at 90vh and only the BODY scrolls, so
+   the title and the footer actions stay pinned (a long modal must never
+   scroll its confirm/cancel buttons out of reach). Flex column + body
+   `overflow-y:auto` — was a single `overflow:auto` on the whole card. */
 .modal {
   background: var(--color-white);
   border-radius: var(--radius-lg);
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: var(--shadow-lg);
 }
 .modal--sm   { max-width: 420px; }
@@ -2483,7 +2670,7 @@ a.btn[aria-disabled="true"] {
 .modal--lg   { max-width: 900px; }
 .modal--xl   { max-width: 1100px; }
 .modal--auto { max-width: min(90vw, 1100px); width: auto; }
-.modal__header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; }
+.modal__header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; flex-shrink: 0; }
 .modal__title { margin: 0; font-size: var(--text-h3); }
 .modal__close {
   background: none; border: none;
@@ -2500,8 +2687,8 @@ a.btn[aria-disabled="true"] {
 .modal__close:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
 .modal__close:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .modal__close svg { flex-shrink: 0; }
-.modal__body { padding: var(--space-lg); }
-.modal__footer { padding: var(--space-lg); border-top: 1px solid var(--color-border); display: flex; gap: var(--space-sm); justify-content: flex-end; }
+.modal__body { padding: var(--space-lg); flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+.modal__footer { padding: var(--space-lg); border-top: 1px solid var(--color-border); display: flex; gap: var(--space-sm); justify-content: flex-end; flex-shrink: 0; }
 
 /* ── TOAST ──────────────────────────────────────────────────────────────── */
 .toast-host {
@@ -2515,9 +2702,13 @@ a.btn[aria-disabled="true"] {
   gap: var(--space-sm);
   pointer-events: none;
 }
+/* CD Bund models the transient toast on its floating Notification card:
+   a light, variant-TINTED surface (not a dark colour-only snackbar) with a
+   status ICON, so success vs error differ by shape, not hue alone
+   (WCAG 1.4.1). Colours come from the shared notification token set. */
 .toast {
-  background: var(--color-text-primary);
-  color: var(--color-text-inverse);
+  background: var(--color-notification-bg);
+  color: var(--color-notification-hint-text);
   padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
@@ -2526,7 +2717,7 @@ a.btn[aria-disabled="true"] {
   animation: toast-in var(--transition);
   display: inline-flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   max-width: min(90vw, 480px);
 }
 .toast--hiding {
@@ -2537,15 +2728,27 @@ a.btn[aria-disabled="true"] {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.toast--success { background: var(--color-success); }
-.toast--danger  { background: var(--color-danger); }
+.toast--success { background: var(--color-notification-success-bg); color: var(--color-notification-success-text); }
+.toast--danger,
+.toast--error   { background: var(--color-notification-error-bg);   color: var(--color-notification-error-text); }
+.toast--warning { background: var(--color-notification-warning-bg); color: var(--color-notification-warning-text); }
+.toast--info    { background: var(--color-notification-info-bg);    color: var(--color-notification-info-text); }
+/* Status icon inherits the variant text colour (fill-current, DS pattern). */
+.toast__icon {
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.toast__icon svg { width: 100%; height: 100%; fill: currentColor; }
 .toast__message {
   flex: 1;
   min-width: 0;
 }
-/* Close affordance — CD `toast-message` pattern. 24 × 24 hit area,
-   white-tint hover surface (works on every variant since toasts have
-   dark/colored backgrounds). */
+/* Close affordance — CD `toast-message` pattern. 24 × 24 hit area, subtle
+   dark-tint hover surface (toasts are now light-tinted cards). */
 .toast__close {
   flex-shrink: 0;
   width: var(--btn-min-h);
@@ -2563,7 +2766,7 @@ a.btn[aria-disabled="true"] {
 }
 .toast__close:hover {
   opacity: 1;
-  background: var(--color-white-15);
+  background: var(--color-black-04);
 }
 
 /* ── FOOTER (matches bbl.admin.ch/de pattern) ───────────────────────────── */
@@ -2737,19 +2940,27 @@ a.btn[aria-disabled="true"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) 0;
+  /* Small horizontal inset + matching negative margin so the row background
+     (added on hover) has breathing room while the text stays aligned with
+     the column edge. */
+  padding: var(--space-md) var(--space-sm);
+  margin-inline: calc(var(--space-sm) * -1);
   font-size: var(--text-body);
   color: var(--color-white-92);
   text-decoration: none;
   border-bottom: 1px solid var(--color-white-15);
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 @media (min-width: 1024px) {
   /* Match the CD-Bund footer cadence — wider link rows at desktop. */
-  .footer-information__list a { padding: var(--space-lg) 0; }
+  .footer-information__list a { padding: var(--space-lg) var(--space-sm); }
 }
-.footer-information__list a:hover {
+/* CD Bund footer fills the WHOLE row on hover/focus (not just a text-colour
+   change) — the affordance reads as a full navigable strip. */
+.footer-information__list a:hover,
+.footer-information__list a:focus-visible {
   color: var(--color-white);
+  background: var(--color-secondary-700);
 }
 .footer-information__list a:hover .footer-information__arrow {
   transform: translateX(4px);
@@ -3146,10 +3357,20 @@ a.btn[aria-disabled="true"] {
   mask-size: contain;
 }
 .accordion__item--open .accordion__icon { transform: rotate(180deg); }
+/* `visibility: hidden` on the collapsed panel removes its links from BOTH
+   the tab order and the accessibility tree (WCAG 2.4.3 / 2.4.7) — a
+   CSS-only `max-height: 0` collapse leaves the content focusable, so
+   keyboard users could Tab onto an invisible link. The `visibility 0s
+   linear 320ms` delay keeps the content visible through the collapse
+   animation, then hides it; on open it becomes visible immediately (delay
+   0s in the --open rule). 320ms matches --transition-slow. */
 .accordion__panel {
   max-height: 0;
   overflow: hidden;
-  transition: max-height var(--transition-slow) ease-out, padding var(--transition-fast);
+  visibility: hidden;
+  transition: max-height var(--transition-slow) ease-out,
+              padding var(--transition-fast),
+              visibility 0s linear 320ms;
   padding: 0 var(--space-sm);
 }
 /* CD Bund `.accordion__content` uses `pb-10` (40 px) — long content
@@ -3157,6 +3378,10 @@ a.btn[aria-disabled="true"] {
    --space-2xl (48 px) so multi-paragraph panels don't feel cramped. */
 .accordion__item--open .accordion__panel {
   max-height: 800px;            /* generous upper bound for animated reveal */
+  visibility: visible;
+  transition: max-height var(--transition-slow) ease-out,
+              padding var(--transition-fast),
+              visibility 0s;
   padding: 0 var(--space-sm) var(--space-2xl);
 }
 
@@ -3199,8 +3424,8 @@ a.btn[aria-disabled="true"] {
   flex-wrap: wrap;
 }
 
-/* "Fresh submission" success banner on the application-detail view —
-   the only difference from the default notification-banner is the
+/* "Fresh submission" success notification on the application-detail view —
+   the only difference from the default `.notification` is the
    `margin-bottom: var(--space-lg)` spacing. */
 .app-detail__fresh-banner { margin-bottom: var(--space-lg); }
 
@@ -3593,6 +3818,54 @@ body.body--mobile-menu-is-open {
   }
   /* Meta links are terminal — no drill-down. Hide their right-arrow. */
   .main-navigation__mobile-meta .main-navigation__arrow { display: none; }
+  /* Account row(s) — user/login/logout with a leading icon. The <button>
+     variants reset button chrome so login/logout read as meta rows. */
+  .main-navigation__mobile-meta-account {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  button.main-navigation__mobile-meta-account {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--color-white-12);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+  }
+  .main-navigation__mobile-meta-account .inline-icon {
+    width: var(--icon-md);
+    height: var(--icon-md);
+    flex-shrink: 0;
+  }
+  /* Language chooser row at the foot of the drawer — the top-bar language
+     switcher is hidden at this width, so mobile users pick language here.
+     Active language uses the CD blue (--color-lang-active), matching the
+     desktop switcher's selected-language treatment. */
+  .main-navigation__mobile-lang {
+    display: flex;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--container-padding);
+    background: var(--color-surface-dark);
+  }
+  .main-navigation__mobile-lang-btn {
+    flex: 1;
+    min-height: var(--btn-min-h);
+    border: 1px solid var(--color-white-25);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--color-white);
+    font: inherit;
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  }
+  .main-navigation__mobile-lang-btn:hover { background: var(--color-white-06); }
+  .main-navigation__mobile-lang-btn--active {
+    background: var(--color-lang-active);
+    border-color: var(--color-lang-active);
+    color: var(--color-white);
+  }
 }
 @media (max-width: 768px) {
   .top-bar__authorities span { display: none; }
@@ -3845,7 +4118,7 @@ body.body--mobile-menu-is-open {
   text-underline-offset: 2px;
   font-weight: var(--font-weight-bold);
 }
-.link-list a:hover { color: var(--color-primary-hover); }
+.link-list a:hover { color: var(--color-link-hover); }   /* CD link hover = primary-800 */
 
 /* External-link affordance — small arrow glyph after the link text. Used by
    any anchor with class="link link--external" (matches DS .link--external).
@@ -3957,7 +4230,7 @@ body.body--mobile-menu-is-open {
   text-decoration: none;
   font-weight: var(--font-weight-regular);
 }
-.contact-block__link:hover { color: var(--color-primary-hover); text-decoration: underline; }
+.contact-block__link:hover { color: var(--color-link-hover); text-decoration: underline; }
 /* `.contact-block__icon` retired — icons now come from
    `icon('phone' | 'envelope' | 'globe')` (one file per glyph under
    `assets/icons/`) and inherit sizing from the
@@ -4429,7 +4702,7 @@ body.body--mobile-menu-is-open {
 .docs-table__linked { color: var(--color-text-secondary); }
 .docs-table__action { text-align: right; }
 .docs-table__download { color: var(--color-primary); }
-.docs-table__download:hover { color: var(--color-primary-hover); }
+.docs-table__download:hover { color: var(--color-link-hover); }
 
 /* ── PROFILE PAGE ────────────────────────────────────────────────────────
    `.profile-page__card` stacks the three profile cards with consistent

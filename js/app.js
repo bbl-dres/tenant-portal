@@ -35,7 +35,7 @@ renderShortcutOverlay, wireGlobalShortcuts,
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
-  toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, acceptCookieConsent, submitSearch, toggleSearch, toggleBurger,
+  toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice, submitSearch, toggleSearch, toggleBurger,
   shell, servicesMenu,
 } from './shell.js';
 import {
@@ -189,7 +189,7 @@ window.portal = {
   renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
-  toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent,
+  toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice,
   openRoleMenu, login, logout,
   statusBadge,
   formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
@@ -959,12 +959,12 @@ function renderLogin() {
     <section class="section section--alt">
       <div class="container">
         <div class="login-page">
-          <div class="notification-banner notification-banner--warning notification-banner--page-top" role="status">
-            <span class="notification-banner__icon" aria-hidden="true">
+          <div class="notification notification--warning notification--page-top" role="status">
+            <span class="notification__icon" aria-hidden="true">
               ${P.icon('alertTriangle')}
             </span>
-            <div class="notification-banner__wrapper">
-              <p class="notification-banner__text">
+            <div class="notification__content">
+              <p>
                 <strong>Prototyp-Anmeldung — kein echtes eIAM.</strong> Diese Seite simuliert den Login. Es wird keine Verbindung zu <code>login.eiam.admin.ch</code> hergestellt.
               </p>
             </div>
@@ -1250,12 +1250,12 @@ function renderApplicationDetail({ id }) {
     <section class="section">
       <div class="container">
         ${a._isNew ? `
-          <div class="notification-banner notification-banner--success app-detail__fresh-banner" role="status">
-            <span class="notification-banner__icon" aria-hidden="true">
+          <div class="notification notification--success app-detail__fresh-banner" role="status">
+            <span class="notification__icon" aria-hidden="true">
               ${P.icon('checkCircle')}
             </span>
-            <div class="notification-banner__wrapper">
-              <p class="notification-banner__text">
+            <div class="notification__content">
+              <p>
                 <strong>Ihr Antrag ${a.id} wurde erfolgreich eingereicht.</strong>
                 Sie erhalten in Kürze eine E-Mail-Bestätigung. Status: <em>${({ submitted: 'Eingereicht', in_review_gs: 'in GS-Prüfung', in_review_pfm: 'in PFM-Prüfung' })[a.status] || a.status}</em>.
               </p>
