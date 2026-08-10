@@ -1,0 +1,388 @@
+/* ==========================================================================
+   components/tables.css — BBL Mieterportal
+
+   Data tables + list-page furniture: table, documents filter bar,
+   active filter pills, pagination, page header (H1 + side actions on the
+   list/detail pages), filter row + filter chips (tag-item).
+   Sources: styles.css 2357-2641, 3388-3418, 3490-3549.
+   Cascade note: .page-header__title overrides the .h1 margin — this file
+   must import after foundations/typography.css.
+   DS counterparts: components/table.postcss, components/pagination.postcss,
+   components/tag-item.postcss, components/badge-filter.postcss.
+   ========================================================================== */
+
+/* ── TABLE ──────────────────────────────────────────────────────────────── */
+/* CD Bund `table.postcss` renders a table as a CONTAINED object: an outer
+   `border border-text-200` + `shadow` around the whole table, not just
+   free-floating underlined rows. `.table--compact` strips both (DS parity)
+   for data-dense reviewer surfaces. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+}
+/* `.table-wrapper` — DS pattern (designsystem css/components/table.postcss):
+   a multi-column table keeps its natural min-content width and scrolls
+   horizontally INSIDE the wrapper on narrow viewports. Without it the
+   table widens its grid/flex column past the viewport and `.container`'s
+   `overflow-x: clip` silently cuts the right edge off. Wrap any table
+   whose columns can't all fit a 360 px screen. */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table th,
+.table td {
+  padding: var(--space-md);                      /* CD: py-4 (16px) — was 8px, ~half DS */
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+/* Zebra striping for long lists (DS `.table--zebra`). Use on the <table>
+   when there are roughly >12 rows and rows aren't grouped semantically. */
+.table--zebra tbody tr:nth-child(even) td { background: var(--color-bg-surface); }
+.table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
+
+/* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
+   defaults `thead th` to UPPERCASE (regular weight, text-700). The portal
+   uses sentence-case + bold headers instead, a deliberate scannability
+   choice for dense reviewer queues where an all-caps eyebrow reads as
+   noise. `.table--caps` opts back into the DS uppercase look for
+   index-style tables. */
+.table th {
+  background: var(--color-bg-alt);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  letter-spacing: 0;
+}
+.table--caps th {
+  font-size: var(--text-body-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+/* Only show the pointer affordance when the row actually has an action.
+   `.table--rows-clickable` opts in to the row-hover-cursor + highlight. */
+.table tr:hover td { background: var(--color-bg-surface); }
+.table--rows-clickable tr:hover td { cursor: pointer; }
+
+/* `.table--compact` — tighter cell padding for data-dense reviewer
+   surfaces (queue, inbox). Mirrors CD Bund `.table--compact`. Trims
+   the row height from ~52 px to ~36 px so 25 rows fit a single screen
+   without scrolling. The .table--zebra alternation stays useful at
+   this density. */
+.table--compact th,
+.table--compact td {
+  padding: var(--space-xs) var(--space-sm);
+}
+/* DS `.table--compact { @apply border-0 shadow-none }` — dense surfaces
+   drop the contained-object border + shadow. */
+.table--compact { font-size: var(--text-body-sm); border: 0; box-shadow: none; }
+
+/* Small helpers used alongside .table — kept here so future tables can
+   share them without re-introducing inline styles in views. */
+.table-hint {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-md);
+}
+.table-empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+}
+
+/* ── DOCUMENTS PAGE — filter bar, document table, pagination ─────────────
+   The downloads page can list thousands of records when wired to the real
+   records-management system. The pattern here scales:
+   - .docs-filter-bar: 3-up filter row (type / building / text) that wraps
+     to stack on narrow viewports.
+   - .docs-table-wrap: horizontal scroll fallback so the table never breaks
+     the page below a min content width.
+   - .table--documents: medium-density list-view; title column uses an icon
+     prefix and a hover affordance via .docs-table__title-link.
+   - .pagination: shared component, reusable by any future paginated table. */
+/* Shared horizontal filter-toolbar layout (downloads bar + inbox row). The
+   `.property-toolbar` is grid-based and keeps its own rule. */
+.docs-filter-bar,
+.filter-row {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+/* ── ACTIVE FILTER PILLS ─────────────────────────────────────────────────
+   Row of removable pills that sits between a filter bar and the data
+   grid below it. Each pill shows the facet label (`Typ`, `Liegenschaft`,
+   `Suche`, …) + the active value + an X button to clear that single
+   facet. When ≥ 2 facets are active, a trailing "Alle zurücksetzen"
+   text-link clears the whole filter set in one click.
+   Used by #/downloads (.docs-filter-bar) and #/properties
+   (.property-toolbar). */
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-lg);
+}
+.filter-pills[hidden] { display: none; }
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 4px 4px var(--space-md);
+  background: var(--color-secondary-50);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-snug);
+}
+.filter-pill__label {
+  color: var(--color-text-secondary);
+}
+.filter-pill__value {
+  font-weight: var(--font-weight-bold);
+}
+/* Visible chip is still 22 × 22, but the clickable area expands to a
+   44 × 44 hit slop via the ::before pseudo so WCAG 2.5.5 is met without
+   blowing up the pill height — audit M-C5. The visible chip styling stays
+   on the button itself; the slop is invisible and centered. */
+.filter-pill__remove {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: var(--space-xs);
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.filter-pill__remove::before {
+  content: '';
+  position: absolute;
+  inset: -11px;              /* 22 + 22 = 44 px clickable square */
+}
+.filter-pill__remove:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+.filter-pill__remove:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.filter-pills__clear-all {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin-left: var(--space-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.filter-pills__clear-all:hover { color: var(--color-primary); }
+.docs-table-wrap {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  contain: inline-size;
+}
+.docs-table-wrap > .table {
+  width: 100%;
+  min-width: 920px;
+}
+.table--documents th,
+.table--documents td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.table--documents td:first-child {
+  white-space: normal;            /* allow titles to wrap on narrow viewports */
+}
+.docs-table__title-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.docs-table__title-link:hover { color: var(--color-primary); text-decoration: underline; }
+.docs-table__title-link .inline-icon { flex: 0 0 auto; color: var(--color-text-muted); }
+
+/* CD Bund pagination — compact pattern (designsystem css/components/pagination.postcss).
+   Layout: [chevron-left btn] [page-number input] "von X Seiten" [chevron-right btn]
+   The numbered-button list with ellipses is *not* a CD Bund pattern — the
+   federal design system uses a small input field for direct page jump
+   instead, which is more accessible at scale (works for any page count
+   without a long row of buttons). */
+.pagination {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;            /* CD Bund .pagination--right pattern */
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding-block: var(--space-lg);
+  font-size: var(--text-body-sm);
+}
+/* Item-range label (e.g. "1–12 von 247 Liegenschaften"). Sits to the
+   left of the controls — `margin-right: auto` pushes the chevron / page
+   input / chevron cluster to the right. Not in the CD Bund component
+   itself, but matches the swisstopo / kbob-fdk federal pattern. */
+.pagination__count {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.pagination__input {
+  width: 48px;
+  text-align: center;
+  padding: 0 var(--space-xs);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius);
+  min-height: var(--btn-min-h);          /* WCAG 2.5.5 — audit M-C9 */
+  transition: border-color var(--transition-fast);
+  /* Hide the spinner arrows — they make the field look noisy at this size */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.pagination__input::-webkit-outer-spin-button,
+.pagination__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pagination__input:hover:not(:focus) { border-color: var(--color-text-primary); }
+.pagination__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+.pagination__text {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+/* Icon-only button variant for chevron-left / chevron-right.
+   Squared the .btn rule's text padding so the icon centers. */
+.btn--icon-only {
+  padding: 0;
+  width: var(--btn-min-h);
+}
+@media (min-width: 1280px) { .btn--icon-only { width: var(--btn-lg-min-h); } }
+.btn--icon-only .inline-icon { width: var(--icon-md); height: var(--icon-md); }
+/* Anchor variant of the pagination buttons — properties pagination uses
+   <a href> so middle-click + back/forward + share links all work. */
+a.btn { text-decoration: none; }
+a.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* ── PAGE HEADER (H1 + side actions) ─────────────────────────────────────
+   Used on inbox / detail / queue. Replaces ad-hoc inline
+   `style="display:flex;justify-content:space-between;..."` blocks. */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  /* CD reference pages keep ≥ 32 px between an H1 block and the first
+     content row. Was 16 px (too tight — caused subtitle / filter chips /
+     table to crash into the heading). Scales 24 → 32 → 48 px so wide
+     desktops get the federal breathing room. */
+  margin-bottom: var(--space-lg);
+}
+@media (min-width: 1024px) { .page-header { margin-bottom: var(--space-xl); } }
+@media (min-width: 1280px) { .page-header { margin-bottom: var(--space-2xl); } }
+/* H1 → subtitle gap was 4 px; subtitle descenders into title baseline.
+   8 px gives the daylight CD reference pages have. */
+.page-header__title { margin: 0 0 var(--space-sm); }
+.page-header__sub { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+.page-header__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.page-header__count {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+
+/* ── FILTER ROW + FILTER CHIPS (DS tag-item pattern) ─────────────────────
+   `.filter-row` is the horizontal toolbar shell holding chips + the text
+   search. `.filter-chips` is the chip group. `.tag-item` mirrors DS
+   `css/components/tag-item.postcss` — pill, 34 px tall, active state
+   uses the brand-tinted surface. Chips are real <button>s so keyboard
+   users can activate them; selected state is `aria-pressed="true"` and
+   styled with `.tag-item--active`. */
+.filter-row { align-items: center; }   /* shared layout above; this is the only delta */
+.filter-row__search {   /* composes .search-field; leads the toolbar */
+  flex: 0 1 340px;
+  min-width: 220px;
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* CD Bund filter chip — DS `.tag-item` pattern from
+   designsystem/css/components/tag-item.postcss:7-67. Default: gray-200
+   pill, dark text, gray-300 on hover. Active: dark gray-800 fill with
+   white text, pointer-events:none (selection is final until another
+   chip is picked). Min-height tracks the DS button scale (44 / 48 / 52)
+   so chips meet WCAG 2.5.5 across breakpoints. */
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--color-gray-200);
+  border: 1px solid transparent;
+  color: var(--color-text-primary);
+  padding: 6px var(--space-md);
+  min-height: var(--btn-min-h);          /* 44 px — DS pattern */
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+@media (min-width: 1280px) { .tag-item { min-height: var(--btn-lg-min-h); } }
+.tag-item:hover { background: var(--color-gray-300); }
+.tag-item--active,
+.tag-item[aria-pressed="true"] {
+  background: var(--color-gray-800);
+  color: var(--color-white);
+}
+.tag-item--active:hover,
+.tag-item[aria-pressed="true"]:hover {
+  background: var(--color-gray-900);
+}
+.tag-item__count {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+.tag-item--active .tag-item__count,
+.tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-white-75); }

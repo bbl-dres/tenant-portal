@@ -1,0 +1,370 @@
+/* ==========================================================================
+   sections/home.css — BBL Mieterportal
+
+   Landing + authenticated home: split hero, explainer video,
+   greeting strip, home hero + CTA, service list, open-items band.
+   Sources: styles.css 3889-3919, 4253-4423, 4466-4625.
+   ========================================================================== */
+
+/* Split hero (image + copy) — CD Bund: equal-column split, constrained to
+   --container-max-width via the shared .hero__inner constraint, no
+   figcaption. Image fills its column edge-to-edge of the column. */
+.hero--split { padding-block: var(--section-py-half); }
+.hero__inner--split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .hero__inner--split { grid-template-columns: 1fr 1fr; gap: var(--space-3xl); }
+}
+.hero__figure {
+  margin: 0;
+  border-radius: 0;            /* CD Bund: hero images are crisp-cornered */
+}
+/* Media wrapper holds the 16:9 aspect ratio + overflow clip so the
+   figcaption below can render freely (CD typography.postcss → figcaption
+   inherits .legend: text--xs, pt-2, text-text-500). Federal lifecycle
+   services (admin.ch, bbl.admin.ch, swisstopo) use 16:9 hero photos. */
+.hero__figure__media {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+.hero__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Explainer-video section (landing) */
+.explainer-section__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .explainer-section__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-3xl);
+  }
+}
+.explainer-section__copy {
+  max-width: 56ch;
+}
+
+/* Video thumbnail card — used by the landing-page explainer block in
+   place of a live iframe. CD-aligned: federal mark + title + author
+   overlaid on a 16:9 image, with a "Watch on YouTube" pill bottom-right.
+   The whole tile is an anchor: click anywhere → opens the real video
+   on YouTube. No third-party tracking until the user actively opts in.
+
+   Image lives in assets/images/Explain-Video.png; swap when a real
+   video lands. The overlay chrome is pure CSS so swapping the image
+   doesn't require any markup changes. */
+.video-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  background: var(--color-secondary-800);
+  text-decoration: none;
+  color: var(--color-white);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.video-thumb:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: var(--color-white);
+}
+.video-thumb:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.video-thumb__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Top overlay: dark-to-transparent gradient anchors the federal mark +
+   title block. Gradient depth tuned so the title stays legible on any
+   image content beneath. */
+.video-thumb__header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: linear-gradient(to bottom, var(--color-black-75) 0%, var(--color-black-45) 60%, transparent 100%);
+  z-index: 1;
+}
+/* Channel-avatar logo — round white container with the federal CH
+   Wappen (shield) inside. Federal authorities are *extremely* detail-
+   oriented about how the Wappen is rendered: white background, full
+   shield visible (no cropping of the shield or cross), shield should
+   fill a clearly recognisable portion of the circle — matches the
+   official admin.ch YouTube channel avatar treatment.
+   `object-fit: contain` alone wasn't enough because the SVG's viewBox
+   has internal padding (the shield path doesn't reach the viewBox
+   edges), so contain-fit still leaves visible white around the shield.
+   Solution: wrapper element (`.video-thumb__logo`) is the round white
+   surface; inner `<img>` (`.video-thumb__logo-inner`) is sized
+   explicitly to 74 % so the shield path itself fits inside the circle's
+   visible area with a thin white ring — same proportions as the
+   federal channel-avatar reference. */
+.video-thumb__logo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  box-shadow: var(--shadow-video-logo);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+@media (min-width: 1024px) { .video-thumb__logo { width: 40px; height: 40px; } }
+.video-thumb__logo-inner {
+  /* Inset the shield so the circular mask does not crop it. */
+  width: auto;
+  height: 74%;
+  display: block;
+  flex-shrink: 0;
+}
+.video-thumb__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.video-thumb__title {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-white);
+}
+@media (min-width: 1024px) { .video-thumb__title { font-size: var(--text-h4); } }
+/* Author line — small + muted, matches YouTube's channel-name secondary
+   row beneath the video title. */
+.video-thumb__author {
+  margin: 2px 0 0;
+  font-size: var(--text-body-xs);
+  color: var(--color-white-75);
+  line-height: var(--line-height-snug);
+}
+/* Centred YouTube play button — the iconic red rounded-rect glyph that
+   marks a thumbnail as a video. SVG asset, no shadow (the play glyph
+   already carries enough visual weight on any photo). Hover scales up
+   slightly so the affordance reads as "clickable". */
+.video-thumb__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 48px;
+  z-index: 1;
+  pointer-events: none;
+  filter: var(--filter-shadow-video-play);
+  transition: transform var(--transition);
+}
+@media (min-width: 1024px) { .video-thumb__play { width: 84px; height: 60px; } }
+.video-thumb:hover .video-thumb__play { transform: translate(-50%, -50%) scale(1.06); }
+/* "Watch on YouTube" pill — bottom-right CTA. White-ish background with
+   the red YouTube glyph + dark text matches the canonical YouTube embed
+   chrome (replaces the previous dark-glass pill). Bigger overall — 14 px
+   font, generous padding, prominent corner radius. */
+.video-thumb__cta {
+  position: absolute;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-white-92);
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-video-cta);
+  z-index: 2;
+}
+.video-thumb__cta-icon {
+  width: 26px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Greeting strip — single line of personal context above the service grid.
+   No card chrome, no eyebrow weight; just acknowledges the user and surfaces
+   the count of open items as an inline link. */
+.greeting-strip {
+  font-size: var(--text-body);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2xl);
+  line-height: var(--line-height-relaxed);
+  padding: var(--space-lg) var(--space-xl);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-lg);
+}
+.greeting-strip a { color: var(--color-primary); text-decoration: none; }
+.greeting-strip a:hover { text-decoration: underline; }
+.greeting-strip__count strong { font-weight: var(--font-weight-bold); }
+.greeting-strip__draft { color: var(--color-text-muted); }
+.greeting-strip__draft a { color: var(--color-link); }
+
+/* Highlight variant for the priority card--quick (e.g. "Bedarf anmelden"
+   on the auth home). 4 px red left rail, same shadow rhythm. */
+
+/* Authenticated home hero — single primary CTA + companion image
+   (replaces the previous hero-cta split with role card) */
+.auth-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+  padding: var(--space-2xl);
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-bg-surface) 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+@media (min-width: 1024px) {
+  .auth-hero { grid-template-columns: 1.2fr 1fr; gap: var(--space-3xl); }
+}
+.auth-hero__title {
+  font-size: var(--text-h1);
+  margin: var(--space-xs) 0 var(--space-md);
+  letter-spacing: var(--tracking-tight);
+}
+.auth-hero__lead {
+  margin: 0 0 var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: var(--line-height-relaxed);
+}
+.auth-hero__cta {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.auth-hero__figure {
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.auth-hero__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+
+/* Hero CTA on the landing + authenticated home */
+.hero-cta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .hero-cta { grid-template-columns: 1fr 320px; }
+}
+.hero-cta__primary {
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-badge-red-bg) 100%);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+.hero-cta__primary h2 {
+  font-size: var(--text-h2);
+  margin: 0 0 var(--space-sm);
+}
+.hero-cta__primary p {
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-lg);
+}
+.hero-cta__primary .btn { font-size: var(--text-body); }
+.hero-cta__secondary {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+.hero-cta__secondary h3 {
+  font-size: var(--text-body-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-md);
+}
+
+/* Service list on landing */
+.service-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.service-list li {
+  border-bottom: 1px solid var(--color-border-light);
+}
+.service-list li:last-child { border-bottom: none; }
+.service-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  gap: var(--space-md);
+}
+.service-list a:hover { color: var(--color-primary); }
+.service-list__hint {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+
+/* Open-items band on the auth home */
+.open-items-band {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.open-items-band__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+}
+.open-items-band__list {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+.open-items-band__item {
+  font-size: var(--text-body-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}

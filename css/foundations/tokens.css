@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    DESIGN TOKENS — CD Bund
    BBL Mieterportal Prototypes
 
@@ -21,8 +21,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans'), local('NotoSans-Regular'),
-       url('../assets/fonts/NotoSans-Regular.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-Regular.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-Regular.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-Regular.ttf')   format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -30,8 +30,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Bold'), local('NotoSans-Bold'),
-       url('../assets/fonts/NotoSans-Bold.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-Bold.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-Bold.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-Bold.ttf')   format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -39,8 +39,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Italic'), local('NotoSans-Italic'),
-       url('../assets/fonts/NotoSans-Italic.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-Italic.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-Italic.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-Italic.ttf')   format('truetype');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -48,8 +48,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Bold Italic'), local('NotoSans-BoldItalic'),
-       url('../assets/fonts/NotoSans-BoldItalic.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-BoldItalic.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-BoldItalic.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-BoldItalic.ttf')   format('truetype');
   font-weight: 700;
   font-style: italic;
   font-display: swap;

@@ -1,0 +1,33 @@
+/* ==========================================================================
+   foundations/print.css — BBL Mieterportal
+
+   Print rules: global chrome suppression + floor-plan print layout.
+   Imported last (mirrors DS main.postcss importing print.postcss last).
+   Sources: styles.css 3881-3886, 7030-7048.
+   DS counterpart: print.postcss.
+   ========================================================================== */
+
+/* Print stylesheet */
+@media print {
+  .top-bar, .navbar, .app-footer, .toast-host, .shortcut-overlay, .skip-to-content, .breadcrumb { display: none !important; }
+  .hero { padding: var(--space-md) 0; background: none; }
+  body { color: var(--color-black); background: var(--color-white); }
+}
+
+/* ── PRINT — floor-plan page ─────────────────────────────────────────────
+   When the user hits the "Drucken" button, hide all federal chrome,
+   toolbar, drawer, and footer. Keep the property-header strip + canvas
+   + legend. The canvas keeps its computed pixel size — MapLibre's WebGL
+   canvas is captured as a raster which prints predictably. */
+@media print {
+  .skip-to-content,
+  header[role="banner"],
+  .breadcrumb,
+  .share-bar,
+  .floor-toolbar,
+  .floor-drawer,
+  footer { display: none !important; }
+  .floor-viewer { display: block; }
+  .floor-canvas { height: 680px; border: 1px solid var(--color-gray-400); page-break-inside: avoid; }
+  .section { padding: 0 !important; }
+}

@@ -1,0 +1,183 @@
+/* ==========================================================================
+   sections/review.css — BBL Mieterportal
+
+   Reviewer surfaces: queue bulk-action toolbar, reviewer split-pane,
+   history timeline, queue table tweaks, Auflagen list.
+   Sources: styles.css 3419-3431, 5034-5091, 5155-5259.
+   ========================================================================== */
+
+/* Reviewer queue — toolbar of bulk actions below the table. */
+.queue-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* "Fresh submission" success notification on the application-detail view —
+   the only difference from the default `.notification` is the
+   `margin-bottom: var(--space-lg)` spacing. */
+.app-detail__fresh-banner { margin-bottom: var(--space-lg); }
+
+/* Reviewer split-pane (§9.1) */
+.reviewer-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+@media (min-width: 1280px) {
+  .reviewer-split { grid-template-columns: 1.4fr 1fr; }
+}
+.reviewer-marks {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  position: sticky;
+  top: var(--space-md);
+}
+.reviewer-marks__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  align-items: center;
+}
+.reviewer-marks__row:last-child { border-bottom: none; }
+/* Heading inside the reviewer marks panel — replaces inline `style="margin-top:0;"`. */
+.reviewer-marks__heading { margin-top: 0; margin-bottom: var(--space-sm); }
+.mark-buttons {
+  display: inline-flex;
+  gap: var(--space-xs);
+}
+.mark-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  /* 36 px — comfortable on iPad / Surface where the reviewer queue is
+     increasingly worked. Was 28 px; not strictly below WCAG 2.5.5 since
+     mark-buttons sit in tight panels, but tablet ergonomics matter for
+     BBL meeting-room review sessions. */
+  min-height: var(--btn-min-h);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+.mark-button .inline-icon { width: var(--icon-xs); height: var(--icon-xs); margin-right: 0; flex-shrink: 0; }
+.mark-button:hover { border-color: var(--color-border-input); background: var(--color-bg-surface); }
+.mark-button--active-ok      { background: var(--color-success); color: var(--color-white); border-color: var(--color-success); }
+.mark-button--active-nok     { background: var(--color-danger);  color: var(--color-white); border-color: var(--color-danger); }
+.mark-button--active-comment { background: var(--color-warning); color: var(--color-gray-900); border-color: var(--color-warning); }
+
+/* History timeline */
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.history-list li {
+  display: grid;
+  grid-template-columns: 140px 140px 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--text-body-sm);
+}
+.history-list time {
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--text-body-xs);
+}
+@media (max-width: 768px) {
+  .history-list li { grid-template-columns: 1fr; }
+}
+
+/* Queue table tweaks */
+.queue-stats {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+}
+.queue-stats__toggle {
+  background: transparent;
+  border: none;
+  padding: var(--space-xs) 0;
+  min-height: var(--btn-min-h);
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-regular);
+  text-align: left;
+}
+.queue-stats__toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.queue-stats__chevron {
+  width: var(--icon-xs); height: var(--icon-xs);
+  margin-right: 0;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+  color: var(--color-text-secondary);
+}
+.queue-stats--open .queue-stats__chevron { transform: rotate(90deg); }
+.queue-stats__body {
+  display: none;
+  margin-top: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-md);
+}
+.queue-stats--open .queue-stats__body { display: grid; }
+.queue-stats__tile {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  text-align: center;
+}
+.queue-stats__value {
+  font-size: var(--text-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+.queue-stats__label {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Auflagen list (Rückfrage flow) */
+.auflagen-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.auflagen-list li {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+}
+.auflagen-list li.done {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+}

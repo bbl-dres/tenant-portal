@@ -3,8 +3,10 @@ import path from 'node:path';
 import process from 'node:process';
 
 const root = process.cwd();
-const tokensPath = path.join(root, 'css', 'tokens.css');
-const stylesPath = path.join(root, 'css', 'styles.css');
+// All design tokens live in exactly ONE file (design-review round 2,
+// Phase B). Every other stylesheet must consume var(--…) only.
+const tokensPath = path.join(root, 'css', 'foundations', 'tokens.css');
+const cssRoot = path.join(root, 'css');
 const jsTemplatePaths = [
   path.join(root, 'js', 'app.js'),
   path.join(root, 'js', 'shell.js'),
@@ -12,18 +14,58 @@ const jsTemplatePaths = [
   path.join(root, 'js', 'lib.js'),
 ];
 
+// Pre-existing off-scale values, grandfathered at the Phase B split so the
+// guard could land without visual changes. Each entry is an open finding in
+// docs/design-review.md (TOK/SPC categories) — remove entries as fixes land;
+// NEW violations are not coverable without editing this list, which is the
+// point: they show up in review.
+const GRANDFATHERED = [
+  { file: 'components/cards.css', decl: 'padding-left: calc(var(--space-lg) + 4px);' },
+  { file: 'components/cards.css', decl: 'margin: 40px 0 0;' },
+  { file: 'components/cards.css', decl: 'padding-bottom: calc(var(--space-xl) + 48px);' },
+  { file: 'components/cards.css', decl: 'padding-bottom: calc(var(--space-lg) + 56px);' },
+  { file: 'components/forms.css', decl: 'padding-inline-end: calc(44px + var(--space-md));' },
+  { file: 'components/forms.css', decl: 'gap: 6px;' },
+  { file: 'components/forms.css', decl: 'padding: 6px 0;' },
+  { file: 'components/tables.css', decl: 'padding: 4px 4px 4px var(--space-md);' },
+  { file: 'components/tables.css', decl: 'padding: 6px var(--space-md);' },
+  { file: 'navigations/header.css', decl: 'gap: 6px;' },
+  { file: 'navigations/header.css', decl: 'gap: 6px;' },
+  { file: 'navigations/header.css', decl: 'padding: var(--space-sm) calc(var(--space-xl) + 8px) var(--space-sm) var(--space-md);' },
+  { file: 'navigations/main-navigation.css', decl: 'margin-left: 6px; margin-right: 0;' },
+  { file: 'sections/media-viewer.css', decl: 'padding: clamp(28px, 6%, 56px);' },
+  { file: 'sections/media-viewer.css', decl: 'font-size: 11px;' },
+  { file: 'sections/media-viewer.css', decl: 'font-size: 13px;' },
+  { file: 'sections/media-viewer.css', decl: 'font-size: 11px;' },
+  { file: 'sections/media-viewer.css', decl: 'font-size: 18px; line-height: 1;' },
+  { file: 'sections/properties.css', decl: 'padding-right: 38px;' },
+  { file: 'sections/properties.css', decl: 'padding: 4px;' },
+  { file: 'sections/property-detail.css', decl: 'gap: 5px;' },
+  { file: 'sections/property-detail.css', decl: 'padding: 4px 9px;' },
+  { file: 'sections/wizard.css', decl: 'gap: 4px;' },
+];
+
 function read(file) {
   return fs.readFileSync(file, 'utf8');
 }
 
-// Verify each expected CD Bund color token is declared in css/tokens.css.
+function walkCss(dir, out = []) {
+  for (const name of fs.readdirSync(dir)) {
+    const p = path.join(dir, name);
+    if (fs.statSync(p).isDirectory()) walkCss(p, out);
+    else if (name.endsWith('.css')) out.push(p);
+  }
+  return out;
+}
+
+// Verify each expected CD Bund color token is declared in the tokens file.
 // The actual values aren't compared against the upstream `swiss/designsystem`
 // — that comparison would require cloning a heavy sibling repo. Local
 // presence is enough to catch accidental token removal.
 function assertTokenDeclared(tokensSource, name, failures) {
   const re = new RegExp(`${name.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*:\\s*[^;]+;`);
   if (!re.test(tokensSource)) {
-    failures.push(`${name}: missing in css/tokens.css`);
+    failures.push(`${name}: missing in css/foundations/tokens.css`);
   }
 }
 
@@ -59,24 +101,48 @@ function stripLineComments(source) {
     .join('\n');
 }
 
-function hardcodedCssColors(stylesSource) {
-  const source = stripCssComments(stylesSource);
-  const hits = [];
-  source.split(/\r?\n/).forEach((line, index) => {
-    const matches = [
-      ...line.matchAll(/#[0-9A-Fa-f]{3,8}\b/g),
-      ...line.matchAll(/\b(?:rgb|rgba|hsl|hsla)\(/gi),
-    ].map(match => match[0]);
-    if (matches.length) hits.push(`${index + 1}: ${matches.join(', ')}`);
-  });
-  return hits;
-}
-
 function inlineStyleAttributes(file, source) {
   const cleaned = stripLineComments(source);
   const hits = [];
   cleaned.split(/\r?\n/).forEach((line, index) => {
     if (/\bstyle\s*=/.test(line)) hits.push(`${path.relative(root, file)}:${index + 1}`);
+  });
+  return hits;
+}
+
+// ── Per-stylesheet scans (everything under css/ except the tokens file) ──
+// 1. Colour literals: any hex / rgb() / hsl() outside the tokens file.
+// 2. Raw px font sizes: font-size with a px value (the type scale lives in
+//    tokens as --text-*).
+// 3. Off-scale spacing: margin/padding/gap declarations with px values of
+//    3px or more (0/1px/2px pass — hairline borders and optical nudges are
+//    not spacing-scale concerns; the scale itself is --space-*).
+function scanStylesheet(file, source) {
+  const rel = path.relative(cssRoot, file).split(path.sep).join('/');
+  const hits = { colors: [], fonts: [], spacing: [] };
+  const grandfathered = GRANDFATHERED.filter(g => g.file === rel).map(g => g.decl);
+  const used = new Array(grandfathered.length).fill(false);
+  const covered = (line) => {
+    const t = line.trim();
+    for (let i = 0; i < grandfathered.length; i++) {
+      if (!used[i] && t.includes(grandfathered[i])) { used[i] = true; return true; }
+    }
+    return false;
+  };
+  stripCssComments(source).split(/\r?\n/).forEach((line, index) => {
+    const loc = `${rel}:${index + 1}`;
+    const colorMatches = [
+      ...line.matchAll(/#[0-9A-Fa-f]{3,8}\b/g),
+      ...line.matchAll(/\b(?:rgb|rgba|hsl|hsla)\(/gi),
+    ].map(m => m[0]);
+    if (colorMatches.length) hits.colors.push(`${loc}: ${colorMatches.join(', ')}`);
+    if (/font-size\s*:[^;]*\dpx/.test(line) && !covered(line)) {
+      hits.fonts.push(`${loc}: ${line.trim().slice(0, 80)}`);
+    }
+    const sp = line.match(/^\s*(?:margin|padding|gap|row-gap|column-gap)[^:]*:\s*([^;]+);/);
+    if (sp && /(^|\s|\()([3-9]|\d\d+)px/.test(sp[1]) && !covered(line)) {
+      hits.spacing.push(`${loc}: ${line.trim().slice(0, 80)}`);
+    }
   });
   return hits;
 }
@@ -98,9 +164,24 @@ if (hardcodedJsColors.length) {
   failures.push(`Hardcoded JS colors outside CD_COLOR_FALLBACKS:\n${hardcodedJsColors.join('\n')}`);
 }
 
-const hardcodedCssColorHits = hardcodedCssColors(read(stylesPath));
-if (hardcodedCssColorHits.length) {
-  failures.push(`Hardcoded CSS colors outside css/tokens.css:\n${hardcodedCssColorHits.join('\n')}`);
+const allColors = [];
+const allFonts = [];
+const allSpacing = [];
+for (const file of walkCss(cssRoot)) {
+  if (path.resolve(file) === path.resolve(tokensPath)) continue;
+  const hits = scanStylesheet(file, read(file));
+  allColors.push(...hits.colors);
+  allFonts.push(...hits.fonts);
+  allSpacing.push(...hits.spacing);
+}
+if (allColors.length) {
+  failures.push(`Hardcoded CSS colors outside css/foundations/tokens.css:\n${allColors.join('\n')}`);
+}
+if (allFonts.length) {
+  failures.push(`Raw px font sizes outside css/foundations/tokens.css (type scale is --text-*):\n${allFonts.join('\n')}`);
+}
+if (allSpacing.length) {
+  failures.push(`Off-scale spacing values (>2px literal; scale is --space-*):\n${allSpacing.join('\n')}`);
 }
 
 const inlineStyleHits = jsTemplatePaths.flatMap(file => inlineStyleAttributes(file, read(file)));

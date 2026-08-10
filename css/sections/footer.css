@@ -1,0 +1,179 @@
+/* ==========================================================================
+   sections/footer.css — BBL Mieterportal
+
+   Footer (three-column information grid + bottom strip).
+   Sources: styles.css 2772-2781, 2864-3025.
+   DS counterpart: sections/footer.postcss.
+   ========================================================================== */
+
+/* ── FOOTER (matches bbl.admin.ch/de pattern) ───────────────────────────── */
+.app-footer {
+  background: var(--color-surface-dark);
+  color: var(--color-text-inverse);
+  position: relative;
+  /* No margin-top — the footer should sit flush against the preceding
+     section. Sections already provide their own vertical padding via
+     --section-py-half. */
+}
+
+/* Footer grid — matches designsystem css/sections/footer.postcss .footer-information:
+   single column on mobile, three equal columns from lg (1024px) up. */
+.footer-information__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2xl);
+  padding: var(--space-3xl) var(--container-padding);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+@media (min-width: 1024px) {
+  .footer-information__inner {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3xl);
+    padding-block: var(--space-4xl);          /* 80 px at lg */
+  }
+}
+@media (min-width: 1544px) {
+  .footer-information__inner {
+    padding-block: calc(var(--space-4xl) + var(--space-md));   /* ~96 px at 2xl */
+    gap: var(--space-4xl);
+  }
+}
+@media (min-width: 1920px) {
+  .footer-information__inner {
+    padding-block: 7rem;                       /* 112 px at 3xl */
+  }
+}
+
+/* Column heading shared by all three footer columns. CD Bund canonical
+   per designsystem/css/sections/footer.postcss .footer-information__entry
+   `h3 { @apply text--xl; mb-6 lg:mb-10 }` — sentence-case white text at
+   ~20→24→26 px across breakpoints, regular weight, generous margin below.
+   Both `.footer-information__brand` (column 1 — descriptive heading) and
+   `.footer-information__heading` (columns 2/3 — link-list heading) share
+   the same look so the three columns scan as a uniform row. The earlier
+   "small uppercase tracked label" treatment was the CD-Bund Tailwind 2.x
+   eyebrow pattern, no longer used on swisstopo / bbl.admin.ch. */
+.footer-information__brand,
+.footer-information__heading {
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-inverse);
+  margin: 0 0 var(--space-lg);
+  letter-spacing: 0;
+  line-height: var(--line-height-snug);
+}
+@media (min-width: 1024px) {
+  .footer-information__brand,
+  .footer-information__heading { margin-bottom: var(--space-2xl); }
+}
+.footer-information__motto {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-white-90);
+  max-width: 34ch;
+}
+.footer-information__prototype-warning {
+  margin: var(--space-lg) 0 0;
+  font-size: var(--text-body-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-white-65);
+  font-weight: var(--font-weight-normal);
+  max-width: 36ch;
+}
+.footer-information__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.footer-information__list li + li { margin-top: 0; }
+.footer-information__list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Small horizontal inset + matching negative margin so the row background
+     (added on hover) has breathing room while the text stays aligned with
+     the column edge. */
+  padding: var(--space-md) var(--space-sm);
+  margin-inline: calc(var(--space-sm) * -1);
+  font-size: var(--text-body);
+  color: var(--color-white-92);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-white-15);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+@media (min-width: 1024px) {
+  /* Match the CD-Bund footer cadence — wider link rows at desktop. */
+  .footer-information__list a { padding: var(--space-lg) var(--space-sm); }
+}
+/* CD Bund footer fills the WHOLE row on hover/focus (not just a text-colour
+   change) — the affordance reads as a full navigable strip. */
+.footer-information__list a:hover,
+.footer-information__list a:focus-visible {
+  color: var(--color-white);
+  background: var(--color-secondary-700);
+}
+.footer-information__list a:hover .footer-information__arrow {
+  transform: translateX(4px);
+}
+.footer-information__arrow {
+  width: var(--icon-base);
+  height: var(--icon-base);
+  transition: transform var(--transition-fast);
+  margin-left: var(--space-md);
+  flex-shrink: 0;
+}
+
+/* "Zugang zu amtlichen Dokumenten" big link */
+.footer-information__big-link {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-inverse);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-white-40);
+  transition: color var(--transition-fast);
+}
+.footer-information__big-link:hover { color: var(--color-white); }
+.footer-information__big-link:hover .footer-information__arrow { transform: translateX(4px); }
+.footer-information__big-link .footer-information__arrow {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+/* Bottom strip — slightly darker, three small links. CD Bund cadence is
+   tight (~12–16 px vertical) so the strip reads as a meta-line rather
+   than a second footer band. */
+.app-footer__bottom {
+  background: var(--color-surface-darker);
+  padding-block: var(--space-sm);
+}
+@media (min-width: 1024px) {
+  .app-footer__bottom { padding-block: var(--space-md); }
+}
+.app-footer__bottom-inner {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xl);
+  font-size: var(--text-body-xs);   /* CD: footer-navigation strip is text--xs (was text--sm — one size too large) */
+}
+@media (min-width: 1024px) {
+  .app-footer__bottom-inner { gap: var(--space-2xl); }
+}
+.app-footer__bottom-link {
+  color: var(--color-white-75);
+  text-decoration: none;
+}
+.app-footer__bottom-link:hover { color: var(--color-white); text-decoration: underline; }

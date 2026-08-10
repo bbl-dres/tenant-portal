@@ -1,0 +1,524 @@
+/* ==========================================================================
+   navigations/header.css — BBL Mieterportal
+
+   Federal chrome: top bar (incl. language switcher, demo chip) and
+   brand bar (logo lockup, header search, meta links).
+   Sources: styles.css 175-620, mobile overrides 3634-3686 + 3792-3793
+   (from the former RESPONSIVE block) and 3871-3872. Navigation-owned
+   strays 3614-3626 live in main-navigation.css.
+   DS counterparts: sections/top-bar.postcss, sections/top-header.postcss,
+   components/logo.postcss, components/language-switcher.postcss,
+   components/search.postcss.
+   ========================================================================== */
+
+/* ── FEDERAL CHROME — BARS ──────────────────────────────────────────────
+   Pattern: outer bar is full-bleed (background colour spans the viewport),
+   inner element (.*__inner) respects --container-max-width and shares the
+   same grid as page content. */
+.top-bar {
+  background: var(--color-surface-dark);
+  color: var(--color-text-inverse);
+  font-size: var(--text-body-sm);
+}
+.top-bar__inner {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  min-height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding-inline: var(--container-padding);
+  gap: var(--space-md);
+}
+.top-bar__authorities {
+  background: transparent;
+  border: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius);
+  /* Was a <button>; now a real <a> linking out to admin.ch. Suppress the
+     global anchor underline so the link reads as a utility chip in the
+     dark top-bar, matching kbob/swisstopo. */
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
+}
+.top-bar__authorities:hover { text-decoration: none; color: var(--color-gray-300); }
+.top-bar__authorities svg { width: var(--icon-sm); height: var(--icon-sm); }
+/* Demo / Prototype chip — sits in the top-bar right cluster beside the
+   language switcher + user pill. Replaces a centred-red "Prototyp — nur
+   zur Demonstration" line that competed visually with the language and
+   user controls. The full descriptive sentence stays as the chip's
+   `aria-label` so AT users still get the context. Federal pattern: a
+   small uppercase warning chip is how `beta.admin.ch`-style services
+   flag the non-production status. */
+.top-bar__demo-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-sm);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-primary-700);
+  color: var(--color-white);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.top-bar__actions { margin-left: auto; display: flex; gap: var(--space-md); align-items: center; }
+.top-bar__action {
+  background: transparent;
+  border: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius);
+  font-size: var(--text-body-sm);
+}
+.top-bar__action:hover { background: var(--color-white-20); }
+.top-bar__action svg { width: var(--icon-lg); height: var(--icon-lg); }
+
+/* Utility links in the dark top bar */
+.top-bar__link {
+  color: var(--color-white-92);
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius);
+  transition: background var(--transition-fast);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
+}
+.top-bar__link:hover { color: var(--color-gray-300); }
+.top-bar__link--user svg { width: var(--icon-lg); height: var(--icon-lg); }
+.top-bar__sep {
+  width: 1px;
+  height: 18px;
+  background: var(--color-white-25);
+}
+
+/* CD pattern: short language codes, dark panel below the trigger, active
+   item highlighted in federal blue. Closed by default. */
+.language-switcher { position: relative; }
+.top-bar__lang {
+  background: transparent;
+  border: none;
+  color: inherit;
+  /* CD: chevron sits flush with the right edge of the switcher container —
+     visually aligning with the right edge of the dropdown panel below. */
+  padding: var(--space-xs) 0 var(--space-xs) var(--space-sm);
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  cursor: pointer;
+  border-radius: var(--radius);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
+}
+.top-bar__lang:hover { color: var(--color-gray-300); }
+/* CD ChevronDown.svg has ~19% inner whitespace on the right (path ends at
+   x=19.42 of the 24-unit viewBox). Pull the SVG ~4px right so the visible
+   glyph aligns with the right edge of the dropdown panel below. */
+.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); margin-right: -4px; }
+
+.language-switcher__dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: var(--color-surface-dark);
+  color: var(--color-white);
+  box-shadow: var(--shadow-dropdown);
+  min-width: 70px;
+  z-index: var(--z-toast);
+  display: none;
+  list-style: none;
+  padding: var(--space-xs) 0;
+  margin: 0;
+}
+.language-switcher.open .language-switcher__dropdown { display: block; }
+.language-switcher__option {
+  width: 100%;
+  display: block;
+  text-align: center;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
+}
+.language-switcher__option[aria-disabled="true"] {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* CD canonical: hover + selected paint the option in Tailwind `blue-600`
+   (#2563eb in designsystem/app/tailwind.config.js:82) with white text.
+   Red is reserved for primary CTAs and brand-accent surfaces; the
+   language switcher uses blue so the selection state can't be mistaken
+   for the federal CTA accent. Focus ring is the global purple
+   `:focus-visible` (var(--color-focus)) — sits on a 2 px inset offset
+   so it reads against the dark dropdown surface and the blue hover
+   alike. */
+.language-switcher__option:hover,
+.language-switcher__option:focus-visible {
+  background: var(--color-lang-active);
+  color: var(--color-white);
+}
+.language-switcher__option[aria-disabled="true"]:hover,
+.language-switcher__option[aria-disabled="true"]:focus-visible {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.language-switcher__option:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+.language-switcher__option--active {
+  background: var(--color-lang-active);
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+.language-switcher__option--active:hover {
+  background: var(--color-lang-active-hover);
+}
+
+/* ── FEDERAL CHROME — BRAND BAR ─────────────────────────────────────────── */
+/* Full-bleed white background; content constrained inside __inner. */
+.top-header {
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+}
+.top-header__department-strip {
+  display: none;
+  background: var(--color-secondary-50);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.top-header__department-strip-inner {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-sm) var(--container-padding);
+  font-size: var(--text-body-sm);
+  line-height: var(--line-height-snug);
+}
+.top-header__inner {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-md) var(--container-padding);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+@media (min-width: 1024px) {
+  .top-header__inner { padding-block: var(--space-lg); }
+}
+@media (min-width: 1280px) {
+  .top-header__inner { padding-block: var(--space-xl); }
+}
+/* Federal mark — sizing + alignment mirrors designsystem css/components/logo.postcss.
+   Centred on mobile, top-aligned from md+ (matches DS .logo `md:items-start`).
+   Mark and divider scale up at lg / xl / 3xl so the brand reads at laptop and
+   widescreen sizes; on mobile the mark stays compact. */
+.top-header__left {
+  display: flex;
+  align-items: center;            /* base: vertical centre on phones */
+  gap: var(--space-md);
+  cursor: pointer;
+  /* `.top-header__left` is now a real anchor (was a div+role=link). Reset
+     the default link styling so the brand still reads as branded text. */
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.top-header__left:hover { text-decoration: none; }
+.top-header__left:hover .top-header__dept strong { color: var(--color-primary); }
+@media (min-width: 768px) {
+  .top-header__left { align-items: flex-start; gap: var(--space-lg); }
+}
+/* Federal mark is split into two SVGs per CD spec
+   (designsystem/css/components/logo.postcss):
+     .logo__flag — always visible (the Swiss cross)
+     .logo__name — `hidden xl:block` (the 4-language federal name)
+   Below 1280 px (xl) only the flag shows; above, the name SVG appears
+   to its right inside the same wrapper. */
+.top-header__bundmark {
+  display: inline-flex;
+  align-items: flex-start;   /* CD: flag top-aligns with the name SVG (DS .logo items-start), not centred against it */
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+.top-header__bundmark-flag {
+  display: block;
+  width: 30px;
+  height: 33px;
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) { .top-header__bundmark-flag { width: 32px; height: 34px; } }
+@media (min-width: 1920px) { .top-header__bundmark-flag { width: 40px; height: 44px; } }
+.top-header__bundmark-name {
+  display: none;
+  flex-shrink: 0;
+  width: 174px;
+  height: 50px;
+}
+@media (min-width: 1280px) { .top-header__bundmark-name { display: block; } }
+@media (min-width: 1920px) { .top-header__bundmark-name { width: 244px; height: 70px; } }
+
+.top-header__divider {
+  width: 1px;
+  height: 40px;                   /* mobile base; matches mark height */
+  background: var(--color-gray-300);
+  align-self: stretch;            /* lets it grow with the flex-start row */
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) { .top-header__divider { height: 52px; } }
+@media (min-width: 1280px) { .top-header__divider { height: 60px; } }
+@media (min-width: 1920px) { .top-header__divider { height: 70px; } }
+
+/* Dept title — sizing tracks designsystem css/components/logo.postcss .logo__title:
+   text-sm base / text-base @ xl / text-lg @ 3xl (14 / 16 / 18 px). Never larger.
+   The small negative margin-top optically aligns the bold title with the SVG's
+   first text row, mirroring DS `mt-[-0.160rem]`. */
+.top-header__dept {
+  font-size: var(--text-body-sm);                /* 14 px base */
+  line-height: var(--line-height-snug);
+  margin-top: -0.16rem;
+}
+@media (min-width: 1280px) { .top-header__dept { font-size: var(--text-body); } }    /* 16 px @ xl */
+@media (min-width: 1920px) { .top-header__dept { font-size: 1.125rem;        } }     /* 18 px @ 3xl */
+
+/* Dept name + sub-line are now distinct block-level spans inside the anchor
+   (replaced the previous `<br>`-inside-span construct). Both rules below
+   apply to the inner spans so the visual rhythm is unchanged. */
+.top-header__dept-name { display: block; }
+.top-header__dept-name strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+/* Back-compat: any remaining `.top-header__dept strong` markup still styles. */
+.top-header__dept strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+/* Sub-line ("Mieterportal") — same size as the dept title (inherits via the
+   parent .top-header__dept rule that already scales 14 → 16 → 18 px), but
+   regular weight to keep the bold dept name dominant. */
+.top-header__dept-sub {
+  display: block;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+  margin-top: 2px;
+}
+.top-header__right {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+.top-header__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+.top-header__meta-link {
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  padding: var(--space-xs) 0;
+  transition: color var(--transition-fast);
+}
+.top-header__meta-link:hover { color: var(--color-primary); text-decoration: underline; }
+.top-header__actions { display: flex; gap: var(--space-md); align-items: center; }
+/* Below lg (1024 px) — meta hides + burger menu surfaces it. Re-stated in
+   the main RESPONSIVE block; here we only adjust right-column flow. */
+@media (max-width: 1023.98px) {
+  .top-header__right { flex-direction: row; }
+}
+
+/* Focus-expand search (kbob-fdk pattern) — collapsed shows "Suche" + icon;
+   click opens an inline form that expands rightward. Esc / blur closes. */
+.header-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 80px;
+  min-height: var(--btn-min-h);
+}
+.header-search__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  min-height: var(--btn-min-h);
+  cursor: pointer;
+  transition: color var(--transition-fast), opacity var(--transition);
+}
+.header-search__toggle:hover { color: var(--color-primary); }
+.header-search__toggle svg { width: var(--icon-md); height: var(--icon-md); }
+.header-search.open .header-search__toggle { opacity: 0; pointer-events: none; }
+
+.header-search__form {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  min-height: var(--btn-min-h);
+  overflow: hidden;
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: width var(--transition-slow), opacity var(--transition);
+}
+.header-search.open .header-search__form {
+  width: 280px;
+  opacity: 1;
+  pointer-events: auto;
+}
+.header-search__input {
+  width: 100%;
+  min-height: var(--btn-min-h);
+  padding: var(--space-sm) calc(var(--space-xl) + 8px) var(--space-sm) var(--space-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  background: var(--color-bg-surface);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+.header-search__input:focus {
+  background: var(--color-white);
+  border-color: var(--color-border-input);
+}
+/* Canonical CD purple focus ring — matches the global :focus-visible
+   rule applied across every interactive surface in the portal. */
+.header-search__input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  background: var(--color-white);
+  border-color: var(--color-border-input);
+}
+.header-search__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.header-search__submit {
+  position: absolute;
+  right: 0;
+  background: transparent;
+  border: none;
+  padding: var(--space-xs);
+  min-width: var(--btn-min-h);
+  min-height: var(--btn-min-h);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.header-search__submit:hover { color: var(--color-primary); }
+.header-search__submit svg { width: var(--icon-base); height: var(--icon-base); }
+
+.top-header__action {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  font-size: var(--text-body-sm);
+  display: inline-flex; gap: var(--space-xs); align-items: center;
+  color: inherit;
+}
+.top-header__action:hover { background: var(--color-bg-alt); }
+.top-header__action--primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+.top-header__action--primary:hover { background: var(--color-primary-hover); }
+
+@media (max-width: 1023.98px) {
+  .top-bar__demo-chip,
+  .top-bar__link--user {
+    display: none;
+  }
+  .top-header__department-strip { display: block; }
+  .top-header__inner {
+    min-height: 78px;
+    padding-block: var(--space-md);
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
+  }
+  .top-header__left {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: var(--space-sm);
+  }
+  .top-header__bundmark-flag {
+    width: 30px;
+    height: 33px;
+  }
+  .top-header__divider {
+    display: block;
+    height: 48px;
+    align-self: center;
+  }
+  .top-header__dept {
+    display: block;
+    min-width: 0;
+    font-size: var(--text-body-sm);
+    line-height: var(--line-height-snug);
+    margin-top: 0;
+  }
+  .top-header__dept-sub { display: none; }
+  .top-header__right {
+    flex: 0 0 auto;
+    width: auto;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+  .top-header__actions {
+    gap: var(--space-sm);
+  }
+  .header-search {
+    min-width: var(--btn-min-h);
+  }
+  .header-search__toggle {
+    width: var(--btn-min-h);
+    padding: 0;
+    justify-content: center;
+  }
+  .header-search__toggle span {
+    display: none;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .header-search__input { width: 140px; }
+  .top-header__meta { display: none; }
+}
+
+@media (max-width: 768px) {
+  .top-bar__authorities span { display: none; }
+  .top-header__meta-nav { display: none; }
+}

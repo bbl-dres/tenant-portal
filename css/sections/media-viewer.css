@@ -1,0 +1,533 @@
+/* ==========================================================================
+   sections/media-viewer.css — BBL Mieterportal
+
+   Document viewer + image gallery (lightbox pair): document templates,
+   zoom toolbar, comments rail, share popover, side-nav chevrons, gallery.
+   Sources: styles.css 5774-6299.
+   ========================================================================== */
+
+/* Plain block that grows with the pages — the viewer scrolls, not this. The
+   nav chevrons + comments rail are pinned (position: fixed) so they stay put
+   while the document scrolls underneath. */
+.docviewer__main { background: var(--color-secondary-800); }
+.docviewer__docnum { white-space: nowrap; }
+.docviewer__stage {
+  padding: var(--space-xl) var(--space-md);
+  cursor: grab;
+}
+.docviewer__stage--grabbing { cursor: grabbing; }
+.docviewer__stage:focus-visible { outline: 2px solid var(--color-white-40); outline-offset: -2px; }
+.docviewer__pages {
+  --docpage-w: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  min-width: min-content;
+}
+
+.docpage {
+  width: var(--docpage-w);
+  min-height: calc(var(--docpage-w) * 1.414);
+  flex: 0 0 auto;
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-lg);
+  padding: clamp(28px, 6%, 56px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+.docpage__footer {
+  display: flex; justify-content: space-between; gap: var(--space-sm);
+  margin-top: auto;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-light);
+  font-size: var(--text-body-xs); color: var(--color-text-muted);
+}
+.docpage__crest { width: 38px; height: auto; flex: 0 0 auto; }
+
+/* Text template */
+.docpage--text .docpage__letterhead { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+.docpage__org { font-size: var(--text-body-xs); color: var(--color-text-secondary); line-height: var(--line-height-snug); }
+.docpage__title { font-size: var(--text-h3); font-weight: var(--font-weight-bold); margin: 0 0 var(--space-md); }
+.docpage__subtitle { font-size: var(--text-h4); margin: 0 0 var(--space-md); color: var(--color-text-secondary); }
+.docpage__metagrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xs) var(--space-lg);
+  margin: 0 0 var(--space-lg); padding: var(--space-md);
+  background: var(--color-bg-surface); border-radius: var(--radius);
+}
+.docpage__metagrid div { display: flex; flex-direction: column; }
+.docpage__metagrid dt { font-size: var(--text-body-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-label); }
+.docpage__metagrid dd { margin: 0; font-size: var(--text-body-sm); font-weight: var(--font-weight-bold); }
+.docpage__p { margin: 0 0 var(--space-md); font-size: var(--text-body-sm); line-height: var(--line-height-relaxed); text-align: justify; }
+
+/* Certificate template */
+.docpage--cert { text-align: center; align-items: center; }
+.docpage--cert .docpage__crest { width: 56px; margin-bottom: var(--space-md); }
+.docpage__cert-org { margin: 0 0 var(--space-xl); font-size: var(--text-body-xs); color: var(--color-text-secondary); letter-spacing: var(--tracking-wide); text-transform: uppercase; }
+.docpage__cert-kicker { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-primary); font-weight: var(--font-weight-bold); }
+.docpage__cert-title { margin: 0 0 var(--space-lg); font-size: var(--text-h2); font-weight: var(--font-weight-bold); max-width: 26ch; }
+.docpage__cert-body { margin: 0 0 var(--space-2xl); font-size: var(--text-body-sm); line-height: var(--line-height-relaxed); color: var(--color-text-secondary); max-width: 48ch; }
+.docpage__cert-place { margin: 0 0 var(--space-xl); font-size: var(--text-body-sm); }
+.docpage__cert-sign { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; max-width: 380px; margin-top: var(--space-2xl); }
+.docpage__cert-name { border-top: 1px solid var(--color-text-primary); padding-top: var(--space-xs); font-size: var(--text-body-sm); }
+.docpage__seal {
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  width: 84px; height: 84px; border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary); font-weight: var(--font-weight-bold); font-size: var(--text-body-xs);
+  letter-spacing: var(--tracking-label);
+  transform: rotate(-12deg);
+  opacity: 0.85;
+}
+
+/* Floor-plan template (blueprint schematic) */
+.docpage--plan { padding: clamp(16px, 3%, 32px); justify-content: center; }
+.docpage__plan { display: block; width: 100%; height: auto; }
+.docpage__plan .plan-sheet { fill: var(--color-bg-surface); stroke: var(--color-border); stroke-width: 1; }
+.docpage__plan .plan-wall { fill: none; stroke: var(--color-secondary-700); stroke-width: 3; stroke-linecap: square; }
+.docpage__plan .plan-room { fill: var(--color-secondary-50); stroke: var(--color-secondary-300); stroke-width: 1; }
+.docpage__plan .plan-label { fill: var(--color-text-secondary); font-size: 11px; font-weight: var(--font-weight-bold); text-anchor: middle; font-family: var(--font-family); }
+.docpage__plan .plan-north line { stroke: var(--color-text-secondary); stroke-width: 1.5; }
+.docpage__plan .plan-titleblock { fill: var(--color-white); stroke: var(--color-secondary-700); stroke-width: 1.5; }
+.docpage__plan .plan-title { fill: var(--color-text-primary); font-size: 13px; font-weight: var(--font-weight-bold); font-family: var(--font-family); }
+.docpage__plan .plan-meta { fill: var(--color-text-secondary); font-size: 11px; font-family: var(--font-family); }
+
+/* Floating zoom toolbar — pinned to the viewport (the viewer scrolls). */
+.docviewer__toolbar {
+  position: fixed; bottom: var(--space-lg); left: 50%; transform: translateX(-50%);
+  z-index: 5;
+  display: flex; align-items: center; gap: var(--space-xs);
+  padding: var(--space-xs);
+  background: var(--color-secondary-900);
+  border: 1px solid var(--color-white-15);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+}
+.docviewer__zoom {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; height: 36px; padding: 0 var(--space-sm);
+  background: none; border: none; border-radius: var(--radius-full);
+  color: var(--color-white); font-size: var(--text-body-sm); cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.docviewer__zoom:hover { background: var(--color-white-12); }
+.docviewer__zoom:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
+.docviewer__zoom .inline-icon { width: 18px; height: 18px; }
+.docviewer__zoom--reset { min-width: 56px; font-variant-numeric: tabular-nums; }
+
+/* Comments side panel — fixed right rail below the sticky bar, with its own
+   scroll, so it stays put while the document scrolls. `--docviewer-bar-h` is
+   measured in JS (the bar height is responsive). */
+.docviewer__comments {
+  position: fixed;
+  top: var(--docviewer-bar-h, 56px); right: 0; bottom: 0;
+  width: 320px; max-width: 80vw;
+  z-index: 6;
+  display: flex; flex-direction: column;
+  background: var(--color-white);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+}
+.docviewer__comments[hidden] { display: none; }
+.docviewer__comments-title { margin: 0; padding: var(--space-md); font-size: var(--text-h4); border-bottom: 1px solid var(--color-border-light); }
+.docviewer__comments-list { list-style: none; margin: 0; padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-lg); flex: 1 1 auto; }
+.docviewer__comment { display: flex; gap: var(--space-sm); }
+.docviewer__avatar {
+  flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--color-primary-50); color: var(--color-primary-700);
+  font-size: var(--text-body-xs); font-weight: var(--font-weight-bold);
+}
+.docviewer__comment-head { margin: 0 0 2px; font-size: var(--text-body-sm); }
+.docviewer__comment-head span { color: var(--color-text-muted); font-size: var(--text-body-xs); }
+.docviewer__comment-text { margin: 0; font-size: var(--text-body-sm); color: var(--color-text-secondary); line-height: var(--line-height-snug); }
+.docviewer__comments-add { padding: var(--space-md); border-top: 1px solid var(--color-border-light); display: flex; flex-direction: column; gap: var(--space-sm); }
+
+/* Share popover — light card anchored under the share button (coords set in
+   JS). Sits above the bar/comments so it's never clipped. */
+.docviewer-share {
+  position: fixed;
+  z-index: 7;
+  width: 340px;
+  max-width: calc(100vw - 2 * var(--space-md));
+  padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-sm);
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-dropdown);
+}
+.docviewer-share__title { margin: 0; font-size: var(--text-body); font-weight: var(--font-weight-bold); }
+.docviewer-share__hint { margin: 0; font-size: var(--text-body-xs); color: var(--color-text-secondary); line-height: var(--line-height-snug); }
+.docviewer-share__row { display: flex; gap: var(--space-xs); align-items: stretch; }
+.docviewer-share__input {
+  flex: 1 1 auto; min-width: 0;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.docviewer-share__input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.docviewer-share__copy { flex: 0 0 auto; white-space: nowrap; }
+.docviewer-share__copy .inline-icon { width: 16px; height: 16px; }
+.docviewer-share__mail {
+  display: inline-flex; align-items: center; gap: var(--space-xs);
+  font-size: var(--text-body-sm); color: var(--color-primary);
+  text-decoration: none;
+}
+.docviewer-share__mail:hover { text-decoration: underline; }
+.docviewer-share__mail .inline-icon { width: 16px; height: 16px; }
+
+@media (max-width: 640px) {
+  .docviewer__comments { width: 88vw; }
+  .docviewer__heading-icon { display: none; }
+}
+
+/* ── Side nav chevrons (shared by the document viewer + image gallery) ──────
+   Circular, translucent-white buttons pinned to the vertical centre of the
+   stage. Hidden when there is only one item; the doc viewer also hides them
+   while the comments panel is open so they don't overlap it. */
+.docviewer__nav,
+.gallery__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px;
+  background: var(--color-white-12);
+  border: none; border-radius: var(--radius-full);
+  color: var(--color-white); cursor: pointer;
+  transition: background var(--transition-fast);
+  z-index: 2;
+}
+.docviewer__nav:hover,
+.gallery__nav:hover { background: var(--color-white-25); }
+.docviewer__nav:focus-visible,
+.gallery__nav:focus-visible { outline: 2px solid var(--color-white); outline-offset: 2px; }
+.docviewer__nav .inline-icon,
+.gallery__nav .inline-icon { width: 24px; height: 24px; }
+.docviewer__nav[hidden],
+.gallery__nav[hidden] { display: none; }
+.docviewer__nav--prev,
+.gallery__nav--prev { left: var(--space-md); }
+.docviewer__nav--next,
+.gallery__nav--next { right: var(--space-md); }
+/* The viewer scrolls, so its chevrons must be pinned to the viewport (the
+   gallery doesn't scroll, so it keeps the shared `absolute`). */
+.docviewer__nav { position: fixed; }
+.docviewer--comments-open .docviewer__nav { display: none; }
+
+/* ── Image gallery (lightbox) — mirrors the .docviewer chrome ──────────────
+   Dark full-screen surface: image name top-left, download/upload/delete
+   top-right, centred image with side chevrons, bottom-centre thumbnail
+   strip. Chevrons + thumbnails appear only with 2+ images. */
+.gallery {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-docviewer);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-secondary-900);
+}
+.gallery__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-secondary-900);
+  border-bottom: 1px solid var(--color-white-12);
+}
+.gallery__heading { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.gallery__heading-icon { color: var(--color-white-65); flex: 0 0 auto; }
+.gallery__heading-text { min-width: 0; }
+.gallery__name {
+  margin: 0;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gallery__sub { margin: 0; color: var(--color-white-65); font-size: var(--text-body-xs); font-variant-numeric: tabular-nums; }
+.gallery__actions { display: flex; align-items: center; gap: var(--space-xs); flex: 0 0 auto; }
+.gallery__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  background: none; border: none; border-radius: var(--radius);
+  color: var(--color-white); cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.gallery__btn:hover { background: var(--color-white-12); }
+.gallery__btn:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
+.gallery__btn:disabled { opacity: 0.4; cursor: default; }
+.gallery__btn:disabled:hover { background: none; }
+.gallery__btn--close:hover { background: var(--color-primary); }
+.gallery__btn .inline-icon { width: 20px; height: 20px; }
+
+.gallery__main {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: var(--space-lg) var(--space-md);
+}
+.gallery__stage {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+.gallery__image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.gallery__image[hidden] { display: none; }
+.gallery__empty { margin: 0; color: var(--color-white-65); font-size: var(--text-body-sm); text-align: center; }
+.gallery__empty[hidden] { display: none; }
+
+.gallery__thumbs {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: safe center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-secondary-900);
+  border-top: 1px solid var(--color-white-12);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.gallery__thumbs[hidden] { display: none; }
+.gallery__thumb {
+  flex: 0 0 auto;
+  width: 84px; height: 56px;
+  padding: 0;
+  background: var(--color-secondary-800);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--transition-fast), border-color var(--transition-fast);
+}
+.gallery__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gallery__thumb:hover { opacity: 0.85; }
+.gallery__thumb:focus-visible { outline: 2px solid var(--color-white); outline-offset: 2px; opacity: 1; }
+.gallery__thumb--active { opacity: 1; border-color: var(--color-white); }
+
+@media (max-width: 640px) {
+  .gallery__thumb { width: 64px; height: 44px; }
+  .gallery__heading-icon { display: none; }
+}
+
+.property-popup__title { margin: 0 0 2px; font-weight: var(--font-weight-bold); font-size: var(--text-body); line-height: var(--line-height-snug); }
+.property-popup__meta  { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+/* Full-width "Details öffnen" CTA at the foot of the map info panel. Uses
+   the standard .btn .btn--filled chrome; only the width is local. */
+.property-popup__cta { width: 100%; }
+/* Banner media — full-bleed to the popup edges. Hosts two overlays: the
+   building-id chip (top-left) and MapLibre's close button (top-right). */
+.property-popup__media {
+  position: relative;
+  width: calc(100% + var(--space-md) * 2);
+  height: 112px;
+  margin: calc(-1 * var(--space-md)) calc(-1 * var(--space-md)) var(--space-sm);
+  overflow: hidden;
+  background-color: var(--color-bg-alt);
+}
+.property-popup__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Building-id chip — dark scrim so it reads on any photo; mirrors the id
+   shown on the marker label above the pin. */
+.property-popup__id {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  padding: 2px var(--space-xs);
+  background: var(--color-black-70);
+  color: var(--color-white);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-sm);
+}
+.property-popup__body { display: block; }
+
+/* Portfolio-map popup chrome (scoped via the `property-map-popup` className).
+   Padding matches the image's negative-margin bleed; content is clipped so
+   the photo fills the rounded top edge cleanly. */
+.property-map-popup .maplibregl-popup-content {
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+/* Close button — overlaid on the photo top-right as a dark scrim circle so it
+   reads on any image (mirrors the id chip top-left); red on hover. */
+.property-map-popup .maplibregl-popup-close-button {
+  width: 26px; height: 26px;
+  top: var(--space-sm); right: var(--space-sm);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 18px; line-height: 1;
+  color: var(--color-white);
+  background: var(--color-black-70);
+  transition: background var(--transition-fast);
+}
+.property-map-popup .maplibregl-popup-close-button:hover { background: var(--color-primary); }
+
+/* Small screens: a tethered bubble gets clipped on a short map, so dock the
+   popup as a bottom card spanning the map width. Overrides MapLibre's inline
+   transform (CSS !important beats inline) and drops the tail. */
+@media (max-width: 640px) {
+  .property-map-popup.maplibregl-popup {
+    max-width: none !important;
+    width: auto !important;
+    left: var(--space-sm) !important;
+    right: var(--space-sm) !important;
+    bottom: var(--space-sm) !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  .property-map-popup .maplibregl-popup-content { width: 100%; max-width: none !important; }
+  .property-map-popup .maplibregl-popup-tip { display: none !important; }
+  .property-map-popup .property-popup__media { height: 96px; }
+}
+
+/* `.property-location-map` — Standort map at the bottom of the property
+   detail page. Single marker centred on the building. Uses MapLibre +
+   positron + WGS84 because the BBL portfolio spans federal-wide and
+   eventually overseas FDFA missions, so the basemap must work globally. */
+.property-location-map {
+  width: 100%;
+  height: 320px;
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-bg-alt);
+}
+@media (min-width: 768px) { .property-location-map { height: 400px; } }
+@media (min-width: 1280px) { .property-location-map { height: 480px; } }
+.property-location-meta {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+/* Static marker variant — same teardrop pin but without hover/active
+   treatments (no click interaction on a single-building map). */
+.property-marker--static { cursor: default; pointer-events: none; }
+
+/* (Pagination rules consolidated — single canonical block lives in the
+   "DOCUMENTS PAGE — filter bar, document table, pagination" section above.
+   Both #/properties and #/downloads now use that shared block.) */
+
+/* Existing card grid (gallery view) */
+.property-grid {
+  display: grid;
+  /* min(100%, 320px): the 320 px floor must never exceed the container,
+     or cards overflow + get clipped on viewports ≤ 352 px. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-lg);
+}
+.card--property {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+.card--property:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+.card--property:hover .card--property__title { color: var(--color-primary); }
+/* `.card--property__image` stays a `<div>` because it hosts the overlay
+   status badge as a positioned child. The photo itself is a real `<img>`
+   inside it (`object-fit: cover` fills the container) so it gets native
+   lazy-loading + CLS-safe dimensions. */
+.card--property__image {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  background-color: var(--color-bg-alt);
+}
+.card--property__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Status badge overlaying the top-left of the property card image —
+   moves the "open issues" / "ok" chip off the body so the SAP line +
+   title + meta have full width. Backdrop sits on a translucent white
+   surface so the badge stays legible over any photo. */
+.card--property__status {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: 1;
+  backdrop-filter: blur(2px);
+  box-shadow: var(--shadow-property-status);
+}
+/* Quiet variant for the success state — semi-transparent white surface
+   over the photo so an all-green portfolio doesn't shout. */
+.card--property__status--quiet {
+  background: var(--color-white-85);
+  color: var(--color-success);
+}
+.card--property__body {
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+}
+.card--property__sap {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
+.card--property__title {
+  margin: 0;
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+  transition: color var(--transition-fast);
+}
+.card--property__address {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.card--property__meta {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-sm);
+}
+/* Footer dropped the status badge (moved to image overlay); now just hosts
+   the portfolio-category chip (Verwaltungseinheit). Left-aligned. */
+.card--property__category {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+}
