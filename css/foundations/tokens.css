@@ -389,23 +389,27 @@
   --radius-full:               9999px;
 
   /* ── SHADOWS ──────────────────────────────────────────────────────────── */
+  /* Full DS box-shadow scale, verbatim from designsystem
+     app/tailwind.config.js:226-234 (sm / DEFAULT / md / lg / xl / 2xl).
+     The dropdown / nav-menu / nav-trigger elevations are ALIASES of the DS
+     2xl step — the DS applies shadow-2xl to its desktop-menu drawer, the
+     lifted nav trigger and the fixed notification banner
+     (desktop-menu.postcss:18, main-navigation.postcss:52,
+     notification-banner.postcss:16). Register: TOK-001, TOK-002. */
   --shadow-sm:                 0 1px 2px 0 rgba(0,0,0,0.05);
   --shadow:                    0 1px 2px 0 rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.08);
+  --shadow-md:                 0 2px 4px -1px rgba(0,0,0,0.06), 0 4px 10px -1px rgba(0,0,0,0.08);
   --shadow-lg:                 0 2px 6px -1px rgba(0,0,0,0.06), 0 5px 20px -3px rgba(0,0,0,0.08);
-  --shadow-dropdown:           0 8px 20px -4px var(--color-black-40);
-  --shadow-nav-menu:           0 12px 32px -8px rgba(15, 23, 42, 0.18),
-                               0 2px 4px var(--color-black-04);
-  --shadow-nav-trigger:        0 25px 50px -12px var(--color-black-25);
+  --shadow-xl:                 0 6px 10px -5px rgba(0,0,0,0.06), 0 15px 25px -3px rgba(0,0,0,0.09);
+  --shadow-2xl:                0 10px 20px 0 rgba(0,0,0,0.06), 1px 10px 70px -8px rgba(0,0,0,0.13);
+  --shadow-dropdown:           var(--shadow-2xl);
+  --shadow-nav-menu:           var(--shadow-2xl);
+  --shadow-nav-trigger:        var(--shadow-2xl);
   --shadow-video-logo:         0 1px 2px var(--color-black-25);
   --shadow-video-cta:          0 2px 6px var(--color-black-20);
   --shadow-property-marker:    0 2px 4px var(--color-black-25);
   --shadow-property-status:    0 1px 2px var(--color-black-15);
   --shadow-sticky-edge:        0 -4px 8px -4px var(--color-black-04);
-  /* Tailwind `shadow-2xl`, the elevation the DS puts on its fixed
-     notification banner. Same value as `--shadow-nav-trigger`; kept under its
-     own name so the two can drift apart without one silently restyling the
-     other. */
-  --shadow-2xl:                0 25px 50px -12px var(--color-black-25);
   --filter-shadow-video-play:  drop-shadow(0 2px 6px var(--color-black-35));
 
   /* ── TRANSITIONS ──────────────────────────────────────────────────────── */
@@ -638,7 +642,7 @@ html { scroll-behavior: smooth; }
   background: var(--color-secondary-900);
   color: var(--color-text-inverse);
   border: 2px solid var(--color-white);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);  /* DS global.postcss:67 skip-link shadow-md — TOK-002 */
   text-decoration: none;
   transition: transform var(--transition);
 }
