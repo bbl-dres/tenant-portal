@@ -34,6 +34,11 @@ const TARGETS = [
   { role: null, id: 'landing', hash: '#/' },
   { role: null, id: 'login', hash: '#/login' },
   { role: null, id: 'info', hash: '#/info' },
+  // Login-gate pages: protected routes visited while logged out render the
+  // central gate (renderLoginGate) instead of auto-logging in.
+  { role: null, id: 'gate-inbox', hash: '#/inbox' },
+  { role: null, id: 'gate-properties', hash: '#/properties' },
+  { role: null, id: 'gate-wizard', hash: '#/wizard/1' },
   { role: 'LBO', id: 'home', hash: '#/home' },
   { role: 'LBO', id: 'wizard-1', hash: '#/wizard/1' },
   { role: 'LBO', id: 'wizard-2', hash: '#/wizard/2' },
@@ -45,7 +50,7 @@ const TARGETS = [
   { role: 'LBO', id: 'properties-gallery', hash: '#/properties' },
   { role: 'LBO', id: 'properties-list', hash: '#/properties?view=list' },
   { role: 'LBO', id: 'properties-map', hash: '#/properties?view=map', pixelVolatile: true },
-  { role: 'LBO', id: 'property-detail', pick: 'propertyDetail' },
+  { role: 'LBO', id: 'property-detail', pick: 'propertyDetail', pixelVolatile: true },
   { role: 'LBO', id: 'floor-detail', pick: 'floorDetail', pixelVolatile: true },
   { role: 'LBO', id: 'downloads', hash: '#/downloads' },
   { role: 'LBO', id: 'repair', hash: '#/repair' },
@@ -146,6 +151,13 @@ const PROBES = [
 
 // Whole-DOM computed-style hash — runs in the page. One record per element
 // in document order: tag, class, hash(main), hash(::before), hash(::after).
+// Hasher v2: custom properties (--*) are EXCLUDED from per-element hashes —
+// they are inherited strings, so one token whose text changes (e.g. a
+// url('../…') path after a file move) would otherwise mark every element as
+// different while rendering identically. Their visual effects surface in the
+// longhand properties that consume them. The root token SET is still
+// compared, as a dedicated first record (i:-1) with url(../) paths
+// normalised, so genuine token additions/removals/value changes are caught.
 function domHashScript() {
   const SKIP = new Set(['SCRIPT', 'STYLE', 'LINK', 'META', 'TITLE', 'NOSCRIPT']);
   const fnv = (str) => {
@@ -156,15 +168,35 @@ function domHashScript() {
     }
     return (h >>> 0).toString(16);
   };
+  // v3: computed values embedding absolute URLs (mask-image, background-
+  // image, …) carry the capture server's random port — strip the origin so
+  // two runs are comparable. Custom-prop enumeration order follows cascade
+  // order, so the root-token record sorts names before hashing.
+  const origin = location.origin;
+  const clean = (v) => v.split(origin).join('');
   const styleString = (cs) => {
     let s = '';
     for (let i = 0; i < cs.length; i++) {
       const p = cs[i];
-      s += p + ':' + cs.getPropertyValue(p) + ';';
+      if (p.startsWith('--')) continue;
+      s += p + ':' + clean(cs.getPropertyValue(p)) + ';';
     }
     return s;
   };
   const out = [];
+  {
+    const rootCs = getComputedStyle(document.documentElement);
+    const names = [];
+    for (let i = 0; i < rootCs.length; i++) {
+      if (rootCs[i].startsWith('--')) names.push(rootCs[i]);
+    }
+    names.sort();
+    let tokens = '';
+    for (const p of names) {
+      tokens += p + ':' + clean(rootCs.getPropertyValue(p)).replace(/(\.\.\/)+/g, '') + ';';
+    }
+    out.push({ i: -1, t: ':root-tokens', c: '', h: fnv(tokens), hb: '0', ha: '0' });
+  }
   const els = document.querySelectorAll('*');
   let idx = 0;
   for (const el of els) {
@@ -251,6 +283,14 @@ async function gotoTarget(page, baseUrl, target) {
     { timeout: 15000 },
   );
   await page.waitForTimeout(target.pixelVolatile ? 2500 : 400);
+  // Embedded MapLibre surfaces (properties map, property-detail mini-map,
+  // floor plan) show a .map-loading placeholder until init completes —
+  // capturing mid-init makes the DOM (and thus the hash dump) racy.
+  await page.waitForFunction(
+    () => !document.querySelector('.map-loading'),
+    undefined,
+    { timeout: 10000 },
+  ).catch(() => {});
   await settle(page);
   const rendered = await page.evaluate(() => document.getElementById('page-body').dataset.route);
   return { requested: hash, rendered };
