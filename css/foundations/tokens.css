@@ -332,6 +332,11 @@
 
   /* ── SPACING (4px base unit) ──────────────────────────────────────────── */
   --space-xs:                  4px;
+  /* Intermediate 6px step — Tailwind spacing 1.5 (0.375rem). The DS keeps
+     Tailwind's default quarter-rem grid (no spacing override in
+     app/tailwind.config.js), so half-steps are DS-legal. Used for micro-gaps
+     that read cramped at 4px and loose at 8px. */
+  --space-2xs:                 6px;
   --space-sm:                  8px;
   --space-md:                  16px;
   --space-lg:                  24px;

@@ -166,7 +166,7 @@
    declared later in the file. */
 .inline-icon.main-navigation__chevron {
   width: var(--icon-sm); height: var(--icon-sm);
-  margin-left: 6px; margin-right: 0;
+  margin-left: var(--space-2xs); margin-right: 0;
   flex-shrink: 0;
   display: none;
 }
