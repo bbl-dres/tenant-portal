@@ -8,13 +8,19 @@
 // structural mismatches (different element count / tag / class), which
 // usually mean the app itself changed rather than the CSS.
 // Exit code 1 when any difference is found.
+//
+// --subset: walk the CANDIDATE side instead — for quick iteration runs that
+// captured only a width subset; baseline captures without a candidate
+// counterpart are then not treated as missing.
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import process from 'node:process';
 
-const [, , baseDir, candDir] = process.argv;
+const args = process.argv.slice(2).filter(a => a !== '--subset');
+const subset = process.argv.includes('--subset');
+const [baseDir, candDir] = args;
 if (!baseDir || !candDir) {
-  console.error('usage: node scripts/review/diff-baseline.mjs <baselineDir> <candidateDir>');
+  console.error('usage: node scripts/review/diff-baseline.mjs [--subset] <baselineDir> <candidateDir>');
   process.exit(2);
 }
 
@@ -32,13 +38,15 @@ let filesDiffering = 0;
 let missing = 0;
 const detail = [];
 
-for (const basePath of walk(baseDir)) {
-  const rel = relative(baseDir, basePath);
+const walkRoot = subset ? candDir : baseDir;
+for (const walkPath of walk(walkRoot)) {
+  const rel = relative(walkRoot, walkPath);
+  const basePath = join(baseDir, rel);
   const candPath = join(candDir, rel);
   const label = rel.split(sep).join('/');
-  if (!existsSync(candPath)) {
+  if (!existsSync(candPath) || !existsSync(basePath)) {
     missing++;
-    detail.push(`MISSING in candidate: ${label}`);
+    detail.push(`MISSING in ${existsSync(basePath) ? 'candidate' : 'baseline'}: ${label}`);
     continue;
   }
   const a = JSON.parse(readFileSync(basePath, 'utf8'));

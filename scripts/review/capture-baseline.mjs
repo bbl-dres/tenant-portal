@@ -82,10 +82,15 @@ const PICKERS = {
     return s.news.length ? '#/news/' + s.news[0].id : null;
   },
   floorDetail: () => {
-    // Runs right after property-detail was rendered — read the first floor
-    // link out of that page's DOM (anchor form, app.js renderPropertyDetail).
+    // Runs right after property-detail was rendered — floor rows render as
+    // <tr onclick="location.hash='#/properties/…/floors/…'"> (app.js:2856),
+    // with anchor variants on some views. Try both shapes.
     const a = document.querySelector('a[href*="/floors/"]');
-    return a ? a.getAttribute('href') : null;
+    if (a) return a.getAttribute('href');
+    const tr = document.querySelector('[onclick*="/floors/"]');
+    if (!tr) return null;
+    const m = (tr.getAttribute('onclick') || '').match(/#\/properties\/[^']+\/floors\/[^'&]+/);
+    return m ? m[0] : null;
   },
   reviewDetail: () => {
     const s = window.portal.state;
@@ -283,12 +288,26 @@ async function runPass(browser, baseUrl, widths, mobile) {
     });
     await suppressPrototypeNotice(context);
     const page = await context.newPage();
+    const consoleErrors = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text().slice(0, 200));
+    });
+    page.on('pageerror', (err) => consoleErrors.push(String(err).slice(0, 200)));
     await page.goto(`${baseUrl}/#/`, { waitUntil: 'networkidle' });
     await page.evaluate(() => window.portal.dismissPrototypeNotice && window.portal.dismissPrototypeNotice());
     await page.evaluate(() => window.portal.acceptCookieConsent && window.portal.acceptCookieConsent('necessary'));
 
+    const only = process.env.REVIEW_TARGETS ? new Set(process.env.REVIEW_TARGETS.split(',')) : null;
     let currentRole = null;
     for (const target of TARGETS) {
+      if (only && !only.has(target.id) && !(target.pick && only.has(target.id))) {
+        // Still perform role switches so filtered targets get the right user.
+        if (target.role !== currentRole) {
+          if (target.role) await loginRole(page, target.role);
+          currentRole = target.role;
+        }
+        continue;
+      }
       if (target.role !== currentRole) {
         if (target.role) await loginRole(page, target.role);
         currentRole = target.role;
@@ -302,11 +321,14 @@ async function runPass(browser, baseUrl, widths, mobile) {
           continue;
         }
         const agg = await capture(page, dir, target.id, target, width, !mobile && PROBE_WIDTHS.has(width));
+        const errs = consoleErrors.splice(0);
         manifest.push({
           role: roleDir, target: target.id, width, ok: true, agg,
           requested: nav.requested, rendered: nav.rendered,
+          ...(errs.length ? { consoleErrors: errs } : {}),
           ...(target.pixelVolatile ? { pixelVolatile: true } : {}),
         });
+        if (errs.length) console.log(`     console errors on ${roleDir}/${target.id} @${width}: ${errs.length}`);
         console.log(`ok   ${roleDir}/${target.id} @${width}${mobile ? ' (mobile)' : ''} ${agg}`);
       } catch (err) {
         manifest.push({ role: roleDir, target: target.id, width, ok: false, note: String(err && err.message || err).split('\n')[0] });
@@ -414,12 +436,13 @@ try {
   await runPass(browser, baseUrl, WIDTHS, false);
   if (!process.env.REVIEW_WIDTHS) {
     await runPass(browser, baseUrl, MOBILE_WIDTHS, true);
-    await runStates(browser, baseUrl);
+    if (!process.env.REVIEW_TARGETS) await runStates(browser, baseUrl);
   }
 } finally {
   await browser.close();
   server.close();
-  save(join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 1));
+  const manifestName = process.env.REVIEW_TARGETS ? 'manifest-supplement.json' : 'manifest.json';
+  save(join(OUT, manifestName), JSON.stringify(manifest, null, 1));
   const failed = manifest.filter(m => !m.ok);
   console.log(`\nBaseline capture: ${manifest.length - failed.length}/${manifest.length} captures ok, out: ${OUT}`);
   if (failed.length) {
