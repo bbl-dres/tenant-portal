@@ -99,8 +99,8 @@
      instead — if you ever want that look, swap to CD's `blue-700`
      `#1d4ed8` / `blue-800` `#1e40af` (NOT the previous off-palette
      `#1F6FAB` — that wasn't on any federal ramp). */
-  --color-link:                #D8232A;   /* primary-600 — was #1F6FAB blue */
-  --color-link-hover:          #99191E;   /* primary-800 — was #134A77 */
+  --color-link:                var(--color-primary-600);
+  --color-link-hover:          var(--color-primary-800);
 
   /* ── NEUTRALS ─────────────────────────────────────────────────────────── */
   --color-white:               #FFFFFF;
@@ -131,28 +131,33 @@
   --color-secondary-900:       #131B22;
 
   /* ── SEMANTIC TEXT ─────────────────────────────────────────────────────── */
-  --color-text-primary:        #1F2937;   /* text-800 */
-  --color-text-secondary:      #6B7280;   /* text-500 — WCAG AA on white: 4.69:1 */
+  /* Semantic tokens alias the primitive ramps via var() wherever the portal
+     declares the ramp (primary / secondary / gray) — a ramp retune then
+     propagates automatically. Hex literals remain only for ramps the portal
+     intentionally does not declare (blue / green / orange / yellow / teal /
+     violet). Register: TOK-003. */
+  --color-text-primary:        var(--color-gray-800);   /* DS text-800 */
+  --color-text-secondary:      var(--color-gray-500);   /* DS text-500 — WCAG AA on white: 4.69:1 */
   /* `--color-text-muted` previously `#9CA3AF` (text-400) which fails
      WCAG AA on white at 2.85:1. Collapsed to text-500 — same value as
      `--color-text-secondary`. We get a passing colour everywhere
      muted was used (SAP keys on property cards, category chips, table
      secondary cells, calc-block hint text). For a genuinely lighter
      tertiary, reach for a smaller font-size instead of a paler grey. */
-  --color-text-muted:          #6B7280;
-  --color-text-inverse:        #FFFFFF;
+  --color-text-muted:          var(--color-gray-500);
+  --color-text-inverse:        var(--color-white);
 
   /* ── SURFACES ─────────────────────────────────────────────────────────── */
-  --color-bg-default:          #FFFFFF;
-  --color-bg-alt:              #F3F4F6;
-  --color-bg-surface:          #F9FAFB;
-  --color-surface-dark:        #2F4356;     /* top bar, dark sections */
-  --color-surface-darker:      #263645;     /* footer bottom */
+  --color-bg-default:          var(--color-white);
+  --color-bg-alt:              var(--color-gray-100);
+  --color-bg-surface:          var(--color-gray-50);
+  --color-surface-dark:        var(--color-secondary-600);   /* top bar, dark sections */
+  --color-surface-darker:      var(--color-secondary-700);   /* footer bottom */
 
   /* ── BORDERS ──────────────────────────────────────────────────────────── */
-  --color-border:              #E5E7EB;
-  --color-border-light:        #F3F4F6;
-  --color-border-input:        #6B7280;
+  --color-border:              var(--color-gray-200);
+  --color-border-light:        var(--color-gray-100);
+  --color-border-input:        var(--color-gray-500);
 
   /* ── FOCUS (CD Bund purple-500 — confirmed in workspace-management
      and kbob-fdk; both federal sibling prototypes) ─────────────────────── */
@@ -170,8 +175,8 @@
   --color-success-light:       #D1FAE5;
   --color-warning:             #F59E0B;
   --color-warning-light:       #FEF3C7;
-  --color-danger:              #D8232A;
-  --color-danger-light:        #FAE1E2;   /* CD red-100 (was stock-Tailwind #FEE2E2) */
+  --color-danger:              var(--color-primary-600);
+  --color-danger-light:        var(--color-primary-100);   /* CD red-100 */
   --color-info:                #0F6B75;
   --color-info-light:          #CBFBF8;   /* CD teal-100 (was stock-Tailwind #CCFBF1) */
 
@@ -186,18 +191,18 @@
      while the DS notification info is blue, and the portal's warning is
      amber while the DS is orange. Splitting them lets the component match
      upstream exactly without re-tinting the whole status vocabulary. */
-  --color-notification-bg:           #F9FAFB;   /* gray-50 (DS default) */
+  --color-notification-bg:           var(--color-gray-50);       /* DS default */
   --color-notification-info-bg:      #EFF6FF;   /* blue-50 */
   --color-notification-info-text:    #1D4ED8;   /* blue-700 */
   --color-notification-success-bg:   #ECFDF5;   /* green-50 */
   --color-notification-success-text: #065F46;   /* green-800 */
   --color-notification-warning-bg:   #FFF7ED;   /* orange-50 */
   --color-notification-warning-text: #9A3412;   /* orange-800 */
-  --color-notification-error-bg:     #FFEDEE;   /* red-50 (CD red, not stock Tailwind) */
-  --color-notification-error-text:   #99191E;   /* red-800 */
-  --color-notification-alert-bg:     #801519;   /* red-900 — inverted variant */
-  --color-notification-hint-bg:      #F0F4F7;   /* secondary-50 */
-  --color-notification-hint-text:    #374151;   /* text-700 */
+  --color-notification-error-bg:     var(--color-primary-50);    /* red-50 (CD red) */
+  --color-notification-error-text:   var(--color-primary-800);   /* red-800 */
+  --color-notification-alert-bg:     var(--color-primary-900);   /* red-900 — inverted variant */
+  --color-notification-hint-bg:      var(--color-secondary-50);
+  --color-notification-hint-text:    var(--color-gray-700);      /* DS text-700 */
 
   /* ── LANGUAGE SWITCHER ────────────────────────────────────────────────
      Tailwind blue-600 / blue-700 from the DS canonical pattern
@@ -244,14 +249,14 @@
   --color-badge-green-text:    #065F46;
   --color-badge-blue-bg:       #DBEAFE;
   --color-badge-blue-text:     #1E40AF;
-  --color-badge-red-bg:        #FAE1E2;
-  --color-badge-red-text:      #99191E;
+  --color-badge-red-bg:        var(--color-primary-100);
+  --color-badge-red-text:      var(--color-primary-800);
   --color-badge-yellow-bg:     #FEF3C7;
   --color-badge-yellow-text:   #92400E;
   --color-badge-orange-bg:     #FFEDD5;
   --color-badge-orange-text:   #9A3412;
-  --color-badge-gray-bg:       #E5E7EB;
-  --color-badge-gray-text:     #374151;
+  --color-badge-gray-bg:       var(--color-gray-200);
+  --color-badge-gray-text:     var(--color-gray-700);
 
   /* ── PORTAL-SPECIFIC ──────────────────────────────────────────────────── */
   --color-prototype-notice:    #ff4444;
