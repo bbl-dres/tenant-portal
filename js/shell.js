@@ -149,7 +149,8 @@ export function acceptCookieConsent(mode = 'necessary') {
 // Surface: the "Dienstleistungen" nav-menu dropdown.
 // Source: REQUIREMENTS.md §1.3 pilot + §4.1 Case A roadmap (REQ-FA-*) +
 // FUNC-LP-007 self-service downloads / training.
-// Services (login required) — appear only in authenticated nav.
+// Shown in both the authenticated and the logged-out nav; the individual
+// service routes require login and render the login gate for visitors.
 // Exported so #/services can also render this list as a card grid via
 // `renderServicesOverview` in app.js without duplicating the catalogue.
 // A function (not a const) so labels translate against the active language at
@@ -172,9 +173,18 @@ export function servicesMenu() {
 
 // Nav items are built per render so labels follow the active language.
 // Arbeitsinstrumente / Pläne & Dokumente are inlined here for the same reason.
+// Logged-out visitors see the FULL tenant navigation (same entries as the
+// LBO role) so the portal's scope is discoverable before login — user
+// feedback showed visitors did not realise more content exists behind the
+// mock login. Protected routes render the central login gate instead of
+// content (renderLoginGate via handleHash in app.js).
 export function publicNavItems() {
   return [
     { id: 'start', href: '#/', label: t('nav.start') },
+    servicesMenu(),
+    { id: 'properties', href: '#/properties', label: t('nav.properties') },
+    { id: 'downloads', href: '#/downloads', label: t('nav.downloads') },
+    { id: 'inbox', href: '#/inbox', label: t('nav.inbox') },
     { id: 'info', href: '#/info', label: t('nav.info') },
   ];
 }

@@ -8,7 +8,7 @@
 //
 // Run: npm run verify:property-images
 import { chromium } from 'playwright';
-import { startServer, makeReporter, run, waitForRoute, suppressPrototypeNotice } from './lib.mjs';
+import { startServer, makeReporter, run, waitForRoute, suppressPrototypeNotice, loginAs } from './lib.mjs';
 
 const { server, baseUrl } = await startServer();
 const reporter = makeReporter('check-property-images');
@@ -27,6 +27,18 @@ await run(reporter, async () => {
       imgResponses.push({ url, status: resp.status() });
     }
   });
+
+  // Property views sit behind the login gate for logged-out visitors (the
+  // former silent deep-link auto-login is gone) — authenticate first. The
+  // subsequent goto calls differ only in hash, so they are same-document
+  // navigations and the in-memory login survives them.
+  await loginAs(page, baseUrl, 'LBO');
+  // loginAs renders the landing page, whose news teasers currently load
+  // Unsplash imagery (data/news.json — pre-existing, tracked in
+  // docs/design-review.md). This check's mandate is PROPERTY imagery, so
+  // scope the session-wide assertions to what follows the login, exactly
+  // as before the auth gate existed.
+  imgResponses.length = 0;
 
   for (const hash of ['#/properties', '#/properties/T-2010-AA-01']) {
     // NB: after the first load this is a same-document hash navigation, so

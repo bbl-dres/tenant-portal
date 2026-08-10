@@ -145,6 +145,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.page-header[__title/__sub/__actions/__count]` | (layout-only)   | H1 + side-actions row used on inbox / queue / detail; replaces ad-hoc inline flex blocks |
 | `.section-intro[--tight]` | (layout-only)                        | lead paragraph under a section-heading — `max-width: 60ch`, secondary text |
 | `.login-page[__title/__subhead/__dl/__cta/__hint(--muted)]` | (block) | narrow centred form layout for login / contact pages                |
+| `.login-gate[__icon/__body/__text/__cta/__back]` | (block, Kundenportal BBL gate pattern) | central auth gate for protected routes while logged out: alt-surface box, lock glyph, eIAM CTA preserving the requested deep link |
 | `.role-switch-btn[--active]` | (block)                            | full-width modal-stack button; carries `aria-pressed`                 |
 | `.notification__icon`, `.notification-banner__icon` | `notification.postcss` | leading status icon; portal addition on the banner (DS ships none there) so colour is never the only signal |
 | `.queue-actions`     | (layout-only)                             | bulk-action toolbar below the reviewer queue table                    |

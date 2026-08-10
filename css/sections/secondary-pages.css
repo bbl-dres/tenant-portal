@@ -201,6 +201,37 @@
    `style="margin-top: var(--space-xl);"`. */
 .empty-state--inset { margin-top: var(--space-xl); }
 
+/* ── LOGIN GATE ──────────────────────────────────────────────────────────
+   Rendered by handleHash (renderLoginGate in app.js) for any protected
+   route while logged out: alt-surface panel with a leading lock glyph,
+   explanatory text and the eIAM login CTA. Recomposes the Kundenportal
+   BBL application-gate pattern from existing portal classes and tokens. */
+.login-gate {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius);
+  padding: var(--space-xl);
+  margin-top: var(--space-lg);
+  max-width: 76ch;
+}
+.login-gate__icon .inline-icon {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+}
+.login-gate__text {
+  margin: 0 0 var(--space-lg);
+  max-width: 60ch;
+}
+.login-gate__back { margin-bottom: var(--space-lg); }
+@media (max-width: 480px) {
+  .login-gate {
+    flex-direction: column;
+    padding: var(--space-lg);
+  }
+}
+
 /* ── LOGIN PAGE ──────────────────────────────────────────────────────────
    CD-Bund pattern for narrow, single-column flows (login, contact form,
    subscription): centred container on an alt-surface section so the form
