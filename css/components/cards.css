@@ -90,7 +90,7 @@
   border: none;
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
-  padding-bottom: calc(var(--space-xl) + 48px);
+  padding-bottom: var(--space-4xl);   /* keeps text clear of the corner arrow-btn */
   text-decoration: none;
   color: inherit;
   box-shadow: var(--shadow-card);
@@ -175,7 +175,7 @@
 }
 .card--profile__body {
   padding: var(--space-lg);
-  padding-bottom: calc(var(--space-lg) + 56px);
+  padding-bottom: var(--space-4xl);   /* keeps text clear of the corner arrow */
   flex: 1;
   display: flex;
   flex-direction: column;

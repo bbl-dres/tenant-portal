@@ -88,7 +88,7 @@
 .wizard__autosave {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
   color: var(--color-success);
   font-weight: var(--font-weight-regular);
 }

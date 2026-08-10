@@ -83,7 +83,7 @@
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  padding: 4px;
+  padding: var(--space-xs);
   display: inline-flex;
   cursor: pointer;
   border-radius: var(--radius);

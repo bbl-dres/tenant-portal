@@ -22,9 +22,6 @@ const jsTemplatePaths = [
 const GRANDFATHERED = [
   { file: 'components/cards.css', decl: 'padding-left: calc(var(--space-lg) + 4px);' },
   { file: 'components/cards.css', decl: 'margin: 40px 0 0;' },
-  { file: 'components/cards.css', decl: 'padding-bottom: calc(var(--space-xl) + 48px);' },
-  { file: 'components/cards.css', decl: 'padding-bottom: calc(var(--space-lg) + 56px);' },
-  { file: 'components/forms.css', decl: 'padding-inline-end: calc(44px + var(--space-md));' },
   { file: 'components/forms.css', decl: 'gap: 6px;' },
   { file: 'components/forms.css', decl: 'padding: 6px 0;' },
   { file: 'components/tables.css', decl: 'padding: 4px 4px 4px var(--space-md);' },
@@ -39,10 +36,8 @@ const GRANDFATHERED = [
   { file: 'sections/media-viewer.css', decl: 'font-size: 11px;' },
   { file: 'sections/media-viewer.css', decl: 'font-size: 18px; line-height: 1;' },
   { file: 'sections/properties.css', decl: 'padding-right: 38px;' },
-  { file: 'sections/properties.css', decl: 'padding: 4px;' },
   { file: 'sections/property-detail.css', decl: 'gap: 5px;' },
   { file: 'sections/property-detail.css', decl: 'padding: 4px 9px;' },
-  { file: 'sections/wizard.css', decl: 'gap: 4px;' },
 ];
 
 function read(file) {

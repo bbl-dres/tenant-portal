@@ -153,7 +153,7 @@ select.input,
   background-size:
     20px 20px,
     1px 100%;
-  padding-inline-end: calc(44px + var(--space-md));
+  padding-inline-end: calc(var(--btn-min-h) + var(--space-md));
 }
 /* Custom combobox — replaces native `<datalist>` so the suggestion
    popup matches the input width, our typography, and the rest of the
