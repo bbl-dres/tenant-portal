@@ -656,6 +656,15 @@ body.body--mobile-menu-is-open {
     transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   }
   .main-navigation__mobile-lang-btn:hover { background: var(--color-white-06); }
+  /* RM sits in the CD-canonical order but is not localised — the button is
+     aria-disabled with no handler, mirroring the top-bar switcher's muted
+     non-interactive treatment. */
+  .main-navigation__mobile-lang-btn[aria-disabled="true"] {
+    color: var(--color-white-50);
+    border-color: var(--color-white-12);
+    cursor: not-allowed;
+  }
+  .main-navigation__mobile-lang-btn[aria-disabled="true"]:hover { background: transparent; }
   .main-navigation__mobile-lang-btn--active {
     background: var(--color-lang-active);
     border-color: var(--color-lang-active);
