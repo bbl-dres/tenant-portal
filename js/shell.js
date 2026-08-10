@@ -124,7 +124,7 @@ function renderConsentBanner() {
         <span class="notification-banner__icon" aria-hidden="true">${icon('info')}</span>
         <p class="notification-banner__text">
           Dieses Portal speichert technisch notwendige Einstellungen lokal im Browser. Optionale Analyse-Cookies werden erst nach Zustimmung aktiviert.
-          <a href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklaerung</a>
+          <a href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklärung</a>
         </p>
         <div class="notification-banner__actions">
           <button class="btn btn--bare btn--sm" type="button" onclick="window.portal.acceptCookieConsent('necessary')">Nur notwendige ${icon('x')}</button>
