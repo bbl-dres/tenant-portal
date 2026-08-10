@@ -360,6 +360,13 @@
   --icon-xl:                   40px;   /* visual ≈ 27 — modal close, hero, prominent */
   --icon-2xl:                  48px;   /* visual ≈ 32 — heavy emphasis, illustration */
 
+  /* External-link glyph, masked with currentColor by `.link--external`
+     (css/sections/info.css). The DS declares the same token at :root as an
+     inline data URI (designsystem/css/components/link.postcss:37-39); the
+     portal points at the shared asset file instead. The url() resolves
+     relative to this stylesheet (css/foundations/ → assets/). */
+  --icon-external-link:        url('../../assets/icons/External.svg');
+
   /* ── LAYOUT ───────────────────────────────────────────────────────────── */
   --container-max-width:       1544px;
   --container-padding:         1rem;       /* 16px base; scales below */

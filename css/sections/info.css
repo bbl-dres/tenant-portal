@@ -228,9 +228,6 @@
   -webkit-mask: var(--icon-external-link) center / contain no-repeat;
           mask: var(--icon-external-link) center / contain no-repeat;
 }
-:root {
-  --icon-external-link: url('../../assets/icons/External.svg');
-}
 
 /* Contact block — armasuisse / bbl.admin.ch pattern. Two-column on desktop:
    address + phone + email on the left, description on the right. Red SVG
