@@ -212,6 +212,13 @@
   color: var(--color-text-primary);
   border-bottom: 1px solid var(--color-border-light);
 }
+/* DS sections/top-header.postcss `.top-header__mobile-title` is `xs:hidden`:
+   the grey office strip appears only below the xs breakpoint (480 px), where
+   the lockup has no room for the full office name. From 480 px up the lockup
+   title alone carries the name — showing both would double it. */
+@media (max-width: 479.98px) {
+  .top-header__department-strip { display: block; }
+}
 .top-header__department-strip-inner {
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -462,7 +469,6 @@
   .top-bar__link--user {
     display: none;
   }
-  .top-header__department-strip { display: block; }
   .top-header__inner {
     min-height: 78px;
     padding-block: var(--space-md);
