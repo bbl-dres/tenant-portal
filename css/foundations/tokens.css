@@ -307,6 +307,20 @@
   --text-body-sm:              0.875rem;   /* 14px */
   --text-body-xs:              0.75rem;    /* 12px — smallest step; DS scale bottoms out at xs 12px */
 
+  /* Chrome static type — federal chrome text does NOT ride the responsive
+     text--sm/base cascade. The DS sets chrome sizes from the STATIC
+     Tailwind fontSize scale (designsystem/app/tailwind.config.js:206-208:
+     sm=0.875rem, base=1rem, lg=1.125rem):
+       top-bar      `text-sm 2xl:text-base`            (sections/top-bar.postcss:7)
+       breadcrumb   `text-sm`                          (sections/breadcrumb.postcss:8)
+       logo lockup  `text-sm xl:text-base 3xl:text-lg` (components/logo.postcss:79)
+     These tokens never scale with the viewport; any breakpoint bump lives
+     at the call site (header.css) on the DS screens grid
+     (xl 1280 / 2xl 1544 / 3xl 1920 — tailwind.config.js:20-28). */
+  --text-chrome-sm:            0.875rem;   /* 14px — Tailwind fontSize.sm */
+  --text-chrome-base:          1rem;       /* 16px — Tailwind fontSize.base */
+  --text-chrome-lg:            1.125rem;   /* 18px — Tailwind fontSize.lg */
+
   --line-height-tight:         1.25;
   --line-height-snug:          1.375;
   --line-height-normal:        1.5;

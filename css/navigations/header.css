@@ -15,10 +15,19 @@
    Pattern: outer bar is full-bleed (background colour spans the viewport),
    inner element (.*__inner) respects --container-max-width and shares the
    same grid as page content. */
+/* DS top-bar type is STATIC `text-sm 2xl:text-base` (sections/
+   top-bar.postcss:7): 14 px with a single bump to 16 px at the 2xl screen
+   (1544 px — designsystem/app/tailwind.config.js:26). NOT the responsive
+   --text-body-sm cascade, which reaches 16 px already at 1280 and 18 px
+   at 1920. Descendant controls use `font-size: inherit` so the whole bar
+   follows this one declaration. */
 .top-bar {
   background: var(--color-surface-dark);
   color: var(--color-text-inverse);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-chrome-sm);
+}
+@media (min-width: 1544px) {
+  .top-bar { font-size: var(--text-chrome-base); }
 }
 .top-bar__inner {
   max-width: var(--container-max-width);
@@ -42,7 +51,7 @@
      global anchor underline so the link reads as a utility chip in the
      dark top-bar, matching kbob/swisstopo. */
   text-decoration: none;
-  font-size: var(--text-body-sm);
+  font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
   min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__authorities:hover { text-decoration: none; color: var(--color-gray-300); }
@@ -86,7 +95,7 @@
 .top-bar__link {
   color: var(--color-white-92);
   text-decoration: none;
-  font-size: var(--text-body-sm);
+  font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
   padding: var(--space-xs) var(--space-sm);
   background: transparent;
   border: none;
@@ -121,7 +130,7 @@
   gap: var(--space-2xs);
   align-items: center;
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
   font-weight: var(--font-weight-regular);
   cursor: pointer;
   border-radius: var(--radius);
@@ -156,7 +165,7 @@
   border: none;
   color: inherit;
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
   font-weight: var(--font-weight-regular);
   padding: var(--space-sm) var(--space-md);
   cursor: pointer;
@@ -300,17 +309,19 @@
 @media (min-width: 1280px) { .top-header__divider { height: 60px; } }
 @media (min-width: 1920px) { .top-header__divider { height: 70px; } }
 
-/* Dept title — sizing tracks designsystem css/components/logo.postcss .logo__title:
-   text-sm base / text-base @ xl / text-lg @ 3xl (14 / 16 / 18 px). Never larger.
-   The small negative margin-top optically aligns the bold title with the SVG's
-   first text row, mirroring DS `mt-[-0.160rem]`. */
+/* Dept title — sizing tracks designsystem css/components/logo.postcss:79
+   .logo__title `text-sm xl:text-base 3xl:text-lg` on the STATIC Tailwind
+   fontSize scale: fixed 14 / 16 @ xl (1280) / 18 @ 3xl (1920). Never larger —
+   the responsive --text-body* cascade must not leak in here (it would put
+   18 px at xl already). The small negative margin-top optically aligns the
+   bold title with the SVG's first text row, mirroring DS `mt-[-0.160rem]`. */
 .top-header__dept {
-  font-size: var(--text-body-sm);                /* 14 px base */
+  font-size: var(--text-chrome-sm);              /* 14 px */
   line-height: var(--line-height-snug);
   margin-top: -0.16rem;
 }
-@media (min-width: 1280px) { .top-header__dept { font-size: var(--text-body); } }    /* 16 px @ xl */
-@media (min-width: 1920px) { .top-header__dept { font-size: 1.125rem;        } }     /* 18 px @ 3xl */
+@media (min-width: 1280px) { .top-header__dept { font-size: var(--text-chrome-base); } }  /* 16 px @ xl */
+@media (min-width: 1920px) { .top-header__dept { font-size: var(--text-chrome-lg); } }    /* 18 px @ 3xl */
 
 /* Dept name + sub-line are now distinct block-level spans inside the anchor
    (replaced the previous `<br>`-inside-span construct). Both rules below
@@ -504,7 +515,7 @@
   .top-header__dept {
     display: block;
     min-width: 0;
-    font-size: var(--text-body-sm);
+    font-size: var(--text-chrome-sm);
     line-height: var(--line-height-snug);
     margin-top: 0;
   }

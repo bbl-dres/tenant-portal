@@ -101,7 +101,11 @@
   position: relative;
   text-decoration: none;
   color: var(--color-text-primary);
-  font-size: var(--text-body-sm);
+  /* DS nav links declare no size of their own (main-navigation.postcss) —
+     they inherit body `.text--base` = `text-base xl:text-lg 3xl:text-xl`
+     (typography.postcss:47-49) → 16 / 18 @ 1280 / 20 @ 1920. That is
+     exactly our responsive --text-body token, one step up from body-sm. */
+  font-size: var(--text-body);
   font-weight: var(--font-weight-regular);
   padding: var(--space-md);
   transition: color var(--transition-fast);
@@ -341,7 +345,10 @@
   max-width: var(--container-max-width);
   margin: 0 auto;
   padding: var(--space-md) var(--container-padding) var(--space-sm);
-  font-size: var(--text-body-sm);
+  /* DS breadcrumb is STATIC `text-sm` (sections/breadcrumb.postcss:8) —
+     fixed 14 px at every width, never the responsive --text-body-sm
+     cascade (16 px @ 1280 / 18 px @ 1920). */
+  font-size: var(--text-chrome-sm);
   color: var(--color-text-secondary);
   background: transparent;
   text-align: left;
