@@ -19,7 +19,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS td text--base; .table--compact opts down to text--sm */
   background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-md);  /* DS table.postcss:22 shadow-md — TOK-002 */
@@ -36,13 +36,20 @@
 }
 .table th,
 .table td {
-  padding: var(--space-md);                      /* CD: py-4 (16px) — was 8px, ~half DS */
+  padding: var(--space-md) var(--space-lg);      /* DS px-6 py-4 — 24px inline / 16px block */
   text-align: left;
-  border-bottom: 1px solid var(--color-border);
+  /* DS row separators are border-text-300 (one step darker than the
+     text-200 outer table border, which stays on --color-border). */
+  border-bottom: 1px solid var(--color-border-strong);
 }
-/* Zebra striping for long lists (DS `.table--zebra`). Use on the <table>
-   when there are roughly >12 rows and rows aren't grouped semantically. */
-.table--zebra tbody tr:nth-child(even) td { background: var(--color-bg-surface); }
+/* DS table.postcss:52-57 — body cells in non-compact tables read
+   text-gray-600; `.table--compact` cells inherit the darker page default,
+   exactly as the DS scopes it via `table:not(.table--compact)`. */
+.table:not(.table--compact) td { color: var(--color-gray-600); }
+/* Zebra striping for long lists (DS `.table--zebra`: even rows tinted
+   bg-secondary-50). Use on the <table> when there are roughly >12 rows
+   and rows aren't grouped semantically. */
+.table--zebra tbody tr:nth-child(even) td { background: var(--color-secondary-50); }
 .table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
 
 /* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
@@ -52,9 +59,9 @@
    noise. `.table--caps` opts back into the DS uppercase look for
    index-style tables. */
 .table th {
-  background: var(--color-bg-alt);
+  background: var(--color-secondary-50);   /* DS thead bg-secondary-50 — federal blue-gray */
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-secondary);
+  color: var(--color-gray-700);            /* DS th text-text-700 — 9.3:1 on secondary-50 */
   font-size: var(--text-body-sm);
   letter-spacing: 0;
 }
@@ -69,13 +76,12 @@
 .table--rows-clickable tr:hover td { cursor: pointer; }
 
 /* `.table--compact` — tighter cell padding for data-dense reviewer
-   surfaces (queue, inbox). Mirrors CD Bund `.table--compact`. Trims
-   the row height from ~52 px to ~36 px so 25 rows fit a single screen
-   without scrolling. The .table--zebra alternation stays useful at
-   this density. */
+   surfaces (queue, inbox). Mirrors CD Bund `.table--compact`: px-2 py-2
+   (8px all sides) + text--sm. The .table--zebra alternation stays
+   useful at this density. */
 .table--compact th,
 .table--compact td {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-sm);
 }
 /* DS `.table--compact { @apply border-0 shadow-none }` — dense surfaces
    drop the contained-object border + shadow. */
@@ -134,7 +140,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: 4px 4px 4px var(--space-md);
+  padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-md);
   background: var(--color-secondary-50);
   border: 1px solid var(--color-secondary-100);
   border-radius: var(--radius-full);
@@ -143,7 +149,9 @@
   line-height: var(--line-height-snug);
 }
 .filter-pill__label {
-  color: var(--color-text-secondary);
+  /* A11Y-002: gray-500 on the secondary-50 pill is 4.37:1 (< 4.5). Tinted
+     surfaces take -700 foregrounds per the DS notification-hint pairing. */
+  color: var(--color-gray-700);
 }
 .filter-pill__value {
   font-weight: var(--font-weight-bold);
@@ -236,7 +244,7 @@
   flex-wrap: wrap;
   gap: var(--space-sm);
   padding-block: var(--space-lg);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS pagination input btn--base → text--base; count/text inherit */
 }
 /* Item-range label (e.g. "1–12 von 247 Liegenschaften"). Sits to the
    left of the controls — `margin-right: auto` pushes the chevron / page
@@ -254,7 +262,7 @@
   text-align: center;
   padding: 0 var(--space-xs);
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS btn--base text--base */
   color: var(--color-text-primary);
   background: var(--color-white);
   border: 1px solid var(--color-border-input);
@@ -360,11 +368,11 @@ a.btn[aria-disabled="true"] {
   background: var(--color-gray-200);
   border: 1px solid transparent;
   color: var(--color-text-primary);
-  padding: 6px var(--space-md);
+  padding: var(--space-2xs) var(--space-md);   /* DS tag-item__text py-1.5 (6px) / __inner px-4 */
   min-height: var(--btn-min-h);          /* 44 px — DS pattern */
   border-radius: var(--radius-full);
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS tag-item--base text--base */
   font-weight: var(--font-weight-regular);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -382,7 +390,9 @@ a.btn[aria-disabled="true"] {
 }
 .tag-item__count {
   font-size: var(--text-body-xs);
-  color: var(--color-text-muted);
+  /* A11Y-002: gray-500 on the gray-200 chip is 3.90:1 at 12 px (< 4.5).
+     Gray-700 keeps the muted hierarchy while clearing AA on the tint. */
+  color: var(--color-gray-700);
 }
 .tag-item--active .tag-item__count,
 .tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-white-75); }

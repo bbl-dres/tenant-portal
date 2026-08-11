@@ -33,7 +33,21 @@
   flex-direction: column;
   position: relative;     /* containing block for .back-to-top-wrapper */
 }
+/* #page-body sits INSIDE the #main landmark (shell.js renders
+   `<main id="main"><div id="page-body">…`), so #main is the flex child of
+   .page-container that absorbs leftover space; it passes the stretch on to
+   #page-body via its own column flex. */
+#main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
 #page-body { flex: 1 0 auto; }
+/* The main landmark is a programmatic focus target (skip link, router
+   focus hand-off) — not an interactive control. Since it now wraps the
+   whole page content, suppress the focus ring that would otherwise frame
+   the entire page. */
+#main:focus { outline: none; }
 
 /* No-JS fallback (eCH-0059 federal-accessibility convention). The SPA
    needs JS to render anything; in restricted federal-admin environments
@@ -163,7 +177,10 @@
      .hero--split — two-column hero with .hero__figure on the right
    Title size comes from the .h1 utility (compose: `class="h1 hero__title"`). */
 .hero {
-  padding: var(--section-py) var(--container-padding);
+  /* DS hero rhythm is asymmetric (hero.postcss): pt-12 lg:pt-14 3xl:pt-20
+     on top (--hero-pt: 48/56/80), container--pb on the bottom — the same
+     scale as --section-py (56/80/128). */
+  padding: var(--hero-pt) var(--container-padding) var(--section-py);
   background: var(--color-bg-default);
 }
 .hero__inner { max-width: var(--container-max-width); margin: 0 auto; }
@@ -185,7 +202,8 @@
 }
 .hero__cta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
+/* No phone-size padding reduction: the DS hero keeps its full pt-12 /
+   container--pb rhythm at every width — only the lead steps down. */
 @media (max-width: 480px) {
-  .hero { padding: var(--section-py-half) var(--container-padding); }
   .hero__lead { font-size: var(--text-body); }
 }

@@ -293,11 +293,14 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     // CSS only at <1024 px; hidden on desktop.
     const mobileArrow = `<span class="main-navigation__arrow" aria-hidden="true">${icon('chevronRight')}</span>`;
     if (item.type === 'dropdown') {
+      // APG disclosure-navigation pattern: aria-expanded + aria-controls
+      // only. No aria-haspopup="menu" — the controlled panel is a
+      // role="region" with plain links, not a menu widget, so announcing
+      // "menu" promises arrow-key behaviour that doesn't exist (A11Y-010).
       return `
         <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
                 type="button"
                 aria-expanded="false"
-                aria-haspopup="menu"
                 aria-controls="navMenu-${item.id}"
                 data-menu="${item.id}"
                 onclick="window.portal.toggleNavMenu('${item.id}')">
@@ -406,7 +409,8 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     ${renderPrototypeNotice()}
     ${renderConsentBanner()}
 
-    <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+    <a href="#main" class="skip-to-content"
+       onclick="event.preventDefault(); document.getElementById('main')?.focus();">Zum Inhalt springen</a>
 
     <header class="site-header" role="banner">
       <div class="top-bar">
@@ -467,17 +471,17 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
                 <button class="header-search__toggle" type="button"
                         aria-expanded="false" aria-controls="headerSearchForm"
                         onclick="window.portal.toggleSearch(true)">
-                  <span>Suche</span>
+                  <span>${t('top.search')}</span>
                   ${icon('search')}
                 </button>
-                <form class="header-search__form" id="headerSearchForm" role="search" aria-label="Portal durchsuchen"
+                <form class="header-search__form" id="headerSearchForm" role="search" aria-label="${t('top.search')}"
                       onsubmit="event.preventDefault(); window.portal.submitSearch(this);">
                   <input class="header-search__input" id="headerSearchInput" type="search"
                          name="q"
                          placeholder="${t('top.searchPlaceholder')}" aria-label="${t('top.searchPlaceholder')}"
                          autocomplete="off"
                          onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
-                  <button class="header-search__submit" type="submit" aria-label="Suchen">
+                  <button class="header-search__submit" type="submit" aria-label="${t('top.search')}">
                     ${icon('search')}
                   </button>
                 </form>
@@ -510,7 +514,10 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
 
     ${breadcrumbHtml}
 
-    <main id="main" tabindex="-1"></main>
+    <!-- The main landmark CONTAINS the page content: every route renders
+         into #page-body, which lives inside #main so "jump to main" /
+         the skip link actually land on the content (WCAG 1.3.1/2.4.1). -->
+    <main id="main" tabindex="-1"><div id="page-body"></div></main>
   `;
 }
 
@@ -531,16 +538,16 @@ export function renderFooter() {
               Bundesamt für Bauten und Logistik — nachhaltig, partnerschaftlich und vorbildlich.
             </p>
             <p class="footer-information__prototype-warning" role="note">
-              Diese Anwendung ist ein Prototyp. Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration.
+              ${t('proto.title')} ${t('proto.text')}
             </p>
           </div>
 
           <div class="footer-information__col footer-information__col--links">
             <h2 class="footer-information__heading">${t('footer.moreInfo')}</h2>
             <ul class="footer-information__list">
-              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">${t('footer.legal')} ${icon('arrowRight', 'footer-information__arrow')}</a></li>
               <li><a href="https://www.bbl.admin.ch/de/e-rechnung" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')} ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
 
@@ -579,12 +586,17 @@ export function toggleBreadcrumbDropdown(index, force) {
   if (!panel) return;
   const isOpen = !panel.hasAttribute('hidden');
   const next = (typeof force === 'boolean') ? force : !isOpen;
+  // Capture BEFORE hiding: [hidden] on the focused subtree silently drops
+  // focus to <body> (A11Y-010, same rationale as toggleNavMenu below).
+  const restoreFocus = panel.contains(document.activeElement) || document.activeElement === document.body;
   // Close any other open breadcrumb dropdowns first.
   document.querySelectorAll('.breadcrumb__dropdown').forEach(p => p.setAttribute('hidden', ''));
   document.querySelectorAll('.breadcrumb__dropdown-icon').forEach(t => t.setAttribute('aria-expanded', 'false'));
   if (next) {
     panel.removeAttribute('hidden');
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
+  } else if (isOpen && restoreFocus && trigger) {
+    trigger.focus();
   }
 }
 
@@ -667,6 +679,13 @@ export function toggleNavMenu(id, force) {
   if (!panel) return;
   const isOpen = !panel.hasAttribute('hidden');
   const next = (typeof force === 'boolean') ? force : !isOpen;
+  // Focus bookkeeping BEFORE the panel gets [hidden]: hiding the focused
+  // subtree silently drops focus to <body> (WCAG 2.4.3), leaving keyboard
+  // users at the top of the document after Esc / close button / click
+  // outside. `activeElement === body` covers the outside-click path, where
+  // the browser has already blurred the panel link on mousedown (a click on
+  // a focusable target keeps focus there instead — never stolen). A11Y-010.
+  const restoreFocus = panel.contains(document.activeElement) || document.activeElement === document.body;
   // Close any other open nav menus + drop the lift on their triggers.
   document.querySelectorAll('.nav-menu').forEach(m => {
     m.setAttribute('hidden', '');
@@ -711,6 +730,8 @@ export function toggleNavMenu(id, force) {
         panel.style.right = 'auto';
       }
     }
+  } else if (isOpen && restoreFocus && trigger) {
+    trigger.focus();
   }
 }
 
@@ -849,10 +870,16 @@ export function toggleSearch(open) {
     }
     if (input) setTimeout(() => input.focus(), 50);
   } else {
+    // Capture BEFORE collapsing: once the form goes visibility:hidden the
+    // browser silently drops focus to <body>, stranding keyboard users with
+    // no visible focus (A11Y-009). Esc in the input and submitSearch both
+    // land here with focus still inside the widget.
+    const hadFocusInside = document.activeElement && el.contains(document.activeElement);
     el.classList.remove('open');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'false');
       toggle.removeAttribute('tabindex');
+      if (hadFocusInside) toggle.focus();
     }
   }
 }
@@ -991,9 +1018,12 @@ export function shell({ activeNav = '', breadcrumb = [], deptSub = '' } = {}) {
   // back-to-top CSS block in styles.css for the sticky mechanism.
   root.innerHTML = '<div class="page-container">'
                  +   renderShell({ deptSub, activeNav, breadcrumb, navItems })
-                 +   '<div id="page-body"></div>'
-                 +   '<div class="back-to-top-wrapper" aria-hidden="true">'
-                 +     `<a class="app-footer__top-btn" href="#" aria-label="Zum Seitenanfang"
+                 // DS BackToTopBtn.vue ships the wrapper WITHOUT aria-hidden:
+                 // the link inside is focusable, and a focusable element must
+                 // not sit in an aria-hidden subtree (WCAG 4.1.2). The link's
+                 // own aria-label names it for AT.
+                 +   '<div class="back-to-top-wrapper">'
+                 +     `<a class="app-footer__top-btn" href="#" aria-label="${t('footer.backToTop')}"
                           onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });">${icon('chevronUp')}</a>`
                  +   '</div>'
                  + '</div>'

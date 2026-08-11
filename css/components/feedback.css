@@ -122,7 +122,10 @@
 }
 .notification-banner__text,
 .notification-banner__infos { margin: 0; flex: 1; overflow-wrap: break-word; }
-.notification-banner__actions { display: flex; gap: var(--space-sm); flex-shrink: 0; }
+/* Two nowrap buttons side by side exceed a sub-375px viewport; wrapping
+   keeps every consent action reachable (html clips overflow-x, so an
+   unwrapped row would be cut with no scroll affordance). */
+.notification-banner__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); flex-shrink: 0; }
 .notification-banner__actions .btn { white-space: nowrap; }
 /* A 40 px glyph is right for the standalone card but dominates a compact
    `text--sm` bar, where it sits beside one or two lines of copy. The wrapper
@@ -218,56 +221,88 @@ body.body--prototype-notice .toast-host {
    so the next section breathes. Replaces inline `style="margin-bottom: var(--space-lg);"`. */
 .notification--page-top { margin-bottom: var(--space-lg); }
 
-/* ── MODAL ──────────────────────────────────────────────────────────────── */
+/* ── MODAL ────────────────────────────────────────────────────────────────
+   CD Bund modal anatomy (designsystem/css/components/modal.postcss +
+   app/components/ch/components/Modal.vue): the dialog is TOP-ANCHORED
+   (wrapper py-[10vh]) and FRAMELESS — no border-radius, no box-shadow.
+   The header row sits ABOVE the white surface, painted directly on the
+   backdrop: white h4-scale title + white close glyph (icon 2xl,
+   hover:opacity-50), mb-2 lg:mb-4. The body is the white surface and the
+   only scroll region; the footer is p-4 bg-white with a secondary-100
+   top border, actions right. The whole content is capped at 80vh.
+   The app keeps its own DOM seam (.modal-backdrop > .modal >
+   header/body/footer, js/lib.js modal()) and its width modifiers. */
 .modal-backdrop {
   position: fixed; inset: 0;
   background: var(--color-backdrop);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
   z-index: var(--z-modal);
-  padding: var(--space-md);
+  padding: 10vh 1.75rem;               /* DS .modal py-[10vh]; content px-7 */
 }
-/* Modal — base + DS-aligned size modifiers (.modal--sm/md/lg/auto).
-   Default (.modal alone) is medium 600 px; combine with --sm/--lg/--auto for
-   narrower forms, wider bulk-approve views, or fit-content sizing. */
-/* CD Bund modal: the CARD is capped at 90vh and only the BODY scrolls, so
-   the title and the footer actions stay pinned (a long modal must never
-   scroll its confirm/cancel buttons out of reach). Flex column + body
-   `overflow-y:auto` — was a single `overflow:auto` on the whole card. */
 .modal {
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
   max-width: 600px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 80vh;                    /* DS modal__content max-h-[80vh] */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
 }
 .modal--sm   { max-width: 420px; }
 .modal--md   { max-width: 600px; }    /* default — explicit for clarity */
 .modal--lg   { max-width: 900px; }
 .modal--xl   { max-width: 1100px; }
 .modal--auto { max-width: min(90vw, 1100px); width: auto; }
-.modal__header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; flex-shrink: 0; }
-.modal__title { margin: 0; font-size: var(--text-h3); }
+/* Header above the surface — DS modal__header--with-title:
+   justify-between, items-start, text-white, mb-2 lg:mb-4. */
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+  color: var(--color-white);
+  margin-bottom: var(--space-sm);
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) { .modal__header { margin-bottom: var(--space-md); } }
+/* DS titles the modal with an h4 (Modal.vue:13) — h4 ramp 18/18/20/22. */
+.modal__title { margin: 0; font-size: var(--text-h4); color: inherit; }
 .modal__close {
   background: none; border: none;
+  padding: 0;
   margin-left: auto;
-  width: 36px; height: 36px;
-  border-radius: var(--radius);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: var(--color-white);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: opacity var(--transition-fast);
 }
-.modal__close:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
-.modal__close:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-.modal__close svg { flex-shrink: 0; }
-.modal__body { padding: var(--space-lg); flex: 1 1 auto; overflow-y: auto; min-height: 0; }
-.modal__footer { padding: var(--space-lg); border-top: 1px solid var(--color-border); display: flex; gap: var(--space-sm); justify-content: flex-end; flex-shrink: 0; }
+.modal__close:hover { opacity: 0.5; }             /* DS hover:opacity-50 */
+/* Close sits on the dark backdrop — same light focus ring as other
+   dark-surface controls (see buttons.css dark-surface block). */
+.modal__close:focus-visible { outline: 2px solid var(--color-focus-dark); outline-offset: 2px; }
+/* DS close glyph is icon size 2xl (Modal.vue:23): 36 -> 40 md -> 48 lg
+   (css/foundations/icons.postcss:39-41); nearest token steps 40/48. */
+.modal__close svg { flex-shrink: 0; width: var(--icon-xl); height: var(--icon-xl); }
+@media (min-width: 1024px) { .modal__close svg { width: var(--icon-2xl); height: var(--icon-2xl); } }
+/* Body = the white surface and the only scroll region (DS modal__body
+   w-full overflow-auto). DS keeps the body p-0 and lets the slotted
+   content bring container padding; the app's call sites inject bare
+   HTML, so the body carries that padding itself. */
+.modal__body {
+  background: var(--color-white);
+  padding: var(--space-lg);
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+.modal__footer {
+  padding: var(--space-md);                            /* DS p-4 */
+  background: var(--color-white);
+  border-top: 1px solid var(--color-secondary-100);    /* DS border-secondary-100 */
+  display: flex; gap: var(--space-sm); justify-content: flex-end;   /* DS text-right */
+  flex-shrink: 0;
+}
 
 /* ── TOAST ──────────────────────────────────────────────────────────────── */
 .toast-host {
@@ -365,14 +400,35 @@ body.body--prototype-notice .toast-host {
   max-width: 720px;
   width: 100%;
   box-shadow: var(--shadow-lg);
+  /* Reflow (WCAG 1.4.10): at phone heights / 200 % zoom the shortcut list
+     is taller than the viewport — cap the card and scroll inside it so no
+     content is unreachable. Same principle as .modal (90vh cap + inner
+     scroll) and DS modal.postcss max-h-[80vh]. dvh accounts for mobile
+     browser chrome; the 2 x 16 px subtraction mirrors the overlay's own
+     padding. Plain 90vh first as fallback where dvh is unsupported. */
+  max-height: 90vh;
+  max-height: min(90vh, calc(100dvh - 2 * var(--space-md)));
+  overflow-y: auto;
 }
-.shortcut-overlay__title { margin: 0 0 var(--space-md); font-size: var(--text-h3); }
+/* Header row: title left, real close button right (A11Y-011 — an
+   aria-modal dialog needs a focusable, pointer-free-discoverable close
+   control; pattern mirrors .modal__header / .nav-menu__close). */
+.shortcut-overlay__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.shortcut-overlay__title { margin: 0; font-size: var(--text-h3); }
+.shortcut-overlay__close { flex-shrink: 0; }
 .shortcut-overlay__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-lg);
 }
-.shortcut-overlay__group h4 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+/* Group headings are h3 (h2 title → h3 groups, no level jump — A11Y-011). */
+.shortcut-overlay__group h3 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
 .shortcut-overlay__group dl { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm); }
 .shortcut-overlay__group dt { font-family: var(--font-family-mono); }
 .shortcut-overlay__group dd { margin: 0; }

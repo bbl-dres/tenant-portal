@@ -72,11 +72,12 @@ export function roleLabel(role) {
   })[role] || role;
 }
 
-// Single canonical Document.type → German label map. Used by the downloads
-// page, the property-detail Dokumente groups, and the linked-document table
-// helpers. Keys match the schema A.10 enum (canonical EN) in
-// docs/DATAMODEL.md. Add a new key here whenever the enum grows — both
-// consumer surfaces pick it up automatically.
+// Canonical Document.type enum → German fallback label. Keys match the
+// schema A.10 enum (canonical EN) in docs/DATAMODEL.md. UI surfaces must
+// localise through the matching doctype.* keys in data/i18n.json
+// (docTypeLabel in app.js) — this map stays the enum source and keeps
+// lib.js free of app-state imports. A new enum value needs BOTH an entry
+// here and a doctype.* key.
 export const DOC_TYPE_LABEL = {
   Lease:       'Mietvertrag',
   FloorPlan:   'Grundriss',
@@ -545,15 +546,28 @@ export function modal({ title, body, actions = [], onClose = null, size = '' }) 
 
 
 // ── SHORTCUT OVERLAY (§ 11.13) ─────────────────────────────────────────────
+// aria-modal dialog, so it must behave like one (A11Y-011): a real close
+// button gives it a focusable control + pointer-free discovery, focus moves
+// onto that button on open, is trapped inside while open, and returns to the
+// opener on close — all via toggleShortcutOverlay below. Every close path
+// (backdrop click, close button, «?», Esc) funnels through that function so
+// no path can strand focus. Headings: h2 title → h3 groups (no h4 jump).
 export function renderShortcutOverlay() {
   return `
     <div class="shortcut-overlay" id="shortcutOverlay" role="dialog" aria-modal="true" aria-label="Tastatur-Kurzbefehle"
-         onclick="if(event.target===this)this.classList.remove('open')">
+         onclick="if(event.target===this)window.portal.toggleShortcutOverlay(false)">
       <div class="shortcut-overlay__inner">
-        <h2 class="shortcut-overlay__title">Tastatur-Kurzbefehle</h2>
+        <div class="shortcut-overlay__header">
+          <h2 class="shortcut-overlay__title">Tastatur-Kurzbefehle</h2>
+          <button class="btn btn--bare shortcut-overlay__close" type="button"
+                  onclick="window.portal.toggleShortcutOverlay(false)">
+            <span>Schliessen</span>
+            ${icon('x')}
+          </button>
+        </div>
         <div class="shortcut-overlay__grid">
           <div class="shortcut-overlay__group">
-            <h4>Navigation</h4>
+            <h3>Navigation</h3>
             <dl>
               <dt>?</dt><dd>Dieses Overlay öffnen/schliessen</dd>
               <dt>g g</dt><dd>Zur Startseite</dd>
@@ -563,7 +577,7 @@ export function renderShortcutOverlay() {
             </dl>
           </div>
           <div class="shortcut-overlay__group">
-            <h4>Wizard</h4>
+            <h3>Wizard</h3>
             <dl>
               <dt>Tab</dt><dd>Nächstes Feld</dd>
               <dt>Ctrl+S</dt><dd>Entwurf speichern</dd>
@@ -571,7 +585,7 @@ export function renderShortcutOverlay() {
             </dl>
           </div>
           <div class="shortcut-overlay__group">
-            <h4>Queue (GS-Prüfer/in)</h4>
+            <h3>Queue (GS-Prüfer/in)</h3>
             <dl>
               <dt>j / ↓</dt><dd>Nächste Zeile</dd>
               <dt>k / ↑</dt><dd>Vorherige Zeile</dd>
@@ -580,7 +594,7 @@ export function renderShortcutOverlay() {
             </dl>
           </div>
           <div class="shortcut-overlay__group">
-            <h4>Detail</h4>
+            <h3>Detail</h3>
             <dl>
               <dt>a</dt><dd>OK markieren</dd>
               <dt>n</dt><dd>NoK markieren</dd>
@@ -597,14 +611,67 @@ export function renderShortcutOverlay() {
   `;
 }
 
+// Single open/close seam for the overlay (A11Y-011). Mirrors modal()'s
+// focus contract — modal() builds and destroys its own DOM per call, so its
+// embedded trap isn't directly reusable for this persistent, class-toggled
+// element; the Tab-wrap below is the same logic against #shortcutOverlay.
+//   open:  remember the opener, move focus onto the close button, trap Tab.
+//   close: release the trap, return focus to the opener.
+let _shortcutOpener = null;
+let _shortcutTrap = null;
+export function toggleShortcutOverlay(force) {
+  const overlay = document.getElementById('shortcutOverlay');
+  if (!overlay) return;
+  const isOpen = overlay.classList.contains('open');
+  const next = typeof force === 'boolean' ? force : !isOpen;
+  if (next === isOpen) return;
+  if (next) {
+    _shortcutOpener = document.activeElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null;
+    overlay.classList.add('open');
+    // Defensive: shell() re-renders the overlay on route change, which can
+    // orphan a previous trap — never stack two.
+    if (_shortcutTrap) document.removeEventListener('keydown', _shortcutTrap, true);
+    _shortcutTrap = (e) => {
+      if (e.key !== 'Tab' || !overlay.isConnected) return;
+      const focusables = Array.from(overlay.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter(el => el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !overlay.contains(document.activeElement))) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !overlay.contains(document.activeElement))) {
+        e.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', _shortcutTrap, true);
+    const closeBtn = overlay.querySelector('.shortcut-overlay__close');
+    // Defer like modal(): let the browser finish the current event first.
+    if (closeBtn) setTimeout(() => closeBtn.focus(), 0);
+  } else {
+    overlay.classList.remove('open');
+    if (_shortcutTrap) {
+      document.removeEventListener('keydown', _shortcutTrap, true);
+      _shortcutTrap = null;
+    }
+    if (_shortcutOpener && document.body.contains(_shortcutOpener)) {
+      try { _shortcutOpener.focus(); } catch { /* opener unfocusable */ }
+    }
+    _shortcutOpener = null;
+  }
+}
+
 export function wireGlobalShortcuts() {
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input, textarea, select')) return;
     if (e.key === '?' || (e.shiftKey && e.key === '/')) {
       e.preventDefault();
-      document.getElementById('shortcutOverlay')?.classList.toggle('open');
+      toggleShortcutOverlay();
     } else if (e.key === 'Escape') {
-      document.getElementById('shortcutOverlay')?.classList.remove('open');
+      toggleShortcutOverlay(false);
     }
   });
 }

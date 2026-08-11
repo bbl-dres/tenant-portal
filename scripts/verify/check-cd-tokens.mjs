@@ -22,8 +22,6 @@ const jsTemplatePaths = [
 const GRANDFATHERED = [
   { file: 'components/cards.css', decl: 'padding-left: calc(var(--space-lg) + 4px);' },
   { file: 'components/cards.css', decl: 'margin: 40px 0 0;' },
-  { file: 'components/tables.css', decl: 'padding: 4px 4px 4px var(--space-md);' },
-  { file: 'components/tables.css', decl: 'padding: 6px var(--space-md);' },
   { file: 'navigations/header.css', decl: 'padding: var(--space-sm) calc(var(--space-xl) + 8px) var(--space-sm) var(--space-md);' },
   { file: 'sections/media-viewer.css', decl: 'padding: clamp(28px, 6%, 56px);' },
   { file: 'sections/media-viewer.css', decl: 'font-size: 11px;' },

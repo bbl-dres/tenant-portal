@@ -1,33 +1,54 @@
 /* ==========================================================================
    foundations/print.css — BBL Mieterportal
 
-   Print rules: global chrome suppression + floor-plan print layout.
+   Print rules: global chrome suppression + the floor-plan print sheet.
    Imported last (mirrors DS main.postcss importing print.postcss last).
-   Sources: styles.css 3881-3886, 7030-7048.
    DS counterpart: print.postcss.
    ========================================================================== */
 
-/* Print stylesheet */
+/* Generic print chrome — mirrors DS print.postcss: interactive chrome is
+   hidden (DS hides .top-bar / .top-header__right / .desktop-menu at 12-17,
+   .breadcrumb at 27-29, and #main-footer / .notification-banner /
+   .back-to-top-wrapper / .share-bar at 61-81), while the federal brand bar
+   stays on paper: the full wordmark is forced visible like DS `.logo__name`
+   (print.postcss:47-49) and the brand-bar border is dropped like DS
+   `.top-header` (print.postcss:39-41). Every ordinary route must print
+   WITH Confederation branding. */
 @media print {
-  .top-bar, .navbar, .app-footer, .toast-host, .shortcut-overlay, .skip-to-content, .breadcrumb { display: none !important; }
+  .top-bar,
+  .top-header__right,
+  .navbar,
+  .app-footer,
+  .toast-host,
+  .shortcut-overlay,
+  .skip-to-content,
+  .breadcrumb,
+  .share-bar,
+  .back-to-top-wrapper,
+  .notification-banner { display: none !important; }
+  .top-header { border: 0 !important; }
+  .top-header__bundmark-name { display: block !important; }
   .hero { padding: var(--space-md) 0; background: none; }
   body { color: var(--color-black); background: var(--color-white); }
 }
 
-/* ── PRINT — floor-plan page ─────────────────────────────────────────────
-   When the user hits the "Drucken" button, hide all federal chrome,
-   toolbar, drawer, and footer. Keep the property-header strip + canvas
-   + legend. The canvas keeps its computed pixel size — MapLibre's WebGL
-   canvas is captured as a raster which prints predictably. */
+/* ── PRINT — floor-plan sheet (route-scoped) ─────────────────────────────
+   Only the floor-detail route prints as a bare plan sheet: all federal
+   chrome out, property-header strip + canvas + legend only. The canvas
+   keeps its computed pixel size — MapLibre's WebGL canvas is captured as
+   a raster which prints predictably. Every selector must stay behind
+   body.route-floor (set by renderFloorDetail in js/app.js, cleared by
+   handleHash on navigation) — unscoped, this block strips the
+   Confederation branding from every printout (CSS-002). */
 @media print {
-  .skip-to-content,
-  header[role="banner"],
-  .breadcrumb,
-  .share-bar,
-  .floor-toolbar,
-  .floor-drawer,
-  footer { display: none !important; }
-  .floor-viewer { display: block; }
-  .floor-canvas { height: 680px; border: 1px solid var(--color-gray-400); page-break-inside: avoid; }
-  .section { padding: 0 !important; }
+  body.route-floor .skip-to-content,
+  body.route-floor header[role="banner"],
+  body.route-floor .breadcrumb,
+  body.route-floor .share-bar,
+  body.route-floor .floor-toolbar,
+  body.route-floor .floor-drawer,
+  body.route-floor footer { display: none !important; }
+  body.route-floor .floor-viewer { display: block; }
+  body.route-floor .floor-canvas { height: 680px; border: 1px solid var(--color-gray-400); page-break-inside: avoid; }
+  body.route-floor .section { padding: 0 !important; }
 }

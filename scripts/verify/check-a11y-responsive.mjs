@@ -21,7 +21,12 @@ const flows = [
   { label: 'property-detail', hash: '#/properties/T-2010-AA-01', role: 'LBO' },
   { label: 'downloads', hash: '#/downloads', role: 'LBO' },
   { label: 'repair', hash: '#/repair', role: 'LBO' },
-  { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' }
+  { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' },
+  // A11Y-016: wizard, application detail and reviewer split used to escape
+  // the sweep (h1 count / heading-jump checks never saw them).
+  { label: 'wizard-step1', hash: '#/wizard/1', role: 'LBO' },
+  { label: 'application-detail', hash: '#/inbox/BE-2026-014', role: 'LBO' },
+  { label: 'review-split', hash: '#/review/BE-2026-014', role: 'GS-Reviewer' }
 ];
 
 const failures = [];
@@ -91,12 +96,16 @@ async function checkPage(page, scope) {
         //  - CD Bund patterns whose canonical size is <44 px: top-bar
         //    utility links, header meta links, news dots/links,
         //    breadcrumb chevrons, `.btn--sm`, inline `.link` text links.
-        //  - table content: dense data rows (.table--compact) are a
-        //    deliberate reviewer-surface trade-off; rows are clickable.
+        //  - table content: ONLY genuinely row-clickable tables
+        //    (.table--rows-clickable), where the row itself is the target
+        //    and in-cell controls are secondary. A11Y-007: the previous
+        //    blanket `table` waiver also hid the downloads table, whose
+        //    rows are NOT clickable — its per-row download anchor is the
+        //    sole affordance and must meet the target size.
         //  - MapLibre's own controls/attribution (third-party widget).
         //  - radio/checkbox inputs wrapped in a <label> — the label is
         //    the real tap target, the 18 px input is a false positive.
-        if (el.closest('p, .rich-text, .footer__links, .app-footer__bottom, .top-bar, .top-header__meta, .news-section__dots, .breadcrumb, table, .maplibregl-ctrl, label')) return false;
+        if (el.closest('p, .rich-text, .footer__links, .app-footer__bottom, .top-bar, .top-header__meta, .news-section__dots, .breadcrumb, .table--rows-clickable, .maplibregl-ctrl, label')) return false;
         if (el.classList.contains('btn--sm') || el.classList.contains('link') || el.classList.contains('news-section__more')) return false;
         const r = el.getBoundingClientRect();
         return r.width < 44 || r.height < 44;

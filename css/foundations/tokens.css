@@ -157,6 +157,7 @@
 
   /* ── BORDERS ──────────────────────────────────────────────────────────── */
   --color-border:              var(--color-gray-200);
+  --color-border-strong:       var(--color-gray-300);   /* DS text-300 — table row separators */
   --color-border-light:        var(--color-gray-100);
   --color-border-input:        var(--color-gray-500);
 
@@ -306,10 +307,45 @@
   --text-body-sm:              0.875rem;   /* 14px */
   --text-body-xs:              0.75rem;    /* 12px — smallest step; DS scale bottoms out at xs 12px */
 
+  /* Chrome static type — federal chrome text does NOT ride the responsive
+     text--sm/base cascade. The DS sets chrome sizes from the STATIC
+     Tailwind fontSize scale (designsystem/app/tailwind.config.js:206-208:
+     sm=0.875rem, base=1rem, lg=1.125rem):
+       top-bar      `text-sm 2xl:text-base`            (sections/top-bar.postcss:7)
+       breadcrumb   `text-sm`                          (sections/breadcrumb.postcss:8)
+       logo lockup  `text-sm xl:text-base 3xl:text-lg` (components/logo.postcss:79)
+     These tokens never scale with the viewport; any breakpoint bump lives
+     at the call site (header.css) on the DS screens grid
+     (xl 1280 / 2xl 1544 / 3xl 1920 — tailwind.config.js:20-28). */
+  --text-chrome-sm:            0.875rem;   /* 14px — Tailwind fontSize.sm */
+  --text-chrome-base:          1rem;       /* 16px — Tailwind fontSize.base */
+  --text-chrome-lg:            1.125rem;   /* 18px — Tailwind fontSize.lg */
+  /* Static xl step — the DS search--large query text is `text-xl`
+     (designsystem/css/components/search.postcss:139), the STATIC
+     Tailwind size (app/tailwind.config.js fontSize.xl = 1.25rem), not
+     the responsive text--xl cascade. */
+  --text-chrome-xl:            1.25rem;    /* 20px — Tailwind fontSize.xl */
+
+  /* Minimum computed size for FOCUSABLE form controls — the iOS Safari
+     zoom-on-focus threshold. DS controls never sit below it: the bare
+     `input` rule inherits body text--base = 16px+
+     (designsystem/css/components/input.postcss:6-19); portal compact
+     variants clamp with max() against this floor (register RWD-010). */
+  --text-control-min:          1rem;       /* 16px */
+
   --line-height-tight:         1.25;
   --line-height-snug:          1.375;
   --line-height-normal:        1.5;
   --line-height-relaxed:       1.625;
+
+  /* Badge type — DS badges ride the STATIC Tailwind ramp at md/lg
+     (`text-xs md:text-sm lg:text-base` + `leading-5 lg:leading-6`,
+     designsystem/css/components/badge.postcss:73-77), NOT the portal's
+     responsive text--xs cascade (which steps at xl/3xl instead and
+     rendered every pill one size small on tablet/desktop). Dedicated
+     tokens; breakpoint bumps below at 768/1024. */
+  --text-badge:                0.75rem;    /* 12px — Tailwind fontSize.xs */
+  --leading-badge:             1.25rem;    /* 20px — Tailwind leading-5 */
 
   /* Letter-spacing — three named tracks consolidate the ad-hoc tunings
      scattered through styles.css. Remaining literal values (-0.02em,
@@ -338,12 +374,19 @@
      that read cramped at 4px and loose at 8px. */
   --space-2xs:                 6px;
   --space-sm:                  8px;
+  /* Intermediate 12px step — Tailwind spacing 3 (0.75rem). DS menu rows sit
+     on it: `.menu__item` py-3 and the drawer items' xl:px-3 xl:py-3
+     (designsystem/css/components/menu.postcss:16, navigations/navy.postcss:15). */
+  --space-2sm:                 12px;
   --space-md:                  16px;
   --space-lg:                  24px;
   --space-xl:                  32px;
   --space-2xl:                 48px;
   --space-3xl:                 64px;
   --space-4xl:                 80px;
+  /* 96px step — Tailwind spacing 24 (6rem). DS desktop-menu drawer padding
+     at 3xl: `3xl:p-24` (designsystem/css/sections/desktop-menu.postcss:15). */
+  --space-5xl:                 96px;
 
   /* ── ICON SIZES ───────────────────────────────────────────────────────────
      Declared px values, NOT visual. CD Bund glyphs leave ~33 % of the
@@ -383,6 +426,15 @@
   --nav-height:                56px;
   --section-py:                3.5rem;          /* 56px base — scales below */
   --section-py-half:           1.75rem;         /* 28px base */
+  /* Hero top padding — DS hero rhythm is asymmetric: pt-12 lg:pt-14
+     3xl:pt-20 on top, container--pb (= --section-py) on the bottom
+     (designsystem css/sections/hero.postcss). */
+  --hero-pt:                   3rem;            /* 48px base — scales below */
+  /* Gap below a section heading — DS .section__title pb-10 = 40px, one
+     fixed value at every breakpoint (designsystem css/layouts/
+     section.postcss). 40px is Tailwind spacing.10; the --space-* t-shirt
+     scale jumps 32 → 48, so the DS step lives as its own token. */
+  --section-heading-mb:        2.5rem;          /* 40px, all breakpoints */
 
   /* ── RADIUS (mirror CD Bund Tailwind borderRadius scale) ───────────────
      Full DS scale kept verbatim, including steps with no current consumer
@@ -498,6 +550,13 @@
   }
 }
 
+/* ── RESPONSIVE BADGE TYPE — DS badge.postcss `text-xs md:text-sm
+   lg:text-base` + `leading-5 lg:leading-6` on the static Tailwind
+   fontSize scale (12/14/16 px at base/768/1024; leading 20 → 24 px
+   at 1024). ─────────────────────────────────────────────────────────── */
+@media (min-width: 768px)  { :root { --text-badge: 0.875rem; } }                          /* 14px */
+@media (min-width: 1024px) { :root { --text-badge: 1rem; --leading-badge: 1.5rem; } }     /* 16px / 24px */
+
 /* ── RESPONSIVE CONTAINER PADDING — matches kbob-fdk / CD Bund ──────────
    Steps: 16 → 28 → 36 → 40 → 48 → 64 px across sm/md/lg/xl/2xl/3xl. */
 @media (min-width: 480px)  { :root { --container-padding: 1.75rem; } }   /* 28 */
@@ -536,8 +595,8 @@
    (128 px). Previous portal scale added a 96 px step at 2xl, which we
    removed for exact CD parity. Half scale: py-7 lg:py-10 3xl:py-16
    (28 → 40 → 40 → 64 px). */
-@media (min-width: 1024px) { :root { --section-py: 5rem;   --section-py-half: 2.5rem; } }
-@media (min-width: 1920px) { :root { --section-py: 8rem;   --section-py-half: 4rem;   } }
+@media (min-width: 1024px) { :root { --section-py: 5rem;   --section-py-half: 2.5rem; --hero-pt: 3.5rem; } }
+@media (min-width: 1920px) { :root { --section-py: 8rem;   --section-py-half: 4rem;   --hero-pt: 5rem;   } }
 
 /* Breakpoint reference (use in @media; CSS variables can't be used in @media):
      xs:  480px   sm:  640px   md:  768px   lg:  1024px

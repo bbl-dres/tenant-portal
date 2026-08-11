@@ -131,10 +131,13 @@ await run(reporter, async () => {
       dTop: Math.round(r.top - trig.bottom)
     };
   });
-  // Width as a sanity range, not the exact CSS constant (480 px today) —
-  // a deliberate design tweak shouldn't fail the behavioural check.
+  // Width as a sanity range, not the exact CSS constant — a deliberate
+  // design tweak shouldn't fail the behavioural check. The DS drawer
+  // ladder is 450/650/850 px at lg/xl/3xl (CMP-001, designsystem
+  // css/sections/desktop-menu.postcss:13-15); this viewport (1440) sits
+  // in the xl tier.
   check('desktop dropdown floats anchored under trigger',
-    !!desk && desk.position === 'absolute' && desk.width >= 360 && desk.width <= 560 &&
+    !!desk && desk.position === 'absolute' && desk.width >= 400 && desk.width <= 900 &&
     Math.abs(desk.dLeft) < 8 && Math.abs(desk.dTop) < 8,
     JSON.stringify(desk));
 }, async () => {

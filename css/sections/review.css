@@ -46,7 +46,10 @@
 }
 .reviewer-marks__row:last-child { border-bottom: none; }
 /* Heading inside the reviewer marks panel — replaces inline `style="margin-top:0;"`. */
-.reviewer-marks__heading { margin-top: 0; margin-bottom: var(--space-sm); }
+/* The heading element was demoted h3 → h2 for the document outline
+   (h1 → h2, no level jump); pin the font-size to the UA default it had
+   as an h3 (1.17em) so the visual size stays exactly as before. */
+.reviewer-marks__heading { margin-top: 0; margin-bottom: var(--space-sm); font-size: 1.17em; }
 .mark-buttons {
   display: inline-flex;
   gap: var(--space-xs);

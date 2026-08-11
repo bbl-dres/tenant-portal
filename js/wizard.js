@@ -134,6 +134,10 @@ export function renderWizard({ step }) {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--narrow">
+        <!-- Page-level h1 for the wizard (WCAG 1.3.1/2.4.6): visually the
+             step indicator + h2.wizard__title already carry this context,
+             so the h1 is sr-only — same pattern as the auth home. -->
+        <h1 class="sr-only">Bedarf anmelden — Schritt ${stepNum} von 5</h1>
         ${renderStepIndicator(stepNum, wizardSteps())}
         <div class="wizard" id="wizardBody">
           ${renderWizardStep(stepNum, draft)}
@@ -204,9 +208,9 @@ function renderStep1(draft) {
                  aria-controls="wizAddressOptions"
                  aria-expanded="false"
                  aria-required="true">
-          <ul class="combobox__list" id="wizAddressOptions" role="listbox" hidden>
-            ${state.buildings.map(b => `
-              <li class="combobox__option" role="option" data-value="${escapeHtml(b.address)}">
+          <ul class="combobox__list" id="wizAddressOptions" role="listbox" aria-label="Adressvorschläge" hidden>
+            ${state.buildings.map((b, i) => `
+              <li class="combobox__option" id="wizAddressOption-${i}" role="option" aria-selected="false" data-value="${escapeHtml(b.address)}">
                 <span class="combobox__option-primary">${escapeHtml(b.address)}</span>
                 <span class="combobox__option-secondary">${escapeHtml(b.name)}</span>
               </li>
@@ -274,6 +278,37 @@ function wireAddressCombobox(scope, input, draft) {
   const list = scope.querySelector('#wizAddressOptions');
   if (!combobox || !list) return;
   const allOptions = Array.from(list.querySelectorAll('.combobox__option'));
+  // A11Y-014: keyboard cursor over the currently VISIBLE options (the wizard
+  // variant filters by hiding options rather than re-rendering the list).
+  let activeIndex = -1;
+  const visibleOptions = () => allOptions.filter(opt => !opt.hidden);
+
+  function clearActive() {
+    activeIndex = -1;
+    allOptions.forEach(opt => {
+      opt.classList.remove('combobox__option--active');
+      opt.setAttribute('aria-selected', 'false');
+    });
+    input.removeAttribute('aria-activedescendant');
+  }
+  // Same ARIA-state contract as the properties search combobox (app.js):
+  // visual highlight + aria-selected on the option, aria-activedescendant
+  // on the input, so arrowing is announced by screen readers.
+  function moveActive(delta) {
+    if (list.hidden) open();
+    const opts = visibleOptions();
+    if (!opts.length) return;
+    activeIndex = Math.max(0, Math.min(opts.length - 1, activeIndex + delta));
+    allOptions.forEach(opt => {
+      opt.classList.remove('combobox__option--active');
+      opt.setAttribute('aria-selected', 'false');
+    });
+    const active = opts[activeIndex];
+    active.classList.add('combobox__option--active');
+    active.setAttribute('aria-selected', 'true');
+    input.setAttribute('aria-activedescendant', active.id);
+    active.scrollIntoView({ block: 'nearest' });
+  }
 
   function filter(value) {
     const q = value.trim().toLowerCase();
@@ -294,6 +329,7 @@ function wireAddressCombobox(scope, input, draft) {
   function close() {
     list.hidden = true;
     input.setAttribute('aria-expanded', 'false');
+    clearActive();
   }
   function pick(value) {
     input.value = value;
@@ -312,6 +348,9 @@ function wireAddressCombobox(scope, input, draft) {
     if (e.target.value) setFieldError(input, null);
     updateSapInfo(draft);
     persistDraft(draft);
+    // Typing re-filters the list, so the previous cursor position may point
+    // at a now-hidden option — reset it (A11Y-014).
+    clearActive();
     open();
   });
   // Use mousedown (not click) so we beat the input's blur — otherwise
@@ -326,8 +365,19 @@ function wireAddressCombobox(scope, input, draft) {
     // Delay so a click on a list option still registers.
     setTimeout(close, 150);
   });
+  // A11Y-014: arrow-key navigation + Enter selection, ported from the
+  // properties search combobox — the suggestions were mousedown-only before.
   input.addEventListener('keydown', e => {
-    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowDown')      { e.preventDefault(); moveActive(+1); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); moveActive(-1); }
+    else if (e.key === 'Enter') {
+      const opts = visibleOptions();
+      if (!list.hidden && activeIndex >= 0 && opts[activeIndex]) {
+        e.preventDefault();
+        pick(opts[activeIndex].dataset.value);
+      }
+    }
+    else if (e.key === 'Escape') close();
   });
 }
 
@@ -536,6 +586,7 @@ function renderStep3(draft) {
       <h3>Dateien hochladen</h3>
       <p class="form-field__hint">Erlaubt: PDF, DOCX, XLSX, JPG, PNG · max. 25 MB · max. 10 Dateien · jede Datei wird auf Schadsoftware geprüft.</p>
       <input class="wizard__file-picker" type="file" id="filePicker" multiple>
+      <label class="btn btn--outline wizard__file-label" for="filePicker">Dateien auswählen</label>
       <ul class="attachment-list wizard__attachment-list" id="attachmentList">
         ${(draft.attachments || []).map((a, i) => attachmentLi(a, i)).join('')}
       </ul>
@@ -797,8 +848,14 @@ function renderStep5(draft) {
 
     <div class="wizard__section">
       <h3>Datenschutz & Klassifizierung</h3>
-      <label class="consent-check"><input type="checkbox" id="confirmCorrect" ${draft.confirmCorrect ? 'checked' : ''}> Ich bestätige, dass die Angaben korrekt und vollständig sind.</label>
-      <label class="consent-check"><input type="checkbox" id="confirmIsg" ${draft.confirmIsg ? 'checked' : ''}> Ich kenne die ISG-Klassifizierung „INTERN" und werde keine sensiblen personenbezogenen Daten in Freitextfeldern eintragen.</label>
+      <!-- A11Y-015: each consent sits in its own .form-field so setFieldError
+           has a wrapper to append the persistent error text to. -->
+      <div class="form-field">
+        <label class="consent-check"><input type="checkbox" id="confirmCorrect" ${draft.confirmCorrect ? 'checked' : ''}> Ich bestätige, dass die Angaben korrekt und vollständig sind.</label>
+      </div>
+      <div class="form-field">
+        <label class="consent-check"><input type="checkbox" id="confirmIsg" ${draft.confirmIsg ? 'checked' : ''}> Ich kenne die ISG-Klassifizierung „INTERN" und werde keine sensiblen personenbezogenen Daten in Freitextfeldern eintragen.</label>
+      </div>
     </div>
 
     <div class="wizard__sticky-footer">
@@ -824,11 +881,27 @@ function section(title, summary, open) {
 
 function wireStep5(draft) {
   const body = document.getElementById('wizardBody');
-  body.querySelector('#confirmCorrect')?.addEventListener('change', e => { draft.confirmCorrect = e.target.checked; persistDraft(draft); });
-  body.querySelector('#confirmIsg')?.addEventListener('change', e => { draft.confirmIsg = e.target.checked; persistDraft(draft); });
+  const correct = body.querySelector('#confirmCorrect');
+  const isg = body.querySelector('#confirmIsg');
+  correct?.addEventListener('change', e => {
+    draft.confirmCorrect = e.target.checked;
+    if (e.target.checked) setFieldError(e.target, null);   // A11Y-015
+    persistDraft(draft);
+  });
+  isg?.addEventListener('change', e => {
+    draft.confirmIsg = e.target.checked;
+    if (e.target.checked) setFieldError(e.target, null);   // A11Y-015
+    persistDraft(draft);
+  });
   body.querySelector('#submitBtn')?.addEventListener('click', () => {
+    // A11Y-015: persist the error at each unchecked consent (aria-invalid +
+    // aria-describedby via setFieldError) and focus the first invalid one —
+    // the toast alone disappears after ~4 s without a field reference.
+    setFieldError(correct, draft.confirmCorrect ? null : 'Bitte Bestätigung ankreuzen.');
+    setFieldError(isg, draft.confirmIsg ? null : 'Bitte Bestätigung ankreuzen.');
     if (!draft.confirmCorrect || !draft.confirmIsg) {
       toast('Bitte beide Bestätigungen ankreuzen.');
+      (!draft.confirmCorrect ? correct : isg)?.focus();
       return;
     }
     submitDraft(draft);

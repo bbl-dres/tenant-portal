@@ -9,7 +9,10 @@
 
 /* ── NEWS LIST PAGE (overview header + list) ─────────────────────────────
    Replaces inline styles on the news-overview heading block. Centred
-   "Veröffentlicht am …" eyebrow above a large display title. */
+   "Veröffentlicht am …" eyebrow above a large display title. The page
+   title carries its own class — `.news-list__title` is the row-title
+   class further down, and sharing the name let the later row rule
+   shrink the h1 to row size (equal specificity, source order). */
 .news-list__header {
   text-align: center;
   margin-bottom: var(--space-2xl);
@@ -19,7 +22,7 @@
   color: var(--color-text-secondary);
   font-size: var(--text-body-sm);
 }
-.news-list__title {
+.news-overview__title {
   margin: 0;
   font-size: var(--text-display);
   font-weight: var(--font-weight-bold);

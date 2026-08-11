@@ -5,6 +5,15 @@
    Sources: styles.css 1570-1797, pipeline mobile override 3878.
    DS counterparts: components/badge.postcss, components/steps.postcss,
    components/step-indicator.postcss.
+
+   IMPORT-ORDER COUPLING — the `.inline-icon` base block below imports
+   AFTER navigations/main-navigation.css and components/cards.css
+   (css/main.css order). Every icon emitted by `icon()` (js/lib.js)
+   carries `.inline-icon`, so a single-class hook in an earlier file
+   ties with this base block and loses on order. Per-icon hooks must be
+   double-class selectors (`.inline-icon.main-navigation__chevron`,
+   `.inline-icon.breadcrumb__sep`, `.inline-icon.section-cta__icon`) to
+   keep their sizing/margins.
    ========================================================================== */
 
 /* ── BADGES ─────────────────────────────────────────────────────────────── */
@@ -15,11 +24,15 @@
   /* CD Bund: padding proportional to font-size so any text-* variant scales */
   padding: 0.219em 1em;
   border-radius: var(--radius-full);
-  font-size: var(--text-body-xs);
+  /* DS badge ramp (badge.postcss:73-77): static Tailwind sizes at
+     md/lg — see the --text-badge/--leading-badge tokens. The former
+     --text-body-xs + tight leading rendered pills 2px small at 768-1279
+     and 5-7px shorter everywhere. */
+  font-size: var(--text-badge);
   font-weight: var(--font-weight-regular);
   background: var(--color-badge-gray-bg);
   color: var(--color-badge-gray-text);
-  line-height: var(--line-height-tight);
+  line-height: var(--leading-badge);
 }
 .badge--success { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
 .badge--info    { background: var(--color-badge-blue-bg);  color: var(--color-badge-blue-text); }
@@ -75,7 +88,10 @@
   align-items: center;
   padding: var(--space-sm) var(--space-md);
   background: var(--color-gray-100);
-  color: var(--color-text-secondary);
+  /* A11Y-002: text-secondary (gray-500) only clears 4.5:1 on white; on the
+     gray-100 tint it lands at 4.39:1. DS pairs tinted surfaces with -700
+     foregrounds (notification-hint pattern), so use gray-700 here. */
+  color: var(--color-gray-700);
   font-size: var(--text-body-sm);
   position: relative;
   white-space: nowrap;

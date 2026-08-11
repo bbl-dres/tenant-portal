@@ -132,7 +132,22 @@
   .view-toggle__btn { flex: 1; justify-content: center; }
 }
 @media (max-width: 640px) {
-  .view-toggle__label { display: none; }
+  /* A11Y-003: hide the label visually but keep it in the accessible name —
+     display:none dropped it from the a11y tree, leaving three nameless
+     icon-only buttons on phones. Same clip technique as the .sr-only
+     utility (forms.css) / DS `sr-only lg:not-sr-only` idiom
+     (designsystem search.postcss .search__button__title). */
+  .view-toggle__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
   .view-toggle__btn { padding: var(--space-sm) var(--space-md); }
 }
 
@@ -166,6 +181,16 @@
 }
 .map-surface {
   position: relative;
+}
+/* CD typeface inside MapLibre surfaces — the vendor stylesheet sets
+   `font: 12px/20px "Helvetica Neue", …` on `.maplibregl-map` (the class it
+   stamps onto every map container), and every popup / attribution / scrim
+   text node inherits it. CD type is NotoSans everywhere (tokens.css
+   --font-family, mirroring designsystem app/tailwind.config.js fontFamily).
+   Double-class selector: maplibre-gl.css is appended to <head> AFTER the
+   app's sheets (loadMapLibre), so equal specificity would lose (TYP-006). */
+.map-surface.maplibregl-map {
+  font-family: var(--font-family);
 }
 .map-loading {
   position: absolute;
@@ -427,6 +452,14 @@ html:has(body.docviewer-open) { overflow: hidden; }
 .floor-toolbar__label {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
+}
+/* Register RWD-010: iOS Safari zooms the page when a focused control
+   computes under 16px and does not zoom back. The view-mode select rides
+   .input--sm (--text-body-sm = 14px below xl); clamp it to the control
+   floor. At ≥1280 --text-body-sm is already 1rem+, so desktop rendering
+   is unchanged. */
+.floor-toolbar .input--sm {
+  font-size: max(var(--text-control-min), var(--text-body-sm));
 }
 
 /* `.floor-switcher` — chip group of floor links. Active chip carries the

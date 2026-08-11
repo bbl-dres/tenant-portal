@@ -106,12 +106,26 @@
 @media (max-width: 1023px) {
   .page-with-toc__toc {
     position: static;
+    /* The single-column grid follows DOM order (content → toc), which
+       would strand the TOC below ~7000 px of the content it navigates.
+       The kbob/armasuisse anchor-nav pattern places the nav above the
+       content on small screens; `order` pulls it first without touching
+       the desktop two-column placement. */
+    order: -1;
+    /* The viewport cap only serves the sticky desktop rail; in flow the
+       list must never scroll inside itself. */
+    max-height: none;
     /* Keep a softer shadow on mobile so the card still has depth — the
        card-on-page treatment matches the federal pattern across
        viewports. */
     box-shadow: var(--shadow-card);
     background: var(--color-white);
+    /* Compact card: as the first block of the page the TOC is an index,
+       not a side rail — tighter padding keeps the first article near
+       the fold. */
+    padding: var(--space-md);
   }
+  .page-with-toc__toc-title { font-size: var(--text-h4); }
 }
 .page-with-toc__toc-title {
   /* Matches CD prominence of "Inhaltsverzeichnis" on kbob/armasuisse — large,
@@ -327,7 +341,9 @@
 /* Secondary descriptive line under a `.contact-block__lead`. The `--last`
    variant drops the bottom margin for the trailing email line. */
 .contact-block__note {
-  color: var(--color-text-secondary);
+  /* A11Y-002: the contact section sits on .section--alt (secondary-50 tint)
+     where gray-500 is 4.37:1 — below AA. Tinted surfaces take gray-700. */
+  color: var(--color-gray-700);
   font-size: var(--text-body-sm);
   margin: 0 0 var(--space-md);
 }

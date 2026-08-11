@@ -8,8 +8,9 @@
 
 /* Split hero (image + copy) — CD Bund: equal-column split, constrained to
    --container-max-width via the shared .hero__inner constraint, no
-   figcaption. Image fills its column edge-to-edge of the column. */
-.hero--split { padding-block: var(--section-py-half); }
+   figcaption. Image fills its column edge-to-edge of the column. The
+   variant carries no padding override: the split hero keeps the base
+   .hero rhythm (--hero-pt top, --section-py bottom). */
 .hero__inner--split {
   display: grid;
   grid-template-columns: 1fr;

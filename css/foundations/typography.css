@@ -28,13 +28,11 @@ figcaption {
 
 /* Section heading — layout-only. Combine with .h2 (or .h1) for size:
    `<h2 class="h2 section-heading">…</h2>`. Adds extra bottom space below
-   the heading. Scales up on desktop so wide-screen sections breathe with
-   the same generosity as admin.ch / swisstopo. */
+   the heading: the DS .section__title carries a fixed pb-10 (40px) at
+   every breakpoint — no responsive escalation. */
 .section-heading {
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--section-heading-mb);
 }
-@media (min-width: 1024px) { .section-heading { margin-bottom: var(--space-xl); } }
-@media (min-width: 1280px) { .section-heading { margin-bottom: var(--space-2xl); } }
 
 /* Section intro lead paragraph — sits below a section-heading and gives
    one sentence of context. Replaces ad-hoc inline `style="max-width:60ch;

@@ -27,10 +27,10 @@ formatChf, formatDate, escapeHtml, escapeJs, safeImageUrl,
 formatAssetKey, roleLabel,
 DOC_TYPE_LABEL,
 // UI primitives
-toast, modal, icon, statusBadge, attachmentLi,
+toast, modal, icon, statusBadge, attachmentLi, setFieldError,
 PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
-renderShortcutOverlay, wireGlobalShortcuts,
+renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import {
@@ -71,6 +71,14 @@ let _lastRenderedPath = null;
 function markRouteRendered(route) {
   const body = document.getElementById('page-body');
   if (body) body.dataset.route = route;
+  // Per-route document.title (WCAG 2.4.2): «<Seitentitel> — BBL Mieterportal»,
+  // derived from the rendered view's own h1 — no separate string table that
+  // could drift from the visible page. Views without an h1 (or pre-shell
+  // error paths) fall back to the bare product name. Runs on every render,
+  // so query-driven re-renders (e.g. ?lang) refresh the title too.
+  const h1 = body ? body.querySelector('h1') : null;
+  const pageTitle = (h1 ? h1.textContent : '').replace(/\s+/g, ' ').trim();
+  document.title = pageTitle ? pageTitle + ' — BBL Mieterportal' : 'BBL Mieterportal';
   // A new page (the route PATH changed, not just a ?query / lang / filter
   // update) starts at the top, like a real navigation — hash routing doesn't
   // reset scroll on its own. Same-path query changes (filters, pagination,
@@ -78,12 +86,25 @@ function markRouteRendered(route) {
   // `scrollToInfo` deep-link pattern: this fires at render time, the smooth
   // scroll-to-section fires ~100 ms later and wins.
   if (route !== _lastRenderedPath) {
+    const isFirstRender = _lastRenderedPath === null;
     _lastRenderedPath = route;
     // Jump instantly to the top. `behavior: 'instant'` overrides the
     // `html { scroll-behavior: smooth }` token — which otherwise animates even
     // a direct scrollTop assignment, gliding the long page up over ~½ s.
     try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
     catch { window.scrollTo(0, 0); }
+    // Route-change focus hand-off: the re-render dropped focus to <body>,
+    // so move it to the main landmark (shell() prepares main[tabindex="-1"]
+    // for exactly this) — screen readers announce the new page, keyboard
+    // users continue from the content. Path changes only; query-driven
+    // re-renders keep the user's place, and the very first render must not
+    // steal focus from the document.
+    if (!isFirstRender) {
+      const main = document.getElementById('main');
+      if (main) {
+        try { main.focus({ preventScroll: true }); } catch { main.focus(); }
+      }
+    }
   }
 }
 async function handleHash() {
@@ -92,6 +113,17 @@ async function handleHash() {
   // are read directly from `location.hash` inside the view handler.
   const qIdx = full.indexOf('?');
   const h = qIdx >= 0 ? full.slice(0, qIdx) : full;
+  // STA-001: route teardown for the queue's document-level shortcut handler —
+  // the analogue of the docviewer/gallery close() removing their own keydown
+  // listeners. Without it the handler outlived #/queue and hijacked Enter and
+  // the arrow keys on every route visited afterwards. Same-path query changes
+  // (#/queue?page=2) keep it; renderQueue rewires on re-render anyway.
+  if (h !== '#/queue') teardownQueueShortcuts();
+  // Scope hook for the floor-plan print sheet (css/foundations/print.css):
+  // body.route-floor must never outlive the floor view — printing any other
+  // route has to keep the federal chrome (CSS-002). Cleared on every
+  // navigation; renderFloorDetail re-adds it when a plan actually renders.
+  document.body.classList.remove('route-floor');
   // Language is a URL parameter and the source of truth: apply `?lang` when
   // present, otherwise re-inject the active language so every view's URL keeps
   // it (shareable + consistent across navigation). replaceState avoids a loop.
@@ -201,7 +233,7 @@ window.portal = {
   state, loadData, loadSpatialData,
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
   registerRoute, navigate, handleHash,
-  renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
+  renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
   toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice,
@@ -251,7 +283,7 @@ function gateLabel(h) {
     ['#/search', P.t('bc.search')],
   ];
   const hit = labels.find(([p]) => h === p || h.startsWith(p + '/'));
-  return hit ? hit[1] : 'Anmeldung erforderlich';
+  return hit ? hit[1] : P.t('login.title');
 }
 
 // Login gate — rendered by handleHash for any protected route while logged
@@ -269,10 +301,10 @@ function renderLoginGate(h) {
     <section class="section">
       <div class="container">
         <button class="btn btn--outline btn--sm login-gate__back" type="button" onclick="history.back()">
-          ${P.icon('arrowLeft')} Zurück
+          ${P.icon('arrowLeft')} ${P.t('btn.back')}
         </button>
         <h1 class="h1">${P.escapeHtml(label)}</h1>
-        <div class="login-gate" role="region" aria-label="Anmeldung erforderlich">
+        <div class="login-gate" role="region" aria-label="${P.t('login.title')}">
           <span class="login-gate__icon" aria-hidden="true">${P.icon('lock')}</span>
           <div class="login-gate__body">
             <p class="login-gate__text">
@@ -282,7 +314,7 @@ function renderLoginGate(h) {
             </p>
             <button class="btn btn--outline login-gate__cta" type="button"
                     onclick="window.portal.login('${P.escapeJs(h)}')">
-              ${P.icon('login')} Anmelden mit eIAM
+              ${P.icon('login')} ${P.t('login.eiam')}
             </button>
           </div>
         </div>
@@ -401,15 +433,14 @@ function renderSearchResults() {
         <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
         <form class="search-hero__form" role="search" aria-label="Portal durchsuchen"
               onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v);">
-          <div class="search-field search-hero__field">
-            ${P.icon('search', 'search-field__icon')}
-            <input type="search" name="q" class="input search-field__input"
+          <div class="search__group">
+            <input type="search" name="q" class="input search-hero__input"
                    value="${P.escapeHtml(query)}"
                    placeholder="Suchbegriff eingeben …"
                    aria-label="Suchbegriff"
                    autocomplete="off">
+            <button class="btn btn--bare search-hero__submit" type="submit" aria-label="Suchen">${P.icon('search')}</button>
           </div>
-          <button class="btn btn--filled" type="submit">Suchen</button>
         </form>
         ${query && total > 0
           ? `<p class="search-hero__meta">${total} ${total === 1 ? 'Treffer' : 'Treffer'} in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>`
@@ -511,7 +542,7 @@ function renderSearchResults() {
   // Move keyboard focus into the hero search field — most users land on
   // this page intending to refine the query.
   setTimeout(() => {
-    const input = document.querySelector('.search-hero__field .search-field__input');
+    const input = document.querySelector('.search-hero__input');
     if (input) {
       input.focus();
       // Place caret at end without selecting all
@@ -559,7 +590,7 @@ function renderInfoPage() {
         </header>
 
         <div class="page-with-toc">
-          <main class="page-with-toc__content">
+          <div class="page-with-toc__content">
 
             <article id="einfuehrung">
               <h2>Einführung</h2>
@@ -599,16 +630,18 @@ function renderInfoPage() {
             <article id="naw">
               <h2>NAW & Bürowelten erklärt</h2>
               <p>Die NAW-Klassen sind die föderale Vorgabe für die Flächenberechnung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
-              <table class="table">
-                <thead>
-                  <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
-                </thead>
-                <tbody>
-                  ${(P.state.referenceData?.nawClasses || []).map(nc => `
-                    <tr><td>${P.escapeHtml(nc.name)}</td><td>${nc.hnf2PerFte.toFixed(1)}</td><td>${nc.gfPerFte.toFixed(1)}</td><td>${P.escapeHtml(nc.description)}</td></tr>
-                  `).join('')}
-                </tbody>
-              </table>
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
+                  </thead>
+                  <tbody>
+                    ${(P.state.referenceData?.nawClasses || []).map(nc => `
+                      <tr><td>${P.escapeHtml(nc.name)}</td><td>${nc.hnf2PerFte.toFixed(1)}</td><td>${nc.gfPerFte.toFixed(1)}</td><td>${P.escapeHtml(nc.description)}</td></tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
             </article>
 
             <article id="verordnungen">
@@ -666,7 +699,7 @@ function renderInfoPage() {
               ${downloadList(P.state.downloads?.training || [])}
             </article>
 
-          </main>
+          </div>
 
           <aside class="page-with-toc__toc" aria-label="Inhaltsverzeichnis">
             <h2 class="page-with-toc__toc-title">Inhaltsverzeichnis</h2>
@@ -856,7 +889,7 @@ function renderNewsList() {
       <div class="container container--narrow">
         <header class="news-list__header">
           <p class="news-list__date">Veröffentlicht am ${P.formatDate(new Date().toISOString())}</p>
-          <h1 class="news-list__title">News-Übersicht</h1>
+          <h1 class="news-overview__title">News-Übersicht</h1>
         </header>
         <ul class="news-list">
           ${pageItems.map(newsListRow).join('')}
@@ -1261,9 +1294,12 @@ function renderInboxEmptyState() {
 }
 
 function rowHtml(a) {
+  // A11Y-001: the row is pure navigation, so the primary cell carries a real
+  // <a href> — the only keyboard/AT-operable path into the detail view. The
+  // tr onclick stays for the mouse "whole row is a target" affordance.
   return `
     <tr data-app-id="${a.id}" onclick="location.hash='#/inbox/${a.id}';">
-      <td><strong>${a.id}</strong></td>
+      <td><a href="#/inbox/${a.id}"><strong>${a.id}</strong></a></td>
       <td>${P.escapeHtml(a.address)}</td>
       <td>${a.type}</td>
       <td>${P.formatDate(a.submittedAt)}</td>
@@ -1446,7 +1482,7 @@ function renderDetailTab(a, tab) {
   if (tab === 'sap') {
     return `
       <div class="card">
-        <h3 class="card__title">SAP RE-FX Integration</h3>
+        <h2 class="card__title">SAP RE-FX Integration</h2>
         <dl class="sap-dl">
           ${a.assetKey ? `
             <dt>Objekt-Schlüssel</dt>
@@ -1471,32 +1507,32 @@ function renderDetailTab(a, tab) {
   return `
     <div class="card-grid">
       <div class="card">
-        <h3 class="card__title">Antragsteller</h3>
+        <h2 class="card__title">Antragsteller</h2>
         <p class="card__inset">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || a.submitterId)}<br><span class="card__inset-meta">${a.submitterVe}${a.submitterDep ? ' · ' + a.submitterDep : ''}</span></p>
       </div>
       <div class="card">
-        <h3 class="card__title">Standort</h3>
+        <h2 class="card__title">Standort</h2>
         <p class="card__inset">${P.escapeHtml(a.address)}<br>${a.assetKey ? `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · EGID <code>${a.egid}</code>` : '<span class="badge badge--greenfield">Greenfield</span>'}</p>
       </div>
       ${a.naw ? `
         <div class="card">
-          <h3 class="card__title">Flächenbedarf</h3>
+          <h2 class="card__title">Flächenbedarf</h2>
           <p class="card__inset">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} · AP ${a.workstations} · HNF2 ${a.hnf2} m² · GF ${a.gf} m²<br>UK ${P.formatChf(a.operatingCosts)} · Möblierung ${P.formatChf(a.furnitureBudget)}</p>
         </div>
       ` : a.extensionData?.berths ? `
         <div class="card">
-          <h3 class="card__title">SEM-Variante</h3>
+          <h2 class="card__title">SEM-Variante</h2>
           <p class="card__inset">Schlafplätze: <strong>${a.extensionData.berths}</strong> (Familie ${a.extensionData.berthsFamily} · Einzel ${a.extensionData.berthsSingle} · Mehrbett ${a.extensionData.berthsShared})<br>Investitionspauschale ${P.formatChf(a.extensionData.investmentLumpSum)}</p>
         </div>
       ` : ''}
       ${a.status === 'clarification' && a.conditions ? `
         <div class="card card--clarification">
-          <h3 class="card__title card__title--icon">${P.icon('refresh')} Rückfrage / Offene Auflagen</h3>
+          <h2 class="card__title card__title--icon">${P.icon('refresh')} Rückfrage / Offene Auflagen</h2>
           <p class="card__justification"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
           <ul class="auflagen-list">
             ${a.conditions.map((x, i) => `
               <li class="${x.done ? 'done' : ''}">
-                <input type="checkbox" ${x.done ? 'checked' : ''} onclick="window.t3lite.toggleAuflage('${a.id}', ${i})">
+                <input type="checkbox" ${x.done ? 'checked' : ''} aria-label="Auflage erledigt: ${P.escapeHtml(x.comment)}" onclick="window.t3lite.toggleAuflage('${a.id}', ${i})">
                 <span>${P.escapeHtml(x.comment)}</span>
                 <span class="badge">${P.escapeHtml(x.field)}</span>
               </li>
@@ -1547,7 +1583,7 @@ function renderQueue() {
           </thead>
           <tbody>
             ${pageItems.map(a => `
-              <tr data-app-id="${a.id}">
+              <tr data-app-id="${a.id}" tabindex="0" aria-label="Antrag ${P.escapeHtml(a.id)} öffnen">
                 <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
                 <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
                 <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
@@ -1604,24 +1640,48 @@ function renderQueue() {
 }
 
 let _queueKeydownHandler = null;
+// STA-001: called from handleHash whenever the route path leaves #/queue, so
+// the shortcut handler's lifetime matches its view (docviewer close() pattern).
+function teardownQueueShortcuts() {
+  if (!_queueKeydownHandler) return;
+  document.removeEventListener('keydown', _queueKeydownHandler);
+  _queueKeydownHandler = null;
+}
 function wireQueueShortcuts() {
   const rows = Array.from(document.querySelectorAll('tbody tr[data-app-id]'));
   let idx = -1;
-  const focus = (i) => {
-    if (rows[idx]) rows[idx].style.outline = '';
+  // A11Y-001: the j/k cursor moves REAL DOM focus — rows carry tabindex="0"
+  // (same pattern as the properties list rows), so the global :focus-visible
+  // ring replaces the old style.outline paint, which drew a fake focus ring
+  // on an element that was never focused and that AT could not track.
+  const moveCursor = (i) => {
     idx = Math.max(0, Math.min(rows.length - 1, i));
     const r = rows[idx];
-    if (r) { r.style.outline = '3px solid var(--color-focus)'; r.scrollIntoView({ block: 'nearest' }); }
+    if (r) {
+      try { r.focus({ preventScroll: true }); } catch { r.focus(); }
+      r.scrollIntoView({ block: 'nearest' });
+    }
   };
   // Remove the previous handler so revisiting #/queue doesn't stack listeners
   // (each closing over a now-detached `rows` — drew multiple outlines + leaked).
   if (_queueKeydownHandler) document.removeEventListener('keydown', _queueKeydownHandler);
   _queueKeydownHandler = (e) => {
-    if (e.target.matches('input, textarea, select')) return;
-    if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); focus(idx + 1); }
-    if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); focus(idx - 1); }
+    // STA-001: form fields keep their keys, and buttons/links keep native
+    // Enter/Space activation (previously Enter on e.g. «Bulk genehmigen» or a
+    // pagination link could be hijacked into opening the cursor row).
+    if (e.target.closest?.('input, textarea, select, button, a[href], [contenteditable="true"]')) return;
+    // A row reached with Tab (not j/k) becomes the cursor too, so
+    // Enter/Space work on whichever row actually has focus.
+    const focusedRow = e.target.closest?.('tr[data-app-id]');
+    if (focusedRow) idx = rows.indexOf(focusedRow);
+    if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); moveCursor(idx + 1); }
+    if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); moveCursor(idx - 1); }
     if ((e.key === 'Enter' || e.key === 'o') && rows[idx]) { e.preventDefault(); location.hash = '#/review/' + rows[idx].getAttribute('data-app-id'); }
-    if (e.key === 'x' && rows[idx]) { const cb = rows[idx].querySelector('.rowSel'); if (cb) cb.checked = !cb.checked; }
+    if ((e.key === 'x' || (e.key === ' ' && focusedRow)) && rows[idx]) {
+      if (e.key === ' ') e.preventDefault(); // selection toggle, not page scroll
+      const cb = rows[idx].querySelector('.rowSel');
+      if (cb) cb.checked = !cb.checked;
+    }
   };
   document.addEventListener('keydown', _queueKeydownHandler);
 }
@@ -1650,24 +1710,26 @@ function renderReviewerSplit({ id }) {
         <div class="reviewer-split">
           <div>
             <div class="card">
-              <h3 class="card__title">Formular (schreibgeschützt)</h3>
-              <table class="table">
-                <tr><th>Antragstyp</th><td>${a.type}</td></tr>
-                <tr><th>VE / DEP</th><td>${a.submitterVe} ${a.submitterDep ? '/ ' + a.submitterDep : ''}</td></tr>
-                <tr><th>Adresse</th><td>${P.escapeHtml(a.address)}</td></tr>
-                ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · ${a.egid}</td></tr>` : ''}
-                ${a.naw ? `<tr><th>NAW-Klasse</th><td>${a.naw.class} (Konfidenz ${Math.round((a.naw.confidence || 0) * 100)} %)</td></tr>` : ''}
-                ${a.fte ? `<tr><th>FTE / AP</th><td>${a.fte} / ${a.workstations}</td></tr>` : ''}
-                ${a.hnf2 ? `<tr><th>HNF2 / GF</th><td>${a.hnf2} m² / ${a.gf} m²</td></tr>` : ''}
-                ${a.operatingCosts ? `<tr><th>UK-Kosten</th><td>${P.formatChf(a.operatingCosts)}</td></tr>` : ''}
-                ${a.extensionData?.berths ? `<tr><th>SEM Schlafplätze</th><td>${a.extensionData.berths} (Pauschale ${P.formatChf(a.extensionData.investmentLumpSum)})</td></tr>` : ''}
-                <tr><th>Anhänge</th><td>${(a.attachments || []).map(x => x.name).join(' · ') || 'keine'}</td></tr>
-              </table>
+              <h2 class="card__title">Formular (schreibgeschützt)</h2>
+              <div class="table-wrapper">
+                <table class="table">
+                  <tr><th>Antragstyp</th><td>${a.type}</td></tr>
+                  <tr><th>VE / DEP</th><td>${a.submitterVe} ${a.submitterDep ? '/ ' + a.submitterDep : ''}</td></tr>
+                  <tr><th>Adresse</th><td>${P.escapeHtml(a.address)}</td></tr>
+                  ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · ${a.egid}</td></tr>` : ''}
+                  ${a.naw ? `<tr><th>NAW-Klasse</th><td>${a.naw.class} (Konfidenz ${Math.round((a.naw.confidence || 0) * 100)} %)</td></tr>` : ''}
+                  ${a.fte ? `<tr><th>FTE / AP</th><td>${a.fte} / ${a.workstations}</td></tr>` : ''}
+                  ${a.hnf2 ? `<tr><th>HNF2 / GF</th><td>${a.hnf2} m² / ${a.gf} m²</td></tr>` : ''}
+                  ${a.operatingCosts ? `<tr><th>UK-Kosten</th><td>${P.formatChf(a.operatingCosts)}</td></tr>` : ''}
+                  ${a.extensionData?.berths ? `<tr><th>SEM Schlafplätze</th><td>${a.extensionData.berths} (Pauschale ${P.formatChf(a.extensionData.investmentLumpSum)})</td></tr>` : ''}
+                  <tr><th>Anhänge</th><td>${(a.attachments || []).map(x => x.name).join(' · ') || 'keine'}</td></tr>
+                </table>
+              </div>
             </div>
           </div>
 
           <aside class="reviewer-marks" aria-label="Prüfung">
-            <h3 class="reviewer-marks__heading">Prüfung pro Feld</h3>
+            <h2 class="reviewer-marks__heading">Prüfung pro Feld</h2>
             ${['type', 've', 'address', 'naw', 'fte', 'hnf2', 'ukKosten', 'attachments'].map(field => `
               <div class="reviewer-marks__row">
                 <span>${fieldLabel(field)}</span>
@@ -1691,7 +1753,7 @@ function renderReviewerSplit({ id }) {
             </div>
             <div class="form-field">
               <label class="form-field__label" for="reviewBegr">Begründung <span class="form-field__required">*</span> <span class="form-field__hint--inline">(VwVG Art. 35 — verpflichtend)</span></label>
-              <textarea class="form-field__textarea" id="reviewBegr"></textarea>
+              <textarea class="form-field__textarea" id="reviewBegr" aria-required="true"></textarea>
             </div>
 
             <div class="reviewer-marks__actions">
@@ -1724,15 +1786,33 @@ function wireReviewerSplit(a) {
         group.querySelectorAll('button').forEach(x => {
           const m = x.getAttribute('data-mark');
           x.className = 'mark-button' + (a._marks[field] === m ? ' mark-button--active-' + m : '');
+          // A11Y-012: keep the ARIA toggle state in sync with the class swap —
+          // same pattern as the filter chips (aria-pressed mirrors selection).
+          x.setAttribute('aria-pressed', String(a._marks[field] === m));
         });
       });
     });
   });
+  // A11Y-015: clear a field's persistent error as soon as it is corrected
+  // (same contract as the wizard step-1 address field).
+  const decisionAnchor = () => document.querySelector('input[name="decision"]');
+  document.querySelectorAll('input[name="decision"]').forEach(r => {
+    r.addEventListener('change', () => setFieldError(decisionAnchor(), null));
+  });
+  document.getElementById('reviewBegr').addEventListener('input', e => {
+    if (e.target.value.trim()) setFieldError(e.target, null);
+  });
   document.getElementById('saveDecision').addEventListener('click', () => {
     const dec = document.querySelector('input[name="decision"]:checked')?.value;
-    const begr = document.getElementById('reviewBegr').value.trim();
-    if (!dec) { P.toast('Bitte Gesamtentscheid wählen.'); return; }
-    if (!begr) { P.toast('Bitte Begründung eintragen (Pflicht).'); return; }
+    const begrEl = document.getElementById('reviewBegr');
+    const begr = begrEl.value.trim();
+    // A11Y-015: the toast alone vanishes after ~4 s and never referenced the
+    // field. Persist the error at the control (aria-invalid + aria-describedby
+    // via setFieldError) and move focus to the first invalid control.
+    setFieldError(decisionAnchor(), dec ? null : 'Bitte Gesamtentscheid wählen.');
+    setFieldError(begrEl, begr ? null : 'Bitte Begründung eintragen (Pflicht).');
+    if (!dec) { P.toast('Bitte Gesamtentscheid wählen.'); decisionAnchor().focus(); return; }
+    if (!begr) { P.toast('Bitte Begründung eintragen (Pflicht).'); begrEl.focus(); return; }
     a.history = a.history || [];
     a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: `Entscheid: ${dec} — "${begr}"` });
     if (dec === 'genehmigen') {
@@ -2062,7 +2142,7 @@ function wirePropertiesSearchCombobox(view) {
 
   const optionEls = () => Array.from(list.querySelectorAll('.combobox__option'));
   const open = () => { list.hidden = false; input.setAttribute('aria-expanded', 'true'); };
-  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; };
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; input.removeAttribute('aria-activedescendant'); };
 
   function render() {
     const parts = [];
@@ -2087,7 +2167,11 @@ function wirePropertiesSearchCombobox(view) {
     }
     if (!parts.length) { list.innerHTML = ''; close(); return; }
     list.innerHTML = parts.join('');
+    // A11Y-014: every option needs an id so aria-activedescendant can point
+    // at the active one while arrowing (WAI-ARIA APG combobox pattern).
+    optionEls().forEach((o, i) => { o.id = 'propertiesSearchOption-' + i; o.setAttribute('aria-selected', 'false'); });
     activeIndex = -1;
+    input.removeAttribute('aria-activedescendant');
     open();
   }
 
@@ -2135,7 +2219,14 @@ function wirePropertiesSearchCombobox(view) {
     if (!opts.length) return;
     if (list.hidden) open();
     activeIndex = Math.max(0, Math.min(opts.length - 1, activeIndex + delta));
-    opts.forEach((o, i) => o.classList.toggle('combobox__option--active', i === activeIndex));
+    // A11Y-014: mirror the visual highlight in ARIA state — aria-selected on
+    // the option, aria-activedescendant on the input — so screen readers
+    // announce the option under the cursor instead of hearing nothing.
+    opts.forEach((o, i) => {
+      o.classList.toggle('combobox__option--active', i === activeIndex);
+      o.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+    });
+    input.setAttribute('aria-activedescendant', opts[activeIndex].id);
     opts[activeIndex].scrollIntoView({ block: 'nearest' });
   }
 
@@ -2354,6 +2445,24 @@ function loadMapLibre() {
   });
   return _maplibreReady;
 }
+// German texts for MapLibre's built-in UI strings — the portal UI is German
+// (Swiss orthography, ss never ß); MapLibre ships English defaults only.
+// Shared by all three map instances (portfolio, Standort, Grundriss), so
+// every vendor-rendered control announces German: zoom buttons, attribution
+// toggle, popup close, marker fallback and the cooperative-gestures scrim
+// (A11Y-017). Keys match MapLibre GL JS 4.x `defaultLocale`.
+const MAP_COOP_LOCALE = {
+  'AttributionControl.ToggleAttribution': 'Quellenangaben ein- oder ausblenden',
+  'CooperativeGesturesHandler.WindowsHelpText': 'Ctrl + Scrollen zum Zoomen der Karte',
+  'CooperativeGesturesHandler.MacHelpText': '⌘ + Scrollen zum Zoomen der Karte',
+  'CooperativeGesturesHandler.MobileHelpText': 'Karte mit zwei Fingern verschieben',
+  'Map.Title': 'Karte',
+  'Marker.Title': 'Kartenmarkierung',
+  'NavigationControl.ResetBearing': 'Ausrichtung nach Norden zurücksetzen',
+  'NavigationControl.ZoomIn': 'Hineinzoomen',
+  'NavigationControl.ZoomOut': 'Herauszoomen',
+  'Popup.Close': 'Popup schliessen',
+};
 // Custom MapLibre control: a single "reset to full extent" button.
 // NavigationControl ships zoom in / out but no home/reset affordance, which
 // users asked for to get back to the portfolio overview after panning away.
@@ -2386,7 +2495,12 @@ function initPropertiesMap(items) {
       container,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [8.2275, 46.8182], zoom: 7,
-      attributionControl: { compact: true }
+      attributionControl: { compact: true },
+      // The map fills most of a phone viewport; without cooperative
+      // gestures every one-finger drag pans the map and traps page
+      // scroll (two-finger pan / ctrl+wheel zoom instead).
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     _propertiesMap = map;
@@ -2432,6 +2546,11 @@ function initPropertiesMap(items) {
         popup.on('close', () => el.classList.remove('property-marker--active'));
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([t.lng, t.lat]).addTo(map);
+        // Marker.addTo() stamps the generic locale string ('Marker.Title')
+        // onto the element, replacing the per-building label set above —
+        // every pin would announce identically. Re-set AFTER addTo so each
+        // pin keeps its distinguishing building name (A11Y-017).
+        el.setAttribute('aria-label', t.buildingName);
         _propertiesMarkers.push({ id: t.id, marker, el, popup });
         bounds.extend([t.lng, t.lat]);
       });
@@ -2522,9 +2641,9 @@ function propertyCard(t, index = 99) {
 }
 
 // ── 10. LIEGENSCHAFTS-DETAIL ─────────────────────────────────────────────
-// Document-type labels come from the canonical DOC_TYPE_LABEL map in lib.js
-// — shared with the downloads page so a Permit doesn't render as
-// "Bewilligung" here and "Baubewilligung" there.
+// Document-type labels resolve through the doctype.* keys in data/i18n.json
+// (enum per DOC_TYPE_LABEL in lib.js) — shared with the downloads page so a
+// Permit renders identically on both surfaces, in every language.
 
 // Property-detail Dokumente: four buckets by user intent (not by chronology).
 // Empty buckets are skipped at render time.
@@ -2920,7 +3039,7 @@ async function renderPropertyDetail({ id }) {
                       ${floorKpis.map(f => `
                         <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
                           <td>
-                            <strong>${P.escapeHtml(f.name)}</strong>
+                            <a href="#/properties/${t.id}/floors/${f.slug}"><strong>${P.escapeHtml(f.name)}</strong></a>
                             ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
                           </td>
                           <td class="floor-list__num">${f.roomCount}</td>
@@ -2941,7 +3060,7 @@ async function renderPropertyDetail({ id }) {
                 : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.appsSection')}">
                      <thead><tr><th scope="col">${P.t('prop.application')}</th><th scope="col">${P.t('prop.type')}</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th></tr></thead>
                      <tbody>
-                       ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><strong>${a.id}</strong></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
+                       ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><a href="#/inbox/${a.id}"><strong>${a.id}</strong></a></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
                      </tbody>
                    </table></div>`}
             </section>
@@ -3017,6 +3136,10 @@ function initPropertyDetailMap(t) {
       center: [t.lng, t.lat],
       zoom: 17.5,
       attributionControl: { compact: true },
+      // Same touch rationale as the portfolio + floor maps: one-finger
+      // drags must keep scrolling the page (two-finger pan / ctrl+wheel).
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     _propertyDetailMap = map;
@@ -3033,6 +3156,9 @@ function initPropertyDetailMap(t) {
       new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([t.lng, t.lat])
         .addTo(map);
+      // Marker.addTo() overwrites the element's aria-label with the generic
+      // locale string — re-set the building name afterwards (A11Y-017).
+      el.setAttribute('aria-label', t.buildingName);
     });
   }).catch(err => {
     console.error('[property location map]', err);
@@ -3315,6 +3441,11 @@ async function renderFloorDetail({ id, floorSlug }) {
     </section>
   `;
 
+  // Print scope: only while an actual floor plan is on screen may the print
+  // stylesheet strip the federal chrome down to the bare plan sheet
+  // (css/foundations/print.css). handleHash clears the class on navigation.
+  document.body.classList.add('route-floor');
+
   wirePropertyGallery(t);
   initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, colorMode);
 
@@ -3541,6 +3672,11 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, initialColor)
       pitchWithRotate: false,
       dragRotate: false,
       touchZoomRotate: true,
+      // The floor canvas spans nearly the full phone viewport; cooperative
+      // gestures keep one-finger drags scrolling the page (two-finger pan /
+      // ctrl+wheel zoom for the map).
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
     });
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
@@ -3720,10 +3856,15 @@ function buildRoomPopupHtml(t, floor, space) {
 }
 
 // ── 11. DOWNLOADS — paginated Document table (§ 6.2) ─────────────────────
-// Document-type DE labels come from the canonical DOC_TYPE_LABEL map in
-// lib.js — shared with the property-detail Dokumente groups so labels
-// don't diverge between the two surfaces.
 const DOCUMENT_PAGE_SIZE = 25;
+
+// Localised Document.type label. The canonical DOC_TYPE_LABEL map in lib.js
+// stays the enum source (schema A.10); every enum value carries a doctype.*
+// key in data/i18n.json. Values outside the enum fall back to the raw type
+// string — never to a doctype.* key name in the UI.
+function docTypeLabel(type) {
+  return DOC_TYPE_LABEL[type] ? P.t('doctype.' + type) : (type || '');
+}
 
 function documentLinkedLabel(d) {
   const ref = (d.linkedTo || [])[0];
@@ -3777,8 +3918,8 @@ function renderDownloads() {
           </div>
           <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
             <option value="">${P.t('downloads.allTypes')}</option>
-            ${Object.entries(DOC_TYPE_LABEL).map(([v, l]) =>
-              `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${l}</option>`).join('')}
+            ${Object.keys(DOC_TYPE_LABEL).map(v =>
+              `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${docTypeLabel(v)}</option>`).join('')}
           </select>
           <select class="input docs-filter-bar__select" id="filterDocBuilding" aria-label="Liegenschaft">
             <option value="">${P.t('downloads.allProperties')}</option>
@@ -3837,7 +3978,7 @@ function renderDownloads() {
     if (!pills) return;
     const active = [];
     if (docState.type) {
-      active.push({ key: 'type', label: 'Typ', value: DOC_TYPE_LABEL[docState.type] || docState.type });
+      active.push({ key: 'type', label: 'Typ', value: docTypeLabel(docState.type) });
     }
     if (docState.building) {
       const b = P.state.buildings.find(x => x.buildingId === docState.building);
@@ -3910,7 +4051,7 @@ function renderDownloads() {
               ${P.icon('document')}<span>${P.escapeHtml(d.title)}</span>
             </a>
           </td>
-          <td><span class="badge badge--info">${P.escapeHtml(DOC_TYPE_LABEL[d.type] || d.type)}</span></td>
+          <td><span class="badge badge--info">${P.escapeHtml(docTypeLabel(d.type))}</span></td>
           <td class="docs-table__linked">${P.escapeHtml(documentLinkedLabel(d))}</td>
           <td><code>${P.escapeHtml(d.format || '')}</code></td>
           <td>${P.escapeHtml(d.size || '')}</td>
@@ -4419,7 +4560,7 @@ function docPageText(doc, n, total) {
         </header>
         <h1 class="docpage__title">${P.escapeHtml(doc.title)}</h1>
         <dl class="docpage__metagrid">
-          <div><dt>Typ</dt><dd>${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)}</dd></div>
+          <div><dt>Typ</dt><dd>${P.escapeHtml(docTypeLabel(doc.type))}</dd></div>
           <div><dt>Format</dt><dd>${P.escapeHtml(doc.format || '')}</dd></div>
           <div><dt>Ausgestellt</dt><dd>${P.escapeHtml(doc.issuedAt || '—')}</dd></div>
           <div><dt>Sprachen</dt><dd>${P.escapeHtml((doc.languages || []).join(' · ').toUpperCase() || '—')}</dd></div>
@@ -4605,10 +4746,20 @@ function openDocumentViewer(doc, siblings) {
       </div>
       <a class="docviewer-share__mail" href="${mail}" data-share-email>${P.icon('envelope')} Per E-Mail teilen</a>`;
     backdrop.appendChild(pop);
-    // Anchor under the share button, right-aligned to it.
+    // Anchor under the share button, right-aligned to it. The right offset
+    // must also be clamped against the popover's own width (readable only
+    // after appendChild): on narrow phones the share button sits further
+    // left than the popover is wide, and an unclamped offset pushes the
+    // panel past the LEFT viewport edge (RWD-007). 8px minimum inset on
+    // both sides; the CSS max-width (100vw − 32px) guarantees both clamps
+    // are satisfiable at once.
     const r = btn.getBoundingClientRect();
     pop.style.setProperty('top', (r.bottom + 8) + 'px');
-    pop.style.setProperty('right', Math.max(8, window.innerWidth - r.right) + 'px');
+    const right = Math.min(
+      Math.max(8, window.innerWidth - r.right),
+      window.innerWidth - pop.offsetWidth - 8,
+    );
+    pop.style.setProperty('right', right + 'px');
     btn.setAttribute('aria-expanded', 'true');
     const input = pop.querySelector('.docviewer-share__input');
     input.value = url;
@@ -4661,7 +4812,7 @@ function openDocumentViewer(doc, siblings) {
         ${P.icon('document', 'docviewer__heading-icon')}
         <div class="docviewer__heading-text">
           <p class="docviewer__title">${P.escapeHtml(doc.title)}</p>
-          <p class="docviewer__sub">${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span>${hasSiblings ? ` · <span class="docviewer__docnum">Dokument ${pos + 1} / ${list.length}</span>` : ''}</p>
+          <p class="docviewer__sub">${P.escapeHtml(docTypeLabel(doc.type))} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span>${hasSiblings ? ` · <span class="docviewer__docnum">Dokument ${pos + 1} / ${list.length}</span>` : ''}</p>
         </div>
       </div>
       <div class="docviewer__actions">
@@ -4886,7 +5037,7 @@ window.t3lite = {
     let body = `
       <p>Sie genehmigen ${sel.length} Anträge. Pro Antrag ist eine schriftliche Begründung erforderlich (VwVG Art. 35).</p>
       <div class="form-field">
-        <label class="form-field__label">Optionaler Vorschlagstext (nicht voreingestellt)</label>
+        <label class="form-field__label" for="batchTemplate">Optionaler Vorschlagstext (nicht voreingestellt)</label>
         <textarea class="form-field__textarea" id="batchTemplate" placeholder="z. B. Formal vollständig, Rechtsgrundlage geprüft, keine Auflagen."></textarea>
         <label class="batch-approve__copy-toggle"><input type="checkbox" id="copyTpl"> Als Vorschlag in alle Felder einsetzen (Default: off)</label>
       </div>
@@ -4897,22 +5048,31 @@ window.t3lite = {
       if (!a) return;
       body += `
         <div class="form-field batch-approve__field">
-          <label class="form-field__label">${a.id} — ${P.escapeHtml(a.address)}</label>
-          <textarea class="form-field__textarea batchBegr" data-id="${a.id}" placeholder="Begründung … (Pflicht)"></textarea>
+          <label class="form-field__label" for="batchBegr-${a.id}">${a.id} — ${P.escapeHtml(a.address)}</label>
+          <textarea class="form-field__textarea batchBegr" id="batchBegr-${a.id}" data-id="${a.id}" placeholder="Begründung … (Pflicht)"></textarea>
         </div>
       `;
     });
     body += `
-      <label><input type="checkbox" id="batchConfirm"> Ich bestätige, dass jede Begründung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
+      <div class="form-field">
+        <label><input type="checkbox" id="batchConfirm"> Ich bestätige, dass jede Begründung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
+      </div>
     `;
     P.modal({
       title: 'Bulk genehmigen', body, size: 'lg',
       actions: [
         { label: P.t('btn.cancel'), variant: 'btn--outline' },
         { label: 'Genehmigen', variant: 'btn--filled', onClick: () => {
-          const begrs = Array.from(document.querySelectorAll('.batchBegr')).map(t => ({ id: t.getAttribute('data-id'), text: t.value.trim() }));
-          if (begrs.some(b => !b.text)) { P.toast('Alle Begründungen sind Pflicht.'); return false; }
-          if (!document.getElementById('batchConfirm').checked) { P.toast('Bitte die Bestätigung ankreuzen.'); return false; }
+          const begrs = Array.from(document.querySelectorAll('.batchBegr')).map(t => ({ el: t, id: t.getAttribute('data-id'), text: t.value.trim() }));
+          // A11Y-015: persistent per-textarea errors + focus the first invalid
+          // control — the toast alone disappears after ~4 s without naming
+          // which of the N justification fields is empty.
+          begrs.forEach(b => setFieldError(b.el, b.text ? null : 'Bitte Begründung eintragen (Pflicht).'));
+          const confirmEl = document.getElementById('batchConfirm');
+          setFieldError(confirmEl, confirmEl.checked ? null : 'Bitte die Bestätigung ankreuzen.');
+          const firstEmpty = begrs.find(b => !b.text);
+          if (firstEmpty) { P.toast('Alle Begründungen sind Pflicht.'); firstEmpty.el.focus(); return false; }
+          if (!confirmEl.checked) { P.toast('Bitte die Bestätigung ankreuzen.'); confirmEl.focus(); return false; }
           // Server-side identical-text check
           const counts = {};
           begrs.forEach(b => counts[b.text] = (counts[b.text] || 0) + 1);
@@ -4936,8 +5096,18 @@ window.t3lite = {
     document.getElementById('copyTpl').addEventListener('change', e => {
       if (e.target.checked) {
         const tpl = document.getElementById('batchTemplate').value;
-        document.querySelectorAll('.batchBegr').forEach(t => t.value = tpl);
+        document.querySelectorAll('.batchBegr').forEach(t => {
+          t.value = tpl;
+          if (tpl.trim()) setFieldError(t, null);
+        });
       }
+    });
+    // A11Y-015: clear persistent errors as soon as the control is corrected.
+    document.querySelectorAll('.batchBegr').forEach(t => {
+      t.addEventListener('input', () => { if (t.value.trim()) setFieldError(t, null); });
+    });
+    document.getElementById('batchConfirm').addEventListener('change', e => {
+      if (e.target.checked) setFieldError(e.target, null);
     });
   },
   toggleAuflage(appId, idx) {
