@@ -182,6 +182,16 @@
 .map-surface {
   position: relative;
 }
+/* CD typeface inside MapLibre surfaces — the vendor stylesheet sets
+   `font: 12px/20px "Helvetica Neue", …` on `.maplibregl-map` (the class it
+   stamps onto every map container), and every popup / attribution / scrim
+   text node inherits it. CD type is NotoSans everywhere (tokens.css
+   --font-family, mirroring designsystem app/tailwind.config.js fontFamily).
+   Double-class selector: maplibre-gl.css is appended to <head> AFTER the
+   app's sheets (loadMapLibre), so equal specificity would lose (TYP-006). */
+.map-surface.maplibregl-map {
+  font-family: var(--font-family);
+}
 .map-loading {
   position: absolute;
   inset: 0;
