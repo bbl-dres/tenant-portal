@@ -19,7 +19,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS td text--base; .table--compact opts down to text--sm */
   background: var(--color-white);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-md);  /* DS table.postcss:22 shadow-md — TOK-002 */
