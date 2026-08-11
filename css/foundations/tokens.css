@@ -157,6 +157,7 @@
 
   /* ── BORDERS ──────────────────────────────────────────────────────────── */
   --color-border:              var(--color-gray-200);
+  --color-border-strong:       var(--color-gray-300);   /* DS text-300 — table row separators */
   --color-border-light:        var(--color-gray-100);
   --color-border-input:        var(--color-gray-500);
 

@@ -38,7 +38,9 @@
 .table td {
   padding: var(--space-md) var(--space-lg);      /* DS px-6 py-4 — 24px inline / 16px block */
   text-align: left;
-  border-bottom: 1px solid var(--color-border);
+  /* DS row separators are border-text-300 (one step darker than the
+     text-200 outer table border, which stays on --color-border). */
+  border-bottom: 1px solid var(--color-border-strong);
 }
 /* DS table.postcss:52-57 — body cells in non-compact tables read
    text-gray-600; `.table--compact` cells inherit the darker page default,
