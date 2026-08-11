@@ -2445,12 +2445,23 @@ function loadMapLibre() {
   });
   return _maplibreReady;
 }
-// German texts for MapLibre's cooperative-gestures scrim — the portal UI is
-// German (Swiss orthography); MapLibre ships English defaults only.
+// German texts for MapLibre's built-in UI strings — the portal UI is German
+// (Swiss orthography, ss never ß); MapLibre ships English defaults only.
+// Shared by all three map instances (portfolio, Standort, Grundriss), so
+// every vendor-rendered control announces German: zoom buttons, attribution
+// toggle, popup close, marker fallback and the cooperative-gestures scrim
+// (A11Y-017). Keys match MapLibre GL JS 4.x `defaultLocale`.
 const MAP_COOP_LOCALE = {
+  'AttributionControl.ToggleAttribution': 'Quellenangaben ein- oder ausblenden',
   'CooperativeGesturesHandler.WindowsHelpText': 'Ctrl + Scrollen zum Zoomen der Karte',
   'CooperativeGesturesHandler.MacHelpText': '⌘ + Scrollen zum Zoomen der Karte',
   'CooperativeGesturesHandler.MobileHelpText': 'Karte mit zwei Fingern verschieben',
+  'Map.Title': 'Karte',
+  'Marker.Title': 'Kartenmarkierung',
+  'NavigationControl.ResetBearing': 'Ausrichtung nach Norden zurücksetzen',
+  'NavigationControl.ZoomIn': 'Hineinzoomen',
+  'NavigationControl.ZoomOut': 'Herauszoomen',
+  'Popup.Close': 'Popup schliessen',
 };
 // Custom MapLibre control: a single "reset to full extent" button.
 // NavigationControl ships zoom in / out but no home/reset affordance, which
@@ -2535,6 +2546,11 @@ function initPropertiesMap(items) {
         popup.on('close', () => el.classList.remove('property-marker--active'));
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([t.lng, t.lat]).addTo(map);
+        // Marker.addTo() stamps the generic locale string ('Marker.Title')
+        // onto the element, replacing the per-building label set above —
+        // every pin would announce identically. Re-set AFTER addTo so each
+        // pin keeps its distinguishing building name (A11Y-017).
+        el.setAttribute('aria-label', t.buildingName);
         _propertiesMarkers.push({ id: t.id, marker, el, popup });
         bounds.extend([t.lng, t.lat]);
       });
@@ -3140,6 +3156,9 @@ function initPropertyDetailMap(t) {
       new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([t.lng, t.lat])
         .addTo(map);
+      // Marker.addTo() overwrites the element's aria-label with the generic
+      // locale string — re-set the building name afterwards (A11Y-017).
+      el.setAttribute('aria-label', t.buildingName);
     });
   }).catch(err => {
     console.error('[property location map]', err);
