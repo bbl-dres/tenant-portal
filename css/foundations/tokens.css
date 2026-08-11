@@ -388,6 +388,11 @@
      3xl:pt-20 on top, container--pb (= --section-py) on the bottom
      (designsystem css/sections/hero.postcss). */
   --hero-pt:                   3rem;            /* 48px base — scales below */
+  /* Gap below a section heading — DS .section__title pb-10 = 40px, one
+     fixed value at every breakpoint (designsystem css/layouts/
+     section.postcss). 40px is Tailwind spacing.10; the --space-* t-shirt
+     scale jumps 32 → 48, so the DS step lives as its own token. */
+  --section-heading-mb:        2.5rem;          /* 40px, all breakpoints */
 
   /* ── RADIUS (mirror CD Bund Tailwind borderRadius scale) ───────────────
      Full DS scale kept verbatim, including steps with no current consumer
