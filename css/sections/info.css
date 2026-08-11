@@ -341,7 +341,9 @@
 /* Secondary descriptive line under a `.contact-block__lead`. The `--last`
    variant drops the bottom margin for the trailing email line. */
 .contact-block__note {
-  color: var(--color-text-secondary);
+  /* A11Y-002: the contact section sits on .section--alt (secondary-50 tint)
+     where gray-500 is 4.37:1 — below AA. Tinted surfaces take gray-700. */
+  color: var(--color-gray-700);
   font-size: var(--text-body-sm);
   margin: 0 0 var(--space-md);
 }

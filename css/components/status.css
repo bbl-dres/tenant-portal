@@ -75,7 +75,10 @@
   align-items: center;
   padding: var(--space-sm) var(--space-md);
   background: var(--color-gray-100);
-  color: var(--color-text-secondary);
+  /* A11Y-002: text-secondary (gray-500) only clears 4.5:1 on white; on the
+     gray-100 tint it lands at 4.39:1. DS pairs tinted surfaces with -700
+     foregrounds (notification-hint pattern), so use gray-700 here. */
+  color: var(--color-gray-700);
   font-size: var(--text-body-sm);
   position: relative;
   white-space: nowrap;

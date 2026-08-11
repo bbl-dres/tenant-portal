@@ -149,7 +149,9 @@
   line-height: var(--line-height-snug);
 }
 .filter-pill__label {
-  color: var(--color-text-secondary);
+  /* A11Y-002: gray-500 on the secondary-50 pill is 4.37:1 (< 4.5). Tinted
+     surfaces take -700 foregrounds per the DS notification-hint pairing. */
+  color: var(--color-gray-700);
 }
 .filter-pill__value {
   font-weight: var(--font-weight-bold);
@@ -388,7 +390,9 @@ a.btn[aria-disabled="true"] {
 }
 .tag-item__count {
   font-size: var(--text-body-xs);
-  color: var(--color-text-muted);
+  /* A11Y-002: gray-500 on the gray-200 chip is 3.90:1 at 12 px (< 4.5).
+     Gray-700 keeps the muted hierarchy while clearing AA on the tint. */
+  color: var(--color-gray-700);
 }
 .tag-item--active .tag-item__count,
 .tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-white-75); }

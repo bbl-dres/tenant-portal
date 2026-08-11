@@ -28,7 +28,9 @@
 .search-hero__field { flex: 1; }
 .search-hero__meta {
   margin: var(--space-lg) 0 0;
-  color: var(--color-text-secondary);
+  /* A11Y-002: the hero sits on .section--alt (secondary-50 tint) where
+     gray-500 is 4.37:1 — below AA. Tinted surfaces take gray-700. */
+  color: var(--color-gray-700);
   font-size: var(--text-body-sm);
 }
 
