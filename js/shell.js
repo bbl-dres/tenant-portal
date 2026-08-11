@@ -994,7 +994,11 @@ export function shell({ activeNav = '', breadcrumb = [], deptSub = '' } = {}) {
   // back-to-top CSS block in styles.css for the sticky mechanism.
   root.innerHTML = '<div class="page-container">'
                  +   renderShell({ deptSub, activeNav, breadcrumb, navItems })
-                 +   '<div class="back-to-top-wrapper" aria-hidden="true">'
+                 // DS BackToTopBtn.vue ships the wrapper WITHOUT aria-hidden:
+                 // the link inside is focusable, and a focusable element must
+                 // not sit in an aria-hidden subtree (WCAG 4.1.2). The link's
+                 // own aria-label names it for AT.
+                 +   '<div class="back-to-top-wrapper">'
                  +     `<a class="app-footer__top-btn" href="#" aria-label="Zum Seitenanfang"
                           onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });">${icon('chevronUp')}</a>`
                  +   '</div>'
