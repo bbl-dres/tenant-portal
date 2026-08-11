@@ -368,6 +368,15 @@ body.body--prototype-notice .toast-host {
   max-width: 720px;
   width: 100%;
   box-shadow: var(--shadow-lg);
+  /* Reflow (WCAG 1.4.10): at phone heights / 200 % zoom the shortcut list
+     is taller than the viewport — cap the card and scroll inside it so no
+     content is unreachable. Same principle as .modal (90vh cap + inner
+     scroll) and DS modal.postcss max-h-[80vh]. dvh accounts for mobile
+     browser chrome; the 2 x 16 px subtraction mirrors the overlay's own
+     padding. Plain 90vh first as fallback where dvh is unsupported. */
+  max-height: 90vh;
+  max-height: min(90vh, calc(100dvh - 2 * var(--space-md)));
+  overflow-y: auto;
 }
 /* Header row: title left, real close button right (A11Y-011 — an
    aria-modal dialog needs a focusable, pointer-free-discoverable close
