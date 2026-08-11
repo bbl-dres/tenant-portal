@@ -132,7 +132,22 @@
   .view-toggle__btn { flex: 1; justify-content: center; }
 }
 @media (max-width: 640px) {
-  .view-toggle__label { display: none; }
+  /* A11Y-003: hide the label visually but keep it in the accessible name —
+     display:none dropped it from the a11y tree, leaving three nameless
+     icon-only buttons on phones. Same clip technique as the .sr-only
+     utility (forms.css) / DS `sr-only lg:not-sr-only` idiom
+     (designsystem search.postcss .search__button__title). */
+  .view-toggle__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
   .view-toggle__btn { padding: var(--space-sm) var(--space-md); }
 }
 
