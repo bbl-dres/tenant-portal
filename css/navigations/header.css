@@ -540,10 +540,17 @@
   .header-search__toggle span {
     display: none;
   }
+  /* The open flyout is right-anchored to .header-search, so an
+     unconditional 280 px can start left of x=0 on narrow phones. Cap it
+     to the viewport minus the 2 x 16 px phone gutter; the input keeps its
+     base width:100 %, so the field fills the form and the absolutely
+     positioned submit magnifier stays attached at its right edge. */
+  .header-search.open .header-search__form {
+    width: min(280px, 100vw - 2 * var(--space-md));
+  }
 }
 
 @media (max-width: 1023.98px) {
-  .header-search__input { width: 140px; }
   .top-header__meta { display: none; }
 }
 
