@@ -293,11 +293,14 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     // CSS only at <1024 px; hidden on desktop.
     const mobileArrow = `<span class="main-navigation__arrow" aria-hidden="true">${icon('chevronRight')}</span>`;
     if (item.type === 'dropdown') {
+      // APG disclosure-navigation pattern: aria-expanded + aria-controls
+      // only. No aria-haspopup="menu" — the controlled panel is a
+      // role="region" with plain links, not a menu widget, so announcing
+      // "menu" promises arrow-key behaviour that doesn't exist (A11Y-010).
       return `
         <button class="main-navigation__link main-navigation__link--has-menu ${activeCls}"
                 type="button"
                 aria-expanded="false"
-                aria-haspopup="menu"
                 aria-controls="navMenu-${item.id}"
                 data-menu="${item.id}"
                 onclick="window.portal.toggleNavMenu('${item.id}')">
@@ -582,12 +585,17 @@ export function toggleBreadcrumbDropdown(index, force) {
   if (!panel) return;
   const isOpen = !panel.hasAttribute('hidden');
   const next = (typeof force === 'boolean') ? force : !isOpen;
+  // Capture BEFORE hiding: [hidden] on the focused subtree silently drops
+  // focus to <body> (A11Y-010, same rationale as toggleNavMenu below).
+  const restoreFocus = panel.contains(document.activeElement) || document.activeElement === document.body;
   // Close any other open breadcrumb dropdowns first.
   document.querySelectorAll('.breadcrumb__dropdown').forEach(p => p.setAttribute('hidden', ''));
   document.querySelectorAll('.breadcrumb__dropdown-icon').forEach(t => t.setAttribute('aria-expanded', 'false'));
   if (next) {
     panel.removeAttribute('hidden');
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
+  } else if (isOpen && restoreFocus && trigger) {
+    trigger.focus();
   }
 }
 
@@ -670,6 +678,13 @@ export function toggleNavMenu(id, force) {
   if (!panel) return;
   const isOpen = !panel.hasAttribute('hidden');
   const next = (typeof force === 'boolean') ? force : !isOpen;
+  // Focus bookkeeping BEFORE the panel gets [hidden]: hiding the focused
+  // subtree silently drops focus to <body> (WCAG 2.4.3), leaving keyboard
+  // users at the top of the document after Esc / close button / click
+  // outside. `activeElement === body` covers the outside-click path, where
+  // the browser has already blurred the panel link on mousedown (a click on
+  // a focusable target keeps focus there instead — never stolen). A11Y-010.
+  const restoreFocus = panel.contains(document.activeElement) || document.activeElement === document.body;
   // Close any other open nav menus + drop the lift on their triggers.
   document.querySelectorAll('.nav-menu').forEach(m => {
     m.setAttribute('hidden', '');
@@ -714,6 +729,8 @@ export function toggleNavMenu(id, force) {
         panel.style.right = 'auto';
       }
     }
+  } else if (isOpen && restoreFocus && trigger) {
+    trigger.focus();
   }
 }
 
