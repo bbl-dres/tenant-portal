@@ -848,8 +848,14 @@ function renderStep5(draft) {
 
     <div class="wizard__section">
       <h3>Datenschutz & Klassifizierung</h3>
-      <label class="consent-check"><input type="checkbox" id="confirmCorrect" ${draft.confirmCorrect ? 'checked' : ''}> Ich bestätige, dass die Angaben korrekt und vollständig sind.</label>
-      <label class="consent-check"><input type="checkbox" id="confirmIsg" ${draft.confirmIsg ? 'checked' : ''}> Ich kenne die ISG-Klassifizierung „INTERN" und werde keine sensiblen personenbezogenen Daten in Freitextfeldern eintragen.</label>
+      <!-- A11Y-015: each consent sits in its own .form-field so setFieldError
+           has a wrapper to append the persistent error text to. -->
+      <div class="form-field">
+        <label class="consent-check"><input type="checkbox" id="confirmCorrect" ${draft.confirmCorrect ? 'checked' : ''}> Ich bestätige, dass die Angaben korrekt und vollständig sind.</label>
+      </div>
+      <div class="form-field">
+        <label class="consent-check"><input type="checkbox" id="confirmIsg" ${draft.confirmIsg ? 'checked' : ''}> Ich kenne die ISG-Klassifizierung „INTERN" und werde keine sensiblen personenbezogenen Daten in Freitextfeldern eintragen.</label>
+      </div>
     </div>
 
     <div class="wizard__sticky-footer">
@@ -875,11 +881,27 @@ function section(title, summary, open) {
 
 function wireStep5(draft) {
   const body = document.getElementById('wizardBody');
-  body.querySelector('#confirmCorrect')?.addEventListener('change', e => { draft.confirmCorrect = e.target.checked; persistDraft(draft); });
-  body.querySelector('#confirmIsg')?.addEventListener('change', e => { draft.confirmIsg = e.target.checked; persistDraft(draft); });
+  const correct = body.querySelector('#confirmCorrect');
+  const isg = body.querySelector('#confirmIsg');
+  correct?.addEventListener('change', e => {
+    draft.confirmCorrect = e.target.checked;
+    if (e.target.checked) setFieldError(e.target, null);   // A11Y-015
+    persistDraft(draft);
+  });
+  isg?.addEventListener('change', e => {
+    draft.confirmIsg = e.target.checked;
+    if (e.target.checked) setFieldError(e.target, null);   // A11Y-015
+    persistDraft(draft);
+  });
   body.querySelector('#submitBtn')?.addEventListener('click', () => {
+    // A11Y-015: persist the error at each unchecked consent (aria-invalid +
+    // aria-describedby via setFieldError) and focus the first invalid one —
+    // the toast alone disappears after ~4 s without a field reference.
+    setFieldError(correct, draft.confirmCorrect ? null : 'Bitte Bestätigung ankreuzen.');
+    setFieldError(isg, draft.confirmIsg ? null : 'Bitte Bestätigung ankreuzen.');
     if (!draft.confirmCorrect || !draft.confirmIsg) {
       toast('Bitte beide Bestätigungen ankreuzen.');
+      (!draft.confirmCorrect ? correct : isg)?.focus();
       return;
     }
     submitDraft(draft);

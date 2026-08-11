@@ -27,7 +27,7 @@ formatChf, formatDate, escapeHtml, escapeJs, safeImageUrl,
 formatAssetKey, roleLabel,
 DOC_TYPE_LABEL,
 // UI primitives
-toast, modal, icon, statusBadge, attachmentLi,
+toast, modal, icon, statusBadge, attachmentLi, setFieldError,
 PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
@@ -1749,7 +1749,7 @@ function renderReviewerSplit({ id }) {
             </div>
             <div class="form-field">
               <label class="form-field__label" for="reviewBegr">Begründung <span class="form-field__required">*</span> <span class="form-field__hint--inline">(VwVG Art. 35 — verpflichtend)</span></label>
-              <textarea class="form-field__textarea" id="reviewBegr"></textarea>
+              <textarea class="form-field__textarea" id="reviewBegr" aria-required="true"></textarea>
             </div>
 
             <div class="reviewer-marks__actions">
@@ -1789,11 +1789,26 @@ function wireReviewerSplit(a) {
       });
     });
   });
+  // A11Y-015: clear a field's persistent error as soon as it is corrected
+  // (same contract as the wizard step-1 address field).
+  const decisionAnchor = () => document.querySelector('input[name="decision"]');
+  document.querySelectorAll('input[name="decision"]').forEach(r => {
+    r.addEventListener('change', () => setFieldError(decisionAnchor(), null));
+  });
+  document.getElementById('reviewBegr').addEventListener('input', e => {
+    if (e.target.value.trim()) setFieldError(e.target, null);
+  });
   document.getElementById('saveDecision').addEventListener('click', () => {
     const dec = document.querySelector('input[name="decision"]:checked')?.value;
-    const begr = document.getElementById('reviewBegr').value.trim();
-    if (!dec) { P.toast('Bitte Gesamtentscheid wählen.'); return; }
-    if (!begr) { P.toast('Bitte Begründung eintragen (Pflicht).'); return; }
+    const begrEl = document.getElementById('reviewBegr');
+    const begr = begrEl.value.trim();
+    // A11Y-015: the toast alone vanishes after ~4 s and never referenced the
+    // field. Persist the error at the control (aria-invalid + aria-describedby
+    // via setFieldError) and move focus to the first invalid control.
+    setFieldError(decisionAnchor(), dec ? null : 'Bitte Gesamtentscheid wählen.');
+    setFieldError(begrEl, begr ? null : 'Bitte Begründung eintragen (Pflicht).');
+    if (!dec) { P.toast('Bitte Gesamtentscheid wählen.'); decisionAnchor().focus(); return; }
+    if (!begr) { P.toast('Bitte Begründung eintragen (Pflicht).'); begrEl.focus(); return; }
     a.history = a.history || [];
     a.history.push({ ts: new Date().toISOString(), actor: P.state.user.name, action: `Entscheid: ${dec} — "${begr}"` });
     if (dec === 'genehmigen') {
@@ -4996,16 +5011,25 @@ window.t3lite = {
       `;
     });
     body += `
-      <label><input type="checkbox" id="batchConfirm"> Ich bestätige, dass jede Begründung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
+      <div class="form-field">
+        <label><input type="checkbox" id="batchConfirm"> Ich bestätige, dass jede Begründung den jeweiligen Antrag individuell betrifft (Verwaltungsverfahrensrecht).</label>
+      </div>
     `;
     P.modal({
       title: 'Bulk genehmigen', body, size: 'lg',
       actions: [
         { label: P.t('btn.cancel'), variant: 'btn--outline' },
         { label: 'Genehmigen', variant: 'btn--filled', onClick: () => {
-          const begrs = Array.from(document.querySelectorAll('.batchBegr')).map(t => ({ id: t.getAttribute('data-id'), text: t.value.trim() }));
-          if (begrs.some(b => !b.text)) { P.toast('Alle Begründungen sind Pflicht.'); return false; }
-          if (!document.getElementById('batchConfirm').checked) { P.toast('Bitte die Bestätigung ankreuzen.'); return false; }
+          const begrs = Array.from(document.querySelectorAll('.batchBegr')).map(t => ({ el: t, id: t.getAttribute('data-id'), text: t.value.trim() }));
+          // A11Y-015: persistent per-textarea errors + focus the first invalid
+          // control — the toast alone disappears after ~4 s without naming
+          // which of the N justification fields is empty.
+          begrs.forEach(b => setFieldError(b.el, b.text ? null : 'Bitte Begründung eintragen (Pflicht).'));
+          const confirmEl = document.getElementById('batchConfirm');
+          setFieldError(confirmEl, confirmEl.checked ? null : 'Bitte die Bestätigung ankreuzen.');
+          const firstEmpty = begrs.find(b => !b.text);
+          if (firstEmpty) { P.toast('Alle Begründungen sind Pflicht.'); firstEmpty.el.focus(); return false; }
+          if (!confirmEl.checked) { P.toast('Bitte die Bestätigung ankreuzen.'); confirmEl.focus(); return false; }
           // Server-side identical-text check
           const counts = {};
           begrs.forEach(b => counts[b.text] = (counts[b.text] || 0) + 1);
@@ -5029,8 +5053,18 @@ window.t3lite = {
     document.getElementById('copyTpl').addEventListener('change', e => {
       if (e.target.checked) {
         const tpl = document.getElementById('batchTemplate').value;
-        document.querySelectorAll('.batchBegr').forEach(t => t.value = tpl);
+        document.querySelectorAll('.batchBegr').forEach(t => {
+          t.value = tpl;
+          if (tpl.trim()) setFieldError(t, null);
+        });
       }
+    });
+    // A11Y-015: clear persistent errors as soon as the control is corrected.
+    document.querySelectorAll('.batchBegr').forEach(t => {
+      t.addEventListener('input', () => { if (t.value.trim()) setFieldError(t, null); });
+    });
+    document.getElementById('batchConfirm').addEventListener('change', e => {
+      if (e.target.checked) setFieldError(e.target, null);
     });
   },
   toggleAuflage(appId, idx) {
