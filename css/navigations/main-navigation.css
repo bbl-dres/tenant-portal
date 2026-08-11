@@ -193,18 +193,21 @@
   width: var(--icon-sm); height: var(--icon-sm);
 }
 
-/* ── NAV DROPDOWN PANEL (swisstopo "Dienstleistungen" pattern) ──────────
-   Constrained card anchored under the trigger word (left:Xpx set in JS),
-   not a full-bleed mega-menu. Single-line item rows, red left bar marks
-   the active route. Close link in the top-right; Esc / click-outside also
-   close. */
+/* ── NAV DROPDOWN PANEL (DS desktop-menu drawer, "Dienstleistungen") ─────
+   Constrained drawer anchored under the trigger word (left:Xpx set in JS),
+   not a full-bleed mega-menu. Geometry = DS `.desktop-menu__drawer`
+   (designsystem/css/sections/desktop-menu.postcss:9-17): w-[450px] p-8
+   pt-16, xl:w-[650px] xl:p-12 xl:pt-20, 3xl:w-[850px] 3xl:p-24 — resolved
+   on Tailwind's default quarter-rem grid to 450/650/850px wide with
+   32/48/96px padding and a 64/80/96px top strip that reserves room for the
+   close button. Esc / click-outside also close. */
 .nav-menu {
   position: absolute;
   top: 100%;
   z-index: var(--z-modal);
   background: var(--color-white);
   box-shadow: var(--shadow-nav-menu);
-  width: 480px;
+  width: 450px;
   max-width: calc(100vw - 24px);
   animation: navMenuIn var(--transition) ease;
 }
@@ -213,34 +216,41 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .nav-menu__inner {
-  padding: var(--space-lg) var(--space-xl) var(--space-lg);
+  padding: var(--space-3xl) var(--space-xl) var(--space-xl);
   position: relative;
 }
+/* Close = DS `.desktop-menu__close` → `.menu__action-btn`
+   (desktop-menu.postcss:56-68, components/menu.postcss:109-122): STATIC
+   text-sm (14px; base only at 3xl), text-500 grey, px-4 py-3, hover
+   bg-secondary-50 with text-600 — never the red hover of links. Position
+   lg:top-4/right-0 → xl:top-6/right-4 → 3xl:top-8/right-20, inside the
+   drawer's reserved top padding strip. Icon 20px (`.icon` h-5 w-5). */
 .nav-menu__close {
   position: absolute;
   top: var(--space-md);
-  right: var(--space-md);
+  right: 0;
   background: none;
   border: none;
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-chrome-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-2sm) var(--space-md);
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  border-radius: var(--radius);
 }
-.nav-menu__close:hover { color: var(--color-primary); background: var(--color-bg-surface); }
-.nav-menu__close svg { flex-shrink: 0; }
+.nav-menu__close:hover { color: var(--color-gray-600); background: var(--color-secondary-50); }
+.nav-menu__close svg { flex-shrink: 0; width: var(--icon-sm); height: var(--icon-sm); }
 
+/* Heading = DS `.navy__title` (navy.postcss:69-73) → `.menu__item` +
+   `--title`: a 16px bold row on the menu grid (py-3, lg:px-0), not a
+   display heading. Static Tailwind base size, so --text-chrome-base. */
 .nav-menu__heading {
-  font-size: var(--text-h4);
+  font-size: var(--text-chrome-base);
   font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--space-md);
-  letter-spacing: -0.005em;
-  padding-right: var(--space-2xl);   /* leave room for close button */
+  margin: 0;
+  padding: var(--space-2sm) 0;
 }
 
 .nav-menu__list {
@@ -250,34 +260,62 @@
 }
 .nav-menu__item {
   position: relative;
-  border-top: 1px solid var(--color-border-light);
 }
-.nav-menu__item:last-child { border-bottom: 1px solid var(--color-border-light); }
 
-/* Active route gets a 3 px red left bar — swisstopo pattern */
+/* Active route: 3px full-height primary-500 bar at the row's left edge —
+   DS navy drawer items `&.active::after { bg-primary-500 w-[3px] absolute
+   top-0 bottom-0 left-0 }` (navy.postcss:18-23). */
 .nav-menu__item--active::before {
   content: '';
   position: absolute;
-  left: -8px;
-  top: 8px;
-  bottom: 8px;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 3px;
-  background: var(--color-primary);
-  border-radius: 2px;
+  background: var(--color-primary-500);
 }
+/* Item rows = DS `.menu__item .menu__item--small .menu__item--border`
+   with the drawer's xl:px-3 xl:py-3 override (navy.postcss:10-16,
+   components/menu.postcss:14-40): px-4 py-3 base, STATIC text-sm (base
+   only at 3xl), border-b secondary-100, hover tints the background
+   secondary-50 and leaves the text colour unchanged. */
 .nav-menu__link {
-  display: block;
-  padding: var(--space-sm) var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2sm) var(--space-md);
   text-decoration: none;
   color: var(--color-text-primary);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-chrome-sm);
   font-weight: var(--font-weight-regular);
-  transition: color var(--transition-fast), background var(--transition-fast);
-  border-radius: var(--radius);
+  border-bottom: 1px solid var(--color-secondary-100);
+  transition: background var(--transition-fast);
 }
+/* DS menus reset anchor styling — `.menu a, a:hover { no-underline
+   text-inherit }` (components/menu.postcss:8-11) — so the hover tint never
+   comes with the global link hover colour/underline. Restated here because
+   the app's global `a:hover` outranks a bare class selector. */
 .nav-menu__link:hover {
-  color: var(--color-primary);
-  background: var(--color-bg-surface);
+  background: var(--color-secondary-50);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+/* DS drawer xl tier (≥1280): 650px wide, p-12 (48px) + pt-20 (80px),
+   item rows xl:px-3 xl:py-3 (12px), close at top-6/right-4. */
+@media (min-width: 1280px) {
+  .nav-menu { width: 650px; }
+  .nav-menu__inner { padding: var(--space-4xl) var(--space-2xl) var(--space-2xl); }
+  .nav-menu__link { padding: var(--space-2sm); }
+  .nav-menu__close { top: var(--space-lg); right: var(--space-md); }
+}
+/* DS drawer 3xl tier (≥1920): 850px wide, p-24 (96px) all sides, close at
+   top-8/right-20; menu text steps to the static base size (16px). */
+@media (min-width: 1920px) {
+  .nav-menu { width: 850px; }
+  .nav-menu__inner { padding: var(--space-5xl); }
+  .nav-menu__close { top: var(--space-xl); right: var(--space-4xl); font-size: var(--text-chrome-base); }
+  .nav-menu__link { font-size: var(--text-chrome-base); }
 }
 
 /* The navbar must establish positioning context for the dropdown */
@@ -574,13 +612,19 @@ body.body--mobile-menu-is-open {
   .nav-menu__close,
   .nav-menu__heading { display: none; }
   .nav-menu__inner { padding: 0; }
-  .nav-menu__item { border-top: 0; }
-  .nav-menu__item:last-child { border-bottom: 0; }
-  .nav-menu__item--active::before { left: var(--space-xs); }
+  /* The accordion keeps its own active marker: inset red bar just inside
+     the row's left edge (the DS desktop drawer's full-height primary-500
+     bar at left:0 applies ≥1024 only). */
+  .nav-menu__item--active::before {
+    left: var(--space-xs);
+    top: var(--space-sm);
+    bottom: var(--space-sm);
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
+  }
   .nav-menu__link {
     padding: var(--space-md) var(--container-padding) var(--space-md) calc(var(--container-padding) + var(--space-md));
     border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
     background: var(--color-bg-surface);
   }
   /* Open trigger row: drop the desktop "lifted card" effect (white bg +

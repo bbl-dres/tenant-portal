@@ -374,12 +374,19 @@
      that read cramped at 4px and loose at 8px. */
   --space-2xs:                 6px;
   --space-sm:                  8px;
+  /* Intermediate 12px step — Tailwind spacing 3 (0.75rem). DS menu rows sit
+     on it: `.menu__item` py-3 and the drawer items' xl:px-3 xl:py-3
+     (designsystem/css/components/menu.postcss:16, navigations/navy.postcss:15). */
+  --space-2sm:                 12px;
   --space-md:                  16px;
   --space-lg:                  24px;
   --space-xl:                  32px;
   --space-2xl:                 48px;
   --space-3xl:                 64px;
   --space-4xl:                 80px;
+  /* 96px step — Tailwind spacing 24 (6rem). DS desktop-menu drawer padding
+     at 3xl: `3xl:p-24` (designsystem/css/sections/desktop-menu.postcss:15). */
+  --space-5xl:                 96px;
 
   /* ── ICON SIZES ───────────────────────────────────────────────────────────
      Declared px values, NOT visual. CD Bund glyphs leave ~33 % of the
