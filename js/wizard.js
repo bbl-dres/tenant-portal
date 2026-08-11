@@ -539,6 +539,7 @@ function renderStep3(draft) {
     <div class="wizard__section">
       <h3>Dateien hochladen</h3>
       <p class="form-field__hint">Erlaubt: PDF, DOCX, XLSX, JPG, PNG · max. 25 MB · max. 10 Dateien · jede Datei wird auf Schadsoftware geprüft.</p>
+      <label class="form-field__label" for="filePicker">Dateien auswählen</label>
       <input class="wizard__file-picker" type="file" id="filePicker" multiple>
       <ul class="attachment-list wizard__attachment-list" id="attachmentList">
         ${(draft.attachments || []).map((a, i) => attachmentLi(a, i)).join('')}

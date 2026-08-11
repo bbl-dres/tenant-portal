@@ -1528,7 +1528,7 @@ function renderDetailTab(a, tab) {
           <ul class="auflagen-list">
             ${a.conditions.map((x, i) => `
               <li class="${x.done ? 'done' : ''}">
-                <input type="checkbox" ${x.done ? 'checked' : ''} onclick="window.t3lite.toggleAuflage('${a.id}', ${i})">
+                <input type="checkbox" ${x.done ? 'checked' : ''} aria-label="Auflage erledigt: ${P.escapeHtml(x.comment)}" onclick="window.t3lite.toggleAuflage('${a.id}', ${i})">
                 <span>${P.escapeHtml(x.comment)}</span>
                 <span class="badge">${P.escapeHtml(x.field)}</span>
               </li>
@@ -4968,7 +4968,7 @@ window.t3lite = {
     let body = `
       <p>Sie genehmigen ${sel.length} Anträge. Pro Antrag ist eine schriftliche Begründung erforderlich (VwVG Art. 35).</p>
       <div class="form-field">
-        <label class="form-field__label">Optionaler Vorschlagstext (nicht voreingestellt)</label>
+        <label class="form-field__label" for="batchTemplate">Optionaler Vorschlagstext (nicht voreingestellt)</label>
         <textarea class="form-field__textarea" id="batchTemplate" placeholder="z. B. Formal vollständig, Rechtsgrundlage geprüft, keine Auflagen."></textarea>
         <label class="batch-approve__copy-toggle"><input type="checkbox" id="copyTpl"> Als Vorschlag in alle Felder einsetzen (Default: off)</label>
       </div>
@@ -4979,8 +4979,8 @@ window.t3lite = {
       if (!a) return;
       body += `
         <div class="form-field batch-approve__field">
-          <label class="form-field__label">${a.id} — ${P.escapeHtml(a.address)}</label>
-          <textarea class="form-field__textarea batchBegr" data-id="${a.id}" placeholder="Begründung … (Pflicht)"></textarea>
+          <label class="form-field__label" for="batchBegr-${a.id}">${a.id} — ${P.escapeHtml(a.address)}</label>
+          <textarea class="form-field__textarea batchBegr" id="batchBegr-${a.id}" data-id="${a.id}" placeholder="Begründung … (Pflicht)"></textarea>
         </div>
       `;
     });
