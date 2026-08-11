@@ -105,7 +105,13 @@
    white inner: keeps the focus indicator clean and CD-canonical. */
 .top-bar :focus-visible,
 .app-footer :focus-visible,
-.section--dark :focus-visible {
+.section--dark :focus-visible,
+/* A11Y-004: the mobile drawer's meta zone and language bar are
+   --color-surface-dark surfaces too — without them here they fell through
+   to the global 3px #8655F6 ring (2.26:1 on the navy, 1.14:1 on the active
+   language button). The purple-300 ring restores >= 3:1 (~5.5:1). */
+.main-navigation__mobile-meta :focus-visible,
+.main-navigation__mobile-lang :focus-visible {
   outline: 2px solid var(--color-focus-dark);
   outline-offset: 2px;
   box-shadow: none;
