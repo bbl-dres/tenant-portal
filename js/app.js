@@ -858,7 +858,7 @@ function renderNewsList() {
       <div class="container container--narrow">
         <header class="news-list__header">
           <p class="news-list__date">Veröffentlicht am ${P.formatDate(new Date().toISOString())}</p>
-          <h1 class="news-list__title">News-Übersicht</h1>
+          <h1 class="news-overview__title">News-Übersicht</h1>
         </header>
         <ul class="news-list">
           ${pageItems.map(newsListRow).join('')}
