@@ -852,10 +852,16 @@ export function toggleSearch(open) {
     }
     if (input) setTimeout(() => input.focus(), 50);
   } else {
+    // Capture BEFORE collapsing: once the form goes visibility:hidden the
+    // browser silently drops focus to <body>, stranding keyboard users with
+    // no visible focus (A11Y-009). Esc in the input and submitSearch both
+    // land here with focus still inside the widget.
+    const hadFocusInside = document.activeElement && el.contains(document.activeElement);
     el.classList.remove('open');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'false');
       toggle.removeAttribute('tabindex');
+      if (hadFocusInside) toggle.focus();
     }
   }
 }

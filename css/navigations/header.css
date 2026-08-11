@@ -388,6 +388,13 @@
 .header-search__toggle svg { width: var(--icon-md); height: var(--icon-md); }
 .header-search.open .header-search__toggle { opacity: 0; pointer-events: none; }
 
+/* `visibility: hidden` removes the collapsed input + submit button from the
+   tab order and the accessibility tree (WCAG 2.4.3/2.4.7) — width:0/opacity:0
+   alone leaves two invisible tab stops in the header on every page. Same
+   transition-delay trick as `.accordion__panel` (disclosure.css): on close,
+   visibility flips only after the 320 ms width collapse has played
+   (`visibility 0s linear 320ms`); on open the delay is 0s so the field is
+   focusable immediately. 320ms matches --transition-slow. Audit: A11Y-009. */
 .header-search__form {
   position: absolute;
   right: 0;
@@ -398,13 +405,18 @@
   overflow: hidden;
   width: 0;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: width var(--transition-slow), opacity var(--transition);
+  transition: width var(--transition-slow), opacity var(--transition),
+              visibility 0s linear 320ms;
 }
 .header-search.open .header-search__form {
   width: 280px;
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  transition: width var(--transition-slow), opacity var(--transition),
+              visibility 0s;
 }
 .header-search__input {
   width: 100%;
