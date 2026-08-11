@@ -71,6 +71,14 @@ let _lastRenderedPath = null;
 function markRouteRendered(route) {
   const body = document.getElementById('page-body');
   if (body) body.dataset.route = route;
+  // Per-route document.title (WCAG 2.4.2): «<Seitentitel> — BBL Mieterportal»,
+  // derived from the rendered view's own h1 — no separate string table that
+  // could drift from the visible page. Views without an h1 (or pre-shell
+  // error paths) fall back to the bare product name. Runs on every render,
+  // so query-driven re-renders (e.g. ?lang) refresh the title too.
+  const h1 = body ? body.querySelector('h1') : null;
+  const pageTitle = (h1 ? h1.textContent : '').replace(/\s+/g, ' ').trim();
+  document.title = pageTitle ? pageTitle + ' — BBL Mieterportal' : 'BBL Mieterportal';
   // A new page (the route PATH changed, not just a ?query / lang / filter
   // update) starts at the top, like a real navigation — hash routing doesn't
   // reset scroll on its own. Same-path query changes (filters, pagination,
@@ -78,12 +86,25 @@ function markRouteRendered(route) {
   // `scrollToInfo` deep-link pattern: this fires at render time, the smooth
   // scroll-to-section fires ~100 ms later and wins.
   if (route !== _lastRenderedPath) {
+    const isFirstRender = _lastRenderedPath === null;
     _lastRenderedPath = route;
     // Jump instantly to the top. `behavior: 'instant'` overrides the
     // `html { scroll-behavior: smooth }` token — which otherwise animates even
     // a direct scrollTop assignment, gliding the long page up over ~½ s.
     try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
     catch { window.scrollTo(0, 0); }
+    // Route-change focus hand-off: the re-render dropped focus to <body>,
+    // so move it to the main landmark (shell() prepares main[tabindex="-1"]
+    // for exactly this) — screen readers announce the new page, keyboard
+    // users continue from the content. Path changes only; query-driven
+    // re-renders keep the user's place, and the very first render must not
+    // steal focus from the document.
+    if (!isFirstRender) {
+      const main = document.getElementById('main');
+      if (main) {
+        try { main.focus({ preventScroll: true }); } catch { main.focus(); }
+      }
+    }
   }
 }
 async function handleHash() {
