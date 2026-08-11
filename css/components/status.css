@@ -5,6 +5,15 @@
    Sources: styles.css 1570-1797, pipeline mobile override 3878.
    DS counterparts: components/badge.postcss, components/steps.postcss,
    components/step-indicator.postcss.
+
+   IMPORT-ORDER COUPLING — the `.inline-icon` base block below imports
+   AFTER navigations/main-navigation.css and components/cards.css
+   (css/main.css order). Every icon emitted by `icon()` (js/lib.js)
+   carries `.inline-icon`, so a single-class hook in an earlier file
+   ties with this base block and loses on order. Per-icon hooks must be
+   double-class selectors (`.inline-icon.main-navigation__chevron`,
+   `.inline-icon.breadcrumb__sep`, `.inline-icon.section-cta__icon`) to
+   keep their sizing/margins.
    ========================================================================== */
 
 /* ── BADGES ─────────────────────────────────────────────────────────────── */

@@ -75,7 +75,11 @@
   transition: color var(--transition-fast);
 }
 .section-cta__link:hover { color: var(--color-primary-700); }
-.section-cta__icon {
+/* Double-class selector: the arrow rides `icon()`'s `.inline-icon` base
+   class, whose `margin-right: var(--space-xs)` in components/status.css
+   imports LATER (css/main.css order) at equal specificity — without the
+   double class the arrow carries a stray trailing gap. */
+.inline-icon.section-cta__icon {
   transition: transform var(--transition-fast);
   margin-right: 0;
 }

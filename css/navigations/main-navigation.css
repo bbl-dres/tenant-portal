@@ -356,12 +356,16 @@
    relied on the system font. Now scales with the breadcrumb font-size
    and inherits text-muted via currentColor. */
 /* Breadcrumb separator — em-based so it scales with the surrounding
-   `text-body-sm` size. 0.75em ≈ 10-11 px at our breadcrumb font-size,
+   breadcrumb font-size. 0.75em ≈ 10-11 px at our breadcrumb font-size,
    matching the subtle "›" you see on bbl.admin.ch / geo.admin.ch.
    `align-items: center` on `.breadcrumb__item` handles centring (the
    item is a flexbox, so the previous `vertical-align: middle` was
-   ignored — that's why the chevron looked off-axis). */
-.breadcrumb__sep {
+   ignored — that's why the chevron looked off-axis).
+   Double-class selector: the separator rides `icon()`'s `.inline-icon`
+   base class, whose 24 px sizing block in components/status.css imports
+   LATER (css/main.css order) at equal specificity — same defence as
+   `.inline-icon.main-navigation__chevron` above. */
+.inline-icon.breadcrumb__sep {
   width: 0.75em; height: 0.75em;
   margin: 0 var(--space-xs);
   color: var(--color-text-muted);
