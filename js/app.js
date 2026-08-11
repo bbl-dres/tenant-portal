@@ -1782,6 +1782,9 @@ function wireReviewerSplit(a) {
         group.querySelectorAll('button').forEach(x => {
           const m = x.getAttribute('data-mark');
           x.className = 'mark-button' + (a._marks[field] === m ? ' mark-button--active-' + m : '');
+          // A11Y-012: keep the ARIA toggle state in sync with the class swap —
+          // same pattern as the filter chips (aria-pressed mirrors selection).
+          x.setAttribute('aria-pressed', String(a._marks[field] === m));
         });
       });
     });
