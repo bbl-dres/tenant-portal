@@ -242,7 +242,7 @@
   flex-wrap: wrap;
   gap: var(--space-sm);
   padding-block: var(--space-lg);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS pagination input btn--base → text--base; count/text inherit */
 }
 /* Item-range label (e.g. "1–12 von 247 Liegenschaften"). Sits to the
    left of the controls — `margin-right: auto` pushes the chevron / page
@@ -260,7 +260,7 @@
   text-align: center;
   padding: 0 var(--space-xs);
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS btn--base text--base */
   color: var(--color-text-primary);
   background: var(--color-white);
   border: 1px solid var(--color-border-input);
@@ -370,7 +370,7 @@ a.btn[aria-disabled="true"] {
   min-height: var(--btn-min-h);          /* 44 px — DS pattern */
   border-radius: var(--radius-full);
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);   /* DS tag-item--base text--base */
   font-weight: var(--font-weight-regular);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
