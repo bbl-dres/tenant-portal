@@ -113,6 +113,12 @@ async function handleHash() {
   // are read directly from `location.hash` inside the view handler.
   const qIdx = full.indexOf('?');
   const h = qIdx >= 0 ? full.slice(0, qIdx) : full;
+  // STA-001: route teardown for the queue's document-level shortcut handler —
+  // the analogue of the docviewer/gallery close() removing their own keydown
+  // listeners. Without it the handler outlived #/queue and hijacked Enter and
+  // the arrow keys on every route visited afterwards. Same-path query changes
+  // (#/queue?page=2) keep it; renderQueue rewires on re-render anyway.
+  if (h !== '#/queue') teardownQueueShortcuts();
   // Language is a URL parameter and the source of truth: apply `?lang` when
   // present, otherwise re-inject the active language so every view's URL keeps
   // it (shareable + consistent across navigation). replaceState avoids a loop.
@@ -1630,6 +1636,13 @@ function renderQueue() {
 }
 
 let _queueKeydownHandler = null;
+// STA-001: called from handleHash whenever the route path leaves #/queue, so
+// the shortcut handler's lifetime matches its view (docviewer close() pattern).
+function teardownQueueShortcuts() {
+  if (!_queueKeydownHandler) return;
+  document.removeEventListener('keydown', _queueKeydownHandler);
+  _queueKeydownHandler = null;
+}
 function wireQueueShortcuts() {
   const rows = Array.from(document.querySelectorAll('tbody tr[data-app-id]'));
   let idx = -1;
@@ -1649,7 +1662,10 @@ function wireQueueShortcuts() {
   // (each closing over a now-detached `rows` — drew multiple outlines + leaked).
   if (_queueKeydownHandler) document.removeEventListener('keydown', _queueKeydownHandler);
   _queueKeydownHandler = (e) => {
-    if (e.target.matches('input, textarea, select')) return;
+    // STA-001: form fields keep their keys, and buttons/links keep native
+    // Enter/Space activation (previously Enter on e.g. «Bulk genehmigen» or a
+    // pagination link could be hijacked into opening the cursor row).
+    if (e.target.closest?.('input, textarea, select, button, a[href], [contenteditable="true"]')) return;
     // A row reached with Tab (not j/k) becomes the cursor too, so
     // Enter/Space work on whichever row actually has focus.
     const focusedRow = e.target.closest?.('tr[data-app-id]');
