@@ -122,7 +122,10 @@
 }
 .notification-banner__text,
 .notification-banner__infos { margin: 0; flex: 1; overflow-wrap: break-word; }
-.notification-banner__actions { display: flex; gap: var(--space-sm); flex-shrink: 0; }
+/* Two nowrap buttons side by side exceed a sub-375px viewport; wrapping
+   keeps every consent action reachable (html clips overflow-x, so an
+   unwrapped row would be cut with no scroll affordance). */
+.notification-banner__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); flex-shrink: 0; }
 .notification-banner__actions .btn { white-space: nowrap; }
 /* A 40 px glyph is right for the standalone card but dominates a compact
    `text--sm` bar, where it sits beside one or two lines of copy. The wrapper
