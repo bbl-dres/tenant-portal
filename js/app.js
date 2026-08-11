@@ -2358,6 +2358,13 @@ function loadMapLibre() {
   });
   return _maplibreReady;
 }
+// German texts for MapLibre's cooperative-gestures scrim — the portal UI is
+// German (Swiss orthography); MapLibre ships English defaults only.
+const MAP_COOP_LOCALE = {
+  'CooperativeGesturesHandler.WindowsHelpText': 'Ctrl + Scrollen zum Zoomen der Karte',
+  'CooperativeGesturesHandler.MacHelpText': '⌘ + Scrollen zum Zoomen der Karte',
+  'CooperativeGesturesHandler.MobileHelpText': 'Karte mit zwei Fingern verschieben',
+};
 // Custom MapLibre control: a single "reset to full extent" button.
 // NavigationControl ships zoom in / out but no home/reset affordance, which
 // users asked for to get back to the portfolio overview after panning away.
@@ -2390,7 +2397,12 @@ function initPropertiesMap(items) {
       container,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [8.2275, 46.8182], zoom: 7,
-      attributionControl: { compact: true }
+      attributionControl: { compact: true },
+      // The map fills most of a phone viewport; without cooperative
+      // gestures every one-finger drag pans the map and traps page
+      // scroll (two-finger pan / ctrl+wheel zoom instead).
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     _propertiesMap = map;
@@ -3545,6 +3557,11 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, initialColor)
       pitchWithRotate: false,
       dragRotate: false,
       touchZoomRotate: true,
+      // The floor canvas spans nearly the full phone viewport; cooperative
+      // gestures keep one-finger drags scrolling the page (two-finger pan /
+      // ctrl+wheel zoom for the map).
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
     });
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
