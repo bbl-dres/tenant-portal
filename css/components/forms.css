@@ -315,8 +315,14 @@ input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  /* DS control size: `h-[0.9rem] w-[0.9rem]` = 14.4 px
+     (designsystem/css/components/input.postcss:82). The 44 px tap target
+     comes from the wrapping label row (.option-group__item min-height),
+     not from the control box itself. The checked glyphs below are
+     background SVGs without fixed width/height, so the radio dot scales
+     with this box; the 10x7 checkbox tick stays centred at any size. */
+  width: 0.9rem;
+  height: 0.9rem;
   flex-shrink: 0;
   margin: 0;
   background: var(--color-white);
@@ -326,7 +332,9 @@ input[type="checkbox"] {
   cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
-input[type="checkbox"] { border-radius: var(--radius-sm); }
+/* DS checkboxes inherit the base input `rounded-xs` = 1 px
+   (input.postcss:14 + app/tailwind.config.js borderRadius.xs 0.0625rem). */
+input[type="checkbox"] { border-radius: var(--radius-xs); }
 input[type="radio"]    { border-radius: 50%; }
 input[type="radio"]:checked,
 input[type="checkbox"]:checked {
