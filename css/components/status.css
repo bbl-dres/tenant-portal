@@ -24,11 +24,15 @@
   /* CD Bund: padding proportional to font-size so any text-* variant scales */
   padding: 0.219em 1em;
   border-radius: var(--radius-full);
-  font-size: var(--text-body-xs);
+  /* DS badge ramp (badge.postcss:73-77): static Tailwind sizes at
+     md/lg — see the --text-badge/--leading-badge tokens. The former
+     --text-body-xs + tight leading rendered pills 2px small at 768-1279
+     and 5-7px shorter everywhere. */
+  font-size: var(--text-badge);
   font-weight: var(--font-weight-regular);
   background: var(--color-badge-gray-bg);
   color: var(--color-badge-gray-text);
-  line-height: var(--line-height-tight);
+  line-height: var(--leading-badge);
 }
 .badge--success { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
 .badge--info    { background: var(--color-badge-blue-bg);  color: var(--color-badge-blue-text); }

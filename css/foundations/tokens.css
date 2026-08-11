@@ -326,6 +326,15 @@
   --line-height-normal:        1.5;
   --line-height-relaxed:       1.625;
 
+  /* Badge type — DS badges ride the STATIC Tailwind ramp at md/lg
+     (`text-xs md:text-sm lg:text-base` + `leading-5 lg:leading-6`,
+     designsystem/css/components/badge.postcss:73-77), NOT the portal's
+     responsive text--xs cascade (which steps at xl/3xl instead and
+     rendered every pill one size small on tablet/desktop). Dedicated
+     tokens; breakpoint bumps below at 768/1024. */
+  --text-badge:                0.75rem;    /* 12px — Tailwind fontSize.xs */
+  --leading-badge:             1.25rem;    /* 20px — Tailwind leading-5 */
+
   /* Letter-spacing — three named tracks consolidate the ad-hoc tunings
      scattered through styles.css. Remaining literal values (-0.02em,
      0.4px, 1px, etc.) are intentional one-off micro-adjustments for
@@ -521,6 +530,13 @@
     --text-body-xs: 1rem;     /* 16px */
   }
 }
+
+/* ── RESPONSIVE BADGE TYPE — DS badge.postcss `text-xs md:text-sm
+   lg:text-base` + `leading-5 lg:leading-6` on the static Tailwind
+   fontSize scale (12/14/16 px at base/768/1024; leading 20 → 24 px
+   at 1024). ─────────────────────────────────────────────────────────── */
+@media (min-width: 768px)  { :root { --text-badge: 0.875rem; } }                          /* 14px */
+@media (min-width: 1024px) { :root { --text-badge: 1rem; --leading-badge: 1.5rem; } }     /* 16px / 24px */
 
 /* ── RESPONSIVE CONTAINER PADDING — matches kbob-fdk / CD Bund ──────────
    Steps: 16 → 28 → 36 → 40 → 48 → 64 px across sm/md/lg/xl/2xl/3xl. */
