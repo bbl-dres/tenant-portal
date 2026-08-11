@@ -40,9 +40,14 @@
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
-/* Zebra striping for long lists (DS `.table--zebra`). Use on the <table>
-   when there are roughly >12 rows and rows aren't grouped semantically. */
-.table--zebra tbody tr:nth-child(even) td { background: var(--color-bg-surface); }
+/* DS table.postcss:52-57 — body cells in non-compact tables read
+   text-gray-600; `.table--compact` cells inherit the darker page default,
+   exactly as the DS scopes it via `table:not(.table--compact)`. */
+.table:not(.table--compact) td { color: var(--color-gray-600); }
+/* Zebra striping for long lists (DS `.table--zebra`: even rows tinted
+   bg-secondary-50). Use on the <table> when there are roughly >12 rows
+   and rows aren't grouped semantically. */
+.table--zebra tbody tr:nth-child(even) td { background: var(--color-secondary-50); }
 .table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
 
 /* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
@@ -52,9 +57,9 @@
    noise. `.table--caps` opts back into the DS uppercase look for
    index-style tables. */
 .table th {
-  background: var(--color-bg-alt);
+  background: var(--color-secondary-50);   /* DS thead bg-secondary-50 — federal blue-gray */
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-secondary);
+  color: var(--color-gray-700);            /* DS th text-text-700 — 9.3:1 on secondary-50 */
   font-size: var(--text-body-sm);
   letter-spacing: 0;
 }
