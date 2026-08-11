@@ -443,6 +443,14 @@ html:has(body.docviewer-open) { overflow: hidden; }
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
+/* Register RWD-010: iOS Safari zooms the page when a focused control
+   computes under 16px and does not zoom back. The view-mode select rides
+   .input--sm (--text-body-sm = 14px below xl); clamp it to the control
+   floor. At ≥1280 --text-body-sm is already 1rem+, so desktop rendering
+   is unchanged. */
+.floor-toolbar .input--sm {
+  font-size: max(var(--text-control-min), var(--text-body-sm));
+}
 
 /* `.floor-switcher` — chip group of floor links. Active chip carries the
    federal primary fill (matches `.tag-item--active` energy without

@@ -326,6 +326,13 @@
      the responsive text--xl cascade. */
   --text-chrome-xl:            1.25rem;    /* 20px — Tailwind fontSize.xl */
 
+  /* Minimum computed size for FOCUSABLE form controls — the iOS Safari
+     zoom-on-focus threshold. DS controls never sit below it: the bare
+     `input` rule inherits body text--base = 16px+
+     (designsystem/css/components/input.postcss:6-19); portal compact
+     variants clamp with max() against this floor (register RWD-010). */
+  --text-control-min:          1rem;       /* 16px */
+
   --line-height-tight:         1.25;
   --line-height-snug:          1.375;
   --line-height-normal:        1.5;
