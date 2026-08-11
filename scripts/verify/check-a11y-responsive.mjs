@@ -21,7 +21,12 @@ const flows = [
   { label: 'property-detail', hash: '#/properties/T-2010-AA-01', role: 'LBO' },
   { label: 'downloads', hash: '#/downloads', role: 'LBO' },
   { label: 'repair', hash: '#/repair', role: 'LBO' },
-  { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' }
+  { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' },
+  // A11Y-016: wizard, application detail and reviewer split used to escape
+  // the sweep (h1 count / heading-jump checks never saw them).
+  { label: 'wizard-step1', hash: '#/wizard/1', role: 'LBO' },
+  { label: 'application-detail', hash: '#/inbox/BE-2026-014', role: 'LBO' },
+  { label: 'review-split', hash: '#/review/BE-2026-014', role: 'GS-Reviewer' }
 ];
 
 const failures = [];

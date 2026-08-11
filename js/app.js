@@ -1448,7 +1448,7 @@ function renderDetailTab(a, tab) {
   if (tab === 'sap') {
     return `
       <div class="card">
-        <h3 class="card__title">SAP RE-FX Integration</h3>
+        <h2 class="card__title">SAP RE-FX Integration</h2>
         <dl class="sap-dl">
           ${a.assetKey ? `
             <dt>Objekt-Schlüssel</dt>
@@ -1473,27 +1473,27 @@ function renderDetailTab(a, tab) {
   return `
     <div class="card-grid">
       <div class="card">
-        <h3 class="card__title">Antragsteller</h3>
+        <h2 class="card__title">Antragsteller</h2>
         <p class="card__inset">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || a.submitterId)}<br><span class="card__inset-meta">${a.submitterVe}${a.submitterDep ? ' · ' + a.submitterDep : ''}</span></p>
       </div>
       <div class="card">
-        <h3 class="card__title">Standort</h3>
+        <h2 class="card__title">Standort</h2>
         <p class="card__inset">${P.escapeHtml(a.address)}<br>${a.assetKey ? `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · EGID <code>${a.egid}</code>` : '<span class="badge badge--greenfield">Greenfield</span>'}</p>
       </div>
       ${a.naw ? `
         <div class="card">
-          <h3 class="card__title">Flächenbedarf</h3>
+          <h2 class="card__title">Flächenbedarf</h2>
           <p class="card__inset">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} · AP ${a.workstations} · HNF2 ${a.hnf2} m² · GF ${a.gf} m²<br>UK ${P.formatChf(a.operatingCosts)} · Möblierung ${P.formatChf(a.furnitureBudget)}</p>
         </div>
       ` : a.extensionData?.berths ? `
         <div class="card">
-          <h3 class="card__title">SEM-Variante</h3>
+          <h2 class="card__title">SEM-Variante</h2>
           <p class="card__inset">Schlafplätze: <strong>${a.extensionData.berths}</strong> (Familie ${a.extensionData.berthsFamily} · Einzel ${a.extensionData.berthsSingle} · Mehrbett ${a.extensionData.berthsShared})<br>Investitionspauschale ${P.formatChf(a.extensionData.investmentLumpSum)}</p>
         </div>
       ` : ''}
       ${a.status === 'clarification' && a.conditions ? `
         <div class="card card--clarification">
-          <h3 class="card__title card__title--icon">${P.icon('refresh')} Rückfrage / Offene Auflagen</h3>
+          <h2 class="card__title card__title--icon">${P.icon('refresh')} Rückfrage / Offene Auflagen</h2>
           <p class="card__justification"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
           <ul class="auflagen-list">
             ${a.conditions.map((x, i) => `
@@ -1652,7 +1652,7 @@ function renderReviewerSplit({ id }) {
         <div class="reviewer-split">
           <div>
             <div class="card">
-              <h3 class="card__title">Formular (schreibgeschützt)</h3>
+              <h2 class="card__title">Formular (schreibgeschützt)</h2>
               <div class="table-wrapper">
                 <table class="table">
                   <tr><th>Antragstyp</th><td>${a.type}</td></tr>
@@ -1671,7 +1671,7 @@ function renderReviewerSplit({ id }) {
           </div>
 
           <aside class="reviewer-marks" aria-label="Prüfung">
-            <h3 class="reviewer-marks__heading">Prüfung pro Feld</h3>
+            <h2 class="reviewer-marks__heading">Prüfung pro Feld</h2>
             ${['type', 've', 'address', 'naw', 'fte', 'hnf2', 'ukKosten', 'attachments'].map(field => `
               <div class="reviewer-marks__row">
                 <span>${fieldLabel(field)}</span>

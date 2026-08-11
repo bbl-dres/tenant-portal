@@ -134,6 +134,10 @@ export function renderWizard({ step }) {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--narrow">
+        <!-- Page-level h1 for the wizard (WCAG 1.3.1/2.4.6): visually the
+             step indicator + h2.wizard__title already carry this context,
+             so the h1 is sr-only — same pattern as the auth home. -->
+        <h1 class="sr-only">Bedarf anmelden — Schritt ${stepNum} von 5</h1>
         ${renderStepIndicator(stepNum, wizardSteps())}
         <div class="wizard" id="wizardBody">
           ${renderWizardStep(stepNum, draft)}
