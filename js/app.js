@@ -559,7 +559,7 @@ function renderInfoPage() {
         </header>
 
         <div class="page-with-toc">
-          <main class="page-with-toc__content">
+          <div class="page-with-toc__content">
 
             <article id="einfuehrung">
               <h2>Einführung</h2>
@@ -668,7 +668,7 @@ function renderInfoPage() {
               ${downloadList(P.state.downloads?.training || [])}
             </article>
 
-          </main>
+          </div>
 
           <aside class="page-with-toc__toc" aria-label="Inhaltsverzeichnis">
             <h2 class="page-with-toc__toc-title">Inhaltsverzeichnis</h2>

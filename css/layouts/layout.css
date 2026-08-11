@@ -33,7 +33,21 @@
   flex-direction: column;
   position: relative;     /* containing block for .back-to-top-wrapper */
 }
+/* #page-body sits INSIDE the #main landmark (shell.js renders
+   `<main id="main"><div id="page-body">…`), so #main is the flex child of
+   .page-container that absorbs leftover space; it passes the stretch on to
+   #page-body via its own column flex. */
+#main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
 #page-body { flex: 1 0 auto; }
+/* The main landmark is a programmatic focus target (skip link, router
+   focus hand-off) — not an interactive control. Since it now wraps the
+   whole page content, suppress the focus ring that would otherwise frame
+   the entire page. */
+#main:focus { outline: none; }
 
 /* No-JS fallback (eCH-0059 federal-accessibility convention). The SPA
    needs JS to render anything; in restricted federal-admin environments

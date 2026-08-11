@@ -510,7 +510,10 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
 
     ${breadcrumbHtml}
 
-    <main id="main" tabindex="-1"></main>
+    <!-- The main landmark CONTAINS the page content: every route renders
+         into #page-body, which lives inside #main so "jump to main" /
+         the skip link actually land on the content (WCAG 1.3.1/2.4.1). -->
+    <main id="main" tabindex="-1"><div id="page-body"></div></main>
   `;
 }
 
@@ -991,7 +994,6 @@ export function shell({ activeNav = '', breadcrumb = [], deptSub = '' } = {}) {
   // back-to-top CSS block in styles.css for the sticky mechanism.
   root.innerHTML = '<div class="page-container">'
                  +   renderShell({ deptSub, activeNav, breadcrumb, navItems })
-                 +   '<div id="page-body"></div>'
                  +   '<div class="back-to-top-wrapper" aria-hidden="true">'
                  +     `<a class="app-footer__top-btn" href="#" aria-label="Zum Seitenanfang"
                           onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });">${icon('chevronUp')}</a>`
