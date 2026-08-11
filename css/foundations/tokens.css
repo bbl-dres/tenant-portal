@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    DESIGN TOKENS — CD Bund
    BBL Mieterportal Prototypes
 
@@ -21,8 +21,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans'), local('NotoSans-Regular'),
-       url('../assets/fonts/NotoSans-Regular.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-Regular.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-Regular.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-Regular.ttf')   format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -30,8 +30,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Bold'), local('NotoSans-Bold'),
-       url('../assets/fonts/NotoSans-Bold.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-Bold.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-Bold.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-Bold.ttf')   format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -39,8 +39,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Italic'), local('NotoSans-Italic'),
-       url('../assets/fonts/NotoSans-Italic.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-Italic.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-Italic.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-Italic.ttf')   format('truetype');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -48,8 +48,8 @@
 @font-face {
   font-family: 'NotoSans';
   src: local('Noto Sans Bold Italic'), local('NotoSans-BoldItalic'),
-       url('../assets/fonts/NotoSans-BoldItalic.woff2') format('woff2'),
-       url('../assets/fonts/NotoSans-BoldItalic.ttf')   format('truetype');
+       url('../../assets/fonts/NotoSans-BoldItalic.woff2') format('woff2'),
+       url('../../assets/fonts/NotoSans-BoldItalic.ttf')   format('truetype');
   font-weight: 700;
   font-style: italic;
   font-display: swap;
@@ -73,10 +73,11 @@
 
 :root {
   /* ── BRAND (Swiss federal red, official primary palette) ─────────────── */
-  /* Full 50→900 ramp matches CD Bund `skins/default.postcss`. Earlier
-     audits revealed missing tints / shades blocked `mark` highlight
-     (200), hover halos (100/200), text-on-light danger (800), and
-     active-state backgrounds (50/100). Filled in §13.6. */
+  /* Full 50→900 ramp matches CD Bund `skins/default.postcss`. The semantic
+     layer aliases into it (`mark` → 200, link / danger / badge red →
+     100/600/800, notification error/alert → 50/800/900);
+     check-cd-tokens.mjs asserts every step is declared, so currently
+     unconsumed steps (300/400/500) stay as guard-mandated ramp keepers. */
   --color-primary-50:          #FFEDEE;
   --color-primary-100:         #FAE1E2;
   --color-primary-200:         #FFCCCE;
@@ -99,8 +100,8 @@
      instead — if you ever want that look, swap to CD's `blue-700`
      `#1d4ed8` / `blue-800` `#1e40af` (NOT the previous off-palette
      `#1F6FAB` — that wasn't on any federal ramp). */
-  --color-link:                #D8232A;   /* primary-600 — was #1F6FAB blue */
-  --color-link-hover:          #99191E;   /* primary-800 — was #134A77 */
+  --color-link:                var(--color-primary-600);
+  --color-link-hover:          var(--color-primary-800);
 
   /* ── NEUTRALS ─────────────────────────────────────────────────────────── */
   --color-white:               #FFFFFF;
@@ -131,28 +132,33 @@
   --color-secondary-900:       #131B22;
 
   /* ── SEMANTIC TEXT ─────────────────────────────────────────────────────── */
-  --color-text-primary:        #1F2937;   /* text-800 */
-  --color-text-secondary:      #6B7280;   /* text-500 — WCAG AA on white: 4.69:1 */
+  /* Semantic tokens alias the primitive ramps via var() wherever the portal
+     declares the ramp (primary / secondary / gray) — a ramp retune then
+     propagates automatically. Hex literals remain only for ramps the portal
+     intentionally does not declare (blue / green / orange / yellow / teal /
+     violet). Register: TOK-003. */
+  --color-text-primary:        var(--color-gray-800);   /* DS text-800 */
+  --color-text-secondary:      var(--color-gray-500);   /* DS text-500 — WCAG AA on white: 4.69:1 */
   /* `--color-text-muted` previously `#9CA3AF` (text-400) which fails
      WCAG AA on white at 2.85:1. Collapsed to text-500 — same value as
      `--color-text-secondary`. We get a passing colour everywhere
      muted was used (SAP keys on property cards, category chips, table
      secondary cells, calc-block hint text). For a genuinely lighter
      tertiary, reach for a smaller font-size instead of a paler grey. */
-  --color-text-muted:          #6B7280;
-  --color-text-inverse:        #FFFFFF;
+  --color-text-muted:          var(--color-gray-500);
+  --color-text-inverse:        var(--color-white);
 
   /* ── SURFACES ─────────────────────────────────────────────────────────── */
-  --color-bg-default:          #FFFFFF;
-  --color-bg-alt:              #F3F4F6;
-  --color-bg-surface:          #F9FAFB;
-  --color-surface-dark:        #2F4356;     /* top bar, dark sections */
-  --color-surface-darker:      #263645;     /* footer bottom */
+  --color-bg-default:          var(--color-white);
+  --color-bg-alt:              var(--color-gray-100);
+  --color-bg-surface:          var(--color-gray-50);
+  --color-surface-dark:        var(--color-secondary-600);   /* top bar, dark sections */
+  --color-surface-darker:      var(--color-secondary-700);   /* footer bottom */
 
   /* ── BORDERS ──────────────────────────────────────────────────────────── */
-  --color-border:              #E5E7EB;
-  --color-border-light:        #F3F4F6;
-  --color-border-input:        #6B7280;
+  --color-border:              var(--color-gray-200);
+  --color-border-light:        var(--color-gray-100);
+  --color-border-input:        var(--color-gray-500);
 
   /* ── FOCUS (CD Bund purple-500 — confirmed in workspace-management
      and kbob-fdk; both federal sibling prototypes) ─────────────────────── */
@@ -170,10 +176,9 @@
   --color-success-light:       #D1FAE5;
   --color-warning:             #F59E0B;
   --color-warning-light:       #FEF3C7;
-  --color-danger:              #D8232A;
-  --color-danger-light:        #FAE1E2;   /* CD red-100 (was stock-Tailwind #FEE2E2) */
+  --color-danger:              var(--color-primary-600);
+  --color-danger-light:        var(--color-primary-100);   /* CD red-100 */
   --color-info:                #0F6B75;
-  --color-info-light:          #CBFBF8;   /* CD teal-100 (was stock-Tailwind #CCFBF1) */
 
   /* ── NOTIFICATION VARIANTS (CD Bund `notification.postcss`) ───────────
      The DS tints each notification variant with a `-50` stop and colours the
@@ -186,18 +191,18 @@
      while the DS notification info is blue, and the portal's warning is
      amber while the DS is orange. Splitting them lets the component match
      upstream exactly without re-tinting the whole status vocabulary. */
-  --color-notification-bg:           #F9FAFB;   /* gray-50 (DS default) */
+  --color-notification-bg:           var(--color-gray-50);       /* DS default */
   --color-notification-info-bg:      #EFF6FF;   /* blue-50 */
   --color-notification-info-text:    #1D4ED8;   /* blue-700 */
   --color-notification-success-bg:   #ECFDF5;   /* green-50 */
   --color-notification-success-text: #065F46;   /* green-800 */
   --color-notification-warning-bg:   #FFF7ED;   /* orange-50 */
   --color-notification-warning-text: #9A3412;   /* orange-800 */
-  --color-notification-error-bg:     #FFEDEE;   /* red-50 (CD red, not stock Tailwind) */
-  --color-notification-error-text:   #99191E;   /* red-800 */
-  --color-notification-alert-bg:     #801519;   /* red-900 — inverted variant */
-  --color-notification-hint-bg:      #F0F4F7;   /* secondary-50 */
-  --color-notification-hint-text:    #374151;   /* text-700 */
+  --color-notification-error-bg:     var(--color-primary-50);    /* red-50 (CD red) */
+  --color-notification-error-text:   var(--color-primary-800);   /* red-800 */
+  --color-notification-alert-bg:     var(--color-primary-900);   /* red-900 — inverted variant */
+  --color-notification-hint-bg:      var(--color-secondary-50);
+  --color-notification-hint-text:    var(--color-gray-700);      /* DS text-700 */
 
   /* ── LANGUAGE SWITCHER ────────────────────────────────────────────────
      Tailwind blue-600 / blue-700 from the DS canonical pattern
@@ -244,17 +249,16 @@
   --color-badge-green-text:    #065F46;
   --color-badge-blue-bg:       #DBEAFE;
   --color-badge-blue-text:     #1E40AF;
-  --color-badge-red-bg:        #FAE1E2;
-  --color-badge-red-text:      #99191E;
+  --color-badge-red-bg:        var(--color-primary-100);
+  --color-badge-red-text:      var(--color-primary-800);
   --color-badge-yellow-bg:     #FEF3C7;
   --color-badge-yellow-text:   #92400E;
   --color-badge-orange-bg:     #FFEDD5;
   --color-badge-orange-text:   #9A3412;
-  --color-badge-gray-bg:       #E5E7EB;
-  --color-badge-gray-text:     #374151;
+  --color-badge-gray-bg:       var(--color-gray-200);
+  --color-badge-gray-text:     var(--color-gray-700);
 
   /* ── PORTAL-SPECIFIC ──────────────────────────────────────────────────── */
-  --color-prototype-notice:    #ff4444;
   --color-pipeline-active:     var(--color-primary-600);
   --color-pipeline-done:       var(--color-success);
   --color-pipeline-rejected:   var(--color-danger);
@@ -272,13 +276,11 @@
   --color-white-40:            rgba(255, 255, 255, 0.4);
   --color-white-50:            rgba(255, 255, 255, 0.5);
   --color-white-65:            rgba(255, 255, 255, 0.65);
-  --color-white-70:            rgba(255, 255, 255, 0.7);
   --color-white-75:            rgba(255, 255, 255, 0.75);
   --color-white-85:            rgba(255, 255, 255, 0.85);
   --color-white-90:            rgba(255, 255, 255, 0.9);
   --color-white-92:            rgba(255, 255, 255, 0.92);
   --color-black-04:            rgba(0, 0, 0, 0.04);
-  --color-black-10:            rgba(0, 0, 0, 0.1);
   --color-black-15:            rgba(0, 0, 0, 0.15);
   --color-black-20:            rgba(0, 0, 0, 0.2);
   --color-black-25:            rgba(0, 0, 0, 0.25);
@@ -287,11 +289,9 @@
   --color-black-45:            rgba(0, 0, 0, 0.45);
   --color-black-70:            rgba(0, 0, 0, 0.7);
   --color-black-75:            rgba(0, 0, 0, 0.75);
-  --color-focus-tint:          rgba(134, 85, 246, 0.25); /* purple-500 @ 25% — focus ring tint */
 
   /* ── TYPOGRAPHY ───────────────────────────────────────────────────────── */
   --font-family:               'NotoSans', 'Fallback-NotoSans', 'Hind', 'Verdana', sans-serif;
-  --font-family-bold:          'NotoSans', 'Fallback-NotoSans', 'Hind', 'Verdana', sans-serif;
   --font-family-mono:          'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
   /* Type scale (mobile-first base; scales at lg / xl / 3xl breakpoints).
@@ -304,8 +304,7 @@
   --text-h4:                   1.125rem;   /* 18px base */
   --text-body:                 1rem;       /* 16px */
   --text-body-sm:              0.875rem;   /* 14px */
-  --text-body-xs:              0.75rem;    /* 12px */
-  --text-micro:                0.6875rem;  /* 11px */
+  --text-body-xs:              0.75rem;    /* 12px — smallest step; DS scale bottoms out at xs 12px */
 
   --line-height-tight:         1.25;
   --line-height-snug:          1.375;
@@ -333,6 +332,11 @@
 
   /* ── SPACING (4px base unit) ──────────────────────────────────────────── */
   --space-xs:                  4px;
+  /* Intermediate 6px step — Tailwind spacing 1.5 (0.375rem). The DS keeps
+     Tailwind's default quarter-rem grid (no spacing override in
+     app/tailwind.config.js), so half-steps are DS-legal. Used for micro-gaps
+     that read cramped at 4px and loose at 8px. */
+  --space-2xs:                 6px;
   --space-sm:                  8px;
   --space-md:                  16px;
   --space-lg:                  24px;
@@ -356,15 +360,20 @@
   --icon-xl:                   40px;   /* visual ≈ 27 — modal close, hero, prominent */
   --icon-2xl:                  48px;   /* visual ≈ 32 — heavy emphasis, illustration */
 
+  /* External-link glyph, masked with currentColor by `.link--external`
+     (css/sections/info.css). The DS declares the same token at :root as an
+     inline data URI (designsystem/css/components/link.postcss:37-39); the
+     portal points at the shared asset file instead. The url() resolves
+     relative to this stylesheet (css/foundations/ → assets/). */
+  --icon-external-link:        url('../../assets/icons/External.svg');
+
   /* ── LAYOUT ───────────────────────────────────────────────────────────── */
   --container-max-width:       1544px;
   --container-padding:         1rem;       /* 16px base; scales below */
-  --grid-gutter:               1.25rem;
   /* CD Bund `.gap--responsive` (grids.postcss): gap-5 → gap-16 across the
      breakpoint cascade (20/28/36/40/48/64 px). Single source of truth for
      responsive grid gutters so page rhythm stops varying per-grid. */
   --gap-responsive:            1.25rem;    /* 20px base; scales below */
-  --sidebar-width:             280px;
 
   /* ── COMPONENT DIMENSIONS ─────────────────────────────────────────────── */
   --btn-min-h:                 44px;
@@ -375,7 +384,10 @@
   --section-py:                3.5rem;          /* 56px base — scales below */
   --section-py-half:           1.75rem;         /* 28px base */
 
-  /* ── RADIUS (mirror CD Bund Tailwind borderRadius scale) ─────────────── */
+  /* ── RADIUS (mirror CD Bund Tailwind borderRadius scale) ───────────────
+     Full DS scale kept verbatim, including steps with no current consumer
+     (xl→6xl) — so future components can adopt any DS radius without token
+     churn, same keeper convention as the colour ramps. */
   --radius-xs:                 1px;
   --radius-sm:                 2px;
   --radius:                    3px;     /* DS default */
@@ -389,23 +401,27 @@
   --radius-full:               9999px;
 
   /* ── SHADOWS ──────────────────────────────────────────────────────────── */
+  /* Full DS box-shadow scale, verbatim from designsystem
+     app/tailwind.config.js:226-234 (sm / DEFAULT / md / lg / xl / 2xl).
+     The dropdown / nav-menu / nav-trigger elevations are ALIASES of the DS
+     2xl step — the DS applies shadow-2xl to its desktop-menu drawer, the
+     lifted nav trigger and the fixed notification banner
+     (desktop-menu.postcss:18, main-navigation.postcss:52,
+     notification-banner.postcss:16). Register: TOK-001, TOK-002. */
   --shadow-sm:                 0 1px 2px 0 rgba(0,0,0,0.05);
   --shadow:                    0 1px 2px 0 rgba(0,0,0,0.06), 0 1px 5px 0 rgba(0,0,0,0.08);
+  --shadow-md:                 0 2px 4px -1px rgba(0,0,0,0.06), 0 4px 10px -1px rgba(0,0,0,0.08);
   --shadow-lg:                 0 2px 6px -1px rgba(0,0,0,0.06), 0 5px 20px -3px rgba(0,0,0,0.08);
-  --shadow-dropdown:           0 8px 20px -4px var(--color-black-40);
-  --shadow-nav-menu:           0 12px 32px -8px rgba(15, 23, 42, 0.18),
-                               0 2px 4px var(--color-black-04);
-  --shadow-nav-trigger:        0 25px 50px -12px var(--color-black-25);
+  --shadow-xl:                 0 6px 10px -5px rgba(0,0,0,0.06), 0 15px 25px -3px rgba(0,0,0,0.09);
+  --shadow-2xl:                0 10px 20px 0 rgba(0,0,0,0.06), 1px 10px 70px -8px rgba(0,0,0,0.13);
+  --shadow-dropdown:           var(--shadow-2xl);
+  --shadow-nav-menu:           var(--shadow-2xl);
+  --shadow-nav-trigger:        var(--shadow-2xl);
   --shadow-video-logo:         0 1px 2px var(--color-black-25);
   --shadow-video-cta:          0 2px 6px var(--color-black-20);
   --shadow-property-marker:    0 2px 4px var(--color-black-25);
   --shadow-property-status:    0 1px 2px var(--color-black-15);
   --shadow-sticky-edge:        0 -4px 8px -4px var(--color-black-04);
-  /* Tailwind `shadow-2xl`, the elevation the DS puts on its fixed
-     notification banner. Same value as `--shadow-nav-trigger`; kept under its
-     own name so the two can drift apart without one silently restyling the
-     other. */
-  --shadow-2xl:                0 25px 50px -12px var(--color-black-25);
   --filter-shadow-video-play:  drop-shadow(0 2px 6px var(--color-black-35));
 
   /* ── TRANSITIONS ──────────────────────────────────────────────────────── */
@@ -638,7 +654,7 @@ html { scroll-behavior: smooth; }
   background: var(--color-secondary-900);
   color: var(--color-text-inverse);
   border: 2px solid var(--color-white);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);  /* DS global.postcss:67 skip-link shadow-md — TOK-002 */
   text-decoration: none;
   transition: transform var(--transition);
 }

@@ -103,6 +103,15 @@ async function handleHash() {
     params.set('lang', state.lang);
     history.replaceState(null, '', h + '?' + params.toString());
   }
+  // Central auth gate: logged-out visitors see the full navigation, and any
+  // non-public route renders the login gate instead of content. Replaces the
+  // former silent deep-link auto-login, which hid the login concept entirely
+  // — visitor feedback showed nobody realised more content exists behind it.
+  if (!state.user && !PUBLIC_HASHES.has(h.toLowerCase())) {
+    renderLoginGate(h);
+    markRouteRendered(h);
+    return;
+  }
   for (const { re, handler } of routes) {
     const m = h.match(re);
     if (m) {
@@ -164,7 +173,11 @@ function openRoleMenu() {
 }
 
 // ── LOGIN STUB ───────────────────────────────────────────────────────────
-function login() {
+// `target` (optional) — hash to land on after login. The login gate passes
+// the route the visitor originally requested so a shared deep link resolves
+// to the intended page after one click; the top-bar Anmelden omits it and
+// lands on the role home as before.
+function login(target) {
   // For the prototype, log in as the first user with multiple roles (Andrea Muster).
   const user = state.users.find(u => u.roles.length > 1) || state.users[0];
   if (!user) return;
@@ -172,7 +185,9 @@ function login() {
   const persistedRole = loadRole();
   state.user.activeRole = persistedRole || user.roles[0];
   toast('Angemeldet als ' + user.name, 'success');
-  navigate('#/home');
+  // navigate() re-runs handleHash() itself when the hash is unchanged, so
+  // the gate page re-renders as the real view either way.
+  navigate(typeof target === 'string' && target.startsWith('#/') ? target : '#/home');
 }
 function logout() {
   state.user = null;
@@ -207,10 +222,73 @@ const root = document.getElementById('root');
 // ── BOOTSTRAP ────────────────────────────────────────────────────────────
 init();
 
-// Hashes that work for an unauthenticated visitor. Everything else is a
-// detail/list view behind the eIAM-equivalent gate and must auto-login
-// first so shareable deep links resolve to the intended page.
+// Hashes that work for an unauthenticated visitor. Every other route
+// renders the login gate (renderLoginGate) while logged out; after login
+// the originally requested hash resolves, so shareable deep links still
+// land on the intended page — now with an explicit login step instead of
+// the former silent auto-login.
 const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info']);
+
+// Best-effort label for the gated area — drives the gate's H1 + breadcrumb
+// so the visitor sees where the login leads. Built per call so labels
+// follow the active language. Longest-prefix entries first.
+function gateLabel(h) {
+  const labels = [
+    ['#/queue', P.t('nav.queue')],
+    ['#/review', P.t('nav.queue')],
+    ['#/inbox', P.t('nav.inbox')],
+    ['#/properties', P.t('nav.properties')],
+    ['#/downloads', P.t('nav.downloads')],
+    ['#/services', P.t('nav.services')],
+    ['#/wizard', P.t('services.request')],
+    ['#/repair', P.t('services.repair')],
+    ['#/moves', P.t('services.move')],
+    ['#/cleaning', P.t('services.cleaning')],
+    ['#/mobiliar', P.t('services.furniture')],
+    ['#/home', P.t('nav.start')],
+    ['#/news', 'News'],
+    ['#/profile', P.t('bc.profile')],
+    ['#/search', P.t('bc.search')],
+  ];
+  const hit = labels.find(([p]) => h === p || h.startsWith(p + '/'));
+  return hit ? hit[1] : 'Anmeldung erforderlich';
+}
+
+// Login gate — rendered by handleHash for any protected route while logged
+// out. Composition: Zurück affordance (the breadcrumb is hidden below lg,
+// the gate keeps its own way back), the target area's H1, and an
+// alt-surface info box with lock glyph, explanation and the eIAM login CTA.
+// Pattern reference: Kundenportal BBL application gate ("Anmelden mit
+// AGOV / FedLogin"), recomposed from existing portal classes.
+function renderLoginGate(h) {
+  const label = gateLabel(h);
+  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label }] });
+  const body = document.getElementById('page-body');
+  if (!body) return;
+  body.innerHTML = `
+    <section class="section">
+      <div class="container">
+        <button class="btn btn--outline btn--sm login-gate__back" type="button" onclick="history.back()">
+          ${P.icon('arrowLeft')} Zurück
+        </button>
+        <h1 class="h1">${P.escapeHtml(label)}</h1>
+        <div class="login-gate" role="region" aria-label="Anmeldung erforderlich">
+          <span class="login-gate__icon" aria-hidden="true">${P.icon('lock')}</span>
+          <div class="login-gate__body">
+            <p class="login-gate__text">
+              Dieser Bereich arbeitet mit Betriebsdaten Ihrer Verwaltungseinheit und erfordert deshalb
+              eine Anmeldung. Melden Sie sich mit eIAM an, um ihn zu öffnen. Frei zugänglich bleiben
+              die <a href="#/">Startseite</a> sowie <a href="#/info">Arbeitsinstrumente und Informationen</a>.
+            </p>
+            <button class="btn btn--outline login-gate__cta" type="button"
+                    onclick="window.portal.login('${P.escapeJs(h)}')">
+              ${P.icon('login')} Anmelden mit eIAM
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>`;
+}
 
 async function init() {
   try {
@@ -225,22 +303,9 @@ async function init() {
   }
   P.wireGlobalShortcuts();
   registerRoutes();
-  // Deep-link auto-login: a user opening a shared URL like
-  // `#/properties/T-2011-AA-01/floors/1OG` would otherwise be bounced to
-  // `#/` because every detail handler does `if (!state.user) navigate('#/')`.
-  // In production this is where eIAM session restore happens — for the
-  // prototype we silently grant the first multi-role demo user so the
-  // intended route renders directly. Toast + navigate() are skipped
-  // because we want to land on the URL the user actually typed.
-  const initialPath = (location.hash.split('?')[0] || '').toLowerCase();
-  if (!state.user && !PUBLIC_HASHES.has(initialPath)) {
-    const user = state.users.find(u => u.roles.length > 1) || state.users[0];
-    if (user) {
-      state.user = { ...user };
-      const persistedRole = loadRole();
-      state.user.activeRole = persistedRole || user.roles[0];
-    }
-  }
+  // Deep links while logged out render the login gate (handleHash) with the
+  // requested hash preserved, so the page resolves right after login. In
+  // production this is where eIAM session restore would happen instead.
   window.addEventListener('hashchange', P.handleHash);
   P.handleHash();
 }

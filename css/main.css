@@ -1,0 +1,48 @@
+/* ==========================================================================
+   MAIN.CSS — BBL Mieterportal, single stylesheet entry point.
+
+   Structure mirrors the Swiss Confederation design system
+   (github.com/swiss/designsystem, reviewed at v1.0.45):
+     foundations/   tokens (single source of truth), typography, print
+     layouts/       page scaffold, generic layout objects
+     navigations/   federal chrome: header bars, navigation, breadcrumb
+     components/    pattern families reused across views
+     sections/      per-surface styles (home, wizard, review, properties, …)
+
+   NAMING — two namespaces share these files:
+     - Design-system component classes keep the DS's own class names
+       (.btn, .card, .badge, .accordion, .tag-item, …) so diffs against
+       designsystem/css/** stay trivial.
+     - App-specific classes use their surface's block name
+       (.wizard-*, .queue-*, .docviewer-*, .property-*, …).
+
+   IMPORT ORDER — cascade-preserving, not taxonomic: the files below are
+   ordered by where their rules sat in the pre-split monolith
+   (css/styles.css, see each file's Sources header), so the cascade is
+   bit-identical to the pre-split rendering. Verified by
+   scripts/review/diff-baseline.mjs (computed-style hash diff over every
+   route × viewport). Do not reorder imports without re-running that check.
+   ========================================================================== */
+@import url('foundations/tokens.css');
+@import url('layouts/layout.css');
+@import url('navigations/header.css');
+@import url('navigations/main-navigation.css');
+@import url('components/buttons.css');
+@import url('components/cards.css');
+@import url('foundations/typography.css');
+@import url('components/status.css');
+@import url('components/forms.css');
+@import url('components/feedback.css');
+@import url('components/tables.css');
+@import url('sections/footer.css');
+@import url('sections/secondary-pages.css');
+@import url('components/disclosure.css');
+@import url('sections/home.css');
+@import url('sections/info.css');
+@import url('sections/wizard.css');
+@import url('sections/review.css');
+@import url('sections/news.css');
+@import url('sections/properties.css');
+@import url('sections/media-viewer.css');
+@import url('sections/property-detail.css');
+@import url('foundations/print.css');

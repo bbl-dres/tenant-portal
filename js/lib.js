@@ -191,7 +191,7 @@ export function safeSessionSet(key, value) {
 export const ICONS = {
   // chrome / interactive
   search: 'Search', user: 'User', help: 'Help', info: 'Info',
-  login: 'Login', logout: 'Logout',
+  login: 'Login', logout: 'Logout', lock: 'Lock',
   share: 'Share', printer: 'Printer', external: 'External',
   download: 'Download', upload: 'Upload', maximize: 'Expand', refresh: 'Refresh',
   home: 'Home', plus: 'Plus', minus: 'Minus', compress: 'Compress',

@@ -1,0 +1,240 @@
+/* ==========================================================================
+   components/status.css — BBL Mieterportal
+
+   Status system: badges, status pipeline, wizard step indicator.
+   Sources: styles.css 1570-1797, pipeline mobile override 3878.
+   DS counterparts: components/badge.postcss, components/steps.postcss,
+   components/step-indicator.postcss.
+   ========================================================================== */
+
+/* ── BADGES ─────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  /* CD Bund: padding proportional to font-size so any text-* variant scales */
+  padding: 0.219em 1em;
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-regular);
+  background: var(--color-badge-gray-bg);
+  color: var(--color-badge-gray-text);
+  line-height: var(--line-height-tight);
+}
+.badge--success { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
+.badge--info    { background: var(--color-badge-blue-bg);  color: var(--color-badge-blue-text); }
+/* CD Bund `badge.postcss` makes `.badge--warning` an ALIAS of `.badge--orange`
+   (bg-orange-100 / text-orange-800). The portal's warning states (open issues,
+   lease expiry, fixed-term) are genuine attention states, so orange is the
+   correct hue and keeps "warning" a single colour across badge, notification
+   and pipeline. `.badge--yellow` remains available for a distinct yellow
+   status if one is ever needed (mirrors DS `.badge--yellow`). */
+.badge--warning,
+.badge--orange  { background: var(--color-badge-orange-bg); color: var(--color-badge-orange-text); }
+.badge--danger  { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
+.badge--yellow  { background: var(--color-badge-yellow-bg); color: var(--color-badge-yellow-text); }
+
+/* Data-quality glyph badges (from §0.3).
+   DESIGNGUIDE §6 forbids emoji in user-visible markup; previously these
+   badges leaned on 🟢🟡🔴⚪◼🤖 which depend on the OS emoji font and
+   render inconsistently between Windows / macOS / Linux. Replaced with
+   CSS-drawn 8 px dots (and a square for greenfield) so colour is the
+   semantic signal and is consistent in every browser. The :before slot
+   is decorative: screen readers continue to announce the badge text. */
+.badge--verified::before,
+.badge--stale::before,
+.badge--manual::before,
+.badge--unchecked::before,
+.badge--greenfield::before,
+.badge--llm::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;            /* falls back to badge text colour */
+}
+.badge--verified::before   { background: var(--color-success); }
+.badge--stale::before      { background: var(--color-warning); }
+.badge--manual::before     { background: var(--color-danger); }
+.badge--unchecked::before  { background: var(--color-gray-300); border: 1px solid var(--color-gray-400); }
+.badge--greenfield::before { background: var(--color-secondary-600); border-radius: 1px; }   /* square: distinct from coloured dots */
+.badge--llm::before        { background: var(--color-link); }
+
+/* ── STATUS PIPELINE (§0.3) ─────────────────────────────────────────────── */
+.pipeline {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  margin-block: var(--space-md);
+  overflow-x: auto;
+}
+.pipeline__step {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-gray-100);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  position: relative;
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+.pipeline__step::after {
+  content: "";
+  position: absolute;
+  top: 50%; right: -10px;
+  border-top: 18px solid transparent;
+  border-bottom: 18px solid transparent;
+  border-left: 10px solid var(--color-gray-100);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.pipeline__step + .pipeline__step { padding-left: var(--space-xl); }
+.pipeline__step:last-child::after { display: none; }
+.pipeline__step--done {
+  background: var(--color-pipeline-done);
+  color: var(--color-white);
+}
+.pipeline__step--done::after { border-left-color: var(--color-pipeline-done); }
+.pipeline__step--active {
+  background: var(--color-pipeline-active);
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+.pipeline__step--active::after { border-left-color: var(--color-pipeline-active); }
+.pipeline__step--rejected {
+  background: var(--color-pipeline-rejected);
+  color: var(--color-white);
+}
+.pipeline__step--rejected::after { border-left-color: var(--color-pipeline-rejected); }
+.pipeline__step--rueckfrage {
+  background: var(--color-warning);
+  color: var(--color-gray-900);
+}
+.pipeline__step--rueckfrage::after { border-left-color: var(--color-warning); }
+/* Pending / faded step ("… genehmigt" on a Rückfrage pipeline). Replaces
+   the previous inline `style="opacity:0.5"` so the styling lives with
+   the rest of the pipeline rules. */
+.pipeline__step--pending {
+  opacity: 0.5;
+}
+/* Reserve a thin gap between the pipeline icon and the label so the
+   inline-icon doesn't bump into the text on smaller pills. */
+.pipeline__step .inline-icon { margin-right: 4px; }
+
+/* Inline icon — used by P.icon() helper, which emits
+   `<svg class="inline-icon"><use href="assets/icons/<Name>.svg"/></svg>`.
+   Vertically centres the glyph alongside body-sm text and adds a small
+   trailing gap. Colour inherits from the parent via `currentColor`
+   (each icon SVG carries `fill="currentColor"` on its root element).
+
+   Sizes are driven by the `--icon-*` tokens in tokens.css. The default
+   `.inline-icon` uses `--icon-base` (24 px declared, ~16 px visual after
+   CD's viewBox padding). Use the modifier classes to step up or down on
+   the DS scale — never write a bare `width: Npx` here. */
+.inline-icon {
+  display: inline-block;
+  width: var(--icon-base);
+  height: var(--icon-base);
+  vertical-align: -6px;
+  margin-right: var(--space-xs);
+  flex-shrink: 0;
+  color: currentColor;
+}
+.inline-icon--xs  { width: var(--icon-xs);  height: var(--icon-xs);  vertical-align: -3px; }
+.inline-icon--sm  { width: var(--icon-sm);  height: var(--icon-sm);  vertical-align: -5px; }
+.inline-icon--md  { width: var(--icon-md);  height: var(--icon-md);  vertical-align: -7px; }
+.inline-icon--lg  { width: var(--icon-lg);  height: var(--icon-lg);  vertical-align: -8px; }
+.inline-icon--xl  { width: var(--icon-xl);  height: var(--icon-xl);  vertical-align: -10px; }
+.inline-icon--2xl { width: var(--icon-2xl); height: var(--icon-2xl); vertical-align: -12px; }
+
+/* Per-component size overrides — pegged to the DS `--icon-md` tier for
+   button-adjacent icons. */
+/* Negative `margin-inline-start` compensates for the chevron's inner
+   viewBox padding (CD glyphs leave ~15 % whitespace on each side of the
+   24 box). Without it the icon visually sits too far from the button's
+   left edge while the text sits flush against the right padding. */
+.btn--back .inline-icon           { width: var(--icon-md); height: var(--icon-md); margin-right: 0; margin-inline-start: -4px; }
+.contact-block__link .inline-icon { width: var(--icon-md); height: var(--icon-md); color: var(--color-primary); }
+.contact-block__link:hover .inline-icon { color: var(--color-link-hover); }
+.filter-pill__remove-icon {
+  display: inline-block;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
+  margin-right: 0;
+  color: currentColor;
+}
+
+/* ── STEP INDICATOR (wizard) ──────────────────────────────────────────────
+   Mirrors designsystem css/components/step-indicator.postcss — 36px circles
+   with gray-400 outline; active filled gray-400; confirmed filled green-500
+   with a checkmark. Wraps with .step-indicator__label below each dot, plus
+   a thin connector line between consecutive dots. */
+/* Single-row layout: each item is a flex row of [circle][label]. Items
+   sit on a wrap-flex parent so they collapse to one-per-row on narrow
+   screens. No connectors — DS canonical pattern doesn't ship them, and
+   the numbered circles plus bold-active label already communicate the
+   user's position in the flow. */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-lg);
+  margin-block: var(--space-lg) var(--space-xl);
+  padding: 0;
+  list-style: none;
+}
+.step-indicator__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+.step-indicator__step {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-gray-400);
+  background: transparent;
+  color: var(--color-gray-400);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body-sm);
+  flex-shrink: 0;
+}
+.step-indicator__step--active {
+  background: var(--color-gray-400);
+  border-color: var(--color-gray-400);
+  color: var(--color-white);
+}
+/* Confirmed step uses success-bright (green-500) — CD Bund pattern for
+   in-flight / just-completed states. The darker `--color-success`
+   (green-700) is reserved for terminal "done" badges where the
+   completion is archival rather than active. */
+.step-indicator__step--confirmed {
+  background: var(--color-success-bright);
+  border-color: var(--color-success-bright);
+  color: var(--color-white);
+}
+.step-indicator__step--confirmed svg { width: var(--icon-base); height: var(--icon-base); }
+.step-indicator__label {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-snug);
+  white-space: nowrap;
+}
+.step-indicator__item[aria-current="step"] .step-indicator__label {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+@media (max-width: 640px) {
+  .step-indicator__item { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .pipeline { font-size: var(--text-body-xs); }
+}

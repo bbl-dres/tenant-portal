@@ -1,0 +1,420 @@
+/* ==========================================================================
+   components/feedback.css — BBL Mieterportal
+
+   Transient + overlay surfaces: notifications, notification banner,
+   prototype notice, modal, toast, keyboard-shortcut overlay, role-switch
+   button (modal content), batch-approve modal fields.
+   Sources: styles.css 2150-2356, 2642-2771, 3275-3308, 3564-3584,
+   4735-4746, shortcut-grid mobile override 3873.
+   DS counterparts: components/notification.postcss,
+   components/notification-banner.postcss, components/modal.postcss,
+   components/toast-message.postcss.
+   ========================================================================== */
+
+/* ── NOTIFICATION ─────────────────────────────────────────────────────────
+   Translation of designsystem/css/components/notification.postcss and
+   notification-banner.postcss. The two compose exactly as upstream's
+   NotificationBanner.vue composes them — `.notification` is the standalone
+   card, `.notification-banner` layers full-bleed bar geometry on top:
+
+     <div class="notification notification--info">…</div>
+     <div class="notification-banner notification notification--info">…</div>
+
+   Deliberate deviations from upstream, all local:
+     • Elevation uses the portal's `--shadow-*` scale rather than raw Tailwind
+       values (see the shadow block in tokens.css).
+     • `__text` / `__actions` / `__sub` are portal element names kept for the
+       existing call sites; `__infos` is the DS name for the same slot and is
+       styled identically, so DS markup pastes in unchanged.
+     • `--danger` is retained as an alias of the DS `--error`, because the
+       portal's badge and pipeline vocabulary says "danger" everywhere else.
+     • The portal puts a status icon in its banners (upstream's banner has
+       none) to satisfy WCAG 1.4.1 — colour is never the only signal.        */
+.notification {
+  position: relative;
+  display: flex;
+  padding: var(--space-sm);                     /* DS p-2 */
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  background: var(--color-notification-bg);     /* DS bg-gray-50 */
+}
+@media (min-width: 480px)  { .notification { padding: var(--space-md); } }   /* DS xs:p-4 */
+@media (min-width: 1024px) { .notification { padding: var(--space-lg); } }   /* DS lg:p-6 */
+@media (min-width: 1544px) { .notification { padding: var(--space-xl); } }   /* DS 2xl:p-8 */
+
+/* Upstream forces links and buttons inside a notification to inherit the
+   variant's text colour, so the tinted surface stays legible whatever the
+   variant. That is why the DS banner uses `outline`/`bare` buttons — a filled
+   button would lose its own foreground here. */
+.notification a,
+.notification .btn { color: currentColor; border-color: currentColor; }
+.notification a { text-decoration: underline; text-underline-offset: 2px; }
+.notification a:hover,
+.notification .btn:hover { color: currentColor; filter: brightness(0.5); }
+
+.notification--info    { background: var(--color-notification-info-bg);    color: var(--color-notification-info-text); }
+.notification--success { background: var(--color-notification-success-bg); color: var(--color-notification-success-text); }
+.notification--warning { background: var(--color-notification-warning-bg); color: var(--color-notification-warning-text); }
+.notification--error,
+.notification--danger  { background: var(--color-notification-error-bg);   color: var(--color-notification-error-text); }
+.notification--hint    { background: var(--color-notification-hint-bg);    color: var(--color-notification-hint-text); }
+/* `--alert` is upstream's inverted, highest-urgency variant and deliberately
+   overrides `--error` when both are present. */
+.notification--alert   { background: var(--color-notification-alert-bg);   color: var(--color-white); }
+
+/* Icon slot — DS `h-10 w-10 mr-3 flex-shrink-0 fill-current`. The glyph is
+   aria-hidden; the element's role and text carry the meaning. */
+.notification__icon,
+.notification-banner__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+  margin-right: var(--space-sm);
+  flex-shrink: 0;
+}
+.notification__icon svg,
+.notification-banner__icon svg { width: 100%; height: 100%; fill: currentColor; }
+
+.notification__content { min-width: 0; margin-block: 10px; }                /* DS my-2.5 */
+@media (min-width: 1280px) { .notification__content { margin-block: var(--space-sm); } }
+.notification__content > p { margin: 0; overflow-wrap: break-word; }
+.notification__content > *:first-child { margin-bottom: var(--space-xs); }
+.notification__header { display: flex; align-items: center; width: 100%; }
+.notification__header .notification__title { margin-bottom: 0; }
+.notification--with-title { display: block; }
+.notification--with-title .notification__content-offset { margin-left: 3.3rem; }
+.notification__close { position: absolute; top: 0; right: 0; }
+.notification__close svg { width: var(--icon-lg); height: var(--icon-lg); }
+
+/* ── NOTIFICATION BANNER ──────────────────────────────────────────────────
+   DS: `px-0`, responsive vertical padding, `text--sm`, `shadow-none` — the
+   bar itself is full-bleed and `__wrapper` is the container that holds the
+   content to the page grid. */
+.notification-banner {
+  display: block;
+  padding: var(--space-md) 0;                   /* DS py-4 */
+  border-radius: 0;
+  box-shadow: none;
+  font-size: var(--text-body-sm);
+}
+@media (min-width: 640px)  { .notification-banner { padding-block: var(--space-xl); } }  /* DS sm:py-8 */
+@media (min-width: 1024px) { .notification-banner { padding-block: var(--space-2xl); } } /* DS lg:py-10 */
+.notification-banner__wrapper {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+/* DS: the wrapper only becomes a row at lg, where the actions move to the
+   right edge and the copy keeps the remaining width. */
+@media (min-width: 1024px) {
+  .notification-banner__wrapper {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .notification-banner__actions { margin-left: var(--space-lg); }           /* DS lg:ml-6 */
+}
+.notification-banner__text,
+.notification-banner__infos { margin: 0; flex: 1; overflow-wrap: break-word; }
+.notification-banner__actions { display: flex; gap: var(--space-sm); flex-shrink: 0; }
+.notification-banner__actions .btn { white-space: nowrap; }
+/* A 40 px glyph is right for the standalone card but dominates a compact
+   `text--sm` bar, where it sits beside one or two lines of copy. The wrapper
+   supplies the gap, so the DS's own `mr-3` would double it. */
+.notification-banner__icon { width: var(--icon-lg); height: var(--icon-lg); margin-right: 0; }
+/* Below lg the DS wrapper is a plain column, which is right for its own
+   icon-less banner but would strand the portal's status glyph on a line of its
+   own. Wrap instead: icon + copy share the first row, the actions take the
+   full width beneath. */
+@media (max-width: 1023px) {
+  .notification-banner__wrapper {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .notification-banner__text,
+  .notification-banner__infos { flex: 1 1 0; min-width: 0; }
+  .notification-banner__actions { flex-basis: 100%; }
+}
+/* The consent bar sits above the header rather than at the viewport edge, so
+   it needs a closing rule against the chrome below it. */
+.cookie-banner { border-bottom: 1px solid var(--color-secondary-100); }
+.cookie-banner .notification-banner__text a {
+  margin-left: var(--space-xs);
+  white-space: nowrap;
+}
+
+/* Sub-line inside a `__text` / `__content` slot — a quieter, smaller line
+   below the main message (e.g. a "BK 1086 = BBL-Portfolio …" rationale).
+   Portal addition; the DS has no equivalent element. */
+.notification__sub,
+.notification-banner__sub {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: var(--text-body-xs);
+}
+/* DS `.notification-banner--fixed`: `fixed right-0 bottom-0 left-0 w-screen`
+   + `border-t border-white` + `shadow-2xl`. Upstream uses it for the
+   cookie-consent popup; the portal reuses it for the prototype disclaimer. */
+.notification-banner--fixed {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-notice);
+  border-top: 1px solid var(--color-white);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* ── PROTOTYPE NOTICE ─────────────────────────────────────────────────────
+   Session-scoped disclaimer shown once per visit on whatever URL the user
+   opens (bookmarks land on deep routes, so the notice rides in renderShell
+   rather than on the landing page). Markup in js/shell.js.
+
+   `--prototype-notice-h` is published by syncPrototypeNoticeOffset() from the
+   measured banner height: the bar overlays the document, so the page reserves
+   exactly that much bottom space and the toast host rides above it. Both fall
+   back to 0px, which is the dismissed state. */
+/* The DS banner scales to py-10 at lg, which suits a one-off consent bar on a
+   marketing page but is too tall for a bar that greets every session of a
+   dense application. Held at the sm step. */
+.prototype-notice { padding-block: var(--space-md); }
+@media (min-width: 640px) { .prototype-notice { padding-block: var(--space-lg); } }
+body.body--prototype-notice #root {
+  padding-bottom: var(--prototype-notice-h, 0px);
+}
+body.body--prototype-notice .toast-host {
+  bottom: calc(var(--space-lg) + var(--prototype-notice-h, 0px));
+}
+/* Below lg the DS wrapper is a column (see the base rules above): the action
+   becomes a full-width tap target under the copy. */
+@media (max-width: 1023px) {
+  .prototype-notice .notification-banner__actions,
+  .prototype-notice .notification-banner__actions .btn { width: 100%; }
+  .prototype-notice .notification-banner__actions .btn { justify-content: center; }
+  /* The disclaimer is the taller element on a phone; cap it so it can never
+     swallow the viewport, and let the text scroll inside if it must. */
+  .prototype-notice { max-height: 60vh; overflow-y: auto; }
+}
+/* At lg the wrapper is a row — centre the copy against the action. */
+@media (min-width: 1024px) {
+  .prototype-notice .notification-banner__wrapper { align-items: center; }
+}
+/* A disclaimer about the on-screen prototype has no meaning on paper, and the
+   fixed position would stamp it onto every printed page. */
+@media print {
+  .prototype-notice { display: none !important; }
+  body.body--prototype-notice #root { padding-bottom: 0; }
+}
+
+/* `.notification--page-top` — notification sitting at the top of a page
+   body (login, application-detail success message). Adds bottom margin
+   so the next section breathes. Replaces inline `style="margin-bottom: var(--space-lg);"`. */
+.notification--page-top { margin-bottom: var(--space-lg); }
+
+/* ── MODAL ──────────────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: var(--color-backdrop);
+  display: flex; align-items: center; justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--space-md);
+}
+/* Modal — base + DS-aligned size modifiers (.modal--sm/md/lg/auto).
+   Default (.modal alone) is medium 600 px; combine with --sm/--lg/--auto for
+   narrower forms, wider bulk-approve views, or fit-content sizing. */
+/* CD Bund modal: the CARD is capped at 90vh and only the BODY scrolls, so
+   the title and the footer actions stay pinned (a long modal must never
+   scroll its confirm/cancel buttons out of reach). Flex column + body
+   `overflow-y:auto` — was a single `overflow:auto` on the whole card. */
+.modal {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.modal--sm   { max-width: 420px; }
+.modal--md   { max-width: 600px; }    /* default — explicit for clarity */
+.modal--lg   { max-width: 900px; }
+.modal--xl   { max-width: 1100px; }
+.modal--auto { max-width: min(90vw, 1100px); width: auto; }
+.modal__header { padding: var(--space-lg); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; flex-shrink: 0; }
+.modal__title { margin: 0; font-size: var(--text-h3); }
+.modal__close {
+  background: none; border: none;
+  margin-left: auto;
+  width: 36px; height: 36px;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.modal__close:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
+.modal__close:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.modal__close svg { flex-shrink: 0; }
+.modal__body { padding: var(--space-lg); flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+.modal__footer { padding: var(--space-lg); border-top: 1px solid var(--color-border); display: flex; gap: var(--space-sm); justify-content: flex-end; flex-shrink: 0; }
+
+/* ── TOAST ──────────────────────────────────────────────────────────────── */
+.toast-host {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+/* CD Bund models the transient toast on its floating Notification card:
+   a light, variant-TINTED surface (not a dark colour-only snackbar) with a
+   status ICON, so success vs error differ by shape, not hue alone
+   (WCAG 1.4.1). Colours come from the shared notification token set. */
+.toast {
+  background: var(--color-notification-bg);
+  color: var(--color-notification-hint-text);
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-body-sm);
+  pointer-events: auto;
+  animation: toast-in var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  max-width: min(90vw, 480px);
+}
+.toast--hiding {
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast--success { background: var(--color-notification-success-bg); color: var(--color-notification-success-text); }
+.toast--danger,
+.toast--error   { background: var(--color-notification-error-bg);   color: var(--color-notification-error-text); }
+.toast--warning { background: var(--color-notification-warning-bg); color: var(--color-notification-warning-text); }
+.toast--info    { background: var(--color-notification-info-bg);    color: var(--color-notification-info-text); }
+/* Status icon inherits the variant text colour (fill-current, DS pattern). */
+.toast__icon {
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.toast__icon svg { width: 100%; height: 100%; fill: currentColor; }
+.toast__message {
+  flex: 1;
+  min-width: 0;
+}
+/* Close affordance — CD `toast-message` pattern. 24 × 24 hit area, subtle
+   dark-tint hover surface (toasts are now light-tinted cards). */
+.toast__close {
+  flex-shrink: 0;
+  width: var(--btn-min-h);
+  height: var(--btn-min-h);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+.toast__close:hover {
+  opacity: 1;
+  background: var(--color-black-04);
+}
+
+/* ── KEYBOARD SHORTCUT OVERLAY ──────────────────────────────────────────── */
+.shortcut-overlay {
+  position: fixed; inset: 0;
+  background: var(--color-backdrop);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: var(--z-shortcut-overlay);
+  padding: var(--space-md);
+}
+.shortcut-overlay.open { display: flex; }
+.shortcut-overlay__inner {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  max-width: 720px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+.shortcut-overlay__title { margin: 0 0 var(--space-md); font-size: var(--text-h3); }
+.shortcut-overlay__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+.shortcut-overlay__group h4 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+.shortcut-overlay__group dl { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm); }
+.shortcut-overlay__group dt { font-family: var(--font-family-mono); }
+.shortcut-overlay__group dd { margin: 0; }
+.shortcut-overlay__hint {
+  margin-top: var(--space-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .shortcut-overlay__grid { grid-template-columns: 1fr; }
+}
+
+/* ── ROLE SWITCH BUTTON (modal stack) ────────────────────────────────────
+   Full-width outlined button used inside the "Rolle wechseln" modal. The
+   active role's button gets a primary-tinted background + checkmark icon
+   instead of the previous inline `style="width:100%;..."` block. */
+.role-switch-btn {
+  width: 100%;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+}
+.role-switch-btn--active {
+  background: var(--color-badge-red-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary-700);
+}
+.role-switch-btn--active strong { color: var(--color-primary-700); }
+.role-switch-btn__spacer {
+  display: inline-block;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* ── BATCH-APPROVE MODAL ─────────────────────────────────────────────────
+   The "Bulk genehmigen" modal: an optional template textarea, a copy
+   toggle, then one form-field per selected application. */
+.batch-approve__copy-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  font-size: var(--text-body-sm);
+}
+.batch-approve__field { margin-bottom: var(--space-sm); }

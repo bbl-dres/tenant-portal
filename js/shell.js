@@ -124,7 +124,7 @@ function renderConsentBanner() {
         <span class="notification-banner__icon" aria-hidden="true">${icon('info')}</span>
         <p class="notification-banner__text">
           Dieses Portal speichert technisch notwendige Einstellungen lokal im Browser. Optionale Analyse-Cookies werden erst nach Zustimmung aktiviert.
-          <a href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklaerung</a>
+          <a href="https://www.admin.ch/gov/de/start/rechtliches.html#datenschutzerkl%C3%A4rung" target="_blank" rel="noopener">Datenschutzerklärung</a>
         </p>
         <div class="notification-banner__actions">
           <button class="btn btn--bare btn--sm" type="button" onclick="window.portal.acceptCookieConsent('necessary')">Nur notwendige ${icon('x')}</button>
@@ -149,7 +149,8 @@ export function acceptCookieConsent(mode = 'necessary') {
 // Surface: the "Dienstleistungen" nav-menu dropdown.
 // Source: REQUIREMENTS.md §1.3 pilot + §4.1 Case A roadmap (REQ-FA-*) +
 // FUNC-LP-007 self-service downloads / training.
-// Services (login required) — appear only in authenticated nav.
+// Shown in both the authenticated and the logged-out nav; the individual
+// service routes require login and render the login gate for visitors.
 // Exported so #/services can also render this list as a card grid via
 // `renderServicesOverview` in app.js without duplicating the catalogue.
 // A function (not a const) so labels translate against the active language at
@@ -172,9 +173,18 @@ export function servicesMenu() {
 
 // Nav items are built per render so labels follow the active language.
 // Arbeitsinstrumente / Pläne & Dokumente are inlined here for the same reason.
+// Logged-out visitors see the FULL tenant navigation (same entries as the
+// LBO role) so the portal's scope is discoverable before login — user
+// feedback showed visitors did not realise more content exists behind the
+// mock login. Protected routes render the central login gate instead of
+// content (renderLoginGate via handleHash in app.js).
 export function publicNavItems() {
   return [
     { id: 'start', href: '#/', label: t('nav.start') },
+    servicesMenu(),
+    { id: 'properties', href: '#/properties', label: t('nav.properties') },
+    { id: 'downloads', href: '#/downloads', label: t('nav.downloads') },
+    { id: 'inbox', href: '#/inbox', label: t('nav.inbox') },
     { id: 'info', href: '#/info', label: t('nav.info') },
   ];
 }
@@ -313,9 +323,15 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
        <button class="main-navigation__link main-navigation__mobile-meta-account" type="button" onclick="window.portal.logout()">${icon('logout')}<span>${t('top.logout')}</span></button>`
     : `<button class="main-navigation__link main-navigation__mobile-meta-account" type="button" onclick="window.portal.login()">${icon('login')}<span>${t('top.login')}</span></button>`;
 
+  // Same CD canonical language order as the top-bar switcher: DE FR IT RM EN.
+  // RM is display-only (no Rumantsch strings) — rendered aria-disabled with
+  // no handler.
   const mobileLangHtml = `
     <div class="main-navigation__mobile-lang" role="group" aria-label="${t('top.language')}">
-      ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en']].map(([code, lang]) => {
+      ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['RM', 'rm', true], ['EN', 'en']].map(([code, lang, disabled]) => {
+        if (disabled) {
+          return `<button class="main-navigation__mobile-lang-btn" type="button" lang="${lang}" aria-disabled="true">${code}</button>`;
+        }
         const isActive = state.lang === lang;
         return `<button class="main-navigation__mobile-lang-btn${isActive ? ' main-navigation__mobile-lang-btn--active' : ''}" type="button" lang="${lang}" aria-pressed="${isActive}" onclick="window.portal.pickLang('${code}')">${code}</button>`;
       }).join('')}
@@ -409,8 +425,11 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
                 <span id="langCurrent">${state.lang.toUpperCase()}</span>
                 ${icon('chevronDown')}
               </button>
+              <!-- CD canonical order (DS LanguageSwitcher.vue): the four
+                   national languages DE FR IT RM before EN; RM is listed
+                   but disabled — the portal carries no Rumantsch strings. -->
               <ul class="language-switcher__dropdown" role="listbox" aria-label="${t('lang.label')}">
-                ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en'], ['RM', 'rm', true]].map(([code, lang, disabled]) => {
+                ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['RM', 'rm', true], ['EN', 'en']].map(([code, lang, disabled]) => {
                   const isActive = !disabled && state.lang === lang;
                   return `<li role="presentation"><button class="language-switcher__option${isActive ? ' language-switcher__option--active' : ''}" role="option" aria-selected="${isActive}"${disabled ? ' aria-disabled="true" tabindex="-1"' : ''} data-lang="${code}" lang="${lang}" onclick="window.portal.pickLang('${code}')">${code}</button></li>`;
                 }).join('')}

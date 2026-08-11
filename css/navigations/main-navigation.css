@@ -1,0 +1,673 @@
+/* ==========================================================================
+   navigations/main-navigation.css — BBL Mieterportal
+
+   Navbar, nav dropdown panel, burger, mobile drawer, breadcrumb.
+   Sources: styles.css 621-1073, stranded base rules 3614-3626 (mobile-meta
+   hide + burger scroll-lock, formerly after the login-page section), mobile
+   drawer rules 3687-3791 + 3794-3868 (from the former RESPONSIVE block).
+   DS counterparts: navigations/main-navigation.postcss,
+   sections/desktop-menu.postcss, sections/mobile-menu.postcss,
+   components/burger.postcss, sections/breadcrumb.postcss.
+   ========================================================================== */
+
+/* ── FEDERAL CHROME — NAVBAR ──────────────────────────────────────────────
+   Modern CD-Bund (swiss/designsystem v1.x — swisstopo, bbl, kbob) does
+   NOT use a red separator strip between the brand bar and the navigation;
+   that was a legacy 2.x styleguide pattern. Keep a single light bottom
+   border so the navigation reads as part of the chrome without adding
+   chrome we don't need. */
+.navbar {
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+}
+.navbar__inner {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+  min-height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.burger {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: var(--space-sm);
+  /* Touch-target — burger lives at the navbar left edge on mobile and
+     must be reachable by thumb. */
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+/* Animated three-bar glyph — ports designsystem/css/components/burger.postcss
+   to vanilla CSS (no Tailwind). Bars rotate into an X when the menu is
+   open. `currentColor` lets the bars inherit the surrounding text colour
+   so the burger sits on light or dark chrome alike. Respects
+   `prefers-reduced-motion` via the global rule in tokens.css. */
+.burger__icon {
+  display: block;
+  position: relative;
+  width: 24px;
+  height: 18px;
+  color: var(--color-text-primary);
+  transition: color var(--transition-fast);
+}
+.burger:hover .burger__icon { color: var(--color-primary); }
+.burger__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform var(--transition), opacity var(--transition-fast), top var(--transition);
+}
+.burger__bar:nth-child(1) { top: 0; }
+.burger__bar:nth-child(2) { top: 50%; transform: translateY(-50%); }
+.burger__bar:nth-child(3) { bottom: 0; top: auto; }
+.burger[aria-expanded="true"] .burger__bar:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.burger[aria-expanded="true"] .burger__bar:nth-child(2) {
+  opacity: 0;
+  transform: translateY(-50%) scaleX(0);
+}
+.burger[aria-expanded="true"] .burger__bar:nth-child(3) {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%) rotate(-45deg);
+}
+.main-navigation {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  /* Negative margin-left cancels the first nav-link's horizontal padding,
+     so its TEXT (not its outer edge) aligns with the container's left
+     edge — same X as the breadcrumb, page heading, and body text.
+     Mirrors DS `main-navigation.postcss:16` — `@apply -ml-4`. */
+  margin-left: calc(var(--space-md) * -1);
+}
+/* Per CD pattern (designsystem/css/navigations/main-navigation.postcss:29
+   — `& > ul > li > a { @apply lg:h-full lg:px-4 }`), each nav link has
+   horizontal padding rather than gap between items. When the `.clicked`
+   lift fires, the white background covers the full click area + this
+   padding, giving the lifted card a deliberate width instead of a thin
+   strip under just the label. */
+.main-navigation__link {
+  position: relative;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  padding: var(--space-md);
+  transition: color var(--transition-fast);
+}
+/* CD Bund pattern: the 3 px red rail is rendered via `::after` and
+   inset by the link's horizontal padding so the bar's width matches
+   the text, NOT the full padded click area. Mirrors
+   designsystem/css/navigations/main-navigation.postcss:34-49 —
+   `&::after { @apply absolute right-4 bottom-0 left-4 h-[3px] }`
+   then `&.active::after, &:hover::after { @apply bg-primary-500 }`. */
+.main-navigation__link::after {
+  content: '';
+  position: absolute;
+  left: var(--space-md);
+  right: var(--space-md);
+  bottom: 0;
+  height: 3px;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+.main-navigation__link:hover { color: var(--color-primary); }
+.main-navigation__link:hover::after,
+.main-navigation__link--active::after,
+.main-navigation__link--has-menu[aria-expanded="true"]::after {
+  background: var(--color-primary-500);   /* CD active/hover rail = primary-500 (#E53940) */
+}
+/* CD: the active nav item is signalled by the underline rail only (no label tint). */
+
+/* CD Bund: only ONE red underscore at a time. When a dropdown is
+   open, the trigger owns the indicator (`[aria-expanded="true"]::after`);
+   the active route's underscore must be suppressed so the UI doesn't
+   present two competing "active" cues. `:has()` lets us scope this to
+   the moment any sibling trigger is expanded — once the dropdown
+   closes, the active-route underscore returns automatically. */
+.main-navigation:has(.main-navigation__link--has-menu[aria-expanded="true"]) .main-navigation__link--active::after {
+  background: transparent;
+}
+
+.main-navigation__link--has-menu {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--font-weight-regular);
+}
+.main-navigation__link--has-menu:hover {
+  color: var(--color-primary);
+}
+/* When the dropdown is open, the trigger keeps the default text color —
+   the red underscore (`::after`), rotated chevron, and `--clicked` lift
+   already signal the open state. Tinting the label red on top of those
+   cues felt over-emphasised and made the open trigger compete with the
+   active-route indicator. */
+/* On desktop the CD pattern HIDES the dropdown indicator on nav-menu
+   triggers (the panel opens on click and lifts the trigger; no extra
+   chevron). See designsystem/css/navigations/main-navigation.postcss:58
+   — `& > ul > li > a > .icon { @apply hidden; }`. Kept visible at
+   narrow widths as a tactile cue for finger taps. Double-class
+   selector wins specificity over `.inline-icon { display: inline-block }`
+   declared later in the file. */
+.inline-icon.main-navigation__chevron {
+  width: var(--icon-sm); height: var(--icon-sm);
+  margin-left: var(--space-2xs); margin-right: 0;
+  flex-shrink: 0;
+  display: none;
+}
+.main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__chevron {
+  transform: rotate(180deg);
+  transition: transform var(--transition-fast);
+}
+/* Mobile drill-down arrow at the right edge of every top-level nav item.
+   Hidden by default; surfaced below 1024 px via the responsive block
+   below. Mirrors the right-arrow pattern in CD's mobile menu
+   (designsystem/css/sections/mobile-menu.postcss
+    .mobile-menu-v2-navigation-item__has-children .icon — h-5 w-5). */
+.main-navigation__arrow {
+  display: none;
+  align-items: center;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+.main-navigation__arrow svg {
+  width: var(--icon-sm); height: var(--icon-sm);
+}
+
+/* ── NAV DROPDOWN PANEL (swisstopo "Dienstleistungen" pattern) ──────────
+   Constrained card anchored under the trigger word (left:Xpx set in JS),
+   not a full-bleed mega-menu. Single-line item rows, red left bar marks
+   the active route. Close link in the top-right; Esc / click-outside also
+   close. */
+.nav-menu {
+  position: absolute;
+  top: 100%;
+  z-index: var(--z-modal);
+  background: var(--color-white);
+  box-shadow: var(--shadow-nav-menu);
+  width: 480px;
+  max-width: calc(100vw - 24px);
+  animation: navMenuIn var(--transition) ease;
+}
+@keyframes navMenuIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nav-menu__inner {
+  padding: var(--space-lg) var(--space-xl) var(--space-lg);
+  position: relative;
+}
+.nav-menu__close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius);
+}
+.nav-menu__close:hover { color: var(--color-primary); background: var(--color-bg-surface); }
+.nav-menu__close svg { flex-shrink: 0; }
+
+.nav-menu__heading {
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-md);
+  letter-spacing: -0.005em;
+  padding-right: var(--space-2xl);   /* leave room for close button */
+}
+
+.nav-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-menu__item {
+  position: relative;
+  border-top: 1px solid var(--color-border-light);
+}
+.nav-menu__item:last-child { border-bottom: 1px solid var(--color-border-light); }
+
+/* Active route gets a 3 px red left bar — swisstopo pattern */
+.nav-menu__item--active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+.nav-menu__link {
+  display: block;
+  padding: var(--space-sm) var(--space-xs);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  border-radius: var(--radius);
+}
+.nav-menu__link:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-surface);
+}
+
+/* The navbar must establish positioning context for the dropdown */
+.navbar { position: relative; z-index: 30; }
+
+/* Lift effect on the active nav-menu trigger — mirrors DS
+   `.main-navigation > ul > li > a.clicked` (postcss line 51-55). The
+   trigger gets a white background + heavy drop shadow + raised z-index
+   so it visually fuses with the dropdown panel below it. `clip-path`
+   crops the shadow's bottom edge so the seam between trigger and panel
+   reads as a single continuous "lifted card". */
+.main-navigation__link--clicked {
+  background: var(--color-white);
+  position: relative;
+  z-index: 31;
+  box-shadow: var(--shadow-nav-trigger);
+  clip-path: inset(-50px -50px -1px -50px);
+}
+
+/* Page overlay — dark gradient that fades from ~20 % black at the top
+   to transparent. Mirrors DS `.desktop-menu__overlay` (sections/
+   desktop-menu.postcss:41-54). Sits below the dropdown panel but above
+   the page content. Clicking it closes the open menu (handler in
+   shell.js `ensureNavOverlay`). */
+.main-navigation__overlay {
+  position: fixed;
+  top: var(--nav-height, 56px);   /* below the navbar */
+  left: 0; right: 0; bottom: 0;
+  /* Matches DS `bg-gradient-to-b from-text-900/20 via-text-900/20
+     to-transparent` — stays at 20 % opacity from 0 % through 50 %, then
+     fades to transparent at 100 %. Wider dark band than my earlier
+     30 %-stop gradient; matches the bbl.admin.ch reference. */
+  background: linear-gradient(to bottom, var(--color-gray-900-20) 0%, var(--color-gray-900-20) 50%, var(--color-gray-900-00) 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  z-index: 25;
+}
+.main-navigation__overlay--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Below lg the panel is no longer a floating card — it renders as an
+   in-drawer accordion (see the mobile-nav rules in the RESPONSIVE block
+   at the end of this file). */
+
+/* ── BREADCRUMB ─────────────────────────────────────────────────────────── */
+/* CD Bund breadcrumb is flat on the page background (no grey strip), with
+   chevron separators and an underlined current page. The full federal
+   variant adds per-level dropdowns; we ship the simpler flat form here.
+   CD canonical: `hidden lg:block` (designsystem/css/sections/breadcrumb.postcss:9)
+   — breadcrumb is hidden below 1024 px on mobile/tablet, where the burger
+   menu serves as the primary back-navigation affordance. */
+.breadcrumb {
+  /* `#root` is a flex column container. Without an explicit width, a flex
+     child with only `max-width` can shrink to fit its content — the
+     auto-margins then centre that narrow box, leaving the text floating
+     in the middle of the viewport. `width: 100%` forces the box to fill
+     up to `max-width` so content sits at the left padding edge instead.
+     `box-sizing: border-box` (set globally on `*`) keeps `width: 100%`
+     compatible with the horizontal padding. */
+  display: block;
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-md) var(--container-padding) var(--space-sm);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  background: transparent;
+  text-align: left;
+}
+.breadcrumb a { color: inherit; text-decoration: none; }
+.breadcrumb a:hover { color: var(--color-primary); text-decoration: underline; }
+.breadcrumb [aria-current="page"] {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-regular);
+}
+/* Inline SVG chevron — replaces the previous `›` literal which
+   relied on the system font. Now scales with the breadcrumb font-size
+   and inherits text-muted via currentColor. */
+/* Breadcrumb separator — em-based so it scales with the surrounding
+   `text-body-sm` size. 0.75em ≈ 10-11 px at our breadcrumb font-size,
+   matching the subtle "›" you see on bbl.admin.ch / geo.admin.ch.
+   `align-items: center` on `.breadcrumb__item` handles centring (the
+   item is a flexbox, so the previous `vertical-align: middle` was
+   ignored — that's why the chevron looked off-axis). */
+.breadcrumb__sep {
+  width: 0.75em; height: 0.75em;
+  margin: 0 var(--space-xs);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+/* Breadcrumb is now an <ol> with schema.org/BreadcrumbList microdata.
+   The list itself stays inline so the chevron rhythm reads as one line. */
+.breadcrumb__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;       /* centre chevron with text */
+  gap: 0;
+}
+.breadcrumb__item {
+  display: inline-flex;
+  align-items: center;       /* centre chevron with text */
+  position: relative;        /* anchor for the dropdown drawer */
+}
+
+/* Red-bordered chevron-down button next to a breadcrumb item that has
+   peer-level siblings. Mirrors DS `.breadcrumb__dropdown-icon`:
+   `w-[1.25em] h-[1.25em]`, `border border-primary-600`,
+   `text-primary-600`, `rounded-sm`. Chevron rotates 180° when the
+   drawer is open. */
+.breadcrumb__dropdown-icon {
+  /* CD: `ml-2` = 8px gap between the breadcrumb link and the chevron
+     button (sections/breadcrumb.postcss). Right margin keeps the
+     chevronRight separator from crowding the button. */
+  margin: 0 var(--space-xs) 0 var(--space-sm);
+  padding: 0;
+  width: 1.25em;
+  height: 1.25em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-primary-600);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-600);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.breadcrumb__dropdown-icon:hover { background: var(--color-bg-alt); color: var(--color-primary-700); border-color: var(--color-primary-700); }
+.breadcrumb__dropdown-icon svg {
+  width: 0.9em; height: 0.9em;
+  transition: transform var(--transition-fast);
+  margin: 0;
+}
+.breadcrumb__dropdown-icon[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* Drawer — 300 px card below the breadcrumb item, white background +
+   heavy shadow, items as menu rows. Mirrors DS `.breadcrumb ul ul`
+   (sections/breadcrumb.postcss:93-113). Active item gets a red
+   left-bar (here the current page itself, shown disabled). */
+.breadcrumb__dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  z-index: 30;
+  margin: 0;
+  padding: var(--space-xs);
+  list-style: none;
+  width: 300px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.breadcrumb__dropdown[hidden] { display: none; }
+.breadcrumb__dropdown li { position: relative; }
+.breadcrumb__dropdown a,
+.breadcrumb__dropdown span {
+  display: block;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  border-radius: var(--radius);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.breadcrumb__dropdown a:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.breadcrumb__dropdown-active span {
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+.breadcrumb__dropdown-active::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 2px;
+  background: var(--color-primary-600);
+  border-radius: 1px;
+}
+
+/* Mobile-only meta links inside the burger menu — surfaces Kontakt/Hilfe
+   that would otherwise be hidden alongside .top-header__meta. */
+.main-navigation__mobile-meta { display: none; }
+
+/* Body scroll-lock while the burger menu is open. Mirrors CD Bund
+   `.body--mobile-menu-is-open` from designsystem/css/foundations/global.postcss:34
+   — fixes the bug where the underlying page could still scroll behind
+   the open mobile nav, and prevents iOS Safari rubber-band scroll from
+   exposing the page header / footer. */
+body.body--mobile-menu-is-open {
+  overflow: hidden;
+  height: 100vh;
+}
+
+@media (max-width: 1023.98px) {
+  .burger { display: inline-flex; }
+  .burger[aria-expanded="true"] .burger__icon {
+    color: var(--color-primary-600);
+  }
+  /* CD `hidden lg:block` — breadcrumb is hidden on mobile/tablet. */
+  .breadcrumb { display: none; }
+  /* Burger now lives inside `.top-header__actions` (CD canonical),
+     so the navbar row only carries the slide-out main-navigation
+     drawer. Hide the empty navbar when no menu is open. */
+  .navbar { display: none; }
+  body.body--mobile-menu-is-open .top-bar,
+  body.body--mobile-menu-is-open .top-header__department-strip,
+  body.body--mobile-menu-is-open .top-header__left {
+    display: none;
+  }
+  body.body--mobile-menu-is-open .top-header {
+    position: relative;
+    z-index: var(--z-modal);
+  }
+  body.body--mobile-menu-is-open .top-header__inner {
+    min-height: 72px;
+    justify-content: flex-end;
+  }
+  body.body--mobile-menu-is-open .navbar {
+    display: block;
+    position: fixed;
+    inset: 72px 0 0;
+    z-index: calc(var(--z-modal) - 1);
+    overflow-y: auto;
+    background: var(--color-surface-dark);
+    border: 0;
+  }
+  body.body--mobile-menu-is-open .navbar__inner {
+    display: block;
+    min-height: 0;
+    padding: 0;
+    max-width: none;
+  }
+  .main-navigation { display: none; flex-direction: column; gap: 0; width: 100%; margin-left: 0; }
+  .main-navigation.open { display: flex; }
+  /* Each item becomes a full-width row: label left, drill-down arrow right.
+     Mirrors CD mobile-menu-v2 list pattern. */
+  .main-navigation__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: var(--space-md) var(--container-padding);
+    border-bottom: 1px solid var(--color-border);
+    width: 100%;
+    background: var(--color-white);
+    color: var(--color-text-primary);
+  }
+  .main-navigation__link::after {
+    display: none;
+  }
+  .main-navigation__link--active,
+  .main-navigation__link--has-menu[aria-expanded="true"] {
+    color: var(--color-text-primary);
+  }
+  body.body--mobile-menu-is-open .main-navigation__link,
+  body.body--mobile-menu-is-open .main-navigation__link:hover,
+  body.body--mobile-menu-is-open .main-navigation__link--active,
+  body.body--mobile-menu-is-open .main-navigation__link--has-menu[aria-expanded="true"] {
+    color: var(--color-text-primary);
+  }
+  .main-navigation__arrow { display: inline-flex; }
+  /* Desktop dropdown indicator (chevronDown) is redundant on mobile —
+     the right-arrow handles the affordance. Hide it. */
+  .inline-icon.main-navigation__chevron { display: none; }
+  /* Sub-menu panels (Dienstleistungen) become in-drawer accordions:
+     static flow directly under their trigger row (the markup places
+     each panel right after its trigger), full width, no floating-card
+     chrome. The desktop card heading + Schliessen button are redundant
+     here — the trigger row itself labels and toggles the group. */
+  .nav-menu {
+    position: static;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    animation: none;
+  }
+  .nav-menu__close,
+  .nav-menu__heading { display: none; }
+  .nav-menu__inner { padding: 0; }
+  .nav-menu__item { border-top: 0; }
+  .nav-menu__item:last-child { border-bottom: 0; }
+  .nav-menu__item--active::before { left: var(--space-xs); }
+  .nav-menu__link {
+    padding: var(--space-md) var(--container-padding) var(--space-md) calc(var(--container-padding) + var(--space-md));
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: var(--color-bg-surface);
+  }
+  /* Open trigger row: drop the desktop "lifted card" effect (white bg +
+     shadow + clip-path) — meaningless inside the flat drawer list —
+     and rotate the drill-down arrow to point at the open accordion. */
+  .main-navigation__link--clicked {
+    box-shadow: none;
+    clip-path: none;
+    background: var(--color-white);
+  }
+  .main-navigation__link--has-menu[aria-expanded="true"] .main-navigation__arrow svg {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 1023.98px) {
+  /* Meta zone (Kontakt / Hilfe) — CD mobile pattern wraps utility links
+     in a dark-navy block at the foot of the menu, white text. Matches
+     designsystem/css/sections/mobile-menu.postcss `.top-bar-navigation--mobile
+     ul a { bg-secondary-500, text-white }`. */
+  .main-navigation__mobile-meta {
+    display: block;
+    width: 100%;
+    background: var(--color-surface-dark);
+  }
+  .main-navigation__mobile-meta .main-navigation__link {
+    min-height: 56px;
+    padding: var(--space-md) var(--container-padding);
+    border-bottom: 1px solid var(--color-white-12);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-white);
+    background: var(--color-surface-dark);
+  }
+  body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link,
+  body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link:hover {
+    color: var(--color-white);
+  }
+  .main-navigation__mobile-meta .main-navigation__link:hover {
+    background: var(--color-white-06);
+    color: var(--color-white);
+  }
+  /* Meta links are terminal — no drill-down. Hide their right-arrow. */
+  .main-navigation__mobile-meta .main-navigation__arrow { display: none; }
+  /* Account row(s) — user/login/logout with a leading icon. The <button>
+     variants reset button chrome so login/logout read as meta rows. */
+  .main-navigation__mobile-meta-account {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  button.main-navigation__mobile-meta-account {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--color-white-12);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+  }
+  .main-navigation__mobile-meta-account .inline-icon {
+    width: var(--icon-md);
+    height: var(--icon-md);
+    flex-shrink: 0;
+  }
+  /* Language chooser row at the foot of the drawer — the top-bar language
+     switcher is hidden at this width, so mobile users pick language here.
+     Active language uses the CD blue (--color-lang-active), matching the
+     desktop switcher's selected-language treatment. */
+  .main-navigation__mobile-lang {
+    display: flex;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--container-padding);
+    background: var(--color-surface-dark);
+  }
+  .main-navigation__mobile-lang-btn {
+    flex: 1;
+    min-height: var(--btn-min-h);
+    border: 1px solid var(--color-white-25);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--color-white);
+    font: inherit;
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  }
+  .main-navigation__mobile-lang-btn:hover { background: var(--color-white-06); }
+  /* RM sits in the CD-canonical order but is not localised — the button is
+     aria-disabled with no handler, mirroring the top-bar switcher's muted
+     non-interactive treatment. */
+  .main-navigation__mobile-lang-btn[aria-disabled="true"] {
+    color: var(--color-white-50);
+    border-color: var(--color-white-12);
+    cursor: not-allowed;
+  }
+  .main-navigation__mobile-lang-btn[aria-disabled="true"]:hover { background: transparent; }
+  .main-navigation__mobile-lang-btn--active {
+    background: var(--color-lang-active);
+    border-color: var(--color-lang-active);
+    color: var(--color-white);
+  }
+}

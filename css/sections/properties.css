@@ -1,0 +1,629 @@
+/* ==========================================================================
+   sections/properties.css — BBL Mieterportal
+
+   Property portfolio: gallery/list/map views, view toggle, markers,
+   map popups, portfolio stats band, floor detail (interactive floor plan).
+   Sources: styles.css 4424-4465, 5437-5773, 6786-7029.
+   ========================================================================== */
+
+/* Portfolio stats band — intentionally tighter than a full `.section`
+   (sits between hero and explainer; the stat numerals carry the rhythm). */
+.portfolio-stats {
+  background: var(--color-bg-alt);
+  padding: var(--section-py-half) var(--container-padding);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+@media (min-width: 1024px) {
+  .portfolio-stats { padding-block: var(--space-3xl); }
+}
+.portfolio-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-lg);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+.portfolio-stats__grid > div {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+/* Modern CD reserves primary red for brand accents only (active nav rail,
+   card rails, danger). Big numerals used to be `--color-primary` which
+   pulled focus away from the hero. Switched to text-primary so the stats
+   read as data, not as marketing. Kept the mono treatment for the "data
+   feel" admin.ch uses. */
+.portfolio-stats__grid strong {
+  font-size: var(--text-h1);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
+}
+.portfolio-stats__grid span {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Property grid (Meine Immobilien) */
+/* ── PROPERTIES VIEW (gallery / list / map) ─────────────────────────────────
+   Multi-view portfolio browser. Toolbar (search + view toggle + count) sits
+   above the active view; pagination at the bottom for gallery + list.
+   Mirrors patterns from sibling prototypes (transaction-immo, property-inventory). */
+.property-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "search filter toggle";
+  gap: var(--space-md);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+@media (max-width: 768px) {
+  .property-toolbar {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "search"
+      "filter"
+      "toggle";
+  }
+}
+.property-toolbar__search { grid-area: search; }   /* composes .search-field */
+.property-toolbar__select {
+  grid-area: filter;
+  min-width: 200px;
+}
+.property-toolbar__input {
+  padding-right: 38px;   /* room for the clear button (× on the right) */
+}
+.property-toolbar__clear {
+  position: absolute;
+  right: var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  padding: var(--space-xs);
+  display: inline-flex;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.property-toolbar__clear:hover { color: var(--color-text-primary); background: var(--color-bg-alt); }
+/* View toggle — segmented control, DS-aligned pill group. */
+.view-toggle {
+  grid-area: toggle;
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--color-border);
+  font: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  min-height: var(--btn-min-h);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.view-toggle__btn:last-child { border-right: none; }
+.view-toggle__btn:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
+.view-toggle__btn--active {
+  background: var(--color-secondary-500);
+  color: var(--color-white);
+}
+.view-toggle__btn--active:hover { background: var(--color-secondary-600); color: var(--color-white); }
+.view-toggle__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); margin-right: 0; }
+/* When the toolbar collapses to a single column (≤ 768 px, see
+   `.property-toolbar`), stretch the toggle to fill the row and give each
+   button an equal share. Bigger touch targets on tablet / phone and a
+   layout that reads as deliberate next to the full-width search and
+   select rows above it. */
+@media (max-width: 768px) {
+  .view-toggle { display: flex; width: 100%; }
+  .view-toggle__btn { flex: 1; justify-content: center; }
+}
+@media (max-width: 640px) {
+  .view-toggle__label { display: none; }
+  .view-toggle__btn { padding: var(--space-sm) var(--space-md); }
+}
+
+/* Property list (table view) */
+.property-list-wrap { overflow-x: auto; }
+.property-list {
+  width: 100%;
+  font-size: var(--text-body-sm);
+}
+.property-list th.numeric, .property-list td.numeric { text-align: right; }
+.property-list tbody tr { cursor: pointer; }
+.property-list tbody tr:hover { background: var(--color-bg-alt); }
+.property-list code {
+  font-family: var(--font-family-mono);
+  font-size: 0.95em;
+  color: var(--color-text-secondary);
+}
+
+/* Map view — full-width canvas; markers carry the affordance, no anchored list. */
+.property-map {
+  height: clamp(480px, 75vh, 820px);
+}
+.property-map__canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-card);
+}
+.map-surface {
+  position: relative;
+}
+.map-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: var(--color-canvas-84);
+  background: color-mix(in srgb, var(--color-bg-canvas) 84%, transparent);
+  pointer-events: none;
+}
+.map-loading__icon {
+  width: var(--icon-2xl);
+  height: var(--icon-2xl);
+  color: var(--color-black);
+  animation: map-loading-spin var(--transition-slow) linear infinite,
+             map-loading-fade-in var(--transition) ease-out;
+}
+@keyframes map-loading-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes map-loading-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-loading__icon {
+    animation: none;
+  }
+}
+.property-map__error {
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+/* Marker — federal red teardrop pin. Standalone button so it's tabbable. */
+.property-marker {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  width: 24px; height: 30px;
+  align-items: center;
+  justify-content: center;
+}
+.property-marker__pin {
+  display: block;
+  width: 18px; height: 18px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-white);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: var(--shadow-property-marker);
+  transition: transform var(--transition-fast);
+}
+.property-marker:hover .property-marker__pin,
+.property-marker--active .property-marker__pin {
+  background: var(--color-primary-700);
+  transform: rotate(-45deg) scale(1.15);
+}
+/* `buildingId` label above the pin (e.g. "BLD-2010"). Absolutely positioned
+   relative to the marker button so it sits clear above the teardrop and is
+   unaffected by MapLibre's marker transform. pointer-events:none keeps the
+   pin the only click target. Zoom-gated via `.property-map--labels-hidden`
+   on the map container (see initPropertiesMap): shown when zoomed into a
+   city, hidden at the national overview where pins cluster together. */
+.property-marker { position: relative; }
+.property-marker__label {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px var(--space-xs);
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  white-space: nowrap;
+  box-shadow: var(--shadow-property-marker);
+  pointer-events: none;
+}
+.property-map--labels-hidden .property-marker__label { display: none; }
+/* "Home"/reset button injected as a custom MapLibre control next to the
+   zoom +/- group. Inherits the maplibregl-ctrl-group button chrome (29px
+   box, hover, focus); we only need to centre the icon inside it. */
+.map-home-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-home-btn .inline-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-primary);
+}
+
+/* Properties search combobox dropdown — grouped suggestions (DB
+   Liegenschaften + swisstopo Orte). The search glyph carries its own
+   `.search-field__icon` class, so dropdown icons (plain `.inline-icon`) are
+   unaffected and need no positioning reset. */
+.combobox__group {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.combobox__hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.combobox__option--location .combobox__option-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.property-toolbar__search .combobox__option--location .inline-icon {
+  color: var(--color-secondary-600);
+  flex-shrink: 0;
+}
+.combobox__spinner { animation: map-loading-spin var(--transition-slow) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .combobox__spinner { animation: none; } }
+
+/* swisstopo locator pin — a secondary-colour teardrop, deliberately unlike
+   the red property markers so a searched "place" never reads as a portfolio
+   object. Single transient pin, managed by dropLocatorPin. */
+.locator-marker {
+  display: inline-flex;
+  width: 22px; height: 28px;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+.locator-marker__pin {
+  display: block;
+  width: 16px; height: 16px;
+  background: var(--color-secondary-600);
+  border: 2px solid var(--color-white);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: var(--shadow-property-marker);
+}
+.locator-popup__label { margin: 0 0 2px; font-weight: var(--font-weight-bold); font-size: var(--text-body-sm); }
+.locator-popup__meta { margin: 0; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   DOCUMENT VIEWER — full-screen Confluence-style preview. Federal dark navy
+   chrome (--color-secondary-900); mocked page templates (text / floor-plan /
+   certificate). All colours via tokens. Opened from a downloads row.
+   ════════════════════════════════════════════════════════════════════════ */
+body.docviewer-open { overflow: hidden; }
+/* `html { overflow-x: clip }` (tokens.css) makes the root non-visible, which
+   stops the body overflow lock above from propagating to the viewport — so a
+   long underlying page would keep its own window scrollbar next to the
+   viewer's. Lock the root too while a viewer/gallery is open, leaving the
+   fixed overlay as the single scroll container. */
+html:has(body.docviewer-open) { overflow: hidden; }
+.docviewer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-docviewer);
+  /* The viewer itself is the single scroll container: one page-level
+     scrollbar spanning the full viewport height, the bar sticky on top of
+     the scrolling pages, the surface stretching to the whole document
+     (Confluence-style). Horizontal scroll only appears when zoomed wider
+     than the viewport. */
+  overflow: auto;
+  background: var(--color-secondary-900);
+}
+.docviewer__bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-secondary-900);
+  border-bottom: 1px solid var(--color-white-12);
+}
+.docviewer__heading { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.docviewer__heading-icon { color: var(--color-white-65); flex: 0 0 auto; }
+.docviewer__heading-text { min-width: 0; }
+.docviewer__title {
+  margin: 0;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.docviewer__sub { margin: 0; color: var(--color-white-65); font-size: var(--text-body-xs); }
+.docviewer__actions { display: flex; align-items: center; gap: var(--space-xs); flex: 0 0 auto; }
+.docviewer__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  background: none; border: none; border-radius: var(--radius);
+  color: var(--color-white); cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.docviewer__btn:hover { background: var(--color-white-12); }
+.docviewer__btn:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
+.docviewer__btn[aria-pressed="true"] { background: var(--color-white-15); }
+.docviewer__btn--close:hover { background: var(--color-primary); }
+.docviewer__btn .inline-icon { width: 20px; height: 20px; }
+
+/* ── FLOOR DETAIL — interactive floor plan ───────────────────────────────
+   The page reuses `.property-header` (building image + name + address) for
+   the top strip so the building identity stays consistent with the
+   property-detail page.  Below that, `.floor-header` is a lighter h2 +
+   KPI line that identifies the specific floor being viewed.  Then the
+   toolbar (etage switcher + view dropdown + fullscreen), the MapLibre
+   canvas, and the legend.  Floor switcher is a chip group derived from
+   `.tag-item` styling but acts as navigation (anchors, not toggle
+   buttons). */
+
+.floor-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.floor-header__title { margin: 0; }
+.floor-header__kpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.floor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-surface, var(--color-secondary-50));
+  border-radius: var(--radius);
+}
+.floor-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.floor-toolbar__group--right { margin-left: auto; }
+.floor-toolbar__label {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* `.floor-switcher` — chip group of floor links. Active chip carries the
+   federal primary fill (matches `.tag-item--active` energy without
+   piggybacking on the filter-chip aria-pressed semantics). */
+.floor-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.floor-switcher__chip {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-secondary-200);
+  background: var(--color-white);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.floor-switcher__chip:hover {
+  background: var(--color-secondary-50);
+  border-color: var(--color-secondary-300);
+}
+.floor-switcher__chip--active,
+.floor-switcher__chip[aria-current="page"] {
+  background: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  color: var(--color-white);
+}
+.floor-switcher__chip--active:hover {
+  background: var(--color-primary-700, var(--color-primary-600));
+}
+
+/* `.floor-viewer` — wraps the canvas + legend so both stay visible when
+   the user enters fullscreen. Room details live in a MapLibre Popup
+   anchored on the clicked polygon (see `.room-popup`), not in a sidebar
+   — gives the floor plan the full container width. */
+.floor-viewer {
+  margin-bottom: var(--space-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.floor-canvas {
+  width: 100%;
+  height: 460px;
+  min-height: 400px;
+  background: var(--color-bg-canvas);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+}
+@media (min-width: 768px) { .floor-canvas { height: 560px; } }
+@media (min-width: 1280px) { .floor-canvas { height: 640px; } }
+
+/* When the `.floor-viewer` enters native fullscreen, the canvas grows
+   to fill the available height (viewport minus the legend strip) so
+   the legend stays visible inside the fullscreen surface. */
+.floor-viewer:fullscreen,
+.floor-viewer:-webkit-full-screen {
+  background: var(--color-white);
+  padding: var(--space-md);
+}
+.floor-viewer:fullscreen .floor-canvas,
+.floor-viewer:-webkit-full-screen .floor-canvas {
+  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
+  border-radius: 0;
+  border: 0;
+}
+
+.floor-canvas__error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+/* `.room-popup` — info popup anchored on the clicked room.  Lives inside
+   MapLibre's `.maplibregl-popup-content` (which provides padding +
+   tail).  Same dl/row pattern as the inbox/property detail cards so the
+   reading rhythm is consistent across the app. */
+.floor-popup .maplibregl-popup-content {
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.floor-popup .maplibregl-popup-close-button {
+  font-size: 1.25rem;
+  padding: 0 var(--space-sm);
+  color: var(--color-text-secondary);
+}
+.room-popup { font-size: var(--text-body-sm); }
+.room-popup__title {
+  margin: 0 0 2px;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-body);
+}
+.room-popup__subtitle {
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text-secondary);
+}
+.room-popup__facts {
+  margin: 0 0 var(--space-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-secondary-100);
+}
+.room-popup__row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: var(--space-sm);
+}
+.room-popup__row dt {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+.room-popup__row dd {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+.room-popup__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  color: var(--color-primary-600);
+  text-decoration: none;
+  font-weight: var(--font-weight-bold);
+}
+.room-popup__action:hover { color: var(--color-primary-700); text-decoration: underline; }
+
+/* `.floor-legend` — horizontal swatch row below the canvas. Items are
+   built dynamically by `renderLegend()` in app.js: each entry has a
+   swatch, the category label, and Σ m² aggregated for that group on
+   the current floor. Sorted by area descending. Sits inside
+   `.floor-viewer` so it stays visible in fullscreen. */
+.floor-legend {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-sm) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.floor-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.floor-legend__swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid var(--color-secondary-200);
+  flex-shrink: 0;
+}
+.floor-legend__swatch--use-work,
+.floor-legend__swatch--sia-hnf,
+.floor-legend__swatch--tenant-a { background: var(--color-floor-work); }
+.floor-legend__swatch--use-collab,
+.floor-legend__swatch--sia-ff { background: var(--color-floor-collab); }
+.floor-legend__swatch--use-infra,
+.floor-legend__swatch--sia-vf { background: var(--color-floor-infra); }
+.floor-legend__swatch--use-special,
+.floor-legend__swatch--sia-nnf,
+.floor-legend__swatch--tenant-c { background: var(--color-floor-special); }
+.floor-legend__swatch--sia-tf,
+.floor-legend__swatch--tenant-b { background: var(--color-floor-collab-strong); }
+.floor-legend__swatch--tenant-d { background: var(--color-floor-tenant-d); }
+.floor-legend__swatch--tenant-e { background: var(--color-floor-tenant-e); }
+.floor-legend__swatch--tenant-f { background: var(--color-floor-tenant-f); }
+.floor-legend__swatch--unassigned { background: var(--color-floor-unassigned); }
+.floor-legend__label { color: var(--color-text-secondary); }
+.floor-legend__area {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+}
+/* Inside fullscreen the legend gets a touch more breathing room above
+   the bottom edge so it doesn't visually fuse with the viewport border. */
+.floor-viewer:fullscreen .floor-legend,
+.floor-viewer:-webkit-full-screen .floor-legend {
+  padding: var(--space-md) 0 var(--space-sm);
+}

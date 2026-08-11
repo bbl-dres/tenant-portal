@@ -1,0 +1,191 @@
+/* ==========================================================================
+   layouts/layout.css — BBL Mieterportal
+
+   Page scaffold + generic layout objects.
+   Sources: styles.css LAYOUT (30-174), HERO (1074-1102), hero mobile
+   override (3876-3877). The page-header block lives in
+   components/tables.css: its .page-header__title margin override must
+   cascade AFTER the .h1 utility (foundations/typography.css), which this
+   file precedes.
+   DS counterparts: layouts/container.postcss, layouts/section.postcss,
+   sections/hero.postcss.
+   ========================================================================== */
+
+/* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+/* Sticky-footer scaffold: #root spans at least the viewport and #page-body
+   absorbs any leftover space, so short pages (e.g. Liegenschaften with a
+   single card) still push the footer to the bottom edge.
+
+   `.page-container` wraps everything above the footer and is the
+   positioning context for `.back-to-top-wrapper`. Keeping the wrapper
+   inside `.page-container` (rather than `#root`) means its negative
+   `bottom` extends INTO the footer area (the next sibling) instead of
+   past the document — otherwise the wrapper's overflow inflates the
+   body scroll height and produces a white strip below the footer. */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.page-container {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;     /* containing block for .back-to-top-wrapper */
+}
+#page-body { flex: 1 0 auto; }
+
+/* No-JS fallback (eCH-0059 federal-accessibility convention). The SPA
+   needs JS to render anything; in restricted federal-admin environments
+   (e.g. some VBS workstations) JS may be disabled. The `<noscript>` block
+   in index.html surfaces a polite German explanation + a support link
+   so the user is never staring at a blank page. */
+.noscript-fallback {
+  max-width: 60ch;
+  margin: var(--space-2xl) auto;
+  padding: var(--space-xl) var(--space-lg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  line-height: var(--line-height-relaxed);
+}
+.noscript-fallback h1 {
+  font-size: var(--text-h2);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-md);
+}
+.noscript-fallback p { margin: 0 0 var(--space-md); }
+.noscript-fallback p:last-child {
+  margin-top: var(--space-lg);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.noscript-fallback a { color: var(--color-primary); }
+
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+  /* CD Bund `.container` adds `overflow-x: clip` so an accidentally-
+     overflowing child (long table, wide image) doesn't trigger a
+     horizontal scrollbar on the whole page. Defensive — costs nothing
+     when nothing overflows. */
+  overflow-x: clip;
+}
+/* `.container--reading` — narrow column tuned for long-form prose (news
+   articles, help pages). 780 px is the sweet spot for 60–80 chars/line at
+   the base body size. Replaces inline `style="max-width: 780px"`. */
+.container--reading {
+  max-width: 780px;
+}
+/* `.container--narrow` — slightly wider task-page column for forms /
+   focused panels (used by the wizard and search results page). Matches
+   the previous inline `style="max-width: 960px"`. */
+.container--narrow {
+  max-width: 960px;
+}
+/* `.section` defaults to the full CD-Bund `.container--py` rhythm:
+   56→80→96→128 px top/bottom across breakpoints. The previous default
+   used `--section-py-half`, which is the modifier scale (28→40→48→64) —
+   that's literally half the federal pattern and made pages feel dense.
+   `.section--py-tight` keeps the old half-scale for bands that intentionally
+   need less air (e.g. the portfolio-stats strip between hero and explainer).
+   `.section--lg` is kept as a back-compat alias for the same full scale. */
+.section { padding-block: var(--section-py); }
+.section--lg { padding-block: var(--section-py); }
+.section--py-tight { padding-block: var(--section-py-half); }
+/* CD canonical name for the half-padding modifier. Alias so CD
+   markup like `<section class="section section--py-half">` works
+   straight from a CD copy-paste. */
+.section--py-half { padding-block: var(--section-py-half); }
+
+/* ── .vertical-spacing — CD foundation utility ─────────────────────────
+   From `designsystem/css/foundations/spacings.postcss`. Applied to a
+   container; child elements inherit a consistent vertical rhythm so
+   views stop bolting on ad-hoc `margin-top` per element. Default child
+   gap 48 → 56 px; heading-to-element 24 px; consecutive paragraphs
+   16 px. First child gets no top margin so the rhythm starts at zero.
+*/
+.vertical-spacing > * { margin-top: var(--space-2xl); }
+@media (min-width: 1544px) {
+  .vertical-spacing > * { margin-top: 3.5rem; }   /* 56 px at 2xl, per CD */
+}
+.vertical-spacing > *:first-child { margin-top: 0; }
+/* Headings reset their own bottom margin (so the rhythm comes from the
+   next sibling's top margin only) and tighten the gap to the next
+   element. Matches CD's heading-to-content cadence (24 px to most
+   elements, 16 px to paragraphs). */
+.vertical-spacing > :is(h1, h2, h3, h4, h5) { margin-bottom: 0; }
+.vertical-spacing > :is(h1, h2, h3, h4, h5) + * { margin-top: var(--space-lg); }
+.vertical-spacing > :is(h1, h2, h3, h4, h5) + p { margin-top: var(--space-md); }
+/* Consecutive paragraphs / lists keep a tight 16 px reading rhythm. */
+.vertical-spacing > p + p,
+.vertical-spacing > p + ul,
+.vertical-spacing > p + ol,
+.vertical-spacing > ul + p,
+.vertical-spacing > ol + p { margin-top: var(--space-md); }
+
+/* Section background variants — admin.ch alternation pattern (modern CD).
+   The DS uses three distinct tints so adjacent sections never look like
+   the same shade:
+     • default       white                    (--color-bg-default)
+     • --alt         cool blue-gray tint      (--color-secondary-50, #F0F4F7)
+     • --surface     warmer near-white        (--color-bg-surface,  #F9FAFB)
+     • --dark        federal navy             (--color-surface-dark)
+   Previously --alt and --surface were both flavours of `--color-gray-*`
+   (1 step apart on the gray ramp) and read as the same shade in the
+   browser — fixed by routing --alt to the federal blue-gray. */
+/* No borders on `--alt` / `--surface` — DS sections delineate purely
+   via background-color changes (see DS section.postcss; no `border`
+   declarations anywhere). Borders read as page chrome, which fights
+   the calmer "alternating bg bands" pattern bbl.admin.ch uses. */
+.section--alt {
+  background: var(--color-secondary-50);
+}
+.section--surface {
+  background: var(--color-bg-surface);
+}
+.section--dark {
+  background: var(--color-surface-dark);
+  color: var(--color-text-inverse);
+}
+.section--dark .section-heading,
+.section--dark h2,
+.section--dark h3 { color: var(--color-text-inverse); }
+
+.stack > * + * { margin-top: var(--space-md); }
+.stack--lg > * + * { margin-top: var(--space-lg); }
+.stack--sm > * + * { margin-top: var(--space-sm); }
+
+/* ── HERO ───────────────────────────────────────────────────────────────── */
+/* CD Bund hero is layout-driven, white background, no gradient. Large
+   heading, a lead paragraph, then a CTA row. Variants:
+     .hero--wide  — widens the title max-width to 26ch (vs. default 18ch)
+     .hero--split — two-column hero with .hero__figure on the right
+   Title size comes from the .h1 utility (compose: `class="h1 hero__title"`). */
+.hero {
+  padding: var(--section-py) var(--container-padding);
+  background: var(--color-bg-default);
+}
+.hero__inner { max-width: var(--container-max-width); margin: 0 auto; }
+/* Hero title — layout-only. Combine with `.h1` for the responsive size
+   (DS pattern: `class="h1 hero__title"`). Sets break behaviour + max-width
+   so titles wrap at ~3 lines max, mirroring kbob/bbl hero proportions. */
+.hero__title {
+  color: var(--color-text-primary);
+  max-width: 18ch;
+  overflow-wrap: break-word;
+}
+.hero--wide .hero__title { max-width: 26ch; }
+.hero__lead {
+  font-size: var(--text-h4);
+  color: var(--color-text-secondary);
+  max-width: 60ch;
+  margin: 0 0 var(--space-xl);
+  line-height: var(--line-height-snug);
+}
+.hero__cta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+
+@media (max-width: 480px) {
+  .hero { padding: var(--section-py-half) var(--container-padding); }
+  .hero__lead { font-size: var(--text-body); }
+}

@@ -1,0 +1,264 @@
+/* ==========================================================================
+   components/buttons.css — BBL Mieterportal
+
+   Buttons: .btn variants, back-to-top, share-bar (back / print / share).
+   Sources: styles.css 1103-1206, 2782-2863, 3026-3095.
+   DS counterparts: components/btn.postcss, components/back-to-top-btn.postcss,
+   components/share-bar.postcss.
+   ========================================================================== */
+
+/* ── BUTTONS ──────────────────────────────────────────────────────────────
+   CD Bund applies bold only to the filled / primary CTA variant. Outline,
+   bare, and link buttons inherit body weight (regular). See
+   designsystem/css/components/btn.postcss — `.btn--outline` (line 17),
+   `.btn--bare` (line 27), `.btn--link` (line 40), `.btn--link-negative`
+   (line 57) all `@apply font-normal`; only `.btn--filled` (line 74) is
+   `font-bold`. Audit reference: DS-M1. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: var(--btn-min-h);
+  padding: var(--space-sm) var(--space-md);   /* CD: px-4 (16px) horizontal */
+  border-radius: var(--radius-sm);            /* CD buttons use rounded-sm (2px) */
+  font-size: var(--text-body);                /* CD: text--base (16/18/20) — was one step small */
+  font-weight: var(--font-weight-regular);
+  font-family: inherit;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+@media (min-width: 1280px) { .btn { min-height: var(--btn-lg-min-h); } }
+@media (min-width: 1920px) { .btn { min-height: 52px; } }
+/* CD Bund: filled action button = navy. Red is reserved for danger and
+   brand-accent surfaces (active nav underline, card rails). Bold-only on
+   filled to match DS — see header comment on `.btn`. */
+.btn--filled {
+  background: var(--color-secondary-500);
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+.btn--filled:hover { color: var(--color-secondary-100); }   /* CD: bg stays, text lightens */
+.btn--outline {
+  background: transparent;
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+.btn--outline:hover {                                        /* CD: text/border darken, no bg fill */
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+}
+.btn--bare {
+  background: transparent;
+  color: var(--color-text-primary);
+}
+.btn--bare:hover { color: var(--color-primary); }            /* CD: text → primary, no bg */
+.btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
+.btn--lg { min-height: 48px; padding: var(--space-md) var(--space-xl); font-size: var(--text-h4); }
+@media (min-width: 1280px) { .btn--sm { min-height: 40px; } .btn--lg { min-height: 52px; } }
+@media (min-width: 1920px) { .btn--sm { min-height: 44px; } .btn--lg { min-height: 56px; } }
+/* DS flat disabled fills (btn.postcss) instead of `opacity`, which makes a
+   disabled navy button translucent (page bleeds through, shadow fades).
+   Filled → solid secondary-200 / white text; outline & bare → muted
+   secondary-300. Base rule handles the variant-less case. */
+.btn[disabled], .btn--disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  color: var(--color-secondary-300);
+}
+.btn--filled[disabled], .btn--filled.btn--disabled {
+  background: var(--color-secondary-200);
+  border-color: var(--color-secondary-200);
+  color: var(--color-white);
+}
+.btn--outline[disabled], .btn--outline.btn--disabled {
+  background: transparent;
+  color: var(--color-secondary-300);
+  border-color: var(--color-secondary-200);
+}
+.btn--bare[disabled], .btn--bare.btn--disabled {
+  background: transparent;
+  color: var(--color-secondary-300);
+}
+/* Explicit focus ring on buttons. The global :focus-visible already covers
+   the keyboard-only case, but a 3 px purple outline on a navy filled
+   button needs extra offset to read against the button itself. */
+.btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+/* Filled buttons (currently navy / secondary-600) get a defensive
+   white inner-ring + the lighter purple outline. This keeps the focus
+   target visible on saturated bg colours regardless of whether the
+   button is navy now or red in a future `--danger` variant. */
+.btn--filled:focus-visible {
+  outline-color: var(--color-focus-dark);
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 5px var(--color-focus-dark);
+  outline: none;
+}
+/* On dark surfaces (top-bar, footer, .section--dark) the focus ring
+   switches to purple-300 (lighter) — matches CD spec
+   `*:focus-visible { ring-2 ring-purple-300 }`. Single 2px ring, no
+   white inner: keeps the focus indicator clean and CD-canonical. */
+.top-bar :focus-visible,
+.app-footer :focus-visible,
+.section--dark :focus-visible {
+  outline: 2px solid var(--color-focus-dark);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Back-to-top — DS canonical `.back-to-top-btn--outline`
+   (designsystem/css/components/back-to-top-btn.postcss:79-88): white bg,
+   primary-600 border + chevron, square with small radius, 44→48→64 px
+   scale. Floats at viewport bottom-right while scrolling and "lands"
+   in the top-right corner of `.footer-information` with the DS
+   canonical constant margins — 12 px right / 12 px top at base & lg,
+   16 px right / 16 px top at xl (≥1280).
+
+   Pure-CSS sticky pattern (no JS): `.back-to-top-wrapper` is
+   `position: absolute` inside `.page-container` (which is the wrapper
+   above the footer, `position: relative`), starting at 80vh and
+   extending `-3.5rem / -4rem / -5rem` past `.page-container`'s
+   bottom — i.e. into the footer area (the next sibling) by 56/64/80
+   px. With a 44/48/64 px button, that leaves a 12/16/16 px margin
+   between the button's top and the footer top. Inside, the button is
+   `position: sticky; top: calc(100vh - 64px)` — sticks to the
+   viewport bottom while the wrapper is in view, then lands at the
+   wrapper's bottom (= DS canonical landing in the footer's top-right
+   corner) when scroll ends. Right offset matches the DS:
+   `right-3` (12 px) → `1rem` (16 px) at xl. */
+.back-to-top-wrapper {
+  position: absolute;
+  top: 80vh;
+  right: 0.75rem;           /* DS: right-3 = 12 px */
+  bottom: -3.5rem;          /* DS: -56 px — sinks into footer, leaves 12 px top margin (44 px btn) */
+  width: 44px;
+  pointer-events: none;
+  z-index: 5;
+}
+@media (min-width: 1024px) {
+  .back-to-top-wrapper {
+    bottom: -4rem;          /* DS: -64 px — 16 px top margin (48 px btn) */
+    width: 48px;
+  }
+}
+@media (min-width: 1280px) {
+  .back-to-top-wrapper {
+    right: 1rem;            /* DS: 16 px */
+    bottom: -5rem;          /* DS: -80 px — 16 px top margin (64 px btn) */
+    width: 64px;
+  }
+}
+.app-footer__top-btn {
+  position: sticky;
+  top: calc(100vh - 64px);   /* 44 px button + 20 px gap from viewport bottom */
+  width: 44px;
+  height: 44px;
+  background: var(--color-white);
+  border: 1px solid var(--color-primary-600);
+  color: var(--color-primary-600);
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: all;
+  text-decoration: none;
+  box-shadow: var(--shadow-lg);
+  transition: color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.app-footer__top-btn:hover {
+  border-color: var(--color-primary-700);
+  color: var(--color-primary-700);
+  box-shadow: var(--shadow-xl);  /* DS back-to-top-btn hover:shadow-xl — TOK-002 */
+  text-decoration: none;
+}
+.app-footer__top-btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.app-footer__top-btn svg {
+  width: 50%;
+  height: auto;
+  margin-right: 0;
+}
+@media (min-width: 1024px) {
+  .app-footer__top-btn { width: 48px; height: 48px; top: calc(100vh - 68px); }
+}
+@media (min-width: 1280px) {
+  .app-footer__top-btn { width: 64px; height: 64px; top: calc(100vh - 88px); }
+}
+
+/* ── SHARE-BAR (detail-view utility bar — back / print / share) ────────
+   Sits right under the breadcrumb. CD Bund pairs a `.back-bar` + `.share-bar`;
+   we combine into one row with `justify-content: space-between` so the
+   row reads back-on-left, actions-on-right. The back link is optional
+   (omitted on non-detail pages) — when absent, actions naturally collapse
+   to the right via the empty first child. */
+.share-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--container-padding);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-xl);
+}
+.share-bar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;             /* keeps actions right-aligned even if back is absent */
+}
+/* `.btn--back` — CD Bund back-button modifier. The federal canonical
+   `.btn--outline` ships with primary-600 text + border (see
+   `designsystem/css/components/btn.postcss`). Our portal's `.btn--outline`
+   stays primary-red and keeps a full touch target. */
+.btn--back {
+  min-height: var(--btn-min-h);
+  padding: var(--space-xs) var(--space-md);
+  gap: var(--space-xs);
+  font-size: var(--text-body-sm);
+  /* Weight inherits from `.btn` base (regular) — matches CD Bund
+     `.btn--outline` `font-normal`. */
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  text-decoration: none;
+}
+.btn--back:hover {
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  background: transparent;
+}
+.btn--back .btn__icon { width: var(--icon-md); height: var(--icon-md); }
+.share-bar__btn {
+  background: transparent;
+  border: none;
+  padding: var(--space-xs) var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-secondary-800);   /* CD bare-button icon color (was gray-500 — too light) */
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: color var(--transition-fast);
+  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C4 */
+  min-width: 44px;
+}
+/* CD .btn--bare hover: text → primary-600 only, no background fill. */
+.share-bar__btn:hover { color: var(--color-primary); }
+/* CD share/print are icon-only buttons (accessible name = the button's
+   aria-label). Fixed square — never width:auto, since the inline-icon <svg>
+   has no intrinsic aspect ratio and auto blows up to the 300px default-object
+   width. Sized at 32px: above the too-small 24px, below bbl.admin.ch's
+   oversized treatment; the DS ShareBar `xl` ramp is 28–36px. */
+.share-bar__btn svg { width: var(--icon-lg); height: var(--icon-lg); }

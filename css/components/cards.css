@@ -1,0 +1,259 @@
+/* ==========================================================================
+   components/cards.css — BBL Mieterportal
+
+   Cards: base card, quick-card, profile card, arrow button.
+   Sources: styles.css 1207-1458.
+   DS counterpart: components/card.postcss.
+   ========================================================================== */
+
+/* ── CARDS ──────────────────────────────────────────────────────────────── */
+/* CD Bund Card uses shadow, not border. --highlight variant uses a
+   4px-wide secondary-300 left rail (not a primary-coloured outline). */
+.card {
+  background: var(--color-bg-default);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-fast);
+}
+@media (min-width: 1024px) { .card { padding: var(--space-xl); } }
+.card:hover { box-shadow: var(--shadow-card-hover); }
+.card:hover .card__title { color: var(--color-primary-700); }
+.card__title { transition: color var(--transition-fast); }
+.card--highlight {
+  position: relative;
+  padding-left: calc(var(--space-lg) + 4px);
+  box-shadow: var(--shadow-card);
+}
+.card--highlight::before {
+  content: '';
+  position: absolute;
+  left: 0; top: var(--space-md); bottom: var(--space-md);
+  width: 4px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+.card--flat { box-shadow: none; border-color: var(--color-secondary-200); }
+/* Canonical card title. DS `card.postcss` `.card__title` is
+   `text-lg xl:text-xl 3xl:text-2xl` bold (18/20/24 px) — never below 18 px.
+   `--text-h4` (18/18/20/22) meets that floor. This is the SINGLE
+   `.card__title` size rule; the former duplicate lower in this file that
+   forced `--text-body` (16 px) was removed. */
+.card__title { margin: 0 0 var(--space-sm); font-size: var(--text-h4); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+.card__lead { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+.card__footer { margin-top: auto; padding-top: var(--space-md); border-top: 1px solid var(--color-border-light); display: flex; gap: var(--space-sm); justify-content: space-between; }
+
+.card-grid {
+  display: grid;
+  gap: var(--gap-responsive);   /* CD `.gap--responsive` cascade — was an ad-hoc 24→32→48 jump */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* "Alle X ansehen →" CTA placed below a preview card-grid (e.g. /home
+   shows 4 services + this link to /services). Right-aligned like DS
+   `.section__action`; spacing mirrors DS `pt-4 + relative top-6
+   lg:top-8 3xl:top-12` ≈ 40 / 48 / 64 px from the grid above.
+   Regular weight, NOT bold — DS reserves bold for `.btn` + titles. */
+.section-cta {
+  display: flex;
+  justify-content: flex-end;
+  margin: 40px 0 0;
+}
+@media (min-width: 1024px) { .section-cta { margin-top: 48px; } }
+@media (min-width: 1920px) { .section-cta { margin-top: 64px; } }
+.section-cta__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.section-cta__link:hover { color: var(--color-primary-700); }
+.section-cta__icon {
+  transition: transform var(--transition-fast);
+  margin-right: 0;
+}
+.section-cta__link:hover .section-cta__icon { transform: translateX(4px); }
+
+/* ── QUICK-CARD (kbob-fdk pattern) — link-style card with arrow button ── */
+.card--quick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-default);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  padding-bottom: var(--space-4xl);   /* keeps text clear of the corner arrow-btn */
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-card);
+  min-height: 200px;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.card--quick:hover {
+  box-shadow: var(--shadow-card-hover);   /* CD cards lift via shadow only, no translate */
+}
+.card--quick,
+.card--quick:hover,
+.card--quick *,
+.card--quick:hover * { text-decoration: none; }
+.card--quick__title {
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md);
+  line-height: var(--line-height-snug);
+  transition: color var(--transition-fast);
+}
+.card--quick:hover .card--quick__title { color: var(--color-primary); }
+.card--quick__desc {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+.card--quick__meta {
+  margin-top: var(--space-md);
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.card--quick__arrow-btn {
+  position: absolute;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+}
+
+/* ── PROFILE CARD (swisstopo "Wählen Sie Ihr Profil" pattern) ───────────── */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+@media (min-width: 768px) {
+  .profile-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1280px) {
+  .profile-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.card--profile {
+  position: relative;
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.card--profile:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+}
+/* Card-top photo — applied to a real `<img>` (not a background-image div)
+   so the browser can lazy-load it natively and reserve the layout box
+   from the `width`/`height` attributes. `object-fit: cover` reproduces
+   the previous `background-size: cover` behaviour; the gray-200 surface
+   shows during load and as the placeholder if the image fails. */
+.card--profile__image {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background-color: var(--color-gray-200);
+}
+.card--profile__body {
+  padding: var(--space-lg);
+  padding-bottom: var(--space-4xl);   /* keeps text clear of the corner arrow */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card--profile__date {
+  font-size: var(--text-body-xs);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-sm);
+}
+.card--profile__title {
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-tight);
+  transition: color var(--transition-fast);
+}
+/* Profile cards sit *inside* .section--dark but have a white card body;
+   override the generic dark-section heading rule so the title stays readable. */
+.section--dark .card--profile__title { color: var(--color-text-primary); }
+.section--dark .card--profile:hover .card--profile__title { color: var(--color-primary); }
+.card--profile:hover .card--profile__title { color: var(--color-primary); }
+.card--profile__desc {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+.card--profile__arrow {
+  position: absolute;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+}
+
+.profile-section__footer {
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-white-15);
+}
+.profile-section__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+@media (min-width: 768px) {
+  .profile-section__links { grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+}
+.profile-section__links a {
+  color: var(--color-white-92);
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.profile-section__links a:hover {
+  color: var(--color-white);
+  border-bottom-color: var(--color-white-50);
+}
+
+/* ── ARROW BUTTON (shared with card--quick) ──────────────────────────────── */
+.arrow-btn {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius);
+}
+.arrow-btn svg { width: var(--icon-base); height: var(--icon-base); color: var(--color-primary); stroke: var(--color-primary); transition: color var(--transition-fast); }
+.card--quick:hover .arrow-btn { background: var(--color-primary); }
+.card--quick:hover .arrow-btn svg { color: var(--color-white); stroke: var(--color-white); }
