@@ -51,11 +51,14 @@ await run(reporter, async () => {
   await page.goto(`${baseUrl}/#/search?q=bafu&lang=de`);
   await waitForRoute(page, '#/search');
   await page.waitForTimeout(80);
+  // CMP-007 recomposed the hero as the DS search--large anatomy
+  // (.search__group wrapping the input + bare submit) — the shared
+  // .search-field shell no longer applies here.
   const heroFocused = await page.evaluate(() => {
-    const f = document.querySelector('.search-hero__field.search-field .search-field__input');
+    const f = document.querySelector('.search__group .search-hero__input');
     return !!f && document.activeElement === f;
   });
-  check('search results: hero uses .search-field and auto-focuses', heroFocused);
+  check('search results: hero uses the DS search__group and auto-focuses', heroFocused);
 
   // Browser-tab favicon = the CD Bund flag.
   const favicon = await page.evaluate(() => document.querySelector('link[rel~="icon"]')?.getAttribute('href'));
