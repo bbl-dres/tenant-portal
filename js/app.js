@@ -30,7 +30,7 @@ DOC_TYPE_LABEL,
 toast, modal, icon, statusBadge, attachmentLi,
 PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
-renderShortcutOverlay, wireGlobalShortcuts,
+renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import {
@@ -228,7 +228,7 @@ window.portal = {
   state, loadData, loadSpatialData,
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
   registerRoute, navigate, handleHash,
-  renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts,
+  renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
   toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice,

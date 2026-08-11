@@ -369,13 +369,25 @@ body.body--prototype-notice .toast-host {
   width: 100%;
   box-shadow: var(--shadow-lg);
 }
-.shortcut-overlay__title { margin: 0 0 var(--space-md); font-size: var(--text-h3); }
+/* Header row: title left, real close button right (A11Y-011 — an
+   aria-modal dialog needs a focusable, pointer-free-discoverable close
+   control; pattern mirrors .modal__header / .nav-menu__close). */
+.shortcut-overlay__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.shortcut-overlay__title { margin: 0; font-size: var(--text-h3); }
+.shortcut-overlay__close { flex-shrink: 0; }
 .shortcut-overlay__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-lg);
 }
-.shortcut-overlay__group h4 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+/* Group headings are h3 (h2 title → h3 groups, no level jump — A11Y-011). */
+.shortcut-overlay__group h3 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
 .shortcut-overlay__group dl { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm); }
 .shortcut-overlay__group dt { font-family: var(--font-family-mono); }
 .shortcut-overlay__group dd { margin: 0; }
