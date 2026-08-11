@@ -3033,6 +3033,10 @@ function initPropertyDetailMap(t) {
       center: [t.lng, t.lat],
       zoom: 17.5,
       attributionControl: { compact: true },
+      // Same touch rationale as the portfolio + floor maps: one-finger
+      // drags must keep scrolling the page (two-finger pan / ctrl+wheel).
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     _propertyDetailMap = map;
