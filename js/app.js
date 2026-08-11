@@ -433,15 +433,14 @@ function renderSearchResults() {
         <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
         <form class="search-hero__form" role="search" aria-label="Portal durchsuchen"
               onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v);">
-          <div class="search-field search-hero__field">
-            ${P.icon('search', 'search-field__icon')}
-            <input type="search" name="q" class="input search-field__input"
+          <div class="search__group">
+            <input type="search" name="q" class="input search-hero__input"
                    value="${P.escapeHtml(query)}"
                    placeholder="Suchbegriff eingeben …"
                    aria-label="Suchbegriff"
                    autocomplete="off">
+            <button class="btn btn--bare search-hero__submit" type="submit" aria-label="Suchen">${P.icon('search')}</button>
           </div>
-          <button class="btn btn--filled" type="submit">Suchen</button>
         </form>
         ${query && total > 0
           ? `<p class="search-hero__meta">${total} ${total === 1 ? 'Treffer' : 'Treffer'} in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>`
@@ -543,7 +542,7 @@ function renderSearchResults() {
   // Move keyboard focus into the hero search field — most users land on
   // this page intending to refine the query.
   setTimeout(() => {
-    const input = document.querySelector('.search-hero__field .search-field__input');
+    const input = document.querySelector('.search-hero__input');
     if (input) {
       input.focus();
       // Place caret at end without selecting all

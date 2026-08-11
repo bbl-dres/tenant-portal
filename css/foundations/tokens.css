@@ -320,6 +320,11 @@
   --text-chrome-sm:            0.875rem;   /* 14px — Tailwind fontSize.sm */
   --text-chrome-base:          1rem;       /* 16px — Tailwind fontSize.base */
   --text-chrome-lg:            1.125rem;   /* 18px — Tailwind fontSize.lg */
+  /* Static xl step — the DS search--large query text is `text-xl`
+     (designsystem/css/components/search.postcss:139), the STATIC
+     Tailwind size (app/tailwind.config.js fontSize.xl = 1.25rem), not
+     the responsive text--xl cascade. */
+  --text-chrome-xl:            1.25rem;    /* 20px — Tailwind fontSize.xl */
 
   --line-height-tight:         1.25;
   --line-height-snug:          1.375;

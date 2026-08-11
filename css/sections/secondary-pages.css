@@ -18,14 +18,52 @@
   margin: 0 0 var(--space-lg);
 }
 .search-hero__form {
-  display: flex;
-  gap: var(--space-sm);
-  align-items: stretch;
   max-width: 720px;
 }
-/* Hero variant of .search-field — just stretches to fill the form row.
-   (Sizing/background come from .input; the leading icon from .search-field.) */
-.search-hero__field { flex: 1; }
+/* DS search--large composition (designsystem/css/components/
+   search.postcss:113-146 + app/pages/searchResults.vue:15-40): ONE
+   relative .search__group at h-16 (64px); the query input is text-xl
+   bold with shadow-none and pr-12 clearance for the control pinned
+   inside; the submit is a bare icon-only button absolutely pinned to
+   the right edge (top-0 right-0 bottom-0) — no external labelled
+   button, no leading magnifier in the field. */
+.search-hero__form .search__group {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 4rem;                           /* DS .search--large .search__group h-16 */
+}
+.search-hero__input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  font-size: var(--text-chrome-xl);       /* DS text-xl (static 20px) */
+  font-weight: var(--font-weight-bold);   /* DS font-bold — placeholder inherits */
+  box-shadow: none;                       /* DS shadow-none */
+  padding-right: var(--space-2xl);        /* DS .search__group input pr-12 */
+}
+.search-hero__submit {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;            /* DS .search__group .btn */
+  /* DS z-20 (search.postcss:144) — keeps the pinned submit above the
+     focused input, which the global :focus-visible rule lifts to z-10. */
+  z-index: 20;
+  min-height: 0;
+}
+.search-hero__submit .inline-icon {
+  width: var(--icon-md);                  /* DS Btn size lg icon tier */
+  height: var(--icon-md);
+  margin-right: 0;
+}
+/* DS hides the WebKit cancel/decoration chrome inside a .search__group
+   (designsystem/css/components/input.postcss:166-171) — the group's own
+   submit control is the only affordance in the field. */
+.search__group input[type="search"]::-webkit-search-cancel-button,
+.search__group input[type="search"]::-webkit-search-decoration,
+.search__group input[type="search"]::-webkit-search-results-button,
+.search__group input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
 .search-hero__meta {
   margin: var(--space-lg) 0 0;
   /* A11Y-002: the hero sits on .section--alt (secondary-50 tint) where
