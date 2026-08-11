@@ -36,7 +36,7 @@
 }
 .table th,
 .table td {
-  padding: var(--space-md);                      /* CD: py-4 (16px) — was 8px, ~half DS */
+  padding: var(--space-md) var(--space-lg);      /* DS px-6 py-4 — 24px inline / 16px block */
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
@@ -74,13 +74,12 @@
 .table--rows-clickable tr:hover td { cursor: pointer; }
 
 /* `.table--compact` — tighter cell padding for data-dense reviewer
-   surfaces (queue, inbox). Mirrors CD Bund `.table--compact`. Trims
-   the row height from ~52 px to ~36 px so 25 rows fit a single screen
-   without scrolling. The .table--zebra alternation stays useful at
-   this density. */
+   surfaces (queue, inbox). Mirrors CD Bund `.table--compact`: px-2 py-2
+   (8px all sides) + text--sm. The .table--zebra alternation stays
+   useful at this density. */
 .table--compact th,
 .table--compact td {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-sm);
 }
 /* DS `.table--compact { @apply border-0 shadow-none }` — dense surfaces
    drop the contained-object border + shadow. */
@@ -139,7 +138,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: 4px 4px 4px var(--space-md);
+  padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-md);
   background: var(--color-secondary-50);
   border: 1px solid var(--color-secondary-100);
   border-radius: var(--radius-full);
@@ -365,7 +364,7 @@ a.btn[aria-disabled="true"] {
   background: var(--color-gray-200);
   border: 1px solid transparent;
   color: var(--color-text-primary);
-  padding: 6px var(--space-md);
+  padding: var(--space-2xs) var(--space-md);   /* DS tag-item__text py-1.5 (6px) / __inner px-4 */
   min-height: var(--btn-min-h);          /* 44 px — DS pattern */
   border-radius: var(--radius-full);
   font-family: inherit;
