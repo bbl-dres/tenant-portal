@@ -119,6 +119,11 @@ async function handleHash() {
   // the arrow keys on every route visited afterwards. Same-path query changes
   // (#/queue?page=2) keep it; renderQueue rewires on re-render anyway.
   if (h !== '#/queue') teardownQueueShortcuts();
+  // Scope hook for the floor-plan print sheet (css/foundations/print.css):
+  // body.route-floor must never outlive the floor view — printing any other
+  // route has to keep the federal chrome (CSS-002). Cleared on every
+  // navigation; renderFloorDetail re-adds it when a plan actually renders.
+  document.body.classList.remove('route-floor');
   // Language is a URL parameter and the source of truth: apply `?lang` when
   // present, otherwise re-inject the active language so every view's URL keeps
   // it (shareable + consistent across navigation). replaceState avoids a loop.
@@ -3417,6 +3422,11 @@ async function renderFloorDetail({ id, floorSlug }) {
       </div>
     </section>
   `;
+
+  // Print scope: only while an actual floor plan is on screen may the print
+  // stylesheet strip the federal chrome down to the bare plan sheet
+  // (css/foundations/print.css). handleHash clears the class on navigation.
+  document.body.classList.add('route-floor');
 
   wirePropertyGallery(t);
   initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, colorMode);
