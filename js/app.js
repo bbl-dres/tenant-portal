@@ -1284,9 +1284,12 @@ function renderInboxEmptyState() {
 }
 
 function rowHtml(a) {
+  // A11Y-001: the row is pure navigation, so the primary cell carries a real
+  // <a href> — the only keyboard/AT-operable path into the detail view. The
+  // tr onclick stays for the mouse "whole row is a target" affordance.
   return `
     <tr data-app-id="${a.id}" onclick="location.hash='#/inbox/${a.id}';">
-      <td><strong>${a.id}</strong></td>
+      <td><a href="#/inbox/${a.id}"><strong>${a.id}</strong></a></td>
       <td>${P.escapeHtml(a.address)}</td>
       <td>${a.type}</td>
       <td>${P.formatDate(a.submittedAt)}</td>
@@ -1570,7 +1573,7 @@ function renderQueue() {
           </thead>
           <tbody>
             ${pageItems.map(a => `
-              <tr data-app-id="${a.id}">
+              <tr data-app-id="${a.id}" tabindex="0" aria-label="Antrag ${P.escapeHtml(a.id)} öffnen">
                 <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
                 <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
                 <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
@@ -1630,21 +1633,35 @@ let _queueKeydownHandler = null;
 function wireQueueShortcuts() {
   const rows = Array.from(document.querySelectorAll('tbody tr[data-app-id]'));
   let idx = -1;
-  const focus = (i) => {
-    if (rows[idx]) rows[idx].style.outline = '';
+  // A11Y-001: the j/k cursor moves REAL DOM focus — rows carry tabindex="0"
+  // (same pattern as the properties list rows), so the global :focus-visible
+  // ring replaces the old style.outline paint, which drew a fake focus ring
+  // on an element that was never focused and that AT could not track.
+  const moveCursor = (i) => {
     idx = Math.max(0, Math.min(rows.length - 1, i));
     const r = rows[idx];
-    if (r) { r.style.outline = '3px solid var(--color-focus)'; r.scrollIntoView({ block: 'nearest' }); }
+    if (r) {
+      try { r.focus({ preventScroll: true }); } catch { r.focus(); }
+      r.scrollIntoView({ block: 'nearest' });
+    }
   };
   // Remove the previous handler so revisiting #/queue doesn't stack listeners
   // (each closing over a now-detached `rows` — drew multiple outlines + leaked).
   if (_queueKeydownHandler) document.removeEventListener('keydown', _queueKeydownHandler);
   _queueKeydownHandler = (e) => {
     if (e.target.matches('input, textarea, select')) return;
-    if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); focus(idx + 1); }
-    if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); focus(idx - 1); }
+    // A row reached with Tab (not j/k) becomes the cursor too, so
+    // Enter/Space work on whichever row actually has focus.
+    const focusedRow = e.target.closest?.('tr[data-app-id]');
+    if (focusedRow) idx = rows.indexOf(focusedRow);
+    if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); moveCursor(idx + 1); }
+    if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); moveCursor(idx - 1); }
     if ((e.key === 'Enter' || e.key === 'o') && rows[idx]) { e.preventDefault(); location.hash = '#/review/' + rows[idx].getAttribute('data-app-id'); }
-    if (e.key === 'x' && rows[idx]) { const cb = rows[idx].querySelector('.rowSel'); if (cb) cb.checked = !cb.checked; }
+    if ((e.key === 'x' || (e.key === ' ' && focusedRow)) && rows[idx]) {
+      if (e.key === ' ') e.preventDefault(); // selection toggle, not page scroll
+      const cb = rows[idx].querySelector('.rowSel');
+      if (cb) cb.checked = !cb.checked;
+    }
   };
   document.addEventListener('keydown', _queueKeydownHandler);
 }
@@ -2957,7 +2974,7 @@ async function renderPropertyDetail({ id }) {
                       ${floorKpis.map(f => `
                         <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
                           <td>
-                            <strong>${P.escapeHtml(f.name)}</strong>
+                            <a href="#/properties/${t.id}/floors/${f.slug}"><strong>${P.escapeHtml(f.name)}</strong></a>
                             ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
                           </td>
                           <td class="floor-list__num">${f.roomCount}</td>
@@ -2978,7 +2995,7 @@ async function renderPropertyDetail({ id }) {
                 : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.appsSection')}">
                      <thead><tr><th scope="col">${P.t('prop.application')}</th><th scope="col">${P.t('prop.type')}</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th></tr></thead>
                      <tbody>
-                       ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><strong>${a.id}</strong></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
+                       ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><a href="#/inbox/${a.id}"><strong>${a.id}</strong></a></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
                      </tbody>
                    </table></div>`}
             </section>
