@@ -384,6 +384,10 @@
   --nav-height:                56px;
   --section-py:                3.5rem;          /* 56px base — scales below */
   --section-py-half:           1.75rem;         /* 28px base */
+  /* Hero top padding — DS hero rhythm is asymmetric: pt-12 lg:pt-14
+     3xl:pt-20 on top, container--pb (= --section-py) on the bottom
+     (designsystem css/sections/hero.postcss). */
+  --hero-pt:                   3rem;            /* 48px base — scales below */
 
   /* ── RADIUS (mirror CD Bund Tailwind borderRadius scale) ───────────────
      Full DS scale kept verbatim, including steps with no current consumer
@@ -537,8 +541,8 @@
    (128 px). Previous portal scale added a 96 px step at 2xl, which we
    removed for exact CD parity. Half scale: py-7 lg:py-10 3xl:py-16
    (28 → 40 → 40 → 64 px). */
-@media (min-width: 1024px) { :root { --section-py: 5rem;   --section-py-half: 2.5rem; } }
-@media (min-width: 1920px) { :root { --section-py: 8rem;   --section-py-half: 4rem;   } }
+@media (min-width: 1024px) { :root { --section-py: 5rem;   --section-py-half: 2.5rem; --hero-pt: 3.5rem; } }
+@media (min-width: 1920px) { :root { --section-py: 8rem;   --section-py-half: 4rem;   --hero-pt: 5rem;   } }
 
 /* Breakpoint reference (use in @media; CSS variables can't be used in @media):
      xs:  480px   sm:  640px   md:  768px   lg:  1024px
