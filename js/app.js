@@ -4727,10 +4727,20 @@ function openDocumentViewer(doc, siblings) {
       </div>
       <a class="docviewer-share__mail" href="${mail}" data-share-email>${P.icon('envelope')} Per E-Mail teilen</a>`;
     backdrop.appendChild(pop);
-    // Anchor under the share button, right-aligned to it.
+    // Anchor under the share button, right-aligned to it. The right offset
+    // must also be clamped against the popover's own width (readable only
+    // after appendChild): on narrow phones the share button sits further
+    // left than the popover is wide, and an unclamped offset pushes the
+    // panel past the LEFT viewport edge (RWD-007). 8px minimum inset on
+    // both sides; the CSS max-width (100vw − 32px) guarantees both clamps
+    // are satisfiable at once.
     const r = btn.getBoundingClientRect();
     pop.style.setProperty('top', (r.bottom + 8) + 'px');
-    pop.style.setProperty('right', Math.max(8, window.innerWidth - r.right) + 'px');
+    const right = Math.min(
+      Math.max(8, window.innerWidth - r.right),
+      window.innerWidth - pop.offsetWidth - 8,
+    );
+    pop.style.setProperty('right', right + 'px');
     btn.setAttribute('aria-expanded', 'true');
     const input = pop.querySelector('.docviewer-share__input');
     input.value = url;
