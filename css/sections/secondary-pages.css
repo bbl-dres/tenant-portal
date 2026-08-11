@@ -338,10 +338,22 @@
 .table--documents .col-size    { width: 8%; }
 .table--documents .col-lang    { width: 8%; }
 .table--documents .col-date    { width: 8%; }
-.table--documents .col-action  { width: 2%; }
+/* A11Y-007: the old 2% column squeezed the only per-row download affordance
+   to an 8 px sliver (the icon shrank 24 -> 4 px via the global svg
+   max-width:100%). Fixed 56 px column (44 px target + cell padding) and an
+   explicit 44x44 inline-flex box on the anchor — CD button tier target. */
+.table--documents .col-action  { width: 56px; }
 .docs-table__linked { color: var(--color-text-secondary); }
 .docs-table__action { text-align: right; }
-.docs-table__download { color: var(--color-primary); }
+.docs-table__download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-primary);
+}
+.docs-table__download .inline-icon { margin-right: 0; }
 .docs-table__download:hover { color: var(--color-link-hover); }
 
 /* ── PROFILE PAGE ────────────────────────────────────────────────────────
