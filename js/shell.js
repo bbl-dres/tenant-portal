@@ -409,7 +409,8 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
     ${renderPrototypeNotice()}
     ${renderConsentBanner()}
 
-    <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+    <a href="#main" class="skip-to-content"
+       onclick="event.preventDefault(); document.getElementById('main')?.focus();">Zum Inhalt springen</a>
 
     <header class="site-header" role="banner">
       <div class="top-bar">
