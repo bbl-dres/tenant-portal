@@ -471,17 +471,17 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
                 <button class="header-search__toggle" type="button"
                         aria-expanded="false" aria-controls="headerSearchForm"
                         onclick="window.portal.toggleSearch(true)">
-                  <span>Suche</span>
+                  <span>${t('top.search')}</span>
                   ${icon('search')}
                 </button>
-                <form class="header-search__form" id="headerSearchForm" role="search" aria-label="Portal durchsuchen"
+                <form class="header-search__form" id="headerSearchForm" role="search" aria-label="${t('top.search')}"
                       onsubmit="event.preventDefault(); window.portal.submitSearch(this);">
                   <input class="header-search__input" id="headerSearchInput" type="search"
                          name="q"
                          placeholder="${t('top.searchPlaceholder')}" aria-label="${t('top.searchPlaceholder')}"
                          autocomplete="off"
                          onkeydown="if(event.key==='Escape') window.portal.toggleSearch(false);">
-                  <button class="header-search__submit" type="submit" aria-label="Suchen">
+                  <button class="header-search__submit" type="submit" aria-label="${t('top.search')}">
                     ${icon('search')}
                   </button>
                 </form>
@@ -538,16 +538,16 @@ export function renderFooter() {
               Bundesamt für Bauten und Logistik — nachhaltig, partnerschaftlich und vorbildlich.
             </p>
             <p class="footer-information__prototype-warning" role="note">
-              Diese Anwendung ist ein Prototyp. Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration.
+              ${t('proto.title')} ${t('proto.text')}
             </p>
           </div>
 
           <div class="footer-information__col footer-information__col--links">
             <h2 class="footer-information__heading">${t('footer.moreInfo')}</h2>
             <ul class="footer-information__list">
-              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">Rechtliche Grundlagen ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">${t('footer.legal')} ${icon('arrowRight', 'footer-information__arrow')}</a></li>
               <li><a href="https://www.bbl.admin.ch/de/e-rechnung" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Kontakt ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')} ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
 
@@ -1023,7 +1023,7 @@ export function shell({ activeNav = '', breadcrumb = [], deptSub = '' } = {}) {
                  // not sit in an aria-hidden subtree (WCAG 4.1.2). The link's
                  // own aria-label names it for AT.
                  +   '<div class="back-to-top-wrapper">'
-                 +     `<a class="app-footer__top-btn" href="#" aria-label="Zum Seitenanfang"
+                 +     `<a class="app-footer__top-btn" href="#" aria-label="${t('footer.backToTop')}"
                           onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });">${icon('chevronUp')}</a>`
                  +   '</div>'
                  + '</div>'

@@ -72,11 +72,12 @@ export function roleLabel(role) {
   })[role] || role;
 }
 
-// Single canonical Document.type → German label map. Used by the downloads
-// page, the property-detail Dokumente groups, and the linked-document table
-// helpers. Keys match the schema A.10 enum (canonical EN) in
-// docs/DATAMODEL.md. Add a new key here whenever the enum grows — both
-// consumer surfaces pick it up automatically.
+// Canonical Document.type enum → German fallback label. Keys match the
+// schema A.10 enum (canonical EN) in docs/DATAMODEL.md. UI surfaces must
+// localise through the matching doctype.* keys in data/i18n.json
+// (docTypeLabel in app.js) — this map stays the enum source and keeps
+// lib.js free of app-state imports. A new enum value needs BOTH an entry
+// here and a doctype.* key.
 export const DOC_TYPE_LABEL = {
   Lease:       'Mietvertrag',
   FloorPlan:   'Grundriss',

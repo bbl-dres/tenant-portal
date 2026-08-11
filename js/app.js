@@ -283,7 +283,7 @@ function gateLabel(h) {
     ['#/search', P.t('bc.search')],
   ];
   const hit = labels.find(([p]) => h === p || h.startsWith(p + '/'));
-  return hit ? hit[1] : 'Anmeldung erforderlich';
+  return hit ? hit[1] : P.t('login.title');
 }
 
 // Login gate — rendered by handleHash for any protected route while logged
@@ -301,10 +301,10 @@ function renderLoginGate(h) {
     <section class="section">
       <div class="container">
         <button class="btn btn--outline btn--sm login-gate__back" type="button" onclick="history.back()">
-          ${P.icon('arrowLeft')} Zurück
+          ${P.icon('arrowLeft')} ${P.t('btn.back')}
         </button>
         <h1 class="h1">${P.escapeHtml(label)}</h1>
-        <div class="login-gate" role="region" aria-label="Anmeldung erforderlich">
+        <div class="login-gate" role="region" aria-label="${P.t('login.title')}">
           <span class="login-gate__icon" aria-hidden="true">${P.icon('lock')}</span>
           <div class="login-gate__body">
             <p class="login-gate__text">
@@ -314,7 +314,7 @@ function renderLoginGate(h) {
             </p>
             <button class="btn btn--outline login-gate__cta" type="button"
                     onclick="window.portal.login('${P.escapeJs(h)}')">
-              ${P.icon('login')} Anmelden mit eIAM
+              ${P.icon('login')} ${P.t('login.eiam')}
             </button>
           </div>
         </div>
@@ -2626,9 +2626,9 @@ function propertyCard(t, index = 99) {
 }
 
 // ── 10. LIEGENSCHAFTS-DETAIL ─────────────────────────────────────────────
-// Document-type labels come from the canonical DOC_TYPE_LABEL map in lib.js
-// — shared with the downloads page so a Permit doesn't render as
-// "Bewilligung" here and "Baubewilligung" there.
+// Document-type labels resolve through the doctype.* keys in data/i18n.json
+// (enum per DOC_TYPE_LABEL in lib.js) — shared with the downloads page so a
+// Permit renders identically on both surfaces, in every language.
 
 // Property-detail Dokumente: four buckets by user intent (not by chronology).
 // Empty buckets are skipped at render time.
@@ -3838,10 +3838,15 @@ function buildRoomPopupHtml(t, floor, space) {
 }
 
 // ── 11. DOWNLOADS — paginated Document table (§ 6.2) ─────────────────────
-// Document-type DE labels come from the canonical DOC_TYPE_LABEL map in
-// lib.js — shared with the property-detail Dokumente groups so labels
-// don't diverge between the two surfaces.
 const DOCUMENT_PAGE_SIZE = 25;
+
+// Localised Document.type label. The canonical DOC_TYPE_LABEL map in lib.js
+// stays the enum source (schema A.10); every enum value carries a doctype.*
+// key in data/i18n.json. Values outside the enum fall back to the raw type
+// string — never to a doctype.* key name in the UI.
+function docTypeLabel(type) {
+  return DOC_TYPE_LABEL[type] ? P.t('doctype.' + type) : (type || '');
+}
 
 function documentLinkedLabel(d) {
   const ref = (d.linkedTo || [])[0];
@@ -3895,8 +3900,8 @@ function renderDownloads() {
           </div>
           <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
             <option value="">${P.t('downloads.allTypes')}</option>
-            ${Object.entries(DOC_TYPE_LABEL).map(([v, l]) =>
-              `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${l}</option>`).join('')}
+            ${Object.keys(DOC_TYPE_LABEL).map(v =>
+              `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${docTypeLabel(v)}</option>`).join('')}
           </select>
           <select class="input docs-filter-bar__select" id="filterDocBuilding" aria-label="Liegenschaft">
             <option value="">${P.t('downloads.allProperties')}</option>
@@ -3955,7 +3960,7 @@ function renderDownloads() {
     if (!pills) return;
     const active = [];
     if (docState.type) {
-      active.push({ key: 'type', label: 'Typ', value: DOC_TYPE_LABEL[docState.type] || docState.type });
+      active.push({ key: 'type', label: 'Typ', value: docTypeLabel(docState.type) });
     }
     if (docState.building) {
       const b = P.state.buildings.find(x => x.buildingId === docState.building);
@@ -4028,7 +4033,7 @@ function renderDownloads() {
               ${P.icon('document')}<span>${P.escapeHtml(d.title)}</span>
             </a>
           </td>
-          <td><span class="badge badge--info">${P.escapeHtml(DOC_TYPE_LABEL[d.type] || d.type)}</span></td>
+          <td><span class="badge badge--info">${P.escapeHtml(docTypeLabel(d.type))}</span></td>
           <td class="docs-table__linked">${P.escapeHtml(documentLinkedLabel(d))}</td>
           <td><code>${P.escapeHtml(d.format || '')}</code></td>
           <td>${P.escapeHtml(d.size || '')}</td>
@@ -4537,7 +4542,7 @@ function docPageText(doc, n, total) {
         </header>
         <h1 class="docpage__title">${P.escapeHtml(doc.title)}</h1>
         <dl class="docpage__metagrid">
-          <div><dt>Typ</dt><dd>${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)}</dd></div>
+          <div><dt>Typ</dt><dd>${P.escapeHtml(docTypeLabel(doc.type))}</dd></div>
           <div><dt>Format</dt><dd>${P.escapeHtml(doc.format || '')}</dd></div>
           <div><dt>Ausgestellt</dt><dd>${P.escapeHtml(doc.issuedAt || '—')}</dd></div>
           <div><dt>Sprachen</dt><dd>${P.escapeHtml((doc.languages || []).join(' · ').toUpperCase() || '—')}</dd></div>
@@ -4779,7 +4784,7 @@ function openDocumentViewer(doc, siblings) {
         ${P.icon('document', 'docviewer__heading-icon')}
         <div class="docviewer__heading-text">
           <p class="docviewer__title">${P.escapeHtml(doc.title)}</p>
-          <p class="docviewer__sub">${P.escapeHtml(DOC_TYPE_LABEL[doc.type] || doc.type)} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span>${hasSiblings ? ` · <span class="docviewer__docnum">Dokument ${pos + 1} / ${list.length}</span>` : ''}</p>
+          <p class="docviewer__sub">${P.escapeHtml(docTypeLabel(doc.type))} · ${P.escapeHtml(doc.format || '')} · <span data-page-indicator>Seite 1 / ${total}</span>${hasSiblings ? ` · <span class="docviewer__docnum">Dokument ${pos + 1} / ${list.length}</span>` : ''}</p>
         </div>
       </div>
       <div class="docviewer__actions">
