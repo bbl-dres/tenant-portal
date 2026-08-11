@@ -2123,7 +2123,7 @@ function wirePropertiesSearchCombobox(view) {
 
   const optionEls = () => Array.from(list.querySelectorAll('.combobox__option'));
   const open = () => { list.hidden = false; input.setAttribute('aria-expanded', 'true'); };
-  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; };
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; input.removeAttribute('aria-activedescendant'); };
 
   function render() {
     const parts = [];
@@ -2148,7 +2148,11 @@ function wirePropertiesSearchCombobox(view) {
     }
     if (!parts.length) { list.innerHTML = ''; close(); return; }
     list.innerHTML = parts.join('');
+    // A11Y-014: every option needs an id so aria-activedescendant can point
+    // at the active one while arrowing (WAI-ARIA APG combobox pattern).
+    optionEls().forEach((o, i) => { o.id = 'propertiesSearchOption-' + i; o.setAttribute('aria-selected', 'false'); });
     activeIndex = -1;
+    input.removeAttribute('aria-activedescendant');
     open();
   }
 
@@ -2196,7 +2200,14 @@ function wirePropertiesSearchCombobox(view) {
     if (!opts.length) return;
     if (list.hidden) open();
     activeIndex = Math.max(0, Math.min(opts.length - 1, activeIndex + delta));
-    opts.forEach((o, i) => o.classList.toggle('combobox__option--active', i === activeIndex));
+    // A11Y-014: mirror the visual highlight in ARIA state — aria-selected on
+    // the option, aria-activedescendant on the input — so screen readers
+    // announce the option under the cursor instead of hearing nothing.
+    opts.forEach((o, i) => {
+      o.classList.toggle('combobox__option--active', i === activeIndex);
+      o.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+    });
+    input.setAttribute('aria-activedescendant', opts[activeIndex].id);
     opts[activeIndex].scrollIntoView({ block: 'nearest' });
   }
 
