@@ -2063,6 +2063,38 @@ function renderQueue() {
             <p class="page-header__sub">Vorgänge zur Prüfung in Ihrer Verwaltungseinheit</p>
           </div>
         </header>
+
+        <!-- Same catalogue bar as every other list. The queue filters by the
+             review state a reviewer actually triages by; no view switch,
+             because a work queue has one useful shape. -->
+        ${catalogueBar({
+          id: 'queue',
+          search: true,
+          q: '',
+          searchLabel: P.t('queue.searchLabel'),
+          placeholder: P.t('queue.searchPlaceholder'),
+          count: `${queue.length} ${queue.length === 1 ? 'Pendenz' : 'Pendenzen'}`,
+          filterLabel: P.t('props.filter'),
+          filterCount: 0,
+          panel: `
+            <fieldset class="catbar__fieldset">
+              <legend class="catbar__legend">Status</legend>
+              <div class="catbar__options">
+                <label class="catbar__option">
+                  <input type="radio" name="queue-status" value="" checked>
+                  <span>Alle (${queue.length})</span>
+                </label>
+                ${['submitted', 'in_review_gs', 'clarification']
+                  .filter(s => queue.some(a => a.status === s))
+                  .map(s => `
+                    <label class="catbar__option">
+                      <input type="radio" name="queue-status" value="${s}">
+                      <span>${CASE_STATUS_LABELS[s]} (${queue.filter(a => a.status === s).length})</span>
+                    </label>`).join('')}
+              </div>
+            </fieldset>`,
+        })}
+
         <div class="table-wrapper">
         <table class="table table--zebra table--rows-clickable table--compact">
           <caption class="sr-only">Pendenzen mit Antragsteller, Objekt, Einreichedatum und Status</caption>
@@ -2072,17 +2104,8 @@ function renderQueue() {
               <th scope="col">Antrag</th><th scope="col">Antragsteller</th><th scope="col">Objekt</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
             </tr>
           </thead>
-          <tbody>
-            ${pageItems.map(a => `
-              <tr data-app-id="${a.id}" tabindex="0" aria-label="Antrag ${P.escapeHtml(a.id)} öffnen">
-                <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
-                <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
-                <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
-                <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(a.address)}</td>
-                <td onclick="location.hash='#/review/${a.id}';">${P.formatDate(a.submittedAt)}</td>
-                <td onclick="location.hash='#/review/${a.id}';">${P.statusBadge(a.status)}</td>
-              </tr>
-            `).join('') || `<tr><td colspan="6" class="table-empty">Keine offenen Pendenzen.</td></tr>`}
+          <tbody id="queueTbody">
+            ${pageItems.map(queueRowHtml).join('') || `<tr><td colspan="6" class="table-empty">Keine offenen Pendenzen.</td></tr>`}
           </tbody>
         </table>
         </div>
@@ -2128,6 +2151,7 @@ function renderQueue() {
   });
   wirePaginationInput('queuePaginationInput');
   wireQueueShortcuts();
+  wireQueueFilters(pageItems);
 }
 
 let _queueKeydownHandler = null;
@@ -2138,6 +2162,50 @@ function teardownQueueShortcuts() {
   document.removeEventListener('keydown', _queueKeydownHandler);
   _queueKeydownHandler = null;
 }
+// One queue row. Extracted so the catalogue bar's status filter can re-render
+// the body in place, the same way the Vorgänge list does.
+function queueRowHtml(a) {
+  return `
+    <tr data-app-id="${a.id}" tabindex="0" aria-label="Antrag ${P.escapeHtml(a.id)} öffnen">
+      <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
+      <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
+      <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
+      <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(a.address)}</td>
+      <td onclick="location.hash='#/review/${a.id}';">${P.formatDate(a.submittedAt)}</td>
+      <td onclick="location.hash='#/review/${a.id}';">${P.statusBadge(a.status)}</td>
+    </tr>
+  `;
+}
+
+// Text + status filtering over the rendered queue rows, in page rather than
+// through the hash: the reviewer keeps their row selection and the filter
+// panel stays open while they triage.
+function wireQueueFilters(rows) {
+  const radios = Array.from(document.querySelectorAll('input[name="queue-status"]'));
+  const filterText = document.getElementById('queue-q');
+  const tbody = document.getElementById('queueTbody');
+  if (!tbody) return;
+  let activeStatus = '';
+  const apply = () => {
+    const t = (filterText?.value || '').toLowerCase();
+    const filtered = rows.filter(a =>
+      (!activeStatus || a.status === activeStatus) &&
+      (!t || a.id.toLowerCase().includes(t) || (a.address || '').toLowerCase().includes(t))
+    );
+    tbody.innerHTML = filtered.map(queueRowHtml).join('')
+      || `<tr><td colspan="6" class="table-empty">Keine Treffer.</td></tr>`;
+    // Re-rendered rows lose their keyboard/selection handlers.
+    wireQueueShortcuts();
+  };
+  radios.forEach(r => r.addEventListener('change', () => {
+    activeStatus = r.value || '';
+    const badge = document.querySelector('#queue-filter .catbar__filter-count');
+    if (badge) badge.textContent = activeStatus ? '1' : '';
+    apply();
+  }));
+  filterText?.addEventListener('input', apply);
+}
+
 function wireQueueShortcuts() {
   const rows = Array.from(document.querySelectorAll('tbody tr[data-app-id]'));
   let idx = -1;

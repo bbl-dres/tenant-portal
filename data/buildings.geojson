@@ -26,7 +26,8 @@
         "egid": "100123456",
         "images": [
           "assets/images/buildings/BLD-2010-nord-nationalbank.jpg",
-          "assets/images/buildings/BLD-2010-nordfassade.jpg"
+          "assets/images/buildings/BLD-2010-nordfassade.jpg",
+          "assets/images/buildings/BLD-2010-strassenseite.jpg"
         ]
       }
     },

@@ -133,3 +133,10 @@ BLD-2017-umgebung.jpg
   License: CC BY-SA 3.0
   URL:     https://commons.wikimedia.org/wiki/File:Bundesamt_fuer_Kommunikation,_Biel_04_09.jpg
   Modification: downscaled to 960 px width.
+
+BLD-2010-strassenseite.jpg
+  Source:  Wikimedia Commons — File:CH-Bundeshaus-Nord.jpg
+  Author:  Unknown, presumably Swiss Federal Parliamentary Services staff
+  License: Copyrighted free use
+  URL:     https://commons.wikimedia.org/wiki/File:CH-Bundeshaus-Nord.jpg
+  Modification: downscaled to 960 px width.

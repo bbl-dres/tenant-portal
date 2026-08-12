@@ -365,12 +365,12 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
        <button class="main-navigation__link main-navigation__mobile-meta-account" type="button" onclick="window.portal.logout()">${icon('logout')}<span>${t('top.logout')}</span></button>`
     : `<button class="main-navigation__link main-navigation__mobile-meta-account" type="button" onclick="window.portal.login()">${icon('login')}<span>${t('top.login')}</span></button>`;
 
-  // Same CD canonical language order as the top-bar switcher: DE FR IT RM EN.
-  // RM is display-only (no Rumantsch strings) — rendered aria-disabled with
-  // no handler.
+  // Same language set and order as the top-bar switcher: DE FR IT EN.
+  // Rumantsch is not offered — the portal carries no Rumantsch strings, and a
+  // permanently disabled fifth option advertised a language it cannot serve.
   const mobileLangHtml = `
     <div class="main-navigation__mobile-lang" role="group" aria-label="${t('top.language')}">
-      ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['RM', 'rm', true], ['EN', 'en']].map(([code, lang, disabled]) => {
+      ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en']].map(([code, lang, disabled]) => {
         if (disabled) {
           return `<button class="main-navigation__mobile-lang-btn" type="button" lang="${lang}" aria-disabled="true">${code}</button>`;
         }
@@ -442,11 +442,11 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
                 <span id="langCurrent">${state.lang.toUpperCase()}</span>
                 ${icon('chevronDown')}
               </button>
-              <!-- CD canonical order (DS LanguageSwitcher.vue): the four
-                   national languages DE FR IT RM before EN; RM is listed
-                   but disabled — the portal carries no Rumantsch strings. -->
+              <!-- CD order (DS LanguageSwitcher.vue) minus Rumantsch: the DS
+                   lists all four national languages, but this portal has no
+                   Rumantsch content, so it offers DE FR IT EN. -->
               <ul class="language-switcher__dropdown" role="listbox" aria-label="${t('lang.label')}">
-                ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['RM', 'rm', true], ['EN', 'en']].map(([code, lang, disabled]) => {
+                ${[['DE', 'de'], ['FR', 'fr'], ['IT', 'it'], ['EN', 'en']].map(([code, lang, disabled]) => {
                   const isActive = !disabled && state.lang === lang;
                   return `<li role="presentation"><button class="language-switcher__option${isActive ? ' language-switcher__option--active' : ''}" role="option" aria-selected="${isActive}"${disabled ? ' aria-disabled="true" tabindex="-1"' : ''} data-lang="${code}" lang="${lang}" onclick="window.portal.pickLang('${code}')">${code}</button></li>`;
                 }).join('')}
@@ -801,7 +801,7 @@ export function toggleLang(forceOpen) {
 export function pickLang(code) {
   const lang = String(code).toLowerCase();
   toggleLang(false);
-  // RM (Rumantsch) is shown but not localised; ignore it and any no-op pick.
+  // Guard against a code the portal does not carry (e.g. an old RM link).
   if (!LANGS.includes(lang) || lang === state.lang) return;
   setLang(lang);   // persist + <html lang> (eCH-0059 a11y)
   // Write the choice into the URL (?lang) — the source of truth. The resulting
