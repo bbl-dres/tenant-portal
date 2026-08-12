@@ -78,6 +78,12 @@
    scannability the stripes provided. */
 .bg--secondary-50 .table--zebra tbody tr:nth-child(even) td,
 .section--alt .table--zebra tbody tr:nth-child(even) td { background: var(--color-white); }
+/* The thead tint has the same problem on those bands — but the CD table
+   anatomy keeps a TINTED header (DS thead bg-secondary-50), so instead of
+   going white (which would erase the header/body distinction) it steps one
+   ramp stop deeper, contrasting with band and body alike. */
+.bg--secondary-50 .table thead th,
+.section--alt .table thead th { background: var(--color-secondary-100); }
 
 /* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
    defaults `thead th` to UPPERCASE (regular weight, text-700). The portal
