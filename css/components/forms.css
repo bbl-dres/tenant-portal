@@ -116,6 +116,82 @@
      focused. */
   box-shadow: 0 0 0 2px var(--color-focus), var(--shadow);
 }
+/* ── MULTISELECT — searchable multi-value select ─────────────────────────
+   Portal-native implementation of the CD's multiselect
+   (designsystem css/components/multiselect.postcss — a restyled vue-select):
+   SQUARE box on the text-500 border (`--vs-border-radius: 0px`,
+   `--vs-border-color: text.500`), selected values as ROUNDED-FULL pills on
+   the gray-200 tint (`.vs__selected { px-3 py-1 rounded-full }`,
+   `--vs-selected-bg: text.200`), a deselect ✕ that hovers red-600
+   (`.vs__deselect { hover:text-red-600 }`), an inline search input, and a
+   white dropdown whose active row is text-600/white and whose selected
+   options carry a ✔ (`.vs__dropdown-option--selected::after`). Used by the
+   downloads Liegenschaft filter, where a plain select can't scale to
+   thousands of entries. */
+.multiselect { position: relative; }
+.multiselect__box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--btn-min-h);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-input);
+  cursor: text;
+}
+/* Field focus convention (see .input above): ring hugs the box. */
+.multiselect__box:focus-within { box-shadow: 0 0 0 2px var(--color-focus), var(--shadow); }
+.multiselect__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-2sm);
+  border-radius: var(--radius-full);
+  background: var(--color-gray-200);
+  font-size: var(--text-body-sm);
+  line-height: var(--line-height-tight);
+}
+.multiselect__deselect {
+  display: inline-flex;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+.multiselect__deselect:hover { color: var(--color-red-600); }
+.multiselect__deselect .inline-icon { width: var(--icon-xs); height: var(--icon-xs); margin-right: 0; }
+.multiselect__search {
+  flex: 1 1 8ch;
+  min-width: 8ch;
+  border: 0;
+  outline: none;
+  background: none;
+  font: inherit;
+}
+.multiselect__search::placeholder { color: var(--color-secondary-400); }
+.multiselect__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: var(--space-xs) 0;
+  list-style: none;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-input);
+  border-top: 0;                 /* DS: dropdown continues the box edge */
+  box-shadow: var(--shadow-lg);
+  max-height: 320px;             /* DS --vs-dropdown-max-height ≈ 350px */
+  overflow-y: auto;
+}
+.multiselect__option { padding: var(--space-xs) var(--space-md); cursor: pointer; }
+.multiselect__option--active { background: var(--color-gray-600); color: var(--color-white); }
+.multiselect__option[aria-selected="true"]::after { content: "✔"; margin-left: var(--space-sm); }
+.multiselect__empty { padding: var(--space-xs) var(--space-md); color: var(--color-text-secondary); }
+
 /* DS .input--sm = text--sm leading-6 (input.postcss:21-23). Live consumer:
    the floor-plan view-mode select. */
 .input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); line-height: 1.5rem; }

@@ -281,7 +281,6 @@
   margin: 0 auto;
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
 }
 .empty-state__glyph {
   font-size: var(--icon-2xl);
@@ -409,6 +408,76 @@
   border: none;
   border-top: 1px solid var(--color-border);
   margin: var(--space-md) 0;
+}
+
+/* ── DOWNLOADS GALLERY — document preview cards ──────────────────────────
+   CD card anatomy (media + body): the media box shows the document's REAL
+   first page — the docviewer's `.docpage` template scaled down inside an
+   aspect-cropped window (top of an A4 sheet peeking out of a secondary-50
+   well, like a sheet on a desk). `--preview-scale` is measured in JS
+   (wrapper width ÷ the docpage's fixed 760px) after each render. The card
+   is a <button> opening the viewer; hover follows the clickable-card
+   convention (shadow lift + title recolour, components/cards.css). */
+.doc-gallery {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-responsive);
+}
+@media (min-width: 640px)  { .doc-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .doc-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.doc-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--color-bg-default);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-fast);
+}
+.doc-card:hover { box-shadow: var(--shadow-card-hover); }
+.doc-card:hover .card__title { color: var(--color-primary); }
+.doc-card__preview {
+  /* The sheet width normally comes from the viewer's `.docviewer__pages`
+     container (media-viewer.css) — re-declare it here or `.docpage`'s
+     `width: var(--docpage-w)` collapses to shrink-to-fit. */
+  --docpage-w: 760px;
+  position: relative;
+  aspect-ratio: 210 / 190;
+  background: var(--color-secondary-50);
+  overflow: hidden;
+}
+/* Zoom-to-fit-width: the 760px sheet fills the card edge to edge and the
+   aspect box crops the page bottom. */
+.doc-card__preview .docpage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(var(--preview-scale, 0.45));
+  transform-origin: top left;
+  pointer-events: none;
+}
+/* Body: badge / title / meta each on their own line; the meta row pins to
+   the card's bottom edge so footers align across a grid row (grid items
+   stretch to equal height, the body absorbs the slack). */
+.doc-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  flex: 1;
+  padding: var(--space-lg);
+}
+.doc-card__body .card__title { margin: 0; }
+.doc-card__meta {
+  margin: 0;
+  margin-top: auto;
+  padding-top: var(--space-sm);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
 }
 
 /* ── DOWNLOADS PAGE ──────────────────────────────────────────────────────

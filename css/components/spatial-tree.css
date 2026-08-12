@@ -1,0 +1,155 @@
+/* ==========================================================================
+   components/spatial-tree.css �?? BBL Mieterportal
+
+   Sidebar structure tree (`.pf-layout` / `.pf-sidebar` / `.pf-tree`) �??
+   ported from the sister service-portal (css/sections/explorer.css, design
+   variant H2 of its «Standortbaum» wireframe study, chosen there after
+   comparing ten treatments against the real six-level hierarchy):
+
+     · INDENTATION carries affiliation, one step per level. It is applied as
+       row padding rather than as a margin on the list, so every row spans
+       the full column and its divider therefore reaches both edges.
+     · DIVIDERS separate rows, drawn as a LEADING rule (border-top) so the
+       column ends without a stray trailing line; the first top-level row
+       clears its rule (kept transparent so row heights stay equal).
+     · A VERTICAL GUIDE appears only along the SELECTED branch, sitting on
+       the axis of the parent's disclosure chevron. It passes BEHIND the
+       selected row: that row is where the trace arrives, not something it
+       crosses.
+
+   Token mapping from the service portal's scale (documented so a future
+   upstream diff stays mechanical): sp-1/1-5/2/2-5/4 �?? space-xs/2xs/sm/
+   0.625rem/md · stroke-1/2 �?? 1px/2px · surface-bg/border/radius/elevation �??
+   bg-default/secondary-100/radius-lg/shadow-sm · fs-xs/sm �?? chrome-xs/sm
+   (static �?? tree rows are UI chrome) · target-min �?? btn-min-h ·
+   state-bar-primary �?? inset 3px primary-600 · focus-ring �?? --color-focus.
+   ========================================================================== */
+
+/* Mobile first: below lg, place the tree above the results instead of
+   squeezing content beside a fixed-width sidebar. */
+.pf-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; align-items: start; margin-top: var(--space-md); }
+.pf-sidebar {
+  position: static;
+  max-height: 22rem;
+  overflow: auto;
+  padding: var(--space-sm);
+  background: var(--color-bg-default);
+  border: 1px solid var(--color-secondary-100);
+  box-shadow: var(--shadow-sm);
+}
+@media (min-width: 1024px) {
+  .pf-layout  { grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr); }
+  .pf-sidebar { position: sticky; top: var(--space-md); max-height: calc(100vh - 7rem); }
+}
+/* Collapsed state — the catbar's filter button discloses the sidebar
+   (?sb=0). Double class outranks the lg media rule re-declaring columns. */
+.pf-layout.pf-layout--sidebar-hidden { grid-template-columns: minmax(0, 1fr); }
+.pf-layout.pf-layout--sidebar-hidden .pf-sidebar { display: none; }
+.pf-sidebar__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); padding: var(--space-2xs) var(--space-sm) var(--space-sm); }
+.pf-sidebar__title { font-size: var(--text-chrome-lg); margin: 0; }
+/* Head close control — hides the sidebar (same action as the catbar filter
+   toggle, to which it delegates). 44px WCAG target, icon-only. */
+.pf-sidebar__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-min-h);
+  min-height: var(--btn-min-h);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.pf-sidebar__close:hover { color: var(--color-primary); }
+.pf-sidebar__close .inline-icon { width: var(--icon-sm); height: var(--icon-sm); margin-right: 0; }
+.pf-main { min-width: 0; }
+
+.pf-tree {
+  --tree-indent: 1rem;            /* one level */
+  --tree-gutter: var(--space-sm); /* space before the first level */
+  --tree-axis: .5rem;             /* half a chevron: the guide's axis */
+  --tree-divider: var(--color-secondary-200);
+  list-style: none; margin: 0; padding: 0;
+}
+.pf-tree__children { position: relative; list-style: none; margin: 0; padding: 0; }
+:is(.pf-tree__node, .pf-tree__leaf) {
+  position: relative; display: flex; align-items: center; gap: var(--space-sm); width: 100%;
+  padding: var(--space-2xs) var(--space-sm); border: 0; border-top: 1px solid var(--tree-divider);
+  border-radius: 0; background: none; font: inherit; font-size: var(--text-chrome-sm);
+  color: var(--color-text-primary); text-align: left; text-decoration: none; cursor: pointer;
+}
+/* The leading rule is kept but made invisible, so the first row stays exactly
+   as tall as every other one. `.is-first-row` is set by syncTreeCounts
+   (js/spatial-tree.js): filtering can hide the first top-level branch, and the
+   row that then leads the column must not draw a line under the head either. */
+.pf-tree > .pf-tree__item:first-child > :is(.pf-tree__node, .pf-tree__leaf),
+.pf-tree :is(.pf-tree__node, .pf-tree__leaf).is-first-row { border-top-color: transparent; }
+.pf-tree .pf-tree__children > .pf-tree__item > :is(.pf-tree__node, .pf-tree__leaf) { padding-left: calc(var(--tree-gutter) + 1 * var(--tree-indent)); }
+.pf-tree .pf-tree__children .pf-tree__children > .pf-tree__item > :is(.pf-tree__node, .pf-tree__leaf) { padding-left: calc(var(--tree-gutter) + 2 * var(--tree-indent)); }
+.pf-tree .pf-tree__children .pf-tree__children .pf-tree__children > .pf-tree__item > :is(.pf-tree__node, .pf-tree__leaf) { padding-left: calc(var(--tree-gutter) + 3 * var(--tree-indent)); }
+.pf-tree .pf-tree__children .pf-tree__children .pf-tree__children .pf-tree__children > .pf-tree__item > :is(.pf-tree__node, .pf-tree__leaf) { padding-left: calc(var(--tree-gutter) + 4 * var(--tree-indent)); }
+:is(.pf-tree__node, .pf-tree__leaf):hover { background: var(--color-secondary-50); color: var(--color-text-primary); text-decoration: none; }
+
+/* Two-tone selection: the ancestors of the selection are light, the selection
+   itself dark plus a primary edge bar, so selection never rests on colour
+   alone. z-index lifts it above the guide. */
+.pf-tree__node.is-path, .pf-tree__leaf.is-path { background: var(--color-gray-100); }
+:is(.pf-tree__node, .pf-tree__leaf).is-active {
+  z-index: 2; background: var(--color-secondary-100);
+  color: var(--color-gray-900); font-weight: var(--font-weight-bold);
+  box-shadow: inset 3px 0 0 var(--color-primary-600);
+}
+
+/* The guide, drawn only on a list that holds the selection or its path. It
+   stops half a row short of the bottom so it ends at the last child rather
+   than running past it. */
+.pf-tree__children:has(.is-active, .is-path)::before {
+  content: ""; position: absolute; top: 0; z-index: 1;
+  width: 1px; height: calc(100% - var(--btn-min-h) / 2);
+  background: var(--color-secondary-100);
+}
+/* The innermost list �?? the one that actually holds the selected row �?? carries
+   the accent, so the trace has exactly one visible end. */
+.pf-tree__children:has(> .pf-tree__item > .is-active)::before {
+  width: 2px; background: var(--color-primary-600);
+}
+.pf-tree .pf-tree__children::before { left: calc(var(--tree-gutter) + var(--tree-axis)); }
+.pf-tree .pf-tree__children .pf-tree__children::before { left: calc(var(--tree-gutter) + var(--tree-axis) + 1 * var(--tree-indent)); }
+.pf-tree .pf-tree__children .pf-tree__children .pf-tree__children::before { left: calc(var(--tree-gutter) + var(--tree-axis) + 2 * var(--tree-indent)); }
+.pf-tree .pf-tree__children .pf-tree__children .pf-tree__children .pf-tree__children::before { left: calc(var(--tree-gutter) + var(--tree-axis) + 3 * var(--tree-indent)); }
+
+/* Icon hooks. Double-class selectors: `icon()` emits `.inline-icon`, whose
+   base block (components/status.css) imports later at equal specificity and
+   would win with its 24px + trailing margin (same pattern as
+   `.inline-icon.section-cta__icon`, components/cards.css). */
+.inline-icon.pf-tree__chev {
+  width: var(--icon-sm); height: var(--icon-sm); margin-right: 0; flex: none;
+  transition: transform var(--transition-fast); color: var(--color-text-secondary);
+}
+.pf-tree__node[aria-expanded="true"] > .pf-tree__chev { transform: rotate(90deg); }
+.inline-icon.pf-tree__ico { width: var(--icon-sm); height: var(--icon-sm); margin-right: 0; flex: none; color: var(--color-text-muted); }
+:is(.pf-tree__node, .pf-tree__leaf).is-active .pf-tree__ico { color: var(--color-gray-800); }
+/* Guarantee 44px targets on touch devices while preserving desktop density. */
+@media (max-width: 1023.98px), (hover: none) {
+  :is(.pf-tree__node, .pf-tree__leaf) { min-height: var(--btn-min-h); padding-block: 0.625rem; }
+}
+/* The key column: monospace, tabular, measured in `ch` so the segments of one
+   level line up exactly and the labels all start at the same x. */
+.pf-tree__id {
+  flex: none; min-width: 2ch; font-family: var(--font-family-mono); font-size: var(--text-chrome-xs);
+  color: var(--color-text-secondary); font-variant-numeric: tabular-nums;
+}
+:is(.pf-tree__node, .pf-tree__leaf).is-active .pf-tree__id { color: var(--color-gray-700); }
+.pf-tree__label { flex: 0 1 auto; min-width: 4ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The count reads as «(7)». The parentheses are presentation, added here
+   rather than in the markup, so the element's text stays the bare number
+   that scripts and assertions parse. */
+.pf-tree__n {
+  flex: none; margin-left: var(--space-xs); font-size: var(--text-chrome-xs);
+  color: var(--color-text-secondary); font-variant-numeric: tabular-nums;
+}
+.pf-tree__n::before { content: "("; }
+.pf-tree__n::after { content: ")"; }
+:is(.pf-tree__node, .pf-tree__leaf).is-active .pf-tree__n { color: var(--color-gray-700); }
+:is(.pf-tree__node, .pf-tree__leaf):focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }

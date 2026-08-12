@@ -85,21 +85,30 @@ await run(reporter, async () => {
         check(`property-detail@${width}: all 4 stat values fully visible`, statsOk);
       }
       if (route.label === 'downloads') {
-        // The filters moved into the shared catalogue bar: the search field
-        // sits in the row, the two dropdowns in its filter panel. Measure the
-        // panel open, since a collapsed panel reports zero-height controls
-        // and would pass this check without ever testing them.
+        // The filters live in the shared catalogue bar: the search field sits
+        // in the row; the panel carries the Dokumenttyp CHECKBOX group and
+        // the Liegenschaft MULTISELECT (CD multiselect anatomy — pills +
+        // inline search in one box). Measure the panel open, since a
+        // collapsed panel reports zero-height controls and would pass this
+        // check without ever testing them.
         await page.evaluate(() => {
-          const panel = document.getElementById('docs-panel');
+          // The filters live in the sidebar now (hidden by default) —
+          // open it the way the filter button does.
+          const layout = document.querySelector('.pf-layout');
           const toggle = document.getElementById('docs-filter');
-          if (panel) panel.hidden = false;
+          if (layout) layout.classList.remove('pf-layout--sidebar-hidden');
           if (toggle) toggle.setAttribute('aria-expanded', 'true');
         });
-        const controls = await page.evaluate(() =>
-          [...document.querySelectorAll('.catbar .input, #docs-panel .input')]
-            .map(el => Math.round(el.getBoundingClientRect().height)));
+        const controls = await page.evaluate(() => ({
+          inputs: [...document.querySelectorAll('.catbar .input')]
+            .map(el => Math.round(el.getBoundingClientRect().height)),
+          typeBoxes: document.querySelectorAll('#docs-sidebar input[name="docs-type"]').length,
+          buildingBoxes: document.querySelectorAll('#docs-sidebar input[name="docs-building"]').length,
+        }));
         check(`downloads@${width}: filter controls normal height (≤60 px)`,
-          controls.length >= 3 && controls.every(h => h <= 60), controls.join(', '));
+          controls.inputs.length >= 1 && controls.inputs.every(h => h <= 60)
+          && controls.typeBoxes >= 3 && controls.buildingBoxes >= 1,
+          JSON.stringify(controls));
       }
 
       if (width === 375) {

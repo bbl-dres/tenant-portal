@@ -37,6 +37,7 @@
 @import url('sections/footer.css');
 @import url('sections/secondary-pages.css');
 @import url('components/disclosure.css');
+@import url('components/spatial-tree.css');
 @import url('sections/home.css');
 @import url('sections/info.css');
 @import url('sections/wizard.css');

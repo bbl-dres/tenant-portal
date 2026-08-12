@@ -143,6 +143,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.table-hint`, `.table-empty` | (layout helpers)                  | helper paragraph below a table / centred empty-row cell              |
 | `.filter-pill[__remove/__remove-icon]` | (block, DS badge-adjacent) | active-filter pill with 44 px hit-slop remove control (the former `.tag-item`/`.filter-row` chip system was removed in the 2026-08 re-audit — unreferenced) |
 | `.page-header[__title/__sub/__actions/__count]` | (layout-only)   | H1 + side-actions row used on inbox / queue / detail; replaces ad-hoc inline flex blocks |
+| `.pf-layout`, `.pf-sidebar[__head/__title]`, `.pf-tree[__item/__node/__leaf/__chev/__ico/__id/__label/__n]` | (ported from service-portal explorer.css + spatial-tree.js) | Standort filter tree on #/properties: Land › Kanton › Ort › Liegenschaft, counts, two-tone selection with branch guide, ARIA tree keyboard pattern. URL keys land/region/city/obj match the sister portal. js/spatial-tree.js + css/components/spatial-tree.css |
 | `.section-intro[--tight]` | (layout-only)                        | lead paragraph under a section-heading — `max-width: 60ch`, secondary text |
 | `.login-page[__title/__subhead/__dl/__cta/__hint(--muted)]` | (block) | narrow centred form layout for login / contact pages                |
 | `.login-gate[__icon/__body/__text/__cta/__back]` | (block, Kundenportal BBL gate pattern) | central auth gate for protected routes while logged out: alt-surface box, lock glyph, eIAM CTA preserving the requested deep link |

@@ -129,16 +129,24 @@
    item marked per the DS localization list (top-bar.postcss:73-80): white
    bold text + a 2px primary-600 left border on transparent ground.
    Closed by default. */
-.language-switcher { position: relative; }
+/* Trigger geometry mirrors the DS native-select switcher EXACTLY
+   (language-switcher.postcss:5-59): em-based width `w-[3.5em] lg:w-[4.5em]`
+   (tracks the chrome font size), `pl-1 lg:pl-4` left padding, `h-full`
+   through the whole chain so the control fills the top bar, and a 24px
+   (`w-6`) chevron slot. The DS recolours the chevron to text-300 on
+   select hover/focus; the portal recolours the whole control — same
+   rendered result on a two-glyph code. (The dropdown PANEL below stays a
+   documented portal addition — the DS uses the native option list.) */
+.language-switcher { position: relative; height: 100%; }
 .top-bar__lang {
   background: transparent;
   border: none;
   color: inherit;
-  /* CD: chevron sits flush with the right edge of the switcher container —
-     visually aligning with the right edge of the dropdown panel below. */
-  padding: var(--space-xs) 0 var(--space-xs) var(--space-sm);
+  width: 3.5em;                       /* DS w-[3.5em] */
+  padding: 0 0 0 var(--space-xs);     /* DS pl-1 */
+  height: 100%;                       /* DS h-full — fills the 44/48/52 bar */
   display: inline-flex;
-  gap: var(--space-2xs);
+  justify-content: space-between;     /* code left, chevron on the right edge */
   align-items: center;
   font-family: inherit;
   font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
@@ -147,11 +155,15 @@
   border-radius: var(--radius);
   min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
+@media (min-width: 1024px) {
+  .top-bar__lang { width: 4.5em; padding-left: var(--space-md); }  /* DS lg:w-[4.5em] lg:pl-4 */
+}
 .top-bar__lang:hover { color: var(--color-gray-300); }
-/* CD ChevronDown.svg has ~19% inner whitespace on the right (path ends at
-   x=19.42 of the 24-unit viewBox). Pull the SVG ~4px right so the visible
-   glyph aligns with the right edge of the dropdown panel below. */
-.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); margin-right: calc(var(--space-xs) * -1); }
+/* DS `.select__icon` chevron slot is w-6 = 24px. CD ChevronDown.svg has
+   ~19% inner whitespace on the right (path ends at x=19.42 of the 24-unit
+   viewBox) — pull the SVG ~4px right so the visible glyph aligns with the
+   right edge of the dropdown panel below. */
+.top-bar__lang svg { width: var(--icon-base); height: var(--icon-base); margin-right: calc(var(--space-xs) * -1); }
 
 .language-switcher__dropdown {
   position: absolute;

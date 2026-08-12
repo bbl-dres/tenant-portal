@@ -31,7 +31,8 @@
       "im": "Nadine Frey",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 0
+    "openIssues": 0,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2011-AA-01",
@@ -65,7 +66,8 @@
       "im": "Nadine Frey",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 3
+    "openIssues": 3,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2012-AA-01",
@@ -99,7 +101,8 @@
       "im": "Nadine Frey",
       "flm": "Yvonne Egger"
     },
-    "openIssues": 0
+    "openIssues": 0,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2013-AA-01",
@@ -133,7 +136,8 @@
       "im": "Nadine Frey",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 1
+    "openIssues": 1,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2014-AA-01",
@@ -167,7 +171,8 @@
       "im": "Nadine Frey",
       "flm": "Yvonne Egger"
     },
-    "openIssues": 0
+    "openIssues": 0,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2015-AA-01",
@@ -201,7 +206,8 @@
       "im": "Nadine Frey",
       "flm": "Andrea Käser"
     },
-    "openIssues": 1
+    "openIssues": 1,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2016-AA-01",
@@ -235,7 +241,8 @@
       "im": "Christian Roth",
       "flm": "Andrea Käser"
     },
-    "openIssues": 0
+    "openIssues": 0,
+    "canton": "AG"
   },
   {
     "tenancyId": "T-2017-AA-01",
@@ -269,7 +276,8 @@
       "im": "Christian Roth",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 2
+    "openIssues": 2,
+    "canton": "BE"
   },
   {
     "tenancyId": "T-2018-AA-01",
@@ -303,7 +311,8 @@
       "im": "Sandra Brunner",
       "flm": "Andrea Käser"
     },
-    "openIssues": 1
+    "openIssues": 1,
+    "canton": "ZH"
   },
   {
     "tenancyId": "T-2019-AA-01",
@@ -337,6 +346,7 @@
       "im": "Luca Beretta",
       "flm": "Yvonne Egger"
     },
-    "openIssues": 0
+    "openIssues": 0,
+    "canton": "TI"
   }
 ]

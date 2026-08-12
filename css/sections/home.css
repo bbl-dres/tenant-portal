@@ -94,7 +94,6 @@
   position: relative;
   display: block;
   aspect-ratio: 16 / 9;
-  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   background: var(--color-secondary-800);
@@ -245,7 +244,6 @@
   line-height: var(--line-height-relaxed);
   padding: var(--space-lg) var(--space-xl);
   background: var(--color-bg-surface);
-  border-radius: var(--radius-lg);
 }
 .greeting-strip a { color: var(--color-primary); text-decoration: none; }
 .greeting-strip a:hover { text-decoration: underline; }

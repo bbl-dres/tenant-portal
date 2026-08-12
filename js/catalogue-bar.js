@@ -43,6 +43,10 @@ function viewSwitch(view, views) {
         </button>`).join('')}
     </div>`;
 }
+// (The filter toggle's chevron is panel-mode only: a drawer opens BELOW the
+// button, which the rotating chevron communicates. When `filterControls`
+// points the toggle at an external surface (the filter sidebar), the
+// pressed fill state carries the open/closed signal on its own.)
 
 /**
  * @param {object}   o
@@ -68,6 +72,7 @@ export function catalogueBar({
   id = 'cat', search = false, q = '', searchLabel = 'Suchen', placeholder = 'Suchen …',
   inputAttrs = '', searchSlot = '', count = '', sort = null,
   filterLabel = '', filterCount = 0, panel = '', panelOpen = false,
+  filterControls = '',   // id the toggle discloses; defaults to the bar's own panel
   view = '', views = null, extra = '',
 } = {}) {
   const searchHtml = search ? `
@@ -91,11 +96,11 @@ export function catalogueBar({
     </select>` : '';
 
   const filterHtml = filterLabel ? `
-    <button class="btn btn--bare catbar__filter" type="button" id="${id}-filter"
-            aria-expanded="${panelOpen}" aria-controls="${id}-panel">
+    <button class="btn btn--bare catbar__filter${panelOpen ? ' catbar__filter--open' : ''}" type="button" id="${id}-filter"
+            aria-expanded="${panelOpen}" aria-controls="${filterControls || `${id}-panel`}">
       ${icon('filter')}<span>${escapeHtml(filterLabel)}</span>
       <span class="catbar__filter-count"${filterCount ? '' : ' hidden'}>${filterCount || ''}</span>
-      ${icon('chevronDown', 'catbar__chevron')}
+      ${filterControls ? '' : icon('chevronDown', 'catbar__chevron')}
     </button>` : '';
 
   const controls = sortHtml + filterHtml + viewSwitch(view, views) + extra;
@@ -142,6 +147,7 @@ export function wireCatalogueBar({ id = 'cat', hashFor, onSearchInput } = {}) {
       const open = panel.hidden;
       panel.hidden = !open;
       filter.setAttribute('aria-expanded', String(open));
+      filter.classList.toggle('catbar__filter--open', open);
     });
   }
 

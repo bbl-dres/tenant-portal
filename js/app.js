@@ -33,6 +33,7 @@ renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
+import { treeHTML, wireTree, restoreTreeSelection, syncTreeCounts } from './spatial-tree.js';
 import { catalogueBar, wireCatalogueBar, setFilterCount } from './catalogue-bar.js';
 import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
 import {
@@ -2652,6 +2653,72 @@ function propertiesResultsHTML(view, filtered, page, query, ort, sort) {
     })}`;
 }
 
+// Country labels for the location tree + selection pill (data carries ISO
+// codes; the BBL portfolio is federal-wide, so foreign missions may appear).
+const COUNTRY_NAME = {
+  CH: 'Schweiz', DE: 'Deutschland', FR: 'Frankreich', IT: 'Italien',
+  AT: 'Österreich', US: 'USA', BR: 'Brasilien', JP: 'Japan', AU: 'Australien',
+};
+// Tree selection ⇄ URL: same query keys as the sister service-portal
+// (#/app/portfolio?land=CH&region=TG&city=…&obj=…) so deep links transfer
+// between the two prototypes. `region` maps onto the tenancy's canton.
+function parseTreeSel(params) {
+  const sel = {};
+  if (params.land)   sel.country = params.land;
+  if (params.region) sel.region  = params.region;
+  if (params.city)   sel.city    = params.city;
+  if (params.obj)    sel.id      = params.obj;
+  return sel;
+}
+// Counts reflect search + Ort facet, deliberately WITHOUT the tree selection
+// itself (upstream contract in js/spatial-tree.js — otherwise a click leaves
+// only the selected branch showing «1», a navigational dead end). `liveQuery`
+// lets the as-you-type preview feed its uncommitted search text.
+function syncPropertiesTree(liveQuery) {
+  const tree = document.querySelector('.pf-tree');
+  if (!tree) return;
+  const p = parseHashQuery(location.hash);
+  const query = liveQuery !== undefined ? liveQuery : (p.q || '').toLowerCase().trim();
+  syncTreeCounts(tree,
+    filterTenancies(getScopedTenancies(), query, (p.ort || '').trim()),
+    (t) => [t.country, t.canton, t.city], (t) => t.id);
+}
+// In-place refresh after a tree click (mirrors the sister portal's
+// renderMain): the URL is updated via replaceState so the tree DOM — and with
+// it every expanded branch — survives; results, pills, count and tree counts
+// re-render around it. Full route re-renders (back/forward, toolbar controls)
+// rebuild the tree and restore the selection from the URL instead.
+function refreshPropertiesResults(view) {
+  const p = parseHashQuery(location.hash);
+  const sel = parseTreeSel(p);
+  const query = (p.q || '').toLowerCase().trim();
+  const ort = (p.ort || '').trim();
+  const sort = ['name','area','stations'].includes(p.sort) ? p.sort : 'name';
+  const filtered = sortTenancies(filterTenancies(getScopedTenancies(), query, ort, sel), sort);
+  if (view === 'map') {
+    const ids = new Set(filtered.map(t => t.id));
+    _propertiesMarkers.forEach(m => { m.el.style.display = ids.has(m.id) ? '' : 'none'; });
+  } else {
+    const results = document.getElementById('propertiesResults');
+    if (results) {
+      results.innerHTML = propertiesResultsHTML(view, filtered, 1, p.q || '', ort, sort);
+      wirePaginationInput();
+    }
+  }
+  const pills = document.getElementById('propsActivePills');
+  if (pills) pills.innerHTML = renderPropertiesFilterPills({ view, query: (p.q || '').trim(), ort, sort });
+  const cnt = document.getElementById('props-count');
+  if (cnt) {
+    const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
+    const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
+    const shown = view === 'map' ? filtered.length : Math.min(perPage, filtered.length);
+    cnt.textContent = filtered.length === 0
+      ? P.t('props.noneFound')
+      : `${shown} ${P.t('props.ofTotal')} ${filtered.length}${totalPages > 1 ? ` · ${P.t('props.pageOf', { a: 1, b: totalPages })}` : ''}`;
+  }
+  syncPropertiesTree();
+}
+
 function renderProperties() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'properties', breadcrumb: [{ label: P.t('nav.properties') }] });
@@ -2660,17 +2727,18 @@ function renderProperties() {
   const allTenancies = getScopedTenancies();
 
   // URL state: ?view=gallery|list|map · ?q=… · ?ort=… · ?sort=… · ?page=N
+  // plus the tree selection ?land=…&region=…&city=…&obj=…
   const params = parseHashQuery(location.hash);
   const view = ['gallery','list','map'].includes(params.view) ? params.view : 'gallery';
   const query = (params.q || '').toLowerCase().trim();
   const ort = (params.ort || '').trim();
   const sort = ['name','area','stations'].includes(params.sort) ? params.sort : 'name';
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
-
-  // Filter options come from the data, so the panel never offers a value with
-  // zero matches.
-  const orte = Array.from(new Set(allTenancies.map(t => t.city).filter(Boolean))).sort((x, y) => x.localeCompare(y, 'de-CH'));
-  const filtered = sortTenancies(filterTenancies(allTenancies, query, ort), sort);
+  const sel = parseTreeSel(params);
+  // ?sb=0 hides the location sidebar (visible by default) — carried in the
+  // URL so the choice survives the full re-render every other control does.
+  const sidebarVisible = params.sb !== '0';
+  const filtered = sortTenancies(filterTenancies(allTenancies, query, ort, sel), sort);
   const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
   const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
@@ -2706,11 +2774,39 @@ function renderProperties() {
             </div>
           </div>
         ` : `
-          ${propertiesToolbar({ view, query, ort, orte, sort, count: countLabel })}
-          ${renderPropertiesFilterPills({ view, query, ort, sort })}
+          ${propertiesToolbar({ view, query, sort, count: countLabel, sidebarVisible,
+            locFilterCount: (Object.keys(sel).length ? 1 : 0) + (ort ? 1 : 0) })}
+          <div id="propsActivePills">${renderPropertiesFilterPills({ view, query, ort, sort })}</div>
 
-          <div id="propertiesResults">
-            ${propertiesResultsHTML(view, filtered, safePage, query, ort, sort)}
+          <div class="pf-layout${sidebarVisible ? '' : ' pf-layout--sidebar-hidden'}">
+            <aside class="pf-sidebar" id="props-sidebar" aria-label="Standorte">
+              <!-- No «Auswahl zurücksetzen» here: the tree selection appears
+                   as a removable pill in the active-filter row above, which is
+                   where every other filter is cleared (upstream rationale,
+                   service-portal portfolio.js). -->
+              <div class="pf-sidebar__head">
+                <h2 class="pf-sidebar__title">Standorte</h2>
+                <button type="button" class="pf-sidebar__close" aria-label="Standorte ausblenden">${P.icon('x')}</button>
+              </div>
+              ${treeHTML(allTenancies, {
+                ariaLabel: 'Standorte',
+                levels: [
+                  { key: 'country', icon: 'globe', word: 'Land', label: v => COUNTRY_NAME[v] || v },
+                  { key: 'canton', attr: 'region', icon: 'map', word: 'Kanton' },
+                  { key: 'city', icon: 'mapMarker', word: 'Ort' },
+                ],
+                leaf: {
+                  icon: () => 'building', word: 'Liegenschaft',
+                  label: t => t.buildingName, objId: t => t.id,
+                  sort: (a, b) => a.buildingName.localeCompare(b.buildingName, 'de'),
+                },
+              })}
+            </aside>
+            <div class="pf-main">
+              <div id="propertiesResults">
+                ${propertiesResultsHTML(view, filtered, safePage, query, ort, sort)}
+              </div>
+            </div>
           </div>
         `}
       </div>
@@ -2719,6 +2815,22 @@ function renderProperties() {
 
   if (view === 'map') initPropertiesMap(filtered);
   wirePropertiesToolbar(view);
+
+  const sidebar = document.querySelector('.pf-sidebar');
+  if (sidebar) {
+    wireTree(sidebar, {
+      onSelect: (nextSel) => {
+        const p = parseHashQuery(location.hash);
+        // replaceState, not location.hash: the tree DOM (expanded branches)
+        // must survive a selection click — see refreshPropertiesResults.
+        history.replaceState(null, '',
+          buildPropertiesHash({ view, q: p.q || '', ort: p.ort || '', sort: p.sort || 'name', page: 1, sel: nextSel }));
+        refreshPropertiesResults(view);
+      },
+    });
+    restoreTreeSelection(sidebar, sel);
+    syncPropertiesTree();
+  }
 }
 
 
@@ -2734,11 +2846,22 @@ function parseHashQuery(hash) {
   });
   return out;
 }
-function buildPropertiesHash({ view, q, ort, sort, page }) {
+function buildPropertiesHash({ view, q, ort, sort, page, sel, sb }) {
+  // `sel` (tree selection) and `sb` (sidebar visibility) default to whatever
+  // the current URL carries, so every existing caller — pills, pagination,
+  // sort, view switch — preserves them without knowing about them. Pass
+  // `sel: {}` to clear the selection; `sb: true/false` to set visibility.
+  const s = sel !== undefined ? sel : parseTreeSel(parseHashQuery(location.hash));
+  const sbHidden = sb !== undefined ? !sb : parseHashQuery(location.hash).sb === '0';
   const parts = [];
   if (view)        parts.push('view=' + encodeURIComponent(view));
   if (q)           parts.push('q='    + encodeURIComponent(q));
   if (ort)         parts.push('ort='  + encodeURIComponent(ort));
+  if (s.country)   parts.push('land='   + encodeURIComponent(s.country));
+  if (s.region)    parts.push('region=' + encodeURIComponent(s.region));
+  if (s.city)      parts.push('city='   + encodeURIComponent(s.city));
+  if (s.id)        parts.push('obj='    + encodeURIComponent(s.id));
+  if (sbHidden)    parts.push('sb=0');
   if (sort && sort !== 'name') parts.push('sort=' + encodeURIComponent(sort));
   if (page && page > 1) parts.push('page=' + page);
   parts.push('lang=' + state.lang);   // keep the active language in shareable URLs
@@ -2748,8 +2871,15 @@ function buildPropertiesHash({ view, q, ort, sort, page }) {
 // Ort replaces the former PFM-Kategorie as the filter dimension: the category
 // was dropped from the data, and location is the axis a reader actually
 // narrows a federal portfolio by.
-function filterTenancies(list, q, ort) {
+function filterTenancies(list, q, ort, sel = {}) {
   let out = list;
+  // Tree selection (country › canton › city › single object). `region` is the
+  // URL/selection key for the canton level — same vocabulary as the sister
+  // service-portal explorers.
+  out = out.filter(t => (!sel.id || t.id === sel.id)
+    && (!sel.country || t.country === sel.country)
+    && (!sel.region || t.canton === sel.region)
+    && (!sel.city || t.city === sel.city));
   if (ort) out = out.filter(t => t.city === ort);
   if (q) {
     out = out.filter(t => {
@@ -2776,7 +2906,7 @@ function sortTenancies(list, sort) {
 // place combobox — passed through as extra input attributes plus the listbox
 // slot, so the shared component keeps owning the row while this page keeps
 // owning its suggestions.
-function propertiesToolbar({ view, query, ort, orte, sort, count }) {
+function propertiesToolbar({ view, query, sort, count, sidebarVisible, locFilterCount }) {
   return catalogueBar({
     id: 'props',
     search: true,
@@ -2794,21 +2924,15 @@ function propertiesToolbar({ view, query, ort, orte, sort, count }) {
         ['stations', P.t('props.sortStations')],
       ],
     },
+    /* The filter toggle discloses the LOCATION SIDEBAR (visible by default)
+       instead of opening a radio panel — the pf-tree owns location filtering,
+       and a second Ort facet in a drawer duplicated it. The badge counts
+       active location filters (tree selection / legacy ?ort) so a hidden
+       sidebar never hides active filter state. */
     filterLabel: P.t('props.filter'),
-    filterCount: ort ? 1 : 0,
-    panelOpen: !!ort,
-    panel: `
-      <fieldset class="catbar__fieldset">
-        <legend class="catbar__legend">${P.t('props.place')}</legend>
-        <div class="catbar__options">
-          ${orte.map(o => `
-            <label class="catbar__option">
-              <input type="radio" name="props-ort" value="${P.escapeHtml(o)}" ${ort === o ? 'checked' : ''}>
-              <span>${P.escapeHtml(o)}</span>
-            </label>`).join('')}
-          ${ort ? `<a class="link catbar__reset" href="${buildPropertiesHash({ view, q: query, sort, page: 1 })}">${P.t('props.allPlaces')}</a>` : ''}
-        </div>
-      </fieldset>`,
+    filterCount: locFilterCount,
+    panelOpen: sidebarVisible,
+    filterControls: 'props-sidebar',
     view,
     views: [
       ['gallery', P.t('props.view.gallery'), 'grid'],
@@ -2823,11 +2947,20 @@ function renderPropertiesFilterPills({ view, query, ort, sort }) {
   const active = [];
   if (query) active.push({ key: 'q',   label: P.t('props.search'), value: query });
   if (ort)   active.push({ key: 'ort', label: P.t('props.place'),  value: ort });
+  // Tree selection appears as a removable pill here — this row is where every
+  // filter is cleared (the sidebar itself carries no reset control).
+  const sel = parseTreeSel(parseHashQuery(location.hash));
+  if (Object.keys(sel).length) {
+    const obj = sel.id ? getScopedTenancies().find(x => x.id === sel.id) : null;
+    const value = sel.id ? ((obj && obj.buildingName) || sel.id)
+      : sel.city || sel.region || (COUNTRY_NAME[sel.country] || sel.country);
+    active.push({ key: 'sel', label: 'Auswahl', value });
+  }
   if (active.length === 0) return '';
   const hrefWithout = (key) => {
     const params = parseHashQuery(location.hash);
     const next = { view, q: params.q || '', ort: params.ort || '', sort, page: 1 };
-    next[key] = '';
+    if (key === 'sel') next.sel = {}; else next[key] = '';
     return buildPropertiesHash(next);
   };
   return `
@@ -2842,7 +2975,7 @@ function renderPropertiesFilterPills({ view, query, ort, sort }) {
           </a>
         </span>
       `).join('')}
-      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, sort, page: 1 })}">${P.t('props.resetFilters')}</a>
+      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, sort, page: 1, sel: {} })}">${P.t('props.resetFilters')}</a>
     </div>
   `;
 }
@@ -2866,11 +2999,29 @@ function wirePropertiesToolbar(view) {
     },
   });
   wirePropertiesSearchCombobox(view);
-  document.querySelectorAll('input[name="props-ort"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      const p = parseHashQuery(location.hash);
-      location.hash = buildPropertiesHash({ view, q: p.q || '', ort: radio.value, sort: p.sort || 'name', page: 1 });
-    });
+  // The filter button discloses the location sidebar in place (no navigation
+  // — the tree DOM and its expanded branches survive); replaceState keeps
+  // the visibility in the URL so it survives the next full re-render.
+  const filterBtn = document.getElementById('props-filter');
+  if (filterBtn) filterBtn.addEventListener('click', () => {
+    const layout = document.querySelector('.pf-layout');
+    if (!layout) return;
+    const hidden = layout.classList.toggle('pf-layout--sidebar-hidden');
+    filterBtn.setAttribute('aria-expanded', String(!hidden));
+    filterBtn.classList.toggle('catbar__filter--open', !hidden);
+    const p = parseHashQuery(location.hash);
+    history.replaceState(null, '', buildPropertiesHash({
+      view, q: p.q || '', ort: p.ort || '', sort: p.sort || 'name',
+      page: Math.max(1, parseInt(p.page || '1', 10) || 1), sb: !hidden,
+    }));
+  });
+  // The X in the sidebar head hides the panel too — it delegates to the
+  // filter toggle so state, URL and pressed tint stay in one code path;
+  // focus lands on the toggle, which is what re-opens the panel.
+  const sidebarClose = document.querySelector('.pf-sidebar__close');
+  if (sidebarClose && filterBtn) sidebarClose.addEventListener('click', () => {
+    filterBtn.click();
+    filterBtn.focus();
   });
   const clearBtn = document.querySelector('[data-action="clear-search"]');
   if (clearBtn) clearBtn.addEventListener('click', () => {
@@ -2892,8 +3043,12 @@ function previewPropertiesFilter(view) {
   if (!input) return;
   const queryRaw = input.value.trim();
   const query = queryRaw.toLowerCase();
-  const ort = parseHashQuery(location.hash).ort || '';
-  const filtered = filterTenancies(getScopedTenancies(), query, ort);
+  const p = parseHashQuery(location.hash);
+  const ort = p.ort || '';
+  const filtered = filterTenancies(getScopedTenancies(), query, ort, parseTreeSel(p));
+  // Tree counts follow the live keystroke too (they reflect search + facets,
+  // never the tree's own selection).
+  syncPropertiesTree(query);
   if (view === 'map') {
     const ids = new Set(filtered.map(t => t.id));
     _propertiesMarkers.forEach(m => { m.el.style.display = ids.has(m.id) ? '' : 'none'; });
@@ -2901,7 +3056,7 @@ function previewPropertiesFilter(view) {
   }
   const results = document.getElementById('propertiesResults');
   if (results) {
-    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, ort, parseHashQuery(location.hash).sort || 'name');
+    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, ort, p.sort || 'name');
     wirePaginationInput();
   }
 }
@@ -3309,11 +3464,11 @@ function initPropertiesMap(items) {
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [8.2275, 46.8182], zoom: 7,
       attributionControl: { compact: true },
-      // The map fills most of a phone viewport; without cooperative
-      // gestures every one-finger drag pans the map and traps page
-      // scroll (two-finger pan / ctrl+wheel zoom instead).
-      cooperativeGestures: true,
-      locale: MAP_COOP_LOCALE,
+      // No cooperativeGestures here: the map view IS the page content (the
+      // catalogue swaps to it), so direct wheel-zoom/one-finger-pan is the
+      // expected behaviour. The ctrl+zoom guard only earns its keep on maps
+      // embedded in a vertically scrollable page — of the portal's three
+      // maps, only the property-detail location map keeps it.
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     _propertiesMap = map;
@@ -4215,8 +4370,10 @@ function initPropertyDetailMap(t) {
       center: [t.lng, t.lat],
       zoom: 17.5,
       attributionControl: { compact: true },
-      // Same touch rationale as the portfolio + floor maps: one-finger
-      // drags must keep scrolling the page (two-finger pan / ctrl+wheel).
+      // The ONE map that keeps cooperativeGestures: it sits mid-page in the
+      // scrollable property-detail hero, where a bare wheel-zoom would trap
+      // page scroll. The portfolio map view and the floor-plan viewer are
+      // work surfaces and zoom directly.
       cooperativeGestures: true,
       locale: MAP_COOP_LOCALE,
     });
@@ -4752,11 +4909,9 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, initialColor)
       pitchWithRotate: false,
       dragRotate: false,
       touchZoomRotate: true,
-      // The floor canvas spans nearly the full phone viewport; cooperative
-      // gestures keep one-finger drags scrolling the page (two-finger pan /
-      // ctrl+wheel zoom for the map).
-      cooperativeGestures: true,
-      locale: MAP_COOP_LOCALE,
+      // No cooperativeGestures: the plan viewer is the surface the reader
+      // came to work in — direct zoom/pan beats the ctrl+wheel guard (kept
+      // only on the property-detail location map, which sits mid-page).
     });
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
@@ -4965,12 +5120,19 @@ function renderDownloads() {
   shell({ activeNav: 'downloads', breadcrumb: [{ label: P.t('nav.downloads') }] });
 
   // Filter + page state persisted in URL hash query (back/forward + shareable).
-  const docState = { type: '', building: '', q: '', page: 1 };
+  // Both filter dimensions are MULTI-value (csv in the URL): Dokumenttyp as a
+  // checkbox group, Liegenschaft through the searchable multiselect — both
+  // living in the filter SIDEBAR (visible by default, ?sb=0 hides it — same
+  // contract as #/properties).
+  const docState = { types: [], buildings: [], q: '', page: 1, sort: 'date', view: 'list', sidebar: true };
   const initial = new URLSearchParams((location.hash.split('?')[1] || ''));
-  docState.type     = initial.get('type')     || '';
-  docState.building = initial.get('building') || '';
+  docState.types     = (initial.get('type')     || '').split(',').filter(Boolean);
+  docState.buildings = (initial.get('building') || '').split(',').filter(Boolean);
   docState.q        = initial.get('q')        || '';
   docState.page     = parseInt(initial.get('page') || '1', 10);
+  docState.sort     = ['date', 'title', 'doctype'].includes(initial.get('sort')) ? initial.get('sort') : 'date';
+  docState.view     = initial.get('view') === 'gallery' ? 'gallery' : 'list';
+  docState.sidebar  = initial.get('sb') !== '0';
   // Deep link from the viewer's share popover (`?doc=<id>`): open that
   // document once the table is rendered. Captured before applyDocState()
   // rewrites the hash (which drops the one-shot `doc` param).
@@ -5000,67 +5162,91 @@ function renderDownloads() {
           placeholder: P.t('downloads.searchPlaceholder'),
       
           count: '',
+          sort: {
+            value: docState.sort,
+            options: [
+              ['date',    'Datum (neueste zuerst)'],
+              ['title',   'Titel (A–Z)'],
+              ['doctype', 'Typ (A–Z)'],
+            ],
+          },
           filterLabel: P.t('props.filter'),
-          filterCount: (docState.type ? 1 : 0) + (docState.building ? 1 : 0),
-          panelOpen: !!(docState.type || docState.building),
-          panel: `
-            <div class="catbar__panel-grid">
-              <div class="catbar__fieldset">
-                <label class="catbar__legend" for="filterDocType">${P.t('downloads.docType')}</label>
-                <select class="input" id="filterDocType">
-                  <option value="">${P.t('downloads.allTypes')}</option>
-                  ${Object.keys(DOC_TYPE_LABEL).map(v =>
-                    `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${docTypeLabel(v)}</option>`).join('')}
-                </select>
-              </div>
-              <div class="catbar__fieldset">
-                <label class="catbar__legend" for="filterDocBuilding">${P.t('nav.properties')}</label>
-                <select class="input" id="filterDocBuilding">
-                  <option value="">${P.t('downloads.allProperties')}</option>
-                  ${P.state.buildings.map(b =>
-                    `<option value="${b.buildingId}" ${docState.building === b.buildingId ? 'selected' : ''}>${P.escapeHtml(b.name)}</option>`).join('')}
-                </select>
-              </div>
-            </div>`,
+          filterCount: docState.types.length + docState.buildings.length,
+          panelOpen: docState.sidebar,
+          filterControls: 'docs-sidebar',
+          view: docState.view,
+          views: [
+            ['gallery', P.t('props.view.gallery'), 'grid'],
+            ['list',    P.t('props.view.list'),    'list'],
+          ],
         })}
 
-        <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
+        <div class="pf-layout${docState.sidebar ? '' : ' pf-layout--sidebar-hidden'}">
+          <aside class="pf-sidebar" id="docs-sidebar" aria-label="${P.t('props.filter')}">
+            <div class="pf-sidebar__head">
+              <h2 class="pf-sidebar__title">${P.t('props.filter')}</h2>
+              <button type="button" class="pf-sidebar__close" aria-label="${P.t('props.filter')} ausblenden">${P.icon('x')}</button>
+            </div>
+            <fieldset class="catbar__fieldset">
+              <legend class="catbar__legend">${P.t('downloads.docType')}</legend>
+              <div class="catbar__options catbar__options--stacked">
+                ${Object.keys(DOC_TYPE_LABEL).map(v => `
+                  <label class="catbar__option">
+                    <input type="checkbox" name="docs-type" value="${v}"${docState.types.includes(v) ? ' checked' : ''}>
+                    <span>${docTypeLabel(v)}</span>
+                  </label>`).join('')}
+              </div>
+            </fieldset>
+            <fieldset class="catbar__fieldset">
+              <legend class="catbar__legend">${P.t('nav.properties')}</legend>
+              <div class="catbar__options catbar__options--stacked">
+                ${P.state.buildings.map(b => `
+                  <label class="catbar__option">
+                    <input type="checkbox" name="docs-building" value="${P.escapeHtml(b.buildingId)}"${docState.buildings.includes(b.buildingId) ? ' checked' : ''}>
+                    <span>${P.escapeHtml(b.name)}</span>
+                  </label>`).join('')}
+              </div>
+            </fieldset>
+          </aside>
+          <div class="pf-main">
+            <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
 
-        <div class="docs-table-wrap">
-          <table class="table table--zebra table--documents">
-            <caption class="sr-only">Dokumente mit Typ, Liegenschaft, Format, Sprache und Download-Aktion</caption>
-            <thead>
-              <tr>
-                <th scope="col" class="col-title">Titel</th>
-                <th scope="col" class="col-type">Typ</th>
-                <th scope="col" class="col-linked">Verknüpft mit</th>
-                <th scope="col" class="col-format">Format</th>
-                <th scope="col" class="col-size">Grösse</th>
-                <th scope="col" class="col-lang">Sprache</th>
-                <th scope="col" class="col-date">Stand</th>
-                <th scope="col" class="col-action"><span class="sr-only">Aktion</span></th>
-              </tr>
-            </thead>
-            <tbody id="docTableBody"></tbody>
-          </table>
+            <div class="docs-table-wrap" id="docsListWrap">
+              <table class="table table--zebra table--documents">
+                <caption class="sr-only">Dokumente mit Typ, Liegenschaft, Format, Sprache und Download-Aktion</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-title">Titel</th>
+                    <th scope="col" class="col-type">Typ</th>
+                    <th scope="col" class="col-linked">Verknüpft mit</th>
+                    <th scope="col" class="col-format">Format</th>
+                    <th scope="col" class="col-size">Grösse</th>
+                    <th scope="col" class="col-lang">Sprache</th>
+                    <th scope="col" class="col-date">Stand</th>
+                    <th scope="col" class="col-action"><span class="sr-only">Aktion</span></th>
+                  </tr>
+                </thead>
+                <tbody id="docTableBody"></tbody>
+              </table>
+            </div>
+            <div class="doc-gallery" id="docsGalleryWrap" hidden></div>
+
+            <div id="docPagination"></div>   <!-- mount; paginationShell renders the <nav class="pagination"> -->
+          </div>
         </div>
-
-        <div id="docPagination"></div>   <!-- mount; paginationShell renders the <nav class="pagination"> -->
       </div>
     </section>
   `;
 
   function filteredDocs() {
     const q = docState.q.toLowerCase();
+    const linkedToBuilding = (d, buildingId) => (d.linkedTo || []).some(r =>
+      (r.entityType === 'Building' && r.entityId === buildingId) ||
+      (r.entityType === 'Tenancy' && P.state.tenancies.some(t =>
+        t.tenancyId === r.entityId && t.buildingId === buildingId)));
     return P.state.documents.filter(d => {
-      if (docState.type && d.type !== docState.type) return false;
-      if (docState.building) {
-        const linkedToBuilding = (d.linkedTo || []).some(r =>
-          (r.entityType === 'Building' && r.entityId === docState.building) ||
-          (r.entityType === 'Tenancy' && P.state.tenancies.some(t =>
-            t.tenancyId === r.entityId && t.buildingId === docState.building)));
-        if (!linkedToBuilding) return false;
-      }
+      if (docState.types.length && !docState.types.includes(d.type)) return false;
+      if (docState.buildings.length && !docState.buildings.some(id => linkedToBuilding(d, id))) return false;
       if (q) {
         const hay = (d.title + ' ' + documentLinkedLabel(d)).toLowerCase();
         if (!hay.includes(q)) return false;
@@ -5073,13 +5259,13 @@ function renderDownloads() {
     const pills = document.getElementById('docFilterPills');
     if (!pills) return;
     const active = [];
-    if (docState.type) {
-      active.push({ key: 'type', label: 'Typ', value: docTypeLabel(docState.type) });
-    }
-    if (docState.building) {
-      const b = P.state.buildings.find(x => x.buildingId === docState.building);
-      active.push({ key: 'building', label: 'Liegenschaft', value: b ? b.name : docState.building });
-    }
+    docState.types.forEach(v => {
+      active.push({ key: `type:${v}`, label: 'Typ', value: docTypeLabel(v) });
+    });
+    docState.buildings.forEach(id => {
+      const b = P.state.buildings.find(x => x.buildingId === id);
+      active.push({ key: `building:${id}`, label: 'Liegenschaft', value: b ? b.name : id });
+    });
     if (docState.q) {
       active.push({ key: 'q', label: 'Suche', value: docState.q });
     }
@@ -5104,28 +5290,33 @@ function renderDownloads() {
       btn.addEventListener('click', () => {
         const key = btn.getAttribute('data-clear');
         if (key === 'all') {
-          docState.type = ''; docState.building = ''; docState.q = '';
-          document.getElementById('filterDocType').value = '';
-          document.getElementById('filterDocBuilding').value = '';
+          docState.types = []; docState.buildings = []; docState.q = '';
           document.getElementById('docs-q').value = '';
-        } else if (key === 'type') {
-          docState.type = '';
-          document.getElementById('filterDocType').value = '';
-        } else if (key === 'building') {
-          docState.building = '';
-          document.getElementById('filterDocBuilding').value = '';
+        } else if (key.startsWith('type:')) {
+          docState.types = docState.types.filter(v => v !== key.slice(5));
+        } else if (key.startsWith('building:')) {
+          docState.buildings = docState.buildings.filter(v => v !== key.slice(9));
         } else if (key === 'q') {
           docState.q = '';
           document.getElementById('docs-q').value = '';
         }
         docState.page = 1;
+        syncPanelControls();
         applyDocState();
       });
     });
   }
 
+  const DOC_SORTS = {
+    date:    (a, b) => String(b.issuedAt || '').localeCompare(String(a.issuedAt || '')),
+    title:   (a, b) => a.title.localeCompare(b.title, 'de'),
+    doctype: (a, b) => docTypeLabel(a.type).localeCompare(docTypeLabel(b.type), 'de')
+      || a.title.localeCompare(b.title, 'de'),
+  };
+
   function applyDocState() {
     const all = filteredDocs();
+    all.sort(DOC_SORTS[docState.sort] || DOC_SORTS.date);
     const total = all.length;
     const totalPages = Math.max(1, Math.ceil(total / DOCUMENT_PAGE_SIZE));
     if (docState.page > totalPages) docState.page = totalPages;
@@ -5135,8 +5326,44 @@ function renderDownloads() {
 
     renderDocFilterPills();
 
+    // One results surface per view: the table (list, default) or the
+    // preview-card gallery. Only the active one is rendered.
+    const listWrap = document.getElementById('docsListWrap');
+    const galleryWrap = document.getElementById('docsGalleryWrap');
+    listWrap.hidden = docState.view !== 'list';
+    galleryWrap.hidden = docState.view !== 'gallery';
+    document.querySelectorAll('.view-switch__btn').forEach(b => {
+      const on = b.dataset.view === docState.view;
+      b.setAttribute('aria-pressed', String(on));
+      b.classList.toggle('view-switch__btn--active', on);
+    });
+    if (docState.view === 'gallery') {
+      galleryWrap.innerHTML = slice.length === 0
+        ? `<p class="table-empty">Keine Treffer für die aktuellen Filter.</p>`
+        : slice.map(d => `
+          <button type="button" class="doc-card" data-doc-id="${P.escapeHtml(d.id)}">
+            <span class="doc-card__preview" aria-hidden="true">${docPageHTML(d, 1, 1)}</span>
+            <span class="doc-card__body">
+              <span class="badge badge--info">${P.escapeHtml(docTypeLabel(d.type))}</span>
+              <span class="h4 card__title">${P.escapeHtml(d.title)}</span>
+              <span class="doc-card__meta">${P.escapeHtml([documentLinkedLabel(d), d.format, d.size, d.issuedAt]
+                .filter(Boolean).join(' · '))}</span>
+            </span>
+          </button>`).join('');
+      galleryWrap.querySelectorAll('.doc-card').forEach(card => {
+        card.addEventListener('click', () => window.t3lite.openDocViewer(card.getAttribute('data-doc-id')));
+      });
+      // The docpage template is a fixed 760px sheet; zoom to fit the card
+      // width exactly (edge to edge, cropped by the preview's aspect box).
+      const preview = galleryWrap.querySelector('.doc-card__preview');
+      if (preview) {
+        galleryWrap.style.setProperty('--preview-scale', (preview.clientWidth / 760).toFixed(4));
+      }
+    }
     const tbody = document.getElementById('docTableBody');
-    if (slice.length === 0) {
+    if (docState.view !== 'list') {
+      tbody.innerHTML = '';
+    } else if (slice.length === 0) {
       tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Keine Treffer für die aktuellen Filter.</td></tr>`;
     } else {
       tbody.innerHTML = slice.map(d => `
@@ -5191,26 +5418,89 @@ function renderDownloads() {
       if (e.key === 'Enter') { e.preventDefault(); goPage(); }
     });
 
+    // In-page filtering re-renders neither the bar nor its badge — sync it.
+    setFilterCount('docs', docState.types.length + docState.buildings.length);
     const qp = new URLSearchParams();
-    if (docState.type)     qp.set('type', docState.type);
-    if (docState.building) qp.set('building', docState.building);
+    if (docState.types.length)     qp.set('type', docState.types.join(','));
+    if (docState.buildings.length) qp.set('building', docState.buildings.join(','));
     if (docState.q)        qp.set('q', docState.q);
+    if (docState.sort !== 'date')      qp.set('sort', docState.sort);
+    if (docState.view === 'gallery')   qp.set('view', 'gallery');
+    if (!docState.sidebar)             qp.set('sb', '0');
     if (docState.page > 1) qp.set('page', docState.page);
     qp.set('lang', state.lang);   // keep the active language in shareable URLs
     const newHash = '#/downloads?' + qp.toString();
     if (location.hash !== newHash) history.replaceState(null, '', newHash);
   }
 
-  // The shared bar owns its filter-panel toggle; this page keeps its own
-  // in-page filtering, so no `hashFor` is handed over.
+  // This page filters/sorts/switches views IN PAGE (no hashFor): the bar's
+  // built-in bindings are hash-driven, so sort, view switch and the filter
+  // toggle are wired manually below.
   wireCatalogueBar({ id: 'docs' });
 
-  document.getElementById('filterDocType').addEventListener('change', e => {
-    docState.type = e.target.value; docState.page = 1; applyDocState();
+  // Filter button = disclosure of the filter sidebar (hidden by default).
+  const docsFilterBtn = document.getElementById('docs-filter');
+  if (docsFilterBtn) docsFilterBtn.addEventListener('click', () => {
+    const layout = document.querySelector('.pf-layout');
+    docState.sidebar = layout.classList.toggle('pf-layout--sidebar-hidden') === false;
+    docsFilterBtn.setAttribute('aria-expanded', String(docState.sidebar));
+    docsFilterBtn.classList.toggle('catbar__filter--open', docState.sidebar);
+    applyDocState();
   });
-  document.getElementById('filterDocBuilding').addEventListener('change', e => {
-    docState.building = e.target.value; docState.page = 1; applyDocState();
+  // Sidebar-head X — delegates to the toggle (one code path), focus returns
+  // to the control that re-opens the panel.
+  const docsSidebarClose = document.querySelector('.pf-sidebar__close');
+  if (docsSidebarClose && docsFilterBtn) docsSidebarClose.addEventListener('click', () => {
+    docsFilterBtn.click();
+    docsFilterBtn.focus();
   });
+
+  const docsSort = document.getElementById('docs-sort');
+  if (docsSort) docsSort.addEventListener('change', () => {
+    docState.sort = docsSort.value; docState.page = 1; applyDocState();
+  });
+
+  document.querySelectorAll('.view-switch__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      docState.view = btn.dataset.view === 'gallery' ? 'gallery' : 'list';
+      docState.page = 1; applyDocState();
+    });
+  });
+
+  // Dokumenttyp checkbox group (multi-value).
+  document.querySelectorAll('input[name="docs-type"]').forEach(box => {
+    box.addEventListener('change', () => {
+      docState.types = box.checked
+        ? [...docState.types, box.value]
+        : docState.types.filter(v => v !== box.value);
+      docState.page = 1; applyDocState();
+    });
+  });
+
+  // Liegenschaften checkbox group (multi-value). The CD multiselect
+  // (multiselect.postcss; CSS ported in components/forms.css) was tried here
+  // and parked — a second search input inside the filter sidebar competed
+  // with the bar's main search. Revisit when the building list outgrows a
+  // checkbox column.
+  document.querySelectorAll('input[name="docs-building"]').forEach(box => {
+    box.addEventListener('change', () => {
+      docState.buildings = box.checked
+        ? [...docState.buildings, box.value]
+        : docState.buildings.filter(v => v !== box.value);
+      docState.page = 1; applyDocState();
+    });
+  });
+
+  // Re-sync panel controls after a pill removal (they aren't re-rendered).
+  function syncPanelControls() {
+    document.querySelectorAll('input[name="docs-type"]').forEach(box => {
+      box.checked = docState.types.includes(box.value);
+    });
+    document.querySelectorAll('input[name="docs-building"]').forEach(box => {
+      box.checked = docState.buildings.includes(box.value);
+    });
+  }
+
   document.getElementById('docs-q').addEventListener('input', e => {
     docState.q = e.target.value; docState.page = 1; applyDocState();
   });

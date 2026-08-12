@@ -31,7 +31,6 @@
 .reviewer-marks {
   background: var(--color-white);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
   padding: var(--space-md);
   position: sticky;
   top: var(--space-md);
@@ -83,7 +82,6 @@
 /* Queue table tweaks */
 .queue-stats {
   background: var(--color-bg-alt);
-  border-radius: var(--radius-lg);
   padding: var(--space-md);
   margin-top: var(--space-md);
 }

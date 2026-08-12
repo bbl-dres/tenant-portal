@@ -601,6 +601,19 @@ html:has(body.docviewer-open) { overflow: hidden; }
   min-width: 0;
   max-width: 100%;
 }
+/* Toolbar sort — a bare dropdown, NOT the segmented form select: the CD
+   toolbar sort (search-results header) has no divider column and only a
+   small chevron; vertical dividers in the bar mark GROUPS (see the view
+   switch below), never individual dropdowns. `select.catbar__sort` outranks
+   `select.input` (forms.css) to strip the segmented background layers and
+   shrink the glyph to the filter toggle's 20px (.catbar__chevron). */
+select.catbar__sort {
+  background-image: url("../../assets/icons/ChevronDown.svg");
+  background-repeat: no-repeat;
+  background-position: right var(--space-xs) center;
+  background-size: var(--icon-sm) var(--icon-sm);
+  padding-inline-end: var(--space-xl);
+}
 .catbar__sort {
   min-height: var(--btn-min-h);
   border: none;
@@ -609,8 +622,21 @@ html:has(body.docviewer-open) { overflow: hidden; }
   font-size: var(--text-body-sm);
   max-width: 100%;
   text-overflow: ellipsis;
+  /* DS right-cluster sort select is text-right (search.postcss:228-234:
+     `.search-results__header__right { flex ml-auto; select { text-right } }`)
+     — the value hugs the control's right edge like the rest of the cluster. */
+  text-align: right;
 }
 .catbar__filter { min-height: var(--btn-min-h); white-space: nowrap; }
+/* Pressed state while the filter surface (panel or sidebar) is open. The DS
+   ships no switch/radio for disclosure buttons — its pressed vocabulary is a
+   FILL change (tag-item--active dark chip, top-bar--is-open bg-secondary-700,
+   pf-tree is-active bg-secondary-100). The selection tint + gray-900 text is
+   the same pairing as the DS neutral badge and the tree's active row. */
+.catbar__filter--open {
+  background: var(--color-secondary-100);
+  color: var(--color-gray-900);
+}
 .catbar__filter-count { font-weight: var(--font-weight-bold); }
 .catbar__chevron { width: var(--icon-sm); height: var(--icon-sm); }
 .catbar__filter[aria-expanded="true"] .catbar__chevron { transform: rotate(180deg); }
@@ -622,10 +648,13 @@ html:has(body.docviewer-open) { overflow: hidden; }
    zeroed the gap on every page that offers filtering. */
 .catbar { margin-bottom: var(--space-xl); }
 .catbar:has(+ .catbar__panel:not([hidden])) { margin-bottom: 0; }
+/* Tinted panel — the service-portal filter drawer's secondary-50 band
+   (same federal blue-gray tint as .section--alt): the panel reads as a
+   distinct settings surface instead of loose controls under the bar. */
 .catbar__panel {
   margin-bottom: var(--space-xl);
-  padding: var(--space-md) 0 var(--space-lg);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-lg);
+  background: var(--color-secondary-50);
 }
 .catbar__fieldset { border: none; margin: 0; padding: 0; }
 .catbar__legend {
@@ -639,6 +668,11 @@ html:has(body.docviewer-open) { overflow: hidden; }
   gap: var(--space-sm) var(--space-lg);
   align-items: center;
 }
+/* Sidebar variant — one option per row (the downloads filter sidebar). */
+.catbar__options--stacked { flex-direction: column; align-items: stretch; gap: var(--space-sm); }
+.pf-sidebar .catbar__fieldset { padding: var(--space-sm); }
+/* Air between filter groups in the sidebar. */
+.pf-sidebar .catbar__fieldset + .catbar__fieldset { margin-top: var(--space-lg); }
 .catbar__option {
   display: inline-flex;
   align-items: center;
@@ -659,35 +693,41 @@ html:has(body.docviewer-open) { overflow: hidden; }
   padding-left: var(--space-md);
   border-left: 1px solid var(--color-secondary-300);
 }
+/* Bare icon glyphs, per the CD reference (real admin.ch search header):
+   no visible labels, no active rail — the active view is the darker glyph,
+   hover recolours to primary. A centred square keeps the 44px target. */
 .view-switch__btn {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
+  justify-content: center;
+  width: var(--btn-min-h);
   min-height: var(--btn-min-h);
-  padding: var(--space-xs) var(--space-sm);
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: var(--text-body-sm);
   cursor: pointer;
 }
 .view-switch__btn:hover { color: var(--color-primary); }
-.view-switch__btn--active { color: var(--color-text-primary); }
-.view-switch__btn--active::after {
-  content: '';
-  position: absolute;
-  left: var(--space-xs);
-  right: var(--space-xs);
-  bottom: 0;
-  height: 3px;
-  background: var(--color-primary-500);
+/* Active view = the same DS fill-change pressed state as the open filter
+   toggle (selection tint + gray-900 glyph) — one pressed vocabulary across
+   the toolbar. */
+.view-switch__btn--active {
+  background: var(--color-secondary-100);
+  color: var(--color-gray-900);
 }
-.view-switch__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); }
-/* Below sm the labels go and the icons carry the switch — the row has to
-   keep search, count and controls on screen at 320px. */
-@media (max-width: 639.98px) {
-  .view-switch__label { display: none; }
+.view-switch__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); margin-right: 0; }
+/* Labels stay for assistive tech only (the buttons also carry title=). */
+.view-switch__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 /* The search-results page instead hides its whole switch on phones — the
    list view works everywhere, the grid is a preference. Moved here from

@@ -217,6 +217,9 @@
   cursor: pointer;
 }
 .filter-pills__clear-all:hover { color: var(--color-primary); }
+/* Explicit `display` defeats the `hidden` attribute's UA style — restore it
+   so the downloads view switch can hide the list surface. */
+.docs-table-wrap[hidden] { display: none; }
 .docs-table-wrap {
   display: block;
   width: 100%;
