@@ -94,7 +94,7 @@ export function catalogueBar({
     <button class="btn btn--bare catbar__filter" type="button" id="${id}-filter"
             aria-expanded="${panelOpen}" aria-controls="${id}-panel">
       ${icon('filter')}<span>${escapeHtml(filterLabel)}</span>
-      ${filterCount ? `<span class="catbar__filter-count">${filterCount}</span>` : ''}
+      <span class="catbar__filter-count"${filterCount ? '' : ' hidden'}>${filterCount || ''}</span>
       ${icon('chevronDown', 'catbar__chevron')}
     </button>` : '';
 
@@ -152,4 +152,18 @@ export function wireCatalogueBar({ id = 'cat', hashFor, onSearchInput } = {}) {
       });
     });
   }
+}
+
+/**
+ * Update the active-filter badge on a bar that filters IN PAGE (the bar itself
+ * is not re-rendered, so the count cannot come from `catalogueBar()`). The
+ * badge node is always emitted — hidden at zero — precisely so this can find
+ * it; when it was conditional the badge simply never appeared and an active
+ * filter was invisible once the panel was collapsed.
+ */
+export function setFilterCount(id, n) {
+  const badge = document.querySelector(`#${id}-filter .catbar__filter-count`);
+  if (!badge) return;
+  badge.textContent = n ? String(n) : '';
+  badge.hidden = !n;
 }

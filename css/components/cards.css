@@ -53,6 +53,14 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+/* CD `.grid--responsive-cols-3` (designsystem/css/layouts/grids.postcss:50):
+   `md:grid-cols-2 lg:grid-cols-3`. A fixed column count, not auto-fit — on a
+   hub page the row length is a composition decision, and auto-fit turns it
+   into whatever the viewport happens to allow (four across at 1440). */
+.card-grid--cols-3 { grid-template-columns: 1fr; }
+@media (min-width: 768px)  { .card-grid--cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .card-grid--cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
 /* "Alle X ansehen →" CTA placed below a preview card-grid (e.g. /home
    shows 4 services + this link to /services). Right-aligned like DS
    `.section__action`; spacing mirrors DS `pt-4 + relative top-6

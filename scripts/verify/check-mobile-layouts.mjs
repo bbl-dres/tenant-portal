@@ -27,6 +27,9 @@ const ROUTES = [
   { label: 'repair', hash: '#/repair' },
   { label: 'inbox', hash: '#/inbox' },
   { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' },
+  // The TOC aside stacks above the content below 1024 px; the NAW table and
+  // the download lists inside it are the widest content in the area.
+  { label: 'info-topic', hash: '#/info/ablauf' },
 ];
 
 const { server, baseUrl } = await startServer();

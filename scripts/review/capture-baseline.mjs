@@ -401,7 +401,7 @@ const STATES = [
     await page.keyboard.press('?');
     await page.waitForTimeout(400);
   } },
-  { id: 'state-accordion-open', role: 'LBO', base: '#/info', widths: [1280, 360], act: async (page) => {
+  { id: 'state-accordion-open', role: 'LBO', base: '#/info/faq', widths: [1280, 360], act: async (page) => {
     await page.click('.accordion button, .accordion__toggle, [aria-expanded="false"]');
     await page.waitForTimeout(400);
   } },

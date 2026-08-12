@@ -73,6 +73,6 @@
     "shortKey": "services.training.desc",
     "type": "view",
     "inMenu": false,
-    "target": { "kind": "section", "href": "#/info", "section": "schulungen" }
+    "target": { "kind": "route", "href": "#/info/schulungen" }
   }
 ]

@@ -33,12 +33,12 @@ renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
-import { catalogueBar, wireCatalogueBar } from './catalogue-bar.js';
+import { catalogueBar, wireCatalogueBar, setFilterCount } from './catalogue-bar.js';
 import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
   toggleNavMenu, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice, submitSearch, toggleSearch, toggleBurger,
-  shell, resolveService,
+  shell, resolveService, INFO_PAGES,
 } from './shell.js';
 import {
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
@@ -141,7 +141,7 @@ async function handleHash() {
   // non-public route renders the login gate instead of content. Replaces the
   // former silent deep-link auto-login, which hid the login concept entirely
   // — visitor feedback showed nobody realised more content exists behind it.
-  if (!state.user && !PUBLIC_HASHES.has(h.toLowerCase())) {
+  if (!state.user && !isPublicHash(h)) {
     renderLoginGate(h);
     markRouteRendered(h);
     return;
@@ -268,7 +268,21 @@ init();
 // the originally requested hash resolves, so shareable deep links still
 // land on the intended page — now with an explicit login step instead of
 // the former silent auto-login.
-const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info']);
+const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info', '#/news']);
+
+// «Wissen und Hilfsmittel» is public as a whole, so prefixes are tested
+// rather than each topic route being listed — the page list lives in
+// shell.js (INFO_PAGES) and must not need a second copy here to stay public.
+//
+// News is public for the same reason it now sits in that drawer: the landing
+// page already shows news cards to signed-out visitors, so gating the list
+// and the articles behind a login contradicted the teaser that led there.
+function isPublicHash(h) {
+  const lower = h.toLowerCase();
+  return PUBLIC_HASHES.has(lower)
+    || lower.startsWith('#/info/')
+    || lower.startsWith('#/news/');
+}
 
 // Best-effort label for the gated area — drives the gate's H1 + breadcrumb
 // so the visitor sees where the login leads. Built per call so labels
@@ -287,7 +301,7 @@ function gateLabel(h) {
     ['#/cleaning', P.t('services.cleaning')],
     ['#/mobiliar', P.t('services.furniture')],
     ['#/home', P.t('nav.start')],
-    ['#/news', 'News'],
+    ['#/news', P.t('nav.news')],
     ['#/profile', P.t('bc.profile')],
     ['#/search', P.t('bc.search')],
   ];
@@ -384,7 +398,11 @@ function registerRoutes() {
   P.registerRoute('#/cleaning',    renderCleaningForm);
   P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
   // Arbeitsinstrumente und Informationen — single long-scroll page (public)
-  P.registerRoute('#/info',                renderInfoPage);
+  P.registerRoute('#/info',                renderInfoOverview);
+  P.registerRoute('#/info/ablauf',         renderInfoAblauf);
+  P.registerRoute('#/info/faq',            renderInfoFaq);
+  P.registerRoute('#/info/vorgaben',       renderInfoVorgaben);
+  P.registerRoute('#/info/schulungen',     renderInfoSchulungen);
   P.registerRoute('#/search',              renderSearchResults);
 }
 
@@ -426,7 +444,6 @@ function buildSearchIndex() {
       type: s.type === 'action' ? 'Dienstleistung' : 'Bereich',
       title: s.label, lead: s.desc, date: '',
       href: s.href, external: s.external,
-      onclick: s.section ? `setTimeout(() => window.t3lite.scrollToInfo('${P.escapeJs(s.section)}'), 100);` : '',
       boost: SEARCH_BOOST.services,
       fields: { title: s.label, type: 'Dienstleistung Service', lead: s.desc },
     });
@@ -507,19 +524,35 @@ function buildSearchIndex() {
     });
   }
 
-  for (const it of INFO_TOC) {
+  // Topic PAGES, not section anchors: each carries its own href, so a hit
+  // lands on a page with a matching H1 and breadcrumb instead of scrolling
+  // an eight-section document to an arbitrary offset.
+  const infoEntries = [
+    { href: '#/info', title: P.t('info.title'), lead: P.t('info.lead') },
+    ...INFO_PAGES.map(p => ({ href: p.href, title: P.t(p.titleKey), lead: P.t(p.descKey) })),
+  ];
+  for (const it of infoEntries) {
     idx.push({
       kind: 'Informationen',
       type: 'Information',
-      title: it.label, lead: 'Abschnitt auf der Seite «Arbeitsinstrumente und Informationen».', date: '',
-      href: '#/info',
-      onclick: `setTimeout(() => window.t3lite.scrollToInfo('${P.escapeJs(it.id)}'), 100);`,
+      title: it.title, lead: it.lead, date: '',
+      href: it.href,
       boost: SEARCH_BOOST.info,
-      fields: { title: it.label, type: 'Information Arbeitsinstrument', lead: '' },
+      fields: { title: it.title, type: 'Information Arbeitsinstrument Wissen Hilfsmittel', lead: it.lead },
     });
   }
 
-  return idx;
+  // One destination, one hit. Sources legitimately overlap — Schulungen is a
+  // page in this area AND a cross-link in the service catalogue — and two
+  // results carrying the same href read as two different things. The
+  // higher-boosted entry wins, so a hit keeps the framing of the source that
+  // ranks it best.
+  const byHref = new Map();
+  for (const entry of idx) {
+    const seen = byHref.get(entry.href);
+    if (!seen || (entry.boost || 0) > (seen.boost || 0)) byHref.set(entry.href, entry);
+  }
+  return [...byHref.values()];
 }
 
 function searchHash({ q, sort, view, kind, page }) {
@@ -726,26 +759,100 @@ function renderSearchNoResults(query) {
 }
 
 
-// ── ARBEITSINSTRUMENTE UND INFORMATIONEN ─────────────────────────────────
-// Single long-scroll page with a sticky Inhaltsverzeichnis on the right
-// (kbob-fdk Handbuch & Downloads pattern; armasuisse Immo-Portal layout).
-// Public — no login required.
+// ── WISSEN UND HILFSMITTEL ───────────────────────────────────────────────
+// An overview plus four topic pages, listed by INFO_PAGES in shell.js and
+// opened from the nav drawer. Public — no login required.
+//
+// This area used to be ONE route carrying eight anchors. It is split because
+// the CD's second navigation level is a list of pages, not of in-page
+// anchors: every topic now has its own breadcrumb, its own search hit and a
+// plain href, which retires the setTimeout(scrollToInfo) hack that every
+// link into this area previously needed.
+//
+// Every page in this area uses the SAME layout: header, then the content
+// column beside a sticky Inhaltsverzeichnis (kbob-fdk Handbuch und Downloads
+// pattern; armasuisse Immo-Portal). An earlier pass varied the layout per
+// page — narrow column where the TOC would have listed only two entries —
+// and moving between the pages then felt like moving between three different
+// sites. Consistency inside one nav item beats per-page optimisation, so
+// content is grouped into at least three sections instead.
 
-const INFO_TOC = [
-  { id: 'einfuehrung',   label: 'Einführung' },
-  { id: 'faq',           label: 'Häufige Fragen' },
-  { id: 'workflow',      label: 'Workflow erklärt' },
-  { id: 'naw',           label: 'NAW & Bürowelten' },
-  { id: 'verordnungen',  label: 'Verordnungen, Weisungen und Vorgaben' },
-  { id: 'strategien',    label: 'Strategien und Konzepte' },
-  { id: 'schulungen',    label: 'Schulungen' },
-  { id: 'kontakt',       label: 'Kontakt' },
-];
+// Chrome shared by all five pages.
+//
+// The breadcrumb mirrors PAGE TITLES, so the parent crumb reads
+// «Arbeitsinstrumente und Informationen» while the nav row carries the short
+// «Wissen und Hilfsmittel». Shortening a nav label is a CD convention;
+// silently renaming the page it leads to would not be.
+function renderInfoShell({ titleKey, leadKey, toc, body, after = '' }) {
+  const title = P.t(titleKey);
+  const isOverview = titleKey === 'info.title';
+  shell({
+    activeNav: 'info',
+    breadcrumb: isOverview
+      ? [{ label: P.t('info.title') }]
+      : [{ href: '#/info', label: P.t('info.title') }, { label: title }],
+  });
 
-function renderInfoPage() {
-  shell({ activeNav: 'info', breadcrumb: [
-    { label: P.t('nav.info') }
-  ]});
+  document.getElementById('page-body').innerHTML = `
+    ${P.renderShareBar()}
+    <section class="section">
+      <div class="container">
+        <div class="page-with-toc">
+          <header class="info-page__header">
+            <p class="meta-info">
+              <span class="meta-info__item">Stand: ${P.formatDate(new Date().toISOString())}</span>
+              <span class="meta-info__item">Öffentlich · kein Login nötig</span>
+            </p>
+            <h1 class="info-page__title">${P.escapeHtml(title)}</h1>
+            <p class="section-intro section-intro--tight">${P.escapeHtml(P.t(leadKey))}</p>
+          </header>
+          <div class="page-with-toc__content info-body">${body}</div>
+          ${infoTocAside(toc)}
+        </div>
+      </div>
+    </section>
+    ${after}
+  `;
+
+  wireInfoScrollSpy(toc);
+}
+
+function infoTocAside(toc) {
+  return `
+    <aside class="page-with-toc__toc" aria-label="Inhaltsverzeichnis">
+      <h2 class="page-with-toc__toc-title">Inhaltsverzeichnis</h2>
+      <ul class="page-with-toc__toc-list">
+        ${toc.map((it, i) => `
+          <li class="page-with-toc__toc-item ${i === 0 ? 'page-with-toc__toc-item--active' : ''}">
+            <a class="page-with-toc__toc-link" href="#${it.id}"
+               onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
+              <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
+              ${P.icon('return', 'page-with-toc__toc-icon')}
+            </a>
+          </li>
+        `).join('')}
+      </ul>
+    </aside>`;
+}
+
+// ── Übersicht ────────────────────────────────────────────────────────────
+// A HUB, not a document — so it does not use renderInfoShell. Same anatomy
+// as the sister portal's #/data: a white band carrying the title and lead,
+// then a tinted band whose section heading sits above a fixed three-column
+// card grid, one card per topic page. The topic pages behind it are the
+// documents, and those all share the TOC layout.
+//
+// The contact block closes the area here rather than repeating on every
+// topic page; the footer and the meta navigation already carry a second
+// path to it. It returns to the white band so the page alternates
+// white · tinted · white rather than running two tinted bands together.
+function renderInfoOverview() {
+  const cards = [
+    ...INFO_PAGES.map(p => ({ href: p.href, label: P.t(p.titleKey), desc: P.t(p.descKey) })),
+    { href: '#/news', label: P.t('nav.news'), desc: P.t('info.news.desc') },
+  ];
+
+  shell({ activeNav: 'info', breadcrumb: [{ label: P.t('info.title') }] });
 
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar()}
@@ -756,192 +863,254 @@ function renderInfoPage() {
             <span class="meta-info__item">Stand: ${P.formatDate(new Date().toISOString())}</span>
             <span class="meta-info__item">Öffentlich · kein Login nötig</span>
           </p>
-          <h1 class="info-page__title">Arbeitsinstrumente und Informationen</h1>
-          <p class="section-intro section-intro--tight">
-            Erklärungen, Merkblätter, Vorlagen und Schulungsmaterial rund um das Mieterportal.
-          </p>
+          <h1 class="info-page__title">${P.escapeHtml(P.t('info.title'))}</h1>
+          <p class="section-intro section-intro--tight">${P.escapeHtml(P.t('info.lead'))}</p>
         </header>
+      </div>
+    </section>
 
-        <div class="page-with-toc">
-          <div class="page-with-toc__content">
-
-            <article id="einfuehrung">
-              <h2>Einführung</h2>
-              <p>Das Bundesamt für Bauten und Logistik (BBL) bewirtschaftet als Eigentümervertretung rund 2'800 Liegenschaften der zivilen Bundesverwaltung — überwiegend Büroflächen in Bundeshäusern und Departementssitzen, dazu spezialisierte Objekte wie die Empfangs- und Verfahrenszentren des SEM. Die Liegenschaften des VBS (armasuisse Immobilien) und die Auslandvertretungen der EDA sind nicht Teil des BBL-Portfolios.</p>
-              <p>Das Mieterportal ist die zentrale digitale Anlaufstelle für die Verwaltungseinheiten als Mietende: Bedarfsmeldung, Schadensmeldung, Statusverfolgung und Zugriff auf Dokumente zu Ihren Liegenschaften. Die hier zusammengetragenen Informationen sind öffentlich zugänglich; für eigentliche Anträge ist eine Anmeldung mit dem föderalen eIAM-Konto erforderlich.</p>
-            </article>
-
-            <article id="faq">
-              <h2>Häufige Fragen</h2>
-              <div class="accordion">
-                ${faqItem('Wer kann das Mieterportal nutzen?', 'Hauptnutzergruppe sind die Logistikbeauftragten (LBO) der Verwaltungseinheiten der zivilen Bundesverwaltung. Daneben haben Generalsekretariate (GS) sowie das Portfolio-Management des BBL Zugriff auf die jeweils zuständigen Sichten. Die Anmeldung erfolgt mit dem föderalen eIAM-Konto.')}
-                ${faqItem('Was bedeutet NAW?', 'NAW steht für „Neue Arbeitswelten" — die föderale Vorgabe für die Klassifizierung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; zusammen mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie die HNF2 und die Geschossfläche.')}
-                ${faqItem('Wer prüft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihres Departements. Die Bundeskanzlei nimmt selbst Generalsekretariats-Funktion wahr — Anträge aus der BK gehen daher ohne zusätzliche GS-Prüfung direkt an das BBL Portfolio-Management.')}
-                ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die angegebene Adresse noch nicht im SAP RE-FX-Stammdatensatz registriert ist — etwa weil ein Neubau- oder Anmietungsprojekt gerade erst geplant wird — aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem entgegengenommen; BBL legt die Wirtschaftseinheit (WE) im weiteren Verlauf an.')}
-                ${faqItem('Wie geht es nach der Genehmigung weiter?', 'Genehmigte Bedarfsmeldungen werden automatisch an SAP ePPM übergeben, wo die zugehörige Projektakte mit einer Bedarfsmeldungs-Nummer eröffnet wird. Sie erhalten eine Eingangsbestätigung sowie die ePPM-Nummer als Referenz für die weitere Korrespondenz.')}
-                ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeit hängt vom Antragstyp ab. Kleinanträge (z. B. punktuelle Anpassungen, Mobiliarbestellungen) werden in der Regel innerhalb von 10 Arbeitstagen entschieden, Grossanträge mit Projekteröffnung benötigen mehrere Wochen. Die konkrete Frist sehen Sie im Antragsdetail.')}
-                ${faqItem('Wer ist während der Bauphase mein Ansprechpartner?', 'Sobald der Antrag in ePPM überführt ist, übernimmt der BBL-Bauherrenvertretung / -Projektmanagement die Leitung. Im Portal sehen Sie die zuständige Kontaktperson in der Antragsdetail-Sicht. Die LBO bleibt während der gesamten Laufzeit die mieterseitige Anlaufstelle.')}
-              </div>
-            </article>
-
-            <article id="workflow">
-              <h2>Workflow erklärt</h2>
-              <p>Eine Bedarfsmeldung durchläuft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
-              <ol>
-                <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Eingaben werden automatisch zwischengespeichert.</li>
-                <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat prüft die Angaben feldweise. Bei Rückfragen erhalten Sie einen kommentierten Auflagenkatalog zur Nachbearbeitung.</li>
-                <li><strong>Genehmigt → in ePPM</strong> — Die freigegebene Meldung wird automatisch an SAP ePPM übergeben. BBL-PFM eröffnet die Projektakte und vergibt eine Bedarfsmeldungs-Nummer.</li>
-                <li><strong>Abgeschlossen</strong> — Nach Umsetzung gilt die Akte als abgeschlossen. Die Historie bleibt im Mieterportal abrufbar.</li>
-              </ol>
-              <p>Zwei Spezialfälle:</p>
-              <ul>
-                <li><strong>Bundeskanzlei-Pfad</strong> — Anträge der BK werden ohne GS-Prüfung direkt dem BBL Portfolio-Management vorgelegt.</li>
-                <li><strong>Greenfield-Pfad</strong> — Wenn das Objekt noch keinen SAP RE-FX-Eintrag hat, ergänzt BBL vor der ePPM-Übergabe einen Schritt „Wirtschaftseinheit anlegen".</li>
-              </ul>
-            </article>
-
-            <article id="naw">
-              <h2>NAW & Bürowelten erklärt</h2>
-              <p>Die NAW-Klassen sind die föderale Vorgabe für die Flächenberechnung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
-              <div class="table-wrapper">
-                <table class="table">
-                  <thead>
-                    <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
-                  </thead>
-                  <tbody>
-                    ${(P.state.referenceData?.nawClasses || []).map(nc => `
-                      <tr><td>${P.escapeHtml(nc.name)}</td><td>${nc.hnf2PerFte.toFixed(1)}</td><td>${nc.gfPerFte.toFixed(1)}</td><td>${P.escapeHtml(nc.description)}</td></tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </article>
-
-            <article id="verordnungen">
-              <h2>Verordnungen, Weisungen und Vorgaben</h2>
-              <p>Rechtsgrundlagen und föderale Vorgaben, die für die Bewirtschaftung von Bundes-Immobilien und die Einreichung von Bedarfsmeldungen massgebend sind.</p>
-              ${downloadList(P.state.downloads?.regulations || [])}
-            </article>
-
-            <article id="strategien">
-              <h2>Strategien und Konzepte</h2>
-              <p>Übergeordnete Strategien des BBL und des Bundes, die das Mieterportal und die zugrunde liegenden Flächenentscheide prägen.</p>
-              ${downloadList(P.state.downloads?.strategies || [])}
-              <p class="text-note">
-                <strong>Hinweis:</strong> Formulare und Checklisten werden direkt im Mieterportal geführt — separate Vorlagen-Downloads entfallen.
-              </p>
-            </article>
-
-            <article id="schulungen">
-              <h2>Ausbildung</h2>
-              <p>Hier finden Sie aktuelle Informationen zu den Ausbildungen rund um das Mieterportal des BBL. Logistikbeauftragte und weitere am Bedarfsprozess beteiligte Personen werden stufengerecht geschult und damit befähigt, ihre Rolle effizient wahrzunehmen.</p>
-
-              <h3>Anmeldungen Ausbildung Mieterportal</h3>
-              <div class="accordion accordion--inset">
-                <div class="accordion__item accordion__item--open">
-                  <button class="accordion__trigger" type="button" aria-expanded="true" onclick="this.setAttribute('aria-expanded', this.parentElement.classList.toggle('accordion__item--open'))">
-                    <span>Für Ausbildungen anmelden</span>
-                    <span class="accordion__icon" aria-hidden="true"></span>
-                  </button>
-                  <div class="accordion__panel">
-                    <ul class="link-list">
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Grundausbildung Mieterportal BBL</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Bedarfserfassung & NAW-Klassifizierung</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Greenfield- und Auslandfälle</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Spezialmodul Reviewer GS / BBL-PFM</a></li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="accordion__item">
-                  <button class="accordion__trigger" type="button" aria-expanded="false" onclick="this.setAttribute('aria-expanded', this.parentElement.classList.toggle('accordion__item--open'))">
-                    <span>Lernvideos</span>
-                    <span class="accordion__icon" aria-hidden="true"></span>
-                  </button>
-                  <div class="accordion__panel">
-                    <ul class="link-list">
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Mieterportal in fünf Minuten — Überblick</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Bedarfsmeldung Schritt für Schritt</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">NAW-Klassifizierung erklärt</a></li>
-                      <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">Greenfield-Pfad und Stammdatenanlage</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <h3>Ausbildungsunterlagen</h3>
-              ${downloadList(P.state.downloads?.training || [])}
-            </article>
-
-          </div>
-
-          <aside class="page-with-toc__toc" aria-label="Inhaltsverzeichnis">
-            <h2 class="page-with-toc__toc-title">Inhaltsverzeichnis</h2>
-            <ul class="page-with-toc__toc-list">
-              ${INFO_TOC.map((it, i) => `
-                <li class="page-with-toc__toc-item ${i === 0 ? 'page-with-toc__toc-item--active' : ''}">
-                  <a class="page-with-toc__toc-link" href="#${it.id}"
-                     onclick="event.preventDefault(); window.t3lite.scrollToInfo('${it.id}');">
-                    <span class="page-with-toc__toc-label">${P.escapeHtml(it.label)}</span>
-                    ${P.icon('return', 'page-with-toc__toc-icon')}
-                  </a>
-                </li>
-              `).join('')}
-            </ul>
-          </aside>
+    <section class="section section--alt">
+      <div class="container">
+        <h2 class="h2 section-heading">Themen</h2>
+        <div class="card-grid card-grid--cols-3">
+          ${cards.map(serviceCard).join('')}
         </div>
       </div>
     </section>
 
-    <section class="section section--alt contact-section" id="kontakt" aria-labelledby="kontakt-heading">
+    <section class="section contact-section" id="kontakt" aria-labelledby="kontakt-heading">
       <div class="container">
         <h2 class="h2 contact-section__heading" id="kontakt-heading">BBL Bundesamt für Bauten und Logistik</h2>
-        <div class="contact-section__grid">
-          <div class="contact-section__info">
-            <p class="contact-section__subheading">Abteilung Immobilienmanagement</p>
-            <p class="contact-block__address">
-              Fellerstrasse 21<br>
-              CH&#8201;–&#8201;3027 Bern
-            </p>
-            <p class="contact-block__row">
-              <a class="contact-block__link" href="tel:+41584655000">
-                ${P.icon('phone')}
-                +41 58 465 50 00
-              </a>
-            </p>
-            <p class="contact-block__row">
-              <a class="contact-block__link" href="mailto:info@bbl.admin.ch">
-                ${P.icon('envelope')}
-                info@bbl.admin.ch
-              </a>
-            </p>
-            <p class="contact-block__row">
-              <a class="contact-block__link" href="https://www.bbl.admin.ch" target="_blank" rel="noopener">
-                ${P.icon('globe')}
-                www.bbl.admin.ch
-              </a>
-            </p>
-            <p class="contact-block__note">
-              Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
-            </p>
-            <p class="contact-block__lead"><strong>BIT IT-Support — eIAM</strong></p>
-            <p class="contact-block__note contact-block__note--last">
-              <a href="mailto:service-desk@bit.admin.ch">service-desk@bit.admin.ch</a>
-            </p>
-          </div>
+          <div class="contact-section__grid">
+            <div class="contact-section__info">
+              <p class="contact-section__subheading">Abteilung Immobilienmanagement</p>
+              <p class="contact-block__address">
+                Fellerstrasse 21<br>
+                CH&#8201;–&#8201;3027 Bern
+              </p>
+              <p class="contact-block__row">
+                <a class="contact-block__link" href="tel:+41584655000">
+                  ${P.icon('phone')}
+                  +41 58 465 50 00
+                </a>
+              </p>
+              <p class="contact-block__row">
+                <a class="contact-block__link" href="mailto:info@bbl.admin.ch">
+                  ${P.icon('envelope')}
+                  info@bbl.admin.ch
+                </a>
+              </p>
+              <p class="contact-block__row">
+                <a class="contact-block__link" href="https://www.bbl.admin.ch" target="_blank" rel="noopener">
+                  ${P.icon('globe')}
+                  www.bbl.admin.ch
+                </a>
+              </p>
+              <p class="contact-block__note">
+                Für Fragen zum Mieterportal, zu Bedarfsmeldungen, zu Flächenstandards (NAW) oder zur Übergabe an SAP ePPM.
+              </p>
+              <p class="contact-block__lead"><strong>BIT IT-Support — eIAM</strong></p>
+              <p class="contact-block__note contact-block__note--last">
+                <a href="mailto:service-desk@bit.admin.ch">service-desk@bit.admin.ch</a>
+              </p>
+            </div>
 
-          <div class="contact-section__map">
-            <iframe
-              src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2596141&N=1199499&zoom=10&crosshair=marker"
-              title="Standort BBL Fellerstrasse 21, 3027 Bern auf swisstopo"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="contact-section__map">
+              <iframe
+                src="https://map.geo.admin.ch/embed.html?lang=de&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&E=2596141&N=1199499&zoom=10&crosshair=marker"
+                title="Standort BBL Fellerstrasse 21, 3027 Bern auf swisstopo"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
   `;
+}
 
-  wireInfoScrollSpy();
+// ── Ablauf und Flächenstandards ──────────────────────────────────────────
+// Workflow, special paths and the NAW reference table on one page: the class
+// table is the input to step one of the workflow, and readers move between
+// the two constantly. Three sections, so it keeps the TOC.
+function renderInfoAblauf() {
+  renderInfoShell({
+    titleKey: 'info.ablauf',
+    leadKey: 'info.ablauf.desc',
+    toc: [
+      { id: 'workflow',      label: 'Ablauf einer Bedarfsmeldung' },
+      { id: 'spezialfaelle', label: 'Spezialfälle' },
+      { id: 'naw',           label: 'NAW und Flächenstandards' },
+    ],
+    body: `
+      <article id="workflow">
+        <h2>Ablauf einer Bedarfsmeldung</h2>
+        <p>Eine Bedarfsmeldung durchläuft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
+        <ol>
+          <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Eingaben werden automatisch zwischengespeichert.</li>
+          <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat prüft die Angaben feldweise. Bei Rückfragen erhalten Sie einen kommentierten Auflagenkatalog zur Nachbearbeitung.</li>
+          <li><strong>Genehmigt → in ePPM</strong> — Die freigegebene Meldung wird automatisch an SAP ePPM übergeben. BBL-PFM eröffnet die Projektakte und vergibt eine Bedarfsmeldungs-Nummer.</li>
+          <li><strong>Abgeschlossen</strong> — Nach Umsetzung gilt die Akte als abgeschlossen. Die Historie bleibt im Mieterportal abrufbar.</li>
+        </ol>
+      </article>
+
+      <article id="spezialfaelle">
+        <h2>Spezialfälle</h2>
+        <p>Zwei Konstellationen weichen vom Standardablauf ab:</p>
+        <ul>
+          <li><strong>Bundeskanzlei-Pfad</strong> — Anträge der BK werden ohne GS-Prüfung direkt dem BBL Portfolio-Management vorgelegt.</li>
+          <li><strong>Greenfield-Pfad</strong> — Wenn das Objekt noch keinen SAP RE-FX-Eintrag hat, ergänzt BBL vor der ePPM-Übergabe einen Schritt „Wirtschaftseinheit anlegen".</li>
+        </ul>
+      </article>
+
+      <article id="naw">
+        <h2>NAW und Flächenstandards</h2>
+        <p>Die NAW-Klassen sind die föderale Vorgabe für die Flächenberechnung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
+            </thead>
+            <tbody>
+              ${(P.state.referenceData?.nawClasses || []).map(nc => `
+                <tr><td>${P.escapeHtml(nc.name)}</td><td>${nc.hnf2PerFte.toFixed(1)}</td><td>${nc.gfPerFte.toFixed(1)}</td><td>${P.escapeHtml(nc.description)}</td></tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </article>`,
+  });
+}
+
+// ── Häufige Fragen ───────────────────────────────────────────────────────
+// Grouped along the reader's timeline — before, during and after an
+// application — rather than kept as one undifferentiated list of seven. The
+// grouping is what gives this page the same three-section shape as its
+// siblings, and it also answers the question a flat FAQ never does: which of
+// these apply to me right now.
+function renderInfoFaq() {
+  renderInfoShell({
+    titleKey: 'info.faq',
+    leadKey: 'info.faq.desc',
+    toc: [
+      { id: 'faq-zugang',  label: 'Zugang und Rollen' },
+      { id: 'faq-erfassen', label: 'Bedarf erfassen' },
+      { id: 'faq-danach',  label: 'Nach dem Einreichen' },
+    ],
+    body: `
+      <article id="faq-zugang">
+        <h2>Zugang und Rollen</h2>
+        <div class="accordion">
+          ${faqItem('Wer kann das Mieterportal nutzen?', 'Hauptnutzergruppe sind die Logistikbeauftragten (LBO) der Verwaltungseinheiten der zivilen Bundesverwaltung. Daneben haben Generalsekretariate (GS) sowie das Portfolio-Management des BBL Zugriff auf die jeweils zuständigen Sichten. Die Anmeldung erfolgt mit dem föderalen eIAM-Konto.')}
+          ${faqItem('Wer prüft meine Bedarfsmeldung?', 'In der Regel das Generalsekretariat (GS) Ihres Departements. Die Bundeskanzlei nimmt selbst Generalsekretariats-Funktion wahr — Anträge aus der BK gehen daher ohne zusätzliche GS-Prüfung direkt an das BBL Portfolio-Management.')}
+        </div>
+      </article>
+
+      <article id="faq-erfassen">
+        <h2>Bedarf erfassen</h2>
+        <div class="accordion">
+          ${faqItem('Was bedeutet NAW?', 'NAW steht für „Neue Arbeitswelten" — die föderale Vorgabe für die Klassifizierung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; zusammen mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie die HNF2 und die Geschossfläche.')}
+          ${faqItem('Was ist ein Greenfield-Pfad?', 'Wenn die angegebene Adresse noch nicht im SAP RE-FX-Stammdatensatz registriert ist — etwa weil ein Neubau- oder Anmietungsprojekt gerade erst geplant wird — aktiviert das Portal den Greenfield-Modus. Der Antrag wird trotzdem entgegengenommen; BBL legt die Wirtschaftseinheit (WE) im weiteren Verlauf an.')}
+        </div>
+      </article>
+
+      <article id="faq-danach">
+        <h2>Nach dem Einreichen</h2>
+        <div class="accordion">
+          ${faqItem('Wie geht es nach der Genehmigung weiter?', 'Genehmigte Bedarfsmeldungen werden automatisch an SAP ePPM übergeben, wo die zugehörige Projektakte mit einer Bedarfsmeldungs-Nummer eröffnet wird. Sie erhalten eine Eingangsbestätigung sowie die ePPM-Nummer als Referenz für die weitere Korrespondenz.')}
+          ${faqItem('Wie lange dauert die Bearbeitung?', 'Die Bearbeitungszeit hängt vom Antragstyp ab. Kleinanträge (z. B. punktuelle Anpassungen, Mobiliarbestellungen) werden in der Regel innerhalb von 10 Arbeitstagen entschieden, Grossanträge mit Projekteröffnung benötigen mehrere Wochen. Die konkrete Frist sehen Sie im Antragsdetail.')}
+          ${faqItem('Wer ist während der Bauphase mein Ansprechpartner?', 'Sobald der Antrag in ePPM überführt ist, übernimmt der BBL-Bauherrenvertretung / -Projektmanagement die Leitung. Im Portal sehen Sie die zuständige Kontaktperson in der Antragsdetail-Sicht. Die LBO bleibt während der gesamten Laufzeit die mieterseitige Anlaufstelle.')}
+        </div>
+      </article>`,
+  });
+}
+
+// ── Vorgaben und Strategien ──────────────────────────────────────────────
+// Verordnungen and Strategien were two separate anchors that differ only by
+// publisher; both are documents that govern the work, so they share a page.
+function renderInfoVorgaben() {
+  return renderInfoShell({
+    titleKey: 'info.vorgaben',
+    leadKey: 'info.vorgaben.desc',
+    toc: [
+      { id: 'verordnungen', label: 'Verordnungen und Weisungen' },
+      { id: 'strategien',   label: 'Strategien und Konzepte' },
+      { id: 'vorlagen',     label: 'Formulare und Vorlagen' },
+    ],
+    body: `
+      <article id="verordnungen">
+        <h2>Verordnungen und Weisungen</h2>
+        <p>Rechtsgrundlagen und föderale Vorgaben, die für die Bewirtschaftung von Bundes-Immobilien und die Einreichung von Bedarfsmeldungen massgebend sind.</p>
+        ${downloadList(P.state.downloads?.regulations || [])}
+      </article>
+
+      <article id="strategien">
+        <h2>Strategien und Konzepte</h2>
+        <p>Übergeordnete Strategien des BBL und des Bundes, die das Mieterportal und die zugrunde liegenden Flächenentscheide prägen.</p>
+        ${downloadList(P.state.downloads?.strategies || [])}
+      </article>
+
+      <article id="vorlagen">
+        <h2>Formulare und Vorlagen</h2>
+        <p>Formulare und Checklisten werden direkt im Mieterportal geführt — es gibt keine Vorlagen zum Herunterladen und Ausfüllen. Die geführten Erfassungsstrecken prüfen Pflichtangaben und berechnen die Flächen nach den oben verlinkten Vorgaben.</p>
+        <ul class="link-list">
+          <li><a class="link" href="#/wizard/1">Bedarf anmelden — geführte Erfassung</a></li>
+          <li><a class="link" href="#/repair">Schaden melden</a></li>
+          <li><a class="link" href="#/downloads">Pläne und Dokumente zu Ihren Liegenschaften</a></li>
+        </ul>
+      </article>`,
+  });
+}
+
+// ── Schulungen ───────────────────────────────────────────────────────────
+// The registration links and the learning videos used to sit in a two-item
+// accordion. They are link lists of four entries each — collapsing them hid
+// content behind a click for no gain, and as sections they give this page
+// the three headings its TOC needs.
+function renderInfoSchulungen() {
+  const linkList = (items) => `
+    <ul class="link-list">
+      ${items.map(label => `
+        <li><a class="link link--external" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${P.escapeHtml(label)}</a></li>
+      `).join('')}
+    </ul>`;
+
+  renderInfoShell({
+    titleKey: 'info.schulungen',
+    leadKey: 'info.schulungen.desc',
+    toc: [
+      { id: 'anmeldung',   label: 'Anmeldung zu Ausbildungen' },
+      { id: 'lernvideos',  label: 'Lernvideos' },
+      { id: 'unterlagen',  label: 'Ausbildungsunterlagen' },
+    ],
+    body: `
+      <article id="anmeldung">
+        <h2>Anmeldung zu Ausbildungen</h2>
+        <p>Logistikbeauftragte und weitere am Bedarfsprozess beteiligte Personen werden stufengerecht geschult und damit befähigt, ihre Rolle effizient wahrzunehmen.</p>
+        ${linkList([
+          'Grundausbildung Mieterportal BBL',
+          'Spezialmodul Bedarfserfassung & NAW-Klassifizierung',
+          'Spezialmodul Greenfield- und Auslandfälle',
+          'Spezialmodul Reviewer GS / BBL-PFM',
+        ])}
+      </article>
+
+      <article id="lernvideos">
+        <h2>Lernvideos</h2>
+        <p>Kurze Aufzeichnungen zum Nachschlagen zwischen zwei Anträgen.</p>
+        ${linkList([
+          'Mieterportal in fünf Minuten — Überblick',
+          'Bedarfsmeldung Schritt für Schritt',
+          'NAW-Klassifizierung erklärt',
+          'Greenfield-Pfad und Stammdatenanlage',
+        ])}
+      </article>
+
+      <article id="unterlagen">
+        <h2>Ausbildungsunterlagen</h2>
+        <p>Die Foliensätze der Ausbildungsmodule zum Nachlesen.</p>
+        ${downloadList(P.state.downloads?.training || [])}
+      </article>`,
+  });
 }
 
 function faqItem(question, answer) {
@@ -956,14 +1125,12 @@ function faqItem(question, answer) {
   `;
 }
 
-function wireInfoScrollSpy() {
-  // Scroll-spy watches the article anchors inside the TOC content column
-  // AND any top-level anchored section that the TOC lists — currently the
-  // `#kontakt` block was lifted out of the grid into its own
-  // `.section--alt` (federal contact pattern, mirrors armasuisse Immo).
-  // Build the watch list from `INFO_TOC` ids so adding a new entry there
-  // is enough — no need to keep this selector list in sync by hand.
-  const targets = INFO_TOC
+// Scroll-spy over the anchors the page's own table of contents lists. The
+// TOC is now per page, so the watch list is passed in rather than read from
+// a module-level constant — each of the two pages that carry a TOC owns its
+// own section ids.
+function wireInfoScrollSpy(toc) {
+  const targets = (toc || [])
     .map(it => document.getElementById(it.id))
     .filter(Boolean);
   const items = document.querySelectorAll('.page-with-toc__toc-item');
@@ -1049,7 +1216,9 @@ function newsCard(n) {
 // ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
 const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
-  shell({ breadcrumb: [{ label: P.t('bc.news') }] });
+  // News sits inside the «Wissen und Hilfsmittel» drawer, so the parent row
+  // carries the active state while you are on it.
+  shell({ activeNav: 'info', breadcrumb: [{ label: P.t('bc.news') }] });
   const items = P.state.news || [];
   const params = parseHashQuery(location.hash);
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
@@ -1106,7 +1275,7 @@ function newsListRow(n) {
 function renderNewsDetail({ id }) {
   const n = P.state.news.find(x => x.id === id);
   if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
-  shell({ breadcrumb: [{ href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
+  shell({ activeNav: 'info', breadcrumb: [{ href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <article class="section">
@@ -1191,7 +1360,7 @@ function renderLanding() {
             <p class="section-intro">
               ${P.t('landing.explainer.lead')}
             </p>
-            <a href="#/info" class="btn btn--outline" onclick="setTimeout(() => window.t3lite.scrollToInfo('faq'), 100);">${P.t('landing.explainer.cta')}</a>
+            <a href="#/info/faq" class="btn btn--outline">${P.t('landing.explainer.cta')}</a>
           </div>
           <a class="video-thumb"
              href="https://www.youtube.com/watch?v=rin3crkLpRk"
@@ -1667,20 +1836,20 @@ function renderInbox() {
 // one building apart.
 function wireInboxFilters(cases) {
   const radios = Array.from(document.querySelectorAll('input[name="inbox-status"]'));
-  const filterText = document.getElementById(`inbox-q`);
-  const tbody = document.getElementById(`inboxTbody`);
+  const filterText = document.getElementById('inbox-q');
+  const tbody = document.getElementById('inboxTbody');
   if (!tbody) return;
-  let activeStatus = ``;
+  let activeStatus = '';
 
   const apply = () => {
-    const t = (filterText?.value || ``).toLowerCase();
+    const t = (filterText?.value || '').toLowerCase();
     const filtered = cases.filter(c =>
       (!activeStatus || c.status === activeStatus) &&
       (!t || c.id.toLowerCase().includes(t)
-          || (c.object || ``).toLowerCase().includes(t)
-          || (c.title || ``).toLowerCase().includes(t))
+          || (c.object || '').toLowerCase().includes(t)
+          || (c.title || '').toLowerCase().includes(t))
     );
-    tbody.innerHTML = filtered.map(caseRowHtml).join(``)
+    tbody.innerHTML = filtered.map(caseRowHtml).join('')
       || `<tr><td colspan="5" class="table-empty">Keine Treffer.</td></tr>`;
   };
 
@@ -1690,12 +1859,11 @@ function wireInboxFilters(cases) {
   // an active filter is visible with the panel collapsed.
   radios.forEach(radio => radio.addEventListener('change', () => {
     activeStatus = radio.value || '';
-    const badge = document.querySelector('#inbox-filter .catbar__filter-count');
-    if (badge) badge.textContent = activeStatus ? '1' : '';
+    setFilterCount('inbox', activeStatus ? 1 : 0);
     apply();
   }));
 
-  filterText?.addEventListener(`input`, apply);
+  filterText?.addEventListener('input', apply);
 }
 
 function renderInboxEmptyState() {
@@ -1708,7 +1876,7 @@ function renderInboxEmptyState() {
       <p class="empty-state__lead">Sie haben derzeit keine laufenden Vorgänge. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
       <div class="empty-state__cta">
         <a href="#/wizard/1" class="btn btn--filled">Bedarf anmelden</a>
-        <a href="#/info" class="btn btn--bare" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">Wie funktioniert das Portal?</a>
+        <a href="#/info/ablauf" class="btn btn--bare">Wie funktioniert das Portal?</a>
       </div>
     </div>
   `;
@@ -2151,6 +2319,7 @@ function renderQueue() {
   });
   wirePaginationInput('queuePaginationInput');
   wireQueueShortcuts();
+  wireCatalogueBar({ id: 'queue' });
   wireQueueFilters(pageItems);
 }
 
@@ -2199,8 +2368,7 @@ function wireQueueFilters(rows) {
   };
   radios.forEach(r => r.addEventListener('change', () => {
     activeStatus = r.value || '';
-    const badge = document.querySelector('#queue-filter .catbar__filter-count');
-    if (badge) badge.textContent = activeStatus ? '1' : '';
+    setFilterCount('queue', activeStatus ? 1 : 0);
     apply();
   }));
   filterText?.addEventListener('input', apply);
@@ -5006,6 +5174,10 @@ function downloadList(items) {
   return `
     <ul class="download-list">
       ${items.map(it => {
+        // A short qualifier (SR number, publishing unit) rides in the meta
+        // row rather than on a line of its own: the CD DownloadItem keeps
+        // description and meta separate, but ours were one-liners, and a
+        // third line pushed every row 27 px taller than the reference.
         // Items carrying a document `id` open the same preview viewer as the
         // downloads page (1:1); plain lists (regulations, strategies, training
         // modules) keep the simulated-download toast.
@@ -5018,12 +5190,10 @@ function downloadList(items) {
             <span class="download-list__icon">${P.icon(it.id ? 'document' : 'download')}</span>
             <div class="download-list__body">
               <p class="download-list__title">${P.escapeHtml(it.title)}</p>
-              ${it.subtitle ? `<p class="download-list__subtitle">${P.escapeHtml(it.subtitle)}</p>` : ''}
               <p class="download-list__meta">
-                ${it.format    ? `<span>${P.escapeHtml(it.format)}</span>`    : ''}
-                ${it.size      ? `<span>${P.escapeHtml(it.size)}</span>`      : ''}
-                ${it.languages ? `<span>${P.escapeHtml(it.languages)}</span>` : ''}
-                ${it.date      ? `<span>${P.escapeHtml(it.date)}</span>`      : ''}
+                ${[it.subtitle, it.format, it.size, it.languages, it.date]
+                  .filter(Boolean)
+                  .map(v => `<span>${P.escapeHtml(v)}</span>`).join('')}
               </p>
             </div>
           </a>
@@ -5303,13 +5473,8 @@ function renderProfile() {
 function serviceCard(svc) {
   const cls = svc.external ? 'card--quick link--external' : 'card--quick';
   const attrs = svc.external ? ' target="_blank" rel="noopener"' : '';
-  // In-page anchors navigate first, then scroll — the same deferred call the
-  // info-page links use, since the section only exists after the route renders.
-  const onclick = svc.section
-    ? ` onclick="setTimeout(() => window.t3lite.scrollToInfo('${P.escapeJs(svc.section)}'), 100);"`
-    : '';
   return `
-    <a href="${svc.href}" class="${cls}"${attrs}${onclick}>
+    <a href="${svc.href}" class="${cls}"${attrs}>
       <p class="card--quick__title">${P.escapeHtml(svc.label)}</p>
       <p class="card--quick__desc">${P.escapeHtml(svc.desc || '')}</p>
       ${arrowBtn({ external: svc.external })}

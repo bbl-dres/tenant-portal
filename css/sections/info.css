@@ -8,24 +8,11 @@
    ========================================================================== */
 
 /* ── INFO PAGE HEADER ────────────────────────────────────────────────────
-   Header above the .page-with-toc layout on the Arbeitsinstrumente page.
-   Replaces three inline-styled blocks. */
-/* Header above the .page-with-toc layout. Scaling left padding gives
-   the title block a small inset from the container edge — visually
-   "set in" rather than flush against the viewport padding. Scales up
-   on wide desktops where the container padding alone leaves less
-   ambient air. */
-.info-page__header {
-  max-width: 60ch;
-  margin-bottom: var(--space-2xl);
-  padding-left: var(--space-md);
-}
-@media (min-width: 1024px) {
-  .info-page__header { padding-left: var(--space-lg); }
-}
-@media (min-width: 1280px) {
-  .info-page__header { padding-left: var(--space-xl); }
-}
+   The title block is a cell of the .page-with-toc grid, so it shares the
+   content column's left edge. It used to sit above the grid with a
+   hand-tuned `padding-left` (md → lg → xl) to look "set in"; that inset was
+   approximating the grid offset the CD gets for free — see below. */
+.info-page__header { max-width: 60ch; }
 .info-page__title {
   font-size: var(--text-display);
   letter-spacing: -0.02em;
@@ -33,59 +20,121 @@
   margin: 0 0 var(--space-md);
 }
 
-/* ── PAGE-WITH-TOC (info long-scroll page; kbob-fdk + armasuisse pattern) ── */
+/* ── PAGE-WITH-TOC ───────────────────────────────────────────────────────
+   CD Bund detail page with anchor navigation. Verified against the
+   designsystem repo rather than approximated:
+
+     app/pages/detailPageAnchorNav.vue
+       <div class="container container--grid container--reverse-mobile
+                   gap--responsive">
+         <div class="container__main vertical-spacing"> … </div>
+         <div class="container__aside"> <Card>Inhaltverzeichnis</Card> </div>
+
+     css/layouts/container.postcss
+       .container--grid   grid grid-cols-12
+       .container__main   col-span-12 · md:col-span-7 · lg:col-span-6 lg:col-start-2
+       .container__aside  col-span-12 · md:col-span-5 md:col-start-8 · lg:col-span-4
+       reverse-mobile     aside order-1 / main order-2 below md
+
+   Two things follow that we did not have. From lg up the content starts at
+   grid column TWO — one full column of air on the left — and the aside ends
+   at column eleven, leaving the twelfth empty. The page sits inside the
+   container instead of running flush against its padding, and the text
+   column comes out ~200 px narrower (648 px vs 853 px at 1440), which is
+   the readable measure the CD is actually after.
+
+   Gap is `--gap-responsive`, which already carries the CD's
+   .gap--responsive cascade (css/layouts/grids.postcss): 20 · 28 (480) ·
+   36 (640) · 40 (1024) · 48 (1280) · 64 (1920) px. */
 .page-with-toc {
   display: grid;
-  gap: var(--space-2xl);
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gap-responsive);
   align-items: start;
 }
+
+/* Single column below the two-column switch, in the CD's reverse-mobile
+   order: title, then the index, then the content it indexes. */
+.page-with-toc > * { grid-column: 1 / -1; }
+.info-page__header      { order: 0; }
+.page-with-toc__toc     { order: 1; }
+.page-with-toc__content { order: 2; }
+
+/* The CD splits at md (768). We split at lg (1024): our container padding
+   and type scale are both a step larger, so a 7-of-12 column at 768 px left
+   ~350 px for the text — narrower than the phone layout it replaced. Same
+   grid, one breakpoint later. */
 @media (min-width: 1024px) {
-  .page-with-toc {
-    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
-    gap: var(--space-3xl);
-  }
+  .info-page__header,
+  .page-with-toc__content { grid-column: 2 / span 6; }
+  .page-with-toc__toc     { grid-column: 8 / span 4; }
+  /* Explicit rows: with auto-placement the aside would slide up beside the
+     title block, which in the CD is a Hero above the grid entirely. */
+  .info-page__header      { grid-row: 1; }
+  .page-with-toc__content,
+  .page-with-toc__toc     { grid-row: 2; }
 }
 .page-with-toc__content { min-width: 0; }
-.page-with-toc__content > article {
+
+/* Long-form typography for the Wissen-und-Hilfsmittel pages. Split from
+   `.page-with-toc__content`, which is now purely the grid cell: only the two
+   pages with three or more sections carry a table of contents, and the rest
+   render the same body markup as a plain narrow column. Keying the type off
+   the layout class would have left those pages unstyled. */
+.info-body { min-width: 0; }
+.info-body > article {
   margin: 0 0 var(--space-2xl);
   padding-bottom: var(--space-2xl);
   border-bottom: 1px solid var(--color-border-light);
   scroll-margin-top: 160px;
 }
-.page-with-toc__content > article:last-child {
+.info-body > article:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
-.page-with-toc__content h2 {
+.info-body h2 {
   font-size: var(--text-h2);
   margin: 0 0 var(--space-lg);
   letter-spacing: var(--tracking-tight);
 }
-.page-with-toc__content p,
-.page-with-toc__content li {
+.info-body p,
+.info-body li {
   line-height: var(--line-height-relaxed);
 }
-.page-with-toc__content table { margin: var(--space-md) 0; }
+.info-body table { margin: var(--space-md) 0; }
 /* Scoped typography defaults so the info-page article body doesn't have
    to repeat `style="padding-left:var(--space-lg);..."` on every <ol>/<ul>.
    These match the kbob/armasuisse long-form pattern: comfortable indent,
    relaxed line-height, secondary-text note paragraphs use `.text-note`. */
-.page-with-toc__content ol,
-.page-with-toc__content ul {
+.info-body ol,
+.info-body ul {
   padding-left: var(--space-lg);
   line-height: var(--line-height-relaxed);
 }
-.page-with-toc__content h3 {
+.info-body h3 {
   margin-top: var(--space-xl);
   font-size: var(--text-h4);
   font-weight: var(--font-weight-bold);
 }
-.page-with-toc__content .text-note {
+.info-body .text-note {
   margin-top: var(--space-md);
   color: var(--color-text-secondary);
   font-size: var(--text-body-sm);
 }
+/* The accordion and the link list bring their own indentation; the scoped
+   rule above would push both in from the heading they belong to. */
+.info-body .accordion ul,
+.info-body .accordion ol,
+.info-body .link-list { padding-left: 0; }
+
+/* Prose paragraphs only. Unscoped, this also hit the stacked <p> elements
+   INSIDE components rendered in the body — the download rows are three
+   paragraphs each, and it added 32 px to every one of them. */
+.info-body > article > p + p { margin-top: var(--space-md); }
+
+/* Topic cards on the Übersicht page sit in the content column, not the full
+   container, so they need a smaller minimum track than the services grid. */
+.card-grid--compact { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
 
 /* Sticky TOC card on the right. CD Bund anchor-nav lives inside a
    `<Card>` with a real drop shadow (not the quieter `--shadow-card`).
@@ -166,6 +215,9 @@
   justify-content: space-between;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
+  /* 44 px minimum touch target (WCAG 2.5.5). The rows were 36 px, which the
+     a11y sweep only started reporting once these pages entered its flows. */
+  min-height: 44px;
   color: var(--color-text-secondary);
   text-decoration: none;
   font-size: var(--text-body-sm);

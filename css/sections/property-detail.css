@@ -452,28 +452,49 @@
   border-bottom: 1px solid var(--color-secondary-100);
 }
 .download-list__item:last-child { border-bottom: none; }
+/* CD `.download-item` (designsystem/css/components/download-item.postcss):
+   flex row, `pt-4 pb-4`, icon `h-7 md:h-8 lg:h-9` in primary-600 with
+   `pr-1 md:pr-2`, bold title, then `.meta-info` at `pt-3`. The icon was
+   24 px with a 16 px gutter here — smaller and further from its title than
+   the federal component, which reads as a bullet rather than an action. */
 .download-list__link {
   display: grid;
-  grid-template-columns: 24px 1fr;
-  column-gap: var(--space-md);
+  grid-template-columns: 28px 1fr;
+  column-gap: var(--space-xs);
   align-items: start;
   padding: var(--space-md) 0;
   text-decoration: none;
   color: inherit;
 }
+@media (min-width: 768px) {
+  .download-list__link {
+    grid-template-columns: 32px 1fr;
+    column-gap: var(--space-sm);
+  }
+}
+@media (min-width: 1024px) {
+  .download-list__link { grid-template-columns: 36px 1fr; }
+}
 .download-list__link:hover { color: var(--color-primary); text-decoration: none; }
 .download-list__link:hover .download-list__title { color: var(--color-primary); }
 .download-list__icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: var(--color-primary);
   flex-shrink: 0;
-  margin-top: 2px;
+  /* CD pulls the glyph up with `-my-1` so its optical centre lands on the
+     first line of the title rather than below it. */
+  margin-top: -2px;
+}
+@media (min-width: 768px) {
+  .download-list__icon { width: 32px; height: 32px; }
+}
+@media (min-width: 1024px) {
+  .download-list__icon { width: 36px; height: 36px; }
 }
 .download-list__body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
   min-width: 0;
 }
 .download-list__title {
@@ -490,19 +511,27 @@
   margin: 0;
   line-height: var(--line-height-snug);
 }
+/* CD `.download-item__meta-info` is `pt-3` (12 px) below the title, and
+   `.meta-info__item:not(:last-child):after` sets the pipe with `px-2
+   lg:px-3` — 8 px each side, 12 px from lg. We had 16 px from a flex gap
+   PLUS another 16 px of margin on the divider, so the meta row ran nearly
+   twice as wide as the federal one. */
 .download-list__meta {
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
-  margin: var(--space-xs) 0 0;
+  margin: var(--space-2sm) 0 0;   /* 12px — CD `pt-3` */
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--space-md);
+  gap: 0;
 }
 .download-list__meta > span { display: inline-flex; align-items: center; }
-.download-list__meta > span + span::before {
+.download-list__meta > span:not(:last-child)::after {
   content: '|';
-  margin-right: var(--space-md);
+  padding: 0 var(--space-sm);
   color: var(--color-border);
+}
+@media (min-width: 1024px) {
+  .download-list__meta > span:not(:last-child)::after { padding: 0 var(--space-2sm); }
 }
 
 /* ── PROPERTY HERO (mosaic + location map) ───────────────────────────────

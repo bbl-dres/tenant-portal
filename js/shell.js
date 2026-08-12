@@ -184,9 +184,6 @@ export function resolveService(s) {
     label: t(s.titleKey),
     desc: t(s.shortKey),
     external: target.kind === 'external',
-    // `section` targets are in-page anchors on the long info page: the href
-    // navigates, then t3lite.scrollToInfo scrolls to the section.
-    section: target.kind === 'section' ? target.section : null,
     type: s.type,
     popular: s.popular,
   };
@@ -201,6 +198,46 @@ export function servicesMenu() {
     label: t('nav.services'),
     type: 'dropdown',
     items: (state.services || []).filter(s => s.inMenu).map(resolveService),
+  };
+}
+
+// The «Wissen und Hilfsmittel» area: an overview page plus four topic pages.
+// Declared here, not in app.js, because THREE surfaces consume the same list
+// — the nav drawer, the overview page's topic cards and the search index —
+// and a menu that drifts from the pages behind it is exactly the failure mode
+// servicesMenu was moved here to prevent.
+//
+// These are pages, not in-page anchors. Until now the whole area was one
+// route with eight anchors and a table of contents; the CD's second level is
+// a list of PAGES (designsystem app/components/ch/navigations/
+// MainNavigation.vue), and eight sections of very unequal weight on one
+// scroll is a document, not an information architecture.
+export const INFO_PAGES = [
+  { href: '#/info/ablauf',     titleKey: 'info.ablauf',     descKey: 'info.ablauf.desc' },
+  { href: '#/info/faq',        titleKey: 'info.faq',        descKey: 'info.faq.desc' },
+  { href: '#/info/vorgaben',   titleKey: 'info.vorgaben',   descKey: 'info.vorgaben.desc' },
+  { href: '#/info/schulungen', titleKey: 'info.schulungen', descKey: 'info.schulungen.desc' },
+];
+
+// Opened by an «Übersicht» row pointing at the parent page — the CD idiom for
+// a nav item that is both a drawer and a destination.
+//
+// News rides in this drawer instead of taking a top-level slot. The sister
+// portal keeps News at L1 on the reasoning that a news item is read once
+// while a tool is reused; that holds, but its nav row has no Liegenschaften
+// and no Pläne & Dokumente to pay for. Here a sixth L1 entry would push the
+// row past the CD's «limit to five» guidance, and News currently has no nav
+// home at all — reachable only from the landing page and from search.
+export function infoMenu() {
+  return {
+    id: 'info',
+    label: t('nav.info'),
+    type: 'dropdown',
+    items: [
+      { href: '#/info', label: t('info.overview') },
+      ...INFO_PAGES.map(p => ({ href: p.href, label: t(p.titleKey) })),
+      { href: '#/news', label: t('nav.news') },
+    ],
   };
 }
 
@@ -221,7 +258,7 @@ export function publicNavItems() {
     servicesMenu(),
     { id: 'properties', href: '#/properties', label: t('nav.properties') },
     { id: 'downloads', href: '#/downloads', label: t('nav.downloads') },
-    { id: 'info', href: '#/info', label: t('nav.info') },
+    infoMenu(),
     { id: 'inbox', href: '#/inbox', label: t('nav.inbox') },
   ];
 }
@@ -229,7 +266,7 @@ export function publicNavItems() {
 export function authNavItems() {
   const role = state.user.activeRole;
   const downloads = { id: 'downloads', href: '#/downloads', label: t('nav.downloads') };
-  const info = { id: 'info', href: '#/info', label: t('nav.info') };
+  const info = infoMenu();
   if (role === 'GS-Reviewer') {
     return [
       { id: 'queue', href: '#/queue', label: t('nav.queue') },
@@ -288,9 +325,14 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
   // drawer can show them as in-flow accordions under the trigger row;
   // on desktop they're position:absolute against .navbar, so their place
   // in the flow doesn't matter there.
-  const currentHash = location.hash || '#/';
+  // Query string dropped before comparing: a row must still read as active on
+  // `#/info?lang=de`, and every branch below is about the PATH.
+  const currentHash = (location.hash || '#/').split('?')[0];
   const isActiveSub = (href) => {
+    // Overview rows are exact matches. Without this the generic prefix rule
+    // marks «Übersicht» active on every topic page underneath it.
     if (href === '#/services')  return currentHash === '#/services';
+    if (href === '#/info')      return currentHash === '#/info';
     if (href === '#/wizard/1')  return currentHash.startsWith('#/wizard');
     if (href === '#/downloads') return currentHash.startsWith('#/downloads');
     return currentHash === href || currentHash.startsWith(href + '/');
@@ -399,10 +441,20 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
   // portal is two or three levels deep with a flat top nav, so the control
   // opened a drawer that merely repeated the navigation bar directly above it
   // — and on a crumb without peers it rendered as an empty bordered box.
-  const breadcrumbHtml = breadcrumb.length
+  // Every trail opens with a link home. Both variants of the DS component
+  // (app/components/ch/navigations/BreadcrumbNavigation.vue, `isSimplePage`
+  // and the full one) start with a «Startseite» item, and bbl.admin.ch
+  // serves it that way too — «Startseite › Arbeiten beim BBL › Vorteile und
+  // Benefits». An earlier round dropped it on the reasoning that the logo
+  // lockup is the home affordance; it is, but the CD carries both.
+  const crumbs = breadcrumb.length
+    ? [{ href: '#/', label: t('bc.home') }, ...breadcrumb]
+    : [];
+
+  const breadcrumbHtml = crumbs.length
     ? `<nav class="breadcrumb" aria-label="Brotkrumen">
          <ol class="breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">
-           ${breadcrumb.map((b, i, a) => {
+           ${crumbs.map((b, i, a) => {
              const isLast = i === a.length - 1;
              return `
              <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">

@@ -28,7 +28,12 @@ const flows = [
   // the sweep (h1 count / heading-jump checks never saw them).
   { label: 'wizard-step1', hash: '#/wizard/1', role: 'LBO' },
   { label: 'application-detail', hash: '#/inbox/BE-2026-014', role: 'LBO' },
-  { label: 'review-split', hash: '#/review/BE-2026-014', role: 'GS-Reviewer' }
+  { label: 'review-split', hash: '#/review/BE-2026-014', role: 'GS-Reviewer' },
+  // «Wissen und Hilfsmittel»: the overview and one topic page. Both are
+  // public, and the topic page carries the TOC aside + accordion, the two
+  // structures in this area most likely to break the heading outline.
+  { label: 'info-overview', hash: '#/info', role: null },
+  { label: 'info-faq', hash: '#/info/faq', role: null }
 ];
 
 const failures = [];
