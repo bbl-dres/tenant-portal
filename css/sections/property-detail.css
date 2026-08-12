@@ -493,8 +493,8 @@
    tile — both scrims so the label stays legible over any photograph. */
 .property-hero__badge {
   position: absolute;
-  right: var(--space-sm);
-  bottom: var(--space-sm);
+  right: var(--space-2sm);   /* shared card-media badge inset — see .card--property__status */
+  bottom: var(--space-2sm);
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);

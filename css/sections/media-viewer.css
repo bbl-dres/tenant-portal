@@ -326,8 +326,8 @@
    shown on the marker label above the pin. */
 .property-popup__id {
   position: absolute;
-  top: var(--space-sm);
-  left: var(--space-sm);
+  top: var(--space-2sm);   /* shared card-media badge inset — see .card--property__status */
+  left: var(--space-2sm);
   padding: 2px var(--space-xs);
   background: var(--color-black-70);
   color: var(--color-white);
@@ -429,10 +429,13 @@
    moves the "open issues" / "ok" chip off the body so the SAP line +
    title + meta have full width. Backdrop sits on a translucent white
    surface so the badge stays legible over any photo. */
+/* Overlay badges on card media sit one step in from the corner
+   (--space-2sm, 12px) — shared inset with .property-popup__id and
+   .property-hero__badge so every photo chip breathes the same. */
 .card--property__status {
   position: absolute;
-  top: var(--space-sm);
-  left: var(--space-sm);
+  top: var(--space-2sm);
+  left: var(--space-2sm);
   z-index: 1;
   backdrop-filter: blur(2px);
   box-shadow: var(--shadow-property-status);
