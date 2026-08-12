@@ -8,7 +8,7 @@
 
    On-disk JSON conforms to docs/DATAMODEL.md (canonical schema). In-memory
    records get two convenience aliases injected at load time:
-     • `id`      → mirrors the entity's canonical PK (applicationId, tenancyId, …)
+     • `id`      → mirrors the entity's canonical PK (spaceRequestId, tenancyId, …)
      • `address` → composed display string from the atomic fields
                    (street / houseNumber / postalCode / city) so render code
                    can use a single string without dragging the Tidy-data
@@ -22,7 +22,7 @@ export const state = {
   user: null,                  // { id, name, ve, roles, activeRole }
   lang: 'de',                  // active UI language (de | fr | it | en)
   i18n: {},                    // loaded from data/i18n.json: key → { de, fr, it, en }
-  applications: [],            // loaded from data/applications.json
+  spaceRequests: [],           // loaded from data/space-requests.json (Bedarfsmeldungen — «applications» in the UI copy, renamed in the data layer because the sister portals use that word for software applications)
   referenceData: null,         // loaded from data/reference-data.json
   buildings: [],               // loaded from data/buildings.json
   users: [],                   // loaded from data/users.json
@@ -30,6 +30,9 @@ export const state = {
   news: [],                    // loaded from data/news.json
   documents: [],               // loaded from data/documents.json (canonical Document records per § 6.2)
   downloads: null,             // loaded from data/downloads.json (UI download lists: regulations, strategies, training)
+  services: [],                // loaded from data/services.json (the service catalogue — nav dropdown, overview page, front-page tiles, search)
+  processDefs: [],             // loaded from data/process-definitions.json (one definition per process; steps drive the pipeline display)
+  processInstances: [],        // loaded from data/process-instances.json (every Vorgang, whatever its process — the 'Meine Vorgänge' collection)
   floors: [],                  // loaded from data/floors.geojson (Floor entities per § 3.2)
   spaces: [],                  // loaded from data/spaces.geojson (Space entities per § 3.3)
   spatialDataReady: null,      // lazy loader promise for floors/spaces
@@ -40,8 +43,8 @@ export const state = {
 };
 
 export async function loadData(basePath = 'data/') {
-  const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads, i18n] = await Promise.all([
-    fetch(basePath + 'applications.json').then(r => r.json()),
+  const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads, services, processDefs, processInstances, i18n] = await Promise.all([
+    fetch(basePath + 'space-requests.json').then(r => r.json()),
     fetch(basePath + 'reference-data.json').then(r => r.json()),
     fetch(basePath + 'users.json').then(r => r.json()),
     fetch(basePath + 'buildings.geojson').then(r => r.json()),
@@ -49,16 +52,30 @@ export async function loadData(basePath = 'data/') {
     fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'documents.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'downloads.json').then(r => r.json()).catch(() => ({ regulations: [], strategies: [], training: [] })),
+    fetch(basePath + 'services.json').then(r => r.json()).catch(() => []),
+    fetch(basePath + 'process-definitions.json').then(r => r.json()).catch(() => []),
+    fetch(basePath + 'process-instances.json').then(r => r.json()).catch(() => []),
     fetch(basePath + 'i18n.json').then(r => r.json()).catch(() => ({})),
   ]);
-  state.applications = apps.map(a => ({ ...a, id: a.applicationId, type: a.applicationType, address: formatAddressLine(a) }));
+  state.spaceRequests = apps.map(a => ({ ...a, id: a.spaceRequestId, type: a.requestType, address: formatAddressLine(a) }));
   state.referenceData = reference;
   state.users = users.map(u => ({ ...u, id: u.userId }));
   state.buildings = (buildingsFc.features || []).map(flattenFeature).map(b => ({ ...b, id: b.buildingId, address: formatAddressLine(b) }));
-  state.tenancies = tenancies.map(t => ({ ...t, id: t.tenancyId, address: formatAddressLine(t) }));
+  // Photos live on the BUILDING (data/buildings.geojson `images[]`), not on
+  // the tenancy — the same object photographed once, whoever rents it. The
+  // tenancy gets the array plus an `image` alias for the first frame, so card
+  // and map-popup code that wants a single thumbnail stays a one-liner.
+  const buildingImages = new Map(state.buildings.map(b => [b.buildingId, b.images || []]));
+  state.tenancies = tenancies.map(t => {
+    const images = buildingImages.get(t.buildingId) || [];
+    return { ...t, id: t.tenancyId, address: formatAddressLine(t), images, image: images[0] || '' };
+  });
   state.news = news.map(n => ({ ...n, id: n.newsId }));
   state.documents = documents.map(d => ({ ...d, id: d.documentId }));
   state.downloads = downloads;
+  state.services = services.map(s => ({ ...s, id: s.serviceId }));
+  state.processDefs = processDefs.map(d => ({ ...d, id: d.defId }));
+  state.processInstances = processInstances.map(i => ({ ...i, id: i.instanceId }));
   state.i18n = i18n || {};
   state.lang = loadLang() || 'de';
   try { document.documentElement.lang = state.lang; } catch {}

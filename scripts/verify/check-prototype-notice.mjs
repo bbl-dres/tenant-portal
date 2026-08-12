@@ -31,6 +31,11 @@ const browser = await chromium.launch();
 
 const NOTICE = '#prototypeNotice';
 
+// `#/` settles on the role home now that the prototype boots signed in, and on
+// the public landing after an explicit sign-out. Both are "the entry page" for
+// this check — it is about the disclaimer, not about which entry page renders.
+const LANDING = ['#/', '#/home'];
+
 // A fresh context = a fresh sessionStorage = a fresh visit.
 async function newSession(width = 1280, height = 900) {
   const context = await browser.newContext({ viewport: { width, height } });
@@ -39,19 +44,18 @@ async function newSession(width = 1280, height = 900) {
 
 await run(reporter, async () => {
   // ── 1. Deep links: every bookmarkable route shows the notice ────────────
-  // Public landing, an authenticated list, a detail page and a nested detail
-  // route — the last two auto-login on load, which is exactly the bookmark
-  // path a returning demo user takes.
+  // Entry page, an authenticated list, a detail page and a nested detail
+  // route — exactly the bookmark path a returning demo user takes.
   const ROUTES = [
-    '#/',
-    '#/downloads',
-    '#/properties/T-2010-AA-01',
-    '#/properties/T-2010-AA-01/floors/2og',
+    ['#/', LANDING],
+    ['#/downloads', '#/downloads'],
+    ['#/properties/T-2010-AA-01', '#/properties/T-2010-AA-01'],
+    ['#/properties/T-2010-AA-01/floors/2og', '#/properties/T-2010-AA-01/floors/2og'],
   ];
-  for (const hash of ROUTES) {
+  for (const [hash, settled] of ROUTES) {
     const { context, page } = await newSession();
     await page.goto(`${baseUrl}/${hash}?lang=de`);
-    await waitForRoute(page, hash);
+    await waitForRoute(page, settled);
     const shown = await page.locator(NOTICE).isVisible().catch(() => false);
     check(`deep link ${hash}: notice shows on a fresh session`, shown);
     await context.close();
@@ -60,7 +64,7 @@ await run(reporter, async () => {
   // ── 2. Content + component identity ─────────────────────────────────────
   const { context, page } = await newSession();
   await page.goto(`${baseUrl}/#/?lang=de`);
-  await waitForRoute(page, '#/');
+  await waitForRoute(page, LANDING);
 
   const anatomy = await page.evaluate(() => {
     const el = document.getElementById('prototypeNotice');
@@ -77,6 +81,7 @@ await run(reporter, async () => {
       atBottom: Math.abs(r.bottom - window.innerHeight) < 2,
       fullWidth: r.width >= window.innerWidth - 2,
       hasIcon: !!el.querySelector('.notification-banner__icon svg'),
+      titleIsBold: el.querySelector('strong#prototypeNoticeTitle')?.textContent?.trim() || '',
       ackLabel: el.querySelector('#prototypeNoticeAck')?.textContent?.trim() || '',
     };
   });
@@ -86,12 +91,18 @@ await run(reporter, async () => {
     !!anatomy && /\bnotification-banner\b/.test(anatomy.classes)
       && /\bnotification-banner--fixed\b/.test(anatomy.classes)
       && /\bnotification\b/.test(anatomy.classes)
-      && /\bnotification--warning\b/.test(anatomy.classes),
+      && /\bnotification--info\b/.test(anatomy.classes),
     anatomy?.classes);
   check('pinned full-width to the bottom edge',
     !!anatomy && anatomy.position === 'fixed' && anatomy.atBottom && anatomy.fullWidth,
     JSON.stringify({ position: anatomy?.position, atBottom: anatomy?.atBottom, fullWidth: anatomy?.fullWidth }));
-  check('carries the status icon (WCAG 1.4.1 — not colour alone)', !!anatomy?.hasIcon);
+  // The banner carries no status glyph by design (the cookie banner keeps
+  // one). WCAG 1.4.1 is satisfied by the bold lead sentence naming the status
+  // in words, so that is what has to be asserted — and the icon has to STAY
+  // gone, or the quiet-note tone silently regresses to an alert.
+  check('states its status in text, not by tint alone (WCAG 1.4.1)',
+    !!anatomy && !anatomy.hasIcon && anatomy.titleIsBold.length > 0,
+    anatomy?.titleIsBold);
   check('landmark has an accessible name',
     !!anatomy && anatomy.role === 'region' && !!anatomy.labelledby && anatomy.labelText.length > 0,
     anatomy?.labelText);
@@ -178,7 +189,7 @@ await run(reporter, async () => {
   for (const [lang, expected, chipText] of LANGS) {
     const s = await newSession();
     await s.page.goto(`${baseUrl}/#/?lang=${lang}`);
-    await waitForRoute(s.page, '#/');
+    await waitForRoute(s.page, LANDING);
     const got = await s.page.evaluate(() =>
       document.getElementById('prototypeNotice')?.textContent.replace(/\s+/g, ' ').trim() || '');
     check(`notice is localised (${lang})`, got.includes(expected), got.slice(0, 80));
@@ -191,7 +202,7 @@ await run(reporter, async () => {
   // ── 8. Phone width: no horizontal overflow, full-width action ───────────
   const mobile = await newSession(390, 844);
   await mobile.page.goto(`${baseUrl}/#/?lang=de`);
-  await waitForRoute(mobile.page, '#/');
+  await waitForRoute(mobile.page, LANDING);
   const m = await mobile.page.evaluate(() => {
     const el = document.getElementById('prototypeNotice');
     const btn = el.querySelector('#prototypeNoticeAck').getBoundingClientRect();

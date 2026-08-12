@@ -660,3 +660,164 @@ html:has(body.docviewer-open) { overflow: hidden; }
 .floor-viewer:-webkit-full-screen .floor-legend {
   padding: var(--space-md) 0 var(--space-sm);
 }
+
+/* ── CATALOGUE BAR (catbar) ──────────────────────────────────────────────
+   One toolbar for every catalogue-like surface — properties, downloads, the
+   Vorgänge list. Anatomy from the CD search-results header
+   (designsystem css/components/search.postcss:208-233) and the sister
+   portal's catbar: search + hit count on the left; after one divider, sort,
+   the filter toggle and the view switch on the right; the filter panel opens
+   below the row.
+
+   Every control shares ONE height (--btn-min-h) so the row never changes
+   height between viewports. That deliberately does not adopt the DS's
+   responsive control growth (btn 44→48px at xl): a toolbar that changes
+   height mid-page reads as a layout bug rather than as responsiveness. */
+.catbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
+  margin-top: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  /* The rule closes the toolbar; the margin then separates it from the
+     results, which otherwise started immediately under the line and read as
+     part of the bar. */
+  margin-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--color-secondary-300);
+  font-size: var(--text-body-sm);
+}
+.catbar__search {
+  position: relative;
+  flex: 1 1 240px;
+  min-width: 180px;
+  max-width: 384px;
+}
+.catbar__input {
+  width: 100%;
+  min-height: var(--btn-min-h);
+  padding-left: var(--btn-min-h);
+}
+/* The submit sits INSIDE the field on the leading edge, the same magnifier
+   position the portal's other in-page search fields use. */
+.catbar__submit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--btn-min-h);
+  min-height: 0;
+  padding: 0;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+.catbar__submit:hover { color: var(--color-primary); background: none; }
+.catbar__count {
+  margin: 0;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.catbar__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-left: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+.catbar__sort {
+  min-height: var(--btn-min-h);
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  font-size: var(--text-body-sm);
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+.catbar__filter { min-height: var(--btn-min-h); white-space: nowrap; }
+.catbar__filter-count { font-weight: var(--font-weight-bold); }
+.catbar__chevron { width: var(--icon-sm); height: var(--icon-sm); }
+.catbar__filter[aria-expanded="true"] .catbar__chevron { transform: rotate(180deg); }
+
+/* Filter panel — opens under the row, stays open while the reader picks. */
+/* The gap belongs to whichever element ends the toolbar. A filter panel is
+   rendered even when closed, so this has to test for a VISIBLE one —
+   `:has(+ .catbar__panel)` alone matched the hidden panel too and silently
+   zeroed the gap on every page that offers filtering. */
+.catbar { margin-bottom: var(--space-xl); }
+.catbar:has(+ .catbar__panel:not([hidden])) { margin-bottom: 0; }
+.catbar__panel {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-md) 0 var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+.catbar__fieldset { border: none; margin: 0; padding: 0; }
+.catbar__legend {
+  padding: 0 0 var(--space-sm);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+}
+.catbar__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
+  align-items: center;
+}
+.catbar__option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-body-sm);
+}
+
+/* View switch — icon buttons with a rail on the active one, the CD treatment
+   for a view toggle (and what the sister portal's `.view-switch` renders). */
+.view-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-left: var(--space-md);
+  border-left: 1px solid var(--color-secondary-300);
+}
+.view-switch__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--btn-min-h);
+  padding: var(--space-xs) var(--space-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+}
+.view-switch__btn:hover { color: var(--color-primary); }
+.view-switch__btn--active { color: var(--color-text-primary); }
+.view-switch__btn--active::after {
+  content: '';
+  position: absolute;
+  left: var(--space-xs);
+  right: var(--space-xs);
+  bottom: 0;
+  height: 3px;
+  background: var(--color-primary-500);
+}
+.view-switch__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); }
+/* Below sm the labels go and the icons carry the switch — the row has to
+   keep search, count and controls on screen at 320px. */
+@media (max-width: 639.98px) {
+  .view-switch__label { display: none; }
+}
+/* Two-up panel for filters that are dropdowns rather than a single option
+   list (the documents page filters by type AND property). */
+.catbar__panel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+@media (min-width: 640px) {
+  .catbar__panel-grid { grid-template-columns: repeat(2, minmax(0, 240px)); }
+}
+.catbar__panel-grid .catbar__legend { display: block; }

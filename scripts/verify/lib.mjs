@@ -102,10 +102,25 @@ export async function loginAs(page, baseUrl, role = 'LBO') {
 // handling onto #page-body (markRouteRendered in js/app.js). Waiting on
 // that marker — plus font readiness, so width measurements are stable —
 // replaces guessed sleeps after navigation.
+//
+// `hash` may be an array when the route legitimately resolves to more than
+// one place: `#/` renders the public landing while logged out but forwards to
+// the role home once authenticated, and the prototype now boots signed in.
+//
+// A route that forwards stamps ITSELF first (handleHash marks the hash it
+// handled, then the redirect re-renders), so matching the marker alone can
+// latch onto a frame that is about to be replaced — the assertion then races
+// the second render. Requiring the address bar to agree with the marker waits
+// for the router to come to rest.
 export async function waitForRoute(page, hash, timeout = 10000) {
+  const accepted = Array.isArray(hash) ? hash : [hash];
   await page.waitForFunction(
-    (h) => document.getElementById('page-body')?.dataset.route === h,
-    hash,
+    (hs) => {
+      const route = document.getElementById('page-body')?.dataset.route;
+      if (!hs.includes(route)) return false;
+      return (location.hash || '#/').split('?')[0] === route;
+    },
+    accepted,
     { timeout },
   );
   await page.evaluate(() => document.fonts?.ready);

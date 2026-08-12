@@ -24,8 +24,10 @@
           "obj": "AA"
         },
         "egid": "100123456",
-        "portfolioCategory": "Administration Class I",
-        "image": "assets/images/buildings/BLD-2010.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2010-nord-nationalbank.jpg",
+          "assets/images/buildings/BLD-2010-nordfassade.jpg"
+        ]
       }
     },
     {
@@ -51,8 +53,11 @@
           "obj": "AA"
         },
         "egid": "100234567",
-        "portfolioCategory": "Administration Class II",
-        "image": "assets/images/buildings/BLD-2011.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2011-nordosten.jpg",
+          "assets/images/buildings/BLD-2011-nordwesten.jpg",
+          "assets/images/buildings/BLD-2011-skulpturen.jpg"
+        ]
       }
     },
     {
@@ -78,8 +83,9 @@
           "obj": "AA"
         },
         "egid": "100345678",
-        "portfolioCategory": "Administration Class II",
-        "image": "assets/images/buildings/BLD-2012.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2012-westen.jpg"
+        ]
       }
     },
     {
@@ -105,8 +111,9 @@
           "obj": "AA"
         },
         "egid": "100456789",
-        "portfolioCategory": "Administration Class II",
-        "image": "assets/images/buildings/BLD-2013.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2013-westen.jpg"
+        ]
       }
     },
     {
@@ -132,8 +139,11 @@
           "obj": "AA"
         },
         "egid": "100567890",
-        "portfolioCategory": "Administration Class II",
-        "image": "assets/images/buildings/BLD-2014.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2014-nordwesten.jpg",
+          "assets/images/buildings/BLD-2014-suedosten.jpg",
+          "assets/images/buildings/BLD-2014-sueden.jpg"
+        ]
       }
     },
     {
@@ -159,8 +169,10 @@
           "obj": "AA"
         },
         "egid": "100678901",
-        "portfolioCategory": "Administration Class II",
-        "image": "assets/images/buildings/BLD-2015.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2015-suedosten.jpg",
+          "assets/images/buildings/BLD-2015-suedosten-uvek.jpg"
+        ]
       }
     },
     {
@@ -186,8 +198,9 @@
           "obj": "AA"
         },
         "egid": "100789012",
-        "portfolioCategory": "Administration Class III",
-        "image": "assets/images/buildings/BLD-2016.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2016-filiale.jpg"
+        ]
       }
     },
     {
@@ -213,8 +226,12 @@
           "obj": "AA"
         },
         "egid": "100890123",
-        "portfolioCategory": "Administration Class II",
-        "image": "assets/images/buildings/BLD-2017.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2017-hauptsitz.jpg",
+          "assets/images/buildings/BLD-2017-eingang.jpg",
+          "assets/images/buildings/BLD-2017-seitenansicht.jpg",
+          "assets/images/buildings/BLD-2017-umgebung.jpg"
+        ]
       }
     },
     {
@@ -240,8 +257,9 @@
           "obj": "AA"
         },
         "egid": "100901234",
-        "portfolioCategory": "Administration Class III",
-        "image": "assets/images/buildings/BLD-2018.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2018-operation-center.jpg"
+        ]
       }
     },
     {
@@ -267,8 +285,9 @@
           "obj": "AA"
         },
         "egid": "101012345",
-        "portfolioCategory": "Administration Class III",
-        "image": "assets/images/buildings/BLD-2019.jpg"
+        "images": [
+          "assets/images/buildings/BLD-2019-centro-sud.jpg"
+        ]
       }
     }
   ]

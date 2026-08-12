@@ -2,7 +2,7 @@
    WIZARD.JS — 5-step Bedarfsmeldung (demand-application) wizard.
 
    The wizard is the portal's single largest piece of business logic and the
-   only one that mutates state.applications (via submitDraft). It earns its
+   only one that mutates state.spaceRequests (via submitDraft). It earns its
    own module because:
      • it's self-contained — only the wizard's renderers and wires touch
        step state via `draft`; nothing outside the wizard reads draft state.
@@ -125,7 +125,6 @@ export function renderWizard({ step }) {
     return;
   }
   shell({ activeNav: 'wizard', breadcrumb: [
-    { href: '#/home', label: t('nav.start') },
     { href: '#/wizard/1', label: t('services.request') },
     { label: t('wizard.stepN', { n: stepNum }) }
   ]});
@@ -224,7 +223,7 @@ function renderStep1(draft) {
     <div class="wizard__sticky-footer">
       <span class="wizard__counter">Schritt 1 / 5</span>
       <button class="btn btn--outline" onclick="window.t3lite.saveDraft()">Entwurf speichern</button>
-      <a class="btn btn--outline" href="#/home">Abbrechen</a>
+      <a class="btn btn--outline" href="#/">Abbrechen</a>
       <button class="btn btn--filled" id="nextStep">Weiter ${icon('arrowRight')}</button>
     </div>
   `;
@@ -909,18 +908,18 @@ function wireStep5(draft) {
 }
 
 export function submitDraft(draft) {
-  // Promote draft to a submitted application (in-memory).
+  // Promote draft to a submitted space request (in-memory).
   // Schema-canonical fields per docs/DATAMODEL.md §4.1. The `id` and
   // `address` aliases mirror what loadData() injects so render code
   // doesn't have to distinguish freshly-submitted from loaded records.
-  const applicationId = 'BE-2026-' + String(Math.floor(Math.random() * 900 + 100));
+  const spaceRequestId = 'BE-2026-' + String(Math.floor(Math.random() * 900 + 100));
   const c = calcWizard({ nawClass: draft.nawClass, fte: draft.fte });
   // Pull atomic address fields from the matched Building when one exists;
   // greenfield drafts keep the free-text only.
   const match = state.buildings.find(b => b.address && draft.address && b.address.toLowerCase() === draft.address.toLowerCase());
   const ts = new Date().toISOString();
   const newApp = {
-    applicationId, applicationType: draft.type, pipelineVariant: draft.pipelineVariant,
+    spaceRequestId, requestType: draft.type, pipelineVariant: draft.pipelineVariant,
     status: 'submitted',
     submitterId: state.user.id, submitterVe: draft.ve, submitterDep: state.user.dep,
     buildingId: match ? match.buildingId : null,
@@ -940,13 +939,31 @@ export function submitDraft(draft) {
     ],
     _isNew: true,
     // Aliases mirroring loadData() normalisation
-    id: applicationId,
+    id: spaceRequestId,
     type: draft.type,
     address: draft.address,
   };
-  state.applications.unshift(newApp);
+  state.spaceRequests.unshift(newApp);
+  // Every Vorgang — whatever its process — needs an envelope in
+  // state.processInstances, or it would not appear in «Meine Vorgänge». The
+  // Bedarfsmeldung's typed record above stays the payload; this is the
+  // envelope that references it (see the PROCESS INSTANCES block in app.js).
+  state.processInstances.unshift({
+    instanceId: 'VG-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9000 + 1000)),
+    defId: 'bedarfsmeldung',
+    variant: draft.pipelineVariant || 'standard',
+    payloadRef: spaceRequestId,
+    title: 'Bedarfsmeldung ' + (draft.address || ''),
+    requesterId: state.user.id,
+    requesterVe: draft.ve,
+    buildingId: match ? match.buildingId : null,
+    status: 'submitted',
+    createdAt: ts,
+    updatedAt: ts,
+    assignee: draft.pipelineVariant === 'bypass' ? 'BBL Portfolio-Management' : 'Generalsekretariat ' + draft.ve,
+  });
   clearDraft();
   state.draft = null;
-  toast(`Antrag ${applicationId} eingereicht. ${draft.pipelineVariant === 'bypass' ? 'Routet an BBL-PFM (BK-Bypass).' : 'Routet an GS.'}`, 'success');
-  window.portal.navigate('#/inbox/' + applicationId);
+  toast(`Antrag ${spaceRequestId} eingereicht. ${draft.pipelineVariant === 'bypass' ? 'Routet an BBL-PFM (BK-Bypass).' : 'Routet an GS.'}`, 'success');
+  window.portal.navigate('#/inbox/' + spaceRequestId);
 }

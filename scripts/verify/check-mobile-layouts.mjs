@@ -20,7 +20,7 @@ const VIEWPORTS = [320, 375, 390];
 // Routes default to the LBO (tenant) role; entries with `role` switch the
 // demo session first. Keep same-role routes adjacent — switching re-renders.
 const ROUTES = [
-  { label: 'home', hash: '#/home' },
+  { label: 'front', hash: '#/' },   // front page = hero + overview + services (was #/home)
   { label: 'properties', hash: '#/properties' },
   { label: 'property-detail', hash: '#/properties/T-2010-AA-01' },
   { label: 'downloads', hash: '#/downloads' },
@@ -57,7 +57,10 @@ await run(reporter, async () => {
         const offenders = [];
         for (const el of document.querySelectorAll('#page-body *')) {
           // Elements inside a horizontal scroller are allowed to overflow it.
-          if (el.closest('.table-wrapper, .docs-table-wrap, .pipeline')) continue;
+          // `.tabs` is one by design — the DS tab strip scrolls its controls
+          // and fades the right edge rather than wrapping them
+          // (designsystem css/components/tab.postcss).
+          if (el.closest('.table-wrapper, .docs-table-wrap, .pipeline, .tabs')) continue;
           const r = el.getBoundingClientRect();
           if (r.width > 0 && (r.right > vw + 1 || r.left < -1)) {
             offenders.push(`${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]} [${Math.round(r.left)}..${Math.round(r.right)}]`);
@@ -79,8 +82,18 @@ await run(reporter, async () => {
         check(`property-detail@${width}: all 4 stat values fully visible`, statsOk);
       }
       if (route.label === 'downloads') {
+        // The filters moved into the shared catalogue bar: the search field
+        // sits in the row, the two dropdowns in its filter panel. Measure the
+        // panel open, since a collapsed panel reports zero-height controls
+        // and would pass this check without ever testing them.
+        await page.evaluate(() => {
+          const panel = document.getElementById('docs-panel');
+          const toggle = document.getElementById('docs-filter');
+          if (panel) panel.hidden = false;
+          if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        });
         const controls = await page.evaluate(() =>
-          [...document.querySelectorAll('.docs-filter-bar .input')]
+          [...document.querySelectorAll('.catbar .input, #docs-panel .input')]
             .map(el => Math.round(el.getBoundingClientRect().height)));
         check(`downloads@${width}: filter controls normal height (≤60 px)`,
           controls.length >= 3 && controls.every(h => h <= 60), controls.join(', '));

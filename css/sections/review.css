@@ -184,3 +184,66 @@
   background: var(--color-success-light);
   border-color: var(--color-success);
 }
+
+/* ── CASE DETAIL — comments + empty states ───────────────────────────────
+   Every tab of a Vorgang renders something: a process with no attachments
+   says so rather than showing a blank panel, which reads as a loading bug. */
+.case-empty {
+  margin: 0;
+  padding: var(--space-lg) 0;
+}
+.case-comments {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.case-comment {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.case-comment:last-child { border-bottom: none; }
+.case-comment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-xs);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.case-comment__text {
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+/* Übersicht of a Vorgang: a vertical stack of titled sections, each a
+   definition list. The earlier four-across card grid squeezed every value
+   into a ~300px column — an address or the NAW line wrapped three times
+   while its neighbour sat half empty — and four cards implied four peer
+   objects where there is one record seen from several angles. */
+.case-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+.case-section__title {
+  margin: 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+}
+.case-section__title .inline-icon {
+  width: var(--icon-base);
+  height: var(--icon-base);
+  vertical-align: -4px;
+  margin-right: var(--space-xs);
+}
+.case-section__note { margin: var(--space-md) 0 0; }
+.case-section .auflagen-list { margin-top: var(--space-md); }
+/* ONE label column across every section of a Vorgang, so the values line up
+   down the whole page. Each `.detail-list` sizes its own label column by
+   default, which made «Name :» and «Wirtschaftseinheit (WE) :» start their
+   values at different x positions two sections apart. */
+@media (min-width: 640px) {
+  .case-overview .detail-list { grid-template-columns: 220px minmax(0, 1fr); }
+}

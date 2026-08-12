@@ -45,7 +45,8 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
 - **Reviewer queue** (General Secretariat reviewer, GS-Prüfer/in) — keyboard-driven (`j`/`k`/`Enter`/`x`), bulk-approve modal, queue statistics strip, dense table with 25 rows per page.
 - **Property portfolio** — gallery / list / map views with MapLibre GL JS, filtered by administrative unit (VE), exportable, with detail page per property (banner, tenancy (Mietverhältnis), related applications, contacts).
 - **Plans & Documents (Pläne & Dokumente)** — paginated documents page with type / building / text filters, simulated downloads.
-- **News + Info** — long-form info page with sticky TOC scroll-spy, news overview + detail, search across all entities.
+- **News + Info** — long-form info page with sticky TOC scroll-spy, news overview + detail.
+- **Portal search** — one ranked stream across services, your Vorgänge, properties, the building portfolio, documents, news and the info sections. Diacritic-folding (`schäden` = `schaeden`), multi-word AND, field-weighted relevance; type facets, sort (relevance / date / title), list and grid views. Ranking lives in [`js/search-engine.js`](js/search-engine.js) — DOM-free, so `npm test` covers it.
 - **Role switching** — tenant (LBO), GS reviewer, BBL Portfolio Management (BBL-PFM), BBL Campus, Auditor. Each role gets a tailored nav + landing.
 
 ### Prototype disclosure
@@ -72,7 +73,7 @@ Prototype of the federal tenant portal for the [Federal Office for Buildings and
 | MapLibre GL JS | v5.x (CDN) | Property portfolio map view |
 | `swiss/designsystem` | v1.0.9 | Federal Corporate Design (CD Bund) tokens + components (hand-translated) |
 | Noto Sans | bundled | Federal canonical typeface |
-| JSON | static | Mock data (applications, buildings, tenancies (Mietverhältnisse), …) |
+| JSON | static | Mock data (space requests, services, buildings, tenancies (Mietverhältnisse), …) |
 
 No build tools and no framework — the app itself is pure static files. `npm` is used only for local verification scripts.
 
@@ -103,7 +104,7 @@ npm run verify:all   # Playwright browser checks (UI regressions + a11y sweep)
 
 Two layers, both run by CI on every push:
 
-- **`npm test`** — ESLint (correctness rules, no style bikeshedding), domain unit checks (wizard maths, the `escapeHtml`/`escapeJs` XSS guards, locale formatters) and the CD Bund token guard (no rogue colors or inline styles outside `css/tokens.css`).
+- **`npm test`** — ESLint (correctness rules, no style bikeshedding), domain unit checks (wizard maths, search folding + ranking, the `escapeHtml`/`escapeJs` XSS guards, locale formatters) and the CD Bund token guard (no rogue colors or inline styles outside `css/tokens.css`).
 - **`npm run verify:all`** — the Playwright checks in `scripts/verify/`, individually runnable: `verify:mobile-nav` (burger-menu behaviour), `verify:mobile-layouts` (horizontal-overflow / control-sizing at phone widths, incl. the reviewer queue), `verify:header-chrome` (split logo, breadcrumb, burger placement across breakpoints), `verify:property-images` (all imagery same-origin, nothing broken), `verify:media-viewer` (document preview: prev/next navigation, single-scroll model with sticky header, share popover + `?doc=` deep link; property image gallery: open, upload, navigate, delete, header-badge sync; plus cross-view UI consistency — the shared `.search-field` and the `.page-header` pattern), `verify:prototype-notice` (the prototype disclaimer: shows on any deep-linked URL, returns each session, CD class composition, reserved space + toast stacking, four-language copy, phone layout), `verify:a11y` (responsive accessibility sweep: landmarks, names, headings, focus management). JSON reports and screenshots land in `verify_out/` (gitignored, uploaded as a CI artifact).
 
 The browser checks wait on a render marker (`#page-body[data-route]`, stamped by the router after each render) instead of sleeping, which keeps them deterministic.
@@ -122,7 +123,7 @@ tenant-portal/
 │   └── operators/         # Operator / federal branding graphics
 ├── css/                   # Design tokens (CD Bund) + app stylesheet
 ├── js/                    # Router, shell, wizard, state, helpers (ES modules)
-├── data/                  # Static JSON / GeoJSON mocks (applications, buildings, tenancies, …)
+├── data/                  # Static JSON / GeoJSON mocks (space requests, services, buildings, tenancies, …)
 ├── docs/                  # Requirements, data model, design guide, CD audit, research
 ├── scripts/               # Dev-only utilities (nothing here ships with the app)
 │   ├── data/              # GeoJSON generation + geocoding (Python, run-once generators)

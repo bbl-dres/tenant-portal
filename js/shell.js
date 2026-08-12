@@ -39,6 +39,13 @@ import { toast, icon, renderShortcutOverlay, safeGet, safeSet, safeSessionGet, s
 // css/components/notification-banner.postcss `.notification-banner--fixed`).
 // Here it carries the prototype disclaimer instead of a consent question.
 //
+// Variant is `notification--info` (DS bg-blue-50 / text-blue-700,
+// css/components/notification.postcss:39-42), not `--warning`: nothing is
+// wrong and nothing needs care — the bar states what this site is. Orange
+// read as an alert and set the wrong tone on entry, and it clashed with the
+// intranet skin, whose brand ramp is blue. Warning stays available for
+// genuine attention states (lease expiry, open defects).
+//
 // Scope is deliberately SESSION, not localStorage: the disclaimer must greet
 // every new visit, and it is emitted from renderShell — which every route
 // mounts — so a bookmarked deep link (#/properties/T-2010-AA-01/floors/1OG)
@@ -59,10 +66,14 @@ function prototypeNoticeAcknowledged() {
 function renderPrototypeNotice() {
   if (prototypeNoticeAcknowledged()) return '';
   return `
-    <aside class="notification-banner notification-banner--fixed notification notification--warning prototype-notice"
+    <aside class="notification-banner notification-banner--fixed notification notification--info prototype-notice"
            id="prototypeNotice" role="region" aria-labelledby="prototypeNoticeTitle">
       <div class="notification-banner__wrapper">
-        <span class="notification-banner__icon" aria-hidden="true">${icon('alertTriangle')}</span>
+        <!-- No notification-banner__icon here (the cookie banner below keeps
+             one). The disclaimer states its own status in the bold lead
+             sentence, so the meaning never rests on the tint alone — the
+             glyph only added weight to a bar that should read as a quiet
+             note. -->
         <p class="notification-banner__text">
           <strong id="prototypeNoticeTitle">${t('proto.title')}</strong> ${t('proto.text')}
         </p>
@@ -155,19 +166,41 @@ export function acceptCookieConsent(mode = 'necessary') {
 // `renderServicesOverview` in app.js without duplicating the catalogue.
 // A function (not a const) so labels translate against the active language at
 // render time. Also consumed by #/services (renderServicesOverview in app.js).
+// Resolve one record from data/services.json into the shape the chrome and the
+// views consume. Kept here (not in a view) because the nav dropdown, the
+// services overview, the front-page tiles and the search index all need the
+// SAME resolution — a service's label, blurb and destination must not depend
+// on which surface is rendering it.
+//
+// `titleKey` / `shortKey` hold i18n keys rather than literal strings: this is
+// the one deliberate divergence from the sister portal's services.json, which
+// inlines German because it ships one language. Everything else — serviceId,
+// type, popular, target { kind, href } — carries the sister portal's names.
+export function resolveService(s) {
+  const target = s.target || {};
+  return {
+    id: s.serviceId,
+    href: target.href || '#/',
+    label: t(s.titleKey),
+    desc: t(s.shortKey),
+    external: target.kind === 'external',
+    // `section` targets are in-page anchors on the long info page: the href
+    // navigates, then t3lite.scrollToInfo scrolls to the section.
+    section: target.kind === 'section' ? target.section : null,
+    type: s.type,
+    popular: s.popular,
+  };
+}
+
+// The nav dropdown shows the entries flagged `inMenu`. Services that own a
+// top-level nav entry already (Liegenschaften, Pläne & Dokumente) or live
+// inside another page (Schulungen) are catalogued but not repeated here.
 export function servicesMenu() {
   return {
     id: 'services',
     label: t('nav.services'),
     type: 'dropdown',
-    items: [
-      { href: '#/services',  label: t('services.overview'),  desc: t('services.overview.desc') },
-      { href: '#/wizard/1',  label: t('services.request'),   desc: t('services.request.desc') },
-      { href: '#/repair',    label: t('services.repair'),    desc: t('services.repair.desc') },
-      { href: '#/moves',     label: t('services.move'),      desc: t('services.move.desc') },
-      { href: '#/cleaning',  label: t('services.cleaning'),  desc: t('services.cleaning.desc') },
-      { href: 'https://bbl-dres.github.io/workspace-management/', label: t('services.furniture'), desc: t('services.furniture.desc'), external: true },
-    ],
+    items: (state.services || []).filter(s => s.inMenu).map(resolveService),
   };
 }
 
@@ -178,14 +211,18 @@ export function servicesMenu() {
 // feedback showed visitors did not realise more content exists behind the
 // mock login. Protected routes render the central login gate instead of
 // content (renderLoginGate via handleHash in app.js).
+// «Meine Vorgänge» sits LAST in the row throughout. The entries before it are
+// the portal's offer — what you can do and look at, browsed left to right;
+// the case list is the reader's own workspace, and parking it at the end of
+// the row keeps it in one predictable place across every role's navigation.
 export function publicNavItems() {
   return [
     { id: 'start', href: '#/', label: t('nav.start') },
     servicesMenu(),
     { id: 'properties', href: '#/properties', label: t('nav.properties') },
     { id: 'downloads', href: '#/downloads', label: t('nav.downloads') },
-    { id: 'inbox', href: '#/inbox', label: t('nav.inbox') },
     { id: 'info', href: '#/info', label: t('nav.info') },
+    { id: 'inbox', href: '#/inbox', label: t('nav.inbox') },
   ];
 }
 
@@ -196,24 +233,25 @@ export function authNavItems() {
   if (role === 'GS-Reviewer') {
     return [
       { id: 'queue', href: '#/queue', label: t('nav.queue') },
-      { id: 'inbox', href: '#/inbox', label: t('nav.inboxVe') },
       servicesMenu(),
       downloads,
       info,
+      { id: 'inbox', href: '#/inbox', label: t('nav.inboxVe') },
     ];
   }
+  // No "home" entry: the signed-in overview lives on the front page now, and
+  // the logo lockup is the way there — the same rule that keeps "Start" out of
+  // the nav row and out of the breadcrumb.
   if (role === 'LBO' || !role) {
     return [
-      { id: 'home',       href: '#/home',       label: t('nav.start') },
       servicesMenu(),
       { id: 'properties', href: '#/properties', label: t('nav.properties') },
       downloads,
-      { id: 'inbox',      href: '#/inbox',      label: t('nav.inbox') },
       info,
+      { id: 'inbox',      href: '#/inbox',      label: t('nav.inbox') },
     ];
   }
   return [
-    { id: 'home', href: '#/home', label: t('nav.start') },
     servicesMenu(),
     downloads,
     info,
@@ -237,10 +275,11 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
        </button>`;
 
   // Per CD pattern (bbl.admin.ch / geo.admin.ch): "Start" is NOT a top-nav
-  // item. The federal logo at the top-left handles the "go home"
-  // affordance, and the breadcrumb starts with "Start" on every sub-page.
-  // The data still carries it (mobile burger menu + auth state checks),
-  // we just don't render it in the desktop nav row.
+  // item — and, since this round, not a breadcrumb item either. The federal
+  // logo lockup (`.top-header__left`, an anchor to `#/`) is the single home
+  // affordance; a "Start" crumb duplicated it on every sub-page. The data
+  // still carries it (mobile burger menu + auth state checks), we just don't
+  // render it in the desktop nav row.
   const desktopNavItems = navItems.filter(n => n.id !== 'start' && n.id !== 'home');
 
   // Dropdown panels (CD Bund pattern: constrained card under the trigger,
@@ -354,48 +393,22 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
   // serves publicly. Each entry is a ListItem with `position` (1-based)
   // and `name`; the anchor's `href` plays the `item` role.
   //
-  // CD pattern: if a breadcrumb item corresponds to a top-level nav
-  // route (e.g. "Liegenschaften" → matches one of `navItems`), surface
-  // a small red-bordered chevron-down beside it. Clicking it opens a
-  // 300 px drawer showing the *peer* top-nav items so the user can hop
-  // sideways without going back through the menu. Matches what
-  // bbl.admin.ch / geo.admin.ch do on their breadcrumbs.
-  const flatNav = navItems.filter(n => n.type !== 'dropdown');
-  // Home (`#/` or `#/home`) is exempt — CD pattern shows "Startseite"
-  // bare, dropdown only on the next breadcrumb item that anchors a
-  // top-nav route. Matches bbl.admin.ch / geo.admin.ch.
-  function siblingsFor(item) {
-    if (!item.href) return null;
-    if (item.href === '#/' || item.href === '#/home') return null;
-    const match = flatNav.find(n => n.href === item.href || (item.href.startsWith(n.href + '/')));
-    if (!match) return null;
-    const peers = flatNav.filter(n => n !== match);
-    return peers.length > 0 ? { active: match, peers } : null;
-  }
+  // No peer-navigation dropdown on the crumbs. The DS does ship
+  // `.breadcrumb__dropdown-icon`, but for a different job: geo.admin.ch-style
+  // deep hierarchies where each level has siblings worth hopping between. This
+  // portal is two or three levels deep with a flat top nav, so the control
+  // opened a drawer that merely repeated the navigation bar directly above it
+  // — and on a crumb without peers it rendered as an empty bordered box.
   const breadcrumbHtml = breadcrumb.length
     ? `<nav class="breadcrumb" aria-label="Brotkrumen">
          <ol class="breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">
            ${breadcrumb.map((b, i, a) => {
              const isLast = i === a.length - 1;
-             const sib = siblingsFor(b);
              return `
-             <li class="breadcrumb__item ${sib ? 'breadcrumb__item--has-dropdown' : ''}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+             <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                ${isLast
                  ? `<span aria-current="page" itemprop="name">${b.label}</span>`
                  : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a>`}
-               ${sib ? `
-                 <button class="breadcrumb__dropdown-icon" type="button"
-                         aria-label="Verwandte Bereiche zu ${b.label}"
-                         aria-haspopup="menu"
-                         aria-expanded="false"
-                         aria-controls="bcDropdown-${i}"
-                         onclick="window.portal.toggleBreadcrumbDropdown(${i})">
-                   ${icon('chevronDown')}
-                 </button>
-                 <ul class="breadcrumb__dropdown" id="bcDropdown-${i}" role="menu" hidden>
-                   <li class="breadcrumb__dropdown-active" role="menuitem"><span>${sib.active.label}</span></li>
-                   ${sib.peers.map(p => `<li role="none"><a role="menuitem" href="${p.href}">${p.label}</a></li>`).join('')}
-                 </ul>` : ''}
                ${!isLast ? icon('chevronRight', 'breadcrumb__sep') : ''}
                <meta itemprop="position" content="${i + 1}">
              </li>
@@ -450,7 +463,7 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
       <div class="top-header">
         <div class="top-header__inner">
           <a class="top-header__left" href="#/"
-             aria-label="${t('nav.start')} — ${t('org.bbl')} · ${sub}">
+             aria-label="${t('nav.start')} — ${t('org.bbl')} · ${sub} (Intranet)">
             <span class="top-header__bundmark">
               <img class="top-header__bundmark-flag" src="assets/swiss-logo-flag.svg" alt="" aria-hidden="true">
               <img class="top-header__bundmark-name" src="assets/swiss-logo-name.svg" alt="" aria-hidden="true">
@@ -459,6 +472,16 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
             <span class="top-header__dept">
               <span class="top-header__dept-name"><strong>${t('org.bbl')}</strong></span>
               <span class="top-header__dept-sub">${sub}</span>
+              <!-- Intranet marker. CD Bund appends it to the logo lockup in
+                   the intranet skin, as a badge--blue pseudo-element on
+                   .logo__title / .logo__accronym
+                   (designsystem/css/skins/intranet.postcss:32-43). Real markup
+                   rather than a ::after so the word is in the accessibility
+                   tree and not duplicated into copied text; the anchor's
+                   aria-label carries it too, since an explicit label would
+                   otherwise suppress the inner text. Untranslated by design —
+                   "Intranet" is the same string in DE/FR/IT/EN. -->
+              <span class="badge badge--blue top-header__skin-badge">Intranet</span>
             </span>
           </a>
           <div class="top-header__right">
@@ -555,7 +578,7 @@ export function renderFooter() {
             <h2 class="footer-information__heading">${t('footer.prototype')}</h2>
             <ul class="footer-information__list">
               <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://github.com/swiss/designsystem" target="_blank" rel="noopener">CD Bund ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://www.bk.admin.ch/de/webauftritt-der-bundesverwaltung" target="_blank" rel="noopener">Webauftritt der Bundesverwaltung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
 
@@ -577,28 +600,6 @@ export function renderFooter() {
 
 
 // ── NAV-MENU DROPDOWN (anchored under trigger word) ───────────────────────
-// Breadcrumb dropdown toggle — open/close the peer-list drawer attached
-// to a breadcrumb item that matches a top-nav route. Same close-on-Esc
-// / click-outside semantics as the nav-menu panels above.
-export function toggleBreadcrumbDropdown(index, force) {
-  const panel = document.getElementById('bcDropdown-' + index);
-  const trigger = document.querySelector(`[aria-controls="bcDropdown-${index}"]`);
-  if (!panel) return;
-  const isOpen = !panel.hasAttribute('hidden');
-  const next = (typeof force === 'boolean') ? force : !isOpen;
-  // Capture BEFORE hiding: [hidden] on the focused subtree silently drops
-  // focus to <body> (A11Y-010, same rationale as toggleNavMenu below).
-  const restoreFocus = panel.contains(document.activeElement) || document.activeElement === document.body;
-  // Close any other open breadcrumb dropdowns first.
-  document.querySelectorAll('.breadcrumb__dropdown').forEach(p => p.setAttribute('hidden', ''));
-  document.querySelectorAll('.breadcrumb__dropdown-icon').forEach(t => t.setAttribute('aria-expanded', 'false'));
-  if (next) {
-    panel.removeAttribute('hidden');
-    if (trigger) trigger.setAttribute('aria-expanded', 'true');
-  } else if (isOpen && restoreFocus && trigger) {
-    trigger.focus();
-  }
-}
 
 // Lazy-creates the page-darkening overlay element that sits behind the
 // open nav-menu panel. DS pattern `.desktop-menu__overlay` — dark
@@ -634,23 +635,12 @@ document.addEventListener('click', (e) => {
       toggleNavMenu(id, false);
     });
   }
-  // Close breadcrumb dropdowns on click outside.
-  if (!e.target.closest('.breadcrumb__dropdown, .breadcrumb__dropdown-icon')) {
-    document.querySelectorAll('.breadcrumb__dropdown:not([hidden])').forEach(p => {
-      const idx = p.id.replace('bcDropdown-', '');
-      toggleBreadcrumbDropdown(Number(idx), false);
-    });
-  }
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   document.querySelectorAll('.nav-menu:not([hidden])').forEach(m => {
     const id = m.id.replace('navMenu-', '');
     toggleNavMenu(id, false);
-  });
-  document.querySelectorAll('.breadcrumb__dropdown:not([hidden])').forEach(p => {
-    const idx = p.id.replace('bcDropdown-', '');
-    toggleBreadcrumbDropdown(Number(idx), false);
   });
 });
 window.addEventListener('resize', () => {

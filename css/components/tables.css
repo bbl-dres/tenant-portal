@@ -396,3 +396,10 @@ a.btn[aria-disabled="true"] {
 }
 .tag-item--active .tag-item__count,
 .tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-white-75); }
+
+/* The row the reader arrived through, in a table that lists siblings (e.g.
+   the other contracts on the same building). A left rail rather than a fill,
+   so it marks the row without competing with the zebra banding. */
+.table__row--current > td:first-child {
+   box-shadow: inset 3px 0 0 0 var(--color-primary);
+}

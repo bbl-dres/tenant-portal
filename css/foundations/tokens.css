@@ -91,6 +91,28 @@
   --color-primary:             var(--color-primary-600);
   --color-primary-hover:       var(--color-primary-700);
 
+  /* ── RED (fixed error ramp, independent of the brand) ─────────────────
+     CD Bund keeps `red` as its own Tailwind palette
+     (designsystem/app/tailwind.config.js:148-159) SEPARATE from `primary`,
+     and sources every error signal from it: `.notification--error/--alert`
+     → bg-red-50 / text-red-800 / bg-red-900, `.badge--red` → bg-red-100 /
+     text-red-800 (css/components/notification.postcss:29-57,
+     components/badge.postcss:23-26). In the default skin `primary` happens
+     to hold the same values, which is why the portal used to alias error
+     tokens onto it. Under the intranet skin primary turns BLUE — so error,
+     danger and rejected states have to sit on this ramp or they would turn
+     blue with it. Values are the DS `red` palette verbatim. */
+  --color-red-50:              #FFEDEE;
+  --color-red-100:             #FAE1E2;
+  --color-red-200:             #FFCCCE;
+  --color-red-300:             #FA9DA1;
+  --color-red-400:             #FC656B;
+  --color-red-500:             #E53940;
+  --color-red-600:             #D8232A;
+  --color-red-700:             #BF1F25;
+  --color-red-800:             #99191E;
+  --color-red-900:             #801519;
+
   /* ── LINK COLOUR — federal red (CD Bund canonical) ─────────────────────
      CD Bund's design system specifies `text-primary-600` (federal red)
      for body links: `.link, main a { @apply text-primary-600
@@ -177,8 +199,10 @@
   --color-success-light:       #D1FAE5;
   --color-warning:             #F59E0B;
   --color-warning-light:       #FEF3C7;
-  --color-danger:              var(--color-primary-600);
-  --color-danger-light:        var(--color-primary-100);   /* CD red-100 */
+  /* Danger is an ERROR signal, not the brand — it rides --color-red-*, so a
+     skin that retunes primary (intranet) leaves it red. */
+  --color-danger:              var(--color-red-600);
+  --color-danger-light:        var(--color-red-100);   /* CD red-100 */
   --color-info:                #0F6B75;
 
   /* ── NOTIFICATION VARIANTS (CD Bund `notification.postcss`) ───────────
@@ -199,9 +223,9 @@
   --color-notification-success-text: #065F46;   /* green-800 */
   --color-notification-warning-bg:   #FFF7ED;   /* orange-50 */
   --color-notification-warning-text: #9A3412;   /* orange-800 */
-  --color-notification-error-bg:     var(--color-primary-50);    /* red-50 (CD red) */
-  --color-notification-error-text:   var(--color-primary-800);   /* red-800 */
-  --color-notification-alert-bg:     var(--color-primary-900);   /* red-900 — inverted variant */
+  --color-notification-error-bg:     var(--color-red-50);        /* DS bg-red-50 */
+  --color-notification-error-text:   var(--color-red-800);       /* DS text-red-800 */
+  --color-notification-alert-bg:     var(--color-red-900);       /* DS bg-red-900 — inverted variant */
   --color-notification-hint-bg:      var(--color-secondary-50);
   --color-notification-hint-text:    var(--color-gray-700);      /* DS text-700 */
 
@@ -250,8 +274,8 @@
   --color-badge-green-text:    #065F46;
   --color-badge-blue-bg:       #DBEAFE;
   --color-badge-blue-text:     #1E40AF;
-  --color-badge-red-bg:        var(--color-primary-100);
-  --color-badge-red-text:      var(--color-primary-800);
+  --color-badge-red-bg:        var(--color-red-100);   /* DS .badge--red bg-red-100 */
+  --color-badge-red-text:      var(--color-red-800);   /* DS .badge--red text-red-800 */
   --color-badge-yellow-bg:     #FEF3C7;
   --color-badge-yellow-text:   #92400E;
   --color-badge-orange-bg:     #FFEDD5;
@@ -317,6 +341,7 @@
      These tokens never scale with the viewport; any breakpoint bump lives
      at the call site (header.css) on the DS screens grid
      (xl 1280 / 2xl 1544 / 3xl 1920 — tailwind.config.js:20-28). */
+  --text-chrome-xs:            0.75rem;    /* 12px — Tailwind fontSize.xs (DS `text-xs`) */
   --text-chrome-sm:            0.875rem;   /* 14px — Tailwind fontSize.sm */
   --text-chrome-base:          1rem;       /* 16px — Tailwind fontSize.base */
   --text-chrome-lg:            1.125rem;   /* 18px — Tailwind fontSize.lg */
@@ -499,6 +524,77 @@
                                0 5px 20px -3px rgba(0, 0, 0, 0.08);
   --shadow-card-hover:         0 10px 20px 0 rgba(0, 0, 0, 0.06),
                                1px 10px 70px -8px rgba(0, 0, 0, 0.13);
+}
+
+/* ══ SKIN: INTRANET ═══════════════════════════════════════════════════════
+   CD Bund ships two brand modes. The public-facing mode is the default
+   `:root` block above (federal red). The internal/intranet mode retunes the
+   brand to blue and the chrome ramp from blue-gray to blue — mirrored here
+   from designsystem/css/skins/intranet.postcss VERBATIM, including the DS's
+   own comment that secondary 50-300 stay grey while 400-900 turn blue.
+
+   Class name and placement follow the DS: `body--intranet` on <body>
+   (designsystem/app/components/ch/objects/AlterBodyClasses.vue:69-73). The
+   portal sets it statically in index.html — this is an intranet application,
+   not a runtime-switchable one. Remove the class there to get the public
+   skin back; nothing else is skin-aware.
+
+   WHY THE SELECTOR TARGETS :root AND NOT body — the portal has a semantic
+   token layer the DS does not: `--color-surface-dark: var(--color-secondary-
+   600)`, `--color-link: var(--color-primary-600)`, and ~30 more. A var() inside
+   a custom property is substituted at computed-value time ON THE ELEMENT THAT
+   DECLARES IT — here :root. Overriding the ramps further down (on body) would
+   therefore repaint only the DIRECT `var(--color-secondary-600)` call sites and
+   leave every alias resolved against the public ramp: measured result was a
+   blue portal with a blue-gray top bar and footer and red links. The skin has
+   to win where the aliases resolve, so it selects the root element by the body
+   class rather than the body itself. The DS avoids the problem by construction
+   — Tailwind's `@apply bg-secondary-600` emits a direct var() at each call
+   site, with no alias layer in between.
+   (`:has()` — Chrome/Edge 105+, Safari 15.4+, Firefox 121+. On anything older
+   the rule simply doesn't match and the portal renders the public skin whole,
+   rather than half-skinned.)
+
+   Only PRIMITIVES are overridden. The semantic layer aliases them via var()
+   (see TOK-003), so link colour, active rails, chrome fills and the pipeline
+   accent follow automatically. Error signals deliberately do NOT: they ride
+   the fixed --color-red-* ramp, exactly as the DS sources them from its own
+   `red` palette rather than from `primary`.
+
+   NOT overridden here, on purpose:
+     --color-focus (purple, accessibility affordance — skin-independent)
+     --color-lang-active (DS uses a literal blue-600 for the selected
+       language in BOTH skins; under intranet it simply coincides with
+       primary-600, same as upstream)
+     the notification info/success/warning tints and the floor-plan palette
+       (categorical, not brand). */
+:root:has(body.body--intranet) {
+  --color-primary-50:          #EFF6FF;
+  --color-primary-100:         #DBEAFE;
+  --color-primary-200:         #BFDBFE;
+  --color-primary-300:         #93C5FD;
+  --color-primary-400:         #60A5FA;
+  --color-primary-500:         #3B82F6;
+  --color-primary-600:         #2563EB;  /* intranet brand blue */
+  --color-primary-700:         #1D4ED8;
+  --color-primary-800:         #1E40AF;
+  --color-primary-900:         #1E3A8A;
+
+  /* light secondary colors are grey — unchanged from the default skin
+     (50-300 are identical upstream); re-declared so the ramp reads as one
+     block against designsystem/css/skins/intranet.postcss:19-22. */
+  --color-secondary-50:        #F0F4F7;
+  --color-secondary-100:       #DFE4E9;
+  --color-secondary-200:       #ACB4BD;
+  --color-secondary-300:       #828E9A;
+
+  /* dense secondary colors are blue */
+  --color-secondary-400:       #5076B3;
+  --color-secondary-500:       #234DC2;
+  --color-secondary-600:       #1E40AF;
+  --color-secondary-700:       #1E3A8A;
+  --color-secondary-800:       #1C3C7D;
+  --color-secondary-900:       #1C3C7D;
 }
 
 /* ── RESPONSIVE TYPE SCALE — matches CD Bund text--Nxl scaling ───────────

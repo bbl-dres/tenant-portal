@@ -1,0 +1,268 @@
+[
+  {
+    "instanceId": "VG-2026-0142",
+    "defId": "bedarfsmeldung",
+    "variant": "standard",
+    "payloadRef": "BE-2026-014",
+    "title": "Bedarfsmeldung Worblentalstrasse 68, 3063 Ittigen",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2011",
+    "status": "in_review_gs",
+    "createdAt": "2026-05-12T14:07:00Z",
+    "updatedAt": "2026-05-20T09:14:00Z",
+    "assignee": "Generalsekretariat UVEK"
+  },
+  {
+    "instanceId": "VG-2026-0139",
+    "defId": "bedarfsmeldung",
+    "variant": "greenfield",
+    "payloadRef": "UVEK-2026-002",
+    "title": "Bedarfsmeldung Avenue de la Gare 47, 1003 Lausanne",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": null,
+    "status": "submitted",
+    "createdAt": "2026-05-11T10:42:00Z",
+    "updatedAt": "2026-05-11T10:42:00Z",
+    "assignee": "Generalsekretariat UVEK"
+  },
+  {
+    "instanceId": "VG-2026-0131",
+    "defId": "bedarfsmeldung",
+    "variant": "standard",
+    "payloadRef": "Z-7-204",
+    "title": "Bedarfsmeldung Mühlestrasse 6, 3063 Ittigen",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2013",
+    "status": "clarification",
+    "createdAt": "2026-05-09T11:00:00Z",
+    "updatedAt": "2026-05-21T15:30:00Z",
+    "assignee": "Andrea Muster",
+    "comments": [
+      {
+        "ts": "2026-05-21T15:35:00Z",
+        "author": "Generalsekretariat UVEK",
+        "text": "Bitte den Nachweis der Kostenstelle und die aktualisierte Personalplanung nachreichen."
+      }
+    ]
+  },
+  {
+    "instanceId": "VG-2026-0128",
+    "defId": "bedarfsmeldung",
+    "variant": "standard",
+    "payloadRef": "BE-2026-013",
+    "title": "Bedarfsmeldung Kochergasse 10, 3003 Bern",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2010",
+    "status": "in_project",
+    "createdAt": "2026-05-08T09:12:00Z",
+    "updatedAt": "2026-06-02T08:00:00Z",
+    "assignee": "BBL Bau"
+  },
+  {
+    "instanceId": "VG-2026-0151",
+    "defId": "bedarfsmeldung",
+    "variant": "bypass",
+    "payloadRef": "BK-2026-007",
+    "title": "Bedarfsmeldung Kochergasse 10, 3003 Bern",
+    "requesterId": "U.123.456",
+    "requesterVe": "BK",
+    "buildingId": "BLD-2010",
+    "status": "in_review_pfm",
+    "createdAt": "2026-05-14T13:00:00Z",
+    "updatedAt": "2026-05-19T11:20:00Z",
+    "assignee": "BBL Portfolio-Management"
+  },
+  {
+    "instanceId": "VG-2026-0117",
+    "defId": "bedarfsmeldung",
+    "variant": "standard",
+    "payloadRef": "UVEK-2026-018",
+    "title": "Bedarfsmeldung Mühlestrasse 4, 3063 Ittigen",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2015",
+    "status": "approved",
+    "createdAt": "2026-05-04T08:45:00Z",
+    "updatedAt": "2026-05-27T16:05:00Z",
+    "assignee": "BBL Portfolio-Management"
+  },
+  {
+    "instanceId": "VG-2025-0872",
+    "defId": "bedarfsmeldung",
+    "variant": "standard",
+    "payloadRef": "UVEK-2025-072",
+    "title": "Bedarfsmeldung Brunnmattstrasse 45, 4800 Zofingen",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2016",
+    "status": "closed",
+    "createdAt": "2025-11-12T09:30:00Z",
+    "updatedAt": "2026-02-18T10:00:00Z",
+    "assignee": "BBL"
+  },
+  {
+    "instanceId": "VG-2026-0203",
+    "defId": "schadensmeldung",
+    "variant": "standard",
+    "title": "Lüftung 4. OG ohne Funktion",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2011",
+    "tenancyId": "T-2011-AA-01",
+    "status": "in_progress",
+    "createdAt": "2026-06-08T07:45:00Z",
+    "updatedAt": "2026-06-10T13:20:00Z",
+    "assignee": "BBL Objektbetrieb",
+    "data": {
+      "Ort": "4. OG, Zone Nord",
+      "Kategorie": "Heizung / Lüftung / Klima",
+      "Dringlichkeit": "hoch",
+      "Beschreibung": "Die Lüftung im Nordflügel läuft seit Montag nicht mehr; Räume 4.12 bis 4.18 sind betroffen."
+    },
+    "history": [
+      {
+        "ts": "2026-06-08T07:45:00Z",
+        "actor": "Andrea Muster",
+        "action": "Gemeldet"
+      },
+      {
+        "ts": "2026-06-08T10:12:00Z",
+        "actor": "BBL Objektmanagement",
+        "action": "Triage — an Objektbetrieb zugewiesen"
+      },
+      {
+        "ts": "2026-06-10T13:20:00Z",
+        "actor": "BBL Objektbetrieb",
+        "action": "in Arbeit — Ersatzteil bestellt"
+      }
+    ],
+    "comments": [
+      {
+        "ts": "2026-06-08T11:02:00Z",
+        "author": "BBL Objektmanagement",
+        "text": "Aufnahme erfolgt, Ersatzteil ist bestellt. Liefertermin voraussichtlich KW 25."
+      },
+      {
+        "ts": "2026-06-10T14:05:00Z",
+        "author": "Andrea Muster",
+        "text": "Danke. Die Räume 4.12–4.18 sind bis dahin eingeschränkt nutzbar — bitte kurze Rückmeldung vor dem Einbau."
+      }
+    ]
+  },
+  {
+    "instanceId": "VG-2026-0198",
+    "defId": "umzug",
+    "variant": "standard",
+    "title": "Umzug Team Klimaanpassung, 12 Arbeitsplätze",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2010",
+    "tenancyId": "T-2010-AA-01",
+    "status": "scheduled",
+    "createdAt": "2026-06-02T09:05:00Z",
+    "updatedAt": "2026-06-09T14:40:00Z",
+    "assignee": "BBL Flächenmanagement",
+    "data": {
+      "Von": "Bundeshaus Nord, 2. OG",
+      "Nach": "Bundeshaus Nord, 5. OG",
+      "Arbeitsplätze": "12",
+      "Wunschtermin": "2026-07-06"
+    },
+    "history": [
+      {
+        "ts": "2026-06-02T09:05:00Z",
+        "actor": "Andrea Muster",
+        "action": "Eingereicht"
+      },
+      {
+        "ts": "2026-06-09T14:40:00Z",
+        "actor": "BBL Flächenmanagement",
+        "action": "Termin fixiert auf 06.07.2026"
+      }
+    ],
+    "comments": [
+      {
+        "ts": "2026-06-09T14:45:00Z",
+        "author": "BBL Flächenmanagement",
+        "text": "Termin auf den 06.07.2026 fixiert. Zugang über den Lieferanteneingang Nord."
+      }
+    ]
+  },
+  {
+    "instanceId": "VG-2026-0186",
+    "defId": "sonderreinigung",
+    "variant": "standard",
+    "title": "Bauendreinigung nach Sanierung 3. OG",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2013",
+    "tenancyId": "T-2013-AA-01",
+    "status": "closed",
+    "createdAt": "2026-05-20T11:30:00Z",
+    "updatedAt": "2026-06-05T16:00:00Z",
+    "assignee": "BBL Objektmanagement",
+    "data": {
+      "Art": "Bauendreinigung",
+      "Fläche": "≈ 640 m²",
+      "Wunschtermin": "2026-06-03"
+    },
+    "history": [
+      {
+        "ts": "2026-05-20T11:30:00Z",
+        "actor": "Andrea Muster",
+        "action": "Eingereicht"
+      },
+      {
+        "ts": "2026-05-26T08:15:00Z",
+        "actor": "BBL Objektmanagement",
+        "action": "Termin fixiert auf 03.06.2026"
+      },
+      {
+        "ts": "2026-06-03T07:00:00Z",
+        "actor": "Reinigungsdienst",
+        "action": "in Ausführung"
+      },
+      {
+        "ts": "2026-06-05T16:00:00Z",
+        "actor": "BBL Objektmanagement",
+        "action": "abgeschlossen — Abnahme erfolgt"
+      }
+    ]
+  },
+  {
+    "instanceId": "VG-2026-0211",
+    "defId": "moebelbestellung",
+    "variant": "standard",
+    "title": "Sitz-Steh-Tische, 12 Stück",
+    "requesterId": "U.123.456",
+    "requesterVe": "UVEK",
+    "buildingId": "BLD-2010",
+    "tenancyId": "T-2010-AA-01",
+    "status": "in_review_pfm",
+    "createdAt": "2026-06-11T10:20:00Z",
+    "updatedAt": "2026-06-12T09:00:00Z",
+    "assignee": "BBL Beschaffung",
+    "data": {
+      "Artikel": "Sitz-Steh-Tisch 160 × 80 cm",
+      "Menge": "12",
+      "Kostenstelle": "810.140",
+      "Wunschtermin": "2026-08-01"
+    },
+    "history": [
+      {
+        "ts": "2026-06-11T10:20:00Z",
+        "actor": "Andrea Muster",
+        "action": "Bestellt"
+      },
+      {
+        "ts": "2026-06-12T09:00:00Z",
+        "actor": "BBL Beschaffung",
+        "action": "in Prüfung — Budgetfreigabe ausstehend"
+      }
+    ]
+  }
+]

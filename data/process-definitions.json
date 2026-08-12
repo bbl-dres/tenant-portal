@@ -1,0 +1,87 @@
+[
+  {
+    "defId": "bedarfsmeldung",
+    "name": "Bedarfsmeldung",
+    "serviceId": "bedarf-anmelden",
+    "payload": "spaceRequest",
+    "variants": {
+      "standard": [
+        { "status": "draft",        "label": "Entwurf",        "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "submitted",    "label": "Eingereicht",    "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "in_review_gs", "label": "in GS-Prüfung",  "role": "Generalsekretariat",     "kind": "user" },
+        { "status": "approved",     "label": "genehmigt",      "role": "BBL Portfolio-Management", "kind": "user" },
+        { "status": "in_project",   "label": "in ePPM",        "role": "BBL Bau",                "kind": "auto" },
+        { "status": "closed",       "label": "abgeschlossen",  "role": "BBL",                    "kind": "auto" }
+      ],
+      "bypass": [
+        { "status": "draft",         "label": "Entwurf",        "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "submitted",     "label": "Eingereicht",    "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "in_review_pfm", "label": "in PFM-Prüfung", "role": "BBL Portfolio-Management", "kind": "user" },
+        { "status": "approved",      "label": "genehmigt",      "role": "BBL Portfolio-Management", "kind": "user" },
+        { "status": "in_project",    "label": "in ePPM",        "role": "BBL Bau",                "kind": "auto" },
+        { "status": "closed",        "label": "abgeschlossen",  "role": "BBL",                    "kind": "auto" }
+      ],
+      "greenfield": [
+        { "status": "draft",              "label": "Entwurf",       "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "submitted",          "label": "Eingereicht",   "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "in_review_gs",       "label": "in GS-Prüfung", "role": "Generalsekretariat",     "kind": "user" },
+        { "status": "approved",           "label": "genehmigt",     "role": "BBL Portfolio-Management", "kind": "user" },
+        { "status": "asset_key_creation", "label": "WE-Anlage",     "role": "BBL Stammdaten",         "kind": "user" },
+        { "status": "in_project",         "label": "in ePPM",       "role": "BBL Bau",                "kind": "auto" },
+        { "status": "closed",             "label": "abgeschlossen", "role": "BBL",                    "kind": "auto" }
+      ]
+    }
+  },
+  {
+    "defId": "schadensmeldung",
+    "name": "Schadensmeldung",
+    "serviceId": "schaden-melden",
+    "variants": {
+      "standard": [
+        { "status": "submitted",  "label": "Gemeldet",      "role": "Meldende Person",      "kind": "user" },
+        { "status": "triage",     "label": "Triage",        "role": "BBL Objektmanagement", "kind": "user" },
+        { "status": "in_progress","label": "in Arbeit",     "role": "BBL Objektbetrieb",    "kind": "user" },
+        { "status": "closed",     "label": "erledigt",      "role": "BBL Objektbetrieb",    "kind": "user" }
+      ]
+    }
+  },
+  {
+    "defId": "umzug",
+    "name": "Umzug",
+    "serviceId": "umzug",
+    "variants": {
+      "standard": [
+        { "status": "submitted",   "label": "Eingereicht",  "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "scheduled",   "label": "Termin fixiert","role": "BBL Flächenmanagement", "kind": "user" },
+        { "status": "in_progress", "label": "in Ausführung","role": "Umzugsdienst",          "kind": "user" },
+        { "status": "closed",      "label": "abgeschlossen","role": "BBL Flächenmanagement", "kind": "auto" }
+      ]
+    }
+  },
+  {
+    "defId": "sonderreinigung",
+    "name": "Sonderreinigung",
+    "serviceId": "sonderreinigung",
+    "variants": {
+      "standard": [
+        { "status": "submitted",   "label": "Eingereicht",   "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "scheduled",   "label": "Termin fixiert", "role": "BBL Objektmanagement",  "kind": "user" },
+        { "status": "in_progress", "label": "in Ausführung",  "role": "Reinigungsdienst",      "kind": "user" },
+        { "status": "closed",      "label": "abgeschlossen",  "role": "BBL Objektmanagement",  "kind": "auto" }
+      ]
+    }
+  },
+  {
+    "defId": "moebelbestellung",
+    "name": "Möbelbestellung",
+    "serviceId": "moebel-bestellen",
+    "variants": {
+      "standard": [
+        { "status": "submitted",   "label": "Bestellt",     "role": "Antragstellende Stelle", "kind": "user" },
+        { "status": "in_review_pfm","label": "in Prüfung",  "role": "BBL Beschaffung",        "kind": "user" },
+        { "status": "in_progress", "label": "in Lieferung", "role": "Lieferant",              "kind": "user" },
+        { "status": "closed",      "label": "geliefert",    "role": "BBL Beschaffung",        "kind": "auto" }
+      ]
+    }
+  }
+]

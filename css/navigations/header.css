@@ -69,9 +69,16 @@
   padding: 2px var(--space-sm);
   font-size: var(--text-body-xs);
   font-weight: var(--font-weight-bold);
-  background: var(--color-primary-700);
+  /* Fixed red, NOT the brand ramp. Under the intranet skin primary-700 is
+     blue — the chip would have dissolved into the blue-800 top bar it sits
+     on. The value is the same red the chip always had; it just no longer
+     travels with the brand. White on red-700 is 6.1:1. */
+  background: var(--color-red-700);
   color: var(--color-white);
-  border-radius: var(--radius-sm);
+  /* Pill, matching the Intranet marker in the lockup below
+     (.top-header__skin-badge / DS .badge) — the two status chips in the
+     chrome now read as one family. */
+  border-radius: var(--radius-full);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -345,6 +352,29 @@
   font-weight: var(--font-weight-normal);
   margin-top: 2px;
 }
+/* Intranet marker pill under the dept lockup — the DS intranet skin's logo
+   suffix (css/skins/intranet.postcss:32-37):
+     .logo__title::after { content:'Intranet'; badge badge--blue;
+                           mt-1 -ml-[1px]; block w-fit }
+   Geometry only. The SIZE is left to `.badge`, which already carries the DS
+   ramp (text-xs md:text-sm lg:text-base + leading-5 lg:leading-6 → the
+   --text-badge / --leading-badge tokens). Pinning it to a static 12px here
+   was a deviation: the DS applies `text-xs` to the ACCRONYM variant only
+   (:38-43), and this lockup's analogue is the TITLE, which takes the full
+   ramp. It does render large — 16px at ≥1024 against a 14px department name
+   — but that is the CD's own proportion, not a scaling fault. If it should
+   be smaller, the DS-legal move is `.badge--sm` (10/12/14) on the element,
+   not a bespoke font-size.
+   Scoped through the parent on purpose: components/status.css imports AFTER
+   this file, so a bare .top-header__skin-badge would lose every declaration
+   it shares with .badge (display, font-size, line-height) to the base
+   component. */
+.top-header__dept .top-header__skin-badge {
+  display: block;          /* DS block */
+  width: fit-content;      /* DS w-fit */
+  margin-top: var(--space-xs);   /* DS mt-1 */
+  margin-left: -1px;             /* DS -ml-[1px] — optical flush with the text above */
+}
 .top-header__right {
   margin-left: auto;
   display: flex;
@@ -519,6 +549,10 @@
     line-height: var(--line-height-snug);
     margin-top: 0;
   }
+  /* Compact chrome drops the sub-line to keep the lockup on one row. The
+     intranet marker stays: it is the shortest string in the lockup, it fits
+     at 320px, and "which portal am I in" is worth more on a phone than the
+     sub-line it replaces. */
   .top-header__dept-sub { display: none; }
   .top-header__right {
     flex: 0 0 auto;

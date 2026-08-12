@@ -12,7 +12,7 @@
  Routes:
    #/              landing (public) OR home (authenticated)
    #/login         eIAM stub
-   #/home          auth home (role-routed via state.user.activeRole)
+   #/home          redirect → #/ (the role home merged into the front page)
    #/wizard/:step  5-step demand wizard
    #/inbox         submitter inbox
    #/inbox/:id     application detail
@@ -33,10 +33,12 @@ renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
+import { catalogueBar, wireCatalogueBar } from './catalogue-bar.js';
+import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
-  toggleNavMenu, toggleBreadcrumbDropdown, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice, submitSearch, toggleSearch, toggleBurger,
-  shell, servicesMenu,
+  toggleNavMenu, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice, submitSearch, toggleSearch, toggleBurger,
+  shell, resolveService,
 } from './shell.js';
 import {
   persistDraft, loadDraft, clearDraft, persistRole, loadRole,
@@ -155,7 +157,7 @@ async function handleHash() {
   }
   // No match: render a 404 through the shell so it has chrome. (The old code
   // targeted a nonexistent `#app`; the mount point is `#page-body`.)
-  shell({ breadcrumb: [{ href: '#/', label: t('nav.start') }, { label: t('error.notFound') }] });
+  shell({ breadcrumb: [{ label: t('error.notFound') }] });
   const body = document.getElementById('page-body');
   if (body) body.innerHTML = `<section class="section"><div class="container"><h1 class="h1 section-heading">${t('error.notFound')}</h1><p><a class="link" href="#/">${t('error.backHome')}</a></p></div></section>`;
   markRouteRendered(h);
@@ -209,17 +211,24 @@ function openRoleMenu() {
 // the route the visitor originally requested so a shared deep link resolves
 // to the intended page after one click; the top-bar Anmelden omits it and
 // lands on the role home as before.
-function login(target) {
-  // For the prototype, log in as the first user with multiple roles (Andrea Muster).
+// Puts the demo session on `state` — the first user with multiple roles
+// (Andrea Muster), on their persisted role if they have one. Shared by the
+// explicit login stub and by the boot-time auto-login below so the two can't
+// drift apart. Returns the user, or null if the fixtures are empty.
+function applyDemoSession() {
   const user = state.users.find(u => u.roles.length > 1) || state.users[0];
-  if (!user) return;
+  if (!user) return null;
   state.user = { ...user };
-  const persistedRole = loadRole();
-  state.user.activeRole = persistedRole || user.roles[0];
+  state.user.activeRole = loadRole() || user.roles[0];
+  return state.user;
+}
+function login(target) {
+  const user = applyDemoSession();
+  if (!user) return;
   toast('Angemeldet als ' + user.name, 'success');
   // navigate() re-runs handleHash() itself when the hash is unchanged, so
   // the gate page re-renders as the real view either way.
-  navigate(typeof target === 'string' && target.startsWith('#/') ? target : '#/home');
+  navigate(typeof target === 'string' && target.startsWith('#/') ? target : '#/');
 }
 function logout() {
   state.user = null;
@@ -236,7 +245,7 @@ window.portal = {
   renderShell, renderFooter, renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
-  toast, modal, toggleSearch, toggleNavMenu, toggleBreadcrumbDropdown, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice,
+  toast, modal, toggleSearch, toggleNavMenu, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice,
   openRoleMenu, login, logout,
   statusBadge,
   formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
@@ -294,7 +303,7 @@ function gateLabel(h) {
 // AGOV / FedLogin"), recomposed from existing portal classes.
 function renderLoginGate(h) {
   const label = gateLabel(h);
-  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label }] });
+  shell({ breadcrumb: [{ label }] });
   const body = document.getElementById('page-body');
   if (!body) return;
   body.innerHTML = `
@@ -335,9 +344,19 @@ async function init() {
   }
   P.wireGlobalShortcuts();
   registerRoutes();
-  // Deep links while logged out render the login gate (handleHash) with the
-  // requested hash preserved, so the page resolves right after login. In
-  // production this is where eIAM session restore would happen instead.
+  // The prototype opens ALREADY SIGNED IN as the demo user. Testers were
+  // reading the logged-out landing page as the whole application and never
+  // pressed the simulated eIAM button, so most of the portal went unseen.
+  // Nothing about the auth model changes — this only picks the starting
+  // state: `logout()` still returns to the public landing page, the login
+  // gate still guards protected routes while logged out, and the top-bar
+  // still names the signed-in user beside the «Demo» chip. In production
+  // this is where eIAM session restore would sit instead; drop this one call
+  // to put visitors back in front of the login.
+  applyDemoSession();
+  // Deep links then resolve straight to their page. While logged out (after
+  // an explicit sign-out) they render the login gate with the requested hash
+  // preserved, so the page still resolves right after login.
   window.addEventListener('hashchange', P.handleHash);
   P.handleHash();
 }
@@ -370,174 +389,310 @@ function registerRoutes() {
 }
 
 // ── GLOBAL SEARCH RESULTS ────────────────────────────────────────────────
-// CD Bund search-results pattern caps each origin-group at a small
-// number and offers a "view all in [origin]" link below. Less overwhelm
-// than one mega-list, lets the user pivot to the canonical paginated
-// surface (inbox / properties / news) when they want to keep digging.
-const SEARCH_GROUP_CAP = 10;
-function renderSearchResults() {
-  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('bc.search') }] });
-  // parseHashQuery splits on `&`, so it isolates `q` from the injected `lang`
-  // param (a naive split('?q=') would capture "eichweg&lang=de").
-  const query = (parseHashQuery(location.hash).q || '').toLowerCase().trim();
+// CD anatomy (designsystem app/pages/searchResults.vue + components/
+// search.postcss «SEARCH RESULTS PAGE», and the live admin.ch search page):
+// a tinted hero carrying the H1 and a search--large field, then ONE ranked
+// stream — not per-origin groups. The type is a FACET, not a heading, which
+// is what lets sorting, filtering and pagination work across all hits at
+// once. The results header carries the count on the left and the sort +
+// view switch on the right.
+//
+// Matching and ranking live in js/search-engine.js (DOM-free, unit-tested).
+// This function owns the INDEX: what is searchable, what a hit is called and
+// where it leads.
+const SEARCH_PAGE_SIZE = 10;
 
-  const matches = {
-    news:        [],
-    applications: [],
-    properties:  [],
-    info:        [],
-  };
+// Per-source boost, applied on top of the textual score. A query is usually a
+// task, so an actionable service outranks a record that merely mentions the
+// same word; a Vorgang the user owns outranks reference content.
+const SEARCH_BOOST = {
+  services: 6,
+  cases: 4,
+  properties: 2,
+  buildings: 1,
+  documents: 0,
+  news: 0,
+  info: 1,
+};
 
-  if (query) {
-    matches.news = (P.state.news || []).filter(n =>
-      n.title.toLowerCase().includes(query) || n.lead.toLowerCase().includes(query));
-    matches.applications = (P.state.applications || []).filter(a => {
-      if (!P.state.user) return false;
-      const mine = a.submitterId === P.state.user.id || a.submitterVe === P.state.user.ve;
-      if (!mine) return false;
-      return a.id.toLowerCase().includes(query) || (a.address || '').toLowerCase().includes(query);
+// Build the index from state. Each entry declares its own display strings and
+// destination, so the renderer below stays uniform across content types.
+function buildSearchIndex() {
+  const idx = [];
+
+  for (const s of catalogueServices()) {
+    idx.push({
+      kind: 'Dienstleistungen',
+      type: s.type === 'action' ? 'Dienstleistung' : 'Bereich',
+      title: s.label, lead: s.desc, date: '',
+      href: s.href, external: s.external,
+      onclick: s.section ? `setTimeout(() => window.t3lite.scrollToInfo('${P.escapeJs(s.section)}'), 100);` : '',
+      boost: SEARCH_BOOST.services,
+      fields: { title: s.label, type: 'Dienstleistung Service', lead: s.desc },
     });
-    matches.properties = (P.state.tenancies || []).filter(t =>
-      t.buildingName.toLowerCase().includes(query) || t.address.toLowerCase().includes(query));
-    // Search the info-page section headings as a simple proxy
-    matches.info = INFO_TOC.filter(it => it.label.toLowerCase().includes(query) || query.includes(it.id));
   }
 
-  const total = matches.news.length + matches.applications.length + matches.properties.length + matches.info.length;
+  // Vorgänge of any process, scoped to what this user may see: their own plus
+  // everything raised inside their unit.
+  if (P.state.user) {
+    const visible = (P.state.processInstances || []).filter(i =>
+      i.requesterId === P.state.user.id || i.requesterVe === P.state.user.ve);
+    for (const c of visible.map(resolveCase)) {
+      idx.push({
+        kind: P.t('nav.inbox'),
+        type: c.processName,
+        title: c.title, lead: c.object, date: c.submittedAt,
+        href: c.href,
+        boost: SEARCH_BOOST.cases,
+        fields: { title: c.title, ref: c.id, type: c.processName, lead: c.object },
+      });
+    }
+  }
 
-  // Renderers for each origin-group's row. Each row uses the CD card-list
-  // pattern: meta-info above title, title + lead in the body, chevron-right
-  // affordance on the right. `__type` highlights the canonical entity-type
-  // pill so users can scan by origin at a glance.
-  const searchRow = ({ href, type, meta, title, lead, onclick }) => `
-    <li class="search-results__item">
-      <a class="search-results__link" href="${href}" ${onclick ? `onclick="${onclick}"` : ''}>
-        <div class="search-results__body">
-          <p class="meta-info search-results__meta">
-            <span class="meta-info__item search-results__type">${P.escapeHtml(type)}</span>
-            ${meta ? `<span class="meta-info__item">${meta}</span>` : ''}
+  // Tenancies = the properties this VE actually occupies.
+  for (const t of getScopedTenancies()) {
+    idx.push({
+      kind: 'Liegenschaften',
+      type: 'Liegenschaft',
+      title: t.buildingName, lead: t.address, date: '',
+      href: `#/properties/${t.id}`, image: t.image,
+      boost: SEARCH_BOOST.properties,
+      fields: { title: t.buildingName, ref: formatAssetKey(t.assetKey), type: 'Liegenschaft Mietverhältnis', lead: t.address, extra: t.floorLabel },
+    });
+  }
+
+  // Buildings from the portfolio that are NOT among the user's tenancies —
+  // without these, a federal property you don't rent is unfindable, which is
+  // exactly the case where search is the only way in.
+  const tenancyBuildingIds = new Set(getScopedTenancies().map(t => t.buildingId));
+  for (const b of (P.state.buildings || [])) {
+    if (tenancyBuildingIds.has(b.buildingId)) continue;
+    idx.push({
+      kind: 'Liegenschaften',
+      type: 'Objekt im Portfolio',
+      title: b.name, lead: b.address, date: '',
+      // No tenancy of this user's → no detail page to open; the portfolio
+      // list scoped by the query is the honest destination.
+      href: `#/properties?q=${encodeURIComponent(b.name)}`,
+      image: (b.images || [])[0],
+      boost: SEARCH_BOOST.buildings,
+      fields: { title: b.name, ref: formatAssetKey(b.assetKey), type: 'Objekt Gebäude Liegenschaft', lead: b.address, extra: b.city },
+    });
+  }
+
+  // Documents — the largest content set in the portal, and the one a user is
+  // most likely to search by name ("Grundriss Bundeshaus").
+  for (const d of (P.state.documents || [])) {
+    const typeLabel = DOC_TYPE_LABEL[d.type] || d.type;
+    const linked = (d.linkedTo || []).map(l => l.entityId).join(' ');
+    idx.push({
+      kind: 'Dokumente',
+      type: typeLabel,
+      title: d.title, lead: [typeLabel, d.format, d.size].filter(Boolean).join(' · '),
+      date: d.issuedAt,
+      href: `#/downloads?doc=${encodeURIComponent(d.id)}`,
+      boost: SEARCH_BOOST.documents,
+      fields: { title: d.title, ref: d.id, type: typeLabel, lead: '', extra: linked },
+    });
+  }
+
+  for (const n of (P.state.news || [])) {
+    idx.push({
+      kind: 'Aktuell',
+      type: n.type || 'Aktuell',
+      title: n.title, lead: n.lead, date: n.date,
+      href: `#/news/${n.id}`, image: n.image,
+      boost: SEARCH_BOOST.news,
+      fields: { title: n.title, type: n.type, lead: n.lead },
+    });
+  }
+
+  for (const it of INFO_TOC) {
+    idx.push({
+      kind: 'Informationen',
+      type: 'Information',
+      title: it.label, lead: 'Abschnitt auf der Seite «Arbeitsinstrumente und Informationen».', date: '',
+      href: '#/info',
+      onclick: `setTimeout(() => window.t3lite.scrollToInfo('${P.escapeJs(it.id)}'), 100);`,
+      boost: SEARCH_BOOST.info,
+      fields: { title: it.label, type: 'Information Arbeitsinstrument', lead: '' },
+    });
+  }
+
+  return idx;
+}
+
+function searchHash({ q, sort, view, kind, page }) {
+  const parts = [];
+  if (q) parts.push('q=' + encodeURIComponent(q));
+  if (kind) parts.push('kind=' + encodeURIComponent(kind));
+  if (sort && sort !== 'relevance') parts.push('sort=' + sort);
+  if (view && view !== 'list') parts.push('view=' + view);
+  if (page && page > 1) parts.push('page=' + page);
+  return '#/search' + (parts.length ? '?' + parts.join('&') : '');
+}
+
+// One hit, list variant — meta line (type · date), title, lead, optional
+// thumbnail on the right. Mirrors the CD SearchResultsList row.
+function searchResultRow(r) {
+  const attrs = r.external ? ' target="_blank" rel="noopener"' : '';
+  const onclick = r.onclick ? ` onclick="${r.onclick}"` : '';
+  return `
+    <li class="search-result">
+      <a class="search-result__link" href="${r.href}"${attrs}${onclick}>
+        <div class="search-result__body">
+          <p class="meta-info search-result__meta">
+            <span class="meta-info__item">${P.escapeHtml(r.type || r.kind)}</span>
+            ${r.date ? `<span class="meta-info__item">${P.formatDate(r.date)}</span>` : ''}
           </p>
-          <h3 class="search-results__title">${P.escapeHtml(title)}</h3>
-          ${lead ? `<p class="search-results__lead">${P.escapeHtml(lead)}</p>` : ''}
+          <h3 class="search-result__title">${P.escapeHtml(r.title)}</h3>
+          ${r.lead ? `<p class="search-result__lead">${P.escapeHtml(r.lead)}</p>` : ''}
         </div>
-        ${P.icon('chevronRight', 'search-results__arrow')}
+        ${r.image ? `<img class="search-result__image" src="${safeImageUrl(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
       </a>
     </li>
   `;
+}
+
+// Grid variant — the CD's second view: same content as a card, with the
+// arrow affordance the portal already uses on its card grids.
+function searchResultCard(r) {
+  const attrs = r.external ? ' target="_blank" rel="noopener"' : '';
+  const onclick = r.onclick ? ` onclick="${r.onclick}"` : '';
+  return `
+    <li class="search-result-card">
+      <a class="search-result-card__link" href="${r.href}"${attrs}${onclick}>
+        <p class="meta-info search-result__meta">
+          <span class="meta-info__item">${P.escapeHtml(r.type || r.kind)}</span>
+          ${r.date ? `<span class="meta-info__item">${P.formatDate(r.date)}</span>` : ''}
+        </p>
+        <h3 class="search-result__title">${P.escapeHtml(r.title)}</h3>
+        ${r.lead ? `<p class="search-result__lead">${P.escapeHtml(r.lead)}</p>` : ''}
+        ${r.image ? `<img class="search-result-card__image" src="${safeImageUrl(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
+        ${arrowBtn('search-result-card__arrow')}
+      </a>
+    </li>
+  `;
+}
+
+function renderSearchResults() {
+  shell({ breadcrumb: [{ label: P.t('bc.search') }] });
+  // parseHashQuery splits on `&`, so it isolates `q` from the injected `lang`
+  // param (a naive split('?q=') would capture "eichweg&lang=de").
+  const params = parseHashQuery(location.hash);
+  const query = (params.q || '').trim();
+  const sort = ['relevance', 'date', 'title'].includes(params.sort) ? params.sort : 'relevance';
+  const view = params.view === 'grid' ? 'grid' : 'list';
+  const kind = params.kind ? decodeURIComponent(params.kind) : '';
+  const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
+
+  const ranked = query ? searchIndex(buildSearchIndex(), query) : [];
+
+  // Facet counts come from the FULL result set, so switching tabs never
+  // changes the other tabs' numbers.
+  const kindCounts = ranked.reduce((o, r) => { o[r.kind] = (o[r.kind] || 0) + 1; return o; }, {});
+  const kinds = Object.keys(kindCounts);
+  const activeKind = kinds.includes(kind) ? kind : '';
+  const filtered = activeKind ? ranked.filter(r => r.kind === activeKind) : ranked;
+  const sorted = sort === 'relevance' ? filtered : [...filtered].sort(compareSearchBy(sort));
+
+  const total = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const visible = sorted.slice((safePage - 1) * SEARCH_PAGE_SIZE, safePage * SEARCH_PAGE_SIZE);
+
+  const tab = (label, value, count) => `
+    <button class="tab__control${activeKind === value ? ' tab__control--active' : ''}" type="button"
+            role="tab" aria-selected="${activeKind === value}"
+            onclick="location.hash='${searchHash({ q: query, sort, view, kind: value, page: 1 })}'">
+      ${P.escapeHtml(label)} <span class="tab__count">${count}</span>
+    </button>
+  `;
 
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar()}
-
-    <section class="section section--alt search-hero">
+    <section class="section bg--secondary-50 search-hero">
       <div class="container">
-        <h1 class="h1 search-hero__title">Suchergebnisse${query ? ` für „${P.escapeHtml(query)}"` : ''}</h1>
-        <form class="search-hero__form" role="search" aria-label="Portal durchsuchen"
-              onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v);">
+        <h1 class="h1 search-hero__title">${P.t('bc.search')}</h1>
+        <form class="search-hero__form" role="search" aria-label="${P.t('landing.searchLabel')}"
+              onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); location.hash = v ? '#/search?q=' + encodeURIComponent(v) : '#/search';">
           <div class="search__group">
-            <input type="search" name="q" class="input search-hero__input"
+            <label class="sr-only" for="searchPageInput">${P.t('landing.searchLabel')}</label>
+            <input id="searchPageInput" type="search" name="q" class="input search-hero__input"
                    value="${P.escapeHtml(query)}"
-                   placeholder="Suchbegriff eingeben …"
-                   aria-label="Suchbegriff"
+                   placeholder="${P.t('landing.searchPlaceholder')}"
                    autocomplete="off">
-            <button class="btn btn--bare search-hero__submit" type="submit" aria-label="Suchen">${P.icon('search')}</button>
+            <button class="btn btn--bare search-hero__submit" type="submit" aria-label="${P.t('top.search')}">${P.icon('search')}</button>
           </div>
         </form>
-        ${query && total > 0
-          ? `<p class="search-hero__meta">${total} ${total === 1 ? 'Treffer' : 'Treffer'} in ${[matches.news.length && 'Aktuell', matches.applications.length && 'Anträge', matches.properties.length && 'Liegenschaften', matches.info.length && 'Arbeitsinstrumente'].filter(Boolean).join(', ')}.</p>`
-          : ''}
       </div>
     </section>
 
     <section class="section">
-      <div class="container container--narrow">
-        ${!query ? `
-          <p class="section-intro">Bitte geben Sie einen Suchbegriff oben ein.</p>
-        ` : total === 0 ? `
-          <div class="search-no-results">
-            <h2 class="h3 search-no-results__title">Die Suche nach <strong>„${P.escapeHtml(query)}"</strong> ergab keine Treffer.</h2>
+      <div class="container">
+        <div class="search-results" aria-live="polite">
+          ${!query ? `
+            <p class="section-intro">Geben Sie einen Suchbegriff ein — zum Beispiel «Schaden», «Bundeshaus» oder «Grundriss». Durchsucht werden Dienstleistungen, Ihre Vorgänge, Liegenschaften, Dokumente, News und die Informationsseite.</p>
+          ` : total === 0 && !activeKind ? renderSearchNoResults(query) : `
+            ${kinds.length > 1 ? `
+              <div class="tabs search-results__tabs">
+                <div class="tab__controls" role="tablist" aria-label="Trefferarten">
+                  ${tab('Alle', '', ranked.length)}
+                  ${kinds.map(k => tab(k, k, kindCounts[k])).join('')}
+                </div>
+              </div>
+            ` : ''}
 
-            <h3 class="h4 search-no-results__heading">Tipps zur Suche</h3>
-            <ul class="search-no-results__list">
-              <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffs.</li>
-              <li>Verwenden Sie einen anderen oder allgemeineren Begriff.</li>
-              <li>Versuchen Sie es mit weniger Suchbegriffen.</li>
-              <li>Durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</li>
-            </ul>
+            <div class="search-results__header">
+              <div class="search-results__header__left">
+                <p class="search-results__occurences">
+                  <strong>${total}</strong>${total === 1 ? 'Suchergebnis' : 'Suchergebnisse'}
+                </p>
+              </div>
+              <div class="search-results__header__right">
+                <label class="sr-only" for="searchSort">Sortierung</label>
+                <!-- Each option carries its own destination, so the handler is
+                     a plain assignment instead of hash string-surgery. -->
+                <select id="searchSort" class="input search-results__sort-select"
+                        onchange="location.hash = this.value">
+                  ${[['relevance', 'Nach Relevanz sortieren'],
+                     ['date', 'Nach Datum sortieren (Absteigend)'],
+                     ['title', 'Nach Titel sortieren (A–Z)']].map(([value, label]) => `
+                    <option value="${searchHash({ q: query, sort: value, view, kind: activeKind, page: 1 })}"${sort === value ? ' selected' : ''}>${label}</option>
+                  `).join('')}
+                </select>
+                <div class="search-results__views" role="group" aria-label="Ansicht">
+                  <a class="search-results__view${view === 'list' ? ' search-results__view--active' : ''}"
+                     href="${searchHash({ q: query, sort, view: 'list', kind: activeKind, page: safePage })}"
+                     aria-label="Listenansicht" aria-current="${view === 'list'}">${P.icon('list')}</a>
+                  <a class="search-results__view${view === 'grid' ? ' search-results__view--active' : ''}"
+                     href="${searchHash({ q: query, sort, view: 'grid', kind: activeKind, page: safePage })}"
+                     aria-label="Rasteransicht" aria-current="${view === 'grid'}">${P.icon('grid')}</a>
+                </div>
+              </div>
+            </div>
 
-            <h3 class="h4 search-no-results__heading">Hinweis</h3>
-            <p class="search-no-results__hint">
-              Die Suche durchsucht aktuell Ihre Anträge, freigegebene Liegenschaften, News-Einträge und die Informationsseite. Erweiterte Suchfilter werden in einer späteren Iteration ergänzt.
-            </p>
-          </div>
-        ` : `
-          ${matches.news.length ? `
-            <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Aktuell <span class="search-results__group-count">(${matches.news.length})</span></h2>
-              <ul class="search-results">
-                ${matches.news.slice(0, SEARCH_GROUP_CAP).map(n => searchRow({
-                  href: `#/news/${n.id}`,
-                  type: n.type || 'Aktuell',
-                  meta: P.formatDate(n.date),
-                  title: n.title,
-                  lead: n.lead.slice(0, 180) + (n.lead.length > 180 ? '…' : ''),
-                })).join('')}
-              </ul>
-              ${matches.news.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/news">${matches.news.length - SEARCH_GROUP_CAP} weitere in der News-Übersicht ansehen ${P.icon('arrowRight')}</a></p>` : ''}
-            </section>
-          ` : ''}
+            ${total === 0 ? `<p class="section-intro">Keine Treffer in diesem Bereich.</p>` : view === 'grid'
+              ? `<ul class="search-results-list search-results--grid">${visible.map(searchResultCard).join('')}</ul>`
+              : `<ul class="search-results-list search-results--list">${visible.map(searchResultRow).join('')}</ul>`}
 
-          ${matches.applications.length ? `
-            <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Anträge <span class="search-results__group-count">(${matches.applications.length})</span></h2>
-              <ul class="search-results">
-                ${matches.applications.slice(0, SEARCH_GROUP_CAP).map(a => searchRow({
-                  href: `#/inbox/${a.id}`,
-                  type: a.type || 'Antrag',
-                  meta: `Eingereicht ${P.formatDate(a.submittedAt)}`,
-                  title: `${a.id} — ${a.address}`,
-                  lead: '',
-                })).join('')}
-              </ul>
-              ${matches.applications.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/inbox">${matches.applications.length - SEARCH_GROUP_CAP} weitere Anträge in der Inbox ${P.icon('arrowRight')}</a></p>` : ''}
-            </section>
-          ` : ''}
-
-          ${matches.properties.length ? `
-            <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Liegenschaften <span class="search-results__group-count">(${matches.properties.length})</span></h2>
-              <ul class="search-results">
-                ${matches.properties.slice(0, SEARCH_GROUP_CAP).map(t => searchRow({
-                  href: `#/properties/${t.id}`,
-                  type: 'Liegenschaft',
-                  meta: formatAssetKey(t.assetKey),
-                  title: t.buildingName,
-                  lead: `${t.address} · ${t.hnf2} m² HNF2`,
-                })).join('')}
-              </ul>
-              ${matches.properties.length > SEARCH_GROUP_CAP ? `<p class="search-results__more"><a href="#/properties?q=${encodeURIComponent(query)}">${matches.properties.length - SEARCH_GROUP_CAP} weitere Liegenschaften im Portfolio ${P.icon('arrowRight')}</a></p>` : ''}
-            </section>
-          ` : ''}
-
-          ${matches.info.length ? `
-            <section class="search-results__group">
-              <h2 class="h3 search-results__group-title">Arbeitsinstrumente und Informationen <span class="search-results__group-count">(${matches.info.length})</span></h2>
-              <ul class="search-results">
-                ${matches.info.map(it => searchRow({
-                  href: '#/info',
-                  type: 'Information',
-                  meta: '',
-                  title: it.label,
-                  lead: 'Abschnitt auf der Info-Seite öffnen.',
-                  onclick: `setTimeout(() => window.t3lite.scrollToInfo('${it.id}'), 100);`,
-                })).join('')}
-              </ul>
-            </section>
-          ` : ''}
-
-        `}
+            ${totalPages > 1 ? renderPagination({
+              current: safePage,
+              totalPages,
+              from: (safePage - 1) * SEARCH_PAGE_SIZE + 1,
+              to: Math.min(safePage * SEARCH_PAGE_SIZE, total),
+              totalItems: total,
+              entitySingular: 'Treffer',
+              entityPlural: 'Treffer',
+              hrefFor: (p) => searchHash({ q: query, sort, view, kind: activeKind, page: p }),
+              inputId: 'searchPaginationInput',
+            }) : ''}
+          `}
+        </div>
       </div>
     </section>
   `;
+
+  if (totalPages > 1) wirePaginationInput('searchPaginationInput');
 
   // Move keyboard focus into the hero search field — most users land on
   // this page intending to refine the query.
@@ -545,12 +700,31 @@ function renderSearchResults() {
     const input = document.querySelector('.search-hero__input');
     if (input) {
       input.focus();
-      // Place caret at end without selecting all
       const len = input.value.length;
       input.setSelectionRange(len, len);
     }
   }, 0);
 }
+
+// CD `.search-results__no-results` — states what was searched, then offers
+// ways forward rather than a dead end.
+function renderSearchNoResults(query) {
+  return `
+    <div class="search-results__no-results">
+      <h2 class="h3">Die Suche nach <strong>„${P.escapeHtml(query)}"</strong> ergab keine Treffer.</h2>
+      <ul class="search-no-results__list">
+        <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffs.</li>
+        <li>Verwenden Sie einen anderen oder allgemeineren Begriff.</li>
+        <li>Versuchen Sie es mit weniger Suchbegriffen.</li>
+        <li>Durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</li>
+      </ul>
+      <p class="search-no-results__hint">
+        Durchsucht werden Dienstleistungen, Ihre Vorgänge, Liegenschaften des Portfolios, Dokumente, News und die Informationsseite.
+      </p>
+    </div>
+  `;
+}
+
 
 // ── ARBEITSINSTRUMENTE UND INFORMATIONEN ─────────────────────────────────
 // Single long-scroll page with a sticky Inhaltsverzeichnis on the right
@@ -570,7 +744,6 @@ const INFO_TOC = [
 
 function renderInfoPage() {
   shell({ activeNav: 'info', breadcrumb: [
-    { href: '#/', label: P.t('nav.start') },
     { label: P.t('nav.info') }
   ]});
 
@@ -876,7 +1049,7 @@ function newsCard(n) {
 // ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
 const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
-  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('bc.news') }] });
+  shell({ breadcrumb: [{ label: P.t('bc.news') }] });
   const items = P.state.news || [];
   const params = parseHashQuery(location.hash);
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
@@ -933,7 +1106,7 @@ function newsListRow(n) {
 function renderNewsDetail({ id }) {
   const n = P.state.news.find(x => x.id === id);
   if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
-  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
+  shell({ breadcrumb: [{ href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <article class="section">
@@ -953,12 +1126,13 @@ function renderNewsDetail({ id }) {
   `;
 }
 
+// `#/` is the portal's ONE front page. It used to forward authenticated
+// visitors to a separate role home at `#/home`; that page has been merged in
+// below the hero (renderOverviewBand + renderQuickServicesBand), so there is
+// no second entry page to forward to and nothing that requires signing out to
+// see. `#/home` remains as a redirect here for old links.
 function renderRoot() {
-  if (P.state.user) {
-    P.navigate('#/home');
-  } else {
-    renderLanding();
-  }
+  renderLanding();
 }
 
 // ── SHELL HELPERS ────────────────────────────────────────────────────────
@@ -974,13 +1148,24 @@ function renderLanding() {
           <p class="hero__lead">
             ${P.t('landing.lead')}
           </p>
-          <div class="hero__cta">
-            <button class="btn btn--filled btn--lg" type="button" onclick="window.portal.login()">
-              ${P.icon('external')}
-              ${P.t('landing.ctaLogin')}
+          <!-- The hero's action slot is the portal-wide search, not a login
+               CTA: the prototype opens signed in, so "what are you looking
+               for?" is the real first question. Field + labelled submit side
+               by side (the sister portal's home-search row), NOT the
+               results page's search--large field with the icon pinned inside
+               it: on an entry page the action deserves to be named. Submits
+               straight to #/search — no suggestion layer. Signing in stays
+               reachable from the top bar and the burger drawer. -->
+          <form class="home-search" role="search" aria-label="${P.t('landing.searchLabel')}"
+                onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); location.hash = v ? '#/search?q=' + encodeURIComponent(v) : '#/search';">
+            <label class="sr-only" for="homeSearchInput">${P.t('landing.searchLabel')}</label>
+            <input id="homeSearchInput" type="search" name="q" class="input home-search__input"
+                   placeholder="${P.t('landing.searchPlaceholder')}"
+                   autocomplete="off">
+            <button class="btn btn--filled btn--lg home-search__submit" type="submit">
+              ${P.icon('search')}${P.t('top.search')}
             </button>
-            <a href="#/info" class="btn btn--outline btn--lg" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">${P.t('landing.ctaHow')}</a>
-          </div>
+          </form>
         </div>
         <figure class="hero__figure">
           <div class="hero__figure__media">
@@ -995,18 +1180,10 @@ function renderLanding() {
       </div>
     </section>
 
-    <section class="portfolio-stats">
-      <div class="container">
-        <div class="portfolio-stats__grid">
-          <div><strong>~2'700</strong><span>${P.t('landing.stat.properties')}</span></div>
-          <div><strong>~6'500</strong><span>${P.t('landing.stat.tenancies')}</span></div>
-          <div><strong>~38'000</strong><span>${P.t('landing.stat.workstations')}</span></div>
-          <div><strong>26</strong><span>${P.t('landing.stat.units')}</span></div>
-        </div>
-      </div>
-    </section>
+    ${renderOverviewBand()}
+    ${renderQuickServicesBand()}
 
-    <section class="section explainer-section" aria-labelledby="explainerTitle">
+    <section class="section bg--secondary-600 explainer-section" aria-labelledby="explainerTitle">
       <div class="container">
         <div class="explainer-section__grid">
           <div class="explainer-section__copy">
@@ -1044,6 +1221,119 @@ function renderLanding() {
     </section>
 
     ${renderNewsSection()}
+  `;
+}
+
+// ── 1a. OVERVIEW BAND (front page, signed in) ────────────────────────────
+// The former `#/home` merged into the front page. An intranet portal supports
+// repeated task completion rather than first-time orientation, so the first
+// thing under the hero is the reader's own work — greeting, then the actual
+// open items, not just a count of them. Both bands render nothing at all when
+// signed out, leaving the public composition (hero → explainer → news).
+const OVERVIEW_ROW_CAP = 5;
+
+// What "my open items" means depends on the active role: a submitter's own
+// applications versus everything queued for a reviewer. Returned as one shape
+// so the band itself stays role-agnostic.
+function overviewScope() {
+  const user = P.state.user;
+  if (user.activeRole === 'GS-Reviewer') {
+    // An assignee's view of the same collection: the cases in their unit that
+    // are waiting on someone, not on the requester.
+    const rows = myCases('ve').filter(c =>
+      ['submitted', 'in_review_gs', 'triage', 'in_review_pfm'].includes(c.status));
+    return {
+      rows,
+      // «Alle Vorgänge», not «Alle Pendenzen»: this band lists cases of every
+      // process, while #/queue is still the Bedarfsmeldung review desk. Point
+      // at the collection that can actually show all of these rows.
+      moreHref: '#/inbox',
+      moreLabel: P.t('overview.allApplications'),
+      sentence: rows.length
+        ? `Es warten <a href="#/queue" class="greeting-strip__count"><strong>${rows.length} ${rows.length === 1 ? 'Vorgang' : 'Vorgänge'}</strong></a> auf Ihre Prüfung.`
+        : 'Derzeit warten keine Vorgänge auf Ihre Prüfung.',
+    };
+  }
+  const rows = myCases('own').filter(c => !['closed', 'rejected'].includes(c.status));
+  const clarification = rows.filter(c => c.status === 'clarification').length;
+  return {
+    rows,
+    moreHref: '#/inbox',
+    moreLabel: P.t('overview.allApplications'),
+    sentence: rows.length
+      ? `Sie haben <a href="#/inbox" class="greeting-strip__count"><strong>${rows.length} ${rows.length === 1 ? 'laufenden Vorgang' : 'laufende Vorgänge'}</strong></a>${clarification ? `, <strong>${clarification}</strong> mit Rückfrage` : ''}.`
+      : 'Sie haben derzeit keine laufenden Vorgänge.',
+  };
+}
+
+function renderOverviewBand() {
+  if (!P.state.user) return '';
+  const scope = overviewScope();
+  const draft = P.loadDraft();
+  const visible = scope.rows.slice(0, OVERVIEW_ROW_CAP);
+  return `
+    <section class="section bg--secondary-50" aria-labelledby="overviewTitle">
+      <div class="container">
+        <h2 class="h2 section-heading" id="overviewTitle">${P.t('overview.title')}</h2>
+        <p class="greeting-strip">
+          ${greetingFor(new Date().getHours())}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
+          ${scope.sentence}
+          ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
+        </p>
+        ${visible.length ? `
+          <div class="table-wrapper">
+            <table class="table table--zebra table--rows-clickable">
+              <caption class="sr-only">${P.t('overview.tableCaption')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Vorgang</th><th scope="col">Objekt</th><th scope="col">Prozess</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${visible.map(caseRowHtml).join('')}
+              </tbody>
+            </table>
+          </div>
+          <p class="section-cta">
+            <a class="section-cta__link" href="${scope.moreHref}">
+              ${scope.moreLabel} ${P.icon('arrowRight', 'section-cta__icon')}
+            </a>
+          </p>
+        ` : ''}
+      </div>
+    </section>
+  `;
+}
+
+// ── 1b. FREQUENTLY USED SERVICES (front page) ────────────────────────────
+// Shown signed out as well: "häufig genutzt" describes the portal's traffic,
+// not this reader's history, and the whole point of the catalogue is that a
+// visitor can see what the portal is for before authenticating. The cards
+// point at protected routes, which is fine — those render the login gate with
+// the destination preserved, the same contract the nav already offers a
+// signed-out visitor.
+function renderQuickServicesBand() {
+  // Which four lead the front page is a property of the SERVICE (its `popular`
+  // rank in data/services.json), not of this template — the sister portal's
+  // rule. Editing the catalogue reorders the front page; nothing here changes.
+  const featured = catalogueServices()
+    .filter(s => s.popular)
+    .sort((a, b) => a.popular - b.popular);
+  if (!featured.length) return '';
+  return `
+    <section class="section bg--white" aria-labelledby="quickServicesTitle">
+      <div class="container">
+        <h2 class="h2 section-heading" id="quickServicesTitle">${P.t('home.services')}</h2>
+        <div class="card-grid">
+          ${featured.map(serviceCard).join('')}
+        </div>
+        <p class="section-cta">
+          <a class="section-cta__link" href="#/services">
+            ${P.t('home.allServices')} ${P.icon('arrowRight', 'section-cta__icon')}
+          </a>
+        </p>
+      </div>
+    </section>
   `;
 }
 
@@ -1093,72 +1383,15 @@ function renderLogin() {
   `;
 }
 
-// ── 3. AUTH HOME ─────────────────────────────────────────────────────────
+// ── 3. AUTH HOME → front page ────────────────────────────────────────────
+// The role home was merged into the front page (renderOverviewBand +
+// renderQuickServicesBand under the hero), so this route no longer renders a
+// page of its own. It stays registered as a redirect: bookmarks, the reviewer
+// hint on the login stub and any older link keep resolving instead of hitting
+// the 404 view. GS reviewers keep their dedicated queue at #/queue, which the
+// overview band links to.
 function renderHome() {
-  if (!P.state.user) { P.navigate('#/'); return; }
-  const role = P.state.user.activeRole;
-  if (role === 'GS-Reviewer') return renderQueue();
-  return renderSubmitterHome();
-}
-
-function renderSubmitterHome() {
-  // Home page = root. CD pattern: no breadcrumb on the landing page —
-  // a single "Start" item just restates the page title. Sub-pages get
-  // the `[Start, …, current]` chain as usual.
-  shell({ activeNav: 'home', breadcrumb: [] });
-  const userApps = P.state.applications
-    .filter(a => a.submitterId === P.state.user.id)
-    .filter(a => !['closed', 'rejected'].includes(a.status));
-
-  const draft = P.loadDraft();
-
-  const rueckfrage = userApps.filter(a => a.status === 'clarification').length;
-  const greeting = greetingFor(new Date().getHours());
-
-  document.getElementById('page-body').innerHTML = `
-    <section class="section">
-      <div class="container">
-        <h1 class="sr-only">Startseite Mieterportal</h1>
-        <p class="greeting-strip">
-          ${greeting}, <strong>${P.escapeHtml(P.state.user.name.split(' ')[0])}</strong>.
-          ${userApps.length
-            ? `Sie haben <a href="#/inbox" class="greeting-strip__count"><strong>${userApps.length} offene Anliegen</strong></a>${rueckfrage ? `, <strong>${rueckfrage}</strong> mit Rückfrage` : ''}.`
-            : `Sie haben derzeit keine offenen Anliegen.`}
-          ${draft ? `<span class="greeting-strip__draft"> · <a href="#" onclick="event.preventDefault(); window.t3lite.continueDraft();">Entwurf fortsetzen</a></span>` : ''}
-        </p>
-        <h2 class="h2 section-heading">${P.t('home.services')}</h2>
-        <div class="card-grid">
-          <a href="#/wizard/1" class="card--quick">
-            <p class="card--quick__title">Bedarf anmelden</p>
-            <p class="card--quick__desc">Unterbringung, Bürofläche oder Auslandvertretung in fünf Schritten erfassen.</p>
-            ${arrowBtn()}
-          </a>
-          <a href="#/properties" class="card--quick">
-            <p class="card--quick__title">Liegenschaften Inventar</p>
-            <p class="card--quick__desc">Von Ihrer Verwaltungseinheit belegte Liegenschaften mit Vertrags- und Belegungsdaten.</p>
-            ${arrowBtn()}
-          </a>
-          <a href="#/repair" class="card--quick">
-            <p class="card--quick__title">Schaden melden</p>
-            <p class="card--quick__desc">Defekte Heizung, Wasserschaden, Beleuchtung oder Schliesssystem an BBL Objektmanagement melden.</p>
-            ${arrowBtn()}
-          </a>
-          <a href="#/downloads" class="card--quick">
-            <p class="card--quick__title">Pläne & Dokumente</p>
-            <p class="card--quick__desc">Grundrisse, Merkblätter und Schulungsmaterial Ihrer Verwaltungseinheit.</p>
-            ${arrowBtn()}
-          </a>
-        </div>
-        <p class="section-cta">
-          <a class="section-cta__link" href="#/services">
-            ${P.t('home.allServices')} ${P.icon('arrowRight', 'section-cta__icon')}
-          </a>
-        </p>
-      </div>
-    </section>
-
-    ${renderNewsSection()}
-  `;
+  P.navigate('#/');
 }
 
 function greetingFor(hour) {
@@ -1185,32 +1418,160 @@ function arrowBtn(extraClassOrOpts = 'card--quick__arrow-btn', maybeOpts = {}) {
 }
 
 // ── 5. SUBMITTER INBOX ───────────────────────────────────────────────────
+// ── PROCESS INSTANCES ("Vorgänge") ───────────────────────────────────────
+// The portal runs several processes — Bedarfsmeldung, Schadensmeldung, Umzug,
+// Sonderreinigung, Möbelbestellung — and «Meine Vorgänge» is the collection of
+// running instances of ANY of them: a customer follows status here, an
+// assignee finds their tasks. The envelope (reference, process, status,
+// history, assignee) is uniform in data/process-instances.json; only the
+// PAYLOAD differs per process.
+//
+// The Bedarfsmeldung's payload stays a typed record in space-requests.json,
+// referenced by `payloadRef`, because its fields are computed and unit-tested
+// (NAW class, m²/FTE, budget ceilings) — flattening those into the loose
+// `data` bag the other processes use would trade a schema for a convention.
+//
+// Statuses are the union across definitions: the pipeline enum from the
+// Bedarfsmeldung plus the operational states the service processes add.
+const CASE_STATUS_LABELS = {
+  draft: 'Entwurf', submitted: 'Eingereicht', triage: 'Triage',
+  in_review_gs: 'in GS-Prüfung', in_review_pfm: 'in PFM-Prüfung',
+  clarification: 'Rückfrage', scheduled: 'Termin fixiert',
+  in_progress: 'in Arbeit', approved: 'genehmigt', in_project: 'in ePPM',
+  asset_key_creation: 'WE-Anlage', closed: 'abgeschlossen', rejected: 'abgelehnt'
+};
+
+function processDef(defId) {
+  return (P.state.processDefs || []).find(d => d.defId === defId) || null;
+}
+
+// Steps for an instance = the variant branch of its definition. Bedarfsmeldung
+// carries three (standard / bypass / greenfield); the service processes have
+// one. Falls back to `standard` so a variant typo degrades to a pipeline
+// instead of an empty strip.
+function processSteps(inst) {
+  const def = processDef(inst.defId);
+  if (!def || !def.variants) return null;
+  return def.variants[inst.variant] || def.variants.standard || null;
+}
+
+// One row shape for every process, whatever its payload. `object` is the thing
+// the case is about — from the typed payload where there is one, otherwise the
+// building the instance points at.
+function resolveCase(inst) {
+  const def = processDef(inst.defId);
+  const payload = inst.payloadRef
+    ? (P.state.spaceRequests || []).find(a => a.id === inst.payloadRef)
+    : null;
+  const building = inst.buildingId
+    ? (P.state.buildings || []).find(b => b.id === inst.buildingId)
+    : null;
+  return {
+    inst,
+    payload,
+    id: inst.instanceId,
+    processName: def ? def.name : inst.defId,
+    title: inst.title,
+    object: payload ? payload.address : (building ? building.address : '—'),
+    status: inst.status,
+    submittedAt: inst.createdAt,
+    // A Bedarfsmeldung opens its rich detail view (pipeline, attachments,
+    // Auflagen, history tabs) keyed by the payload id; every other process
+    // opens the generic case view keyed by the instance id. `#/inbox/:id`
+    // resolves both — a transitional dual key, until the Bedarfsmeldung view
+    // is rebuilt on the instance.
+    href: payload ? `#/inbox/${payload.id}` : `#/inbox/${inst.instanceId}`,
+  };
+}
+
+// `scope` — 'own' for the requester's own cases, 've' for everything raised
+// inside the reviewer's administrative unit.
+function myCases(scope) {
+  const user = P.state.user;
+  if (!user) return [];
+  return (P.state.processInstances || [])
+    .filter(i => scope === 've' ? i.requesterVe === user.ve : i.requesterId === user.id)
+    .map(resolveCase)
+    .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
+}
+
+// Start a process instance from one of the short service forms. Until this
+// existed the three forms minted a ticket number, put it in a toast and threw
+// it away — the Vorgang the user was told about did not exist anywhere, so it
+// never appeared in «Meine Vorgänge» and had no status to follow. Now each
+// form creates a real instance on the same envelope the seeded cases use, and
+// lands the user on it.
+//
+// `spec.fields` maps the German label shown on the detail view to the form
+// control's name; empty inputs are dropped rather than rendered as blank rows.
+function startCase(form, spec) {
+  const data = new FormData(form);
+  const tenancy = P.state.tenancies.find(t => t.id === data.get('building'));
+  if (!tenancy) { P.toast('Bitte Liegenschaft wählen.'); return; }
+  const def = processDef(spec.defId);
+  const ts = new Date().toISOString();
+  const instanceId = 'VG-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9000 + 1000));
+  const payload = {};
+  for (const label in spec.fields) {
+    const v = (data.get(spec.fields[label]) || '').toString().trim();
+    if (v) payload[label] = v;
+  }
+  const firstStep = def && def.variants && def.variants.standard ? def.variants.standard[0] : null;
+  P.state.processInstances.unshift({
+    instanceId, id: instanceId,
+    defId: spec.defId,
+    variant: 'standard',
+    title: spec.title(data, tenancy),
+    requesterId: P.state.user.id,
+    requesterVe: P.state.user.ve,
+    buildingId: tenancy.buildingId,
+    tenancyId: tenancy.id,
+    status: firstStep ? firstStep.status : 'submitted',
+    createdAt: ts,
+    updatedAt: ts,
+    assignee: tenancy.contacts ? tenancy.contacts[spec.contact] : null,
+    data: payload,
+    history: [{ ts, actor: P.state.user.name, action: firstStep ? firstStep.label : 'Eingereicht' }],
+  });
+  P.toast(spec.sent(instanceId, tenancy), 'success');
+  setTimeout(() => P.navigate('#/inbox/' + instanceId), 600);
+}
+
+function caseRowHtml(c) {
+  // A11Y-001: the row is pure navigation, so the primary cell carries a real
+  // <a href> — the only keyboard/AT-operable path into the detail view. The
+  // tr onclick stays for the mouse "whole row is a target" affordance.
+  return `
+    <tr data-case-id="${c.id}" onclick="location.hash='${c.href}';">
+      <td><a href="${c.href}"><strong>${P.escapeHtml(c.id)}</strong></a></td>
+      <td>${P.escapeHtml(c.object)}</td>
+      <td>${P.escapeHtml(c.processName)}</td>
+      <td>${P.formatDate(c.submittedAt)}</td>
+      <td>${P.statusBadge(c.status)}</td>
+    </tr>
+  `;
+}
+
 const INBOX_PAGE_SIZE = 25;
 function renderInbox() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.inbox') }] });
+  shell({ activeNav: 'inbox', breadcrumb: [{ label: P.t('nav.inbox') }] });
   const role = P.state.user.activeRole;
-  const apps = role === 'GS-Reviewer'
-    ? P.state.applications.filter(a => a.submitterVe === P.state.user.ve)
-    : P.state.applications.filter(a => a.submitterId === P.state.user.id);
+  const apps = myCases(role === 'GS-Reviewer' ? 've' : 'own');
 
-  // URL state: ?status=… (filter chips also write here on click) · ?page=N
+  // URL state: ?page=N (status filtering is in-page, see wireInboxFilters)
   const params = parseHashQuery(location.hash);
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
   const totalPages = Math.max(1, Math.ceil(apps.length / INBOX_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageItems = apps.slice((safePage - 1) * INBOX_PAGE_SIZE, safePage * INBOX_PAGE_SIZE);
 
-  // Build status filter chips dynamically from what's actually in the
+  // Filter options are built from what's actually in the
   // user's set, so we never show "Rückfrage" when there are no
   // clarification items. Counts on each chip give an at-a-glance
   // distribution (DS tag-item pattern). Counts are derived from the
   // full apps array, not the paginated slice.
-  const STATUS_LABELS = {
-    draft: 'Entwurf', submitted: 'Eingereicht', in_review_gs: 'in GS-Prüfung',
-    in_review_pfm: 'in PFM-Prüfung', clarification: 'Rückfrage',
-    approved: 'genehmigt', in_project: 'in ePPM', closed: 'abgeschlossen', rejected: 'abgelehnt'
-  };
+  const STATUS_LABELS = CASE_STATUS_LABELS;
   const counts = apps.reduce((o, a) => { o[a.status] = (o[a.status] || 0) + 1; return o; }, {});
   const presentStatuses = Object.keys(STATUS_LABELS).filter(s => counts[s]);
 
@@ -1220,37 +1581,57 @@ function renderInbox() {
         <header class="page-header">
           <div>
             <h1 class="h1 page-header__title">${role === 'GS-Reviewer' ? P.t('nav.inboxVe') : P.t('inbox.title')}</h1>
-            <p class="page-header__sub">${apps.length} ${apps.length === 1 ? 'Antrag' : 'Anträge'} insgesamt</p>
+            <p class="page-header__sub">${apps.length} ${apps.length === 1 ? 'Vorgang' : 'Vorgänge'} insgesamt</p>
           </div>
           <div class="page-header__actions">
-            <a class="btn btn--filled btn--sm" href="#/wizard/1">+ ${P.t('inbox.new')}</a>
+            <!-- The button opens the SERVICE CATALOGUE, not the Bedarfsmeldung
+                 wizard: this list holds every process, so "new" has to be a
+                 choice of process rather than a shortcut into one of them. -->
+            <a class="btn btn--filled btn--sm" href="#/services">+ ${P.t('inbox.new')}</a>
           </div>
         </header>
 
         ${apps.length === 0 ? renderInboxEmptyState() : `
-          <div class="filter-row" role="search">
-            <div class="search-field filter-row__search">
-              ${P.icon('search', 'search-field__icon')}
-              <input id="filterText" type="search" class="input search-field__input" placeholder="Antrag oder Objekt suchen …" aria-label="Suche">
-            </div>
-            <ul class="filter-chips" role="group" aria-label="Status-Filter">
-              <li><button type="button" class="tag-item tag-item--active" data-status="" aria-pressed="true">Alle <span class="tag-item__count">${apps.length}</span></button></li>
-              ${presentStatuses.map(s => `
-                <li><button type="button" class="tag-item" data-status="${s}" aria-pressed="false">${STATUS_LABELS[s]} <span class="tag-item__count">${counts[s]}</span></button></li>
-              `).join('')}
-            </ul>
-          </div>
+          ${catalogueBar({
+            id: 'inbox',
+            search: true,
+            q: '',
+            searchLabel: P.t('inbox.searchLabel'),
+            placeholder: P.t('inbox.searchPlaceholder'),
+        
+            count: `${apps.length} ${apps.length === 1 ? 'Vorgang' : 'Vorgänge'}`,
+            filterLabel: P.t('props.filter'),
+            filterCount: 0,
+            // Status is this list's filter dimension. The counts that used to
+            // sit on the chip row move onto the options, so nothing is lost by
+            // folding them into the shared bar.
+            panel: `
+              <fieldset class="catbar__fieldset">
+                <legend class="catbar__legend">Status</legend>
+                <div class="catbar__options">
+                  <label class="catbar__option">
+                    <input type="radio" name="inbox-status" value="" checked>
+                    <span>Alle (${apps.length})</span>
+                  </label>
+                  ${presentStatuses.map(s => `
+                    <label class="catbar__option">
+                      <input type="radio" name="inbox-status" value="${s}">
+                      <span>${STATUS_LABELS[s]} (${counts[s]})</span>
+                    </label>`).join('')}
+                </div>
+              </fieldset>`,
+          })}
 
           <div class="table-wrapper">
           <table class="table table--zebra table--rows-clickable">
-            <caption class="sr-only">Anträge mit Objekt, Typ, Einreichedatum und Status</caption>
+            <caption class="sr-only">Vorgänge mit Objekt, Prozess, Eingangsdatum und Status</caption>
             <thead>
               <tr>
-                <th scope="col">Antrag</th><th scope="col">Objekt</th><th scope="col">Typ</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
+                <th scope="col">Vorgang</th><th scope="col">Objekt</th><th scope="col">Prozess</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
               </tr>
             </thead>
             <tbody id="inboxTbody">
-              ${pageItems.map(rowHtml).join('')}
+              ${pageItems.map(caseRowHtml).join('')}
             </tbody>
           </table>
           </div>
@@ -1262,8 +1643,8 @@ function renderInbox() {
             from: apps.length === 0 ? 0 : (safePage - 1) * INBOX_PAGE_SIZE + 1,
             to: Math.min(safePage * INBOX_PAGE_SIZE, apps.length),
             totalItems: apps.length,
-            entitySingular: 'Antrag',
-            entityPlural: 'Anträge',
+            entitySingular: 'Vorgang',
+            entityPlural: 'Vorgänge',
             hrefFor: (p) => '#/inbox' + (p > 1 ? '?page=' + p : ''),
             inputId: 'inboxPaginationInput',
           })}
@@ -1272,9 +1653,49 @@ function renderInbox() {
     </section>
   `;
   if (apps.length > 0) {
+    // The shared bar owns its filter-panel toggle; no `hashFor` here because
+    // this list filters in page rather than through the URL.
+    wireCatalogueBar({ id: 'inbox' });
     wireInboxFilters(apps);
     wirePaginationInput('inboxPaginationInput');
   }
+}
+
+// Text + status filtering over the rendered case rows. Operates on the
+// resolved cases (not raw records) so the same row markup is reused, and
+// matches the title too — the only thing that tells two Schadensmeldungen on
+// one building apart.
+function wireInboxFilters(cases) {
+  const radios = Array.from(document.querySelectorAll('input[name="inbox-status"]'));
+  const filterText = document.getElementById(`inbox-q`);
+  const tbody = document.getElementById(`inboxTbody`);
+  if (!tbody) return;
+  let activeStatus = ``;
+
+  const apply = () => {
+    const t = (filterText?.value || ``).toLowerCase();
+    const filtered = cases.filter(c =>
+      (!activeStatus || c.status === activeStatus) &&
+      (!t || c.id.toLowerCase().includes(t)
+          || (c.object || ``).toLowerCase().includes(t)
+          || (c.title || ``).toLowerCase().includes(t))
+    );
+    tbody.innerHTML = filtered.map(caseRowHtml).join(``)
+      || `<tr><td colspan="5" class="table-empty">Keine Treffer.</td></tr>`;
+  };
+
+  // Status filtering stays IN PAGE rather than routing through the hash: the
+  // list re-renders its own tbody, and a navigation would close the filter
+  // panel the reader just opened. The bar's filter badge tracks the choice so
+  // an active filter is visible with the panel collapsed.
+  radios.forEach(radio => radio.addEventListener('change', () => {
+    activeStatus = radio.value || '';
+    const badge = document.querySelector('#inbox-filter .catbar__filter-count');
+    if (badge) badge.textContent = activeStatus ? '1' : '';
+    apply();
+  }));
+
+  filterText?.addEventListener(`input`, apply);
 }
 
 function renderInboxEmptyState() {
@@ -1283,8 +1704,8 @@ function renderInboxEmptyState() {
       <div class="empty-state__glyph" aria-hidden="true">
         ${P.icon('envelope')}
       </div>
-      <h2 class="empty-state__title">Noch keine Anträge</h2>
-      <p class="empty-state__lead">Sie haben derzeit keine Anträge in Bearbeitung. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
+      <h2 class="empty-state__title">Noch keine Vorgänge</h2>
+      <p class="empty-state__lead">Sie haben derzeit keine laufenden Vorgänge. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
       <div class="empty-state__cta">
         <a href="#/wizard/1" class="btn btn--filled">Bedarf anmelden</a>
         <a href="#/info" class="btn btn--bare" onclick="setTimeout(() => window.t3lite.scrollToInfo('workflow'), 100);">Wie funktioniert das Portal?</a>
@@ -1293,141 +1714,314 @@ function renderInboxEmptyState() {
   `;
 }
 
-function rowHtml(a) {
-  // A11Y-001: the row is pure navigation, so the primary cell carries a real
-  // <a href> — the only keyboard/AT-operable path into the detail view. The
-  // tr onclick stays for the mouse "whole row is a target" affordance.
-  return `
-    <tr data-app-id="${a.id}" onclick="location.hash='#/inbox/${a.id}';">
-      <td><a href="#/inbox/${a.id}"><strong>${a.id}</strong></a></td>
-      <td>${P.escapeHtml(a.address)}</td>
-      <td>${a.type}</td>
-      <td>${P.formatDate(a.submittedAt)}</td>
-      <td>${P.statusBadge(a.status)}</td>
-    </tr>
-  `;
+
+// Detail view for a process instance that has no typed payload — a
+// Schadensmeldung, Umzug, Sonderreinigung, Möbelbestellung. Deliberately the
+// same page furniture as the Bedarfsmeldung view (share bar, page header,
+// pipeline, card sections) so a Vorgang reads the same whatever its process;
+// only the payload block differs, rendering the instance's `data` as a
+// definition list because its shape is per-process.
+// ── VORGANG DETAIL ───────────────────────────────────────────────────────
+// ONE detail view for every process. A Bedarfsmeldung, a Schadensmeldung, an
+// Umzug and a Möbelbestellung are the same KIND of thing to a reader — a case
+// with a status, a history and some paperwork — so they get the same page
+// furniture and the same four tabs. Only the Übersicht panel's body varies,
+// because that is the one part that genuinely differs: a Bedarfsmeldung has a
+// typed, computed payload (NAW class, m²/FTE, budget ceilings) while the
+// operational processes carry a loose `data` bag.
+//
+// The tab set is FIXED. Previously the Bedarfsmeldung view carried a
+// «SAP / ePPM» tab that no other process had (and that mostly showed a
+// fabricated correlation id); its two real facts — the asset key and the ePPM
+// project number — now sit in Übersicht with the rest of the record. A tab
+// strip that changes shape per process would make the view feel like four
+// different pages.
+//
+// Empty is a state, not a reason to hide a tab: a process with no attachments
+// shows «Anhänge (0)» and says so inside.
+const CASE_TABS = ['uebersicht', 'anhaenge', 'verlauf', 'kommentare'];
+
+// `#/inbox/:id` accepts either key: the instance id (canonical) or the id of
+// a Bedarfsmeldung payload (older links, and the reviewer flow which still
+// addresses space requests).
+function findCase(id) {
+  const insts = P.state.processInstances || [];
+  return insts.find(i => i.instanceId === id) || insts.find(i => i.payloadRef === id) || null;
 }
 
-function wireInboxFilters(apps) {
-  const chips = Array.from(document.querySelectorAll('.filter-chips .tag-item'));
-  const filterText = document.getElementById('filterText');
-  const tbody = document.getElementById('inboxTbody');
-  if (!tbody) return;
-  let activeStatus = '';
-
-  const apply = () => {
-    const t = (filterText?.value || '').toLowerCase();
-    const filtered = apps.filter(a =>
-      (!activeStatus || a.status === activeStatus) &&
-      (!t || a.id.toLowerCase().includes(t) || (a.address || '').toLowerCase().includes(t))
-    );
-    tbody.innerHTML = filtered.map(rowHtml).join('')
-      || `<tr><td colspan="5" class="table-empty">Keine Treffer.</td></tr>`;
-  };
-
-  chips.forEach(chip => chip.addEventListener('click', () => {
-    activeStatus = chip.getAttribute('data-status') || '';
-    chips.forEach(c => {
-      const isActive = c === chip;
-      c.classList.toggle('tag-item--active', isActive);
-      c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    });
-    apply();
-  }));
-
-  filterText?.addEventListener('input', apply);
-}
-
-// ── 6. APPLICATION DETAIL (submitter view) ───────────────────────────────
 function renderApplicationDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
-  const a = P.state.applications.find(x => x.id === id);
-  if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
-  shell({ activeNav: 'inbox', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/inbox', label: P.t('nav.inbox') }, { label: a.id }] });
-  const tab = parseHashQuery(location.hash).tab || 'daten';
+  const inst = findCase(id);
+  if (!inst) {
+    document.getElementById('page-body').innerHTML = '<div class="container section"><p>Vorgang nicht gefunden.</p></div>';
+    return;
+  }
+  renderCaseDetail(inst);
+}
+
+function renderCaseDetail(inst) {
+  const c = resolveCase(inst);
+  const a = c.payload;                    // typed Bedarfsmeldung payload, or null
+  const steps = processSteps(inst);
+  const attachments = (a && a.attachments) || inst.attachments || [];
+  const comments = inst.comments || [];
+  const history = (a && a.history) || inst.history || [];
+
+  shell({ activeNav: 'inbox', breadcrumb: [
+    { href: '#/inbox', label: P.t('nav.inbox') },
+    { label: inst.instanceId },
+  ]});
+
+  const requested = parseHashQuery(location.hash).tab;
+  const tab = CASE_TABS.includes(requested) ? requested : 'uebersicht';
+  const ctx = { a, attachments, comments, history };
+
+  const tabs = [
+    ['uebersicht', P.t('case.tabOverview')],
+    ['anhaenge',   `${P.t('case.tabAttachments')} (${attachments.length})`],
+    ['verlauf',    P.t('case.tabHistory')],
+    ['kommentare', `${P.t('case.tabComments')} (${comments.length})`],
+  ];
 
   document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'Anträge' })}
+    ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'Vorgänge' })}
     <section class="section">
       <div class="container">
-        ${a._isNew ? `
+        ${a && a._isNew ? `
           <div class="notification notification--success app-detail__fresh-banner" role="status">
-            <span class="notification__icon" aria-hidden="true">
-              ${P.icon('checkCircle')}
-            </span>
+            <span class="notification__icon" aria-hidden="true">${P.icon('checkCircle')}</span>
             <div class="notification__content">
               <p>
-                <strong>Ihr Antrag ${a.id} wurde erfolgreich eingereicht.</strong>
-                Sie erhalten in Kürze eine E-Mail-Bestätigung. Status: <em>${({ submitted: 'Eingereicht', in_review_gs: 'in GS-Prüfung', in_review_pfm: 'in PFM-Prüfung' })[a.status] || a.status}</em>.
+                <strong>Ihr Antrag ${P.escapeHtml(a.id)} wurde erfolgreich eingereicht.</strong>
+                Sie erhalten in Kürze eine E-Mail-Bestätigung.
               </p>
             </div>
           </div>
         ` : ''}
+
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">${a.id} <span class="page-header__count">— ${P.escapeHtml(a.address)}</span></h1>
-            <p class="page-header__sub">Eingereicht ${P.formatDate(a.submittedAt)} · Typ ${a.type}</p>
+            <p class="overtitle">${P.escapeHtml(c.processName)}</p>
+            <h1 class="h1 page-header__title">${P.escapeHtml(inst.title)}</h1>
+            <p class="page-header__sub">
+              ${P.escapeHtml(inst.instanceId)} · ${P.escapeHtml(c.object)} · ${P.t('case.submittedOn')} ${P.formatDate(inst.createdAt)}
+            </p>
           </div>
           <div class="page-header__actions">
-            ${a.status === 'clarification' ? `<button class="btn btn--filled btn--sm" type="button" onclick="window.t3lite.startResubmit('${P.escapeJs(a.id)}')">${P.icon('refresh')} Auflagen erfüllen — Erneut einreichen</button>` : ''}
+            ${P.statusBadge(inst.status)}
+            ${a && a.status === 'clarification' ? `<button class="btn btn--filled btn--sm" type="button" onclick="window.t3lite.startResubmit('${P.escapeJs(a.id)}')">${P.icon('refresh')} Auflagen erfüllen — Erneut einreichen</button>` : ''}
           </div>
         </header>
 
-        ${P.renderPipeline(a)}
+        ${P.renderPipeline(a || inst, steps)}
 
-        <div class="tabs" role="tablist" aria-label="Antrags-Tabs">
-          ${tabBtn('daten',     'Daten',       tab)}
-          ${tabBtn('anhaenge',  'Anhänge',     tab)}
-          ${tabBtn('historie',  'Historie',    tab)}
-          ${tabBtn('sap',       'SAP / ePPM',  tab)}
+        <div class="tabs case-tabs" role="tablist" aria-label="${P.t('case.tabsLabel')}">
+          ${tabs.map(([key, label]) => tabBtn(key, label, tab)).join('')}
         </div>
-
-        <div id="detailTab" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${renderDetailTab(a, tab)}</div>
+        <div id="detailTab" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${renderCaseTab(inst, tab, ctx)}</div>
       </div>
     </section>
   `;
-  wireTabs(a);
-  // Clear "fresh submission" flag after first paint so reload doesn't re-show banner.
-  if (a._isNew) setTimeout(() => { delete a._isNew; }, 500);
+
+  wireCaseTabs(inst, ctx);
+  // Clear the "fresh submission" flag after first paint so a reload doesn't
+  // re-show the banner.
+  if (a && a._isNew) setTimeout(() => { delete a._isNew; }, 500);
 }
 
-// ARIA tab pattern: only one tab is in the tab order; arrow keys move
-// focus between tabs and activate the focused one (auto-activation).
-// Home / End jump to first / last. Matches the WAI-ARIA APG Tabs pattern
-// and the modern designsystem .tabs component.
-function wireTabs(a) {
-  const tabs = Array.from(document.querySelectorAll('.tabs [role="tab"]'));
-  if (!tabs.length) return;
+function renderCaseTab(inst, tab, ctx) {
+  if (tab === 'anhaenge')   return caseAttachmentsPanel(ctx);
+  if (tab === 'verlauf')    return caseHistoryPanel(ctx);
+  if (tab === 'kommentare') return caseCommentsPanel(ctx);
+  return caseOverviewPanel(inst, ctx);
+}
+
+// Shared empty state — every tab renders one rather than disappearing, so the
+// reader learns that the case HAS no attachments instead of wondering where
+// they went.
+function caseEmpty(text) {
+  return `<p class="case-empty text-secondary">${P.escapeHtml(text)}</p>`;
+}
+
+// Übersicht as a VERTICAL stack of titled sections, each a definition list —
+// the same `.detail-list` anatomy the property page uses. The previous
+// four-across card grid forced every value into a ~300px column, so an
+// address or a NAW line wrapped three times while the card next to it sat
+// half empty; and the cards implied four peer objects where there is really
+// one record described from several angles.
+function caseSection(title, rows) {
+  const body = rows.filter(Boolean);
+  if (!body.length) return '';
+  return `
+    <section class="case-section">
+      <h2 class="case-section__title">${P.escapeHtml(title)}</h2>
+      <dl class="detail-list">${body.join('')}</dl>
+    </section>`;
+}
+const caseRow = (label, value) => (value === null || value === undefined || value === '')
+  ? '' : `<dt>${P.escapeHtml(label)}</dt><dd>${value}</dd>`;
+
+function caseOverviewPanel(inst, { a }) {
+  const c = resolveCase(inst);
+  const facts = caseSection(P.t('case.caseFacts'), [
+    caseRow(P.t('case.reference'), P.escapeHtml(inst.instanceId)),
+    caseRow(P.t('case.process'), P.escapeHtml(c.processName)),
+    caseRow(P.t('case.assignee'), P.escapeHtml(inst.assignee || '—')),
+    caseRow(P.t('case.submittedOn'), P.formatDate(inst.createdAt)),
+    caseRow(P.t('case.updatedOn'), P.formatDate(inst.updatedAt || inst.createdAt)),
+    a && a.projectNumber ? caseRow('ePPM', `<strong>${P.escapeHtml(a.projectNumber)}</strong>`) : '',
+  ]);
+
+  // Bedarfsmeldung: the typed record, one section per group of fields.
+  if (a) {
+    const submitter = P.state.users.find(u => u.id === a.submitterId);
+    return `
+      <div class="case-overview">
+        ${caseSection('Antragsteller', [
+          caseRow('Name', P.escapeHtml(submitter?.name || a.submitterId)),
+          caseRow('Verwaltungseinheit', P.escapeHtml(a.submitterVe) + (a.submitterDep ? ' · ' + P.escapeHtml(a.submitterDep) : '')),
+        ])}
+        ${caseSection('Standort', [
+          caseRow('Adresse', P.escapeHtml(a.address)),
+          a.assetKey
+            ? caseRow('Wirtschaftseinheit (WE)', `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code>`)
+            : caseRow('Objekt', '<span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben'),
+          a.assetKey ? caseRow('EGID', `<code>${P.escapeHtml(String(a.egid))}</code>`) : '',
+        ])}
+        ${a.naw ? caseSection('Flächenbedarf', [
+          caseRow('NAW-Klasse', `<strong>${P.escapeHtml(a.naw.class)}</strong>`),
+          caseRow('FTE', a.fte),
+          caseRow('Arbeitsplätze', a.workstations),
+          caseRow('HNF2', `${a.hnf2} m²`),
+          caseRow('Geschossfläche (GF)', `${a.gf} m²`),
+          caseRow('Unterhaltskosten', P.formatChf(a.operatingCosts)),
+          caseRow('Möblierung', P.formatChf(a.furnitureBudget)),
+        ]) : ''}
+        ${a.extensionData?.berths ? caseSection('SEM-Variante', [
+          caseRow('Schlafplätze', `<strong>${a.extensionData.berths}</strong>`),
+          caseRow('davon Familie', a.extensionData.berthsFamily),
+          caseRow('davon Einzel', a.extensionData.berthsSingle),
+          caseRow('davon Mehrbett', a.extensionData.berthsShared),
+          caseRow('Investitionspauschale', P.formatChf(a.extensionData.investmentLumpSum)),
+        ]) : ''}
+        ${facts}
+        ${a.status === 'clarification' && a.conditions ? `
+          <section class="case-section">
+            <h2 class="case-section__title">${P.icon('refresh')} Rückfrage / Offene Auflagen</h2>
+            <p class="case-section__note"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
+            <ul class="auflagen-list">
+              ${a.conditions.map((x, i) => `
+                <li class="${x.done ? 'done' : ''}">
+                  <input type="checkbox" ${x.done ? 'checked' : ''} aria-label="Auflage erledigt: ${P.escapeHtml(x.comment)}" onclick="window.t3lite.toggleAuflage('${P.escapeJs(a.id)}', ${i})">
+                  <span>${P.escapeHtml(x.comment)}</span>
+                  <span class="badge">${P.escapeHtml(x.field)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </section>` : ''}
+      </div>`;
+  }
+
+  // Every other process: its own submitted fields, in the same anatomy.
+  const data = inst.data || {};
+  const keys = Object.keys(data);
+  return `
+    <div class="case-overview">
+      ${keys.length
+        ? caseSection(P.t('case.submittedData'), keys.map(k => caseRow(k, P.escapeHtml(String(data[k])))))
+        : `<section class="case-section">
+             <h2 class="case-section__title">${P.t('case.submittedData')}</h2>
+             ${caseEmpty(P.t('case.noData'))}
+           </section>`}
+      ${facts}
+    </div>`;
+}
+
+
+function caseAttachmentsPanel({ attachments }) {
+  if (!attachments.length) return caseEmpty(P.t('case.noAttachments'));
+  return `
+    <ul class="attachment-list" aria-label="${P.t('case.tabAttachments')}">
+      ${attachments.map(x => attachmentLi(x)).join('')}
+    </ul>
+    <p class="table-hint">Klicken Sie ein Dokument, um es herunterzuladen. Anhänge bleiben für die Dauer der Aktenführung verfügbar.</p>`;
+}
+
+function caseHistoryPanel({ history }) {
+  if (!history.length) return caseEmpty(P.t('case.noHistory'));
+  // Map eventType → tone for the timeline dot. Instances from the service
+  // forms carry no eventType, so the dot simply stays neutral.
+  const dotTone = (eventType) => {
+    if (!eventType) return '';
+    if (/Added|Submitted/i.test(eventType)) return 'history-timeline__dot--info';
+    if (/Approved|Closed/i.test(eventType)) return 'history-timeline__dot--success';
+    if (/Rejected|Clarification/i.test(eventType)) return 'history-timeline__dot--warning';
+    if (/Handover|Project|System/i.test(eventType)) return 'history-timeline__dot--neutral';
+    return '';
+  };
+  return `
+    <ol class="history-timeline" aria-label="${P.t('case.tabHistory')}">
+      ${history.map(h => `
+        <li class="history-timeline__item">
+          <span class="history-timeline__dot ${dotTone(h.eventType)}" aria-hidden="true"></span>
+          <div class="history-timeline__body">
+            <time class="history-timeline__time" datetime="${P.escapeHtml(h.ts)}">${new Date(h.ts).toLocaleString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
+            <p class="history-timeline__action"><strong>${P.escapeHtml(h.actor)}</strong> · ${P.escapeHtml(h.action)}</p>
+          </div>
+        </li>
+      `).join('')}
+    </ol>`;
+}
+
+function caseCommentsPanel({ comments }) {
+  if (!comments.length) return caseEmpty(P.t('case.noComments'));
+  return `
+    <ul class="case-comments" aria-label="${P.t('case.tabComments')}">
+      ${comments.map(k => `
+        <li class="case-comment">
+          <p class="case-comment__meta">
+            <strong>${P.escapeHtml(k.author)}</strong>
+            <time datetime="${P.escapeHtml(k.ts)}">${P.formatDate(k.ts)}</time>
+          </p>
+          <p class="case-comment__text">${P.escapeHtml(k.text)}</p>
+        </li>
+      `).join('')}
+    </ul>`;
+}
+
+// Same roving-tabindex contract as the property tabs (A11Y-016), with the
+// active tab in `?tab=` so a link into a case opens where it was shared from.
+function wireCaseTabs(inst, ctx) {
+  const tabs = Array.from(document.querySelectorAll('.case-tabs [role="tab"]'));
   const panel = document.getElementById('detailTab');
+  if (!tabs.length || !panel) return;
   const select = (next) => {
     const key = next.getAttribute('data-tab');
-    tabs.forEach(t => {
-      const isActive = t === next;
-      t.classList.toggle('tab--active', isActive);
-      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
-      t.setAttribute('tabindex', isActive ? '0' : '-1');
+    tabs.forEach(x => {
+      const isActive = x === next;
+      x.classList.toggle('tab--active', isActive);
+      x.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      x.setAttribute('tabindex', isActive ? '0' : '-1');
     });
     panel.setAttribute('aria-labelledby', 'tab-' + key);
-    panel.innerHTML = renderDetailTab(a, key);
+    panel.innerHTML = renderCaseTab(inst, key, ctx);
     next.focus();
+    const current = parseHashQuery(location.hash);
+    const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
+      .filter(Boolean).join('&');
+    history.replaceState(null, '', `#/inbox/${inst.instanceId}` + (qs ? '?' + qs : ''));
   };
-  tabs.forEach((t, i) => {
-    t.addEventListener('click', () => select(t));
-    t.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        select(tabs[(i + 1) % tabs.length]);
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        select(tabs[(i - 1 + tabs.length) % tabs.length]);
-      } else if (e.key === 'Home') {
-        e.preventDefault(); select(tabs[0]);
-      } else if (e.key === 'End') {
-        e.preventDefault(); select(tabs[tabs.length - 1]);
-      }
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select(tabs[(i + 1) % tabs.length]); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select(tabs[(i - 1 + tabs.length) % tabs.length]); }
+      else if (e.key === 'Home') { e.preventDefault(); select(tabs[0]); }
+      else if (e.key === 'End') { e.preventDefault(); select(tabs[tabs.length - 1]); }
     });
   });
 }
+
 
 function tabBtn(key, label, active) {
   const isActive = active === key;
@@ -1441,109 +2035,6 @@ function tabBtn(key, label, active) {
                   tabindex="${isActive ? '0' : '-1'}">${label}</button>`;
 }
 
-function renderDetailTab(a, tab) {
-  if (tab === 'anhaenge') {
-    const items = a.attachments || [];
-    if (items.length === 0) {
-      return `<p class="text-secondary">Keine Anhänge zu diesem Antrag.</p>`;
-    }
-    return `
-      <ul class="attachment-list" aria-label="Anhänge zu diesem Antrag">
-        ${items.map(x => attachmentLi(x)).join('')}
-      </ul>
-      <p class="table-hint">Klicken Sie ein Dokument, um es herunterzuladen. Anhänge bleiben für die Dauer der Aktenführung verfügbar.</p>
-    `;
-  }
-  if (tab === 'historie') {
-    // Map eventType → tone for the timeline dot. Aligned with the
-    // canonical Application history events from docs/DATAMODEL.md.
-    const dotTone = (eventType) => {
-      if (!eventType) return '';
-      if (/Added|Submitted/i.test(eventType)) return 'history-timeline__dot--info';
-      if (/Approved|Closed/i.test(eventType)) return 'history-timeline__dot--success';
-      if (/Rejected|Clarification/i.test(eventType)) return 'history-timeline__dot--warning';
-      if (/Handover|Project|System/i.test(eventType)) return 'history-timeline__dot--neutral';
-      return '';
-    };
-    return `
-      <ol class="history-timeline" aria-label="Ereignisverlauf">
-        ${(a.history || []).map(h => `
-          <li class="history-timeline__item">
-            <span class="history-timeline__dot ${dotTone(h.eventType)}" aria-hidden="true"></span>
-            <div class="history-timeline__body">
-              <time class="history-timeline__time" datetime="${P.escapeHtml(h.ts)}">${new Date(h.ts).toLocaleString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
-              <p class="history-timeline__action"><strong>${P.escapeHtml(h.actor)}</strong> · ${P.escapeHtml(h.action)}</p>
-            </div>
-          </li>
-        `).join('')}
-      </ol>
-    `;
-  }
-  if (tab === 'sap') {
-    return `
-      <div class="card">
-        <h2 class="card__title">SAP RE-FX Integration</h2>
-        <dl class="sap-dl">
-          ${a.assetKey ? `
-            <dt>Objekt-Schlüssel</dt>
-            <dd><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code></dd>
-            <dt>EGID</dt>
-            <dd><code>${a.egid}</code></dd>
-          ` : `
-            <dt>Objekt-Schlüssel</dt>
-            <dd><span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben</dd>
-          `}
-          ${a.projectNumber ? `
-            <dt>Bedarfsmeldung (ePPM)</dt>
-            <dd><strong>${P.escapeHtml(a.projectNumber)}</strong></dd>
-          ` : ''}
-          <dt>Korrelations-ID</dt>
-          <dd><code>MP-${(a.id || '').slice(-4)}-Z3K9-F2M8-XQ${(Math.random() * 100 | 0)}</code></dd>
-        </dl>
-      </div>
-    `;
-  }
-  // Default: Daten
-  return `
-    <div class="card-grid">
-      <div class="card">
-        <h2 class="card__title">Antragsteller</h2>
-        <p class="card__inset">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || a.submitterId)}<br><span class="card__inset-meta">${a.submitterVe}${a.submitterDep ? ' · ' + a.submitterDep : ''}</span></p>
-      </div>
-      <div class="card">
-        <h2 class="card__title">Standort</h2>
-        <p class="card__inset">${P.escapeHtml(a.address)}<br>${a.assetKey ? `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · EGID <code>${a.egid}</code>` : '<span class="badge badge--greenfield">Greenfield</span>'}</p>
-      </div>
-      ${a.naw ? `
-        <div class="card">
-          <h2 class="card__title">Flächenbedarf</h2>
-          <p class="card__inset">NAW: <strong>${a.naw.class}</strong><br>FTE ${a.fte} · AP ${a.workstations} · HNF2 ${a.hnf2} m² · GF ${a.gf} m²<br>UK ${P.formatChf(a.operatingCosts)} · Möblierung ${P.formatChf(a.furnitureBudget)}</p>
-        </div>
-      ` : a.extensionData?.berths ? `
-        <div class="card">
-          <h2 class="card__title">SEM-Variante</h2>
-          <p class="card__inset">Schlafplätze: <strong>${a.extensionData.berths}</strong> (Familie ${a.extensionData.berthsFamily} · Einzel ${a.extensionData.berthsSingle} · Mehrbett ${a.extensionData.berthsShared})<br>Investitionspauschale ${P.formatChf(a.extensionData.investmentLumpSum)}</p>
-        </div>
-      ` : ''}
-      ${a.status === 'clarification' && a.conditions ? `
-        <div class="card card--clarification">
-          <h2 class="card__title card__title--icon">${P.icon('refresh')} Rückfrage / Offene Auflagen</h2>
-          <p class="card__justification"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
-          <ul class="auflagen-list">
-            ${a.conditions.map((x, i) => `
-              <li class="${x.done ? 'done' : ''}">
-                <input type="checkbox" ${x.done ? 'checked' : ''} aria-label="Auflage erledigt: ${P.escapeHtml(x.comment)}" onclick="window.t3lite.toggleAuflage('${a.id}', ${i})">
-                <span>${P.escapeHtml(x.comment)}</span>
-                <span class="badge">${P.escapeHtml(x.field)}</span>
-              </li>
-            `).join('')}
-          </ul>
-        </div>
-      ` : ''}
-    </div>
-  `;
-}
-
 // ── 7. REVIEWER QUEUE (when activeRole = GS-Prüfer/in) ───────────────────
 const QUEUE_PAGE_SIZE = 25;
 function renderQueue() {
@@ -1551,7 +2042,7 @@ function renderQueue() {
   // GS-Reviewer's landing page — no breadcrumb (same reasoning as the
   // LBO home: a single-item breadcrumb just restates the page title).
   shell({ activeNav: 'queue', breadcrumb: [], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
-  const queue = P.state.applications.filter(a => {
+  const queue = P.state.spaceRequests.filter(a => {
     // Reviewers see all VE applications that are awaiting review
     return ['submitted', 'in_review_gs', 'clarification'].includes(a.status)
         && a.pipelineVariant !== 'bypass';
@@ -1569,7 +2060,7 @@ function renderQueue() {
         <header class="page-header">
           <div>
             <h1 class="h1 page-header__title">Ihre Pendenzen <span class="page-header__count">(${queue.length})</span></h1>
-            <p class="page-header__sub">Anträge zur Prüfung in Ihrer Verwaltungseinheit</p>
+            <p class="page-header__sub">Vorgänge zur Prüfung in Ihrer Verwaltungseinheit</p>
           </div>
         </header>
         <div class="table-wrapper">
@@ -1689,7 +2180,7 @@ function wireQueueShortcuts() {
 // ── 8. REVIEWER SPLIT-PANE (§9.1 / §2.5) ─────────────────────────────────
 function renderReviewerSplit({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
-  const a = P.state.applications.find(x => x.id === id);
+  const a = P.state.spaceRequests.find(x => x.id === id);
   if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
   shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: P.t('nav.queue') }, { label: a.id }], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
 
@@ -1849,7 +2340,7 @@ function getScopedTenancies() {
 // + filter pills). Shared by the initial render and the live search preview
 // so a typed preview is pixel-identical to the committed render. Map view
 // returns the canvas; initPropertiesMap wires it up separately.
-function propertiesResultsHTML(view, filtered, page, query, category) {
+function propertiesResultsHTML(view, filtered, page, query, ort, sort) {
   if (filtered.length === 0) {
     return `
       <div class="empty-state empty-state--inset">
@@ -1877,31 +2368,38 @@ function propertiesResultsHTML(view, filtered, page, query, category) {
       totalItems: filtered.length,
       entitySingular: 'Liegenschaft',
       entityPlural: 'Liegenschaften',
-      hrefFor: (p) => buildPropertiesHash({ view, q: query, cat: category, page: p }),
+      hrefFor: (p) => buildPropertiesHash({ view, q: query, ort, sort, page: p }),
     })}`;
 }
 
 function renderProperties() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'properties', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.properties') }] });
+  shell({ activeNav: 'properties', breadcrumb: [{ label: P.t('nav.properties') }] });
   const ve = P.state.user.ve;
   const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
   const allTenancies = getScopedTenancies();
 
-  // URL state: ?view=gallery|list|map · ?q=… · ?cat=… · ?page=N
+  // URL state: ?view=gallery|list|map · ?q=… · ?ort=… · ?sort=… · ?page=N
   const params = parseHashQuery(location.hash);
   const view = ['gallery','list','map'].includes(params.view) ? params.view : 'gallery';
   const query = (params.q || '').toLowerCase().trim();
-  const category = (params.cat || '').trim();
+  const ort = (params.ort || '').trim();
+  const sort = ['name','area','stations'].includes(params.sort) ? params.sort : 'name';
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
 
-  // Available categories — derived from the actual data so the dropdown
-  // never shows a value with zero matches.
-  const categories = Array.from(new Set(allTenancies.map(t => t.portfolioCategory).filter(Boolean))).sort();
-  const filtered = filterTenancies(allTenancies, query, category);
+  // Filter options come from the data, so the panel never offers a value with
+  // zero matches.
+  const orte = Array.from(new Set(allTenancies.map(t => t.city).filter(Boolean))).sort((x, y) => x.localeCompare(y, 'de-CH'));
+  const filtered = sortTenancies(filterTenancies(allTenancies, query, ort), sort);
   const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
   const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
+  // The bar states what is on screen out of what matched — the same
+  // «N von M · Seite x von y» sentence the reference portal shows.
+  const shown = view === 'map' ? filtered.length : Math.min(perPage, Math.max(0, filtered.length - (safePage - 1) * perPage));
+  const countLabel = filtered.length === 0
+    ? P.t('props.noneFound')
+    : `${shown} ${P.t('props.ofTotal')} ${filtered.length}${totalPages > 1 ? ` · ${P.t('props.pageOf', { a: safePage, b: totalPages })}` : ''}`;
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -1928,11 +2426,11 @@ function renderProperties() {
             </div>
           </div>
         ` : `
-          ${propertiesToolbar({ view, query, category, categories })}
-          ${renderPropertiesFilterPills({ view, query, category })}
+          ${propertiesToolbar({ view, query, ort, orte, sort, count: countLabel })}
+          ${renderPropertiesFilterPills({ view, query, ort, sort })}
 
           <div id="propertiesResults">
-            ${propertiesResultsHTML(view, filtered, safePage, query, category)}
+            ${propertiesResultsHTML(view, filtered, safePage, query, ort, sort)}
           </div>
         `}
       </div>
@@ -1956,22 +2454,26 @@ function parseHashQuery(hash) {
   });
   return out;
 }
-function buildPropertiesHash({ view, q, cat, page }) {
+function buildPropertiesHash({ view, q, ort, sort, page }) {
   const parts = [];
   if (view)        parts.push('view=' + encodeURIComponent(view));
   if (q)           parts.push('q='    + encodeURIComponent(q));
-  if (cat)         parts.push('cat='  + encodeURIComponent(cat));
+  if (ort)         parts.push('ort='  + encodeURIComponent(ort));
+  if (sort && sort !== 'name') parts.push('sort=' + encodeURIComponent(sort));
   if (page && page > 1) parts.push('page=' + page);
   parts.push('lang=' + state.lang);   // keep the active language in shareable URLs
   return '#/properties?' + parts.join('&');
 }
 
-function filterTenancies(list, q, cat) {
+// Ort replaces the former PFM-Kategorie as the filter dimension: the category
+// was dropped from the data, and location is the axis a reader actually
+// narrows a federal portfolio by.
+function filterTenancies(list, q, ort) {
   let out = list;
-  if (cat) out = out.filter(t => t.portfolioCategory === cat);
+  if (ort) out = out.filter(t => t.city === ort);
   if (q) {
     out = out.filter(t => {
-      const hay = [t.buildingName, t.address, formatAssetKey(t.assetKey), t.egid, t.ve, t.dep, t.portfolioCategory]
+      const hay = [t.buildingName, t.address, formatAssetKey(t.assetKey), t.egid, t.ve, t.dep]
         .filter(Boolean).join(' ').toLowerCase();
       return hay.includes(q);
     });
@@ -1979,51 +2481,73 @@ function filterTenancies(list, q, cat) {
   return out;
 }
 
-function propertiesToolbar({ view, query, category, categories }) {
-  // Count + page-position now live in the pagination footer (CD Bund
-  // pagination shows "von X Seiten"), so the toolbar only carries the
-  // search field, a portfolio-category dropdown, and the view-toggle tabs.
-  const tab = (id, label, iconName) => `
-    <button class="view-toggle__btn ${view === id ? 'view-toggle__btn--active' : ''}"
-            type="button" data-view="${id}"
-            aria-pressed="${view === id}">
-      ${P.icon(iconName)}<span class="view-toggle__label">${label}</span>
-    </button>`;
-  return `
-    <div class="property-toolbar">
-      <div class="search-field property-toolbar__search">
-        ${P.icon('search', 'search-field__icon')}
-        <input type="search" id="propertiesSearch" class="input search-field__input property-toolbar__input"
-               aria-label="Liegenschaften und Orte suchen"
-               placeholder="${P.t('props.searchPlaceholder')}"
-               value="${P.escapeHtml(query)}" autocomplete="off"
-               role="combobox" aria-autocomplete="list"
-               aria-controls="propertiesSearchOptions" aria-expanded="false">
-        ${query ? `<button type="button" class="property-toolbar__clear" aria-label="Suche löschen" data-action="clear-search">${P.icon('x')}</button>` : ''}
-        <ul class="combobox__list" id="propertiesSearchOptions" role="listbox" aria-label="Vorschläge" hidden></ul>
-      </div>
-      <select class="input property-toolbar__select" id="propertiesCategory" aria-label="Portfolio-Kategorie">
-        <option value="">${P.t('props.allCategories')}</option>
-        ${categories.map(c => `<option value="${P.escapeHtml(c)}" ${category === c ? 'selected' : ''}>${P.escapeHtml(c)}</option>`).join('')}
-      </select>
-      <div class="view-toggle" role="group" aria-label="Ansicht wechseln">
-        ${tab('gallery', P.t('props.view.gallery'), 'grid')}
-        ${tab('list',    P.t('props.view.list'),    'list')}
-        ${tab('map',     P.t('props.view.map'),     'map')}
-      </div>
-    </div>
-  `;
+// Sort dimensions offered by the catalogue bar. Name is the default: a
+// portfolio is browsed by object, not by size.
+function sortTenancies(list, sort) {
+  const out = [...list];
+  if (sort === 'area')     return out.sort((x, y) => (y.hnf2 || 0) - (x.hnf2 || 0));
+  if (sort === 'stations') return out.sort((x, y) => (y.workstations || 0) - (x.workstations || 0));
+  return out.sort((x, y) => String(x.buildingName).localeCompare(String(y.buildingName), 'de-CH'));
 }
 
-function renderPropertiesFilterPills({ view, query, category }) {
+// The properties toolbar IS the shared catalogue bar (js/catalogue-bar.js):
+// search · count · sort · filter · view switch, in the CD order. The one
+// portal-specific part is the search field, which doubles as a swisstopo
+// place combobox — passed through as extra input attributes plus the listbox
+// slot, so the shared component keeps owning the row while this page keeps
+// owning its suggestions.
+function propertiesToolbar({ view, query, ort, orte, sort, count }) {
+  return catalogueBar({
+    id: 'props',
+    search: true,
+    q: query,
+    searchLabel: P.t('props.searchLabel'),
+    placeholder: P.t('props.searchPlaceholder'),
+    inputAttrs: 'role="combobox" aria-autocomplete="list" aria-controls="propertiesSearchOptions" aria-expanded="false"',
+    searchSlot: `<ul class="combobox__list" id="propertiesSearchOptions" role="listbox" aria-label="Vorschläge" hidden></ul>`,
+    count,
+    sort: {
+      value: sort,
+      options: [
+        ['name',     P.t('props.sortName')],
+        ['area',     P.t('props.sortArea')],
+        ['stations', P.t('props.sortStations')],
+      ],
+    },
+    filterLabel: P.t('props.filter'),
+    filterCount: ort ? 1 : 0,
+    panelOpen: !!ort,
+    panel: `
+      <fieldset class="catbar__fieldset">
+        <legend class="catbar__legend">${P.t('props.place')}</legend>
+        <div class="catbar__options">
+          ${orte.map(o => `
+            <label class="catbar__option">
+              <input type="radio" name="props-ort" value="${P.escapeHtml(o)}" ${ort === o ? 'checked' : ''}>
+              <span>${P.escapeHtml(o)}</span>
+            </label>`).join('')}
+          ${ort ? `<a class="link catbar__reset" href="${buildPropertiesHash({ view, q: query, sort, page: 1 })}">${P.t('props.allPlaces')}</a>` : ''}
+        </div>
+      </fieldset>`,
+    view,
+    views: [
+      ['gallery', P.t('props.view.gallery'), 'grid'],
+      ['list',    P.t('props.view.list'),    'list'],
+      ['map',     P.t('props.view.map'),     'map'],
+    ],
+  });
+}
+
+
+function renderPropertiesFilterPills({ view, query, ort, sort }) {
   const active = [];
-  if (query)    active.push({ key: 'q',   label: 'Suche',     value: query });
-  if (category) active.push({ key: 'cat', label: 'Kategorie', value: category });
+  if (query) active.push({ key: 'q',   label: P.t('props.search'), value: query });
+  if (ort)   active.push({ key: 'ort', label: P.t('props.place'),  value: ort });
   if (active.length === 0) return '';
   const hrefWithout = (key) => {
     const params = parseHashQuery(location.hash);
-    const next = { view, q: params.q || '', cat: params.cat || '', page: 1 };
-    next[key === 'q' ? 'q' : 'cat'] = '';
+    const next = { view, q: params.q || '', ort: params.ort || '', sort, page: 1 };
+    next[key] = '';
     return buildPropertiesHash(next);
   };
   return `
@@ -2038,29 +2562,40 @@ function renderPropertiesFilterPills({ view, query, category }) {
           </a>
         </span>
       `).join('')}
-      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, page: 1 })}">Alle Filter zurücksetzen</a>
+      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, sort, page: 1 })}">${P.t('props.resetFilters')}</a>
     </div>
   `;
 }
 
 function wirePropertiesToolbar(view) {
-  wirePropertiesSearchCombobox(view);
-  const catSelect = document.getElementById('propertiesCategory');
-  if (catSelect) catSelect.addEventListener('change', e => {
-    const params = parseHashQuery(location.hash);
-    location.hash = buildPropertiesHash({ view, q: params.q || '', cat: e.target.value, page: 1 });
+  // The shared bar owns search submit, sort and the view switch; it is given
+  // this route's query-parameter vocabulary through `hashFor`. Everything
+  // else here is properties-specific: the swisstopo combobox and the Ort
+  // radios in the filter panel.
+  wireCatalogueBar({
+    id: 'props',
+    hashFor: (patch) => {
+      const p = parseHashQuery(location.hash);
+      return buildPropertiesHash({
+        view: patch.view !== undefined ? patch.view : view,
+        q:    patch.q    !== undefined ? patch.q    : (p.q || ''),
+        ort:  patch.ort  !== undefined ? patch.ort  : (p.ort || ''),
+        sort: patch.sort !== undefined ? patch.sort : (p.sort || 'name'),
+        page: patch.page || 1,
+      });
+    },
   });
-  document.querySelectorAll('.view-toggle__btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const nextView = btn.getAttribute('data-view');
-      const params = parseHashQuery(location.hash);
-      location.hash = buildPropertiesHash({ view: nextView, q: params.q || '', cat: params.cat || '', page: 1 });
+  wirePropertiesSearchCombobox(view);
+  document.querySelectorAll('input[name="props-ort"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const p = parseHashQuery(location.hash);
+      location.hash = buildPropertiesHash({ view, q: p.q || '', ort: radio.value, sort: p.sort || 'name', page: 1 });
     });
   });
   const clearBtn = document.querySelector('[data-action="clear-search"]');
   if (clearBtn) clearBtn.addEventListener('click', () => {
-    const params = parseHashQuery(location.hash);
-    location.hash = buildPropertiesHash({ view, q: '', cat: params.cat || '', page: 1 });
+    const p = parseHashQuery(location.hash);
+    location.hash = buildPropertiesHash({ view, q: '', ort: p.ort || '', sort: p.sort || 'name', page: 1 });
   });
   // CD Bund pagination input — generic helper picks up the hrefFor
   // closure stashed by renderPagination.
@@ -2073,12 +2608,12 @@ function wirePropertiesToolbar(view) {
 // toggles property-marker visibility so the basemap isn't torn down per
 // keystroke. The hard filter (URL + pills) only commits on Enter / pick.
 function previewPropertiesFilter(view) {
-  const input = document.getElementById('propertiesSearch');
+  const input = document.getElementById('props-q');
   if (!input) return;
   const queryRaw = input.value.trim();
   const query = queryRaw.toLowerCase();
-  const category = document.getElementById('propertiesCategory')?.value || '';
-  const filtered = filterTenancies(getScopedTenancies(), query, category);
+  const ort = parseHashQuery(location.hash).ort || '';
+  const filtered = filterTenancies(getScopedTenancies(), query, ort);
   if (view === 'map') {
     const ids = new Set(filtered.map(t => t.id));
     _propertiesMarkers.forEach(m => { m.el.style.display = ids.has(m.id) ? '' : 'none'; });
@@ -2086,7 +2621,7 @@ function previewPropertiesFilter(view) {
   }
   const results = document.getElementById('propertiesResults');
   if (results) {
-    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, category);
+    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, ort, parseHashQuery(location.hash).sort || 'name');
     wirePaginationInput();
   }
 }
@@ -2134,7 +2669,7 @@ async function fetchSwisstopo(query) {
 // soft live-filter (previewPropertiesFilter) + a grouped suggestion dropdown
 // (DB Liegenschaften → detail view, swisstopo Orte → map locator pin).
 function wirePropertiesSearchCombobox(view) {
-  const input = document.getElementById('propertiesSearch');
+  const input = document.getElementById('props-q');
   const list = document.getElementById('propertiesSearchOptions');
   if (!input || !list) return;
   let dbItems = [], locItems = [], remotePending = false, activeIndex = -1;
@@ -2177,8 +2712,8 @@ function wirePropertiesSearchCombobox(view) {
 
   function refreshDb() {
     const q = input.value.trim().toLowerCase();
-    const cat = document.getElementById('propertiesCategory')?.value || '';
-    dbItems = q ? filterTenancies(getScopedTenancies(), q, cat).slice(0, 6) : [];
+    const ort = parseHashQuery(location.hash).ort || '';
+    dbItems = q ? filterTenancies(getScopedTenancies(), q, ort).slice(0, 6) : [];
   }
   async function refreshRemote() {
     const q = input.value.trim();
@@ -2205,13 +2740,13 @@ function wirePropertiesSearchCombobox(view) {
     } else {
       // Switch to map view, then drop the pin once the map has loaded.
       _pendingLocator = { lng, lat, label };
-      location.hash = buildPropertiesHash({ view: 'map', cat: document.getElementById('propertiesCategory')?.value || '' });
+      location.hash = buildPropertiesHash({ view: 'map', ort: parseHashQuery(location.hash).ort || '' });
     }
   }
 
   function commit() {
     close();
-    location.hash = buildPropertiesHash({ view, q: input.value.trim(), cat: document.getElementById('propertiesCategory')?.value || '', page: 1 });
+    location.hash = buildPropertiesHash({ view, q: input.value.trim(), ort: parseHashQuery(location.hash).ort || '', page: 1 });
   }
 
   function moveActive(delta) {
@@ -2294,7 +2829,6 @@ function renderListView(items) {
         <thead>
           <tr>
             <th scope="col">SAP-WE</th>
-            <th scope="col">EGID</th>
             <th scope="col">Objekt</th>
             <th scope="col">Adresse</th>
             <th scope="col" class="numeric">HNF2</th>
@@ -2308,7 +2842,6 @@ function renderListView(items) {
                 onkeydown="if(event.key==='Enter')location.hash='#/properties/${t.id}'"
                 aria-label="Mietverhältnis ${P.escapeHtml(t.buildingName)} öffnen">
               <td><code>${formatAssetKey(t.assetKey)}</code></td>
-              <td>${t.egid}</td>
               <td><strong>${P.escapeHtml(t.buildingName)}</strong></td>
               <td>${P.escapeHtml(t.address)}</td>
               <td class="numeric">${t.hnf2}</td>
@@ -2626,7 +3159,7 @@ function propertyCard(t, index = 99) {
         ${issuesBadge}
       </div>
       <div class="card--property__body">
-        <p class="card--property__sap">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
+        <p class="card--property__sap">${formatAssetKey(t.assetKey)}</p>
         <h2 class="card--property__title">${P.escapeHtml(t.buildingName)}</h2>
         <p class="card--property__address">${P.escapeHtml(t.address)} · ${P.escapeHtml(t.floorLabel)}</p>
         <div class="card--property__meta">
@@ -2634,7 +3167,6 @@ function propertyCard(t, index = 99) {
           <span>${t.workstations} AP</span>
           <span>${P.formatChf(t.yearlyCost)} / Jahr</span>
         </div>
-        <span class="card--property__category">${P.escapeHtml(t.portfolioCategory)}</span>
       </div>
     </a>
   `;
@@ -2656,13 +3188,6 @@ function staffLink(name) {
   return `<a class="link link--external" href="${STAATSKALENDER_ORG_URL}" target="_blank" rel="noopener">${P.escapeHtml(name || '')}</a>`;
 }
 
-const PROPERTY_DOC_GROUPS = [
-  { titleKey: 'prop.docGroup.lease',   types: ['Lease', 'LegalBasis'],            defaultOpen: true  },
-  { titleKey: 'prop.docGroup.plans',   types: ['FloorPlan'],                       defaultOpen: false },
-  { titleKey: 'prop.docGroup.safety',  types: ['Certificate', 'Manual', 'Permit'], defaultOpen: false },
-  { titleKey: 'prop.docGroup.history', types: ['Other', 'WiBe', 'Attachment'],     defaultOpen: false },
-];
-
 // ── PROPERTY IMAGE GALLERY ────────────────────────────────────────────────
 // Resolves a gallery image source. Static building photos go through the
 // shared `safeImageUrl` allow-list (assets/ or http[s]); session uploads are
@@ -2680,11 +3205,11 @@ function galleryImgSrc(s) {
 // lightbox; degrades to a disabled button when the property has no photo.
 function propertyHeaderMedia(t) {
   if (!Array.isArray(t.gallery)) {
-    // Seeded once from the single building photo. Uploads/deletes via the
+    // Seeded from the building's photo array. Uploads/deletes via the
     // lightbox mutate this array, which lives on the tenancy object so it
     // survives route re-renders within the session (not persisted to disk,
     // like the rest of the prototype's mutations).
-    t.gallery = t.image ? [{ src: t.image, name: t.buildingName + ' — Aussenansicht' }] : [];
+    t.gallery = (t.images || []).map((src, i) => ({ src, name: t.buildingName + (i === 0 ? ' — Aussenansicht' : ' — Aufnahme ' + (i + 1)) }));
   }
   const count = t.gallery.length;
   const src = count ? galleryImgSrc(t.gallery[0].src) : '';
@@ -2700,9 +3225,17 @@ function propertyHeaderMedia(t) {
     </button>`;
 }
 
+// Every mosaic tile is its own gallery trigger and opens AT its own image —
+// clicking the third photo should show the third photo, not restart at the
+// first. The floor page's single thumbnail carries no index and falls back
+// to 0, which is the same behaviour it had before.
 function wirePropertyGallery(t) {
-  const btn = document.querySelector('[data-gallery-open]');
-  if (btn) btn.addEventListener('click', () => openImageGallery(t));
+  document.querySelectorAll('[data-gallery-open]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.getAttribute('data-gallery-index') || '0', 10) || 0;
+      openImageGallery(t, i);
+    });
+  });
 }
 
 // Dark full-screen image lightbox — styled to match the document viewer
@@ -2765,6 +3298,18 @@ function openImageGallery(t, startIndex = 0) {
   // upload/delete, so closing the lightbox lands on a consistent header
   // without a full route re-render.
   function syncHeader() {
+    // Property detail: the mosaic's TILE COUNT changes with the gallery, so
+    // patching one thumbnail is not enough — re-render the tiles (and only
+    // the tiles; the map column beside them keeps its live MapLibre
+    // instance) and re-bind their triggers.
+    const hero = document.querySelector('.property-hero');
+    if (hero) {
+      const mosaic = hero.querySelector('.property-hero__mosaic');
+      if (mosaic) mosaic.innerHTML = propertyHeroTiles(t);
+      wirePropertyGallery(t);
+      return;
+    }
+    // Floor page: a single thumbnail with a count chip.
     const btn = document.querySelector('[data-gallery-open]');
     if (!btn) return;
     const img = btn.querySelector('.property-header__image');
@@ -2891,12 +3436,17 @@ async function renderPropertyDetail({ id }) {
   if (!t) { document.getElementById('page-body').innerHTML = `<div class="container section"><p>${P.t('prop.notFound')}</p></div>`; return; }
   await P.loadSpatialData('data/');
   shell({ activeNav: 'properties', breadcrumb: [
-    { href: '#/home', label: P.t('nav.start') },
     { href: '#/properties', label: P.t('nav.properties') },
     { label: t.buildingName }
   ]});
 
-  const related = P.state.applications.filter(a => a.buildingId === t.buildingId);
+  // Every Vorgang that concerns this building, not just its Bedarfsmeldungen:
+  // a Schadensmeldung or an Umzug on this property belongs in the same list,
+  // and the process envelope makes that one query instead of five.
+  const related = (P.state.processInstances || [])
+    .filter(i => i.buildingId === t.buildingId)
+    .map(resolveCase)
+    .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
   const today = new Date();
   const leaseEnd = new Date(t.leaseEnd);
   const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
@@ -2936,179 +3486,39 @@ async function renderPropertyDetail({ id }) {
     )
   );
 
-  const docGroupHtml = PROPERTY_DOC_GROUPS
-    .map(g => {
-      const items = linkedDocs
-        .filter(d => g.types.includes(d.type))
-        .sort((a, b) => (b.issuedAt || '').localeCompare(a.issuedAt || ''));
-      if (items.length === 0) return '';
-      const visible = items.slice(0, 6);
-      const overflow = items.length - visible.length;
-      const adapted = visible.map(d => ({
-        id:       d.id,
-        title:    d.title,
-        subtitle: P.t('doctype.' + d.type),
-        format:   d.format,
-        size:     d.size,
-        languages: Array.isArray(d.languages) ? d.languages.map(l => l.toUpperCase()).join(' · ') : d.languages,
-        date:     d.issuedAt ? P.formatDate(d.issuedAt) : undefined,
-      }));
-      return `
-        <details class="doc-group" ${g.defaultOpen ? 'open' : ''}>
-          <summary class="doc-group__summary">
-            <span class="doc-group__title">${P.escapeHtml(P.t(g.titleKey))}</span>
-            <span class="doc-group__count">${items.length}</span>
-          </summary>
-          <div class="doc-group__body">
-            ${downloadList(adapted)}
-            ${overflow > 0 ? `<p class="doc-group__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">… ${P.t('prop.docsMore', { n: overflow })}</a></p>` : ''}
-          </div>
-        </details>
-      `;
-    })
-    .join('');
+  // Tab state lives in the URL (`?tab=`) so a tab is linkable and the back
+  // button steps through them — same contract as the Vorgang detail view.
+  // Short labels on the tabs, descriptive headings inside the panels — a tab
+  // strip has to stay scannable at a glance, and «Dokumente zu dieser
+  // Liegenschaft (11)» as a tab pushes the strip into a scroll on a laptop.
+  const PROP_TABS = [
+    { key: 'uebersicht', label: P.t('prop.tabOverview') },
+    { key: 'vertraege',  label: `${P.t('prop.tabContracts')} (${(P.state.tenancies || []).filter(x => x.buildingId === t.buildingId).length})` },
+    { key: 'geschosse',  label: `${P.t('prop.tabFloors')} (${floors.length})` },
+    { key: 'dokumente',  label: `${P.t('prop.tabDocuments')} (${linkedDocs.length})` },
+    { key: 'vorgaenge',  label: `${P.t('prop.tabCases')} (${related.length})` },
+  ];
+  const requested = parseHashQuery(location.hash).tab;
+  const activeTab = PROP_TABS.some(x => x.key === requested) ? requested : 'uebersicht';
 
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/properties', backLabel: P.t('nav.properties') })}
     <section class="section section--py-tight">
       <div class="container">
         <header class="property-header">
-          <div class="property-header__body">
-            <p class="property-header__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
-            <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
-            <p class="property-header__address">${P.escapeHtml(t.address)}</p>
-            <p class="property-header__chips">
-              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">${P.t('prop.restTerm', { n: monthsToEnd })}</span>
-            </p>
-          </div>
-          ${propertyHeaderMedia(t)}
+          <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
+          <p class="property-header__address">
+            ${P.escapeHtml(t.address)}
+          </p>
         </header>
-      </div>
-    </section>
 
-    <section class="section section--alt">
-      <div class="container">
-        <div class="property-layout">
-          <div>
-            <section class="property-section">
-              <h2 class="h2 section-heading">${P.t('prop.contractSection')}</h2>
+        ${propertyHeroMosaic(t)}
 
-              <div class="property-stats">
-                <div class="property-stats__item">
-                  <span class="property-stats__label">HNF2</span>
-                  <span class="property-stats__value">${t.hnf2.toLocaleString('de-CH')}<small> m²</small></span>
-                </div>
-                <div class="property-stats__item">
-                  <span class="property-stats__label">GF</span>
-                  <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
-                </div>
-                <div class="property-stats__item">
-                  <span class="property-stats__label">${P.t('prop.workstations')}</span>
-                  <span class="property-stats__value">${t.workstations}</span>
-                </div>
-                <div class="property-stats__item">
-                  <span class="property-stats__label">${P.t('prop.yearlyCost')}</span>
-                  <span class="property-stats__value">${P.formatChf(t.yearlyCost)}</span>
-                </div>
-              </div>
-
-              <table class="table property-facts">
-                <tr><th>${P.t('prop.tenantVe')}</th><td>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</td></tr>
-                <tr><th>${P.t('prop.pfmCategory')}</th><td>${P.escapeHtml(t.portfolioCategory)}</td></tr>
-                <tr><th>${P.t('prop.leaseType')}</th><td>${t.leaseAuto ? `<span class="badge badge--success">${P.t('prop.autoRenew')}</span>` : `<span class="badge badge--warning">${P.t('prop.fixedTerm')}</span>`}</td></tr>
-                <tr><th>${P.t('prop.term')}</th><td>${P.formatDate(t.leaseStart)} – ${P.formatDate(t.leaseEnd)}</td></tr>
-              </table>
-            </section>
-
-            <section class="property-section">
-              <h2 class="h2 section-heading">${P.t('prop.floorsSection')} (${floors.length})</h2>
-              ${floors.length === 0
-                ? `<p class="text-secondary">${P.t('prop.noFloors')}</p>`
-                : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable floor-list" aria-label="Geschosse mit interaktivem Grundriss">
-                    <thead>
-                      <tr>
-                        <th scope="col">${P.t('prop.floor')}</th>
-                        <th scope="col" class="floor-list__num">${P.t('prop.rooms')}</th>
-                        <th scope="col" class="floor-list__num">HNF2</th>
-                        <th scope="col" class="floor-list__num">${P.t('prop.workstations')}</th>
-                        <th scope="col" class="floor-list__num">${P.t('prop.ofWhich')} ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
-                        <th scope="col" aria-hidden="true" class="floor-list__chevron-th"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${floorKpis.map(f => `
-                        <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
-                          <td>
-                            <a href="#/properties/${t.id}/floors/${f.slug}"><strong>${P.escapeHtml(f.name)}</strong></a>
-                            ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
-                          </td>
-                          <td class="floor-list__num">${f.roomCount}</td>
-                          <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} m²</td>
-                          <td class="floor-list__num">${f.workstations}</td>
-                          <td class="floor-list__num">${f.myVeCount}</td>
-                          <td class="floor-list__chevron">${P.icon('chevronRight')}</td>
-                        </tr>
-                      `).join('')}
-                    </tbody>
-                  </table></div>`}
-            </section>
-
-            <section class="property-section">
-              <h2 class="h2 section-heading">${P.t('prop.appsSection')} (${related.length})</h2>
-              ${related.length === 0
-                ? `<p class="text-secondary">${P.t('prop.noApps')}</p>`
-                : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.appsSection')}">
-                     <thead><tr><th scope="col">${P.t('prop.application')}</th><th scope="col">${P.t('prop.type')}</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th></tr></thead>
-                     <tbody>
-                       ${related.map(a => `<tr onclick="location.hash='#/inbox/${a.id}';"><td><a href="#/inbox/${a.id}"><strong>${a.id}</strong></a></td><td>${a.type}</td><td>${P.formatDate(a.submittedAt)}</td><td>${P.statusBadge(a.status)}</td></tr>`).join('')}
-                     </tbody>
-                   </table></div>`}
-            </section>
-
-            <section class="property-section">
-              <h2 class="h2 section-heading">${P.t('prop.docsSection')} (${linkedDocs.length})</h2>
-              ${linkedDocs.length === 0
-                ? `<p class="text-secondary">${P.t('prop.noDocs')}</p>`
-                : `<div class="doc-groups">${docGroupHtml}</div>`}
-            </section>
-
-            <section class="property-section">
-              <h2 class="h2 section-heading">${P.t('prop.location')}</h2>
-              <div id="propertyLocationMap" class="property-location-map map-surface" aria-label="${P.t('prop.location')}">
-                ${renderMapLoading(P.t('prop.mapLoading'))}
-              </div>
-              <p class="property-location-meta">${P.escapeHtml(t.address)}${typeof t.lat === 'number' && typeof t.lng === 'number' ? ` · ${t.lat.toFixed(4)}°N, ${t.lng.toFixed(4)}°E` : ''}</p>
-            </section>
-          </div>
-
-          <aside class="property-aside">
-            <div class="card property-aside__card">
-              <h3 class="card__title">${P.t('prop.actions')}</h3>
-              <div class="property-aside__actions">
-                <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.icon('tool')}${P.t('prop.actionRepair')}</a>
-                <a href="#/wizard/1" class="btn btn--bare">${P.icon('document')}${P.t('prop.actionRequest')}</a>
-                <a href="#/moves?building=${t.buildingId}" class="btn btn--bare">${P.icon('truck')}${P.t('prop.actionMove')}</a>
-                <a href="#/cleaning?building=${t.buildingId}" class="btn btn--bare">${P.icon('sparkles')}${P.t('prop.actionCleaning')}</a>
-              </div>
-            </div>
-            <div class="card">
-              <h3 class="card__title">${P.t('prop.contactsTitle')}</h3>
-              <dl class="contact-dl">
-                <div class="contact-dl__row">
-                  <dt>${P.t('prop.contactPfm')}</dt>
-                  <dd>${staffLink(t.contacts.pfm)}</dd>
-                </div>
-                <div class="contact-dl__row">
-                  <dt>${P.t('prop.contactIm')}</dt>
-                  <dd>${staffLink(t.contacts.im)}</dd>
-                </div>
-                <div class="contact-dl__row">
-                  <dt>${P.t('prop.contactFlm')}</dt>
-                  <dd>${staffLink(t.contacts.flm)}</dd>
-                </div>
-              </dl>
-            </div>
-          </aside>
+        <div class="tabs property-tabs" role="tablist" aria-label="${P.t('prop.tabsLabel')}">
+          ${PROP_TABS.map(x => tabBtn(x.key, x.label, activeTab)).join('')}
+        </div>
+        <div class="property-tabpanel" id="detailTab" role="tabpanel" aria-labelledby="tab-${activeTab}" tabindex="0">
+          ${renderPropertyTab(t, activeTab, { floorKpis, linkedDocs, related, restWarn, monthsToEnd, userVe, userDep })}
         </div>
       </div>
     </section>
@@ -3116,7 +3526,379 @@ async function renderPropertyDetail({ id }) {
 
   wirePropertyGallery(t);
   initPropertyDetailMap(t);
+  wirePropertyTabs(t, { floorKpis, linkedDocs, related, restWarn, monthsToEnd, userVe, userDep });
 }
+
+// ── PROPERTY HERO ────────────────────────────────────────────────────────
+// Image mosaic + location map, after the sister portal's property header:
+// one large image, up to four side tiles, the map beside them. Every tile
+// opens the existing fullscreen gallery, and the last real side tile carries
+// the «Alle Bilder anzeigen» overlay.
+//
+// SOLO VARIANT: each property ships exactly one photo today, so the default
+// rendering would be one image beside four «Kein Bild» boxes — a header that
+// looks broken rather than sparse. With no side images the mosaic drops the
+// side column entirely and the main image takes the width. Placeholders only
+// appear once there IS a second image (uploads through the gallery add them),
+// where they read as free slots rather than missing content.
+const HERO_SIDE_SLOTS = 4;
+
+// The tiles alone — re-rendered on their own after a gallery upload or
+// delete, so the mosaic reflects the new image count without tearing down
+// and re-initialising the MapLibre instance beside it.
+
+// The tiles alone. Re-rendered on their own after a gallery upload or delete
+// so the mosaic reflects the new image count WITHOUT tearing down and
+// re-initialising the MapLibre instance in the column beside it.
+function propertyHeroTiles(t) {
+  if (!Array.isArray(t.gallery)) {
+    // Seeded from the building's photo array. Uploads/deletes via the
+    // lightbox mutate this array, which lives on the tenancy object so it
+    // survives route re-renders within the session (not persisted to disk,
+    // like the rest of the prototype's mutations).
+    t.gallery = (t.images || []).map((src, i) => ({ src, name: t.buildingName + (i === 0 ? ' — Aussenansicht' : ' — Aufnahme ' + (i + 1)) }));
+  }
+  const items = t.gallery;
+  const n = items.length;
+
+  const cell = (item, index, cls, overlay = '') => `
+    <button type="button" class="property-hero__cell ${cls}" data-gallery-open data-gallery-index="${index}"
+            aria-haspopup="dialog"
+            aria-label="${P.escapeHtml(item.name || t.buildingName)} — Bild ${index + 1} von ${n} in der Galerie öffnen">
+      <img class="property-hero__photo" src="${galleryImgSrc(item.src)}" alt="" loading="lazy" decoding="async">
+      ${overlay}
+    </button>`;
+
+  // CD `image__not-available` (designsystem css/components/
+  // image-not-available.postcss + ImageNotAvailable.vue): centred glyph over
+  // a caption. An empty slot is deliberately VISIBLE rather than collapsed —
+  // a property with one photo should look like a property whose gallery is
+  // waiting to be filled, and every slot is a live upload target.
+  const empty = () => `
+    <div class="property-hero__cell property-hero__cell--empty">
+      <div class="image__not-available">
+        ${P.icon('image')}
+        <p class="image__not-available-text">${P.t('prop.noImage')}</p>
+      </div>
+    </div>`;
+
+  const side = items.slice(1, 1 + HERO_SIDE_SLOTS);
+  const hidden = n - (1 + side.length);
+  // The overlay goes on the last REAL tile — never on a placeholder, which
+  // would offer to open images that do not exist.
+  const sideTiles = side.map((item, i) => {
+    const isLast = i === side.length - 1;
+    const overlay = isLast
+      ? `<span class="property-hero__more">
+           ${hidden > 0 ? `<span class="property-hero__more-num">+${hidden}</span>` : ''}
+           <span class="property-hero__more-label">${P.t('prop.showAllImages')}</span>
+         </span>`
+      : '';
+    return cell(item, i + 1, 'property-hero__cell--side', overlay);
+  }).join('') + empty().repeat(Math.max(0, HERO_SIDE_SLOTS - side.length));
+
+  const mainCell = n
+    ? cell(items[0], 0, 'property-hero__cell--main', `
+        <span class="property-hero__badge" data-gallery-badge>
+          ${P.icon('image')}
+          <span class="property-hero__badge-label">${n}&nbsp;${n === 1 ? P.t('prop.image') : P.t('prop.images')}</span>
+        </span>`)
+    : `<div class="property-hero__cell property-hero__cell--main property-hero__cell--empty">
+         <div class="image__not-available">
+           ${P.icon('image')}
+           <p class="image__not-available-text">${P.t('prop.noImage')}</p>
+         </div>
+       </div>`;
+
+  // The side column is ALWAYS rendered, placeholders included. An earlier
+  // version collapsed it whenever a property had a single photo, on the
+  // theory that four empty boxes look broken — but hiding the slots also
+  // hides the invitation to fill them, and every tile here is an upload
+  // target. Empty slots stay, and they read as free slots.
+  return mainCell + `<div class="property-hero__side">${sideTiles}</div>`;
+}
+
+function propertyHeroMosaic(t) {
+  const tiles = propertyHeroTiles(t);   // also seeds t.gallery on first render
+
+  // Exit to Google Maps above the map. The portal map places the property in
+  // its federal context; directions and street view belong to the tool already
+  // on the reader's phone. The Maps `search` endpoint drops a real marker at
+  // the coordinate — `@lat,lng,zoom` only moves the camera.
+  const hasGeo = typeof t.lat === 'number' && typeof t.lng === 'number';
+  const mapsUrl = hasGeo
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(t.lat + ',' + t.lng)}`
+    : '';
+
+  return `
+    <div class="property-hero">
+      <div class="property-hero__mosaic">
+        ${tiles}
+      </div>
+      <div class="property-hero__mapcol">
+        ${hasGeo ? `<p class="property-hero__maplink">
+          <a class="link link--external" href="${mapsUrl}" target="_blank" rel="external noopener noreferrer">${P.t('prop.googleMaps')}</a>
+        </p>` : ''}
+        <div id="propertyLocationMap" class="property-hero__map map-surface" aria-label="${P.t('prop.location')}">
+          ${renderMapLoading(P.t('prop.mapLoading'))}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── PROPERTY TAB PANELS ──────────────────────────────────────────────────
+function renderPropertyTab(t, tab, ctx) {
+  if (tab === 'vertraege')  return propertyContractPanel(t);
+  if (tab === 'geschosse')  return propertyFloorsPanel(t, ctx);
+  if (tab === 'dokumente')  return propertyDocumentsPanel(t, ctx);
+  if (tab === 'vorgaenge')  return propertyCasesPanel(t, ctx);
+  return propertyOverviewPanel(t);
+}
+
+// Aside: actions and contacts on the grey surface. Rendered by the ÜBERSICHT
+// panel only — the same rule the sister portal follows. The other tabs are
+// full-width tables, and a 320px column of unrelated links beside them would
+// squeeze the data without adding anything to it.
+function propertyAside(t) {
+  return `
+    <aside class="property-aside" aria-label="${P.t('prop.actions')}">
+     <div class="property-aside__inner">
+      <div class="property-aside__card">
+        <h2 class="property-aside__title">${P.t('prop.actions')}</h2>
+        <div class="property-aside__actions">
+          <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.t('prop.actionRepair')}</a>
+          <a href="#/wizard/1" class="btn btn--bare">${P.t('prop.actionRequest')}</a>
+          <a href="#/moves?building=${t.buildingId}" class="btn btn--bare">${P.t('prop.actionMove')}</a>
+          <a href="#/cleaning?building=${t.buildingId}" class="btn btn--bare">${P.t('prop.actionCleaning')}</a>
+        </div>
+      </div>
+      <div class="property-aside__card">
+        <h2 class="property-aside__title">${P.t('prop.contactsTitle')}</h2>
+        <dl class="contact-dl">
+          <div class="contact-dl__row">
+            <dt>${P.t('prop.contactPfm')}</dt><dd>${staffLink(t.contacts.pfm)}</dd>
+          </div>
+          <div class="contact-dl__row">
+            <dt>${P.t('prop.contactIm')}</dt><dd>${staffLink(t.contacts.im)}</dd>
+          </div>
+          <div class="contact-dl__row">
+            <dt>${P.t('prop.contactFlm')}</dt><dd>${staffLink(t.contacts.flm)}</dd>
+          </div>
+        </dl>
+      </div>
+     </div>
+    </aside>`;
+}
+
+function propertyOverviewPanel(t) {
+  return `
+    <div class="property-layout">
+      <div>
+        <!-- No «Eckdaten» heading: the tab is already labelled Übersicht and
+             the panel opens with the figures themselves, so the heading only
+             restated its own container. -->
+        <div class="property-stats">
+          <div class="property-stats__item">
+            <span class="property-stats__label">HNF2</span>
+            <span class="property-stats__value">${t.hnf2.toLocaleString('de-CH')}<small> m²</small></span>
+          </div>
+          <div class="property-stats__item">
+            <span class="property-stats__label">GF</span>
+            <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
+          </div>
+          <div class="property-stats__item">
+            <span class="property-stats__label">${P.t('prop.workstations')}</span>
+            <span class="property-stats__value">${t.workstations}</span>
+          </div>
+          <div class="property-stats__item">
+            <span class="property-stats__label">${P.t('prop.yearlyCost')}</span>
+            <span class="property-stats__value">${P.formatChf(t.yearlyCost)}</span>
+          </div>
+        </div>
+
+        <dl class="detail-list property-facts-list">
+          <dt>${P.t('prop.assetKeyLabel')}</dt><dd>${formatAssetKey(t.assetKey)}</dd>
+          <dt>EGID</dt><dd>${P.escapeHtml(String(t.egid))}</dd>
+          <dt>${P.t('prop.addressLabel')}</dt><dd>${P.escapeHtml(t.address)}</dd>
+          <dt>${P.t('prop.tenantVe')}</dt><dd>${P.escapeHtml(t.ve)}${t.dep && t.dep !== t.ve ? ' / ' + P.escapeHtml(t.dep) : ''}</dd>
+          <dt>${P.t('prop.floorLabel')}</dt><dd>${P.escapeHtml(t.floorLabel || '—')}</dd>
+        </dl>
+
+      </div>
+      ${propertyAside(t)}
+    </div>`;
+}
+
+// Vorgänge concerning this property — its own tab rather than a block at the
+// foot of Übersicht, where it competed with the key figures for the same
+// glance. Same row markup as «Meine Vorgänge», so a case looks identical
+// wherever it is listed.
+function propertyCasesPanel(t, { related }) {
+  return `
+    <div>
+      ${related.length === 0
+        ? `<p class="text-secondary">${P.t('prop.noCases')}</p>`
+        : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.casesSection')}">
+             <thead>
+               <tr>
+                 <th scope="col">Vorgang</th><th scope="col">Objekt</th><th scope="col">Prozess</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th>
+               </tr>
+             </thead>
+             <tbody>${related.map(caseRowHtml).join('')}</tbody>
+           </table></div>`}
+    </div>`;
+}
+
+// A contract LIST, one row per Mietverhältnis — a building can carry several
+// (different administrative units, or a lease succeeded by its renewal), so
+// this is a table that grows rather than a field/value sheet describing the
+// single tenancy the reader arrived through. Rows are scoped by building, so
+// a second tenancy in the data appears here with no code change.
+function propertyContractPanel(t) {
+  const contracts = (P.state.tenancies || []).filter(x => x.buildingId === t.buildingId);
+  const today = new Date();
+  return `
+    <div>
+      <div class="table-wrapper">
+        <table class="table table--zebra" aria-label="${P.t('prop.contractSection')}">
+          <thead>
+            <tr>
+              <th scope="col">${P.t('prop.contractRef')}</th>
+              <th scope="col">${P.t('prop.tenantVe')}</th>
+              <th scope="col">${P.t('prop.term')}</th>
+              <th scope="col">${P.t('prop.leaseType')}</th>
+              <th scope="col">HNF2</th>
+              <th scope="col">${P.t('prop.yearlyCost')}</th>
+              <th scope="col">${P.t('prop.restTermShort')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${contracts.map(c => {
+              const months = Math.max(0, Math.round((new Date(c.leaseEnd) - today) / (30 * 86400000)));
+              return `
+              <tr${c.id === t.id ? ' class="table__row--current"' : ''}>
+                <td><strong>${P.escapeHtml(c.id)}</strong></td>
+                <td>${P.escapeHtml(c.ve)}${c.dep && c.dep !== c.ve ? ' / ' + P.escapeHtml(c.dep) : ''}</td>
+                <td>${P.formatDate(c.leaseStart)} – ${P.formatDate(c.leaseEnd)}</td>
+                <td>${c.leaseAuto ? `<span class="badge badge--success">${P.t('prop.autoRenew')}</span>` : `<span class="badge badge--warning">${P.t('prop.fixedTerm')}</span>`}</td>
+                <td>${c.hnf2.toLocaleString('de-CH')} m²</td>
+                <td>${P.formatChf(c.yearlyCost)}</td>
+                <td>${P.t('prop.restTerm', { n: months })}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function propertyFloorsPanel(t, { floorKpis, userVe, userDep }) {
+  return `
+    <div>
+        ${floorKpis.length === 0
+          ? `<p class="text-secondary">${P.t('prop.noFloors')}</p>`
+          : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable floor-list" aria-label="${P.t('prop.floorsSection')}">
+              <thead>
+                <tr>
+                  <th scope="col">${P.t('prop.floor')}</th>
+                  <th scope="col" class="floor-list__num">${P.t('prop.rooms')}</th>
+                  <th scope="col" class="floor-list__num">HNF2</th>
+                  <th scope="col" class="floor-list__num">${P.t('prop.workstations')}</th>
+                  <th scope="col" class="floor-list__num">${P.t('prop.ofWhich')} ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
+                  <th scope="col" aria-hidden="true" class="floor-list__chevron-th"></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${floorKpis.map(f => `
+                  <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
+                    <td>
+                      <a href="#/properties/${t.id}/floors/${f.slug}"><strong>${P.escapeHtml(f.name)}</strong></a>
+                      ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
+                    </td>
+                    <td class="floor-list__num">${f.roomCount}</td>
+                    <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} m²</td>
+                    <td class="floor-list__num">${f.workstations}</td>
+                    <td class="floor-list__num">${f.myVeCount}</td>
+                    <td class="floor-list__chevron">${P.icon('chevronRight')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table></div>`}
+    </div>`;
+}
+
+// Documents as a CD table rather than the previous <details> accordion, so
+// they read the same way as Geschosse — one scannable list with a row per
+// record instead of collapsed groups the reader has to open to count.
+function propertyDocumentsPanel(t, { linkedDocs }) {
+  const docs = [...linkedDocs].sort((a, b) => (b.issuedAt || '').localeCompare(a.issuedAt || ''));
+  return `
+    <div>
+        ${docs.length === 0
+          ? `<p class="text-secondary">${P.t('prop.noDocs')}</p>`
+          : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.docsSection')}">
+              <thead>
+                <tr>
+                  <th scope="col">${P.t('prop.docTitle')}</th>
+                  <th scope="col">${P.t('prop.type')}</th>
+                  <th scope="col">${P.t('prop.format')}</th>
+                  <th scope="col">${P.t('prop.date')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${docs.map(d => `
+                  <tr onclick="window.t3lite.openDocViewer('${P.escapeJs(d.id)}');">
+                    <td><a href="#/downloads?doc=${encodeURIComponent(d.id)}"
+                           onclick="event.preventDefault(); event.stopPropagation(); window.t3lite.openDocViewer('${P.escapeJs(d.id)}');"><strong>${P.escapeHtml(d.title)}</strong></a></td>
+                    <td>${P.escapeHtml(P.t('doctype.' + d.type))}</td>
+                    <td>${P.escapeHtml([d.format, d.size].filter(Boolean).join(' · '))}</td>
+                    <td>${d.issuedAt ? P.formatDate(d.issuedAt) : '—'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table></div>
+            <p class="property-docs__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">${P.t('prop.allDocs')} ${P.icon('arrowRight')}</a></p>`}
+    </div>`;
+}
+
+// Same roving-tabindex contract as the Vorgang detail tabs (A11Y-016): arrow
+// keys move between tabs, the panel is re-rendered in place, and the URL keeps
+// `?tab=` so the state survives a reload or a shared link.
+function wirePropertyTabs(t, ctx) {
+  const tabs = Array.from(document.querySelectorAll('.property-tabs [role="tab"]'));
+  const panel = document.getElementById('detailTab');
+  if (!tabs.length || !panel) return;
+  const select = (next) => {
+    const key = next.getAttribute('data-tab');
+    tabs.forEach(x => {
+      const isActive = x === next;
+      x.classList.toggle('tab--active', isActive);
+      x.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      x.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+    panel.setAttribute('aria-labelledby', 'tab-' + key);
+    panel.innerHTML = renderPropertyTab(t, key, ctx);
+    next.focus();
+    // Keep `lang` in the URL: the router treats it as the source of truth, so
+    // dropping it here would make a link copied off an inner tab resolve in
+    // whatever language the next reader has stored rather than the one shown.
+    const current = parseHashQuery(location.hash);
+    const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
+      .filter(Boolean).join('&');
+    history.replaceState(null, '', `#/properties/${t.id}` + (qs ? '?' + qs : ''));
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select(tabs[(i + 1) % tabs.length]); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select(tabs[(i - 1 + tabs.length) % tabs.length]); }
+      else if (e.key === 'Home') { e.preventDefault(); select(tabs[0]); }
+      else if (e.key === 'End') { e.preventDefault(); select(tabs[tabs.length - 1]); }
+    });
+  });
+}
+
 
 // `Standort` map on the property detail page — single marker on a positron
 // basemap, centred on the building's lat/lng. WGS84 since the portfolio is
@@ -3237,13 +4019,20 @@ const CD_COLOR_FALLBACKS = {
   '--color-floor-invalid': '#FEE2E2',
   '--color-bg-canvas': '#FAFAFA',
   '--color-map-outline': '#6B7280',
+  // Public-skin value. Skin-aware tokens resolve live from the stylesheet
+  // (cdColor reads the body element), so this literal only ever applies if
+  // the token itself is missing — it is not a second source of truth.
   '--color-map-selection': '#801519',
   '--color-map-text': '#1F2937',
   '--color-white': '#FFFFFF',
 };
 
 function cdColor(tokenName, seen = new Set()) {
-  const styles = getComputedStyle(document.documentElement);
+  // Body, not documentElement — both resolve the skinned values (the skin
+  // wins at :root, see css/foundations/tokens.css), but reading from the
+  // element the paint actually applies to keeps this correct if a future
+  // skin ever scopes tokens further down the tree.
+  const styles = getComputedStyle(document.body || document.documentElement);
   let value = styles.getPropertyValue(tokenName).trim();
   if (!value) return CD_COLOR_FALLBACKS[tokenName] || CD_COLOR_FALLBACKS['--color-map-text'];
   const varMatch = value.match(/^var\((--[^),\s]+)/);
@@ -3342,7 +4131,6 @@ async function renderFloorDetail({ id, floorSlug }) {
   const floor = buildingFloors.find(f => f.floorId === `${t.buildingId}-${floorSlug}`);
   if (!floor) {
     shell({ activeNav: 'properties', breadcrumb: [
-      { href: '#/home', label: P.t('nav.start') },
       { href: '#/properties', label: P.t('nav.properties') },
       { href: `#/properties/${t.id}`, label: t.buildingName },
       { label: floorSlug }
@@ -3352,7 +4140,6 @@ async function renderFloorDetail({ id, floorSlug }) {
   }
 
   shell({ activeNav: 'properties', breadcrumb: [
-    { href: '#/home', label: P.t('nav.start') },
     { href: '#/properties', label: P.t('nav.properties') },
     { href: `#/properties/${t.id}`, label: t.buildingName },
     { label: floor.name }
@@ -3882,7 +4669,7 @@ function documentLinkedLabel(d) {
 
 function renderDownloads() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'downloads', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('nav.downloads') }] });
+  shell({ activeNav: 'downloads', breadcrumb: [{ label: P.t('nav.downloads') }] });
 
   // Filter + page state persisted in URL hash query (back/forward + shareable).
   const docState = { type: '', building: '', q: '', page: 1 };
@@ -3908,25 +4695,41 @@ function renderDownloads() {
           </div>
         </header>
 
-        <div class="docs-filter-bar">
-          <div class="search-field docs-filter-bar__search">
-            ${P.icon('search', 'search-field__icon')}
-            <input class="input search-field__input" type="search" id="filterDocText"
-                   placeholder="${P.t('downloads.searchPlaceholder')}"
-                   value="${P.escapeHtml(docState.q)}"
-                   aria-label="Suche">
-          </div>
-          <select class="input docs-filter-bar__select" id="filterDocType" aria-label="Dokumenttyp">
-            <option value="">${P.t('downloads.allTypes')}</option>
-            ${Object.keys(DOC_TYPE_LABEL).map(v =>
-              `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${docTypeLabel(v)}</option>`).join('')}
-          </select>
-          <select class="input docs-filter-bar__select" id="filterDocBuilding" aria-label="Liegenschaft">
-            <option value="">${P.t('downloads.allProperties')}</option>
-            ${P.state.buildings.map(b =>
-              `<option value="${b.buildingId}" ${docState.building === b.buildingId ? 'selected' : ''}>${P.escapeHtml(b.name)}</option>`).join('')}
-          </select>
-        </div>
+        <!-- Same catalogue bar as the properties and Vorgänge lists. The two
+             dropdowns that used to sit loose in the row are now the filter
+             panel's two dimensions, so this page's toolbar has the same
+             anatomy and the same control heights as every other list. -->
+        ${catalogueBar({
+          id: 'docs',
+          search: true,
+          q: docState.q,
+          searchLabel: P.t('downloads.searchLabel'),
+          placeholder: P.t('downloads.searchPlaceholder'),
+      
+          count: '',
+          filterLabel: P.t('props.filter'),
+          filterCount: (docState.type ? 1 : 0) + (docState.building ? 1 : 0),
+          panelOpen: !!(docState.type || docState.building),
+          panel: `
+            <div class="catbar__panel-grid">
+              <div class="catbar__fieldset">
+                <label class="catbar__legend" for="filterDocType">${P.t('downloads.docType')}</label>
+                <select class="input" id="filterDocType">
+                  <option value="">${P.t('downloads.allTypes')}</option>
+                  ${Object.keys(DOC_TYPE_LABEL).map(v =>
+                    `<option value="${v}" ${docState.type === v ? 'selected' : ''}>${docTypeLabel(v)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="catbar__fieldset">
+                <label class="catbar__legend" for="filterDocBuilding">${P.t('nav.properties')}</label>
+                <select class="input" id="filterDocBuilding">
+                  <option value="">${P.t('downloads.allProperties')}</option>
+                  ${P.state.buildings.map(b =>
+                    `<option value="${b.buildingId}" ${docState.building === b.buildingId ? 'selected' : ''}>${P.escapeHtml(b.name)}</option>`).join('')}
+                </select>
+              </div>
+            </div>`,
+        })}
 
         <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
 
@@ -4011,7 +4814,7 @@ function renderDownloads() {
           docState.type = ''; docState.building = ''; docState.q = '';
           document.getElementById('filterDocType').value = '';
           document.getElementById('filterDocBuilding').value = '';
-          document.getElementById('filterDocText').value = '';
+          document.getElementById('docs-q').value = '';
         } else if (key === 'type') {
           docState.type = '';
           document.getElementById('filterDocType').value = '';
@@ -4020,7 +4823,7 @@ function renderDownloads() {
           document.getElementById('filterDocBuilding').value = '';
         } else if (key === 'q') {
           docState.q = '';
-          document.getElementById('filterDocText').value = '';
+          document.getElementById('docs-q').value = '';
         }
         docState.page = 1;
         applyDocState();
@@ -4105,13 +4908,17 @@ function renderDownloads() {
     if (location.hash !== newHash) history.replaceState(null, '', newHash);
   }
 
+  // The shared bar owns its filter-panel toggle; this page keeps its own
+  // in-page filtering, so no `hashFor` is handed over.
+  wireCatalogueBar({ id: 'docs' });
+
   document.getElementById('filterDocType').addEventListener('change', e => {
     docState.type = e.target.value; docState.page = 1; applyDocState();
   });
   document.getElementById('filterDocBuilding').addEventListener('change', e => {
     docState.building = e.target.value; docState.page = 1; applyDocState();
   });
-  document.getElementById('filterDocText').addEventListener('input', e => {
+  document.getElementById('docs-q').addEventListener('input', e => {
     docState.q = e.target.value; docState.page = 1; applyDocState();
   });
 
@@ -4161,7 +4968,7 @@ function downloadList(items) {
 // ── 12. SCHADENSMELDUNG (REQ-FA-005 stub) ────────────────────────────────
 function renderRepairQuickForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'home', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('bc.repair') }] });
+  shell({ activeNav: 'home', breadcrumb: [{ label: P.t('bc.repair') }] });
 
   const params = new URLSearchParams((location.hash.split('?')[1] || ''));
   const presetBuildingId = params.get('building');
@@ -4214,7 +5021,7 @@ function renderRepairQuickForm() {
             <p class="form-field__hint">Nur ausfüllen, wenn ein anderer Kontakt als Ihr eIAM-Profil zuständig ist.</p>
           </div>
           <div class="wizard__sticky-footer">
-            <a class="btn btn--outline" href="#/home">Abbrechen</a>
+            <a class="btn btn--outline" href="#/">Abbrechen</a>
             <button type="submit" class="btn btn--filled">Schadensmeldung senden</button>
           </div>
         </form>
@@ -4245,7 +5052,7 @@ function presetTenancyId() {
 // confirms with a toast and routes back to the building.
 function renderMoveForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/services', label: P.t('nav.services') }, { label: P.t('services.move') }] });
+  shell({ activeNav: '', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.move') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -4308,7 +5115,7 @@ function renderMoveForm() {
 // ── 12c. SONDERREINIGUNG (REQ-FA-006 — special-cleaning service) ─────────
 function renderCleaningForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { href: '#/services', label: P.t('nav.services') }, { label: P.t('services.cleaning') }] });
+  shell({ activeNav: '', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.cleaning') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -4368,7 +5175,7 @@ function renderCleaningForm() {
 // ── 13. PROFILE / EINSTELLUNGEN ──────────────────────────────────────────
 function renderProfile() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/home', label: P.t('nav.start') }, { label: P.t('bc.profile') }] });
+  shell({ activeNav: '', breadcrumb: [{ label: P.t('bc.profile') }] });
   const u = P.state.user;
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -4422,8 +5229,35 @@ function renderProfile() {
 }
 
 // ── SERVICES OVERVIEW (linked from the nav dropdown "Übersicht") ────────
+// One card per catalogued service. Every surface that shows services — this
+// page, the front-page tiles — renders through here, so a service added to
+// data/services.json appears everywhere with identical markup and affordances.
+function serviceCard(svc) {
+  const cls = svc.external ? 'card--quick link--external' : 'card--quick';
+  const attrs = svc.external ? ' target="_blank" rel="noopener"' : '';
+  // In-page anchors navigate first, then scroll — the same deferred call the
+  // info-page links use, since the section only exists after the route renders.
+  const onclick = svc.section
+    ? ` onclick="setTimeout(() => window.t3lite.scrollToInfo('${P.escapeJs(svc.section)}'), 100);"`
+    : '';
+  return `
+    <a href="${svc.href}" class="${cls}"${attrs}${onclick}>
+      <p class="card--quick__title">${P.escapeHtml(svc.label)}</p>
+      <p class="card--quick__desc">${P.escapeHtml(svc.desc || '')}</p>
+      ${arrowBtn({ external: svc.external })}
+    </a>
+  `;
+}
+
+// The catalogue, minus its own overview entry — that one exists so the nav
+// dropdown can link back to this page, and listing it here would be a card
+// pointing at the page you are on.
+function catalogueServices() {
+  return (P.state.services || []).filter(s => s.serviceId !== 'uebersicht').map(resolveService);
+}
+
 function renderServicesOverview() {
-  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { label: P.t('nav.services') }] });
+  shell({ breadcrumb: [{ label: P.t('nav.services') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
@@ -4436,33 +5270,7 @@ function renderServicesOverview() {
     <section class="section section--alt">
       <div class="container">
         <div class="card-grid">
-          ${servicesMenu().items.slice(1).map(svc => {
-            const ext = svc.external === true;
-            const cls = ext ? 'card--quick link--external' : 'card--quick';
-            const attrs = ext ? ' target="_blank" rel="noopener"' : '';
-            return `
-              <a href="${svc.href}" class="${cls}"${attrs}>
-                <p class="card--quick__title">${P.escapeHtml(svc.label)}</p>
-                <p class="card--quick__desc">${P.escapeHtml(svc.desc || '')}</p>
-                ${arrowBtn({ external: ext })}
-              </a>
-            `;
-          }).join('')}
-          <a href="#/properties" class="card--quick">
-            <p class="card--quick__title">${P.t('nav.properties')}</p>
-            <p class="card--quick__desc">${P.t('services.properties.desc')}</p>
-            ${arrowBtn()}
-          </a>
-          <a href="#/downloads" class="card--quick">
-            <p class="card--quick__title">${P.t('nav.downloads')}</p>
-            <p class="card--quick__desc">${P.t('services.downloads.desc')}</p>
-            ${arrowBtn()}
-          </a>
-          <a href="#/info" class="card--quick" onclick="setTimeout(() => window.t3lite.scrollToInfo('schulungen'), 100);">
-            <p class="card--quick__title">${P.t('services.training')}</p>
-            <p class="card--quick__desc">${P.t('services.training.desc')}</p>
-            ${arrowBtn()}
-          </a>
+          ${catalogueServices().map(serviceCard).join('')}
         </div>
       </div>
     </section>
@@ -4475,7 +5283,7 @@ function renderServicesOverview() {
 // sites don't change, but the value is no longer surfaced to users —
 // it stays in code comments / commit history for traceability.
 function renderServiceStub(title, _reqId, lead, externalUrl) {
-  shell({ breadcrumb: [{ href: '#/', label: P.t('nav.start') }, { href: '#/services', label: P.t('nav.services') }, { label: title }] });
+  shell({ breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: title }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -4957,28 +5765,28 @@ window.t3lite = {
     openDocumentViewer(doc, siblings.length ? siblings : [doc]);
   },
   submitRepair(form) {
-    const data = new FormData(form);
-    const building = P.state.tenancies.find(t => t.id === data.get('building'));
-    if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
-    const ticketId = 'R-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
-    P.toast(`Schadensmeldung ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
-    setTimeout(() => P.navigate('#/properties/' + building.id), 800);
+    startCase(form, {
+      defId: 'schadensmeldung', contact: 'im',
+      title: (d, t) => `Schadensmeldung ${t.buildingName}`,
+      fields: { 'Kategorie': 'category', 'Dringlichkeit': 'urgency', 'Beschreibung': 'desc', 'Telefon': 'phone' },
+      sent: (id, t) => `Schadensmeldung ${id} an BBL Objektmanagement gesendet (${t.contacts.im}).`,
+    });
   },
   submitMove(form) {
-    const data = new FormData(form);
-    const building = P.state.tenancies.find(t => t.id === data.get('building'));
-    if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
-    const ticketId = 'U-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
-    P.toast(`Umzugsanfrage ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.flm)}).`, 'success');
-    setTimeout(() => P.navigate('#/properties/' + building.id), 800);
+    startCase(form, {
+      defId: 'umzug', contact: 'flm',
+      title: (d, t) => `Umzug ${t.buildingName}`,
+      fields: { 'Art': 'moveType', 'Von': 'from', 'Nach': 'to', 'Arbeitsplätze': 'count', 'Wunschtermin': 'date' },
+      sent: (id, t) => `Umzugsanfrage ${id} an BBL Flächenmanagement gesendet (${t.contacts.flm}).`,
+    });
   },
   submitCleaning(form) {
-    const data = new FormData(form);
-    const building = P.state.tenancies.find(t => t.id === data.get('building'));
-    if (!building) { P.toast('Bitte Liegenschaft wählen.'); return; }
-    const ticketId = 'SR-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900 + 100));
-    P.toast(`Reinigungsanfrage ${ticketId} an BBL Objektmanagement gesendet (${P.escapeHtml(building.contacts.im)}).`, 'success');
-    setTimeout(() => P.navigate('#/properties/' + building.id), 800);
+    startCase(form, {
+      defId: 'sonderreinigung', contact: 'im',
+      title: (d, t) => `Sonderreinigung ${t.buildingName}`,
+      fields: { 'Art': 'type', 'Bereich': 'area', 'Fläche (m²)': 'size', 'Wunschtermin': 'date', 'Beschreibung': 'desc' },
+      sent: (id, t) => `Reinigungsanfrage ${id} an BBL Objektmanagement gesendet (${t.contacts.im}).`,
+    });
   },
   demoRole(role) {
     // Convenience: log in as a demo user whose roles include the requested
@@ -4990,13 +5798,13 @@ window.t3lite = {
     P.persistRole(role);
     P.toast(`Angemeldet als ${candidate.name} — Rolle ${P.roleLabel(role)}`, 'success');
     const landing = {
-      'LBO':           '#/home',
+      'LBO':           '#/',
       'GS-Reviewer':   '#/queue',
-      'BBL-PFM':        '#/home',
-      'BBL-Campus':     '#/home',
+      'BBL-PFM':        '#/',
+      'BBL-Campus':     '#/',
       'Auditor':        '#/inbox',
     };
-    P.navigate(landing[role] || '#/home');
+    P.navigate(landing[role] || '#/');
   },
   continueDraft() {
     const d = P.loadDraft();
@@ -5044,7 +5852,7 @@ window.t3lite = {
       <hr class="rule">
     `;
     sel.forEach(id => {
-      const a = P.state.applications.find(x => x.id === id);
+      const a = P.state.spaceRequests.find(x => x.id === id);
       if (!a) return;
       body += `
         <div class="form-field batch-approve__field">
@@ -5082,7 +5890,7 @@ window.t3lite = {
             return false;
           }
           begrs.forEach(b => {
-            const a = P.state.applications.find(x => x.id === b.id);
+            const a = P.state.spaceRequests.find(x => x.id === b.id);
             if (!a) return;
             a.status = 'approved';
             a.history = a.history || [];
@@ -5111,7 +5919,7 @@ window.t3lite = {
     });
   },
   toggleAuflage(appId, idx) {
-    const a = P.state.applications.find(x => x.id === appId);
+    const a = P.state.spaceRequests.find(x => x.id === appId);
     if (!a || !a.conditions) return;
     a.conditions[idx].done = !a.conditions[idx].done;
     P.handleHash();
@@ -5126,7 +5934,7 @@ window.t3lite = {
       actions: [
         { label: P.t('btn.cancel'), variant: 'btn--outline' },
         { label: 'Erneut einreichen', variant: 'btn--filled', onClick: () => {
-          const a = P.state.applications.find(x => x.id === appId);
+          const a = P.state.spaceRequests.find(x => x.id === appId);
           if (a) {
             a.conditions?.forEach(x => x.done = true);
             a.status = 'submitted';

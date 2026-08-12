@@ -261,3 +261,38 @@
 .arrow-btn svg { width: var(--icon-base); height: var(--icon-base); color: var(--color-primary); stroke: var(--color-primary); transition: color var(--transition-fast); }
 .card--quick:hover .arrow-btn { background: var(--color-primary); }
 .card--quick:hover .arrow-btn svg { color: var(--color-white); stroke: var(--color-white); }
+
+/* ── DETAIL LIST ──────────────────────────────────────────────────────────
+   Generic two-column definition list for card content: label left, value
+   right, collapsing to one column on phones. The portal already had three
+   one-off variants of this (.sap-dl, .contact-dl, .profile-dl) that differ
+   only in where they live; new surfaces use this one rather than adding a
+   fourth. Same geometry as .sap-dl, which it generalises. */
+.detail-list {
+  display: grid;
+  /* A generous label column — `fit-content` lets it take what the longest
+     label needs, up to a cap, instead of the ragged `max-content` width that
+     left «Wirtschaftseinheit (WE)» hard against its value. */
+  grid-template-columns: fit-content(18rem) minmax(0, 1fr);
+  gap: var(--space-sm) var(--space-lg);
+  margin: var(--space-md) 0 0;
+}
+.detail-list dt {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-regular);
+}
+/* The colon belongs to the LIST's presentation, not to the label strings —
+   putting it here means every consumer gets it without each call site
+   carrying punctuation. The preceding space is a non-breaking one, so a
+   wrapping label can never leave the colon stranded on the next line. */
+.detail-list dt::after { content: "\00A0:"; }
+.detail-list dd {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+}
+@media (max-width: 640px) {
+  .detail-list { grid-template-columns: 1fr; gap: var(--space-xs) 0; }
+  .detail-list dd { margin-bottom: var(--space-sm); }
+}

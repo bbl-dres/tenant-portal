@@ -1,7 +1,7 @@
 [
   {
-    "applicationId": "BE-2026-014",
-    "applicationType": "Kleinantrag",
+    "spaceRequestId": "BE-2026-014",
+    "requestType": "Kleinantrag",
     "pipelineVariant": "standard",
     "status": "in_review_gs",
     "submitterId": "U.123.456",
@@ -46,8 +46,8 @@
     ]
   },
   {
-    "applicationId": "UVEK-2026-002",
-    "applicationType": "Grossantrag",
+    "spaceRequestId": "UVEK-2026-002",
+    "requestType": "Grossantrag",
     "pipelineVariant": "greenfield",
     "status": "submitted",
     "submitterId": "U.123.456",
@@ -84,8 +84,8 @@
     ]
   },
   {
-    "applicationId": "Z-7-204",
-    "applicationType": "Kleinantrag",
+    "spaceRequestId": "Z-7-204",
+    "requestType": "Kleinantrag",
     "pipelineVariant": "standard",
     "status": "clarification",
     "submitterId": "U.123.456",
@@ -128,8 +128,8 @@
     ]
   },
   {
-    "applicationId": "BE-2026-013",
-    "applicationType": "Kleinantrag",
+    "spaceRequestId": "BE-2026-013",
+    "requestType": "Kleinantrag",
     "pipelineVariant": "standard",
     "status": "in_project",
     "submitterId": "U.123.456",
@@ -167,8 +167,8 @@
     ]
   },
   {
-    "applicationId": "BK-2026-007",
-    "applicationType": "Kleinantrag",
+    "spaceRequestId": "BK-2026-007",
+    "requestType": "Kleinantrag",
     "pipelineVariant": "bypass",
     "status": "in_review_pfm",
     "submitterId": "U.123.456",
@@ -205,8 +205,8 @@
     ]
   },
   {
-    "applicationId": "UVEK-2026-018",
-    "applicationType": "Kleinantrag",
+    "spaceRequestId": "UVEK-2026-018",
+    "requestType": "Kleinantrag",
     "pipelineVariant": "standard",
     "status": "approved",
     "submitterId": "U.123.456",
@@ -246,8 +246,8 @@
     ]
   },
   {
-    "applicationId": "UVEK-2025-072",
-    "applicationType": "Kleinantrag",
+    "spaceRequestId": "UVEK-2025-072",
+    "requestType": "Kleinantrag",
     "pipelineVariant": "standard",
     "status": "closed",
     "submitterId": "U.123.456",

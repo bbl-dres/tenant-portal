@@ -12,12 +12,13 @@
    address, chips) and a thumbnail of the building on the right. The
    thumbnail acts as a "you are looking at the right building" cue without
    dominating the viewport like the previous full-bleed banner did. */
+/* No bottom rule. The hero, the tab strip and the stats block each brought
+   their own horizontal line, so the top of the page was four rules deep
+   before any content; the hero image below already separates the header. */
 .property-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  padding-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--color-secondary-100);
+  gap: var(--space-xs);
 }
 .property-header__body {
   display: grid;
@@ -99,7 +100,10 @@
 .property-header__media:focus-visible .property-header__media-badge { background: var(--color-black-75); }
 .property-header__media[disabled] .property-header__media-badge { display: none; }
 @media (min-width: 768px) {
-  .property-header { flex-direction: row; align-items: center; gap: var(--space-xl); }
+  /* Scoped to the headers that still carry a thumbnail (the floor page). The
+     property detail header is now title + sub-line only, and the row rule
+     would set the address beside the title instead of under it. */
+  .property-header:has(.property-header__media) { flex-direction: row; align-items: center; gap: var(--space-xl); }
   .property-header__body { flex: 1; min-width: 0; }
   .property-header__media { width: 240px; height: 140px; flex-shrink: 0; }
 }
@@ -111,16 +115,19 @@
    table. Big numbers, secondary labels. Pattern from CD Bund key-figure
    cards (`.info-block` family) but lighter — no card chrome, just a
    strong type contrast that lets the four numbers read at a glance. */
+/* Figures on a quiet surface instead of between two rules. The rules sat
+   immediately under the tab strip's own border and above the facts list, so
+   the eye met three horizontal lines in ~120px; a tinted panel separates the
+   block just as clearly without adding another line to that stack. */
 .property-stats {
   display: grid;
   /* minmax(0, 1fr) — not bare 1fr — so a long value (CHF 1'140'000)
      wraps inside its cell instead of widening the track past the card. */
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md);
-  margin: 0 0 var(--space-lg);
-  padding: var(--space-md) 0;
-  border-top: 1px solid var(--color-secondary-100);
-  border-bottom: 1px solid var(--color-secondary-100);
+  margin: 0 0 var(--space-xl);
+  padding: var(--space-lg);
+  background: var(--color-bg-surface);
 }
 @media (min-width: 768px) {
   .property-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
@@ -299,8 +306,14 @@
    at track size; overflowing tables scroll via `.table-wrapper` instead. */
 .property-layout > * { min-width: 0; }
 @media (min-width: 1024px) {
-  .property-layout { grid-template-columns: 1fr 320px; align-items: start; }
-  .property-aside { position: sticky; top: var(--space-md); }
+  /* NOT `align-items: start`: a start-aligned grid item is only as tall as its
+     own content, which makes it its own sticky containing block — the aside
+     then has zero travel and scrolls away with the page despite
+     `position: sticky` computing correctly. The item stretches to the row
+     height instead and the sticky sits on an inner wrapper, which is what
+     gives it room to pin. */
+  .property-layout { grid-template-columns: 1fr 320px; }
+  .property-aside__inner { position: sticky; top: var(--space-md); }
 }
 
 /* Attachments list — shared by the wizard upload step (badge shows
@@ -490,4 +503,220 @@
   content: '|';
   margin-right: var(--space-md);
   color: var(--color-border);
+}
+
+/* ── PROPERTY HERO (mosaic + location map) ───────────────────────────────
+   Replaces the compact header thumbnail with the sister portal's property
+   header: one large image, up to four side tiles, the location map beside
+   them. Every tile opens the existing fullscreen gallery.
+
+   EMPTY SLOTS STAY VISIBLE. Collapsing the side column for a property with a
+   single photo was tried and reversed: hiding the slots also hides the
+   invitation to fill them. Every tile is an upload target, so an empty one
+   carries the CD `image__not-available` placeholder and reads as a free slot
+   rather than as missing content. */
+.property-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+.property-hero__mosaic {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .property-hero__mosaic { grid-template-columns: 2fr 1fr; }
+}
+.property-hero__side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+.property-hero__cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  background: var(--color-bg-alt);
+  cursor: pointer;
+  min-height: 0;
+}
+.property-hero__cell--main { aspect-ratio: 4 / 3; }
+.property-hero__cell--side { aspect-ratio: 4 / 3; }
+@media (min-width: 640px) {
+  /* The main tile spans both side rows, so its height is set by the side
+     column rather than its own ratio — that is what makes the mosaic line
+     up on the bottom edge. */
+  .property-hero__cell--main { aspect-ratio: auto; grid-row: span 2; }
+}
+@media (min-width: 1024px) {
+  /* EQUAL THIRDS across the full width, like the reference header: main
+     image · 2×2 tile grid · map. The mosaic wrapper is `display: contents`
+     so its two children join the hero's own grid as tracks 1 and 2 — the
+     wrapper still exists in the DOM (a gallery upload re-renders exactly
+     that element, leaving the live MapLibre instance beside it untouched),
+     it just stops forming a box of its own. */
+  .property-hero { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+  .property-hero__mosaic { display: contents; }
+  /* A FIXED band height, not an aspect ratio. On a wide viewport a 16:9 main
+     image would grow with the column — at 1440px the mosaic is ~800px wide,
+     so the ratio alone put a 450px photograph above the tabs and pushed the
+     content the reader came for below the fold. The reference header is a
+     compact strip; the cells fill it and crop with object-fit.
+
+     The height has to travel the WHOLE chain: hero → mosaic → cell → img.
+     Setting it on the hero alone left every descendant auto-height, so
+     `height: 100%` resolved against an auto parent, the intrinsic image
+     height won, and the photograph spilled out of the 320px band and over
+     the tab strip below it. `min-height: 0` is the other half — a grid item
+     defaults to `min-height: auto`, which refuses to shrink below its
+     content and would re-inflate the row. */
+  .property-hero { height: 320px; }
+  .property-hero__side,
+  .property-hero__mapcol { height: 100%; min-height: 0; }
+  /* 2×2: four equal tiles, whatever the mix of photos and free slots. */
+  .property-hero__side { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  /* NO aspect ratios inside the band. The hero has a fixed height and the
+     side column is two equal `1fr` rows, so every cell's size comes from the
+     grid; a leftover ratio on the side cells made the top row content-sized,
+     leaving the two photos shorter than the placeholders beneath them.
+     `object-fit: cover` on the image then handles any source proportion. */
+  .property-hero__cell { height: 100%; min-height: 0; aspect-ratio: auto; }
+  .property-hero__cell--main { grid-row: auto; }
+  .property-hero__map { min-height: 0; }
+}
+@media (min-width: 1920px) {
+  .property-hero { height: 380px; }
+}
+/* Absolutely filling the cell, not just sized to it. The cell is a centring
+   flex container, so a `height: 100%` child resolved against a content-sized
+   line box and the photo sat letterboxed in the top of its tile. Pinned to
+   the cell's edges it always crops to fill, whatever the source ratio. */
+.property-hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.property-hero__cell:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.property-hero__cell--empty {
+  cursor: default;
+  color: var(--color-text-secondary);
+  /* A dashed edge marks the slot as a place something belongs — a flat grey
+     box reads as a rendering failure, which is what «currently it's blank»
+     described. */
+  border: 1px dashed var(--color-secondary-200);
+  background: var(--color-bg-surface);
+}
+/* CD `image__not-available` (image-not-available.postcss): centred column,
+   glyph over caption. The DS sizes the glyph h-20 lg:h-12; these tiles are
+   small, so it takes the icon scale's large step instead of a viewport one. */
+.image__not-available {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-sm);
+}
+.image__not-available .inline-icon { width: var(--icon-2xl); height: var(--icon-2xl); }
+.image__not-available-text {
+  margin: var(--space-sm) var(--space-xs) 0;
+  font-size: var(--text-body-sm);
+}
+/* The main tile is large enough for the DS's own base caption size. */
+.property-hero__cell--main .image__not-available-text { font-size: var(--text-body); }
+
+/* Image count on the main tile, «Alle Bilder anzeigen» on the last side
+   tile — both scrims so the label stays legible over any photograph. */
+.property-hero__badge {
+  position: absolute;
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-black-70);
+  color: var(--color-white);
+  font-size: var(--text-body-xs);
+}
+.property-hero__badge .inline-icon { width: var(--icon-sm); height: var(--icon-sm); }
+.property-hero__more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background: var(--color-black-45);
+  color: var(--color-white);
+  font-size: var(--text-body-sm);
+  text-align: center;
+  padding: var(--space-sm);
+}
+.property-hero__more-num { font-size: var(--text-h3); font-weight: var(--font-weight-bold); }
+.property-hero__more-label { text-decoration: underline; text-underline-offset: 2px; }
+.property-hero__cell:hover .property-hero__more { background: var(--color-black-70); }
+
+.property-hero__mapcol {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* The map's caption bar. It carries the same grey as the map's own loading
+   surface so the exit link reads as part of the map column — on the white
+   page it was white-on-white, a link floating in the gap above the tiles. */
+.property-hero__maplink {
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-bg-surface);
+  font-size: var(--text-body-sm);
+}
+.property-hero__map {
+  flex: 1 1 auto;
+  min-height: 260px;
+  background: var(--color-bg-alt);
+}
+
+/* ── PROPERTY TABS ───────────────────────────────────────────────────────
+   Same tab primitives as the Vorgang detail view; the panel carries the
+   two-column layout (content + aside) so every tab shares one grid. */
+/* One rhythm for the page: hero → tabs → panel. The tab strip carries the
+   gap above it and the panel the gap below the strip, so neither the panels
+   nor the individual blocks inside them need their own top margins. */
+.property-tabs { margin-top: var(--space-xl); }
+.property-tabpanel { padding-top: 0; }
+.property-tabpanel:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.property-section__heading { margin-top: var(--space-2xl); }
+.property-facts-list { margin-top: 0; }
+.property-docs__more { margin: var(--space-md) 0 0; }
+.property-docs__more .inline-icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  margin-left: var(--space-xs);
+  vertical-align: -5px;
+}
+
+/* Aside cards on the grey surface — the page itself stays white, so the
+   actions and contacts read as a distinct column rather than as more page. */
+.property-aside__card {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-bg-surface);
+}
+.property-aside__card:last-child { margin-bottom: 0; }
+.property-aside__title {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
 }

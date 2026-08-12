@@ -16,7 +16,6 @@
     "city": "Bern",
     "country": "CH",
     "buildingName": "Bundeshaus Nord",
-    "portfolioCategory": "Administration Class I",
     "floorLabel": "2. OG",
     "hnf2": 680,
     "gf": 1420,
@@ -32,8 +31,7 @@
       "im": "Nadine Frey",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 0,
-    "image": "assets/images/buildings/BLD-2010.jpg"
+    "openIssues": 0
   },
   {
     "tenancyId": "T-2011-AA-01",
@@ -52,7 +50,6 @@
     "city": "Ittigen",
     "country": "CH",
     "buildingName": "BAFU Hauptsitz Worblentalstrasse",
-    "portfolioCategory": "Administration Class II",
     "floorLabel": "EG – 4. OG",
     "hnf2": 5840,
     "gf": 11200,
@@ -68,8 +65,7 @@
       "im": "Nadine Frey",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 3,
-    "image": "assets/images/buildings/BLD-2011.jpg"
+    "openIssues": 3
   },
   {
     "tenancyId": "T-2012-AA-01",
@@ -88,7 +84,6 @@
     "city": "Ittigen",
     "country": "CH",
     "buildingName": "ARE Hauptsitz",
-    "portfolioCategory": "Administration Class II",
     "floorLabel": "1. + 2. OG",
     "hnf2": 920,
     "gf": 1950,
@@ -104,8 +99,7 @@
       "im": "Nadine Frey",
       "flm": "Yvonne Egger"
     },
-    "openIssues": 0,
-    "image": "assets/images/buildings/BLD-2012.jpg"
+    "openIssues": 0
   },
   {
     "tenancyId": "T-2013-AA-01",
@@ -124,7 +118,6 @@
     "city": "Ittigen",
     "country": "CH",
     "buildingName": "BAV Hauptsitz",
-    "portfolioCategory": "Administration Class II",
     "floorLabel": "EG – 5. OG",
     "hnf2": 3460,
     "gf": 7100,
@@ -140,8 +133,7 @@
       "im": "Nadine Frey",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 1,
-    "image": "assets/images/buildings/BLD-2013.jpg"
+    "openIssues": 1
   },
   {
     "tenancyId": "T-2014-AA-01",
@@ -160,7 +152,6 @@
     "city": "Ittigen",
     "country": "CH",
     "buildingName": "BAZL Hauptsitz",
-    "portfolioCategory": "Administration Class II",
     "floorLabel": "1. – 4. OG",
     "hnf2": 2780,
     "gf": 5620,
@@ -176,8 +167,7 @@
       "im": "Nadine Frey",
       "flm": "Yvonne Egger"
     },
-    "openIssues": 0,
-    "image": "assets/images/buildings/BLD-2014.jpg"
+    "openIssues": 0
   },
   {
     "tenancyId": "T-2015-AA-01",
@@ -196,7 +186,6 @@
     "city": "Ittigen",
     "country": "CH",
     "buildingName": "BFE Hauptsitz",
-    "portfolioCategory": "Administration Class II",
     "floorLabel": "2. + 3. OG",
     "hnf2": 1840,
     "gf": 3950,
@@ -212,8 +201,7 @@
       "im": "Nadine Frey",
       "flm": "Andrea Käser"
     },
-    "openIssues": 1,
-    "image": "assets/images/buildings/BLD-2015.jpg"
+    "openIssues": 1
   },
   {
     "tenancyId": "T-2016-AA-01",
@@ -232,7 +220,6 @@
     "city": "Zofingen",
     "country": "CH",
     "buildingName": "ASTRA Filiale Zofingen",
-    "portfolioCategory": "Administration Class III",
     "floorLabel": "Gesamtkomplex",
     "hnf2": 1240,
     "gf": 2680,
@@ -248,8 +235,7 @@
       "im": "Christian Roth",
       "flm": "Andrea Käser"
     },
-    "openIssues": 0,
-    "image": "assets/images/buildings/BLD-2016.jpg"
+    "openIssues": 0
   },
   {
     "tenancyId": "T-2017-AA-01",
@@ -268,7 +254,6 @@
     "city": "Biel/Bienne",
     "country": "CH",
     "buildingName": "BAKOM Hauptsitz",
-    "portfolioCategory": "Administration Class II",
     "floorLabel": "EG – 3. OG",
     "hnf2": 2640,
     "gf": 5380,
@@ -284,8 +269,7 @@
       "im": "Christian Roth",
       "flm": "Tobias Spiess"
     },
-    "openIssues": 2,
-    "image": "assets/images/buildings/BLD-2017.jpg"
+    "openIssues": 2
   },
   {
     "tenancyId": "T-2018-AA-01",
@@ -304,7 +288,6 @@
     "city": "Zürich-Flughafen",
     "country": "CH",
     "buildingName": "MeteoSchweiz Flughafen Zürich",
-    "portfolioCategory": "Administration Class III",
     "floorLabel": "Gesamtkomplex",
     "hnf2": 2180,
     "gf": 4520,
@@ -320,8 +303,7 @@
       "im": "Sandra Brunner",
       "flm": "Andrea Käser"
     },
-    "openIssues": 1,
-    "image": "assets/images/buildings/BLD-2018.jpg"
+    "openIssues": 1
   },
   {
     "tenancyId": "T-2019-AA-01",
@@ -340,7 +322,6 @@
     "city": "Locarno-Monti",
     "country": "CH",
     "buildingName": "MeteoSchweiz Locarno-Monti",
-    "portfolioCategory": "Administration Class III",
     "floorLabel": "Gesamtkomplex",
     "hnf2": 420,
     "gf": 880,
@@ -356,7 +337,6 @@
       "im": "Luca Beretta",
       "flm": "Yvonne Egger"
     },
-    "openIssues": 0,
-    "image": "assets/images/buildings/BLD-2019.jpg"
+    "openIssues": 0
   }
 ]

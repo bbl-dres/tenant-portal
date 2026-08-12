@@ -6,6 +6,31 @@
    Sources: styles.css 3889-3919, 4253-4423, 4466-4625.
    ========================================================================== */
 
+/* ── LANDING HERO SEARCH ─────────────────────────────────────────────────
+   The front page's action slot: search field + labelled submit on one row
+   (the sister service portal's `home-search`). Deliberately NOT the results
+   page's `search--large` field with the glyph pinned inside it — an entry
+   page names its action, and the query text stays regular weight because
+   nothing has been searched for yet. Both controls share the lg button
+   height so the pair reads as a single control. */
+.home-search {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-sm);
+  max-width: 640px;
+}
+.home-search__input {
+  flex: 1 1 auto;
+  min-width: 0;                        /* lets the field shrink instead of pushing the button out */
+  min-height: var(--btn-lg-min-h);     /* match .btn--lg so the row aligns */
+}
+.home-search__submit { flex: 0 0 auto; }
+/* Below sm the 2-up row squeezes the field under a usable width — the pair
+   stacks, both full-bleed. */
+@media (max-width: 639.98px) {
+  .home-search { flex-direction: column; }
+}
+
 /* Split hero (image + copy) — CD Bund: equal-column split, constrained to
    --container-max-width via the shared .hero__inner constraint, no
    figcaption. Image fills its column edge-to-edge of the column. The

@@ -119,7 +119,18 @@
 }
 .tab {
   position: relative;
+  display: inline-flex;
+  align-items: center;
   padding: var(--space-md);                /* DS px-4 py-4 */
+  /* An explicit line-height and floor, because a `button` defaults to
+     `line-height: normal` — a height derived from FONT METRICS. Before Noto
+     Sans swaps in, the metric-override fallback produces a much shorter line
+     box, so the same tab measured 38px with the fallback and 54px with the
+     web font: the strip visibly re-flowed on load, and in the fallback state
+     the control fell below the 44px target size (the a11y sweep caught this
+     as a target-size notice on the Vorgang detail tabs). */
+  min-height: var(--btn-min-h);
+  line-height: var(--line-height-normal);
   background: transparent;
   border: none;
   font-size: var(--text-body);             /* inherit-equivalent: body text--base */

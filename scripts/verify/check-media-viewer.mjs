@@ -6,8 +6,8 @@
 //      available in the view it was opened from (downloads table / property
 //      doc-groups), with a "Dokument X / Y" indicator. ArrowLeft/Right work.
 //
-//   2. Property image gallery — the header photo is a button carrying a
-//      persistent "Galerie" badge (+ count when >1). Clicking opens a dark
+//   2. Property image gallery — every tile of the hero mosaic is a button;
+//      the main tile carries the image count. Clicking opens a dark
 //      lightbox: image name top-left, download/upload/delete top-right, side
 //      chevrons + bottom thumbnail strip (both only with 2+ images). Upload
 //      reads files locally (FileReader); delete/upload mutate the in-session
@@ -29,22 +29,33 @@ await run(reporter, async () => {
   await loginAs(page, baseUrl, 'LBO');
 
   // ── 0. Search-field consistency across the filter toolbars ─────────────
-  // Every in-page search box composes the shared `.search-field` (leading
-  // left magnifier + `.input`), so the affordance is identical everywhere.
+  // Every in-page search box puts its magnifier on the LEADING edge of the
+  // field, so the affordance is identical wherever the reader meets it. Two
+  // compositions satisfy that while the catalogue-bar migration runs: the
+  // original `.search-field` shell, and the shared catalogue bar's
+  // `.catbar__search` (properties moved first). The assertion is on the
+  // geometry, not on which of the two rendered — that is the part a reader
+  // actually perceives.
   for (const [hash, label, required] of [['#/downloads', 'downloads', true], ['#/properties', 'properties', true], ['#/inbox', 'inbox', false]]) {
     await page.goto(`${baseUrl}/${hash}?lang=de`);
     await waitForRoute(page, hash);
     const sf = await page.evaluate(() => {
-      const field = document.querySelector('#page-body .search-field');
+      const legacy = document.querySelector('#page-body .search-field');
+      const catbar = document.querySelector('#page-body .catbar__search');
+      const field = legacy || catbar;
       if (!field) return null;
-      const icon = field.querySelector('.search-field__icon');
-      const input = field.querySelector('.search-field__input');
-      if (!icon || !input) return { ok: false };
+      const icon = field.querySelector(legacy ? '.search-field__icon' : '.catbar__submit');
+      const input = field.querySelector(legacy ? '.search-field__input' : '.catbar__input');
+      if (!icon || !input) return { ok: false, shell: legacy ? 'search-field' : 'catbar' };
       const ir = icon.getBoundingClientRect(), pr = input.getBoundingClientRect();
-      return { ok: true, leading: ir.left < pr.left + pr.width / 2 && ir.left >= pr.left - 2 };
+      return {
+        ok: true,
+        shell: legacy ? 'search-field' : 'catbar',
+        leading: ir.left < pr.left + pr.width / 2 && ir.left >= pr.left - 2,
+      };
     });
     if (!sf && !required) { check(`${label}: no filter toolbar rendered (skipped)`, true); continue; }
-    check(`${label}: search uses shared .search-field with a leading icon`, !!sf && sf.ok && sf.leading, JSON.stringify(sf));
+    check(`${label}: search field carries a leading magnifier`, !!sf && sf.ok && sf.leading, JSON.stringify(sf));
   }
 
   // The search-results hero composes the same component and auto-focuses.
@@ -60,9 +71,13 @@ await run(reporter, async () => {
   });
   check('search results: hero uses the DS search__group and auto-focuses', heroFocused);
 
-  // Browser-tab favicon = the CD Bund flag.
+  // No browser-tab icon: the Swiss cross is a federal formal element and a
+  // 16px tab favicon is not a placement the CD sanctions. `data:,` is an empty
+  // inline resource, which suppresses the icon WITHOUT leaving the browser to
+  // request /favicon.ico and log a 404 — so the assertion is on that exact
+  // value, not merely on the link being absent.
   const favicon = await page.evaluate(() => document.querySelector('link[rel~="icon"]')?.getAttribute('href'));
-  check('browser tab favicon is the CD Bund flag', favicon === 'assets/swiss-logo-flag.svg', favicon || '(none)');
+  check('browser tab carries no federal mark (empty favicon, no 404)', favicon === 'data:,', favicon ?? '(no link)');
 
   // Federal mark: the flag top-aligns with the 4-language name SVG (CD), not
   // centred against it. (Name is visible at this 1280px width.)
@@ -214,28 +229,50 @@ await run(reporter, async () => {
   await page.locator('.docviewer__btn--close').click();
   await page.waitForTimeout(60);
 
-  // ── 2. Property header — persistent gallery affordance ─────────────────
-  await page.goto(`${baseUrl}/#/properties/T-2010-AA-01?lang=de`);
-  await waitForRoute(page, '#/properties/T-2010-AA-01');
+  // ── 2. Property hero — mosaic gallery affordance ───────────────────────
+  // A property with exactly ONE photo: the lightbox assertions below are about
+  // the single-image state (no chevrons, no thumbnail strip) and the upload
+  // step counts up from it. Bundeshaus Nord carries several views now.
+  await page.goto(`${baseUrl}/#/properties/T-2012-AA-01?lang=de`);
+  await waitForRoute(page, '#/properties/T-2012-AA-01');
   const badge = await page.evaluate(() => {
-    const b = document.querySelector('.property-header__media-badge');
+    const b = document.querySelector('.property-hero__badge');
     if (!b) return null;
     const cs = getComputedStyle(b);
     const r = b.getBoundingClientRect();
     return {
       shown: cs.display !== 'none' && Number(cs.opacity) > 0.5 && r.width > 0 && r.height > 0,
-      label: b.querySelector('.property-header__media-label')?.textContent?.trim(),
-      countHidden: b.querySelector('[data-gallery-count]')?.hidden,
+      // The label joins count and noun with a non-breaking space so «1 Bild»
+      // never wraps inside the badge — normalise it before comparing.
+      label: b.querySelector('.property-hero__badge-label')?.textContent?.replace(/\s+/g, ' ').trim(),
+      tiles: document.querySelectorAll('.property-hero__cell').length,
+      photos: document.querySelectorAll('.property-hero__photo').length,
+      empties: document.querySelectorAll('.property-hero__cell--empty').length,
+      placeholders: document.querySelectorAll('.property-hero__cell--empty .image__not-available').length,
+      triggers: document.querySelectorAll('[data-gallery-open]').length,
     };
   });
-  check('header: gallery badge visible without hover', !!badge && badge.shown, JSON.stringify(badge));
-  check('header: badge reads "Galerie"', badge?.label === 'Galerie', badge?.label);
-  check('header: count chip hidden for a single image', badge?.countHidden === true);
+  check('hero: image count badge visible without hover', !!badge && badge.shown, JSON.stringify(badge));
+  // Derived from what the building actually carries rather than a hardcoded
+  // number: photo counts come from data/buildings.geojson and change whenever
+  // imagery is added, which is not a regression the check should report.
+  check('hero: badge counts the images',
+    badge?.label === `${badge?.photos} ${badge?.photos === 1 ? 'Bild' : 'Bilder'}`, badge?.label);
+  // Free slots stay VISIBLE. Collapsing them also hides the invitation to
+  // upload more, and every tile is an upload target — so the mosaic always
+  // shows five cells: one per photo, the rest CD `image__not-available`
+  // placeholders, and a gallery trigger on each real photo.
+  check('hero: empty slots render CD placeholders rather than collapsing',
+    badge?.tiles === 5
+      && badge?.photos + badge?.empties === 5
+      && badge?.placeholders === badge?.empties
+      && badge?.triggers === badge?.photos,
+    JSON.stringify(badge));
 
   // ── 3. Gallery lightbox — open, upload, navigate, delete, sync ─────────
-  await page.locator('[data-gallery-open]').click();
+  await page.locator('[data-gallery-open]').first().click();
   await page.waitForSelector('.gallery', { timeout: 10000 });
-  check('gallery: opens from the header photo', await page.locator('.gallery').count() > 0);
+  check('gallery: opens from a mosaic tile', await page.locator('.gallery').count() > 0);
   check('gallery: chevrons hidden with a single image', !(await page.locator('.gallery__nav--next').isVisible()));
   check('gallery: thumbnail strip hidden with a single image', !(await page.locator('[data-gallery-thumbs]').isVisible()));
 
@@ -267,11 +304,18 @@ await run(reporter, async () => {
   await page.locator('.gallery__btn--close').click();
   await page.waitForTimeout(60);
   check('gallery: closes', await page.locator('.gallery').count() === 0);
-  const chip = await page.evaluate(() => {
-    const c = document.querySelector('.property-header__media-badge [data-gallery-count]');
-    return c ? { text: c.textContent.trim(), hidden: c.hidden } : null;
-  });
-  check('header: badge count syncs after edits (2)', !!chip && chip.text === '2' && chip.hidden === false, JSON.stringify(chip));
+  // The mosaic re-renders after an upload/delete: two images means the badge
+  // reads 2 AND the side column has appeared, so the solo variant is gone.
+  const chip = await page.evaluate(() => ({
+    label: document.querySelector('.property-hero__badge-label')?.textContent?.replace(/\s+/g, ' ').trim(),
+    empties: document.querySelectorAll('.property-hero__cell--empty').length,
+    triggers: document.querySelectorAll('[data-gallery-open]').length,
+  }));
+  // Two images after the edits: the badge counts them, a second tile became a
+  // real trigger, and one placeholder was consumed — proving the mosaic
+  // re-rendered rather than merely patching the count.
+  check('hero: mosaic re-renders after edits (2 images, one slot filled)',
+    chip.label === '2 Bilder' && chip.triggers === 2 && chip.empties === 3, JSON.stringify(chip));
 }, async () => {
   await browser.close();
   server.close();

@@ -4,10 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BBL Mieterportal</title>
-<link rel="icon" href="assets/swiss-logo-flag.svg" type="image/svg+xml">
+<!-- No tab icon. `data:,` is an empty inline resource: it suppresses the
+     favicon without leaving the browser to request /favicon.ico and log a
+     404. The tab identifies the page by its title, which markRouteRendered
+     keeps per-route. -->
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
+<!-- `body--intranet` selects the CD Bund intranet skin (blue brand + blue
+     chrome ramp) over the public-facing federal-red default. Same class name
+     and placement as the design system's own AlterBodyClasses; the token
+     overrides live in css/foundations/tokens.css. Remove it to return the
+     portal to the public skin. -->
+<body class="body--intranet">
 
 <div id="root"></div>
 

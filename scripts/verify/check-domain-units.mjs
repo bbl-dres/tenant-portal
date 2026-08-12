@@ -27,6 +27,7 @@ globalThis.window = {
 const { state } = await import('../../js/state.js');
 const { calcWizard, deriveNawClass } = await import('../../js/wizard.js');
 const { escapeHtml, escapeJs, formatChf, formatDate } = await import('../../js/lib.js');
+const { fold, tokenize, search } = await import('../../js/search-engine.js');
 
 // ── Wizard domain maths ───────────────────────────────────────────────────
 state.referenceData = {
@@ -120,5 +121,49 @@ assert.equal(
   formatDate('2018-01-01'),
   new Date('2018-01-01').toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' }),
 );
+
+// ── Search engine — folding, AND semantics, ranking ───────────────────────
+// Ranking is invisible to screenshots and silent in the Playwright checks, so
+// it is only ever covered here.
+
+// Folding is symmetric: query and index must converge on the same form, which
+// is what lets a user type without umlauts.
+assert.equal(fold('Schäden'), fold('schaden'));
+assert.equal(fold('Störung'), fold('stoerung'));
+assert.equal(fold('Mühlestrasse'), fold('Muehlestrasse'));
+assert.equal(fold('Straße'), fold('Strasse'));
+assert.equal(fold('  Kochergasse 10, 3003 Bern '), 'kochergasse 10 3003 bern');
+assert.deepEqual(tokenize('Bundeshaus  Grundriss'), ['bundeshaus', 'grundriss']);
+assert.deepEqual(tokenize('   '), []);
+
+const INDEX = [
+  { id: 'a', kind: 'Dienstleistungen', title: 'Schaden melden', date: '',
+    fields: { title: 'Schaden melden', type: 'Dienstleistung', lead: 'Defekte melden' }, boost: 6 },
+  { id: 'b', kind: 'Vorgänge', title: 'Lüftung 4. OG ohne Funktion', date: '2026-06-08',
+    fields: { title: 'Lüftung 4. OG ohne Funktion', ref: 'VG-2026-0203', type: 'Schadensmeldung', lead: 'Worblentalstrasse 68' } },
+  { id: 'c', kind: 'Dokumente', title: 'Grundriss EG Bundeshaus Nord', date: '2025-01-04',
+    fields: { title: 'Grundriss EG Bundeshaus Nord', type: 'Plan', extra: 'Bundeshaus Nord' } },
+  { id: 'd', kind: 'Aktuell', title: 'Wartungsfenster ePPM', date: '2026-05-17',
+    fields: { title: 'Wartungsfenster ePPM', lead: 'Ein Schaden an der Anlage ist ausgeschlossen' } },
+];
+
+// Umlaut-free query still finds the umlaut record.
+assert.deepEqual(search(INDEX, 'lueftung').map(r => r.id), ['b']);
+
+// AND across tokens: both must land, in any field. The old substring search
+// returned nothing here because the phrase never occurs verbatim.
+assert.deepEqual(search(INDEX, 'bundeshaus grundriss').map(r => r.id), ['c']);
+assert.deepEqual(search(INDEX, 'grundriss lueftung').map(r => r.id), []);
+
+// A title hit outranks a lead hit, and the service boost puts the actionable
+// result first among title matches.
+const schaden = search(INDEX, 'schaden').map(r => r.id);
+assert.deepEqual(schaden, ['a', 'b', 'd']);
+
+// Reference lookup finds the exact record.
+assert.deepEqual(search(INDEX, 'VG-2026-0203').map(r => r.id), ['b']);
+
+// Empty query matches nothing rather than everything.
+assert.deepEqual(search(INDEX, '').map(r => r.id), []);
 
 console.log('Domain unit checks passed.');

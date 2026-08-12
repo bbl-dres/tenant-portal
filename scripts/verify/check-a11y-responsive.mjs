@@ -16,7 +16,9 @@ const viewports = [
 
 const flows = [
   { label: 'public-start', hash: '#/', role: null },
-  { label: 'home', hash: '#/home', role: 'LBO' },
+  // Same URL as public-start but signed in: the front page then carries the
+  // overview + services bands that used to live at #/home (merged this round).
+  { label: 'front-signed-in', hash: '#/', role: 'LBO' },
   { label: 'properties-grid', hash: '#/properties', role: 'LBO' },
   { label: 'property-detail', hash: '#/properties/T-2010-AA-01', role: 'LBO' },
   { label: 'downloads', hash: '#/downloads', role: 'LBO' },

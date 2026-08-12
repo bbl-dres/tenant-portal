@@ -35,7 +35,7 @@ await run(reporter, async () => {
     () => !document.body.classList.contains('body--mobile-menu-is-open'), null, { timeout: 5000 });
 
   // ── Drawer opens below the real header bottom (consent banner visible) ──
-  await page.goto(`${baseUrl}/#/home?lang=de`);
+  await page.goto(`${baseUrl}/#/?lang=de`);
   await page.waitForSelector('.burger', { timeout: 10000 });
   await page.click('.burger');
   await drawerOpen();
@@ -112,7 +112,7 @@ await run(reporter, async () => {
 
   // ── Desktop regression: dropdown still floats under its trigger ────────
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(`${baseUrl}/#/home?lang=de`);
+  await page.goto(`${baseUrl}/#/?lang=de`);
   await page.waitForSelector('button[data-menu="services"]', { timeout: 10000 });
   await page.click('button[data-menu="services"]');
   await page.waitForFunction(() => {

@@ -35,7 +35,12 @@
   line-height: var(--leading-badge);
 }
 .badge--success { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
-.badge--info    { background: var(--color-badge-blue-bg);  color: var(--color-badge-blue-text); }
+/* `.badge--blue` is the DS's own name for this variant (badge.postcss:46-49);
+   `.badge--info` is the portal's semantic name for the same pair. Kept as
+   aliases — same pattern as `.badge--warning` / `.badge--orange` below — so
+   markup copied from the design system styles without translation. */
+.badge--info,
+.badge--blue    { background: var(--color-badge-blue-bg);  color: var(--color-badge-blue-text); }
 /* CD Bund `badge.postcss` makes `.badge--warning` an ALIAS of `.badge--orange`
    (bg-orange-100 / text-orange-800). The portal's warning states (open issues,
    lease expiry, fixed-term) are genuine attention states, so orange is the

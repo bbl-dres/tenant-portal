@@ -152,19 +152,74 @@
    via background-color changes (see DS section.postcss; no `border`
    declarations anywhere). Borders read as page chrome, which fights
    the calmer "alternating bg bands" pattern bbl.admin.ch uses. */
+/* CD names for the same bands. The DS drives section backgrounds with a
+   `bg--*` family on `.section` (designsystem/css/layouts/section.postcss:
+   13-49, declared for white and every secondary step), which is why CD markup
+   pasted in carries `bg--secondary-50` rather than a portal modifier. The two
+   naming schemes are aliased onto one declaration instead of duplicated, so
+   there is still ONE definition of each band. */
+.bg--white {
+  background: var(--color-bg-default);
+}
+.bg--secondary-50,
 .section--alt {
   background: var(--color-secondary-50);
+}
+.bg--secondary-100 {
+  background: var(--color-secondary-100);
 }
 .section--surface {
   background: var(--color-bg-surface);
 }
+.bg--secondary-600,
 .section--dark {
   background: var(--color-surface-dark);
   color: var(--color-text-inverse);
 }
+.bg--secondary-600 .section-heading,
+.bg--secondary-600 h2,
+.bg--secondary-600 h3,
 .section--dark .section-heading,
 .section--dark h2,
 .section--dark h3 { color: var(--color-text-inverse); }
+
+/* NEGATIVE TREATMENT on the dark steps. The DS switches type and controls to
+   their negative variants there rather than letting brand colours ride onto a
+   brand-coloured ground (section.postcss:59-79 → `.section__title` white and
+   `.section__action .btn` → `btn--bare-negative`; btn.postcss:87-109). Under
+   the intranet skin this is not cosmetic: `--color-link` is blue-600 on a
+   blue-800 band, which is barely legible.
+   Body copy takes secondary-100 rather than pure white — the DS's own
+   `hover:text-secondary-100` step — so the lead sits a shade below the
+   heading instead of competing with it. */
+.bg--secondary-600 .section-intro,
+.section--dark .section-intro {
+  color: var(--color-secondary-100);
+}
+.bg--secondary-600 a:not(.btn),
+.section--dark a:not(.btn) {
+  color: var(--color-white);
+}
+.bg--secondary-600 .btn--outline,
+.section--dark .btn--outline {
+  color: var(--color-white);
+  border-color: var(--color-white);
+}
+.bg--secondary-600 .btn--outline:hover,
+.section--dark .btn--outline:hover {
+  color: var(--color-secondary-100);
+  border-color: var(--color-secondary-100);
+}
+
+/* DS rule (section.postcss:29-51): when two bands share a background the seam
+   is invisible, so the second one drops its top padding instead of stacking a
+   double gap. Ported for the bands the portal actually uses. */
+.bg--white + .bg--white,
+.bg--secondary-50 + .bg--secondary-50,
+.bg--secondary-100 + .bg--secondary-100,
+.bg--secondary-600 + .bg--secondary-600 {
+  padding-top: 0;
+}
 
 .stack > * + * { margin-top: var(--space-md); }
 .stack--lg > * + * { margin-top: var(--space-lg); }
@@ -200,7 +255,9 @@
   margin: 0 0 var(--space-xl);
   line-height: var(--line-height-snug);
 }
-.hero__cta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+/* `.hero__cta` (the button row) is retired: the landing hero's action slot is
+   the portal search — see `.home-search` in sections/secondary-pages.css,
+   which shares the search-results hero's DS search--large composition. */
 
 /* No phone-size padding reduction: the DS hero keeps its full pt-12 /
    container--pb rhythm at every width — only the lead steps down. */

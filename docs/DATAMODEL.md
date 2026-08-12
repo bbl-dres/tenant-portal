@@ -157,8 +157,8 @@ erDiagram
         number lat "WGS84"
     }
     APPLICATION {
-        string applicationId PK
-        enum   applicationType "Kleinantrag / Grossantrag"
+        string spaceRequestId PK
+        enum   requestType "Kleinantrag / Grossantrag"
         enum   pipelineVariant "standard / bypass / greenfield"
         enum   status
         string submitterId FK
@@ -294,7 +294,7 @@ libraries.
 
 | Entity EN              | Entity DE                  | Description                                                                                                                          | Status         | File                                                  |
 | ---------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------- | ----------------------------------------------------- |
-| [**Application**](#41-application-bedarfsmeldung) | Bedarfsmeldung | Demand request raised by a Verwaltungseinheit. Carries the full review pipeline + audit trail. | Implemented | [`data/applications.json`](../data/applications.json) |
+| [**SpaceRequest**](#41-spacerequest-bedarfsmeldung) | Bedarfsmeldung | Demand request raised by a Verwaltungseinheit. Carries the full review pipeline + audit trail. | Implemented | [`data/space-requests.json`](../data/space-requests.json) |
 | [**Attachment**](#44-embedded-attachment) | Anhang | File attached to an Application during submission (WiBe.pdf, Rechtsgrundlage.pdf, …). Will resolve to a `Document` once Document is live. | Embedded | in Application |
 | [**Condition**](#45-embedded-condition-auflage) | Auflage | Reviewer-set compliance instruction during the `clarification` state. Submitter ticks each off before resubmitting. | Embedded | in Application |
 | [**HistoryEntry**](#46-embedded-historyentry) | Historieneintrag | Immutable record of a state transition on an Application (VwVG Art. 35 audit trail). | Embedded | in Application |
@@ -569,9 +569,9 @@ The **owned** domain. The portal writes Applications end-to-end through
 their review pipeline, retains an immutable VwVG-compliant audit trail,
 and hands approved cases off to the external project-management system.
 
-### 4.1 Application (Bedarfsmeldung)
+### 4.1 SpaceRequest (Bedarfsmeldung)
 
-**File:** [`data/applications.json`](../data/applications.json)
+**File:** [`data/space-requests.json`](../data/space-requests.json)
 
 A demand request raised by a Verwaltungseinheit. The flagship entity:
 carries the review pipeline, audit trail, attachments, and reviewer-set
@@ -582,8 +582,8 @@ workflow is portal-specific.
 
 | Field                  | PK/FK | Type            | Description                                                            | Constraints                | Alias (EN)             | Alias (DE)               |
 | ---------------------- | ----- | --------------- | ---------------------------------------------------------------------- | -------------------------- | ---------------------- | ------------------------ |
-| **applicationId**      | PK    | string          | Unique identifier. Format `{VE}-{year}-{seq}` (e.g. `BE-2026-014`)      | **mandatory**              | Application ID         | Bedarfsmeldungs-ID       |
-| **applicationType**    |       | string, enum    | Application size category. See Appendix A.1.                            | **mandatory**              | Application Type       | Antragstyp               |
+| **spaceRequestId**      | PK    | string          | Unique identifier. Format `{VE}-{year}-{seq}` (e.g. `BE-2026-014`)      | **mandatory**              | Application ID         | Bedarfsmeldungs-ID       |
+| **requestType**    |       | string, enum    | Application size category. See Appendix A.1.                            | **mandatory**              | Application Type       | Antragstyp               |
 | **pipelineVariant**    |       | string, enum    | Pipeline branch. See Appendix A.2.                                      | **mandatory**              | Pipeline Variant       | Pipeline-Variante        |
 | **status**             |       | string, enum    | Current state in the pipeline. See Appendix A.3.                        | **mandatory**              | Status                 | Status                   |
 | **submitterId**        | FK    | string          | Reference to User who filed the application.                            | **mandatory**              | Submitter              | Antragsteller            |
@@ -623,7 +623,7 @@ workflow is portal-specific.
 
 #### Swiss extension fields (`extensionData`)
 
-Applicable when `applicationType = Grossantrag` and the requesting VE is SEM:
+Applicable when `requestType = Grossantrag` and the requesting VE is SEM:
 
 | Field                              | Type   | Description                                            | Alias (EN)               | Alias (DE)               |
 | ---------------------------------- | ------ | ------------------------------------------------------ | ------------------------ | ------------------------ |
@@ -640,8 +640,8 @@ Applicable when `applicationType = Grossantrag` and the requesting VE is SEM:
 
 ```jsonc
 {
-  "applicationId": "BE-2026-014",
-  "applicationType": "Kleinantrag",
+  "spaceRequestId": "BE-2026-014",
+  "requestType": "Kleinantrag",
   "pipelineVariant": "standard",
   "status": "in_review_gs",
   "submitterId": "U.123.456",
@@ -694,7 +694,7 @@ Plus two off-pipeline terminals reachable from any `in_review_*` state:
 - `rejected`      — Reviewer rejected with `reviewerJustification` (VwVG Art. 35).
 
 Resubmission after `clarification` returns the same Application (same
-`applicationId`) to `submitted`; history is preserved.
+`spaceRequestId`) to `submitted`; history is preserved.
 
 ```mermaid
 stateDiagram-v2
@@ -1183,7 +1183,10 @@ attached to a Building. Standard anchor: IBPDI Certificate (future).
 
 | File                                                  | Records (mock) | Entities held                                                  |
 | ----------------------------------------------------- | -------------- | -------------------------------------------------------------- |
-| [`data/applications.json`](../data/applications.json)   | 7              | Application (with embedded Attachment / Condition / HistoryEntry) |
+| [`data/space-requests.json`](../data/space-requests.json)   | 7              | SpaceRequest (with embedded Attachment / Condition / HistoryEntry) — the typed PAYLOAD of a Bedarfsmeldung; its envelope is the matching ProcessInstance |
+| [`data/process-definitions.json`](../data/process-definitions.json) | 5     | ProcessDefinition (one per process; `variants` hold the ordered pipeline `steps[]`) |
+| [`data/process-instances.json`](../data/process-instances.json) | 11        | ProcessInstance — every Vorgang, whatever its process. Bedarfsmeldungen carry `payloadRef` → `spaceRequestId`; the operational processes carry a loose per-process `data` bag |
+| [`data/services.json`](../data/services.json)           | 9              | Service — the catalogue behind the navigation dropdown, the services overview, the front-page tiles and search. `titleKey`/`shortKey` reference `i18n.json` |
 | [`data/tenancies.json`](../data/tenancies.json)         | 6              | Tenancy                                                          |
 | [`data/users.json`](../data/users.json)                 | 5              | User                                                             |
 | [`data/reference-data.json`](../data/reference-data.json) | 1              | ReferenceData (single object)                                     |
@@ -1506,5 +1509,7 @@ external walls and balconies are counted.)
 | 0.8.0   | 2026-05-19 | Added **Dossier** (GEVER aggregating container, Future) as a sibling of Document; Document now carries an optional `dossierId` FK. Title changed to **Tenant Portal (Mieterportal) — Data Model**. Building DE corrected from "Gebäude / Liegenschaft" to just "Gebäude" (Liegenschaft is a sub-category of Parcel, not a synonym for Building). Parcel DE corrected from "Parzelle" to "Grundstück" (matches EGRID and ZGB Art. 655). Fixed pipe-escape rendering bug in §2.3 Document row (literal pipe characters inside a table cell were being parsed as column separators). Added GEVER, eCH-0039, eCH-0147 to references. New Appendix A.13 (Dossier Status). |
 | 0.9.0   | 2026-05-19 | **Document structure restructure.** Replaced the junk-drawer "§ 5 Detailed Entity Schemas" with one top-level section per domain — each domain now contains its own entity schemas and its own future-entities subsection. New top-level sections: § 3 Spatial Inventory, § 4 Demand Workflow, § 5 Tenancy Management, § 6 Records & Documents, § 7 Organisational Data, § 8 Communications, § 9 Reference Data, § 10 Facility Management (future-only). § 7 Future Entities removed; its entries distributed into the relevant domain sections (Site / Parcel / asset entities → § 3.5; Decision / Comment / Assignment / AccessLog → § 4.7; LeaseDetail → § 5.2; DocumentVersion → § 6.3; Contact / Address → § 7.3; Notification → § 8.2; Ticket / Service / Contract / Certificate → § 10). Renumbered File summary (§ 11), External System Integrations (§ 12), References (§ 13), Version History (§ 14). Added anchor links to entity names in § 2.3 Entity overview tables so each name jumps to its detailed schema. All internal cross-references updated to the new section numbering. |
 | 0.10.0  | 2026-05-19 | **Final consistency pass.** § 2.1: domain count corrected from "six" to **eight** (Communications + Facility management folded into the main domain table — they are no longer "additional"). Renamed domain "Records management" → "Records & Documents" and "Reference data" → "Reference data & catalogues" to match the § 2.3 cluster headers and § 6 / § 9 section titles. § 2.2 ER diagram: flipped AreaMeasurement subject edges to one-to-many (each measurement has exactly one subject); flipped Dossier subject edges to one-to-many and added `BUILDING ‖..o{ DOSSIER`; added `floorIds`/`spaceIds`/`rentedScope` to the TENANCY block; added `dossierId FK` and `retentionUntil` to DOCUMENT / DOSSIER blocks; changed BUILDING `assetKey` from `string` to `object`; rewrote the preamble to be precise about Planned-vs-Future dashed semantics. **Schema refinements (AreaMeasurement and Building):** Building reverted from `coords: [number, number]` array to scalar `lng` / `lat` fields (easier to validate, index, and read from JS; the array form survives only in GeoJSON serialisation via `geometry.coordinates`). AreaMeasurement: renamed `basis` → **`standard`** (matches the description text "measurement standard"); renamed `measuredBy` → **`source`** with expanded definition (file references like `floorplan-EG.dwg` or `model.ifc`, survey organisations, or `manual`); renamed `note` → **`comment`**; **dropped `measuredAt`** (`validFrom` / `validUntil` already carry the temporal information). § 7.2 Organisation heading now carries an explicit `[Embedded → Planned]` status tag, consistent with `[Planned]` / `[Future]` tags elsewhere. Appendix B coordinate-convention note rewritten for the scalar lng/lat shape. |
+| 0.14.0  | 2026-08-11 | **Process envelope: `ProcessDefinition` + `ProcessInstance`.** The portal runs five processes (Bedarfsmeldung, Schadensmeldung, Umzug, Sonderreinigung, Möbelbestellung) but only the first was persisted — the other three service forms minted a ticket number into a toast and discarded it, so the Vorgang the user was told about existed nowhere. Two new files: **`data/process-definitions.json`** (one definition per process; `defId`, `serviceId` back to the service catalogue, and `variants` holding the ordered `steps[]` — the Bedarfsmeldung keeps its three branches standard / bypass / greenfield, which previously lived as hardcoded arrays in `js/lib.js`) and **`data/process-instances.json`** (the envelope for every Vorgang: `instanceId`, `defId`, `variant`, requester, building, `status`, `assignee`, `history[]`, plus a loose per-process `data` bag). Field names follow the sibling portals. **Envelope/payload split:** a Bedarfsmeldung instance carries `payloadRef` → `spaceRequestId`, keeping its typed, computed and unit-tested record (NAW class, m²/FTE, budget ceilings) in `space-requests.json` rather than flattening it into the untyped `data` bag the operational processes use. «Meine Vorgänge» (formerly «Meine Anträge») lists instances of all five processes; `#/inbox/:id` transitionally resolves either a `spaceRequestId` (rich Bedarfsmeldung view) or an `instanceId` (generic case view). `#/queue` remains the Bedarfsmeldung review desk and is not yet process-generic. |
+| 0.13.0  | 2026-08-11 | **Entity rename: `Application` → `SpaceRequest`.** The portal shares its data vocabulary with the sibling BBL portals, where *application* denotes a software application (an Anwendung in the application catalogue), not a Bedarfsmeldung. Holding both meanings in one word made the file name `applications.json` mean two different things across the estate. Renamed: `data/applications.json` → **`data/space-requests.json`**, `applicationId` → **`spaceRequestId`**, `applicationType` → **`requestType`**, in-memory `state.applications` → `state.spaceRequests`. German UI copy is unchanged — a Bedarfsmeldung is still an *Antrag* on screen; this is a data-layer rename only. Also added **`data/services.json`** (the service catalogue that drives the navigation dropdown, the services overview, the front-page tiles and search; field names follow the sibling portals' `services.json` — `serviceId` / `type` / `popular` / `target`, with `titleKey` / `shortKey` holding i18n keys because this portal ships four languages). |
 | 0.12.0  | 2026-05-19 | **Data-file alignment to schema (stages 1-3 of the prototype migration).** All six existing `data/*.json` files rewritten to conform to the canonical schema in this document: English status enum values (`in_review_gs`, `submitted`, `clarification`, `approved`, `closed`, `rejected`, …), English field names (`applicationId`/`applicationType`/`assetKey`/`workstations`/`operatingCosts`/`furnitureBudget`/`conditions`/`reviewerJustification`/`projectNumber`/`portfolioCategory`/`floorLabel`), atomic address fields (`street`/`houseNumber`/`postalCode`/`city`/`country`) replacing free-text `address`, `BLD-*` building-ID format, English NAW-answer enums (`medium`/`occasional`/`none`/`regular`/`low`), SEM Grossantrag fields nested under `extensionData`, `eventType` on every history record, ISO 8601 datetimes with explicit `Z` timezone, English roles (`LBO`/`GS-Reviewer`). `data/master-data.json` renamed to `data/reference-data.json` with English field names (`furnitureBudgetPerSqm`, `operatingCostCeilingPerSqmGf`, `companyCode`, …) plus a new `currency: "CHF"` row. `data/buildings.json` migrated to **`data/buildings.geojson`** (FeatureCollection of Point features, `geometry.coordinates: [lng, lat]` per GeoJSON spec; scalar `lng`/`lat` reconstituted at load time). Hardcoded UI content extracted from `js/app.js` to a new **`data/downloads.json`** (download-link catalogues for the downloads page, info-page regulations / strategies / training, and per-property document placeholders). Inline NAW HTML table on the info page now renders from `reference-data.json` `nawClasses` (single source of truth). § 11 File summary updated to reflect the new file list. |
 | 0.11.0  | 2026-05-19 | **Tidy-data principle + maintainability pass.** § 1.2 Design Principles expanded with four new rows: **Tidy data** (no concatenated values), **Date vs datetime** (two crisp tags only — `string (date)` for `YYYY-MM-DD`, `string (datetime)` for full RFC 3339 timestamps), **Enum value casing** (snake_case for lifecycle states, PascalCase for type discriminators, standards-canonical for measurement standards), **Field-name conventions** (FKs end in `Id`; `ve` is the documented exception — a federal organisational code, not an opaque Id; role-prefixed FKs like `submitterVe`). The existing **Extensibility** and **Traceability** rows tightened to clarify that `extensionData` and `validFrom`/`validUntil` are portal-owned-only — reader-domain entities inherit validity / extensions from their lead system. **Address split applied** per the new Tidy-data principle: `Building.address`, `Application.address`, `Tenancy.address` (single free-text string) replaced with five atomic fields — `street`, `houseNumber`, `postalCode`, `city`, `country` (ISO 3166-1 alpha-2, default `CH`). The future **Address** entity (§ 7.3) remains the eventual FK target for cross-parent sharing. **Denormalisation made explicit:** boxed notes added to Application and Tenancy listing every echo field from Building (`street` / `houseNumber` / `postalCode` / `city` / `country` / `buildingName` / `assetKey` / `egid` / `lat` / `lng` / `image`) — developers can now see at a glance which fields are read-cached vs. authoritative. **Date-type tags normalised across the document:** all `string (ISO 8601)` and `string (ISO date)` occurrences replaced with `string (date)` or `string (datetime)` per the Date-vs-datetime principle; `Application.submittedAt` and `HistoryEntry.ts` are the only `datetime` fields. Dropped the redundant `minLength: 20` constraint on `submittedAt` (the type now disambiguates). **LinkRef promoted to shared helper:** § 6.2.1 reworked to explicitly list the consumer-restricted entityType ranges for `Document.linkedTo[]` (5 types) and `Dossier.subjectRef` (3 types); the Dossier `subjectRef` row now cross-references § 6.2.1. § 2.3 DE column: dropped redundant parentheses from "Verwaltungseinheit (VE)" and "Dossier (Geschäftsfall)" to match the established "no German in parens" rule. |

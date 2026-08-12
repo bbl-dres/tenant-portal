@@ -265,6 +265,13 @@ export function statusBadge(status) {
     'submitted':     { cls: 'badge badge--info',      label: 'Eingereicht' },
     'in_review_gs':  { cls: 'badge badge--info',      label: 'in GS-Prüfung' },
     'in_review_pfm': { cls: 'badge badge--info',      label: 'in PFM-Prüfung' },
+    // States the operational processes add (Schadensmeldung, Umzug,
+    // Sonderreinigung, Möbelbestellung — see data/process-definitions.json).
+    // All neutral pipeline progress, so all `info` per the rationale above.
+    'triage':             { cls: 'badge badge--info', label: 'Triage' },
+    'scheduled':          { cls: 'badge badge--info', label: 'Termin fixiert' },
+    'in_progress':        { cls: 'badge badge--info', label: 'in Arbeit' },
+    'asset_key_creation': { cls: 'badge badge--info', label: 'WE-Anlage' },
     'approved':      { cls: 'badge badge--success',   label: 'genehmigt' },
     'in_project':    { cls: 'badge badge--info',      label: 'in ePPM' },
     'closed':        { cls: 'badge badge--success',   label: 'abgeschlossen' },
@@ -306,11 +313,17 @@ export const PIPELINE_GREENFIELD = [
   { status: 'closed',             label: 'abgeschlossen' },
 ];
 
-export function renderPipeline(application) {
-  let steps;
-  if (application.pipelineVariant === 'bypass') steps = PIPELINE_BK;
-  else if (application.pipelineVariant === 'greenfield') steps = PIPELINE_GREENFIELD;
-  else steps = PIPELINE_STANDARD;
+export function renderPipeline(application, explicitSteps) {
+  // `explicitSteps` — the step list from data/process-definitions.json, which is
+  // the source of truth now that every process (not just the Bedarfsmeldung)
+  // has a pipeline. The PIPELINE_* constants below stay as the fallback for a
+  // caller that has no definition to hand; they mirror the bedarfsmeldung def.
+  let steps = explicitSteps;
+  if (!steps) {
+    if (application.pipelineVariant === 'bypass') steps = PIPELINE_BK;
+    else if (application.pipelineVariant === 'greenfield') steps = PIPELINE_GREENFIELD;
+    else steps = PIPELINE_STANDARD;
+  }
 
   const currentIdx = steps.findIndex(s => s.status === application.status);
   const isRejected = application.status === 'rejected';
