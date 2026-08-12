@@ -631,6 +631,7 @@ export function renderFooter() {
             <ul class="footer-information__list">
               <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub ${icon('arrowRight', 'footer-information__arrow')}</a></li>
               <li><a href="https://www.bk.admin.ch/de/webauftritt-der-bundesverwaltung" target="_blank" rel="noopener">Webauftritt der Bundesverwaltung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              <li><a href="https://bbl-dres.github.io/service-portal/" target="_blank" rel="noopener">Variante Service Portal ${icon('arrowRight', 'footer-information__arrow')}</a></li>
             </ul>
           </div>
 
