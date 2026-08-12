@@ -540,22 +540,11 @@ function buildSearchIndex() {
     });
   }
 
-  // Vorgänge of any process, scoped to what this user may see: their own plus
-  // everything raised inside their unit.
-  if (P.state.user) {
-    const visible = (P.state.processInstances || []).filter(i =>
-      i.requesterId === P.state.user.id || i.requesterVe === P.state.user.ve);
-    for (const c of visible.map(resolveCase)) {
-      idx.push({
-        kind: P.t('nav.inbox'),
-        type: c.processName,
-        title: c.title, lead: c.object, date: c.submittedAt,
-        href: c.href,
-        boost: SEARCH_BOOST.cases,
-        fields: { title: c.title, ref: c.id, type: c.processName, lead: c.object },
-      });
-    }
-  }
+  // Individual Vorgänge are deliberately NOT indexed: the global search is
+  // for finding content (services, properties, documents, news, info), while
+  // case work lives in «Meine Vorgänge», which has its own reference/title
+  // filter. Surfacing single process instances in global results mixed two
+  // mental models and cluttered the hit list (user feedback, 2026-08).
 
   // Tenancies = the properties this VE actually occupies.
   for (const t of getScopedTenancies()) {
@@ -682,7 +671,11 @@ function searchResultRow(r) {
       <a class="search-result__link" href="${r.href}"${attrs}${onclick}>
         <div class="search-result__body">
           <p class="meta-info search-result__meta">
-            <span class="meta-info__item">${P.escapeHtml(r.type || r.kind)}</span>
+            <!-- The label is the result's CATEGORY — the same vocabulary as
+                 the facet tabs above (kind), not the specific sub-type: a
+                 WiBe template labels as «Dokumente», not «WiBe» (the
+                 sub-type already leads the description line). -->
+            <span class="meta-info__item">${P.escapeHtml(r.kind || r.type)}</span>
             ${r.date ? `<span class="meta-info__item">${P.formatDate(r.date)}</span>` : ''}
           </p>
           <h3 class="search-result__title">${P.escapeHtml(r.title)}</h3>
@@ -703,7 +696,8 @@ function searchResultCard(r) {
     <li class="search-result-card">
       <a class="search-result-card__link" href="${r.href}"${attrs}${onclick}>
         <p class="meta-info search-result__meta">
-          <span class="meta-info__item">${P.escapeHtml(r.type || r.kind)}</span>
+          <!-- Category = tab vocabulary (kind), matching the list row. -->
+          <span class="meta-info__item">${P.escapeHtml(r.kind || r.type)}</span>
           ${r.date ? `<span class="meta-info__item">${P.formatDate(r.date)}</span>` : ''}
         </p>
         <h3 class="search-result__title">${P.escapeHtml(r.title)}</h3>
@@ -776,7 +770,7 @@ function renderSearchResults() {
       <div class="container">
         <div class="search-results" aria-live="polite">
           ${!query ? `
-            <p class="section-intro">Geben Sie einen Suchbegriff ein — zum Beispiel «Schaden», «Bundeshaus» oder «Grundriss». Durchsucht werden Dienstleistungen, Ihre Vorgänge, Liegenschaften, Dokumente, News und die Informationsseite.</p>
+            <p class="section-intro">Geben Sie einen Suchbegriff ein — zum Beispiel «Schaden», «Bundeshaus» oder «Grundriss». Durchsucht werden Dienstleistungen, Liegenschaften, Dokumente, News und die Informationsseite.</p>
           ` : total === 0 && !activeKind ? renderSearchNoResults(query) : `
             ${kinds.length > 1 ? `
               <div class="tabs search-results__tabs">
@@ -864,7 +858,7 @@ function renderSearchNoResults(query) {
         <li>Durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</li>
       </ul>
       <p class="search-no-results__hint">
-        Durchsucht werden Dienstleistungen, Ihre Vorgänge, Liegenschaften des Portfolios, Dokumente, News und die Informationsseite.
+        Durchsucht werden Dienstleistungen, Liegenschaften des Portfolios, Dokumente, News und die Informationsseite.
       </p>
     </div>
   `;

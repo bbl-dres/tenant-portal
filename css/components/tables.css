@@ -72,6 +72,12 @@
    and rows aren't grouped semantically. */
 .table--zebra tbody tr:nth-child(even) td { background: var(--color-secondary-50); }
 .table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
+/* On the tinted section bands the zebra tint IS the band colour — even rows
+   read as holes punched through the white table (grey on grey). Inside those
+   bands the rows stay white; the tbody border-top separators carry the
+   scannability the stripes provided. */
+.bg--secondary-50 .table--zebra tbody tr:nth-child(even) td,
+.section--alt .table--zebra tbody tr:nth-child(even) td { background: var(--color-white); }
 
 /* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
    defaults `thead th` to UPPERCASE (regular weight, text-700). The portal
