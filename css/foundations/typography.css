@@ -1,17 +1,21 @@
 /* ==========================================================================
    foundations/typography.css — BBL Mieterportal
 
-   Heading utilities (.h1-.h5), caption, section heading/intro, meta-info.
+   Heading utilities (.h1-.h5), caption, section heading/intro, content
+   list/hr rhythm, meta-info.
    Sources: styles.css 1459-1569.
-   DS counterparts: foundations/typography.postcss, components/meta-info.postcss.
+   DS counterparts: foundations/typography.postcss, components/meta-info.postcss,
+   components/list.postcss, components/separator.postcss.
    ========================================================================== */
 
 /* DS heading utility classes — mirror designsystem css/foundations/typography.postcss
    (.h1 → .h5). Combine with layout-specific block classes (e.g.
    `class="h1 hero__title"`) so each block contributes only its own
    responsibility (size/weight vs. spacing/max-width). */
-.h1 { font-size: var(--text-h1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); letter-spacing: var(--tracking-tight); }
-.h2 { font-size: var(--text-h2); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); letter-spacing: var(--tracking-tight); }
+/* No heading letter-spacing: the DS applies none anywhere on .h1-.h5
+   (typography.postcss:106-114 — text ramp + font-bold + mb-4 only). */
+.h1 { font-size: var(--text-h1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }
+.h2 { font-size: var(--text-h2); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }
 .h3 { font-size: var(--text-h3); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }  /* DS `.text--xl` applies leading-tight (1.25) */
 .h4 { font-size: var(--text-h4); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
 .h5 { font-size: var(--text-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
@@ -48,36 +52,34 @@ figcaption {
 }
 .section-intro--tight { margin-bottom: var(--space-lg); }
 
-/* `.card__title--icon` — card title with a leading inline-icon (e.g. the
-   "Rückfrage" card carries a refresh glyph). Aligns the icon with the
-   first text baseline. */
-.card__title--icon {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
+/* ── Content rhythm inside #page-body (route-rendered main content) ──────
+   DS base list rhythm (designsystem/css/components/list.postcss:13-25):
+   `main ul:not([class])` → list-disc list-outside pl-5 space-y-2;
+   `main ol:not([class])` → list-decimal, same box. Scoped to #page-body —
+   the portal's main content container — so chrome lists (nav, footer,
+   comboboxes) are unaffected. */
+#page-body ul:not([class]),
+#page-body ol:not([class]) {
+  padding-left: 1.25rem;           /* 20px, DS pl-5 */
+  margin: 0;
 }
-.card__title--icon .inline-icon {
-  margin-right: 0;
-  width: 18px;
-  height: 18px;
+#page-body ul:not([class]) { list-style: disc outside; }
+#page-body ol:not([class]) { list-style: decimal outside; }
+#page-body ul:not([class]) > li + li,
+#page-body ol:not([class]) > li + li {
+  margin-top: var(--space-sm);     /* DS space-y-2 */
 }
 
-/* `.card__inset` — paragraph living inside a `.card` that shouldn't add
-   the default `<p>` top/bottom margin (the card already supplies
-   --space-sm gap between its children). Replaces inline `style="margin:0;"`. */
-.card__inset { margin: 0; }
-.card__inset-meta { color: var(--color-text-secondary); font-size: var(--text-body-sm); }
-
-/* `.card--clarification` — the Rückfrage / offene Auflagen card that
-   spans the full grid row and shows a warning rail on the left.
-   Replaces the previous inline `style="grid-column: 1 / -1; border-left: 4px solid var(--color-warning);"`. */
-.card--clarification {
-  grid-column: 1 / -1;
-  border-left: 4px solid var(--color-warning);
-}
-.card__justification {
-  margin: 0 0 var(--space-sm);
-  font-size: var(--text-body-sm);
+/* Bare `<hr>` (js/wizard.js emits one between summary blocks) — DS
+   separator look: no native border, a single secondary-200 rule
+   (designsystem/css/components/separator.postcss:5-17). Scoped to
+   :not([class]) so the portal's own `.rule` separator (sections/
+   secondary-pages.css, --color-border) keeps winning on classed hrs —
+   an unscoped `#page-body hr` would out-rank `.rule` on ID specificity. */
+#page-body hr:not([class]) {
+  border: 0;
+  border-top: 1px solid var(--color-secondary-200);
+  margin: var(--space-md) 0;
 }
 
 /* (The former duplicate `.card__title` size override lived here. It forced
@@ -109,8 +111,8 @@ figcaption {
 .meta-info__item:not(:last-child)::after {
   content: '|';
   color: var(--color-text-muted);
-  padding: 0 var(--space-sm);
+  padding: 0 var(--space-sm);      /* DS px-2 — meta-info.postcss:16-19 */
 }
 @media (min-width: 1024px) {
-  .meta-info__item:not(:last-child)::after { padding: 0 var(--space-md); }
+  .meta-info__item:not(:last-child)::after { padding: 0 var(--space-2sm); }   /* DS lg:px-3 */
 }

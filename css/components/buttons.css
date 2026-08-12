@@ -24,13 +24,17 @@
   border-radius: var(--radius-sm);            /* CD buttons use rounded-sm (2px) */
   font-size: var(--text-body);                /* CD: text--base (16/18/20) — was one step small */
   font-weight: var(--font-weight-regular);
+  /* DS size rule `leading-5 lg:leading-6` (btn.postcss:116) — 20 px base,
+     24 px from 1024. Without it the button inherits body 1.5 (24 px at
+     16 px) and single-line buttons sit 4 px taller than CD at base. */
+  line-height: 1.25rem;
   font-family: inherit;
   text-decoration: none;
   border: 1px solid transparent;
   transition: background var(--transition-fast), color var(--transition-fast);
   cursor: pointer;
-  letter-spacing: 0.01em;
 }
+@media (min-width: 1024px) { .btn { line-height: 1.5rem; } }
 @media (min-width: 1280px) { .btn { min-height: var(--btn-lg-min-h); } }
 @media (min-width: 1920px) { .btn { min-height: 52px; } }
 /* CD Bund: filled action button = navy. Red is reserved for danger and
@@ -51,13 +55,37 @@
   color: var(--color-primary-700);
   border-color: var(--color-primary-700);
 }
+/* DS pins the resting colour through focus (btn.postcss:19
+   `focus:text-primary-600 focus:border-primary-600`) so the hover darkening
+   can't bleed into the keyboard-focus state. */
+.btn--outline:focus-visible {
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+/* DS `.btn--bare` (btn.postcss:27-30): px-2 (8 px — deliberately narrower
+   than the px-4 base) and text-secondary-800 (federal blue-gray, NOT the
+   neutral gray ramp). Hover → primary-600, no bg. */
 .btn--bare {
   background: transparent;
-  color: var(--color-text-primary);
+  padding-inline: var(--space-sm);
+  color: var(--color-secondary-800);
 }
 .btn--bare:hover { color: var(--color-primary); }            /* CD: text → primary, no bg */
-.btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
-.btn--lg { min-height: 48px; padding: var(--space-md) var(--space-xl); font-size: var(--text-h4); }
+/* DS `.btn--link` (btn.postcss:38-53): flush-left red text link — pl-0
+   pr-2, primary-600 regular, hover → primary-700, 32 px icon. This is the
+   canonical federal back-affordance base (composed with `.btn--back`). */
+.btn--link {
+  background: transparent;
+  padding-left: 0;
+  padding-right: var(--space-sm);
+  color: var(--color-primary-600);
+}
+.btn--link:hover { color: var(--color-primary-700); }
+.btn--link .btn__icon { width: var(--icon-lg); height: var(--icon-lg); }
+.btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); line-height: 1rem; }
+.btn--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-xl); font-size: var(--text-h4); line-height: 1.5rem; }
+/* DS size ramps (btn.postcss:112-129): sm leading-4 lg:leading-5. */
+@media (min-width: 1024px) { .btn--sm { line-height: 1.25rem; } }
 @media (min-width: 1280px) { .btn--sm { min-height: 40px; } .btn--lg { min-height: 52px; } }
 @media (min-width: 1920px) { .btn--sm { min-height: 44px; } .btn--lg { min-height: 56px; } }
 /* DS flat disabled fills (btn.postcss) instead of `opacity`, which makes a
@@ -79,7 +107,8 @@
   color: var(--color-secondary-300);
   border-color: var(--color-secondary-200);
 }
-.btn--bare[disabled], .btn--bare.btn--disabled {
+.btn--bare[disabled], .btn--bare.btn--disabled,
+.btn--link[disabled], .btn--link.btn--disabled {
   background: transparent;
   color: var(--color-secondary-300);
 }
@@ -99,23 +128,9 @@
   box-shadow: 0 0 0 2px var(--color-white), 0 0 0 5px var(--color-focus-dark);
   outline: none;
 }
-/* On dark surfaces (top-bar, footer, .section--dark) the focus ring
-   switches to purple-300 (lighter) — matches CD spec
-   `*:focus-visible { ring-2 ring-purple-300 }`. Single 2px ring, no
-   white inner: keeps the focus indicator clean and CD-canonical. */
-.top-bar :focus-visible,
-.app-footer :focus-visible,
-.section--dark :focus-visible,
-/* A11Y-004: the mobile drawer's meta zone and language bar are
-   --color-surface-dark surfaces too — without them here they fell through
-   to the global 3px #8655F6 ring (2.26:1 on the navy, 1.14:1 on the active
-   language button). The purple-300 ring restores >= 3:1 (~5.5:1). */
-.main-navigation__mobile-meta :focus-visible,
-.main-navigation__mobile-lang :focus-visible {
-  outline: 2px solid var(--color-focus-dark);
-  outline-offset: 2px;
-  box-shadow: none;
-}
+/* Dark-surface focus rings live with the global focus rule in
+   foundations/tokens.css (one thickness everywhere per DESIGNGUIDE §5.12,
+   colour switch to purple-300 per DS global.postcss:78-85). */
 
 /* Back-to-top — DS canonical `.back-to-top-btn--outline`
    (designsystem/css/components/back-to-top-btn.postcss:79-88): white bg,
@@ -161,13 +176,13 @@
 }
 .app-footer__top-btn {
   position: sticky;
-  top: calc(100vh - 64px);   /* 44 px button + 20 px gap from viewport bottom */
+  top: calc(100vh - 3.5rem);   /* DS back-to-top-btn.postcss:41 — 44 px button + 12 px viewport gap */
   width: 44px;
   height: 44px;
   background: var(--color-white);
   border: 1px solid var(--color-primary-600);
   color: var(--color-primary-600);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);   /* DS rounded-sm (back-to-top-btn.postcss:32) */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -189,14 +204,16 @@
 }
 .app-footer__top-btn svg {
   width: 50%;
-  height: auto;
+  height: 100%;   /* DS .back-to-top-btn__icon w-1/2 h-full */
   margin-right: 0;
 }
+/* Sticky offsets per DS back-to-top-btn.postcss:41-48 —
+   100vh − 3.5/4.5/5 rem → 12/24/16 px gaps for the 44/48/64 px button. */
 @media (min-width: 1024px) {
-  .app-footer__top-btn { width: 48px; height: 48px; top: calc(100vh - 68px); }
+  .app-footer__top-btn { width: 48px; height: 48px; top: calc(100vh - 4.5rem); }
 }
 @media (min-width: 1280px) {
-  .app-footer__top-btn { width: 64px; height: 64px; top: calc(100vh - 88px); }
+  .app-footer__top-btn { width: 64px; height: 64px; top: calc(100vh - 5rem); }
 }
 
 /* ── SHARE-BAR (detail-view utility bar — back / print / share) ────────
@@ -222,27 +239,19 @@
   gap: var(--space-xs);
   margin-left: auto;             /* keeps actions right-aligned even if back is absent */
 }
-/* `.btn--back` — CD Bund back-button modifier. The federal canonical
-   `.btn--outline` ships with primary-600 text + border (see
-   `designsystem/css/components/btn.postcss`). Our portal's `.btn--outline`
-   stays primary-red and keeps a full touch target. */
+/* `.btn--back` — DS layout-only modifier (btn.postcss:188-191: float +
+   a small top-margin nudge; it carries NO colour, size or border). The
+   visual comes from the composed variant classes: the DS's own detail
+   pages all render `<Btn variant="outline" size="sm" icon="ArrowLeft"
+   class="btn--back">` — an OUTLINED small button (verified against
+   detailPressRelease/detailEvent/detailPublication*.vue). The float and
+   top-nudge are omitted: the portal's share-bar is a flex row (float is
+   inert, align-items centres). min-height keeps the portal's documented
+   44 px touch-target floor (DESIGNGUIDE §5, WCAG 2.5.5) — DS `--sm` is
+   34 px at base. */
 .btn--back {
   min-height: var(--btn-min-h);
-  padding: var(--space-xs) var(--space-md);
-  gap: var(--space-xs);
-  font-size: var(--text-body-sm);
-  /* Weight inherits from `.btn` base (regular) — matches CD Bund
-     `.btn--outline` `font-normal`. */
-  color: var(--color-primary-600);
-  border-color: var(--color-primary-600);
-  text-decoration: none;
 }
-.btn--back:hover {
-  color: var(--color-primary-700);
-  border-color: var(--color-primary-700);
-  background: transparent;
-}
-.btn--back .btn__icon { width: var(--icon-md); height: var(--icon-md); }
 .share-bar__btn {
   background: transparent;
   border: none;
@@ -257,8 +266,8 @@
   cursor: pointer;
   border-radius: var(--radius);
   transition: color var(--transition-fast);
-  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C4 */
-  min-width: 44px;
+  min-height: var(--btn-min-h);          /* WCAG 2.5.5 touch-target — audit M-C4 */
+  min-width: var(--btn-min-h);
 }
 /* CD .btn--bare hover: text → primary-600 only, no background fill. */
 .share-bar__btn:hover { color: var(--color-primary); }

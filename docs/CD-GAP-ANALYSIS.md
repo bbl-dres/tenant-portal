@@ -1,5 +1,14 @@
 # CD-Bund Design Gap Analysis — BBL Mieterportal
 
+> **SUPERSEDED (2026-08-12).** A fresh-eyes re-audit (four parallel reviews:
+> component fidelity, chrome/layout fidelity, hardcoded values, CSS
+> duplication) found most findings below resolved and the file/line
+> references stale (they cite the pre-split `css/styles.css`). The re-audit
+> was implemented directly: ~600 lines of dead CSS removed, the CD-guard
+> grandfather list cleared to empty, chrome/component values realigned to
+> the DS sources, and the deviations register in DESIGNGUIDE.md §5/§5a
+> updated. This document is kept as an audit trail only.
+
 **Audit date:** 2026-07-29
 **Reviewed against:** official Swiss Federal Design System (CD Bund), local clone
 `C:\Users\david\Documents\GitHub\designsystem` (Tailwind + PostCSS + Vue source of truth).

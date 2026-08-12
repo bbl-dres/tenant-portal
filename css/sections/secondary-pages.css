@@ -121,45 +121,14 @@
   margin: 0;
 }
 
-/* Facet tabs. `.tabs` and `.tab__control` are the DS tab primitives
-   (css/components/disclosure.css); only the count chip is search-specific. */
+/* Facet tabs. `.tabs` and `.tab__control` are the DS tab primitives —
+   `.tab__control` is styled as a selector alias of `.tab` in
+   css/components/disclosure.css; only the count chip and the strip
+   container are search-specific. */
 .search-results__tabs .tab__controls {
   display: flex;
   align-items: stretch;
 }
-.tab__control {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-md);                /* DS px-4 py-4 */
-  /* Same reason as `.tab` (components/disclosure.css): a button's default
-     `line-height: normal` makes its height depend on which font has loaded,
-     which both re-flows the strip on swap and can drop the target below 44px. */
-  min-height: var(--btn-min-h);
-  line-height: var(--line-height-normal);
-  background: transparent;
-  border: none;
-  font-size: var(--text-body);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color var(--transition-fast);
-}
-.tab__control:first-child { padding-left: 0; }
-.tab__control::after {
-  content: '';
-  display: block;
-  position: absolute;
-  left: var(--space-md);
-  right: var(--space-md);
-  bottom: 0;
-  height: 3px;
-  transition: background var(--transition);
-}
-.tab__control:first-child::after { left: 0; }
-.tab__control--active::after,
-.tab__control:hover::after { background: var(--color-primary-500); }
-.tab__count { color: var(--color-text-secondary); }
 
 /* Sort + view switch, right of the count in .search-results__header. */
 .search-results__header__right {
@@ -177,13 +146,13 @@
   /* DS `.search-results__header__right select { text-right }`. */
   text-align: right;
 }
-.search-results__views {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding-left: var(--space-md);
-  border-left: 1px solid var(--color-secondary-300);
-}
+/* `.search-results__views` container geometry is merged into the
+   `.view-switch` rule (sections/properties.css) — byte-identical pair.
+   The per-button `.search-results__view` rules below stay local: their
+   geometry (fixed square, centred) and active treatment (no rail) differ
+   from `.view-switch__btn`. The phone-width hide for the container moved
+   to properties.css next to the merged rule to keep its cascade position
+   after the base rule. */
 .search-results__view {
   display: inline-flex;
   align-items: center;
@@ -196,11 +165,6 @@
 .search-results__view:hover { color: var(--color-primary); }
 .search-results__view--active { color: var(--color-text-primary); }
 .search-results__view .inline-icon { width: var(--icon-base); height: var(--icon-base); }
-@media (max-width: 640px) {
-  /* The switch is the first thing to go when the row runs out of width —
-     the list view works everywhere, the grid is a preference. */
-  .search-results__views { display: none; }
-}
 
 /* ── RESULT ROW (list view) ─────────────────────────────────────────────
    Meta line (type · date) above the title, lead below, optional thumbnail
@@ -291,15 +255,10 @@
 .search-no-results {
   max-width: 640px;
 }
-.search-results__no-results h2,
-.search-no-results__title {
+.search-results__no-results h2 {
   margin: 0 0 var(--space-xl);
 }
-.search-results__no-results h2 strong,
-.search-no-results__title strong { color: var(--color-text-primary); }
-.search-no-results__heading {
-  margin: var(--space-lg) 0 var(--space-sm);
-}
+.search-results__no-results h2 strong { color: var(--color-text-primary); }
 .search-no-results__list {
   margin: 0 0 var(--space-lg);
   padding-left: var(--space-lg);
@@ -325,7 +284,7 @@
   border-radius: var(--radius-lg);
 }
 .empty-state__glyph {
-  font-size: 3rem;
+  font-size: var(--icon-2xl);
   margin-bottom: var(--space-md);
 }
 .empty-state__title {
@@ -417,14 +376,6 @@
 .login-page__hint { font-size: var(--text-body-xs); color: var(--color-text-secondary); margin-top: var(--space-md); }
 .login-page__hint--muted { color: var(--color-text-muted); margin-top: var(--space-sm); }
 
-/* ── APP-DETAIL HELPERS ──────────────────────────────────────────────────
-   Small typography utilities used inside the application-detail card body
-   and the SAP/ePPM tab. Replaces inline style declarations. */
-.app-detail__correlation {
-  font-size: var(--text-body-xs);
-  color: var(--color-text-muted);
-}
-
 /* `.modal__meta` — small muted line inside modal body copy (e.g. ID
    continuity note in the resubmit modal). */
 .modal__meta {
@@ -461,30 +412,7 @@
 }
 
 /* ── DOWNLOADS PAGE ──────────────────────────────────────────────────────
-   Filter bar (typed selects + search), table column widths, download
-   action cell. Replaces ~10 inline style declarations across the
-   downloads view. */
-.docs-filter-bar__select {
-  flex: 1 1 220px;
-  min-width: min(100%, 220px);
-  min-height: var(--btn-min-h);
-}
-.docs-filter-bar__search {   /* composes .search-field; leads the bar */
-  flex: 2 1 260px;
-  min-width: min(100%, 200px);
-}
-.docs-filter-bar > .input { min-width: 0; }
-@media (max-width: 639.98px) {
-  .docs-filter-bar { flex-direction: column; }
-  .docs-filter-bar__select,
-  .docs-filter-bar__search {
-    width: 100%;
-    /* The row-layout `flex: 1 1 220px/260px` basis applies to HEIGHT once
-       the bar stacks as a column — without this reset every control
-       balloons into a 220–260 px tall box. */
-    flex: 0 0 auto;
-  }
-}
+   Table column widths + download action cell. */
 .table--documents .col-title   { width: 32%; }
 .table--documents .col-type    { width: 13%; }
 .table--documents .col-linked  { width: 22%; }

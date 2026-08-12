@@ -7,45 +7,41 @@
    ========================================================================== */
 
 /* ── CARDS ──────────────────────────────────────────────────────────────── */
-/* CD Bund Card uses shadow, not border. --highlight variant uses a
-   4px-wide secondary-300 left rail (not a primary-coloured outline). */
+/* CD Bund Card: white ground + shadow-lg, SQUARE corners, no border
+   (card.postcss:5-13 — no border-radius appears anywhere in the file;
+   square content surfaces are a federal CD signature). Body rhythm is
+   `px-6 py-10` (24 px sides / 40 px vertical), FIXED at every width
+   (card.postcss:210-213). Hover elevation is scoped to clickable cards
+   only (DS `.card--clickable`, card.postcss:15-41) — the portal's base
+   .card is always a static container (verified: every `class="card"`
+   call site is a <div>/<form>), so it carries no hover state.
+   The former `.card--flat` / `.card--highlight` modifiers were deleted
+   in the 2026-08 re-audit: both were unreferenced AND collided with DS
+   classes of the same name that mean something visually different
+   (list-row variant / offset secondary-300 backing panel). */
 .card {
   background: var(--color-bg-default);
-  border: 1px solid transparent;
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  padding: var(--space-2lg) var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   box-shadow: var(--shadow-card);
-  transition: box-shadow var(--transition-fast);
 }
-@media (min-width: 1024px) { .card { padding: var(--space-xl); } }
-.card:hover { box-shadow: var(--shadow-card-hover); }
-.card:hover .card__title { color: var(--color-primary-700); }
-.card__title { transition: color var(--transition-fast); }
-.card--highlight {
-  position: relative;
-  padding-left: calc(var(--space-lg) + 4px);
-  box-shadow: var(--shadow-card);
+/* Canonical card title. DS `card.postcss:215-220` `.card__title` is
+   `text-lg xl:text-xl 3xl:text-2xl` bold (18/20/24 px) — never below 18 px —
+   with `leading-snug` and `break-words`. `--text-h4` (18/18/20/22) meets
+   that floor. This is the SINGLE `.card__title` size rule; the former
+   duplicate lower in this file that forced `--text-body` (16 px) was
+   removed. */
+.card__title {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-snug);
+  overflow-wrap: break-word;
 }
-.card--highlight::before {
-  content: '';
-  position: absolute;
-  left: 0; top: var(--space-md); bottom: var(--space-md);
-  width: 4px;
-  background: var(--color-primary);
-  border-radius: 2px;
-}
-.card--flat { box-shadow: none; border-color: var(--color-secondary-200); }
-/* Canonical card title. DS `card.postcss` `.card__title` is
-   `text-lg xl:text-xl 3xl:text-2xl` bold (18/20/24 px) — never below 18 px.
-   `--text-h4` (18/18/20/22) meets that floor. This is the SINGLE
-   `.card__title` size rule; the former duplicate lower in this file that
-   forced `--text-body` (16 px) was removed. */
-.card__title { margin: 0 0 var(--space-sm); font-size: var(--text-h4); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
 .card__lead { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
-.card__footer { margin-top: auto; padding-top: var(--space-md); border-top: 1px solid var(--color-border-light); display: flex; gap: var(--space-sm); justify-content: space-between; }
 
 .card-grid {
   display: grid;
@@ -69,10 +65,10 @@
 .section-cta {
   display: flex;
   justify-content: flex-end;
-  margin: 40px 0 0;
+  margin: var(--space-2lg) 0 0;
 }
-@media (min-width: 1024px) { .section-cta { margin-top: 48px; } }
-@media (min-width: 1920px) { .section-cta { margin-top: 64px; } }
+@media (min-width: 1024px) { .section-cta { margin-top: var(--space-2xl); } }
+@media (min-width: 1920px) { .section-cta { margin-top: var(--space-3xl); } }
 .section-cta__link {
   display: inline-flex;
   align-items: center;
@@ -94,13 +90,13 @@
 .section-cta__link:hover .section-cta__icon { transform: translateX(4px); }
 
 /* ── QUICK-CARD (kbob-fdk pattern) — link-style card with arrow button ── */
+/* Square corners per the base card rule — DS cards carry no radius. */
 .card--quick {
   position: relative;
   display: flex;
   flex-direction: column;
   background: var(--color-bg-default);
   border: none;
-  border-radius: var(--radius-lg);
   padding: var(--space-xl);
   padding-bottom: var(--space-4xl);   /* keeps text clear of the corner arrow-btn */
   text-decoration: none;
@@ -108,7 +104,7 @@
   box-shadow: var(--shadow-card);
   min-height: 200px;
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: box-shadow var(--transition-fast);
 }
 .card--quick:hover {
   box-shadow: var(--shadow-card-hover);   /* CD cards lift via shadow only, no translate */
@@ -167,10 +163,12 @@
   flex-direction: column;
   min-height: 360px;
   overflow: hidden;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition: box-shadow var(--transition);
 }
+/* CD cards lift via shadow only — no translate (DS card.postcss:27-29,
+   the sole transform in the DS card family is the --highlight backing
+   panel's scale, not a lift). */
 .card--profile:hover {
-  transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
 }
 /* Card-top photo — applied to a real `<img>` (not a background-image div)
@@ -197,18 +195,15 @@
   color: var(--color-text-muted);
   margin: 0 0 var(--space-sm);
 }
+/* No letter-spacing — the DS applies no tracking to card titles or
+   headings (typography.postcss / card.postcss set none). */
 .card--profile__title {
   font-size: var(--text-h3);
   font-weight: var(--font-weight-bold);
   margin: 0 0 var(--space-sm);
   color: var(--color-text-primary);
-  letter-spacing: var(--tracking-tight);
   transition: color var(--transition-fast);
 }
-/* Profile cards sit *inside* .section--dark but have a white card body;
-   override the generic dark-section heading rule so the title stays readable. */
-.section--dark .card--profile__title { color: var(--color-text-primary); }
-.section--dark .card--profile:hover .card--profile__title { color: var(--color-primary); }
 .card--profile:hover .card--profile__title { color: var(--color-primary); }
 .card--profile__desc {
   font-size: var(--text-body-sm);
@@ -222,42 +217,10 @@
   right: var(--space-lg);
 }
 
-.profile-section__footer {
-  margin-top: var(--space-3xl);
-  padding-top: var(--space-xl);
-  border-top: 1px solid var(--color-white-15);
-}
-.profile-section__links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-sm);
-}
-@media (min-width: 768px) {
-  .profile-section__links { grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
-}
-.profile-section__links a {
-  color: var(--color-white-92);
-  text-decoration: none;
-  font-size: var(--text-body-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) 0;
-  border-bottom: 1px solid transparent;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
-}
-.profile-section__links a:hover {
-  color: var(--color-white);
-  border-bottom-color: var(--color-white-50);
-}
-
 /* ── ARROW BUTTON (shared with card--quick) ──────────────────────────────── */
 .arrow-btn {
-  width: 44px;
-  height: 44px;
+  width: var(--btn-min-h);
+  height: var(--btn-min-h);
   border: 1px solid var(--color-primary);
   background: transparent;
   display: flex;
@@ -272,16 +235,19 @@
 
 /* ── DETAIL LIST ──────────────────────────────────────────────────────────
    Generic two-column definition list for card content: label left, value
-   right, collapsing to one column on phones. The portal already had three
-   one-off variants of this (.sap-dl, .contact-dl, .profile-dl) that differ
-   only in where they live; new surfaces use this one rather than adding a
-   fourth. Same geometry as .sap-dl, which it generalises. */
+   right, collapsing to one column on phones. Canonical portal DL — the
+   one-off variants it generalised are gone (.sap-dl deleted 2026-08) or
+   grandfathered (.contact-dl, .profile-dl); new surfaces use this one
+   rather than adding another. */
 .detail-list {
   display: grid;
   /* A generous label column — `fit-content` lets it take what the longest
      label needs, up to a cap, instead of the ragged `max-content` width that
-     left «Wirtschaftseinheit (WE)» hard against its value. */
-  grid-template-columns: fit-content(18rem) minmax(0, 1fr);
+     left «Wirtschaftseinheit (WE)» hard against its value. Consumers with a
+     known label width override via the --dl-label-col hook (e.g.
+     `.case-overview .detail-list { --dl-label-col: 220px }` in review.css)
+     instead of re-declaring the whole grid. */
+  grid-template-columns: var(--dl-label-col, fit-content(18rem)) minmax(0, 1fr);
   gap: var(--space-sm) var(--space-lg);
   margin: var(--space-md) 0 0;
 }

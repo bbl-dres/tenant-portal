@@ -2,7 +2,7 @@
    sections/review.css — BBL Mieterportal
 
    Reviewer surfaces: queue bulk-action toolbar, reviewer split-pane,
-   history timeline, queue table tweaks, Auflagen list.
+   queue table tweaks, Auflagen list.
    Sources: styles.css 3419-3431, 5034-5091, 5155-5259.
    ========================================================================== */
 
@@ -79,29 +79,6 @@
 .mark-button--active-ok      { background: var(--color-success); color: var(--color-white); border-color: var(--color-success); }
 .mark-button--active-nok     { background: var(--color-danger);  color: var(--color-white); border-color: var(--color-danger); }
 .mark-button--active-comment { background: var(--color-warning); color: var(--color-gray-900); border-color: var(--color-warning); }
-
-/* History timeline */
-.history-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.history-list li {
-  display: grid;
-  grid-template-columns: 140px 140px 1fr;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--color-border-light);
-  font-size: var(--text-body-sm);
-}
-.history-list time {
-  color: var(--color-text-secondary);
-  font-family: var(--font-family-mono);
-  font-size: var(--text-body-xs);
-}
-@media (max-width: 768px) {
-  .history-list li { grid-template-columns: 1fr; }
-}
 
 /* Queue table tweaks */
 .queue-stats {
@@ -243,7 +220,8 @@
 /* ONE label column across every section of a Vorgang, so the values line up
    down the whole page. Each `.detail-list` sizes its own label column by
    default, which made «Name :» and «Wirtschaftseinheit (WE) :» start their
-   values at different x positions two sections apart. */
-@media (min-width: 640px) {
-  .case-overview .detail-list { grid-template-columns: 220px minmax(0, 1fr); }
-}
+   values at different x positions two sections apart. Pinned via the
+   `--dl-label-col` hook (components/cards.css) instead of re-declaring the
+   grid; below 640px cards.css collapses the list to one column regardless,
+   so no media query is needed here. */
+.case-overview .detail-list { --dl-label-col: 220px; }

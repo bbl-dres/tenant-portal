@@ -50,9 +50,9 @@
 .burger__icon {
   display: block;
   position: relative;
-  width: 24px;
+  width: var(--icon-base);
   height: 18px;
-  color: var(--color-text-primary);
+  color: var(--color-gray-500);   /* DS burger.postcss:12 text-text-500 (#6B7280) */
   transition: color var(--transition-fast);
 }
 .burger:hover .burger__icon { color: var(--color-primary); }
@@ -62,7 +62,7 @@
   right: 0;
   height: 2px;
   background: currentColor;
-  border-radius: 1px;
+  border-radius: var(--radius-xs);
   transition: transform var(--transition), opacity var(--transition-fast), top var(--transition);
 }
 .burger__bar:nth-child(1) { top: 0; }
@@ -84,7 +84,6 @@
 .main-navigation {
   display: flex;
   gap: 0;
-  flex-wrap: wrap;
   /* Negative margin-left cancels the first nav-link's horizontal padding,
      so its TEXT (not its outer edge) aligns with the container's left
      edge — same X as the breadcrumb, page heading, and body text.
@@ -193,6 +192,30 @@
   width: var(--icon-sm); height: var(--icon-sm);
 }
 
+/* DS desktop nav row (main-navigation.postcss:27-33): the list is a
+   full-height row (`h-14 xl:h-16 3xl:h-20` — exactly our --nav-height
+   ramp 56/64 @1280/80 @1920) and each link is a full-height flex cell:
+   `lg:flex lg:items-center lg:h-full lg:px-4 leading-tight
+   whitespace-nowrap`. Horizontal padding ONLY — with the link spanning
+   the row height, the ::after rail (bottom: 0) sits on the nav row's
+   bottom edge instead of hugging the text box. The row never wraps
+   (DS whitespace-nowrap). Scoped to ≥1024 — mobile drawer rows keep
+   their own geometry (responsive block below). */
+@media (min-width: 1024px) {
+  .main-navigation {
+    height: var(--nav-height);
+    flex-wrap: nowrap;
+  }
+  .main-navigation__link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 var(--space-md);
+    line-height: var(--line-height-tight);
+    white-space: nowrap;
+  }
+}
+
 /* ── NAV DROPDOWN PANEL (DS desktop-menu drawer, "Dienstleistungen") ─────
    Constrained drawer anchored under the trigger word (left:Xpx set in JS),
    not a full-bleed mega-menu. Geometry = DS `.desktop-menu__drawer`
@@ -244,10 +267,13 @@
 .nav-menu__close svg { flex-shrink: 0; width: var(--icon-sm); height: var(--icon-sm); }
 
 /* Heading = DS `.navy__title` (navy.postcss:69-73) → `.menu__item` +
-   `--title`: a 16px bold row on the menu grid (py-3, lg:px-0), not a
-   display heading. Static Tailwind base size, so --text-chrome-base. */
+   `--title`: a bold row on the menu grid (py-3, lg:px-0), not a display
+   heading. It declares NO size of its own, so it inherits the body scale
+   — `.text--base` = `text-base xl:text-lg 3xl:text-xl`
+   (typography.postcss:47-49), i.e. the RESPONSIVE 16 / 18 @1280 /
+   20 @1920 cascade = our --text-body. */
 .nav-menu__heading {
-  font-size: var(--text-chrome-base);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-bold);
   margin: 0;
   padding: var(--space-2sm) 0;
@@ -319,7 +345,7 @@
 }
 
 /* The navbar must establish positioning context for the dropdown */
-.navbar { position: relative; z-index: 30; }
+.navbar { position: relative; z-index: var(--z-navbar); }
 
 /* Lift effect on the active nav-menu trigger — mirrors DS
    `.main-navigation > ul > li > a.clicked` (postcss line 51-55). The
@@ -330,7 +356,7 @@
 .main-navigation__link--clicked {
   background: var(--color-white);
   position: relative;
-  z-index: 31;
+  z-index: var(--z-nav-trigger);
   box-shadow: var(--shadow-nav-trigger);
   clip-path: inset(-50px -50px -1px -50px);
 }
@@ -342,7 +368,7 @@
    shell.js `ensureNavOverlay`). */
 .main-navigation__overlay {
   position: fixed;
-  top: var(--nav-height, 56px);   /* below the navbar */
+  top: 0;   /* actual offset set at runtime by shell.js positionNavOverlay (shell.js:751) */
   left: 0; right: 0; bottom: 0;
   /* Matches DS `bg-gradient-to-b from-text-900/20 via-text-900/20
      to-transparent` — stays at 20 % opacity from 0 % through 50 %, then
@@ -351,8 +377,9 @@
   background: linear-gradient(to bottom, var(--color-gray-900-20) 0%, var(--color-gray-900-20) 50%, var(--color-gray-900-00) 100%);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-fast);
-  z-index: 25;
+  /* DS overlay fades over duration-300 — the portal's 320 ms slow step. */
+  transition: opacity var(--transition-slow);
+  z-index: var(--z-nav-scrim);
 }
 .main-navigation__overlay--open {
   opacity: 1;
@@ -365,8 +392,10 @@
 
 /* ── BREADCRUMB ─────────────────────────────────────────────────────────── */
 /* CD Bund breadcrumb is flat on the page background (no grey strip), with
-   chevron separators and an underlined current page. The full federal
-   variant adds per-level dropdowns; we ship the simpler flat form here.
+   chevron separators; the current page is set apart by colour + weight
+   (text-primary, regular — no underline, see [aria-current] below). The
+   full federal variant adds per-level dropdowns; we ship the simpler flat
+   form here.
    CD canonical: `hidden lg:block` (designsystem/css/sections/breadcrumb.postcss:9)
    — breadcrumb is hidden below 1024 px on mobile/tablet, where the burger
    menu serves as the primary back-navigation affordance. */
@@ -382,7 +411,9 @@
   width: 100%;
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-md) var(--container-padding) var(--space-sm);
+  /* DS breadcrumb bar is symmetric `py-2 xl:py-3`
+     (sections/breadcrumb.postcss:6) — 8 px block padding, 12 px from 1280. */
+  padding: var(--space-sm) var(--container-padding);
   /* DS breadcrumb is STATIC `text-sm` (sections/breadcrumb.postcss:8) —
      fixed 14 px at every width, never the responsive --text-body-sm
      cascade (16 px @ 1280 / 18 px @ 1920). */
@@ -390,6 +421,9 @@
   color: var(--color-text-secondary);
   background: transparent;
   text-align: left;
+}
+@media (min-width: 1280px) {
+  .breadcrumb { padding-block: var(--space-2sm); }
 }
 .breadcrumb a { color: inherit; text-decoration: none; }
 .breadcrumb a:hover { color: var(--color-primary); text-decoration: underline; }
@@ -459,28 +493,28 @@
 .breadcrumb__dropdown-icon:hover { background: var(--color-bg-alt); color: var(--color-primary-700); border-color: var(--color-primary-700); }
 .breadcrumb__dropdown-icon svg {
   width: 0.9em; height: 0.9em;
-  transition: transform var(--transition-fast);
+  /* DS rotates the chevron over duration-300 (breadcrumb.postcss:55-56);
+     we use the portal's 200 ms standard step. */
+  transition: transform var(--transition);
   margin: 0;
 }
 .breadcrumb__dropdown-icon[aria-expanded="true"] svg { transform: rotate(180deg); }
 
 /* Drawer — 300 px card below the breadcrumb item, white background +
    heavy shadow, items as menu rows. Mirrors DS `.breadcrumb ul ul`
-   (sections/breadcrumb.postcss:93-113). Active item gets a red
-   left-bar (here the current page itself, shown disabled). */
+   (sections/breadcrumb.postcss:93-96): `w-[300px] p-2, bg-white
+   shadow-2xl` — no border, no border-radius. */
 .breadcrumb__dropdown {
   position: absolute;
   top: calc(100% + var(--space-xs));
   left: 0;
-  z-index: 30;
+  z-index: var(--z-navbar);
   margin: 0;
-  padding: var(--space-xs);
+  padding: var(--space-sm);
   list-style: none;
   width: 300px;
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-2xl);
 }
 .breadcrumb__dropdown[hidden] { display: none; }
 .breadcrumb__dropdown li { position: relative; }
@@ -490,26 +524,16 @@
   padding: var(--space-sm) var(--space-md);
   color: var(--color-text-primary);
   text-decoration: none;
-  font-size: var(--text-body-sm);
+  /* Chrome stays on the STATIC scale — the DS drawer rows inherit the
+     breadcrumb's fixed `text-sm` (breadcrumb.postcss:8). */
+  font-size: var(--text-chrome-sm);
   border-radius: var(--radius);
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 .breadcrumb__dropdown a:hover {
-  background: var(--color-bg-alt);
+  background: var(--color-secondary-50);   /* DS menu rows hover:bg-secondary-50 (menu.postcss:20) */
   color: var(--color-primary);
   text-decoration: none;
-}
-.breadcrumb__dropdown-active span {
-  color: var(--color-text-secondary);
-  cursor: default;
-}
-.breadcrumb__dropdown-active::after {
-  content: '';
-  position: absolute;
-  left: 0; top: 4px; bottom: 4px;
-  width: 2px;
-  background: var(--color-primary-600);
-  border-radius: 1px;
 }
 
 /* Mobile-only meta links inside the burger menu — surfaces Kontakt/Hilfe
@@ -528,9 +552,6 @@ body.body--mobile-menu-is-open {
 
 @media (max-width: 1023.98px) {
   .burger { display: inline-flex; }
-  .burger[aria-expanded="true"] .burger__icon {
-    color: var(--color-primary-600);
-  }
   /* CD `hidden lg:block` — breadcrumb is hidden on mobile/tablet. */
   .breadcrumb { display: none; }
   /* Burger now lives inside `.top-header__actions` (CD canonical),
@@ -556,7 +577,7 @@ body.body--mobile-menu-is-open {
     inset: 72px 0 0;
     z-index: calc(var(--z-modal) - 1);
     overflow-y: auto;
-    background: var(--color-surface-dark);
+    background: var(--color-secondary-500);   /* DS mobile-menu.postcss:39 bg-secondary-500 */
     border: 0;
   }
   body.body--mobile-menu-is-open .navbar__inner {
@@ -575,10 +596,16 @@ body.body--mobile-menu-is-open {
     justify-content: space-between;
     min-height: 56px;
     padding: var(--space-md) var(--container-padding);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-secondary-100);   /* DS menu__item--border border-secondary-100 (menu.postcss:38-39) */
     width: 100%;
     background: var(--color-white);
     color: var(--color-text-primary);
+  }
+  /* DS mobile nav rows tint on hover/focus — navy.postcss:31
+     `bg-white hover:bg-secondary-50 focus:bg-secondary-50`. */
+  .main-navigation__link:hover,
+  .main-navigation__link:focus-visible {
+    background: var(--color-secondary-50);
   }
   .main-navigation__link::after {
     display: none;
@@ -624,8 +651,8 @@ body.body--mobile-menu-is-open {
   }
   .nav-menu__link {
     padding: var(--space-md) var(--container-padding) var(--space-md) calc(var(--container-padding) + var(--space-md));
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-bg-surface);
+    border-bottom: 1px solid var(--color-secondary-100);   /* DS menu__item--border (menu.postcss:38-39) */
+    background: var(--color-secondary-50);   /* DS nested grey rows: menu__item--grey bg-secondary-50 (menu.postcss:43) */
   }
   /* Open trigger row: drop the desktop "lifted card" effect (white bg +
      shadow + clip-path) — meaningless inside the flat drawer list —
@@ -648,7 +675,7 @@ body.body--mobile-menu-is-open {
   .main-navigation__mobile-meta {
     display: block;
     width: 100%;
-    background: var(--color-surface-dark);
+    background: var(--color-secondary-500);   /* DS mobile-menu.postcss:39 / navy.postcss:39 bg-secondary-500 */
   }
   .main-navigation__mobile-meta .main-navigation__link {
     min-height: 56px;
@@ -656,7 +683,7 @@ body.body--mobile-menu-is-open {
     border-bottom: 1px solid var(--color-white-12);
     font-weight: var(--font-weight-normal);
     color: var(--color-white);
-    background: var(--color-surface-dark);
+    background: var(--color-secondary-500);   /* DS navy.postcss:39 bg-secondary-500 */
   }
   body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link,
   body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link:hover {
@@ -690,13 +717,14 @@ body.body--mobile-menu-is-open {
   }
   /* Language chooser row at the foot of the drawer — the top-bar language
      switcher is hidden at this width, so mobile users pick language here.
-     Active language uses the CD blue (--color-lang-active), matching the
-     desktop switcher's selected-language treatment. */
+     Active language follows the DS localization pattern (top-bar.
+     postcss:73-80): white bold text with a primary-600 accent border on
+     transparent ground — matching the desktop switcher's treatment. */
   .main-navigation__mobile-lang {
     display: flex;
     gap: var(--space-xs);
     padding: var(--space-md) var(--container-padding);
-    background: var(--color-surface-dark);
+    background: var(--color-secondary-500);   /* DS mobile-menu.postcss:39 bg-secondary-500 */
   }
   .main-navigation__mobile-lang-btn {
     flex: 1;
@@ -721,8 +749,8 @@ body.body--mobile-menu-is-open {
   }
   .main-navigation__mobile-lang-btn[aria-disabled="true"]:hover { background: transparent; }
   .main-navigation__mobile-lang-btn--active {
-    background: var(--color-lang-active);
-    border-color: var(--color-lang-active);
+    background: transparent;
+    border: 2px solid var(--color-primary-600);   /* DS active-language accent: border-primary-600 (top-bar.postcss:78) */
     color: var(--color-white);
   }
 }

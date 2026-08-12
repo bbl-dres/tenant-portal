@@ -23,7 +23,7 @@
    Deliberate deviations from upstream, all local:
      • Elevation uses the portal's `--shadow-*` scale rather than raw Tailwind
        values (see the shadow block in tokens.css).
-     • `__text` / `__actions` / `__sub` are portal element names kept for the
+     • `__text` / `__actions` are portal element names kept for the
        existing call sites; `__infos` is the DS name for the same slot and is
        styled identically, so DS markup pastes in unchanged.
      • `--danger` is retained as an alias of the DS `--error`, because the
@@ -62,8 +62,9 @@
    overrides `--error` when both are present. */
 .notification--alert   { background: var(--color-notification-alert-bg);   color: var(--color-white); }
 
-/* Icon slot — DS `h-10 w-10 mr-3 flex-shrink-0 fill-current`. The glyph is
-   aria-hidden; the element's role and text carry the meaning. */
+/* Icon slot — DS `h-10 w-10 mr-3 flex-shrink-0 fill-current`
+   (notification.postcss:60-65) — mr-3 = 12 px. The glyph is aria-hidden;
+   the element's role and text carry the meaning. */
 .notification__icon,
 .notification-banner__icon {
   display: inline-flex;
@@ -71,7 +72,7 @@
   justify-content: center;
   width: var(--icon-xl);
   height: var(--icon-xl);
-  margin-right: var(--space-sm);
+  margin-right: var(--space-2sm);
   flex-shrink: 0;
 }
 .notification__icon svg,
@@ -81,12 +82,23 @@
 @media (min-width: 1280px) { .notification__content { margin-block: var(--space-sm); } }
 .notification__content > p { margin: 0; overflow-wrap: break-word; }
 .notification__content > *:first-child { margin-bottom: var(--space-xs); }
-.notification__header { display: flex; align-items: center; width: 100%; }
-.notification__header .notification__title { margin-bottom: 0; }
-.notification--with-title { display: block; }
-.notification--with-title .notification__content-offset { margin-left: 3.3rem; }
+/* `.notification__close` — like `.notification--hint` and
+   `.notification--alert` above — is currently unconsumed by portal markup;
+   kept as DS-parity API surface so DS markup pastes in unchanged
+   (notification.postcss:45-58,67-73). */
 .notification__close { position: absolute; top: 0; right: 0; }
 .notification__close svg { width: var(--icon-lg); height: var(--icon-lg); }
+
+/* DS notification button spacing (notification.postcss:89-92):
+   `mt-4 sm:mt-8 lg:mt-0 lg:ml-6` — below lg the button drops under the
+   copy, at lg it moves beside it. */
+.notification .btn { margin-top: var(--space-md); }
+@media (min-width: 640px)  { .notification .btn { margin-top: var(--space-xl); } }
+@media (min-width: 1024px) { .notification .btn { margin-top: 0; margin-left: var(--space-lg); } }
+/* Portal banners wrap their buttons in a `.notification-banner__actions`
+   flex row with its own gap (and banner markup also carries `.notification`),
+   so the DS per-button margins above would double-space them — reset. */
+.notification-banner__actions .btn { margin-top: 0; margin-left: 0; }
 
 /* ── NOTIFICATION BANNER ──────────────────────────────────────────────────
    DS: `px-0`, responsive vertical padding, `text--sm`, `shadow-none` — the
@@ -100,7 +112,7 @@
   font-size: var(--text-body-sm);
 }
 @media (min-width: 640px)  { .notification-banner { padding-block: var(--space-xl); } }  /* DS sm:py-8 */
-@media (min-width: 1024px) { .notification-banner { padding-block: var(--space-2xl); } } /* DS lg:py-10 */
+@media (min-width: 1024px) { .notification-banner { padding-block: var(--space-2lg); } } /* DS lg:py-10 = 40px — notification-banner.postcss:8 */
 .notification-banner__wrapper {
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -153,25 +165,18 @@
   white-space: nowrap;
 }
 
-/* Sub-line inside a `__text` / `__content` slot — a quieter, smaller line
-   below the main message (e.g. a "BK 1086 = BBL-Portfolio …" rationale).
-   Portal addition; the DS has no equivalent element. */
-.notification__sub,
-.notification-banner__sub {
-  display: block;
-  margin-top: var(--space-xs);
-  font-size: var(--text-body-xs);
-}
 /* DS `.notification-banner--fixed`: `fixed right-0 bottom-0 left-0 w-screen`
-   + `border-t border-white` + `shadow-2xl`. Upstream uses it for the
-   cookie-consent popup; the portal reuses it for the prototype disclaimer. */
+   + `border border-t border-white` (a full 1px white frame, not just the top
+   edge — notification-banner.postcss:13-17) + `shadow-2xl`. Upstream uses it
+   for the cookie-consent popup; the portal reuses it for the prototype
+   disclaimer. */
 .notification-banner--fixed {
   position: fixed;
   right: 0;
   bottom: 0;
   left: 0;
   z-index: var(--z-notice);
-  border-top: 1px solid var(--color-white);
+  border: 1px solid var(--color-white);
   box-shadow: var(--shadow-2xl);
 }
 
@@ -246,10 +251,13 @@ body.body--prototype-notice .toast-host {
   display: flex;
   flex-direction: column;
 }
-.modal--sm   { max-width: 420px; }
-.modal--md   { max-width: 600px; }    /* default — explicit for clarity */
-.modal--lg   { max-width: 900px; }
-.modal--xl   { max-width: 1100px; }
+/* Size modifiers follow the DS screen scale (modal.postcss:52-70,
+   `max-w-screen-{xs..xl}` → tailwind.config.js screens 480/640/768/1024/1280). */
+.modal--xs   { max-width: 480px; }
+.modal--sm   { max-width: 640px; }
+.modal--md   { max-width: 768px; }
+.modal--lg   { max-width: 1024px; }
+.modal--xl   { max-width: 1280px; }
 .modal--auto { max-width: min(90vw, 1100px); width: auto; }
 /* Header above the surface — DS modal__header--with-title:
    justify-between, items-start, text-white, mb-2 lg:mb-4. */
@@ -428,7 +436,7 @@ body.body--prototype-notice .toast-host {
   gap: var(--space-lg);
 }
 /* Group headings are h3 (h2 title → h3 groups, no level jump — A11Y-011). */
-.shortcut-overlay__group h3 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+.shortcut-overlay__group h3 { margin: 0 0 var(--space-sm); font-size: var(--text-body-sm); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: var(--tracking-caps); }
 .shortcut-overlay__group dl { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: var(--space-xs); font-size: var(--text-body-sm); }
 .shortcut-overlay__group dt { font-family: var(--font-family-mono); }
 .shortcut-overlay__group dd { margin: 0; }

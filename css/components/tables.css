@@ -1,14 +1,12 @@
 /* ==========================================================================
    components/tables.css — BBL Mieterportal
 
-   Data tables + list-page furniture: table, documents filter bar,
-   active filter pills, pagination, page header (H1 + side actions on the
-   list/detail pages), filter row + filter chips (tag-item).
+   Data tables + list-page furniture: table, active filter pills,
+   pagination, page header (H1 + side actions on the list/detail pages).
    Sources: styles.css 2357-2641, 3388-3418, 3490-3549.
    Cascade note: .page-header__title overrides the .h1 margin — this file
    must import after foundations/typography.css.
-   DS counterparts: components/table.postcss, components/pagination.postcss,
-   components/tag-item.postcss, components/badge-filter.postcss.
+   DS counterparts: components/table.postcss, components/pagination.postcss.
    ========================================================================== */
 
 /* ── TABLE ──────────────────────────────────────────────────────────────── */
@@ -38,9 +36,32 @@
 .table td {
   padding: var(--space-md) var(--space-lg);      /* DS px-6 py-4 — 24px inline / 16px block */
   text-align: left;
-  /* DS row separators are border-text-300 (one step darker than the
-     text-200 outer table border, which stays on --color-border). */
-  border-bottom: 1px solid var(--color-border-strong);
+}
+/* DS row separators sit on the ROW, not the cell: `tbody/tfoot tr {
+   border-t border-text-300 }` (table.postcss:45-50) — one step darker than
+   the text-200 outer table border, which stays on --color-border. The DS
+   scopes this to `table:not(.table--compact)`; the portal keeps separators
+   on `.table--compact` too — its dense reviewer queues rely on them. */
+.table tbody tr,
+.table tfoot tr {
+  border-top: 1px solid var(--color-border-strong);
+}
+/* DS tfoot frame: `border-y-2 border-text-300` (table.postcss:65-67). */
+.table tfoot {
+  border-top: 2px solid var(--color-border-strong);
+  border-bottom: 2px solid var(--color-border-strong);
+}
+/* DS caption (table.postcss:25-32): hidden by default, `.table--caption`
+   opts into a bottom-side, left-aligned caption styled like `.legend`
+   (`@apply hidden legend; caption-side: bottom` → `table-caption text-left`). */
+.table caption { display: none; caption-side: bottom; }
+.table--caption caption {
+  display: table-caption;
+  text-align: left;
+  font-size: var(--text-body-xs);
+  padding-top: var(--space-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-snug);
 }
 /* DS table.postcss:52-57 — body cells in non-compact tables read
    text-gray-600; `.table--compact` cells inherit the darker page default,
@@ -59,16 +80,24 @@
    noise. `.table--caps` opts back into the DS uppercase look for
    index-style tables. */
 .table th {
-  background: var(--color-secondary-50);   /* DS thead bg-secondary-50 — federal blue-gray */
   font-weight: var(--font-weight-bold);
   color: var(--color-gray-700);            /* DS th text-text-700 — 9.3:1 on secondary-50 */
   font-size: var(--text-body-sm);
   letter-spacing: 0;
 }
+/* Header fill scoped to thead — a `<th scope="row">` in a tfoot total row
+   must NOT carry it (it painted the Total label cell blue-gray while its
+   sibling tds stayed white). DS header cells also align to the top edge
+   (`align-top`, table.postcss:37-42) so multi-line column labels rise
+   from a common baseline. */
+.table thead th {
+  background: var(--color-secondary-50);   /* DS thead bg-secondary-50 — federal blue-gray */
+  vertical-align: top;
+}
 .table--caps th {
   font-size: var(--text-body-xs);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: var(--tracking-caps);
 }
 /* Only show the pointer affordance when the row actually has an action.
    `.table--rows-clickable` opts in to the row-hover-cursor + highlight. */
@@ -100,25 +129,14 @@
   color: var(--color-text-muted);
 }
 
-/* ── DOCUMENTS PAGE — filter bar, document table, pagination ─────────────
+/* ── DOCUMENTS PAGE — document table, pagination ─────────────────────────
    The downloads page can list thousands of records when wired to the real
    records-management system. The pattern here scales:
-   - .docs-filter-bar: 3-up filter row (type / building / text) that wraps
-     to stack on narrow viewports.
    - .docs-table-wrap: horizontal scroll fallback so the table never breaks
      the page below a min content width.
    - .table--documents: medium-density list-view; title column uses an icon
      prefix and a hover affordance via .docs-table__title-link.
    - .pagination: shared component, reusable by any future paginated table. */
-/* Shared horizontal filter-toolbar layout (downloads bar + inbox row). The
-   `.property-toolbar` is grid-based and keeps its own rule. */
-.docs-filter-bar,
-.filter-row {
-  display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-md);
-}
 
 /* ── ACTIVE FILTER PILLS ─────────────────────────────────────────────────
    Row of removable pills that sits between a filter bar and the data
@@ -126,8 +144,7 @@
    `Suche`, …) + the active value + an X button to clear that single
    facet. When ≥ 2 facets are active, a trailing "Alle zurücksetzen"
    text-link clears the whole filter set in one click.
-   Used by #/downloads (.docs-filter-bar) and #/properties
-   (.property-toolbar). */
+   Used by #/downloads and #/properties (.property-toolbar). */
 .filter-pills {
   display: flex;
   flex-wrap: wrap;
@@ -334,68 +351,6 @@ a.btn[aria-disabled="true"] {
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-normal);
 }
-
-/* ── FILTER ROW + FILTER CHIPS (DS tag-item pattern) ─────────────────────
-   `.filter-row` is the horizontal toolbar shell holding chips + the text
-   search. `.filter-chips` is the chip group. `.tag-item` mirrors DS
-   `css/components/tag-item.postcss` — pill, 34 px tall, active state
-   uses the brand-tinted surface. Chips are real <button>s so keyboard
-   users can activate them; selected state is `aria-pressed="true"` and
-   styled with `.tag-item--active`. */
-.filter-row { align-items: center; }   /* shared layout above; this is the only delta */
-.filter-row__search {   /* composes .search-field; leads the toolbar */
-  flex: 0 1 340px;
-  min-width: 220px;
-}
-.filter-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-/* CD Bund filter chip — DS `.tag-item` pattern from
-   designsystem/css/components/tag-item.postcss:7-67. Default: gray-200
-   pill, dark text, gray-300 on hover. Active: dark gray-800 fill with
-   white text, pointer-events:none (selection is final until another
-   chip is picked). Min-height tracks the DS button scale (44 / 48 / 52)
-   so chips meet WCAG 2.5.5 across breakpoints. */
-.tag-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  background: var(--color-gray-200);
-  border: 1px solid transparent;
-  color: var(--color-text-primary);
-  padding: var(--space-2xs) var(--space-md);   /* DS tag-item__text py-1.5 (6px) / __inner px-4 */
-  min-height: var(--btn-min-h);          /* 44 px — DS pattern */
-  border-radius: var(--radius-full);
-  font-family: inherit;
-  font-size: var(--text-body);   /* DS tag-item--base text--base */
-  font-weight: var(--font-weight-regular);
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-@media (min-width: 1280px) { .tag-item { min-height: var(--btn-lg-min-h); } }
-.tag-item:hover { background: var(--color-gray-300); }
-.tag-item--active,
-.tag-item[aria-pressed="true"] {
-  background: var(--color-gray-800);
-  color: var(--color-white);
-}
-.tag-item--active:hover,
-.tag-item[aria-pressed="true"]:hover {
-  background: var(--color-gray-900);
-}
-.tag-item__count {
-  font-size: var(--text-body-xs);
-  /* A11Y-002: gray-500 on the gray-200 chip is 3.90:1 at 12 px (< 4.5).
-     Gray-700 keeps the muted hierarchy while clearing AA on the tint. */
-  color: var(--color-gray-700);
-}
-.tag-item--active .tag-item__count,
-.tag-item[aria-pressed="true"] .tag-item__count { color: var(--color-white-75); }
 
 /* The row the reader arrived through, in a table that lists siblings (e.g.
    the other contracts on the same building). A left rail rather than a fill,

@@ -46,13 +46,18 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
+  /* DS first-item flush: `pl-4 -ml-4` (top-bar.postcss:131) — the negative
+     margin cancels the left padding so the TEXT sits on the container edge,
+     same X as the lockup and body content below. Our padding is --space-sm,
+     so the compensation is --space-sm too. */
+  margin-left: calc(var(--space-sm) * -1);
   border-radius: var(--radius);
   /* Was a <button>; now a real <a> linking out to admin.ch. Suppress the
      global anchor underline so the link reads as a utility chip in the
      dark top-bar, matching kbob/swisstopo. */
   text-decoration: none;
   font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
-  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
+  min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__authorities:hover { text-decoration: none; color: var(--color-gray-300); }
 .top-bar__authorities svg { width: var(--icon-sm); height: var(--icon-sm); }
@@ -93,14 +98,16 @@
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius);
-  font-size: var(--text-body-sm);
+  font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
 }
-.top-bar__action:hover { background: var(--color-white-20); }
+/* Hover is a colour-only affordance — DS `hover:text-text-300`
+   (top-bar.postcss:130, text-300 = #D1D5DB = gray-300). No invented fill. */
+.top-bar__action:hover { color: var(--color-gray-300); }
 .top-bar__action svg { width: var(--icon-lg); height: var(--icon-lg); }
 
 /* Utility links in the dark top bar */
 .top-bar__link {
-  color: var(--color-white-92);
+  color: var(--color-white);   /* DS top-bar text is plain `text-white` (top-bar.postcss:7) */
   text-decoration: none;
   font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
   padding: var(--space-xs) var(--space-sm);
@@ -113,18 +120,15 @@
   gap: var(--space-2xs);
   border-radius: var(--radius);
   transition: background var(--transition-fast);
-  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C3 */
+  min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__link:hover { color: var(--color-gray-300); }
 .top-bar__link--user svg { width: var(--icon-lg); height: var(--icon-lg); }
-.top-bar__sep {
-  width: 1px;
-  height: 18px;
-  background: var(--color-white-25);
-}
 
-/* CD pattern: short language codes, dark panel below the trigger, active
-   item highlighted in federal blue. Closed by default. */
+/* CD pattern: short language codes, dark panel below the trigger. Active
+   item marked per the DS localization list (top-bar.postcss:73-80): white
+   bold text + a 2px primary-600 left border on transparent ground.
+   Closed by default. */
 .language-switcher { position: relative; }
 .top-bar__lang {
   background: transparent;
@@ -141,13 +145,13 @@
   font-weight: var(--font-weight-regular);
   cursor: pointer;
   border-radius: var(--radius);
-  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
+  min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
 .top-bar__lang:hover { color: var(--color-gray-300); }
 /* CD ChevronDown.svg has ~19% inner whitespace on the right (path ends at
    x=19.42 of the 24-unit viewBox). Pull the SVG ~4px right so the visible
    glyph aligns with the right edge of the dropdown panel below. */
-.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); margin-right: -4px; }
+.top-bar__lang svg { width: var(--icon-sm); height: var(--icon-sm); margin-right: calc(var(--space-xs) * -1); }
 
 .language-switcher__dropdown {
   position: absolute;
@@ -170,50 +174,50 @@
   text-align: center;
   background: none;
   border: none;
-  color: inherit;
+  /* DS localization list: resting languages are `text-secondary-100`
+     (top-bar.postcss:74). */
+  color: var(--color-secondary-100);
   font-family: inherit;
   font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
   font-weight: var(--font-weight-regular);
   padding: var(--space-sm) var(--space-md);
   cursor: pointer;
-  letter-spacing: 0.05em;
-  min-height: 44px;          /* WCAG 2.5.5 touch-target — audit M-C2 */
+  letter-spacing: var(--tracking-wide);
+  min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C2 */
 }
 .language-switcher__option[aria-disabled="true"] {
-  color: var(--color-text-muted);
+  /* DS language-switcher.postcss:19-21 — disabled option is `text-text-400`
+     (#9CA3AF), a plain colour step with no opacity fade. */
+  color: var(--color-gray-400);
   cursor: not-allowed;
-  opacity: 0.65;
 }
 
-/* CD canonical: hover + selected paint the option in Tailwind `blue-600`
-   (#2563eb in designsystem/app/tailwind.config.js:82) with white text.
-   Red is reserved for primary CTAs and brand-accent surfaces; the
-   language switcher uses blue so the selection state can't be mistaken
-   for the federal CTA accent. Focus ring is the global purple
-   `:focus-visible` (var(--color-focus)) — sits on a 2 px inset offset
-   so it reads against the dark dropdown surface and the blue hover
-   alike. */
+/* CD canonical (top-bar.postcss:73-80): the DS has NO filled selection
+   surface for languages — the active item is white bold text with a 2px
+   primary-600 left border on transparent ground; hover is a colour-only
+   affordance (resting secondary-100 → white). Focus ring is the global
+   purple `:focus-visible` (var(--color-focus)) — sits on a 2 px inset
+   offset so it reads against the dark dropdown surface. */
 .language-switcher__option:hover,
 .language-switcher__option:focus-visible {
-  background: var(--color-lang-active);
   color: var(--color-white);
 }
 .language-switcher__option[aria-disabled="true"]:hover,
 .language-switcher__option[aria-disabled="true"]:focus-visible {
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--color-gray-400);
 }
 .language-switcher__option:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: -2px;
 }
 .language-switcher__option--active {
-  background: var(--color-lang-active);
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
-}
-.language-switcher__option--active:hover {
-  background: var(--color-lang-active-hover);
+  /* DS active language: `border-l-2 border-primary-600 pl-2`
+     (top-bar.postcss:76-79). */
+  border-left: 2px solid var(--color-primary-600);
+  padding-left: var(--space-sm);
 }
 
 /* ── FEDERAL CHROME — BRAND BAR ─────────────────────────────────────────── */
@@ -224,7 +228,7 @@
 }
 .top-header__department-strip {
   display: none;
-  background: var(--color-secondary-50);
+  background: var(--color-secondary-100);   /* DS top-header.postcss:14 bg-secondary-100 */
   color: var(--color-text-primary);
   border-bottom: 1px solid var(--color-border-light);
 }
@@ -239,23 +243,34 @@
   max-width: var(--container-max-width);
   margin: 0 auto;
   padding: var(--space-sm) var(--container-padding);
-  font-size: var(--text-body-sm);
+  /* DS top-header.postcss:15 — the mobile office strip is STATIC `text-xs`
+     (12 px), never the responsive body cascade. */
+  font-size: var(--text-chrome-xs);
   line-height: var(--line-height-snug);
 }
+/* Brand-bar vertical padding — DS top-header.postcss:6
+   `py-3 md:py-4 lg:py-6 xl:py-8 3xl:py-10` = 12 / 16 @768 / 24 @1024 /
+   32 @1280 / 40 @1920. */
 .top-header__inner {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-md) var(--container-padding);
+  padding: var(--space-2sm) var(--container-padding);
   display: flex;
   align-items: center;
   gap: var(--space-md);
   flex-wrap: wrap;
+}
+@media (min-width: 768px) {
+  .top-header__inner { padding-block: var(--space-md); }
 }
 @media (min-width: 1024px) {
   .top-header__inner { padding-block: var(--space-lg); }
 }
 @media (min-width: 1280px) {
   .top-header__inner { padding-block: var(--space-xl); }
+}
+@media (min-width: 1920px) {
+  .top-header__inner { padding-block: var(--space-2lg); }
 }
 /* Federal mark — sizing + alignment mirrors designsystem css/components/logo.postcss.
    Centred on mobile, top-aligned from md+ (matches DS .logo `md:items-start`).
@@ -264,7 +279,10 @@
 .top-header__left {
   display: flex;
   align-items: center;            /* base: vertical centre on phones */
-  gap: var(--space-md);
+  /* Gap doubles as the separator's per-side margin — DS logo.postcss:71-72
+     gives the separator ml/mr `2 sm:4 lg:6 3xl:8` = 8 / 16 @640 / 24 @1024 /
+     32 @1920 per side. */
+  gap: var(--space-sm);
   cursor: pointer;
   /* `.top-header__left` is now a real anchor (was a div+role=link). Reset
      the default link styling so the brand still reads as branded text. */
@@ -273,8 +291,17 @@
 }
 .top-header__left:hover { text-decoration: none; }
 .top-header__left:hover .top-header__dept strong { color: var(--color-primary); }
+@media (min-width: 640px) {
+  .top-header__left { gap: var(--space-md); }
+}
 @media (min-width: 768px) {
-  .top-header__left { align-items: flex-start; gap: var(--space-lg); }
+  .top-header__left { align-items: flex-start; }
+}
+@media (min-width: 1024px) {
+  .top-header__left { gap: var(--space-lg); }
+}
+@media (min-width: 1920px) {
+  .top-header__left { gap: var(--space-xl); }
 }
 /* Federal mark is split into two SVGs per CD spec
    (designsystem/css/components/logo.postcss):
@@ -305,15 +332,15 @@
 @media (min-width: 1280px) { .top-header__bundmark-name { display: block; } }
 @media (min-width: 1920px) { .top-header__bundmark-name { width: 244px; height: 70px; } }
 
+/* Federal separator — DS logo.postcss:70 `h-10 md:h-14 3xl:h-[70px]` =
+   40 / 56 @768 / 70 @1920. No intermediate lg/xl tiers. */
 .top-header__divider {
   width: 1px;
-  height: 40px;                   /* mobile base; matches mark height */
+  height: 40px;
   background: var(--color-gray-300);
-  align-self: stretch;            /* lets it grow with the flex-start row */
   flex-shrink: 0;
 }
-@media (min-width: 1024px) { .top-header__divider { height: 52px; } }
-@media (min-width: 1280px) { .top-header__divider { height: 60px; } }
+@media (min-width: 768px)  { .top-header__divider { height: 56px; } }
 @media (min-width: 1920px) { .top-header__divider { height: 70px; } }
 
 /* Dept title — sizing tracks designsystem css/components/logo.postcss:79
@@ -390,7 +417,10 @@
 .top-header__meta-link {
   text-decoration: none;
   color: var(--color-text-primary);
-  font-size: var(--text-body-sm);
+  /* DS brand-bar chrome is STATIC `text-sm 3xl:text-base`
+     (top-header.postcss:8) — 14 px, single bump to 16 px at 1920 (grouped
+     3xl rule after .top-header__action below). */
+  font-size: var(--text-chrome-sm);
   padding: var(--space-xs) 0;
   transition: color var(--transition-fast);
 }
@@ -418,7 +448,7 @@
   background: none;
   border: none;
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-chrome-sm);   /* static chrome scale, 3xl bump below */
   color: var(--color-text-secondary);
   padding: var(--space-xs) var(--space-sm);
   min-height: var(--btn-min-h);
@@ -452,35 +482,37 @@
               visibility 0s linear 320ms;
 }
 .header-search.open .header-search__form {
-  width: 280px;
+  width: 288px;   /* DS open search field is lg:w-72 = 288px (search.postcss:23) */
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  box-shadow: var(--shadow-2xl);   /* DS search.postcss:28 — open field carries shadow-2xl */
   transition: width var(--transition-slow), opacity var(--transition),
               visibility 0s;
 }
 .header-search__input {
   width: 100%;
   min-height: var(--btn-min-h);
-  padding: var(--space-sm) calc(var(--space-xl) + 8px) var(--space-sm) var(--space-md);
+  padding: var(--space-sm) calc(var(--space-xl) + var(--space-sm)) var(--space-sm) var(--space-md);
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
   font-family: inherit;
-  font-size: var(--text-body-sm);
+  font-size: var(--text-chrome-sm);   /* static chrome scale, 3xl bump below */
   background: var(--color-bg-surface);
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
-.header-search__input:focus {
-  background: var(--color-white);
-  border-color: var(--color-border-input);
-}
-/* Canonical CD purple focus ring — matches the global :focus-visible
-   rule applied across every interactive surface in the portal. */
+/* Text-field focus convention (matches `.input`, forms.css): the DS gives
+   fields `focus:outline-none` and lets the global `ring-2 ring-purple-500`
+   (global.postcss:75-76) hug the field edge — a 2 px purple ring with no
+   offset, composed with the open-state shadow-2xl so the flyout keeps its
+   elevation while focused. Text inputs are the one control family where
+   the portal's 3 px offset outline (§5.12) does NOT apply — the ring IS
+   the CD field-focus look. */
+.header-search__input:focus,
 .header-search__input:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
+  outline: none;
   background: var(--color-white);
-  border-color: var(--color-border-input);
+  box-shadow: 0 0 0 2px var(--color-focus), var(--shadow-2xl);
 }
 .header-search__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .header-search__submit {
@@ -505,7 +537,7 @@
   border: 1px solid var(--color-border);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-chrome-sm);   /* static chrome scale, 3xl bump below */
   display: inline-flex; gap: var(--space-xs); align-items: center;
   color: inherit;
 }
@@ -517,6 +549,15 @@
 }
 .top-header__action--primary:hover { background: var(--color-primary-hover); }
 
+/* Brand-bar chrome type — the single DS 3xl bump: `text-sm 3xl:text-base`
+   (top-header.postcss:8). 14 px everywhere below 1920, 16 px from 1920. */
+@media (min-width: 1920px) {
+  .top-header__meta-link,
+  .header-search__toggle,
+  .header-search__input,
+  .top-header__action { font-size: var(--text-chrome-base); }
+}
+
 @media (max-width: 1023.98px) {
   .top-bar__demo-chip,
   .top-bar__link--user {
@@ -524,14 +565,15 @@
   }
   .top-header__inner {
     min-height: 78px;
-    padding-block: var(--space-md);
+    /* Vertical padding stays on the DS tier ramp (12 base / 16 @768) —
+       min-height carries the compact-chrome height. */
     flex-wrap: nowrap;
     gap: var(--space-sm);
   }
   .top-header__left {
     min-width: 0;
     flex: 1 1 auto;
-    gap: var(--space-sm);
+    /* Gap stays on the DS separator-margin ramp (8 base / 16 @640). */
   }
   .top-header__bundmark-flag {
     width: 30px;
@@ -575,12 +617,12 @@
     display: none;
   }
   /* The open flyout is right-anchored to .header-search, so an
-     unconditional 280 px can start left of x=0 on narrow phones. Cap it
+     unconditional 288 px can start left of x=0 on narrow phones. Cap it
      to the viewport minus the 2 x 16 px phone gutter; the input keeps its
      base width:100 %, so the field fills the form and the absolutely
      positioned submit magnifier stays attached at its right edge. */
   .header-search.open .header-search__form {
-    width: min(280px, 100vw - 2 * var(--space-md));
+    width: min(288px, 100vw - 2 * var(--space-md));
   }
 }
 
@@ -590,5 +632,4 @@
 
 @media (max-width: 768px) {
   .top-bar__authorities span { display: none; }
-  .top-header__meta-nav { display: none; }
 }

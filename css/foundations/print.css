@@ -15,6 +15,14 @@
    `.top-header` (print.postcss:39-41). Every ordinary route must print
    WITH Confederation branding. */
 @media print {
+  /* DS print page setup (print.postcss:6-10): one type step down and a
+     narrower ink column with centred margins — without it pages print
+     full-bleed at 16 px, ~23 % wider and one step larger than CD. */
+  html {
+    font-size: 0.8125rem !important;   /* 13px — DS print.postcss:7 */
+    max-width: 80% !important;
+    margin: 2rem auto !important;
+  }
   .top-bar,
   .top-header__right,
   .navbar,
@@ -26,10 +34,30 @@
   .share-bar,
   .back-to-top-wrapper,
   .notification-banner { display: none !important; }
+  /* DS print.postcss:61-81 also suppresses embedded media and card/section
+     action chrome — none of it is useful on paper. */
+  video,
+  audio,
+  object,
+  iframe,
+  .section-cta,
+  .card--profile__image { display: none !important; }
   .top-header { border: 0 !important; }
   .top-header__bundmark-name { display: block !important; }
   .hero { padding: var(--space-md) 0; background: none; }
   body { color: var(--color-black); background: var(--color-white); }
+  /* DS pagination control (print.postcss:83-85, 109-120): keep paragraphs,
+     images, lists and cards whole across page boundaries; grids fall back
+     to block flow so break-inside can take effect on their children. */
+  .card-grid { display: block !important; }
+  p,
+  img,
+  ul,
+  .card {
+    position: relative;
+    break-inside: avoid;
+  }
+  .card { margin-bottom: 2em; }
 }
 
 /* ── PRINT — floor-plan sheet (route-scoped) ─────────────────────────────

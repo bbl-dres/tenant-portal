@@ -15,23 +15,11 @@ const jsTemplatePaths = [
 ];
 
 // Pre-existing off-scale values, grandfathered at the Phase B split so the
-// guard could land without visual changes. Each entry is an open finding in
-// docs/design-review.md (TOK/SPC categories) — remove entries as fixes land;
-// NEW violations are not coverable without editing this list, which is the
-// point: they show up in review.
-const GRANDFATHERED = [
-  { file: 'components/cards.css', decl: 'padding-left: calc(var(--space-lg) + 4px);' },
-  { file: 'components/cards.css', decl: 'margin: 40px 0 0;' },
-  { file: 'navigations/header.css', decl: 'padding: var(--space-sm) calc(var(--space-xl) + 8px) var(--space-sm) var(--space-md);' },
-  { file: 'sections/media-viewer.css', decl: 'padding: clamp(28px, 6%, 56px);' },
-  { file: 'sections/media-viewer.css', decl: 'font-size: 11px;' },
-  { file: 'sections/media-viewer.css', decl: 'font-size: 13px;' },
-  { file: 'sections/media-viewer.css', decl: 'font-size: 11px;' },
-  { file: 'sections/media-viewer.css', decl: 'font-size: 18px; line-height: 1;' },
-  { file: 'sections/properties.css', decl: 'padding-right: 38px;' },
-  { file: 'sections/property-detail.css', decl: 'gap: 5px;' },
-  { file: 'sections/property-detail.css', decl: 'padding: 4px 9px;' },
-];
+// guard could land without visual changes. The 2026-08 CD re-audit cleared
+// every entry (tokenised or deleted as dead CSS) — the list is now EMPTY
+// and must stay that way: a new violation is not coverable without adding
+// an entry here, which is the point: it shows up in review.
+const GRANDFATHERED = [];
 
 function read(file) {
   return fs.readFileSync(file, 'utf8');

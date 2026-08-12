@@ -140,15 +140,6 @@
    completion badges are wanted in future, reach for `.badge--warning`
    / `.badge--success` in the markup instead of CSS-content. */
 
-/* Wizard step-2 used to be a two-column grid that cramped the radios on
-   small laptops. Now always stacks — kept the class as a no-op so any
-   leftover call sites still work, with a vertical gap between sections. */
-.wizard-two-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
 /* `.wizard__sap-info` — slot below the SAP address autocomplete where
    the BK 1086 banner / Greenfield notice gets rendered. Replaces inline
    `style="margin-top:var(--space-sm);"`. */

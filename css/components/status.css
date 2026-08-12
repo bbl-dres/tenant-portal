@@ -52,33 +52,21 @@
 .badge--danger  { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
 .badge--yellow  { background: var(--color-badge-yellow-bg); color: var(--color-badge-yellow-text); }
 
-/* Data-quality glyph badges (from §0.3).
-   DESIGNGUIDE §6 forbids emoji in user-visible markup; previously these
-   badges leaned on 🟢🟡🔴⚪◼🤖 which depend on the OS emoji font and
-   render inconsistently between Windows / macOS / Linux. Replaced with
-   CSS-drawn 8 px dots (and a square for greenfield) so colour is the
-   semantic signal and is consistent in every browser. The :before slot
-   is decorative: screen readers continue to announce the badge text. */
-.badge--verified::before,
-.badge--stale::before,
-.badge--manual::before,
-.badge--unchecked::before,
-.badge--greenfield::before,
-.badge--llm::before {
+/* Data-quality glyph badge (from §0.3). DESIGNGUIDE §6 forbids emoji in
+   user-visible markup — a CSS-drawn 8 px square marks greenfield rows so
+   the signal is consistent in every browser. The ::before slot is
+   decorative: screen readers continue to announce the badge text.
+   (The former verified/stale/manual/unchecked/llm dot variants were
+   removed in the 2026-08 re-audit — unreferenced.) */
+.badge--greenfield::before {
   content: "";
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-xs);     /* square: distinct from status dots */
   flex-shrink: 0;
-  background: currentColor;            /* falls back to badge text colour */
+  background: var(--color-secondary-600);
 }
-.badge--verified::before   { background: var(--color-success); }
-.badge--stale::before      { background: var(--color-warning); }
-.badge--manual::before     { background: var(--color-danger); }
-.badge--unchecked::before  { background: var(--color-gray-300); border: 1px solid var(--color-gray-400); }
-.badge--greenfield::before { background: var(--color-secondary-600); border-radius: 1px; }   /* square: distinct from coloured dots */
-.badge--llm::before        { background: var(--color-link); }
 
 /* ── STATUS PIPELINE (§0.3) ─────────────────────────────────────────────── */
 .pipeline {
@@ -114,27 +102,35 @@
 }
 .pipeline__step + .pipeline__step { padding-left: var(--space-xl); }
 .pipeline__step:last-child::after { display: none; }
+/* Step-state colours follow the DS status language — a -100 tint with
+   -800 text (badge.postcss:23-50), never a saturated status fill. The
+   previous saturated treatment painted "active" federal red (identical
+   to "rejected" under the public skin) and used a third warning hue
+   (amber) for Rückfrage; audit S1. The ACTIVE step is the one deliberate
+   exception: it uses the filled-button chrome navy (secondary-500 +
+   bold white — same emphasis language as `.btn--filled`), because
+   "where the process is now" is emphasis, not a status hue. */
 .pipeline__step--done {
-  background: var(--color-pipeline-done);
-  color: var(--color-white);
+  background: var(--color-badge-green-bg);
+  color: var(--color-badge-green-text);
 }
-.pipeline__step--done::after { border-left-color: var(--color-pipeline-done); }
+.pipeline__step--done::after { border-left-color: var(--color-badge-green-bg); }
 .pipeline__step--active {
-  background: var(--color-pipeline-active);
+  background: var(--color-secondary-500);
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
 }
-.pipeline__step--active::after { border-left-color: var(--color-pipeline-active); }
+.pipeline__step--active::after { border-left-color: var(--color-secondary-500); }
 .pipeline__step--rejected {
-  background: var(--color-pipeline-rejected);
-  color: var(--color-white);
+  background: var(--color-badge-red-bg);
+  color: var(--color-badge-red-text);
 }
-.pipeline__step--rejected::after { border-left-color: var(--color-pipeline-rejected); }
+.pipeline__step--rejected::after { border-left-color: var(--color-badge-red-bg); }
 .pipeline__step--rueckfrage {
-  background: var(--color-warning);
-  color: var(--color-gray-900);
+  background: var(--color-badge-orange-bg);
+  color: var(--color-badge-orange-text);
 }
-.pipeline__step--rueckfrage::after { border-left-color: var(--color-warning); }
+.pipeline__step--rueckfrage::after { border-left-color: var(--color-badge-orange-bg); }
 /* Pending / faded step ("… genehmigt" on a Rückfrage pipeline). Replaces
    the previous inline `style="opacity:0.5"` so the styling lives with
    the rest of the pipeline rules. */
@@ -143,7 +139,7 @@
 }
 /* Reserve a thin gap between the pipeline icon and the label so the
    inline-icon doesn't bump into the text on smaller pills. */
-.pipeline__step .inline-icon { margin-right: 4px; }
+.pipeline__step .inline-icon { margin-right: var(--space-xs); }
 
 /* Inline icon — used by P.icon() helper, which emits
    `<svg class="inline-icon"><use href="assets/icons/<Name>.svg"/></svg>`.
@@ -153,8 +149,9 @@
 
    Sizes are driven by the `--icon-*` tokens in tokens.css. The default
    `.inline-icon` uses `--icon-base` (24 px declared, ~16 px visual after
-   CD's viewBox padding). Use the modifier classes to step up or down on
-   the DS scale — never write a bare `width: Npx` here. */
+   CD's viewBox padding). Components that need another step size it with
+   a per-component override on the DS `--icon-*` scale (see below) —
+   never a bare `width: Npx`. */
 .inline-icon {
   display: inline-block;
   width: var(--icon-base);
@@ -164,20 +161,13 @@
   flex-shrink: 0;
   color: currentColor;
 }
-.inline-icon--xs  { width: var(--icon-xs);  height: var(--icon-xs);  vertical-align: -3px; }
-.inline-icon--sm  { width: var(--icon-sm);  height: var(--icon-sm);  vertical-align: -5px; }
-.inline-icon--md  { width: var(--icon-md);  height: var(--icon-md);  vertical-align: -7px; }
-.inline-icon--lg  { width: var(--icon-lg);  height: var(--icon-lg);  vertical-align: -8px; }
-.inline-icon--xl  { width: var(--icon-xl);  height: var(--icon-xl);  vertical-align: -10px; }
-.inline-icon--2xl { width: var(--icon-2xl); height: var(--icon-2xl); vertical-align: -12px; }
-
-/* Per-component size overrides — pegged to the DS `--icon-md` tier for
-   button-adjacent icons. */
-/* Negative `margin-inline-start` compensates for the chevron's inner
-   viewBox padding (CD glyphs leave ~15 % whitespace on each side of the
-   24 box). Without it the icon visually sits too far from the button's
-   left edge while the text sits flush against the right padding. */
-.btn--back .inline-icon           { width: var(--icon-md); height: var(--icon-md); margin-right: 0; margin-inline-start: -4px; }
+/* Per-component size overrides — sized straight from the `--icon-*`
+   tokens (the former .inline-icon--xs…2xl modifier ladder was
+   unreferenced and was removed in the 2026-08 re-audit). */
+/* Back-button icon — DS `.btn__icon` is em-proportional (`w-[1.4em]`,
+   btn.postcss:148): 1.4 × the sm button's 14 px text ≈ 20 px = --icon-sm.
+   The .btn base gap supplies the text spacing. */
+.btn--back .inline-icon           { width: var(--icon-sm); height: var(--icon-sm); margin-right: 0; }
 .contact-block__link .inline-icon { width: var(--icon-md); height: var(--icon-md); color: var(--color-primary); }
 .contact-block__link:hover .inline-icon { color: var(--color-link-hover); }
 .filter-pill__remove-icon {

@@ -786,13 +786,17 @@ export function toggleNavMenu(id, force) {
 // `justify-content: space-between` so the row reads back-on-left,
 // actions-on-right. Pass these from detail pages reached from a list.
 export function renderShareBar({ backTo = null, backLabel = null } = {}) {
-  // Canonical CD Bund back button: `.btn .btn--outline .btn--back` with an
-  // ArrowLeft glyph + "Zurück" label. The full destination ("Zurück zu …")
-  // stays in `aria-label` for screen-reader context; the breadcrumb above
-  // already shows it visually.
+  // Canonical CD Bund back button: `.btn .btn--outline .btn--sm .btn--back`
+  // with an ArrowLeft glyph — verified against the DS's own detail pages
+  // (detailPressRelease/detailEvent/detailPublication*.vue all compose
+  // `<Btn variant="outline" size="sm" icon="ArrowLeft" class="btn--back">`;
+  // `.btn--back` itself is only the float/margin modifier,
+  // btn.postcss:188-191). The full destination ("Zurück zu …") stays in
+  // `aria-label` for screen-reader context; the breadcrumb above already
+  // shows it visually.
   const back = backTo
-    ? `<a class="btn btn--outline btn--back" href="${backTo}" aria-label="${t('btn.back')}${backLabel ? ' – ' + escapeHtml(backLabel) : ''}">
-         ${icon('chevronLeft')}
+    ? `<a class="btn btn--outline btn--sm btn--back" href="${backTo}" aria-label="${t('btn.back')}${backLabel ? ' – ' + escapeHtml(backLabel) : ''}">
+         ${icon('arrowLeft')}
          <span>${t('btn.back')}</span>
        </a>`
     : '';

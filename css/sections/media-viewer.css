@@ -33,7 +33,10 @@
   background: var(--color-white);
   color: var(--color-text-primary);
   box-shadow: var(--shadow-lg);
-  padding: clamp(28px, 6%, 56px);
+  /* Simulated A4 sheet margin — scales with the zoomed page width between
+     28px (1.75rem) and 56px (3.5rem); document geometry, not UI spacing,
+     so it doesn't ride the --space-* scale. */
+  padding: clamp(1.75rem, 6%, 3.5rem);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -88,11 +91,11 @@
 .docpage__plan .plan-sheet { fill: var(--color-bg-surface); stroke: var(--color-border); stroke-width: 1; }
 .docpage__plan .plan-wall { fill: none; stroke: var(--color-secondary-700); stroke-width: 3; stroke-linecap: square; }
 .docpage__plan .plan-room { fill: var(--color-secondary-50); stroke: var(--color-secondary-300); stroke-width: 1; }
-.docpage__plan .plan-label { fill: var(--color-text-secondary); font-size: 11px; font-weight: var(--font-weight-bold); text-anchor: middle; font-family: var(--font-family); }
+.docpage__plan .plan-label { fill: var(--color-text-secondary); font-size: var(--text-plan-label); font-weight: var(--font-weight-bold); text-anchor: middle; font-family: var(--font-family); }
 .docpage__plan .plan-north line { stroke: var(--color-text-secondary); stroke-width: 1.5; }
 .docpage__plan .plan-titleblock { fill: var(--color-white); stroke: var(--color-secondary-700); stroke-width: 1.5; }
-.docpage__plan .plan-title { fill: var(--color-text-primary); font-size: 13px; font-weight: var(--font-weight-bold); font-family: var(--font-family); }
-.docpage__plan .plan-meta { fill: var(--color-text-secondary); font-size: 11px; font-family: var(--font-family); }
+.docpage__plan .plan-title { fill: var(--color-text-primary); font-size: var(--text-plan-title); font-weight: var(--font-weight-bold); font-family: var(--font-family); }
+.docpage__plan .plan-meta { fill: var(--color-text-secondary); font-size: var(--text-plan-label); font-family: var(--font-family); }
 
 /* Floating zoom toolbar — pinned to the viewport (the viewer scrolls). */
 .docviewer__toolbar {
@@ -186,7 +189,6 @@
 
 @media (max-width: 640px) {
   .docviewer__comments { width: 88vw; }
-  .docviewer__heading-icon { display: none; }
 }
 
 /* ── Side nav chevrons (shared by the document viewer + image gallery) ──────
@@ -226,7 +228,11 @@
 /* ── Image gallery (lightbox) — mirrors the .docviewer chrome ──────────────
    Dark full-screen surface: image name top-left, download/upload/delete
    top-right, centred image with side chevrons, bottom-centre thumbnail
-   strip. Chevrons + thumbnails appear only with 2+ images. */
+   strip. Chevrons + thumbnails appear only with 2+ images.
+   The bar / heading / action-button chrome (.gallery__bar, __heading*,
+   __name, __sub, __actions, __btn*) is merged with the .docviewer__*
+   equivalents in sections/properties.css — only gallery-specific rules
+   live here. */
 .gallery {
   position: fixed;
   inset: 0;
@@ -235,41 +241,6 @@
   flex-direction: column;
   background: var(--color-secondary-900);
 }
-.gallery__bar {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-secondary-900);
-  border-bottom: 1px solid var(--color-white-12);
-}
-.gallery__heading { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
-.gallery__heading-icon { color: var(--color-white-65); flex: 0 0 auto; }
-.gallery__heading-text { min-width: 0; }
-.gallery__name {
-  margin: 0;
-  color: var(--color-white);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--text-body);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.gallery__sub { margin: 0; color: var(--color-white-65); font-size: var(--text-body-xs); font-variant-numeric: tabular-nums; }
-.gallery__actions { display: flex; align-items: center; gap: var(--space-xs); flex: 0 0 auto; }
-.gallery__btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px;
-  background: none; border: none; border-radius: var(--radius);
-  color: var(--color-white); cursor: pointer;
-  transition: background var(--transition-fast);
-}
-.gallery__btn:hover { background: var(--color-white-12); }
-.gallery__btn:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
-.gallery__btn:disabled { opacity: 0.4; cursor: default; }
-.gallery__btn:disabled:hover { background: none; }
-.gallery__btn--close:hover { background: var(--color-primary); }
-.gallery__btn .inline-icon { width: 20px; height: 20px; }
 
 .gallery__main {
   position: relative;
@@ -333,7 +304,6 @@
 
 @media (max-width: 640px) {
   .gallery__thumb { width: 64px; height: 44px; }
-  .gallery__heading-icon { display: none; }
 }
 
 .property-popup__title { margin: 0 0 2px; font-weight: var(--font-weight-bold); font-size: var(--text-body); line-height: var(--line-height-snug); }
@@ -383,7 +353,7 @@
   top: var(--space-sm); right: var(--space-sm);
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
-  font-size: 18px; line-height: 1;
+  font-size: var(--text-chrome-lg); line-height: 1;
   color: var(--color-white);
   background: var(--color-black-70);
   transition: background var(--transition-fast);
@@ -408,25 +378,6 @@
   .property-map-popup .property-popup__media { height: 96px; }
 }
 
-/* `.property-location-map` — Standort map at the bottom of the property
-   detail page. Single marker centred on the building. Uses MapLibre +
-   positron + WGS84 because the BBL portfolio spans federal-wide and
-   eventually overseas FDFA missions, so the basemap must work globally. */
-.property-location-map {
-  width: 100%;
-  height: 320px;
-  border: 1px solid var(--color-secondary-100);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--color-bg-alt);
-}
-@media (min-width: 768px) { .property-location-map { height: 400px; } }
-@media (min-width: 1280px) { .property-location-map { height: 480px; } }
-.property-location-meta {
-  margin: var(--space-xs) 0 0;
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-}
 /* Static marker variant — same teardrop pin but without hover/active
    treatments (no click interaction on a single-building map). */
 .property-marker--static { cursor: default; pointer-events: none; }

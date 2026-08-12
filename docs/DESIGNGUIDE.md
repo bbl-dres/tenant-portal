@@ -141,7 +141,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.input`, `.input--{sm,lg,error,disabled}` | `input.postcss`             | standalone input visuals — reusable outside `.form-field`            |
 | `.table`, `.table--{zebra,rows-clickable,caps,compact}` | `table.postcss` | DS contained-object look (outer border + shadow); `--compact` drops both. Headers are sentence-case + bold (DS default is uppercase — see §5.10); `--caps` restores the DS uppercase look |
 | `.table-hint`, `.table-empty` | (layout helpers)                  | helper paragraph below a table / centred empty-row cell              |
-| `.tag-item[--active]`, `.filter-row`, `.filter-chips` | `tag-item.postcss` | DS filter chip (pill, 34 px tall, `aria-pressed`); chip group inside a toolbar |
+| `.filter-pill[__remove/__remove-icon]` | (block, DS badge-adjacent) | active-filter pill with 44 px hit-slop remove control (the former `.tag-item`/`.filter-row` chip system was removed in the 2026-08 re-audit — unreferenced) |
 | `.page-header[__title/__sub/__actions/__count]` | (layout-only)   | H1 + side-actions row used on inbox / queue / detail; replaces ad-hoc inline flex blocks |
 | `.section-intro[--tight]` | (layout-only)                        | lead paragraph under a section-heading — `max-width: 60ch`, secondary text |
 | `.login-page[__title/__subhead/__dl/__cta/__hint(--muted)]` | (block) | narrow centred form layout for login / contact pages                |
@@ -153,11 +153,6 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.eppm-tab[--visible]` | (block)                                 | auxiliary ePPM-mapping label next to a wizard field; hidden by default |
 | `.wizard__inline-toggle` | (layout-only)                         | small inline toggle inside a wizard subtitle (e.g. "Erweiterte Ansicht") |
 | `.date-grid`         | (layout-only)                             | three equal-column grid for date inputs; stacks under 640 px           |
-| `.card__inset`, `.card__inset-meta` | (layout-only)              | paragraphs and meta-spans living inside a `.card` (resets `<p>` margins) |
-| `.card--clarification` | (block)                                | full-row Rückfrage / Auflagen card with warning left-rail              |
-| `.card__justification` | (layout-only)                          | reviewer's reason paragraph inside a clarification card                |
-| `.card__title--icon` | (block)                                   | card title with a leading inline-icon                                  |
-| `.notification__sub`, `.notification-banner__sub` | (block)     | quieter secondary line inside a `__text` / `__content` slot            |
 | `.pipeline__step--pending` | (block)                             | dimmed pipeline step (replaces inline `opacity:0.5`)                   |
 | `.mark-button[--active-{ok,nok,comment}]` | (block)              | reviewer field-mark pill (28 px tall, hosts inline-icon + label)       |
 | `.breadcrumb__list`, `.breadcrumb__item` | (layout-only)         | `<ol>`/`<li>` shells used by the new schema.org BreadcrumbList markup  |
@@ -171,16 +166,15 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.wizard__sap-info`, `.naw-confidence__line--meta`, `.role-switch-btn__spacer` | (helpers) | single-purpose helpers that replaced inline style= declarations        |
 | `.section`           | sections.postcss                          | full CD-Bund `.container--py` rhythm (56→80→96→128 px). `--py-tight` modifier for the half-scale (rare). |
 | `.section--alt`      | (alt variant)                             | federal cool-blue-gray tint (`--color-secondary-50`) for alternating sections — distinct from white AND `--color-bg-surface` |
-| `.section--surface`  | (alt variant)                             | warmer near-white (`--color-bg-surface`) for in-section card backings   |
 | `.section--py-tight` | (modifier)                                | half-scale section padding (28→40→48→64 px) for tight rhythm strips     |
 | `.option-group[--wrap]`, `.option-group__item` | DS radio/checkbox     | fieldset-based form group; each option its own row; `--wrap` rows-then-wrap for short labels |
 | `.sr-only`           | utility                                   | visually-hidden text for AT (legend duplicates, header annotations)     |
 | `.profile-page__{card,note,save}`, `.profile-dl` | (block)            | profile/settings page layout                                            |
-| `.docs-filter-bar__{select,search}`, `.docs-table__{linked,action,download}` | (block) | downloads page filter bar + table cells          |
+| `.docs-table__{linked,action,download}` | (block)                | downloads table cells (the former `.docs-filter-bar` was removed in the 2026-08 re-audit — unreferenced) |
 | `.table--documents .col-*` | (table-column-width modifiers)      | pixel-percentage column widths on the downloads table                   |
 | `.checklist`, `.consent-check`, `.batch-approve__*` | (block)      | wizard step-5 validation list + bulk-approve modal                      |
 | `.rule`              | utility                                   | soft horizontal rule separator inside panels and modals                 |
-| `.modal__meta`, `.form-field__hint--inline`, `.reviewer-marks__actions`, `.app-detail__correlation` | (helpers) | per-view one-off helpers                                |
+| `.modal__meta`, `.form-field__hint--inline`, `.reviewer-marks__actions` | (helpers) | per-view one-off helpers                                |
 | `.notification--page-top` | (modifier)                            | extra bottom margin when a notification sits at the top of a page body  |
 | `.main-navigation__chevron` | (block)                            | dropdown trigger chevron (rotates on open)                              |
 | `.service-stub__{lead,actions,hint}` | (block)                  | placeholder page for services not yet wired up (no requirements ID on UI) |
@@ -314,17 +308,40 @@ size | date` metadata strip. Whole row is one clickable link.
 12. **3 px focus outline on light surfaces** — DS uses a 2 px `ring`; we use
     a 3 px `outline` + 2 px offset (WCAG 2.4.11-favourable, thicker target).
     On dark chrome the ring switches **colour** (purple-300) at the same
-    thickness. Consistent one-thickness rule.
+    thickness. Consistent one-thickness rule. **Exception: text fields** —
+    inputs (incl. the header search) take the DS-exact 2 px purple ring
+    hugging the field edge with the border staying `text-500`
+    (`input.postcss:17` + `global.postcss:75-76`); a 3 px offset outline
+    around a bordered field reads as a double frame.
 
 13. **`.overtitle` restyle** — uppercase + `0.06em` tracking + `text-500`
     recolour vs the DS `overtitle` (`secondary-100`, no transform). The
     recolour keeps the kicker legible on light card surfaces; the
     transform/tracking is a deliberate eyebrow treatment.
 
-14. **Neutral gray default badge** — the base `.badge` uses the neutral
-    `gray-200` tint rather than DS `.badge--gray`'s blue-gray `secondary-100`,
-    for calmer status dots in dense data tables. (`.badge--warning` now
-    aliases orange per DS; `.badge--yellow` is available for a yellow status.)
+14. ~~**Neutral gray default badge**~~ **— RESOLVED (now DS-aligned).**
+    The base `.badge` now uses the DS `.badge--gray` pair (blue-gray
+    `secondary-100` tint + `gray-800` text, badge.postcss:18-21). The
+    "calmer neutral gray" argument didn't outweigh the most-used badge
+    sitting off the federal ramp. (`.badge--warning` aliases orange per DS;
+    `.badge--yellow` is available for a yellow status.)
+
+15. **Display-title tracking only** — `--tracking-tight`/`--tracking-tighter`
+    (−0.01/−0.02 em) apply ONLY to display-size titles (hero/section titles
+    at `--text-display` scale) as optical tuning. The DS applies no heading
+    tracking anywhere; the portal's `.h1`–`.h5` utilities and component
+    titles now carry none either (2026-08 re-audit).
+
+16. **Pipeline active step = chrome navy** — pipeline states ride the DS
+    badge tint pairs (-100 bg / -800 text). The ACTIVE step alone uses
+    `secondary-500` + bold white — the same emphasis language as
+    `.btn--filled` — because "where the process is now" is emphasis, not a
+    status hue. (The DS ships no process-bar component; steps/progress
+    postcss are empty stubs.)
+
+17. **No footer socials row** — DS `footer.postcss:67-79` ships a social-
+    icons row in the first footer column. The portal has no social accounts
+    to link; the row is omitted rather than stubbed.
 
 ## 5a. Naming-collision register
 
@@ -333,11 +350,19 @@ Document them here so copy-paste from `swiss/designsystem` doesn't surprise.
 
 | Class | Our behaviour | DS behaviour | Risk if mixed |
 | --- | --- | --- | --- |
-| `.modal` | Toggled by JS removing the surrounding `.modal-backdrop` wrapper. | Toggled via `[open='true']` attribute (Vue binding). | DS markup won't show/hide in our app. |
+| `.modal` | Toggled by JS removing the surrounding `.modal-backdrop` wrapper. Size modifiers map to the DS screen scale (xs/sm/md/lg/xl = 480/640/768/1024/1280). | Toggled via `[open='true']` attribute (Vue binding). | DS markup won't show/hide in our app. |
 | `.toast` | Animated message inside a `.toast-host` region. | Wrapped as `.toast__message.active`. No `.toast-host` concept. | Markup shapes differ. |
-| `.card--flat` | Borderless, no shadow. | Bottom-bordered list-item variant. | Two visually different looks under the same name. |
-| `.card--highlight` | (Modifier defined but currently unused after recent edit.) | Secondary-300 backplate behind the card. | Low — we no longer apply it. |
 | `.notification-banner` | Full DS translation: composes with `.notification` exactly as `NotificationBanner.vue` does. `__text` is an alias of DS `__infos`; `--danger` an alias of DS `--error`. | Same. | None — DS markup pastes in unchanged. |
+
+Resolved collisions (2026-08 re-audit): `.card--flat` and `.card--highlight`
+were deleted (both unreferenced; both meant something visually different
+upstream). `.btn--back` now matches the DS contract — a layout-only modifier
+whose visual comes from the composed variant classes. The DS's own detail
+pages render it `variant="outline" size="sm" icon="ArrowLeft"` (verified in
+detailPressRelease/detailEvent/detailPublication*.vue), i.e. the Zurück
+button next to the ShareBar IS a bordered outline-sm button; the portal
+composes `btn btn--outline btn--sm btn--back` accordingly (44 px target
+floor kept per §5, WCAG 2.5.5).
 
 ## 5b. Pattern-composition rules (DS-aligned)
 
@@ -385,6 +410,19 @@ contributes a single responsibility — mirrors the DS pattern in
 - New design tokens go in `css/tokens.css` before being used.
 - Inline `style="…"` is reserved for dynamic, per-instance values; recurring
   patterns become CSS classes.
+- **Scroll on navigation follows the CONTEXT, not the URL** (implemented in
+  `markRouteRendered`, js/app.js):
+  1. *Context change* (list → detail, another entity, a main-nav link):
+     instant scroll to top + focus `#main` — like a real page load.
+  2. *Facet change within one context* (tab, floor switch, filter, page,
+     sort, language): scroll stays put; focus moves to the swapped panel.
+     Facets ride a `?query` on the same path wherever possible; a child
+     PATH that renders the same scaffold as its parent (e.g.
+     `#/properties/:id/floors/:slug`) must declare a shared context in
+     `SCROLL_CONTEXTS` or the router will treat it as a new page.
+  3. *Deep links to in-page content* (`?space=`, `scrollToInfo` anchors)
+     scroll to their target, never to the top.
+  4. The back-to-top button is the only *smooth* scroll to top.
 
 ## 7. When to update what
 

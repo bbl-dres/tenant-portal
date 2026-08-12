@@ -70,6 +70,31 @@ function navigate(hash) {
 // navigate('#/')) still stamps its own hash first; the redirect then
 // re-renders and re-stamps.
 let _lastRenderedPath = null;
+// ── Scroll contexts ──────────────────────────────────────────────────────
+// Scroll policy: only a CONTEXT change jumps to the top of the page; every
+// transition within one context keeps the reader's scroll position.
+//   • context change  — different page/entity (list → detail, another
+//     property, a main-nav link): top + focus #main, like a real navigation.
+//   • facet change    — same content, different slice (tab, floor, filter,
+//     page, language): scroll stays put; focus moves to the swapped panel.
+//     Facets normally ride a ?query on the SAME path, which the path
+//     comparison below already treats as "keep scroll" — child PATHS that
+//     render the same scaffold as their parent must additionally declare a
+//     shared context here, or the router mistakes them for new pages and
+//     throws the reader back above the hero on every switch.
+//   • deep links      — ?space= / scrollToInfo anchors scroll to their
+//     target content ~100 ms after render and win over both cases.
+const SCROLL_CONTEXTS = [
+  // Floor-plan routes share the property-detail scaffold (hero + tab strip;
+  // the plan viewer is just the Geschosse panel's alternate content).
+  { re: /^(#\/properties\/[^/]+)\/floors\/[^/]+$/, ctx: '$1' },
+];
+function scrollContext(path) {
+  for (const { re, ctx } of SCROLL_CONTEXTS) {
+    if (re.test(path)) return path.replace(re, ctx);
+  }
+  return path;
+}
 function markRouteRendered(route) {
   const body = document.getElementById('page-body');
   if (body) body.dataset.route = route;
@@ -81,15 +106,31 @@ function markRouteRendered(route) {
   const h1 = body ? body.querySelector('h1') : null;
   const pageTitle = (h1 ? h1.textContent : '').replace(/\s+/g, ' ').trim();
   document.title = pageTitle ? pageTitle + ' — BBL Mieterportal' : 'BBL Mieterportal';
-  // A new page (the route PATH changed, not just a ?query / lang / filter
-  // update) starts at the top, like a real navigation — hash routing doesn't
-  // reset scroll on its own. Same-path query changes (filters, pagination,
-  // view toggle, language) keep the scroll position. Compatible with the
-  // `scrollToInfo` deep-link pattern: this fires at render time, the smooth
-  // scroll-to-section fires ~100 ms later and wins.
+  // A new page (the scroll CONTEXT changed, not just a ?query / lang /
+  // filter update or a facet sibling — see SCROLL_CONTEXTS) starts at the
+  // top, like a real navigation — hash routing doesn't reset scroll on its
+  // own. Same-path query changes (filters, pagination, view toggle,
+  // language) and same-context path changes (property tabs ↔ floor plan)
+  // keep the scroll position. Compatible with the `scrollToInfo` deep-link
+  // pattern: this fires at render time, the smooth scroll-to-section fires
+  // ~100 ms later and wins.
   if (route !== _lastRenderedPath) {
     const isFirstRender = _lastRenderedPath === null;
+    const sameContext = !isFirstRender
+      && scrollContext(route) === scrollContext(_lastRenderedPath);
     _lastRenderedPath = route;
+    if (sameContext) {
+      // Facet change within one context: keep the reader's scroll. The
+      // full re-render still dropped focus to <body>, so hand it to the
+      // swapped tab panel (ARIA tabs pattern; #detailTab carries
+      // tabindex="0") — or the main landmark when no panel exists —
+      // without moving the viewport.
+      const panel = document.getElementById('detailTab') || document.getElementById('main');
+      if (panel) {
+        try { panel.focus({ preventScroll: true }); } catch { panel.focus(); }
+      }
+      return;
+    }
     // Jump instantly to the top. `behavior: 'instant'` overrides the
     // `html { scroll-behavior: smooth }` token — which otherwise animates even
     // a direct scrollTop assignment, gliding the long page up over ~½ s.
@@ -98,7 +139,7 @@ function markRouteRendered(route) {
     // Route-change focus hand-off: the re-render dropped focus to <body>,
     // so move it to the main landmark (shell() prepares main[tabindex="-1"]
     // for exactly this) — screen readers announce the new page, keyboard
-    // users continue from the content. Path changes only; query-driven
+    // users continue from the content. Context changes only; query-driven
     // re-renders keep the user's place, and the very first render must not
     // steal focus from the document.
     if (!isFirstRender) {
@@ -634,11 +675,14 @@ function renderSearchResults() {
   const safePage = Math.min(page, totalPages);
   const visible = sorted.slice((safePage - 1) * SEARCH_PAGE_SIZE, safePage * SEARCH_PAGE_SIZE);
 
+  // «Label (n)» as ONE text node — the flex .tab base treats separate text
+  // nodes/spans as flex items and swallows the whitespace between them,
+  // which rendered «Alle11». Same convention as the property-detail tabs.
   const tab = (label, value, count) => `
     <button class="tab__control${activeKind === value ? ' tab__control--active' : ''}" type="button"
             role="tab" aria-selected="${activeKind === value}"
             onclick="location.hash='${searchHash({ q: query, sort, view, kind: value, page: 1 })}'">
-      ${P.escapeHtml(label)} <span class="tab__count">${count}</span>
+      ${P.escapeHtml(label)}&nbsp;(${count})
     </button>
   `;
 
@@ -3436,30 +3480,9 @@ function galleryImgSrc(s) {
   return safeImageUrl(s);
 }
 
-// Clickable building-photo thumbnail in the property/floor header. Seeds the
-// per-tenancy gallery on first use and renders a button that opens the
-// lightbox; degrades to a disabled button when the property has no photo.
-function propertyHeaderMedia(t) {
-  if (!Array.isArray(t.gallery)) {
-    // Seeded from the building's photo array. Uploads/deletes via the
-    // lightbox mutate this array, which lives on the tenancy object so it
-    // survives route re-renders within the session (not persisted to disk,
-    // like the rest of the prototype's mutations).
-    t.gallery = (t.images || []).map((src, i) => ({ src, name: t.buildingName + (i === 0 ? ' — Aussenansicht' : ' — Aufnahme ' + (i + 1)) }));
-  }
-  const count = t.gallery.length;
-  const src = count ? galleryImgSrc(t.gallery[0].src) : '';
-  return `
-    <button type="button" class="property-header__media" data-gallery-open aria-haspopup="dialog"
-            title="Bildergalerie öffnen" aria-label="Bildergalerie öffnen${count > 1 ? ` (${count} Bilder)` : ''}"${count ? '' : ' disabled'}>
-      <img class="property-header__image" src="${src}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="280" height="160">
-      <span class="property-header__media-badge" aria-hidden="true">
-        ${P.icon('image', 'property-header__media-icon')}
-        <span class="property-header__media-label">Galerie</span>
-        <span class="property-header__media-count" data-gallery-count${count > 1 ? '' : ' hidden'}>${count}</span>
-      </span>
-    </button>`;
-}
+// (The former propertyHeaderMedia single-thumbnail header block was retired
+// when the floor route adopted the property-detail scaffold — the hero
+// mosaic, which also seeds t.gallery, renders on both routes now.)
 
 // Every mosaic tile is its own gallery trigger and opens AT its own image —
 // clicking the third photo should show the third photo, not restart at the
@@ -3666,16 +3689,11 @@ function openImageGallery(t, startIndex = 0) {
   setTimeout(() => { try { backdrop.querySelector('[data-act="close"]').focus(); } catch {} }, 0);
 }
 
-async function renderPropertyDetail({ id }) {
-  if (!P.state.user) { P.navigate('#/'); return; }
-  const t = P.state.tenancies.find(x => x.id === id);
-  if (!t) { document.getElementById('page-body').innerHTML = `<div class="container section"><p>${P.t('prop.notFound')}</p></div>`; return; }
-  await P.loadSpatialData('data/');
-  shell({ activeNav: 'properties', breadcrumb: [
-    { href: '#/properties', label: P.t('nav.properties') },
-    { label: t.buildingName }
-  ]});
-
+// Shared data prep for the property-detail scaffold. Both routes that render
+// it — #/properties/:id (tab view) and #/properties/:id/floors/:slug (same
+// view with the floor viewer in the Geschosse panel) — need identical tab
+// counts, KPIs and lease maths, so this lives in one place.
+function buildPropertyContext(t) {
   // Every Vorgang that concerns this building, not just its Bedarfsmeldungen:
   // a Schadensmeldung or an Umzug on this property belongs in the same list,
   // and the process envelope makes that one query instead of five.
@@ -3722,23 +3740,24 @@ async function renderPropertyDetail({ id }) {
     )
   );
 
-  // Tab state lives in the URL (`?tab=`) so a tab is linkable and the back
-  // button steps through them — same contract as the Vorgang detail view.
   // Short labels on the tabs, descriptive headings inside the panels — a tab
   // strip has to stay scannable at a glance, and «Dokumente zu dieser
   // Liegenschaft (11)» as a tab pushes the strip into a scroll on a laptop.
-  const PROP_TABS = [
+  const propTabs = [
     { key: 'uebersicht', label: P.t('prop.tabOverview') },
     { key: 'vertraege',  label: `${P.t('prop.tabContracts')} (${(P.state.tenancies || []).filter(x => x.buildingId === t.buildingId).length})` },
     { key: 'geschosse',  label: `${P.t('prop.tabFloors')} (${floors.length})` },
     { key: 'dokumente',  label: `${P.t('prop.tabDocuments')} (${linkedDocs.length})` },
     { key: 'vorgaenge',  label: `${P.t('prop.tabCases')} (${related.length})` },
   ];
-  const requested = parseHashQuery(location.hash).tab;
-  const activeTab = PROP_TABS.some(x => x.key === requested) ? requested : 'uebersicht';
 
-  document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar({ backTo: '#/properties', backLabel: P.t('nav.properties') })}
+  return { related, monthsToEnd, restWarn, floors, floorKpis, linkedDocs, userVe, userDep, propTabs };
+}
+
+// Shared header block: title, address, hero mosaic and the tab strip.
+// `activeTab` names the highlighted tab; the caller renders the panel.
+function propertyDetailScaffold(t, ctx, activeTab, panelHtml) {
+  return `
     <section class="section section--py-tight">
       <div class="container">
         <header class="property-header">
@@ -3751,18 +3770,41 @@ async function renderPropertyDetail({ id }) {
         ${propertyHeroMosaic(t)}
 
         <div class="tabs property-tabs" role="tablist" aria-label="${P.t('prop.tabsLabel')}">
-          ${PROP_TABS.map(x => tabBtn(x.key, x.label, activeTab)).join('')}
+          ${ctx.propTabs.map(x => tabBtn(x.key, x.label, activeTab)).join('')}
         </div>
         <div class="property-tabpanel" id="detailTab" role="tabpanel" aria-labelledby="tab-${activeTab}" tabindex="0">
-          ${renderPropertyTab(t, activeTab, { floorKpis, linkedDocs, related, restWarn, monthsToEnd, userVe, userDep })}
+          ${panelHtml}
         </div>
       </div>
     </section>
   `;
+}
+
+async function renderPropertyDetail({ id }) {
+  if (!P.state.user) { P.navigate('#/'); return; }
+  const t = P.state.tenancies.find(x => x.id === id);
+  if (!t) { document.getElementById('page-body').innerHTML = `<div class="container section"><p>${P.t('prop.notFound')}</p></div>`; return; }
+  await P.loadSpatialData('data/');
+  shell({ activeNav: 'properties', breadcrumb: [
+    { href: '#/properties', label: P.t('nav.properties') },
+    { label: t.buildingName }
+  ]});
+
+  const ctx = buildPropertyContext(t);
+
+  // Tab state lives in the URL (`?tab=`) so a tab is linkable and the back
+  // button steps through them — same contract as the Vorgang detail view.
+  const requested = parseHashQuery(location.hash).tab;
+  const activeTab = ctx.propTabs.some(x => x.key === requested) ? requested : 'uebersicht';
+
+  document.getElementById('page-body').innerHTML = `
+    ${P.renderShareBar({ backTo: '#/properties', backLabel: P.t('nav.properties') })}
+    ${propertyDetailScaffold(t, ctx, activeTab, renderPropertyTab(t, activeTab, ctx))}
+  `;
 
   wirePropertyGallery(t);
   initPropertyDetailMap(t);
-  wirePropertyTabs(t, { floorKpis, linkedDocs, related, restWarn, monthsToEnd, userVe, userDep });
+  wirePropertyTabs(t, ctx);
 }
 
 // ── PROPERTY HERO ────────────────────────────────────────────────────────
@@ -4030,6 +4072,15 @@ function propertyContractPanel(t) {
 }
 
 function propertyFloorsPanel(t, { floorKpis, userVe, userDep }) {
+  // Column totals for the tfoot — DS `tfoot` treatment (2px rules) plus
+  // bold cells; mirrors the service-portal Geschosse table's "Total (n)".
+  const sum = (fn) => floorKpis.reduce((acc, f) => acc + fn(f), 0);
+  const totals = {
+    rooms: sum(f => f.roomCount),
+    area: sum(f => f.totalArea),
+    workstations: sum(f => f.workstations),
+    myVe: sum(f => f.myVeCount),
+  };
   return `
     <div>
         ${floorKpis.length === 0
@@ -4060,6 +4111,16 @@ function propertyFloorsPanel(t, { floorKpis, userVe, userDep }) {
                   </tr>
                 `).join('')}
               </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">Total (${floorKpis.length})</th>
+                  <td class="floor-list__num"><strong>${totals.rooms}</strong></td>
+                  <td class="floor-list__num"><strong>${totals.area.toLocaleString('de-CH')} m²</strong></td>
+                  <td class="floor-list__num"><strong>${totals.workstations}</strong></td>
+                  <td class="floor-list__num"><strong>${totals.myVe}</strong></td>
+                  <td aria-hidden="true"></td>
+                </tr>
+              </tfoot>
             </table></div>`}
     </div>`;
 }
@@ -4389,13 +4450,6 @@ async function renderFloorDetail({ id, floorSlug }) {
     .filter(s => s.useType === 'Office' || s.useType === 'OpenSpace')
     .reduce((sum, s) => sum + (s.capacity || 0), 0);
 
-  // Reuse the property-detail Restlaufzeit calculation so the chip stays
-  // consistent across the property page and the floor page.
-  const today = new Date();
-  const leaseEnd = new Date(t.leaseEnd);
-  const monthsToEnd = Math.max(0, Math.round((leaseEnd - today) / (30 * 86400000)));
-  const restWarn = monthsToEnd <= 12;
-
   // Pre-select a room from ?space=… and the "Einfärben" colour mode from
   // ?color=… on the hash. The colour mode persists across level switches.
   const queryStr = (location.hash.split('?')[1] || '');
@@ -4404,65 +4458,67 @@ async function renderFloorDetail({ id, floorSlug }) {
   const colorMode = ['none', 'useType', 'sia', 'tenant'].includes(params.get('color')) ? params.get('color') : 'none';
   const colorQuery = colorMode !== 'none' ? `?color=${colorMode}` : '';
 
-  document.getElementById('page-body').innerHTML = `
-    ${P.renderShareBar({ backTo: `#/properties/${t.id}`, backLabel: t.buildingName })}
-    <section class="section section--py-tight">
-      <div class="container">
-        <header class="property-header">
-          <div class="property-header__body">
-            <p class="property-header__meta">${formatAssetKey(t.assetKey)} · EGID ${t.egid}</p>
-            <h1 class="h1 property-header__title">${P.escapeHtml(t.buildingName)}</h1>
-            <p class="property-header__address">${P.escapeHtml(t.address)}</p>
-            <p class="property-header__chips">
-              <span class="badge ${restWarn ? 'badge--warning' : 'badge--success'}">${P.t('prop.restTerm', { n: monthsToEnd })}</span>
-            </p>
-          </div>
-          ${propertyHeaderMedia(t)}
-        </header>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <header class="floor-header">
-          <h2 class="h2 floor-header__title">Geschoss ${P.escapeHtml(floor.name)}</h2>
-          <p class="floor-header__kpis">${rooms.length} Räume · ${totalArea.toLocaleString('de-CH')} m² HNF2 · ${workstations} Arbeitsplätze</p>
-        </header>
-        <div class="floor-toolbar">
-          <div class="floor-toolbar__group">
-            <span class="floor-toolbar__label">Etage</span>
-            <div class="floor-switcher" role="tablist" aria-label="Etage wechseln">
-              ${buildingFloors.map(f => {
-                const slug = f.floorId.replace(t.buildingId + '-', '');
-                const isActive = f.floorId === floor.floorId;
-                return `<a class="floor-switcher__chip${isActive ? ' floor-switcher__chip--active' : ''}"
-                          href="#/properties/${t.id}/floors/${slug}${colorQuery}"
-                          ${isActive ? 'aria-current="page"' : ''}>${P.escapeHtml(f.name)}</a>`;
-              }).join('')}
-            </div>
-          </div>
-
-          <div class="floor-toolbar__group floor-toolbar__group--right">
-            <label class="floor-toolbar__label" for="floorViewMode">Einfärben</label>
-            <select id="floorViewMode" class="input input--sm">
-              <option value="none"${colorMode === 'none' ? ' selected' : ''}>Keine</option>
-              <option value="useType"${colorMode === 'useType' ? ' selected' : ''}>Nutzung</option>
-              <option value="sia"${colorMode === 'sia' ? ' selected' : ''}>SIA 416 Kategorie</option>
-              <option value="tenant"${colorMode === 'tenant' ? ' selected' : ''}>Mietende VE</option>
-            </select>
-            <button class="btn btn--bare btn--sm" type="button" id="floorFullscreenBtn" aria-label="Vollbild">${P.icon('maximize')}Vollbild</button>
-          </div>
-        </div>
-
-        <div class="floor-viewer">
-          <div id="floorCanvas" class="floor-canvas map-surface" aria-label="Interaktiver Grundriss">
-            ${renderMapLoading('Grundriss wird geladen')}
-          </div>
-          <ul class="floor-legend" id="floorLegend" aria-label="Legende"></ul>
+  // Same view as #/properties/:id?tab=geschosse — identical hero header and
+  // tab strip — with the floor-plan viewer in the Geschosse panel instead of
+  // the floor table, plus a back affordance to the table (service-portal
+  // Grundrisse pattern).
+  const ctx = buildPropertyContext(t);
+  const floorPanel = `
+    <div class="floor-toolbar">
+      <div class="floor-toolbar__group">
+        <a class="btn btn--link floor-toolbar__back" href="#/properties/${t.id}?tab=geschosse">
+          ${P.icon('chevronLeft')}<span>Alle Geschosse</span>
+        </a>
+        <div class="floor-switcher" role="tablist" aria-label="Etage wechseln">
+          ${buildingFloors.map(f => {
+            const slug = f.floorId.replace(t.buildingId + '-', '');
+            const isActive = f.floorId === floor.floorId;
+            return `<a class="floor-switcher__chip${isActive ? ' floor-switcher__chip--active' : ''}"
+                      href="#/properties/${t.id}/floors/${slug}${colorQuery}"
+                      ${isActive ? 'aria-current="page"' : ''}>${P.escapeHtml(f.name)}</a>`;
+          }).join('')}
         </div>
       </div>
-    </section>
+
+      <div class="floor-toolbar__group floor-toolbar__group--right">
+        <label class="floor-toolbar__label" for="floorViewMode">Einfärben</label>
+        <select id="floorViewMode" class="input input--sm">
+          <option value="none"${colorMode === 'none' ? ' selected' : ''}>Keine</option>
+          <option value="useType"${colorMode === 'useType' ? ' selected' : ''}>Nutzung</option>
+          <option value="sia"${colorMode === 'sia' ? ' selected' : ''}>SIA 416 Kategorie</option>
+          <option value="tenant"${colorMode === 'tenant' ? ' selected' : ''}>Mietende VE</option>
+        </select>
+        <button class="btn btn--bare btn--sm" type="button" id="floorFullscreenBtn" aria-label="Vollbild">${P.icon('maximize')}Vollbild</button>
+      </div>
+    </div>
+
+    <p class="floor-header__kpis">Geschoss ${P.escapeHtml(floor.name)} · ${rooms.length} Räume · ${totalArea.toLocaleString('de-CH')} m² HNF2 · ${workstations} Arbeitsplätze</p>
+
+    <div class="floor-viewer">
+      <div id="floorCanvas" class="floor-canvas map-surface" aria-label="Interaktiver Grundriss">
+        ${renderMapLoading('Grundriss wird geladen')}
+      </div>
+      <ul class="floor-legend" id="floorLegend" aria-label="Legende"></ul>
+    </div>
   `;
+
+  document.getElementById('page-body').innerHTML = `
+    ${P.renderShareBar({ backTo: `#/properties/${t.id}?tab=geschosse`, backLabel: t.buildingName })}
+    ${propertyDetailScaffold(t, ctx, 'geschosse', floorPanel)}
+  `;
+
+  // Tabs on this route navigate back to the property URL (the panel here is
+  // the floor viewer, not an in-place-switchable table) — the Geschosse tab
+  // itself included, which doubles as a second path back to the floor table.
+  document.querySelectorAll('.property-tabs [role="tab"]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const key = tab.getAttribute('data-tab');
+      const lang = parseHashQuery(location.hash).lang;
+      const qs = [key === 'uebersicht' ? '' : `tab=${key}`, lang ? `lang=${lang}` : '']
+        .filter(Boolean).join('&');
+      P.navigate(`#/properties/${t.id}` + (qs ? '?' + qs : ''));
+    });
+  });
 
   // Print scope: only while an actual floor plan is on screen may the print
   // stylesheet strip the federal chrome down to the bare plan sheet
@@ -4470,6 +4526,7 @@ async function renderFloorDetail({ id, floorSlug }) {
   document.body.classList.add('route-floor');
 
   wirePropertyGallery(t);
+  initPropertyDetailMap(t);
   initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, colorMode);
 
   // Vollbild toggle — fullscreens `.floor-viewer` so the legend stays

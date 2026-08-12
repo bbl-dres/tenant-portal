@@ -16,13 +16,19 @@
      --section-py-half. */
 }
 
-/* Footer grid — matches designsystem css/sections/footer.postcss .footer-information:
-   single column on mobile, three equal columns from lg (1024px) up. */
+/* Footer grid — matches designsystem css/sections/footer.postcss
+   .footer-information: single column on mobile, three equal columns from
+   lg (1024 px), four from xl (1280 px) with the brand column spanning two
+   (footer.postcss:7-8 `lg:grid-cols-3 lg:gap-16 xl:grid-cols-4` +
+   :62-64 `__entry--big xl:col-span-2`). Vertical rhythm is the canonical
+   `container--py` scale (footer.postcss:9) — our --section-py token
+   already resolves 56 / 80 @1024 / 128 @1920, no local bumps. The gap
+   holds at 64 px from lg up (DS has no 2xl widening). */
 .footer-information__inner {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-2xl);
-  padding: var(--space-3xl) var(--container-padding);
+  padding: var(--section-py) var(--container-padding);
   max-width: var(--container-max-width);
   margin: 0 auto;
 }
@@ -30,18 +36,14 @@
   .footer-information__inner {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-3xl);
-    padding-block: var(--space-4xl);          /* 80 px at lg */
   }
 }
-@media (min-width: 1544px) {
+@media (min-width: 1280px) {
   .footer-information__inner {
-    padding-block: calc(var(--space-4xl) + var(--space-md));   /* ~96 px at 2xl */
-    gap: var(--space-4xl);
+    grid-template-columns: repeat(4, 1fr);
   }
-}
-@media (min-width: 1920px) {
-  .footer-information__inner {
-    padding-block: 7rem;                       /* 112 px at 3xl */
+  .footer-information__col--brand {
+    grid-column: span 2;
   }
 }
 
@@ -59,13 +61,14 @@
   font-size: var(--text-h3);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-inverse);
+  /* DS `mb-6 lg:mb-10` (footer.postcss:51) = 24 px base, 40 px from lg. */
   margin: 0 0 var(--space-lg);
   letter-spacing: 0;
-  line-height: var(--line-height-snug);
+  line-height: var(--line-height-tight);   /* DS text--xl carries leading-tight (typography.postcss:38-41) */
 }
 @media (min-width: 1024px) {
   .footer-information__brand,
-  .footer-information__heading { margin-bottom: var(--space-2xl); }
+  .footer-information__heading { margin-bottom: var(--space-2lg); }
 }
 .footer-information__motto {
   margin: 0;
@@ -86,6 +89,10 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  /* DS `.footer-information__links` pulls the list up by the links'
+     top padding (`-mt-4`, footer.postcss:87) so the first row's TEXT
+     aligns with the first text line of column 1. */
+  margin-top: calc(var(--space-md) * -1);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -97,18 +104,15 @@
   justify-content: space-between;
   /* Small horizontal inset + matching negative margin so the row background
      (added on hover) has breathing room while the text stays aligned with
-     the column edge. */
+     the column edge. DS row padding is `py-4 px-2` (footer.postcss:96) —
+     16 / 8 px at EVERY width, no desktop bump. */
   padding: var(--space-md) var(--space-sm);
   margin-inline: calc(var(--space-sm) * -1);
   font-size: var(--text-body);
-  color: var(--color-white-92);
+  color: var(--color-white);   /* DS footer links are plain text-white (footer.postcss:22, 43) */
   text-decoration: none;
-  border-bottom: 1px solid var(--color-white-15);
+  border-bottom: 1px solid var(--color-secondary-300);   /* DS border-secondary-300, opaque #828E9A (footer.postcss:97) */
   transition: color var(--transition-fast), background var(--transition-fast);
-}
-@media (min-width: 1024px) {
-  /* Match the CD-Bund footer cadence — wider link rows at desktop. */
-  .footer-information__list a { padding: var(--space-lg) var(--space-sm); }
 }
 /* CD Bund footer fills the WHOLE row on hover/focus (not just a text-colour
    change) — the affordance reads as a full navigable strip. */
@@ -128,37 +132,12 @@
   flex-shrink: 0;
 }
 
-/* "Zugang zu amtlichen Dokumenten" big link */
-.footer-information__big-link {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-md) 0;
-  font-size: var(--text-h3);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-snug);
-  color: var(--color-text-inverse);
-  text-decoration: none;
-  border-bottom: 1px solid var(--color-white-40);
-  transition: color var(--transition-fast);
-}
-.footer-information__big-link:hover { color: var(--color-white); }
-.footer-information__big-link:hover .footer-information__arrow { transform: translateX(4px); }
-.footer-information__big-link .footer-information__arrow {
-  width: var(--icon-md);
-  height: var(--icon-md);
-}
-
-/* Bottom strip — slightly darker, three small links. CD Bund cadence is
-   tight (~12–16 px vertical) so the strip reads as a meta-line rather
-   than a second footer band. */
+/* Bottom strip — slightly darker, small meta links. DS `.footer-navigation`
+   (footer.postcss:12-17): `py-3` = 12 px block padding at EVERY width,
+   link gap `space-x-2 sm:space-x-4` = 8 px base / 16 px from 640. */
 .app-footer__bottom {
   background: var(--color-surface-darker);
-  padding-block: var(--space-sm);
-}
-@media (min-width: 1024px) {
-  .app-footer__bottom { padding-block: var(--space-md); }
+  padding-block: var(--space-2sm);
 }
 .app-footer__bottom-inner {
   max-width: var(--container-max-width);
@@ -166,14 +145,17 @@
   padding-inline: var(--container-padding);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xl);
+  gap: var(--space-sm);
   font-size: var(--text-body-xs);   /* CD: footer-navigation strip is text--xs (was text--sm — one size too large) */
 }
-@media (min-width: 1024px) {
-  .app-footer__bottom-inner { gap: var(--space-2xl); }
+@media (min-width: 640px) {
+  .app-footer__bottom-inner { gap: var(--space-md); }
 }
 .app-footer__bottom-link {
   color: var(--color-white-75);
   text-decoration: none;
 }
-.app-footer__bottom-link:hover { color: var(--color-white); text-decoration: underline; }
+/* DS footer link hover is a colour-only step to text-300 (#D1D5DB gray-300,
+   footer.postcss:22) — links are not underlined at rest, so no underline
+   appears on hover either. */
+.app-footer__bottom-link:hover { color: var(--color-gray-300); }

@@ -229,14 +229,6 @@
   --color-notification-hint-bg:      var(--color-secondary-50);
   --color-notification-hint-text:    var(--color-gray-700);      /* DS text-700 */
 
-  /* ── LANGUAGE SWITCHER ────────────────────────────────────────────────
-     Tailwind blue-600 / blue-700 from the DS canonical pattern
-     (designsystem/app/tailwind.config.js:82). NOT the federal primary
-     red — the DS uses blue specifically for "currently-selected
-     language" to distinguish from primary-action red. */
-  --color-lang-active:         #2563EB;
-  --color-lang-active-hover:   #1D4ED8;
-
   /* ── FLOOR-PLAN PALETTE (SIA 416 usage categories) ────────────────────
      Same colours mirrored in js/app.js USETYPE_FILL — MapLibre paint
      specs don't accept CSS variables, so the JS map is the runtime
@@ -280,13 +272,19 @@
   --color-badge-yellow-text:   #92400E;
   --color-badge-orange-bg:     #FFEDD5;
   --color-badge-orange-text:   #9A3412;
-  --color-badge-gray-bg:       var(--color-gray-200);
-  --color-badge-gray-text:     var(--color-gray-700);
+  /* Default/neutral badge — DS `.badge--gray` is text-gray-800 on
+     bg-secondary-100 (badge.postcss:18-21): the federal BLUE-gray tint,
+     not the neutral gray ramp. Realigned in the 2026-08 re-audit; the
+     former gray-200/gray-700 pair was a documented deviation
+     (DESIGNGUIDE §5.14) that made the most-used badge read off-ramp. */
+  --color-badge-gray-bg:       var(--color-secondary-100);
+  --color-badge-gray-text:     var(--color-gray-800);
 
   /* ── PORTAL-SPECIFIC ──────────────────────────────────────────────────── */
-  --color-pipeline-active:     var(--color-primary-600);
-  --color-pipeline-done:       var(--color-success);
-  --color-pipeline-rejected:   var(--color-danger);
+  /* The former --color-pipeline-* fills were retired in the 2026-08
+     re-audit: the pipeline now rides the badge tint pairs directly
+     (DS status language, -100 bg + -800 text) with secondary-500 for
+     the active step — see components/status.css. */
 
   /* ── ALPHA / OVERLAY ──────────────────────────────────────────────────── */
   --color-backdrop:            rgba(17, 24, 39, 0.7);   /* gray-900 @ 70% — matches CD Bund bg-text-900/70 */
@@ -351,6 +349,13 @@
      the responsive text--xl cascade. */
   --text-chrome-xl:            1.25rem;    /* 20px — Tailwind fontSize.xl */
 
+  /* SVG floor-plan annotation type — the only text in the app below the
+     12px ramp floor. Rendered inside scaled plan graphics (media-viewer),
+     where the surrounding geometry, not readability at 1:1, sets the size.
+     Deliberately NOT on the --text-* ramp; do not reuse for HTML copy. */
+  --text-plan-label:           11px;
+  --text-plan-title:           13px;
+
   /* Minimum computed size for FOCUSABLE form controls — the iOS Safari
      zoom-on-focus threshold. DS controls never sit below it: the bare
      `input` rule inherits body text--base = 16px+
@@ -372,13 +377,18 @@
   --text-badge:                0.75rem;    /* 12px — Tailwind fontSize.xs */
   --leading-badge:             1.25rem;    /* 20px — Tailwind leading-5 */
 
-  /* Letter-spacing — three named tracks consolidate the ad-hoc tunings
-     scattered through styles.css. Remaining literal values (-0.02em,
-     0.4px, 1px, etc.) are intentional one-off micro-adjustments for
-     a specific element and don't fit a token. */
-  --tracking-tight:            -0.01em;   /* h1/h2/h3 + page titles */
+  /* Letter-spacing — five named tracks consolidate the ad-hoc tunings
+     scattered through the section files. Remaining literal values (1px on
+     the property-hero badge, 0.08em on the demo chip) are intentional
+     one-off micro-adjustments for a specific element and don't fit a token.
+     Note: the DS applies NO letter-spacing to headings — heading tracking
+     was removed in the 2026-08 CD re-audit; --tracking-tight remains for
+     portal display titles that pair with --text-display. */
+  --tracking-tight:            -0.01em;   /* portal display/page titles */
+  --tracking-tighter:          -0.02em;   /* display-size hero/section titles (news, info, properties) */
   --tracking-label:            0.06em;    /* uppercase-tracked labels (e.g. .overtitle, footer-information__heading) */
   --tracking-wide:             0.05em;    /* eyebrow / kicker text */
+  --tracking-caps:             0.4px;     /* small uppercase table/overlay captions */
 
   /* CD Bund typography uses a binary weight axis: regular (400) and
      bold (700). Noto Sans only ships those two faces; intermediate
@@ -406,6 +416,10 @@
   --space-md:                  16px;
   --space-lg:                  24px;
   --space-xl:                  32px;
+  /* 40px step — Tailwind spacing 10 (2.5rem). DS rhythm anchors on it:
+     .section__title pb-10, notification-banner lg:py-10, footer lg:mb-10.
+     The t-shirt scale jumps 32 → 48, so the DS step gets its own token. */
+  --space-2lg:                 40px;
   --space-2xl:                 48px;
   --space-3xl:                 64px;
   --space-4xl:                 80px;
@@ -447,10 +461,17 @@
   --btn-min-h:                 44px;
   --btn-sm-min-h:              34px;
   --btn-lg-min-h:              48px;
-  --topbar-height:             46px;   /* scales below */
+  /* Top-bar height — CD Bund anchor is `min-height: 2.75rem` (44px,
+     top-bar.postcss:133); the responsive bumps follow the 44/48/52
+     chrome pattern shared with the tag-item/button min-height ramp.
+     (Was 46/50/56 — off-pattern values corrected in the 2026-08 audit.) */
+  --topbar-height:             44px;   /* scales below */
   --nav-height:                56px;
   --section-py:                3.5rem;          /* 56px base — scales below */
   --section-py-half:           1.75rem;         /* 28px base */
+  /* Anchor-jump clearance for pages with sticky in-page chrome (info-page
+     TOC + federal header) — overrides the global [id] scroll-margin. */
+  --scroll-mt-toc:             160px;
   /* Hero top padding — DS hero rhythm is asymmetric: pt-12 lg:pt-14
      3xl:pt-20 on top, container--pb (= --section-py) on the bottom
      (designsystem css/sections/hero.postcss). */
@@ -507,6 +528,12 @@
   --transition-slow:           320ms ease;
 
   /* ── Z-INDEX SCALE ────────────────────────────────────────────────────── */
+  /* Nav chrome layers — the sticky navbar sits above page content, the
+     lifted nav trigger one step above its own bar (DS main-navigation
+     `.clicked` pattern), and the desktop-menu scrim between page and bar. */
+  --z-nav-scrim:                25;
+  --z-navbar:                   30;
+  --z-nav-trigger:              31;
   /* Fixed notification banner (prototype disclaimer) — above page chrome,
      below toasts so a confirmation message is never hidden behind it. */
   --z-notice:                   90;
@@ -563,11 +590,12 @@
 
    NOT overridden here, on purpose:
      --color-focus (purple, accessibility affordance — skin-independent)
-     --color-lang-active (DS uses a literal blue-600 for the selected
-       language in BOTH skins; under intranet it simply coincides with
-       primary-600, same as upstream)
      the notification info/success/warning tints and the floor-plan palette
-       (categorical, not brand). */
+       (categorical, not brand).
+   (The former --color-lang-active blue tokens were retired in the 2026-08
+   re-audit — the DS marks the selected language with white bold text + a
+   2px primary-600 left rail, top-bar.postcss:73-80, which follows the
+   skin's primary ramp automatically.) */
 :root:has(body.body--intranet) {
   --color-primary-50:          #EFF6FF;
   --color-primary-100:         #DBEAFE;
@@ -670,8 +698,8 @@
 @media (min-width: 1920px) { :root { --gap-responsive: 4rem; } }         /* 64 */
 
 /* ── RESPONSIVE TOP-BAR HEIGHT — CD Bund pattern (44/48/52 px) ──────── */
-@media (min-width: 1280px) { :root { --topbar-height: 50px; } }
-@media (min-width: 1920px) { :root { --topbar-height: 56px; } }
+@media (min-width: 1280px) { :root { --topbar-height: 48px; } }
+@media (min-width: 1920px) { :root { --topbar-height: 52px; } }
 
 /* ── RESPONSIVE NAV HEIGHT — CD Bund main-navigation scales the nav row
    with the rest of the chrome (56 → 64 → 80 px). The top-bar and brand
@@ -719,20 +747,21 @@ body {
 img, svg { display: block; max-width: 100%; }
 button { font-family: inherit; cursor: pointer; }
 /* Underline with 2 px offset per CD Bund `.link, main a` pattern —
-   prevents descender collisions and matches federal sites. */
-a { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; }
+   prevents descender collisions and matches federal sites. `break-words`
+   (overflow-wrap) is part of the same DS rule (link.postcss:5-10) so long
+   URLs / German compounds wrap instead of overflowing their column. */
+a { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: break-word; }
 a:hover { color: var(--color-link-hover); }
 /* CD Bund `link.postcss` darkens body links on BOTH hover and focus
    (`hover:text-primary-800 focus:text-primary-800`). */
 a:focus-visible { color: var(--color-link-hover); }
 
-/* `mark` — CD Bund `typography.postcss` uses `bg-primary-200` (light
-   red) instead of the browser-default lurid yellow. Used by search-hit
-   highlighting and any inline "Treffer" emphasis. */
+/* `mark` — CD Bund `typography.postcss:157-159`: `bg-primary-200 py-0.5
+   px-1` (2px/4px, square corners) instead of the browser-default lurid
+   yellow. Used by search-hit highlighting and inline "Treffer" emphasis. */
 mark {
   background: var(--color-primary-200);
-  padding: 0 0.125em;
-  border-radius: var(--radius-sm);
+  padding: 2px 4px;
 }
 
 /* `.overtitle` — CD Bund kicker label above an h1 / hero title.
@@ -744,7 +773,7 @@ mark {
   font-size: var(--text-body-xs);
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-sm);
 }
@@ -760,6 +789,25 @@ mark {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
   z-index: 10;
+}
+
+/* Dark-chrome focus ring — DS `global.postcss:78-85` switches the ring to
+   purple-300 wherever the ground is the dense secondary ramp (`.top-bar &,
+   .bg--secondary-500…900 &`). purple-500 on secondary-600 is ≈2.4:1; the
+   purple-300 variant is ≈6.6:1. Same 3 px thickness as the global ring
+   (DESIGNGUIDE §5.12: one-thickness rule; only the colour switches on
+   dark ground). A11Y-004: the mobile drawer's meta zone + language bar
+   are dark surfaces too. Components that draw their own on-dark rings
+   (media-viewer bars, .btn--filled) are more specific / later and win. */
+.top-bar :focus-visible,
+.app-footer :focus-visible,
+.bg--secondary-600 :focus-visible,
+.bg--secondary-700 :focus-visible,
+.main-navigation__mobile-meta :focus-visible,
+.main-navigation__mobile-lang :focus-visible {
+  outline: 3px solid var(--color-focus-dark);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 /* ── REDUCED MOTION — WCAG 2.1 SC 2.3.3 / SC 2.2.2 ─────────────────────

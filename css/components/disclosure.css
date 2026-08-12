@@ -16,18 +16,30 @@
   width: 100%;
   background: transparent;
   border: none;
-  padding: var(--space-md) var(--space-sm);
+  padding: var(--space-2sm) var(--space-sm);   /* DS py-3 px-2 — accordion.postcss:26 */
   text-align: left;
-  font-size: var(--text-body);
+  /* DS `.accordion__title` is static text-base (accordion.postcss:75-78). Its
+     pr-4→lg:pr-6→2xl:pr-8 right gutter is carried here by the flex `gap`
+     (held at 16px = pr-4) — equivalent separation between title and chevron. */
+  font-size: var(--text-chrome-base);
   font-weight: var(--font-weight-bold);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-md);
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: color var(--transition);         /* DS duration-200 — accordion.postcss:29 */
 }
-.accordion__trigger:hover { color: var(--color-primary); }
+/* DS 2xl step: py-5 px-3 (accordion.postcss:26). 20px = 5×4px has no
+   spacing token — composed from md (16) + xs (4). */
+@media (min-width: 1544px) {
+  .accordion__trigger { padding: calc(var(--space-md) + var(--space-xs)) var(--space-2sm); }
+}
+.accordion__trigger:hover { color: var(--color-primary-500); }   /* DS hover:text-primary-500 — accordion.postcss:28 */
+/* Touch guard — no sticky hover colour on touch screens (DS accordion.postcss:31-35). */
+@media (hover: none) {
+  .accordion__trigger:hover { color: inherit; }
+}
 /* Chevron-down rendered as an SVG mask so it inherits `currentColor`
    and doesn't depend on the user's font (the previous "▾" Unicode glyph
    rendered inconsistently across Windows / macOS / Linux). Rotates
@@ -37,8 +49,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-base);
+  height: var(--icon-base);
   transition: transform var(--transition);
   flex-shrink: 0;
   color: currentColor;
@@ -73,16 +85,25 @@
               visibility 0s linear 320ms;
   padding: 0 var(--space-sm);
 }
-/* CD Bund `.accordion__content` uses `pb-10` (40 px) — long content
-   blocks need breathing room. Was --space-md (16 px); bumped to
-   --space-2xl (48 px) so multi-paragraph panels don't feel cramped. */
+/* CD Bund `.accordion__content` is `px-2 pt-4 pb-10 2xl:px-3`
+   (accordion.postcss:70-73). Top padding follows DS pt-4 (16 px, applied
+   only in the open state — the collapsed panel keeps 0 so the max-height
+   animation closes flush). Bottom padding: DS is pb-10 (40 px); held at
+   --space-2xl (48 px), the portal's documented choice so multi-paragraph
+   panels don't feel cramped. */
 .accordion__item--open .accordion__panel {
   max-height: 800px;            /* generous upper bound for animated reveal */
   visibility: visible;
   transition: max-height var(--transition-slow) ease-out,
               padding var(--transition-fast),
               visibility 0s;
-  padding: 0 var(--space-sm) var(--space-2xl);
+  padding: var(--space-md) var(--space-sm) var(--space-2xl);
+}
+/* DS 2xl horizontal step: px-3 (accordion.postcss:71). Both selectors so the
+   higher-specificity open rule above is also overridden. */
+@media (min-width: 1544px) {
+  .accordion__panel,
+  .accordion__item--open .accordion__panel { padding-inline: var(--space-2sm); }
 }
 
 /* Application detail tabs — geometry and density from DS tab.postcss:
@@ -117,7 +138,12 @@
 @media (min-width: 640px) {
   .tabs::after { width: 80px; margin-left: -80px; }   /* DS sm:w-20 */
 }
-.tab {
+/* `.tab__control` is the DS-canonical class name for the same control — the
+   search-results facet tabs (js/app.js) use it with a `--active` modifier.
+   Aliased on every rule here so both spellings share one implementation
+   (the former duplicate block in sections/secondary-pages.css is gone). */
+.tab,
+.tab__control {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -140,10 +166,12 @@
   white-space: nowrap;
   transition: color var(--transition-fast);
 }
-.tab:first-child { padding-left: 0; }
+.tab:first-child,
+.tab__control:first-child { padding-left: 0; }
 /* Rail as an inset ::after (DS h-[3px] right-4 bottom-0 left-4;
    first-child rail left-0). */
-.tab::after {
+.tab::after,
+.tab__control::after {
   content: '';
   display: block;
   position: absolute;
@@ -153,20 +181,26 @@
   height: 3px;
   transition: background var(--transition);
 }
-.tab:first-child::after { left: 0; }
+.tab:first-child::after,
+.tab__control:first-child::after { left: 0; }
 .tab--active::after,
 .tab[aria-selected="true"]::after,
-.tab:hover::after {
+.tab:hover::after,
+.tab__control--active::after,
+.tab__control[aria-selected="true"]::after,
+.tab__control:hover::after {
   background: var(--color-primary-500);    /* DS bg-primary-500 */
 }
 /* DS: only a non-active hover recolours the label (text-primary-600);
    the active label keeps body colour — the rail carries the state. */
-.tab:hover:not(.tab--active):not([aria-selected="true"]) {
+.tab:hover:not(.tab--active):not([aria-selected="true"]),
+.tab__control:hover:not(.tab__control--active):not([aria-selected="true"]) {
   color: var(--color-primary-600);
 }
 /* When the tab itself receives keyboard focus, lift the outline slightly
    below the underline so both affordances are visible at once. */
-.tab:focus-visible {
+.tab:focus-visible,
+.tab__control:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: -3px;
   border-radius: var(--radius);

@@ -1,11 +1,10 @@
 /* ==========================================================================
    components/forms.css — BBL Mieterportal
 
-   Form fields, inputs, selects, combobox, search field, DS form
-   aliases, option groups (radio/checkbox).
+   Form fields, inputs, selects, combobox, option groups (radio/checkbox).
    Sources: styles.css 1798-2149.
    DS counterparts: components/form.postcss, components/input.postcss,
-   components/select.postcss, components/search.postcss.
+   components/select.postcss.
    ========================================================================== */
 
 /* ── FORM FIELDS ──────────────────────────────────────────────────────────
@@ -15,11 +14,10 @@
 
    Class naming: tenant uses BEM `.form-field*` (one outer flex column
    with gap). DS canonical is a different architecture — `.form` >
-   `.form__group` > `.form__group__input` (inner wrapper + `space-y-2`).
-   See designsystem/css/components/form.postcss. The compatibility-alias
-   block at the end of this section (search "DS form-class aliases")
-   maps DS class names to the same visuals so Storybook copy-paste works
-   without rewriting tenant markup. Audit ref: DS-N3. */
+   `.form__group` > `.form__group__input` (inner wrapper + `space-y-2`),
+   see designsystem/css/components/form.postcss. The former DS form-class
+   alias shim (`.form`, `.form__group*`, `.radio-group`, `.checkbox-group`)
+   was removed in the 2026-08 CD audit — nothing in the portal consumed it. */
 .form-field {
   display: flex;
   flex-direction: column;
@@ -77,53 +75,53 @@
 .form-field__input,
 .form-field__textarea,
 .form-field__select {
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.625rem var(--space-md);             /* DS px-4 py-[0.625rem] — input.postcss:11 */
   border: 1px solid var(--color-border-input);   /* CD: text-500 (#6B7280) at rest */
   border-radius: var(--radius-xs);               /* CD inputs use rounded-xs (1px) */
   background: var(--color-white);
   font-size: var(--text-body);
   font-family: inherit;
+  line-height: 1;                                /* DS leading-none — input.postcss:15; textarea re-widens below */
   min-height: var(--btn-min-h);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);                     /* DS default `shadow` step — input.postcss:12 */
   transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
-.input:hover,
-.form-field__input:hover,
-.form-field__textarea:hover,
-.form-field__select:hover {
-  border-color: var(--color-border-input);
+/* DS 2xl min-height step: --input-min-height-2xl = 48px
+   (input.postcss:2-3,16 — `2xl:min-h-[var(--input-min-height-2xl)]`). */
+@media (min-width: 1544px) {
+  .input,
+  .form-field__input,
+  .form-field__textarea,
+  .form-field__select { min-height: var(--btn-lg-min-h); }
 }
+/* DS `placeholder-secondary-400` (input.postcss:18). `opacity: 1` defeats
+   Firefox's default placeholder fade so the token renders as specified. */
+.input::placeholder,
+.form-field__input::placeholder,
+.form-field__textarea::placeholder { color: var(--color-secondary-400); opacity: 1; }
+/* Focus: the DS input declares only `focus:outline-none` (input.postcss:17)
+   and lets the GLOBAL `*:focus-visible { ring-2 ring-purple-500 }`
+   (global.postcss:75-76) paint a 2 px purple ring hugging the field — the
+   border itself stays text-500. (No hover state either: the former portal
+   hover rule re-set the border to its own resting colour, a no-op.) The
+   previous portal focus additionally darkened the border to gray-800,
+   which the CD does not do — removed 2026-08. */
 .input:focus,
 .form-field__input:focus,
 .form-field__textarea:focus,
 .form-field__select:focus {
   outline: none;
-  border-color: var(--color-text-primary);
-  /* CD: solid purple-500 ring (DS `ring-2 ring-purple-500`) instead of the
-     former 25%-opacity tint, which was borderline for the WCAG 2.4.11 3:1
-     non-text focus-indicator contrast. The darkened border stays as a
-     secondary cue. */
-  box-shadow: 0 0 0 2px var(--color-focus);
+  /* Ring + the resting drop shadow — Tailwind's ring and shadow utilities
+     compose on one box-shadow, so the DS field keeps its elevation while
+     focused. */
+  box-shadow: 0 0 0 2px var(--color-focus), var(--shadow);
 }
-.input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); }
-.input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-body); }
-
-/* ── Search field ─────────────────────────────────────────────────────────
-   Reusable filter-as-you-type field: a leading (left) magnifier glyph + an
-   `.input`. The single source of truth for every in-page search box — the
-   inbox filter, the downloads filter bar, the properties toolbar and the
-   search-results hero all compose it, so the affordance is identical
-   everywhere. The glyph is decorative (`pointer-events: none`); the input
-   keeps full `.input` styling plus left room for the glyph. */
-.search-field { position: relative; display: flex; align-items: center; }
-.search-field__icon {
-  position: absolute;
-  left: var(--space-sm);
-  width: var(--icon-base); height: var(--icon-base);
-  color: var(--color-text-secondary);
-  pointer-events: none;
-}
-.search-field__input { width: 100%; min-width: 0; padding-left: 38px; }
+/* DS .input--sm = text--sm leading-6 (input.postcss:21-23). Live consumer:
+   the floor-plan view-mode select. */
+.input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); line-height: 1.5rem; }
+/* DS .input--lg = text--lg leading-7 (input.postcss:25-27). DS API parity;
+   unconsumed in portal markup. */
+.input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-chrome-lg); line-height: 1.75rem; }
 
 /* Native `<select>` chevron — replaces the browser default (jammed
    against the right edge) with `assets/icons/ChevronDown.svg`
@@ -139,21 +137,23 @@ select.input,
   -moz-appearance: none;
   appearance: none;
   /* CD Bund select — reproduces the DS `.select__icon` segmented look
-     (field │ ▾, designsystem/css/components/select.postcss) WITHOUT a
-     wrapper element: two background layers — the chevron glyph, plus a
-     full-height 1 px divider drawn as a `linear-gradient` at the left edge
-     of the ~44 px chevron column, matching the DS `border-left`. */
+     (field │ ▾, designsystem/css/components/select.postcss:4-6,37-46)
+     WITHOUT a wrapper element: two background layers — the chevron glyph
+     (DS `& svg { w-8 }` = 32 px, centred in the column), plus a full-height
+     1 px divider drawn as a `linear-gradient` at the left edge of the
+     48 px chevron column (DS `.select__icon { w-12 border-l }`). Field
+     padding reserves the DS `pr-20` = 80 px. */
   background-image:
     url("../../assets/icons/ChevronDown.svg"),
     linear-gradient(var(--color-border-input), var(--color-border-input));
   background-repeat: no-repeat, no-repeat;
   background-position:
-    right var(--space-md) center,
-    right 44px top;
+    right var(--space-sm) center,   /* (48 − 32) / 2 = 8 px — glyph centred in the column */
+    right 48px top;
   background-size:
-    20px 20px,
+    32px 32px,
     1px 100%;
-  padding-inline-end: calc(var(--btn-min-h) + var(--space-md));
+  padding-inline-end: var(--space-4xl);   /* 80px, DS pr-20 — select.postcss:5 */
 }
 /* Custom combobox — replaces native `<datalist>` so the suggestion
    popup matches the input width, our typography, and the rest of the
@@ -194,20 +194,32 @@ select.input,
 .combobox__option-primary   { font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
 .combobox__option-secondary { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
 
-.input--error { border-color: var(--color-danger); }
-/* DS flat disabled input (input.postcss `[disabled]` → bg-text-50 /
-   text-text-400 / border-text-300) instead of opacity. */
+/* DS error state (input.postcss:50-58): red-500 border, red-800 text,
+   red-400 placeholder. DS API parity; unconsumed — live invalid styling
+   rides `.form-field--invalid` below. */
+.input--error {
+  border-color: var(--color-red-500);
+  color: var(--color-red-800);
+}
+.input--error::placeholder { color: var(--color-red-400); }
+/* DS flat disabled input (input.postcss:38-44 `[disabled]` → bg-text-50 /
+   text-text-400 / border-text-300 + pointer-events-none) instead of opacity. */
 .input--disabled,
 .input:disabled,
 .form-field__input:disabled,
 .form-field__textarea:disabled,
 .form-field__select:disabled {
   cursor: not-allowed;
+  pointer-events: none;
   background: var(--color-bg-surface);
   color: var(--color-gray-400);
   border-color: var(--color-gray-300);
 }
-.form-field__textarea { min-height: 90px; resize: vertical; }
+/* Deliberate divergence: DS applies `leading-none` to the shared input rule
+   with no textarea exception (input.postcss:6-19), but a leading-1
+   multi-line control is unusable — textareas restore body leading. */
+.form-field__textarea,
+textarea.input { min-height: 90px; resize: vertical; line-height: var(--line-height-normal); }
 .form-field--invalid .form-field__input,
 .form-field--invalid .form-field__textarea,
 .form-field--invalid .input {
@@ -217,61 +229,6 @@ select.input,
   font-size: var(--text-body-xs);
   color: var(--color-danger);
   font-weight: var(--font-weight-regular);
-}
-
-/* ── DS form-class aliases (Storybook copy-paste compatibility) ──────────
-   These rules let markup written against the canonical DS
-   `<form class="form"><div class="form__group">…</div></form>` pattern
-   render correctly without being rewritten. The DS architecture differs
-   (inner wrapper div + `space-y-2` for vertical rhythm vs. tenant's
-   outer flex column + `gap`), but the visual outcome is the same. New
-   tenant code should keep using `.form-field*` for consistency; this
-   block is a shim, not a recommended target. Audit ref: DS-N3. Source:
-   designsystem/css/components/form.postcss. */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);              /* DS `space-y-6` ≈ 24 px */
-}
-.form__group {
-  /* DS marker class — no visual rule. Tenant analog: `.form-field`. */
-}
-.form__group__legend {
-  margin-bottom: var(--space-sm);    /* DS `mb-2` ≈ 8 px */
-}
-.form__group__input,
-.form__group__select {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);              /* DS `space-y-2` ≈ 8 px */
-}
-.form__group__radio {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);              /* DS `gap-2` */
-  margin-bottom: var(--space-sm);    /* DS `mb-2` */
-}
-label + .form__group__radio { margin-top: var(--space-sm); }   /* DS `label + & { mt-2 }` */
-.form__group__checkbox {
-  margin-bottom: var(--space-sm);    /* DS `mb-2` */
-}
-
-/* Legacy radio/checkbox group layout. Input rendering is handled by the
-   global `input[type="checkbox"]` / `input[type="radio"]` rule above
-   (DS appearance-none pattern); these classes only provide flex layout
-   for the label rows. */
-.radio-group, .checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-}
-.radio-group label, .checkbox-group label {
-  font-size: var(--text-body-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  cursor: pointer;
 }
 
 /* ── OPTION GROUP (radios / checkboxes) ──────────────────────────────────
@@ -304,8 +261,8 @@ label + .form__group__radio { margin-top: var(--space-sm); }   /* DS `label + & 
 /* DS appearance-none checkbox / radio — global rule, ports
    designsystem/css/components/input.postcss:80-152. Type-selector scope
    (not wrapper-class scope) so every checkbox / radio anywhere in the
-   app — wizard `.option-group__item`, `.radio-group`, `.checkbox-group`,
-   `.consent-check`, `.wizard__inline-toggle`, plain in-table selects,
+   app — wizard `.option-group__item`, `.consent-check`,
+   `.wizard__inline-toggle`, plain in-table selects,
    inline labels — picks up the federal-rendered control. Keeps visual
    fidelity on Windows where the native control still renders in a
    2007-era style that `accent-color` alone can't override.
@@ -338,8 +295,9 @@ input[type="checkbox"] { border-radius: var(--radius-xs); }
 input[type="radio"]    { border-radius: 50%; }
 input[type="radio"]:checked,
 input[type="checkbox"]:checked {
-  background-color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
+  /* DS checked fill is bg-text-700 (#374151) and the border stays at the
+     base text-500 — no checked border override (input.postcss:129-131). */
+  background-color: var(--color-gray-700);
 }
 input[type="checkbox"]:checked {
   background-image: url("data:image/svg+xml,%3Csvg width='10' height='7' viewBox='0 0 10 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.20692 0.293031C9.39439 0.480558 9.49971 0.734866 9.49971 1.00003C9.49971 1.26519 9.39439 1.5195 9.20692 1.70703L4.20692 6.70703C4.01939 6.8945 3.76508 6.99982 3.49992 6.99982C3.23475 6.99982 2.98045 6.8945 2.79292 6.70703L0.792919 4.70703C0.610761 4.51843 0.509966 4.26583 0.512245 4.00363C0.514523 3.74143 0.619692 3.49062 0.8051 3.30521C0.990508 3.1198 1.24132 3.01463 1.50352 3.01236C1.76571 3.01008 2.01832 3.11087 2.20692 3.29303L3.49992 4.58603L7.79292 0.293031C7.98045 0.10556 8.23475 0.000244141 8.49992 0.000244141C8.76508 0.000244141 9.01939 0.10556 9.20692 0.293031Z' fill='white'/%3E%3C/svg%3E");

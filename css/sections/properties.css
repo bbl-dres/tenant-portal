@@ -1,155 +1,16 @@
 /* ==========================================================================
    sections/properties.css — BBL Mieterportal
 
-   Property portfolio: gallery/list/map views, view toggle, markers,
-   map popups, portfolio stats band, floor detail (interactive floor plan).
+   Property portfolio: gallery/list/map views, markers, map popups,
+   floor detail (interactive floor plan), catalogue bar, shared
+   docviewer/gallery overlay chrome.
    Sources: styles.css 4424-4465, 5437-5773, 6786-7029.
    ========================================================================== */
 
-/* Portfolio stats band — intentionally tighter than a full `.section`
-   (sits between hero and explainer; the stat numerals carry the rhythm). */
-.portfolio-stats {
-  background: var(--color-bg-alt);
-  padding: var(--section-py-half) var(--container-padding);
-  border-top: 1px solid var(--color-border-light);
-  border-bottom: 1px solid var(--color-border-light);
-}
-@media (min-width: 1024px) {
-  .portfolio-stats { padding-block: var(--space-3xl); }
-}
-.portfolio-stats__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-lg);
-  max-width: var(--container-max-width);
-  margin: 0 auto;
-}
-.portfolio-stats__grid > div {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-/* Modern CD reserves primary red for brand accents only (active nav rail,
-   card rails, danger). Big numerals used to be `--color-primary` which
-   pulled focus away from the hero. Switched to text-primary so the stats
-   read as data, not as marketing. Kept the mono treatment for the "data
-   feel" admin.ch uses. */
-.portfolio-stats__grid strong {
-  font-size: var(--text-h1);
-  color: var(--color-text-primary);
-  font-family: var(--font-family-mono);
-  letter-spacing: -0.02em;
-  line-height: var(--line-height-tight);
-}
-.portfolio-stats__grid span {
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-}
-
-/* Property grid (Meine Immobilien) */
 /* ── PROPERTIES VIEW (gallery / list / map) ─────────────────────────────────
-   Multi-view portfolio browser. Toolbar (search + view toggle + count) sits
-   above the active view; pagination at the bottom for gallery + list.
-   Mirrors patterns from sibling prototypes (transaction-immo, property-inventory). */
-.property-toolbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  grid-template-areas: "search filter toggle";
-  gap: var(--space-md);
-  align-items: center;
-  margin-bottom: var(--space-md);
-}
-@media (max-width: 768px) {
-  .property-toolbar {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "search"
-      "filter"
-      "toggle";
-  }
-}
-.property-toolbar__search { grid-area: search; }   /* composes .search-field */
-.property-toolbar__select {
-  grid-area: filter;
-  min-width: 200px;
-}
-.property-toolbar__input {
-  padding-right: 38px;   /* room for the clear button (× on the right) */
-}
-.property-toolbar__clear {
-  position: absolute;
-  right: var(--space-sm);
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  padding: var(--space-xs);
-  display: inline-flex;
-  cursor: pointer;
-  border-radius: var(--radius);
-}
-.property-toolbar__clear:hover { color: var(--color-text-primary); background: var(--color-bg-alt); }
-/* View toggle — segmented control, DS-aligned pill group. */
-.view-toggle {
-  grid-area: toggle;
-  display: inline-flex;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-white);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.view-toggle__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md);
-  background: transparent;
-  border: none;
-  border-right: 1px solid var(--color-border);
-  font: inherit;
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  min-height: var(--btn-min-h);
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-.view-toggle__btn:last-child { border-right: none; }
-.view-toggle__btn:hover { background: var(--color-bg-alt); color: var(--color-text-primary); }
-.view-toggle__btn--active {
-  background: var(--color-secondary-500);
-  color: var(--color-white);
-}
-.view-toggle__btn--active:hover { background: var(--color-secondary-600); color: var(--color-white); }
-.view-toggle__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); margin-right: 0; }
-/* When the toolbar collapses to a single column (≤ 768 px, see
-   `.property-toolbar`), stretch the toggle to fill the row and give each
-   button an equal share. Bigger touch targets on tablet / phone and a
-   layout that reads as deliberate next to the full-width search and
-   select rows above it. */
-@media (max-width: 768px) {
-  .view-toggle { display: flex; width: 100%; }
-  .view-toggle__btn { flex: 1; justify-content: center; }
-}
-@media (max-width: 640px) {
-  /* A11Y-003: hide the label visually but keep it in the accessible name —
-     display:none dropped it from the a11y tree, leaving three nameless
-     icon-only buttons on phones. Same clip technique as the .sr-only
-     utility (forms.css) / DS `sr-only lg:not-sr-only` idiom
-     (designsystem search.postcss .search__button__title). */
-  .view-toggle__label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-  .view-toggle__btn { padding: var(--space-sm) var(--space-md); }
-}
+   Multi-view portfolio browser. The shared `.catbar` (below) carries the
+   search / sort / filter / view controls; pagination at the bottom for
+   gallery + list. */
 
 /* Property list (table view) */
 .property-list-wrap { overflow-x: auto; }
@@ -216,11 +77,6 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .map-loading__icon {
-    animation: none;
-  }
-}
 .property-map__error {
   padding: var(--space-lg);
   color: var(--color-text-secondary);
@@ -272,7 +128,7 @@
   border-radius: var(--radius-sm);
   font-size: var(--text-body-xs);
   font-weight: var(--font-weight-bold);
-  line-height: 1.4;
+  line-height: var(--line-height-snug);
   white-space: nowrap;
   box-shadow: var(--shadow-property-marker);
   pointer-events: none;
@@ -319,12 +175,7 @@
   align-items: center;
   gap: var(--space-xs);
 }
-.property-toolbar__search .combobox__option--location .inline-icon {
-  color: var(--color-secondary-600);
-  flex-shrink: 0;
-}
 .combobox__spinner { animation: map-loading-spin var(--transition-slow) linear infinite; }
-@media (prefers-reduced-motion: reduce) { .combobox__spinner { animation: none; } }
 
 /* swisstopo locator pin — a secondary-colour teardrop, deliberately unlike
    the red property markers so a searched "place" never reads as a portfolio
@@ -372,10 +223,15 @@ html:has(body.docviewer-open) { overflow: hidden; }
   overflow: auto;
   background: var(--color-secondary-900);
 }
-.docviewer__bar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+/* Shared overlay-bar chrome — the document viewer (this file) and the image
+   gallery (media-viewer.css) render byte-identical top bars, headings and
+   action buttons; one merged block styles both surfaces. Per-surface deltas
+   follow the shared rules as tiny separate rules. This block lives here (not
+   in media-viewer.css) because properties.css imports first in main.css and
+   keeping the merged rules at the earlier cascade position preserves the
+   pre-merge source order for everything that follows. */
+.docviewer__bar,
+.gallery__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -384,51 +240,70 @@ html:has(body.docviewer-open) { overflow: hidden; }
   background: var(--color-secondary-900);
   border-bottom: 1px solid var(--color-white-12);
 }
-.docviewer__heading { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
-.docviewer__heading-icon { color: var(--color-white-65); flex: 0 0 auto; }
-.docviewer__heading-text { min-width: 0; }
-.docviewer__title {
+/* The viewer is one big scroll container, so its bar pins to the top; the
+   gallery is a non-scrolling flex column, so its bar is a static row. */
+.docviewer__bar { position: sticky; top: 0; z-index: 5; }
+.gallery__bar { flex: 0 0 auto; }
+.docviewer__heading,
+.gallery__heading { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.docviewer__heading-icon,
+.gallery__heading-icon { color: var(--color-white-65); flex: 0 0 auto; }
+.docviewer__heading-text,
+.gallery__heading-text { min-width: 0; }
+.docviewer__title,
+.gallery__name {
   margin: 0;
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
   font-size: var(--text-body);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.docviewer__sub { margin: 0; color: var(--color-white-65); font-size: var(--text-body-xs); }
-.docviewer__actions { display: flex; align-items: center; gap: var(--space-xs); flex: 0 0 auto; }
-.docviewer__btn {
+.docviewer__sub,
+.gallery__sub { margin: 0; color: var(--color-white-65); font-size: var(--text-body-xs); }
+/* Gallery counter ("3 / 12") stays steady while paging. */
+.gallery__sub { font-variant-numeric: tabular-nums; }
+.docviewer__actions,
+.gallery__actions { display: flex; align-items: center; gap: var(--space-xs); flex: 0 0 auto; }
+.docviewer__btn,
+.gallery__btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px;
   background: none; border: none; border-radius: var(--radius);
   color: var(--color-white); cursor: pointer;
   transition: background var(--transition-fast);
 }
-.docviewer__btn:hover { background: var(--color-white-12); }
-.docviewer__btn:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
-.docviewer__btn[aria-pressed="true"] { background: var(--color-white-15); }
-.docviewer__btn--close:hover { background: var(--color-primary); }
-.docviewer__btn .inline-icon { width: 20px; height: 20px; }
+.docviewer__btn:hover,
+.gallery__btn:hover { background: var(--color-white-12); }
+.docviewer__btn:focus-visible,
+.gallery__btn:focus-visible { outline: 2px solid var(--color-white); outline-offset: -2px; }
+.docviewer__btn[aria-pressed="true"],
+.gallery__btn[aria-pressed="true"] { background: var(--color-white-15); }
+.docviewer__btn:disabled,
+.gallery__btn:disabled { opacity: 0.4; cursor: default; }
+.docviewer__btn:disabled:hover,
+.gallery__btn:disabled:hover { background: none; }
+.docviewer__btn--close:hover,
+.gallery__btn--close:hover { background: var(--color-primary); }
+.docviewer__btn .inline-icon,
+.gallery__btn .inline-icon { width: 20px; height: 20px; }
+/* Both bars drop the heading glyph on phones so the truncated title + the
+   action buttons keep one row (merged from the two per-surface hide blocks
+   that used to live in media-viewer.css). */
+@media (max-width: 640px) {
+  .docviewer__heading-icon,
+  .gallery__heading-icon { display: none; }
+}
 
 /* ── FLOOR DETAIL — interactive floor plan ───────────────────────────────
-   The page reuses `.property-header` (building image + name + address) for
-   the top strip so the building identity stays consistent with the
-   property-detail page.  Below that, `.floor-header` is a lighter h2 +
-   KPI line that identifies the specific floor being viewed.  Then the
-   toolbar (etage switcher + view dropdown + fullscreen), the MapLibre
-   canvas, and the legend.  Floor switcher is a chip group derived from
-   `.tag-item` styling but acts as navigation (anchors, not toggle
+   The floor route renders the full property-detail scaffold (hero header +
+   tab strip, `propertyDetailScaffold` in js/app.js) with this viewer in the
+   Geschosse panel: a toolbar («Alle Geschosse» back link + etage switcher +
+   view dropdown + fullscreen), a floor KPI line, the MapLibre canvas, and
+   the legend. Floor switcher chips act as navigation (anchors, not toggle
    buttons). */
 
-.floor-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-sm) var(--space-md);
-  margin-bottom: var(--space-md);
-}
-.floor-header__title { margin: 0; }
 .floor-header__kpis {
-  margin: 0;
+  margin: 0 0 var(--space-md);
   color: var(--color-text-secondary);
 }
 
@@ -558,7 +433,7 @@ html:has(body.docviewer-open) { overflow: hidden; }
   box-shadow: var(--shadow);
 }
 .floor-popup .maplibregl-popup-close-button {
-  font-size: 1.25rem;
+  font-size: var(--text-chrome-xl);
   padding: 0 var(--space-sm);
   color: var(--color-text-secondary);
 }
@@ -628,7 +503,7 @@ html:has(body.docviewer-open) { overflow: hidden; }
   display: inline-block;
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-secondary-200);
   flex-shrink: 0;
 }
@@ -772,8 +647,12 @@ html:has(body.docviewer-open) { overflow: hidden; }
 }
 
 /* View switch — icon buttons with a rail on the active one, the CD treatment
-   for a view toggle (and what the sister portal's `.view-switch` renders). */
-.view-switch {
+   for a view toggle (and what the sister portal's `.view-switch` renders).
+   `.search-results__views` (the search page's switch container,
+   secondary-pages.css) shares the identical container geometry, so it rides
+   this rule instead of duplicating it. */
+.view-switch,
+.search-results__views {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -809,6 +688,13 @@ html:has(body.docviewer-open) { overflow: hidden; }
    keep search, count and controls on screen at 320px. */
 @media (max-width: 639.98px) {
   .view-switch__label { display: none; }
+}
+/* The search-results page instead hides its whole switch on phones — the
+   list view works everywhere, the grid is a preference. Moved here from
+   secondary-pages.css so it stays AFTER the merged base rule above in the
+   cascade (equal specificity; source order decides). */
+@media (max-width: 640px) {
+  .search-results__views { display: none; }
 }
 /* Two-up panel for filters that are dropdowns rather than a single option
    list (the documents page filters by type AND property). */

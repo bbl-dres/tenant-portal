@@ -112,44 +112,15 @@
    straight from a CD copy-paste. */
 .section--py-half { padding-block: var(--section-py-half); }
 
-/* ── .vertical-spacing — CD foundation utility ─────────────────────────
-   From `designsystem/css/foundations/spacings.postcss`. Applied to a
-   container; child elements inherit a consistent vertical rhythm so
-   views stop bolting on ad-hoc `margin-top` per element. Default child
-   gap 48 → 56 px; heading-to-element 24 px; consecutive paragraphs
-   16 px. First child gets no top margin so the rhythm starts at zero.
-*/
-.vertical-spacing > * { margin-top: var(--space-2xl); }
-@media (min-width: 1544px) {
-  .vertical-spacing > * { margin-top: 3.5rem; }   /* 56 px at 2xl, per CD */
-}
-.vertical-spacing > *:first-child { margin-top: 0; }
-/* Headings reset their own bottom margin (so the rhythm comes from the
-   next sibling's top margin only) and tighten the gap to the next
-   element. Matches CD's heading-to-content cadence (24 px to most
-   elements, 16 px to paragraphs). */
-.vertical-spacing > :is(h1, h2, h3, h4, h5) { margin-bottom: 0; }
-.vertical-spacing > :is(h1, h2, h3, h4, h5) + * { margin-top: var(--space-lg); }
-.vertical-spacing > :is(h1, h2, h3, h4, h5) + p { margin-top: var(--space-md); }
-/* Consecutive paragraphs / lists keep a tight 16 px reading rhythm. */
-.vertical-spacing > p + p,
-.vertical-spacing > p + ul,
-.vertical-spacing > p + ol,
-.vertical-spacing > ul + p,
-.vertical-spacing > ol + p { margin-top: var(--space-md); }
-
 /* Section background variants — admin.ch alternation pattern (modern CD).
-   The DS uses three distinct tints so adjacent sections never look like
-   the same shade:
-     • default       white                    (--color-bg-default)
-     • --alt         cool blue-gray tint      (--color-secondary-50, #F0F4F7)
-     • --surface     warmer near-white        (--color-bg-surface,  #F9FAFB)
-     • --dark        federal navy             (--color-surface-dark)
-   Previously --alt and --surface were both flavours of `--color-gray-*`
-   (1 step apart on the gray ramp) and read as the same shade in the
-   browser — fixed by routing --alt to the federal blue-gray. */
-/* No borders on `--alt` / `--surface` — DS sections delineate purely
-   via background-color changes (see DS section.postcss; no `border`
+   Bands the portal actually renders:
+     • default            white               (--color-bg-default)
+     • --alt / bg--50     cool blue-gray tint (--color-secondary-50, #F0F4F7)
+     • bg--secondary-600  federal navy        (--color-surface-dark)
+   (The former `.section--surface` gray-50 band and `.bg--secondary-100`
+   step were unreferenced and were removed in the 2026-08 re-audit.) */
+/* No borders on the bands — DS sections delineate purely via
+   background-color changes (see DS section.postcss; no `border`
    declarations anywhere). Borders read as page chrome, which fights
    the calmer "alternating bg bands" pattern bbl.admin.ch uses. */
 /* CD names for the same bands. The DS drives section backgrounds with a
@@ -165,23 +136,13 @@
 .section--alt {
   background: var(--color-secondary-50);
 }
-.bg--secondary-100 {
-  background: var(--color-secondary-100);
-}
-.section--surface {
-  background: var(--color-bg-surface);
-}
-.bg--secondary-600,
-.section--dark {
+.bg--secondary-600 {
   background: var(--color-surface-dark);
   color: var(--color-text-inverse);
 }
 .bg--secondary-600 .section-heading,
 .bg--secondary-600 h2,
-.bg--secondary-600 h3,
-.section--dark .section-heading,
-.section--dark h2,
-.section--dark h3 { color: var(--color-text-inverse); }
+.bg--secondary-600 h3 { color: var(--color-text-inverse); }
 
 /* NEGATIVE TREATMENT on the dark steps. The DS switches type and controls to
    their negative variants there rather than letting brand colours ride onto a
@@ -192,21 +153,17 @@
    Body copy takes secondary-100 rather than pure white — the DS's own
    `hover:text-secondary-100` step — so the lead sits a shade below the
    heading instead of competing with it. */
-.bg--secondary-600 .section-intro,
-.section--dark .section-intro {
+.bg--secondary-600 .section-intro {
   color: var(--color-secondary-100);
 }
-.bg--secondary-600 a:not(.btn),
-.section--dark a:not(.btn) {
+.bg--secondary-600 a:not(.btn) {
   color: var(--color-white);
 }
-.bg--secondary-600 .btn--outline,
-.section--dark .btn--outline {
+.bg--secondary-600 .btn--outline {
   color: var(--color-white);
   border-color: var(--color-white);
 }
-.bg--secondary-600 .btn--outline:hover,
-.section--dark .btn--outline:hover {
+.bg--secondary-600 .btn--outline:hover {
   color: var(--color-secondary-100);
   border-color: var(--color-secondary-100);
 }
@@ -216,14 +173,11 @@
    double gap. Ported for the bands the portal actually uses. */
 .bg--white + .bg--white,
 .bg--secondary-50 + .bg--secondary-50,
-.bg--secondary-100 + .bg--secondary-100,
 .bg--secondary-600 + .bg--secondary-600 {
   padding-top: 0;
 }
 
 .stack > * + * { margin-top: var(--space-md); }
-.stack--lg > * + * { margin-top: var(--space-lg); }
-.stack--sm > * + * { margin-top: var(--space-sm); }
 
 /* ── HERO ───────────────────────────────────────────────────────────────── */
 /* CD Bund hero is layout-driven, white background, no gradient. Large
