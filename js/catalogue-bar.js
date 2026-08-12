@@ -114,20 +114,40 @@ export function catalogueBar({
     ${panel ? `<div class="catbar__panel" id="${id}-panel"${panelOpen ? '' : ' hidden'}>${panel}</div>` : ''}`;
 }
 
+// Resolve the `.catbar` element a given bar id rendered into — anchored on
+// the id-carrying controls (`#${id}-sort`, then `#${id}-form`), so a bar
+// never captures another bar's view switch (review M-VIEWSWITCH). Falls back
+// to `document` for a caller whose bar has neither control.
+function barEl(id) {
+  return document.getElementById(`${id}-sort`)?.closest('.catbar')
+    || document.getElementById(`${id}-form`)?.closest('.catbar')
+    || document;
+}
+
 /**
  * Wire a rendered bar. `hashFor(patch)` returns the destination hash for a
  * changed control; the caller owns the query-parameter vocabulary of its own
  * route. Every control resets `page` through the caller's hashFor.
  *
  * `onSearchInput` is optional and only used by surfaces with live suggestions.
+ * `onView` (review M-VIEWSWITCH) claims the view switch for a surface that
+ * switches IN PAGE: when present it receives the clicked view key instead of
+ * the hash navigation. Pair it with `setActiveView` to re-sync the pressed
+ * state after the in-page re-render.
  */
-export function wireCatalogueBar({ id = 'cat', hashFor, onSearchInput } = {}) {
+export function wireCatalogueBar({ id = 'cat', hashFor, onSearchInput, onView } = {}) {
   const form = document.getElementById(`${id}-form`);
   const input = document.getElementById(`${id}-q`);
-  if (form && input && hashFor) {
+  if (form && input) {
+    // ALWAYS bind submit, even for in-page surfaces that pass no hashFor:
+    // the bar renders a real <form>, so without preventDefault, Enter in the
+    // search field performs a NATIVE GET submission — the fragment is
+    // dropped, the whole app reloads at #/ and every filter is lost.
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      location.hash = hashFor({ q: input.value.trim(), page: 1 });
+      if (hashFor) location.hash = hashFor({ q: input.value.trim(), page: 1 });
+      // In-page surfaces already filter through their own `input` listener;
+      // Enter simply commits what is on screen.
     });
   }
   if (input && onSearchInput) input.addEventListener('input', () => onSearchInput(input));
@@ -151,13 +171,29 @@ export function wireCatalogueBar({ id = 'cat', hashFor, onSearchInput } = {}) {
     });
   }
 
-  if (hashFor) {
-    document.querySelectorAll('.view-switch__btn').forEach(btn => {
+  if (hashFor || onView) {
+    barEl(id).querySelectorAll('.view-switch__btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        location.hash = hashFor({ view: btn.getAttribute('data-view'), page: 1 });
+        const view = btn.getAttribute('data-view');
+        if (onView) onView(view);
+        else location.hash = hashFor({ view, page: 1 });
       });
     });
   }
+}
+
+/**
+ * Re-sync the view switch's pressed state on a bar that switches views IN
+ * PAGE (review M-VIEWSWITCH) — the bar is not re-rendered there, so the
+ * active tint cannot come from `catalogueBar()`. Scoped through the same
+ * `barEl` lookup as the wiring.
+ */
+export function setActiveView(id, view) {
+  barEl(id).querySelectorAll('.view-switch__btn').forEach(btn => {
+    const on = btn.getAttribute('data-view') === view;
+    btn.setAttribute('aria-pressed', String(on));
+    btn.classList.toggle('view-switch__btn--active', on);
+  });
 }
 
 /**
@@ -172,4 +208,106 @@ export function setFilterCount(id, n) {
   if (!badge) return;
   badge.textContent = n ? String(n) : '';
   badge.hidden = !n;
+}
+
+/**
+ * Wire the bar's filter toggle to a `.pf-sidebar` filter sidebar (review
+ * M-SIDEBAR) — the shared mechanics behind the properties location tree and
+ * the downloads filter panel. The toggle flips `pf-layout--sidebar-hidden`
+ * on the surrounding `.pf-layout`, keeps its own aria-expanded + pressed
+ * tint in sync, and reports the resulting visibility through
+ * `onToggle(open)` — persisting that state (URL vs. in-page docState) is
+ * the caller's business. The X in the sidebar head delegates to the toggle
+ * so state and URL stay in ONE code path; focus lands on the toggle, which
+ * is what re-opens the panel.
+ */
+export function wireSidebarToggle({ buttonId, onToggle }) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const layout = document.querySelector('.pf-layout');
+    if (!layout) return;
+    const open = !layout.classList.toggle('pf-layout--sidebar-hidden');
+    btn.setAttribute('aria-expanded', String(open));
+    btn.classList.toggle('catbar__filter--open', open);
+    if (onToggle) onToggle(open);
+  });
+  const sidebarClose = document.querySelector('.pf-sidebar__close');
+  if (sidebarClose) sidebarClose.addEventListener('click', () => {
+    btn.click();
+    btn.focus();
+  });
+}
+
+/**
+ * Wire a multi-value checkbox facet (review M-CHECKGROUP): every
+ * `input[name="…"]` toggles its value in and out of the caller's array via
+ * `get`/`set` — the setter owns whatever follows (page reset, re-render).
+ * Returns `{ sync() }`, which re-checks the boxes from `get()` after the
+ * state changed elsewhere (pill removal / clear-all), because the sidebar
+ * controls are not re-rendered in place.
+ */
+export function wireCheckboxGroup(name, { get, set }) {
+  const boxes = () => document.querySelectorAll(`input[name="${name}"]`);
+  boxes().forEach(box => {
+    box.addEventListener('change', () => {
+      const next = box.checked
+        ? [...get(), box.value]
+        : get().filter(v => v !== box.value);
+      set(next);
+    });
+  });
+  return {
+    sync() {
+      boxes().forEach(box => { box.checked = get().includes(box.value); });
+    },
+  };
+}
+
+/**
+ * Active-filter pill row — ONE builder for the `.filter-pills` markup that
+ * the properties and downloads catalogues used to hand-roll separately
+ * (review M-PILLS). The surfaces differ only in the removal mechanism:
+ *   hrefFor given   → hash-navigated list: each remove control is an
+ *                     <a href> built by `hrefFor(key)`, clear-all links to
+ *                     `clearAllHref` (properties).
+ *   hrefFor omitted → in-page list: remove controls are <button
+ *                     data-clear="key">, clear-all is <button
+ *                     data-clear="all"> — the caller binds its own delegated
+ *                     [data-clear] listener, because only the caller knows
+ *                     which state a cleared key resets (downloads).
+ * `pills` is [{ key, label, value }, …]; labels come from the caller's i18n
+ * table (trusted), values are user/data input and are escaped here. Returns
+ * '' when nothing is active — no empty pill row is ever emitted.
+ *
+ * The aria-label names the filter AND its value («Filter Typ: Vertrag
+ * entfernen») so two pills of the same facet stay distinguishable.
+ */
+export function filterPills({ pills, hrefFor = null, clearAllHref = null, clearAllLabel }) {
+  if (!pills || !pills.length) return '';
+  const removeControl = (p) => {
+    const aria = `aria-label="Filter ${escapeHtml(p.label)}: ${escapeHtml(p.value)} entfernen"`;
+    return hrefFor
+      ? `<a class="filter-pill__remove" href="${hrefFor(p.key)}" ${aria}>
+           ${icon('x', 'filter-pill__remove-icon')}
+         </a>`
+      : `<button type="button" class="filter-pill__remove" data-clear="${escapeHtml(p.key)}" ${aria}>
+           ${icon('x', 'filter-pill__remove-icon')}
+         </button>`;
+  };
+  const clearAll = hrefFor
+    ? `<a class="filter-pills__clear-all" href="${clearAllHref}">${escapeHtml(clearAllLabel)}</a>`
+    : `<button class="filter-pills__clear-all" type="button" data-clear="all">${escapeHtml(clearAllLabel)}</button>`;
+  return `
+    <div class="filter-pills" aria-label="Aktive Filter">
+      ${pills.map(p => `
+        <span class="filter-pill">
+          <span class="filter-pill__label">${p.label}:</span>
+          <span class="filter-pill__value">${escapeHtml(p.value)}</span>
+          ${removeControl(p)}
+        </span>
+      `).join('')}
+      ${clearAll}
+    </div>
+  `;
 }

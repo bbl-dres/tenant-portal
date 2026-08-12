@@ -59,6 +59,12 @@ export function syncTreeCounts(root, visible, levelsOf, idOf) {
   // row is actually first now, otherwise a line hangs under the sidebar head.
   root.querySelectorAll('.is-first-row').forEach((row) => row.classList.remove('is-first-row'));
   reachable[0].classList.add('is-first-row');
+  // Keep the roving tab stop where it is while its row is still visible —
+  // this tail runs on every count sync (each keystroke of the live preview),
+  // and unconditionally moving the stop yanked keyboard users off the row
+  // they were on (review m7). Only reassign when the previous stop is hidden
+  // or absent.
+  if (reachable.some((button) => button.tabIndex === 0)) return;
   reachable.forEach((button) => { button.tabIndex = -1; });
   (reachable.find((button) => button.classList.contains('is-active')) || reachable[0]).tabIndex = 0;
 }

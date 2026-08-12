@@ -282,6 +282,15 @@ export function statusBadge(status) {
   return `<span class="${b.cls}">${b.label}</span>`;
 }
 
+// Empty-state table row (review M-EMPTY) — ONE builder for the
+// `.table-empty` row every filterable table falls back to, so the markup
+// (full-width cell, shared styling hook) can't drift. The copy stays a
+// caller argument: «Keine Treffer.» fits a filtered list, a work queue
+// says what is actually empty («Keine offenen Pendenzen.»).
+export function emptyRow(colspan, text = 'Keine Treffer.') {
+  return `<tr><td colspan="${colspan}" class="table-empty">${text}</td></tr>`;
+}
+
 
 // ── STATUS PIPELINE ────────────────────────────────────────────────────────
 // Maps to docs/DATAMODEL.md § 4.2 (three pipeline variants). Each step is
@@ -403,6 +412,58 @@ export function renderStepIndicator(currentStep, steps) {
 }
 
 
+// ── TAB STRIPS ─────────────────────────────────────────────────────────────
+// ONE wiring for every `[role="tab"]` strip (review M-TABS): the Vorgang
+// detail, the property detail and the floor-detail route all share the same
+// roving-tabindex contract (A11Y-016) — click or Arrow/Home/End activates a
+// tab, aria-selected and tabindex follow, and the active tab lands in the
+// URL through `hashFor(key)` so the state survives a reload or a shared link.
+//
+// Two activation modes:
+//   navigate: false → in-place panel swap: `panel.innerHTML = render(key)`,
+//             panel re-labelled, focus moves onto the tab, and the hash is
+//             replaced silently (a tab switch is a facet change, not a
+//             navigation).
+//   navigate: true  → the strip only points elsewhere (floor detail, whose
+//             panel is the floor viewer): activation routes through
+//             `window.portal.navigate(hashFor(key))` — no panel swap. The
+//             keyboard pattern still applies, which is what makes the
+//             inactive tabindex="-1" tabs reachable at all (review B16).
+export function wireTabs({ rootSel, panelId = 'detailTab', render = null, hashFor, navigate = false }) {
+  const tabs = Array.from(document.querySelectorAll(`${rootSel} [role="tab"]`));
+  const panel = document.getElementById(panelId);
+  if (!tabs.length || (!navigate && !panel)) return;
+  const select = (next) => {
+    const key = next.getAttribute('data-tab');
+    if (navigate) {
+      // Full route change — the destination render rebuilds the strip, so
+      // there is no aria/tabindex state worth syncing on the way out.
+      window.portal.navigate(hashFor(key));
+      return;
+    }
+    tabs.forEach(x => {
+      const isActive = x === next;
+      x.classList.toggle('tab--active', isActive);
+      x.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      x.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+    panel.setAttribute('aria-labelledby', 'tab-' + key);
+    panel.innerHTML = render(key);
+    next.focus();
+    history.replaceState(null, '', hashFor(key));
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select(tabs[(i + 1) % tabs.length]); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select(tabs[(i - 1 + tabs.length) % tabs.length]); }
+      else if (e.key === 'Home') { e.preventDefault(); select(tabs[0]); }
+      else if (e.key === 'End') { e.preventDefault(); select(tabs[tabs.length - 1]); }
+    });
+  });
+}
+
+
 // ── TOAST ──────────────────────────────────────────────────────────────────
 // Lazy-create the host so the first toast() call also creates the live
 // region. Uses textContent — never innerHTML — so message content is
@@ -467,6 +528,23 @@ export function toast(message, variant = '') {
 }
 
 
+// ── OVERLAY REGISTRY ───────────────────────────────────────────────────────
+// Full-screen surfaces (modal, docviewer, image gallery) append themselves
+// to <body>, outside #root, so a route re-render does NOT remove them: the
+// browser Back button would leave the overlay pinned over the new page with
+// its capture-phase keydown still swallowing keys (review finding B3).
+// Every overlay registers its close() here; the router closes them all on
+// each hashchange — the same lifecycle contract as teardownQueueShortcuts.
+const _overlayClosers = new Set();
+export function registerOverlay(close) {
+  _overlayClosers.add(close);
+  return () => _overlayClosers.delete(close);
+}
+export function closeAllOverlays() {
+  [..._overlayClosers].forEach(c => { try { c(); } catch { /* already gone */ } });
+  _overlayClosers.clear();
+}
+
 // ── MODAL ──────────────────────────────────────────────────────────────────
 // CD-Bund modal pattern (designsystem css/components/modal.postcss):
 //   role="dialog" + aria-modal="true" + aria-labelledby
@@ -487,6 +565,7 @@ export function modal({ title, body, actions = [], onClose = null, size = '' }) 
   backdrop.className = 'modal-backdrop';
 
   const close = () => {
+    unregister();
     document.removeEventListener('keydown', onKeydown, true);
     backdrop.remove();
     if (opener && typeof opener.focus === 'function') {
@@ -494,6 +573,7 @@ export function modal({ title, body, actions = [], onClose = null, size = '' }) 
     }
     if (onClose) onClose();
   };
+  const unregister = registerOverlay(close);
 
   // Focus-trap + Esc handler. Capture-phase so we win against inline
   // onkeydown handlers inside the modal body.
@@ -578,41 +658,26 @@ export function renderShortcutOverlay() {
             ${icon('x')}
           </button>
         </div>
+        <!-- Only shortcuts that are actually wired are listed (review
+             views-17): «?»/Esc live in wireGlobalShortcuts, the Prüfqueue set
+             in wireQueueShortcuts. The former g-g/g-i/g-q, Ctrl+S, Ctrl+Enter
+             and the a/n/k/s detail set (with its duplicate «k») were never
+             implemented and promised keys that did nothing. -->
         <div class="shortcut-overlay__grid">
           <div class="shortcut-overlay__group">
-            <h3>Navigation</h3>
+            <h3>Allgemein</h3>
             <dl>
               <dt>?</dt><dd>Dieses Overlay öffnen/schliessen</dd>
-              <dt>g g</dt><dd>Zur Startseite</dd>
-              <dt>g i</dt><dd>Zur Inbox</dd>
-              <dt>g q</dt><dd>Zur Pendenzen-Queue (GS)</dd>
               <dt>Esc</dt><dd>Modal / Overlay schliessen</dd>
             </dl>
           </div>
           <div class="shortcut-overlay__group">
-            <h3>Wizard</h3>
-            <dl>
-              <dt>Tab</dt><dd>Nächstes Feld</dd>
-              <dt>Ctrl+S</dt><dd>Entwurf speichern</dd>
-              <dt>Ctrl+Enter</dt><dd>Weiter / Senden</dd>
-            </dl>
-          </div>
-          <div class="shortcut-overlay__group">
-            <h3>Queue (GS-Prüfer/in)</h3>
+            <h3>Prüfqueue</h3>
             <dl>
               <dt>j / ↓</dt><dd>Nächste Zeile</dd>
               <dt>k / ↑</dt><dd>Vorherige Zeile</dd>
               <dt>Enter</dt><dd>Öffnen</dd>
               <dt>x</dt><dd>Markieren</dd>
-            </dl>
-          </div>
-          <div class="shortcut-overlay__group">
-            <h3>Detail</h3>
-            <dl>
-              <dt>a</dt><dd>OK markieren</dd>
-              <dt>n</dt><dd>NoK markieren</dd>
-              <dt>k</dt><dd>OK mit Kommentar</dd>
-              <dt>s</dt><dd>Entscheid speichern</dd>
             </dl>
           </div>
         </div>

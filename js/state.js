@@ -79,7 +79,9 @@ export async function loadData(basePath = 'data/') {
   state.i18n = i18n || {};
   state.lang = loadLang() || 'de';
   try { document.documentElement.lang = state.lang; } catch {}
-  loadSpatialData(basePath).catch(() => {});
+  // No eager loadSpatialData here: spaces.geojson is ~29% of the cold
+  // payload and only the floor-plan route needs it — renderFloorDetail
+  // awaits P.loadSpatialData('data/') itself (review P7).
 }
 
 // ── I18N ────────────────────────────────────────────────────────────────────
@@ -139,6 +141,10 @@ export function loadDraft() {
   try { return JSON.parse(raw); } catch { return null; }
 }
 export function clearDraft() {
+  // Always drop the in-memory draft — otherwise ensureDraft() hands the
+  // previous user's data to the next session after a re-login/role switch,
+  // and the next persist writes it under the NEW user's storage key.
+  state.draft = null;
   if (!state.user) return;
   safeRemove('mp-draft-' + state.user.id);
 }

@@ -459,8 +459,8 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
              return `
              <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                ${isLast
-                 ? `<span aria-current="page" itemprop="name">${b.label}</span>`
-                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${b.label}</span></a>`}
+                 ? `<span aria-current="page" itemprop="name">${escapeHtml(b.label)}</span>`
+                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${escapeHtml(b.label)}</span></a>`}
                ${!isLast ? icon('chevronRight', 'breadcrumb__sep') : ''}
                <meta itemprop="position" content="${i + 1}">
              </li>

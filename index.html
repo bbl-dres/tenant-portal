@@ -9,6 +9,20 @@
      404. The tab identifies the page by its title, which markRouteRendered
      keeps per-route. -->
 <link rel="icon" href="data:,">
+<!-- Font + module preloads (review P9/P10): the fonts otherwise sit at hop 4
+     of the CSS @import chain (HTML → main.css → tokens.css → font fetch) and
+     FOUT on every cold visit; the ES-module graph is likewise discovered
+     only after app.js parses. Preloading flattens both waterfalls without
+     touching the documented main.css cascade order. -->
+<link rel="preload" href="assets/fonts/NotoSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/NotoSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="js/lib.js">
+<link rel="modulepreload" href="js/state.js">
+<link rel="modulepreload" href="js/shell.js">
+<link rel="modulepreload" href="js/wizard.js">
+<link rel="modulepreload" href="js/catalogue-bar.js">
+<link rel="modulepreload" href="js/spatial-tree.js">
+<link rel="modulepreload" href="js/search-engine.js">
 <link rel="stylesheet" href="css/main.css">
 </head>
 <!-- `body--intranet` selects the CD Bund intranet skin (blue brand + blue

@@ -28,13 +28,18 @@ formatAssetKey, roleLabel,
 DOC_TYPE_LABEL,
 // UI primitives
 toast, modal, icon, statusBadge, attachmentLi, setFieldError,
+registerOverlay, closeAllOverlays,
 PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
+wireTabs, emptyRow,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import { treeHTML, wireTree, restoreTreeSelection, syncTreeCounts } from './spatial-tree.js';
-import { catalogueBar, wireCatalogueBar, setFilterCount } from './catalogue-bar.js';
+import {
+  catalogueBar, wireCatalogueBar, setFilterCount, setActiveView,
+  filterPills, wireSidebarToggle, wireCheckboxGroup,
+} from './catalogue-bar.js';
 import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
@@ -151,6 +156,22 @@ function markRouteRendered(route) {
     }
   }
 }
+let _routeGen = 0;
+// Not-found rendering that is safe on COLD deep links: #page-body only
+// exists after shell() has run, so writing to it first crashed with a
+// TypeError and a blank page when a stale bookmark was opened in a fresh
+// session (review B2). Renders full chrome + a message + a way back.
+function renderNotFound(message, { activeNav = '' } = {}) {
+  shell({ activeNav, breadcrumb: [{ label: t('error.notFound') }] });
+  const body = document.getElementById('page-body');
+  if (body) {
+    body.innerHTML = `<section class="section"><div class="container">
+      <h1 class="h1 section-heading">${t('error.notFound')}</h1>
+      <p>${escapeHtml(message)}</p>
+      <p><a class="link" href="#/">${t('error.backHome')}</a></p>
+    </div></section>`;
+  }
+}
 async function handleHash() {
   const full = location.hash || '#/';
   // Strip a `?query` suffix before route matching — query params (view/q/page/…)
@@ -163,6 +184,21 @@ async function handleHash() {
   // the arrow keys on every route visited afterwards. Same-path query changes
   // (#/queue?page=2) keep it; renderQueue rewires on re-render anyway.
   if (h !== '#/queue') teardownQueueShortcuts();
+  // Overlays (modal / docviewer / image gallery) live on <body>, outside
+  // #root — a re-render does not remove them, so the browser Back button
+  // would leave them pinned over the new route (review B3). Close them all.
+  closeAllOverlays();
+  // The nav-menu scrim also lives outside #root and its --open class is only
+  // cleared by toggleNavMenu — which can no longer find the (re-rendered,
+  // hidden) panels after a route change, leaving a click-eating layer over
+  // the whole page (review B4).
+  document.querySelector('.main-navigation__overlay')?.classList.remove('main-navigation__overlay--open');
+  // MapLibre instances are module-referenced; #root re-render detaches their
+  // canvas but keeps WebGL contexts + render loops alive (review B7/P3).
+  // Each map's init tears down only its OWN previous instance, so leaving a
+  // map route leaked the context until the next visit. Routes that need a
+  // map re-create it in their own render.
+  teardownMaps();
   // Scope hook for the floor-plan print sheet (css/foundations/print.css):
   // body.route-floor must never outlive the floor view — printing any other
   // route has to keep the federal chrome (CSS-002). Cleared on every
@@ -188,11 +224,17 @@ async function handleHash() {
     markRouteRendered(h);
     return;
   }
+  // Staleness guard for async handlers (review B6): a slow spatial fetch
+  // must not render property A over the route the user has since navigated
+  // to. Handlers that await take the generation as their 2nd argument and
+  // bail if another navigation has started in the meantime.
+  const gen = ++_routeGen;
   for (const { re, handler } of routes) {
     const m = h.match(re);
     if (m) {
       state.params = m.groups || {};
-      await handler(state.params);
+      await handler(state.params, gen);
+      if (gen !== _routeGen) return;   // superseded while awaiting
       markRouteRendered(h);
       return;
     }
@@ -235,7 +277,10 @@ function openRoleMenu() {
     body,
     actions: [{ label: P.t('btn.cancel'), variant: 'btn--outline' }]
   });
-  document.querySelectorAll('[data-role]').forEach(btn => {
+  // Scope to the modal just appended (last .modal-backdrop) — a document-wide
+  // [data-role] query could also catch unrelated markup (review views-18).
+  const menuEl = [...document.querySelectorAll('.modal-backdrop')].pop() || document;
+  menuEl.querySelectorAll('[data-role]').forEach(btn => {
     btn.addEventListener('click', () => {
       const role = btn.getAttribute('data-role');
       state.user.activeRole = role;
@@ -273,8 +318,12 @@ function login(target) {
   navigate(typeof target === 'string' && target.startsWith('#/') ? target : '#/');
 }
 function logout() {
-  state.user = null;
+  // Order matters: clearDraft() keys the localStorage entry by state.user.id
+  // and no-ops when user is already null — nulling first left the previous
+  // user's wizard draft (VE, addresses, free text) on a shared federal
+  // workstation after an explicit sign-out (review B5).
   clearDraft();
+  state.user = null;
   toast('Abgemeldet.');
   navigate('#/');
 }
@@ -597,6 +646,22 @@ function buildSearchIndex() {
   return [...byHref.values()];
 }
 
+// Search-index memo (review P5): building the index walks every service,
+// case, tenancy, building, document and news record per render — and the
+// search engine attaches `_folded` fields to index entries as its own fold
+// cache, which a fresh index threw away on every keystroke/paging click.
+// Language, user and active role are the only inputs that change its content.
+let _searchIndexCache = null;
+let _searchIndexKey = '';
+function getSearchIndex() {
+  const key = `${P.state.lang}|${P.state.user && P.state.user.id}|${P.state.user && P.state.user.activeRole}`;
+  if (!_searchIndexCache || key !== _searchIndexKey) {
+    _searchIndexCache = buildSearchIndex();
+    _searchIndexKey = key;
+  }
+  return _searchIndexCache;
+}
+
 function searchHash({ q, sort, view, kind, page }) {
   const parts = [];
   if (q) parts.push('q=' + encodeURIComponent(q));
@@ -661,7 +726,7 @@ function renderSearchResults() {
   const kind = params.kind ? decodeURIComponent(params.kind) : '';
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
 
-  const ranked = query ? searchIndex(buildSearchIndex(), query) : [];
+  const ranked = query ? searchIndex(getSearchIndex(), query) : [];
 
   // Facet counts come from the FULL result set, so switching tabs never
   // changes the other tabs' numbers.
@@ -679,10 +744,12 @@ function renderSearchResults() {
   // «Label (n)» as ONE text node — the flex .tab base treats separate text
   // nodes/spans as flex items and swallows the whitespace between them,
   // which rendered «Alle11». Same convention as the property-detail tabs.
+  // escapeJs on the hash: `q` and `kind` carry user/query text into a JS
+  // string literal inside an onclick attribute (review B8).
   const tab = (label, value, count) => `
     <button class="tab__control${activeKind === value ? ' tab__control--active' : ''}" type="button"
             role="tab" aria-selected="${activeKind === value}"
-            onclick="location.hash='${searchHash({ q: query, sort, view, kind: value, page: 1 })}'">
+            onclick="location.hash='${P.escapeJs(searchHash({ q: query, sort, view, kind: value, page: 1 }))}'">
       ${P.escapeHtml(label)}&nbsp;(${count})
     </button>
   `;
@@ -1174,7 +1241,12 @@ function faqItem(question, answer) {
 // TOC is now per page, so the watch list is passed in rather than read from
 // a module-level constant — each of the two pages that carry a TOC owns its
 // own section ids.
+// One live observer at a time: every info-page render creates a fresh spy, so
+// the previous one must be disconnected or observers pile up across
+// navigations, each firing on detached toc items (review B21).
+let _infoObserver = null;
 function wireInfoScrollSpy(toc) {
+  if (_infoObserver) { _infoObserver.disconnect(); _infoObserver = null; }
   const targets = (toc || [])
     .map(it => document.getElementById(it.id))
     .filter(Boolean);
@@ -1188,13 +1260,13 @@ function wireInfoScrollSpy(toc) {
     });
   };
 
-  const observer = new IntersectionObserver((entries) => {
+  _infoObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) setActive(entry.target.id);
     });
   }, { rootMargin: '-30% 0% -55% 0%', threshold: 0 });
 
-  targets.forEach(t => observer.observe(t));
+  targets.forEach(t => _infoObserver.observe(t));
 }
 
 // ── NEWS SECTION (swisstopo "Aktuell" carousel pattern) ─────────────────
@@ -1895,7 +1967,7 @@ function wireInboxFilters(cases) {
           || (c.title || '').toLowerCase().includes(t))
     );
     tbody.innerHTML = filtered.map(caseRowHtml).join('')
-      || `<tr><td colspan="5" class="table-empty">Keine Treffer.</td></tr>`;
+      || emptyRow(5, 'Keine Treffer.');
   };
 
   // Status filtering stays IN PAGE rather than routing through the hash: the
@@ -1966,7 +2038,7 @@ function renderApplicationDetail({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const inst = findCase(id);
   if (!inst) {
-    document.getElementById('page-body').innerHTML = '<div class="container section"><p>Vorgang nicht gefunden.</p></div>';
+    renderNotFound('Vorgang nicht gefunden.', { activeNav: 'inbox' });
     return;
   }
   renderCaseDetail(inst);
@@ -2202,36 +2274,22 @@ function caseCommentsPanel({ comments }) {
     </ul>`;
 }
 
-// Same roving-tabindex contract as the property tabs (A11Y-016), with the
-// active tab in `?tab=` so a link into a case opens where it was shared from.
+// Shared roving-tabindex wiring (lib.js wireTabs, A11Y-016 / review M-TABS),
+// with the active tab in `?tab=` so a link into a case opens where it was
+// shared from. Keep `lang` in the URL: the router treats it as the source of
+// truth, so dropping it would make a copied link resolve in whatever language
+// the next reader has stored rather than the one shown.
+function caseTabHash(instanceId, key) {
+  const current = parseHashQuery(location.hash);
+  const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
+    .filter(Boolean).join('&');
+  return `#/inbox/${instanceId}` + (qs ? '?' + qs : '');
+}
 function wireCaseTabs(inst, ctx) {
-  const tabs = Array.from(document.querySelectorAll('.case-tabs [role="tab"]'));
-  const panel = document.getElementById('detailTab');
-  if (!tabs.length || !panel) return;
-  const select = (next) => {
-    const key = next.getAttribute('data-tab');
-    tabs.forEach(x => {
-      const isActive = x === next;
-      x.classList.toggle('tab--active', isActive);
-      x.setAttribute('aria-selected', isActive ? 'true' : 'false');
-      x.setAttribute('tabindex', isActive ? '0' : '-1');
-    });
-    panel.setAttribute('aria-labelledby', 'tab-' + key);
-    panel.innerHTML = renderCaseTab(inst, key, ctx);
-    next.focus();
-    const current = parseHashQuery(location.hash);
-    const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
-      .filter(Boolean).join('&');
-    history.replaceState(null, '', `#/inbox/${inst.instanceId}` + (qs ? '?' + qs : ''));
-  };
-  tabs.forEach((tab, i) => {
-    tab.addEventListener('click', () => select(tab));
-    tab.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select(tabs[(i + 1) % tabs.length]); }
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select(tabs[(i - 1 + tabs.length) % tabs.length]); }
-      else if (e.key === 'Home') { e.preventDefault(); select(tabs[0]); }
-      else if (e.key === 'End') { e.preventDefault(); select(tabs[tabs.length - 1]); }
-    });
+  wireTabs({
+    rootSel: '.case-tabs',
+    render: (key) => renderCaseTab(inst, key, ctx),
+    hashFor: (key) => caseTabHash(inst.instanceId, key),
   });
 }
 
@@ -2318,7 +2376,7 @@ function renderQueue() {
             </tr>
           </thead>
           <tbody id="queueTbody">
-            ${pageItems.map(queueRowHtml).join('') || `<tr><td colspan="6" class="table-empty">Keine offenen Pendenzen.</td></tr>`}
+            ${pageItems.map(queueRowHtml).join('') || emptyRow(6, 'Keine offenen Pendenzen.')}
           </tbody>
         </table>
         </div>
@@ -2365,7 +2423,9 @@ function renderQueue() {
   wirePaginationInput('queuePaginationInput');
   wireQueueShortcuts();
   wireCatalogueBar({ id: 'queue' });
-  wireQueueFilters(pageItems);
+  // The FULL filtered set, not the page slice — typing must find rows on
+  // other pages, exactly like renderInbox → wireInboxFilters (review B17).
+  wireQueueFilters(queue);
 }
 
 let _queueKeydownHandler = null;
@@ -2407,7 +2467,7 @@ function wireQueueFilters(rows) {
       (!t || a.id.toLowerCase().includes(t) || (a.address || '').toLowerCase().includes(t))
     );
     tbody.innerHTML = filtered.map(queueRowHtml).join('')
-      || `<tr><td colspan="6" class="table-empty">Keine Treffer.</td></tr>`;
+      || emptyRow(6, 'Keine Treffer.');
     // Re-rendered rows lose their keyboard/selection handlers.
     wireQueueShortcuts();
   };
@@ -2462,7 +2522,7 @@ function wireQueueShortcuts() {
 function renderReviewerSplit({ id }) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.spaceRequests.find(x => x.id === id);
-  if (!a) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Antrag nicht gefunden.</p></div>'; return; }
+  if (!a) { renderNotFound('Antrag nicht gefunden.', { activeNav: 'queue' }); return; }
   shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: P.t('nav.queue') }, { label: a.id }], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
 
   const initialMarks = a._marks || {};
@@ -2628,7 +2688,9 @@ function propertiesResultsHTML(view, filtered, page, query, ort, sort) {
         <h2 class="empty-state__title">Keine Treffer${query ? ` für „${P.escapeHtml(query)}"` : ''}</h2>
         <p class="empty-state__lead">Versuchen Sie es mit anderen Filtern.</p>
         <div class="empty-state__cta">
-          <a href="${buildPropertiesHash({ view, page: 1 })}" class="btn btn--outline">Filter zurücksetzen</a>
+          <!-- sel: {} — the reset must also clear the tree selection, like the
+               pill row's clear-all; the default keeps it (review B14). -->
+          <a href="${buildPropertiesHash({ view, page: 1, sel: {} })}" class="btn btn--outline">Filter zurücksetzen</a>
         </div>
       </div>`;
   }
@@ -2696,8 +2758,7 @@ function refreshPropertiesResults(view) {
   const sort = ['name','area','stations'].includes(p.sort) ? p.sort : 'name';
   const filtered = sortTenancies(filterTenancies(getScopedTenancies(), query, ort, sel), sort);
   if (view === 'map') {
-    const ids = new Set(filtered.map(t => t.id));
-    _propertiesMarkers.forEach(m => { m.el.style.display = ids.has(m.id) ? '' : 'none'; });
+    if (_propertiesMapApplyFilter) _propertiesMapApplyFilter(filtered);
   } else {
     const results = document.getElementById('propertiesResults');
     if (results) {
@@ -2707,15 +2768,9 @@ function refreshPropertiesResults(view) {
   }
   const pills = document.getElementById('propsActivePills');
   if (pills) pills.innerHTML = renderPropertiesFilterPills({ view, query: (p.q || '').trim(), ort, sort });
-  const cnt = document.getElementById('props-count');
-  if (cnt) {
-    const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
-    const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
-    const shown = view === 'map' ? filtered.length : Math.min(perPage, filtered.length);
-    cnt.textContent = filtered.length === 0
-      ? P.t('props.noneFound')
-      : `${shown} ${P.t('props.ofTotal')} ${filtered.length}${totalPages > 1 ? ` · ${P.t('props.pageOf', { a: 1, b: totalPages })}` : ''}`;
-  }
+  // In-place refresh re-renders neither the bar nor its badge — keep the
+  // filter count in step with the tree selection + Ort facet (review B13).
+  setFilterCount('props', (Object.keys(sel).length ? 1 : 0) + (ort ? 1 : 0));
   syncPropertiesTree();
 }
 
@@ -2742,12 +2797,8 @@ function renderProperties() {
   const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
   const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
-  // The bar states what is on screen out of what matched — the same
-  // «N von M · Seite x von y» sentence the reference portal shows.
-  const shown = view === 'map' ? filtered.length : Math.min(perPage, Math.max(0, filtered.length - (safePage - 1) * perPage));
-  const countLabel = filtered.length === 0
-    ? P.t('props.noneFound')
-    : `${shown} ${P.t('props.ofTotal')} ${filtered.length}${totalPages > 1 ? ` · ${P.t('props.pageOf', { a: safePage, b: totalPages })}` : ''}`;
+  // No count in the bar — the pagination footer below the results already
+  // carries the «N von M» sentence, and stating it twice read as noise.
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -2774,7 +2825,7 @@ function renderProperties() {
             </div>
           </div>
         ` : `
-          ${propertiesToolbar({ view, query, sort, count: countLabel, sidebarVisible,
+          ${propertiesToolbar({ view, query, sort, sidebarVisible,
             locFilterCount: (Object.keys(sel).length ? 1 : 0) + (ort ? 1 : 0) })}
           <div id="propsActivePills">${renderPropertiesFilterPills({ view, query, ort, sort })}</div>
 
@@ -2842,7 +2893,11 @@ function parseHashQuery(hash) {
   hash.slice(qIdx + 1).split('&').forEach(pair => {
     if (!pair) return;
     const [k, v = ''] = pair.split('=');
-    out[decodeURIComponent(k)] = decodeURIComponent(v);
+    // A malformed escape — `#/…?q=100%` — must not take down the route:
+    // skip the broken pair, keep the rest (review B19).
+    try {
+      out[decodeURIComponent(k)] = decodeURIComponent(v);
+    } catch { /* skip malformed pair */ }
   });
   return out;
 }
@@ -2906,7 +2961,7 @@ function sortTenancies(list, sort) {
 // place combobox — passed through as extra input attributes plus the listbox
 // slot, so the shared component keeps owning the row while this page keeps
 // owning its suggestions.
-function propertiesToolbar({ view, query, sort, count, sidebarVisible, locFilterCount }) {
+function propertiesToolbar({ view, query, sort, sidebarVisible, locFilterCount }) {
   return catalogueBar({
     id: 'props',
     search: true,
@@ -2915,7 +2970,6 @@ function propertiesToolbar({ view, query, sort, count, sidebarVisible, locFilter
     placeholder: P.t('props.searchPlaceholder'),
     inputAttrs: 'role="combobox" aria-autocomplete="list" aria-controls="propertiesSearchOptions" aria-expanded="false"',
     searchSlot: `<ul class="combobox__list" id="propertiesSearchOptions" role="listbox" aria-label="Vorschläge" hidden></ul>`,
-    count,
     sort: {
       value: sort,
       options: [
@@ -2956,28 +3010,20 @@ function renderPropertiesFilterPills({ view, query, ort, sort }) {
       : sel.city || sel.region || (COUNTRY_NAME[sel.country] || sel.country);
     active.push({ key: 'sel', label: 'Auswahl', value });
   }
-  if (active.length === 0) return '';
+  // Shared pill markup (catalogue-bar.js, review M-PILLS) in its
+  // hash-navigated flavour: removal is an <a href> without that facet.
   const hrefWithout = (key) => {
     const params = parseHashQuery(location.hash);
     const next = { view, q: params.q || '', ort: params.ort || '', sort, page: 1 };
     if (key === 'sel') next.sel = {}; else next[key] = '';
     return buildPropertiesHash(next);
   };
-  return `
-    <div class="filter-pills" aria-label="Aktive Filter">
-      ${active.map(f => `
-        <span class="filter-pill">
-          <span class="filter-pill__label">${f.label}:</span>
-          <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
-          <a class="filter-pill__remove" href="${hrefWithout(f.key)}"
-             aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen">
-            ${P.icon('x', 'filter-pill__remove-icon')}
-          </a>
-        </span>
-      `).join('')}
-      <a class="filter-pills__clear-all" href="${buildPropertiesHash({ view, sort, page: 1, sel: {} })}">${P.t('props.resetFilters')}</a>
-    </div>
-  `;
+  return filterPills({
+    pills: active,
+    hrefFor: hrefWithout,
+    clearAllHref: buildPropertiesHash({ view, sort, page: 1, sel: {} }),
+    clearAllLabel: P.t('props.resetFilters'),
+  });
 }
 
 function wirePropertiesToolbar(view) {
@@ -3000,33 +3046,21 @@ function wirePropertiesToolbar(view) {
   });
   wirePropertiesSearchCombobox(view);
   // The filter button discloses the location sidebar in place (no navigation
-  // — the tree DOM and its expanded branches survive); replaceState keeps
-  // the visibility in the URL so it survives the next full re-render.
-  const filterBtn = document.getElementById('props-filter');
-  if (filterBtn) filterBtn.addEventListener('click', () => {
-    const layout = document.querySelector('.pf-layout');
-    if (!layout) return;
-    const hidden = layout.classList.toggle('pf-layout--sidebar-hidden');
-    filterBtn.setAttribute('aria-expanded', String(!hidden));
-    filterBtn.classList.toggle('catbar__filter--open', !hidden);
-    const p = parseHashQuery(location.hash);
-    history.replaceState(null, '', buildPropertiesHash({
-      view, q: p.q || '', ort: p.ort || '', sort: p.sort || 'name',
-      page: Math.max(1, parseInt(p.page || '1', 10) || 1), sb: !hidden,
-    }));
-  });
-  // The X in the sidebar head hides the panel too — it delegates to the
-  // filter toggle so state, URL and pressed tint stay in one code path;
-  // focus lands on the toggle, which is what re-opens the panel.
-  const sidebarClose = document.querySelector('.pf-sidebar__close');
-  if (sidebarClose && filterBtn) sidebarClose.addEventListener('click', () => {
-    filterBtn.click();
-    filterBtn.focus();
-  });
-  const clearBtn = document.querySelector('[data-action="clear-search"]');
-  if (clearBtn) clearBtn.addEventListener('click', () => {
-    const p = parseHashQuery(location.hash);
-    location.hash = buildPropertiesHash({ view, q: '', ort: p.ort || '', sort: p.sort || 'name', page: 1 });
+  // — the tree DOM and its expanded branches survive). Shared toggle + X
+  // mechanics live in catalogue-bar.js (review M-SIDEBAR); replaceState here
+  // keeps the visibility in the URL so it survives the next full re-render.
+  wireSidebarToggle({
+    buttonId: 'props-filter',
+    onToggle: (open) => {
+      const p = parseHashQuery(location.hash);
+      history.replaceState(null, '', buildPropertiesHash({
+        view, q: p.q || '', ort: p.ort || '', sort: p.sort || 'name',
+        page: Math.max(1, parseInt(p.page || '1', 10) || 1), sb: open,
+      }));
+      // Reopening the sidebar must restore the tree's roving tab stop + counts —
+      // both syncers early-return while every row is display:none (review B12).
+      if (open) syncPropertiesTree();
+    },
   });
   // CD Bund pagination input — generic helper picks up the hrefFor
   // closure stashed by renderPagination.
@@ -3045,18 +3079,21 @@ function previewPropertiesFilter(view) {
   const query = queryRaw.toLowerCase();
   const p = parseHashQuery(location.hash);
   const ort = p.ort || '';
-  const filtered = filterTenancies(getScopedTenancies(), query, ort, parseTreeSel(p));
+  // Sort the preview like the committed render — an unsorted preview visibly
+  // reshuffled the list per keystroke — and whitelist p.sort so an arbitrary
+  // URL value never reaches the sorter or the templates (review B10, m8).
+  const sort = ['name','area','stations'].includes(p.sort) ? p.sort : 'name';
+  const filtered = sortTenancies(filterTenancies(getScopedTenancies(), query, ort, parseTreeSel(p)), sort);
   // Tree counts follow the live keystroke too (they reflect search + facets,
   // never the tree's own selection).
   syncPropertiesTree(query);
   if (view === 'map') {
-    const ids = new Set(filtered.map(t => t.id));
-    _propertiesMarkers.forEach(m => { m.el.style.display = ids.has(m.id) ? '' : 'none'; });
+    if (_propertiesMapApplyFilter) _propertiesMapApplyFilter(filtered);
     return;
   }
   const results = document.getElementById('propertiesResults');
   if (results) {
-    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, ort, p.sort || 'name');
+    results.innerHTML = propertiesResultsHTML(view, filtered, 1, queryRaw, ort, sort);
     wirePaginationInput();
   }
 }
@@ -3170,18 +3207,25 @@ function wirePropertiesSearchCombobox(view) {
     const label = opt.dataset.label || '';
     if (view === 'map' && _propertiesMap) {
       input.value = '';
-      _propertiesMarkers.forEach(m => { m.el.style.display = ''; });   // un-filter property pins
+      // Un-filter the pins: re-run the live preview with the now-empty
+      // query, which re-feeds the clustered source with the full set.
+      previewPropertiesFilter(view);
       dropLocatorPin(lng, lat, label);
     } else {
       // Switch to map view, then drop the pin once the map has loaded.
+      // Carry the active sort along — omitting it silently reset a
+      // non-default sort on every place pick (review B9).
       _pendingLocator = { lng, lat, label };
-      location.hash = buildPropertiesHash({ view: 'map', ort: parseHashQuery(location.hash).ort || '' });
+      const p = parseHashQuery(location.hash);
+      location.hash = buildPropertiesHash({ view: 'map', ort: p.ort || '', sort: p.sort || 'name' });
     }
   }
 
   function commit() {
     close();
-    location.hash = buildPropertiesHash({ view, q: input.value.trim(), ort: parseHashQuery(location.hash).ort || '', page: 1 });
+    // Pass the sort through — committing a search must not reset it (review B9).
+    const p = parseHashQuery(location.hash);
+    location.hash = buildPropertiesHash({ view, q: input.value.trim(), ort: p.ort || '', sort: p.sort || 'name', page: 1 });
   }
 
   function moveActive(delta) {
@@ -3273,8 +3317,10 @@ function renderListView(items) {
         </thead>
         <tbody>
           ${items.map(t => `
-            <tr onclick="location.hash='#/properties/${t.id}'" tabindex="0"
-                onkeydown="if(event.key==='Enter')location.hash='#/properties/${t.id}'"
+            <!-- escapeJs: t.id lands in a JS string literal inside the
+                 onclick/onkeydown attributes (review m2). -->
+            <tr onclick="location.hash='#/properties/${P.escapeJs(t.id)}'" tabindex="0"
+                onkeydown="if(event.key==='Enter')location.hash='#/properties/${P.escapeJs(t.id)}'"
                 aria-label="Mietverhältnis ${P.escapeHtml(t.buildingName)} öffnen">
               <td><code>${formatAssetKey(t.assetKey)}</code></td>
               <td><strong>${P.escapeHtml(t.buildingName)}</strong></td>
@@ -3362,22 +3408,41 @@ function renderPagination({ current, totalPages, from, to, totalItems, entitySin
   return paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, inputId: id, nav: { kind: 'link', hrefFor } });
 }
 
-// Wire the page-input field to navigate on Enter / blur. Looks up the
-// hrefFor closure from the Map populated by `renderPagination`.
-function wirePaginationInput(inputId) {
+// Wire a paginationShell's page-input field, in one of two modes matching
+// the shell's `nav` kinds (review M-PAGING):
+//   hash mode (default)     — looks up the hrefFor closure from the Map
+//     populated by `renderPagination` and navigates on Enter / change.
+//   in-place mode (`onPage`) — reports the clamped page number to the caller
+//     instead, and also binds the <button data-step> chevrons inside the
+//     same <nav>. The clamp reads the input's `max` attribute, which
+//     paginationShell stamps with the totalPages of the CURRENT render —
+//     re-wired per render, so it never goes stale.
+function wirePaginationInput(inputId, { onPage } = {}) {
   const id = inputId || 'paginationInput';
   const el = document.getElementById(id);
+  if (!el) return;
   const hrefFor = _paginationHrefBuilders.get(id);
-  if (!el || !hrefFor) return;
-  const max = parseInt(el.getAttribute('max'), 10) || 1;
-  const go = () => {
-    const v = Math.max(1, Math.min(max, parseInt(el.value, 10) || 1));
-    location.hash = hrefFor(v);
+  if (!onPage && !hrefFor) return;
+  const clamp = (n) => {
+    const max = parseInt(el.getAttribute('max'), 10) || 1;
+    return Math.max(1, Math.min(max, n));
   };
+  const commit = (page) => {
+    if (onPage) onPage(page);
+    else location.hash = hrefFor(page);
+  };
+  const go = () => commit(clamp(parseInt(el.value, 10) || 1));
   el.addEventListener('change', go);
   el.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); go(); }
   });
+  if (onPage) {
+    el.closest('nav')?.querySelectorAll('button[data-step]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        commit(clamp((parseInt(el.value, 10) || 1) + parseInt(btn.dataset.step, 10)));
+      });
+    });
+  }
 }
 
 // MapLibre GL — loaded on demand only when the map view is active.
@@ -3386,6 +3451,49 @@ let _propertiesMap = null;
 let _propertiesMarkers = [];
 let _locatorMarker = null;        // single transient swisstopo location pin
 let _pendingLocator = null;       // {lng,lat,label} to drop after switching to map view
+let _propertiesMapApplyFilter = null;  // set by initPropertiesMap; re-feeds the clustered source on in-place filtering
+
+// Route-change teardown for ALL MapLibre instances (called from handleHash).
+// Every init also tears down its own previous instance, but that only runs
+// when the SAME map type is re-entered — leaving a map route otherwise
+// leaked the WebGL context, render loop and resize listeners of a canvas
+// that is no longer in the document (browsers force-lose the oldest context
+// past ~16, which manifests as a randomly blank map).
+function teardownMaps() {
+  if (_propertiesMap) { try { _propertiesMap.remove(); } catch { /* context gone */ } _propertiesMap = null; }
+  _propertiesMarkers = [];
+  _locatorMarker = null;
+  _propertiesMapApplyFilter = null;
+  if (_propertyDetailMap) { try { _propertyDetailMap.remove(); } catch { /* context gone */ } _propertyDetailMap = null; }
+  if (_floorMap) { try { _floorMap.remove(); } catch { /* context gone */ } _floorMap = null; }
+}
+
+// Resolve a MapLibre cluster through its exact leaves first and expansion zoom
+// second — ported verbatim from the sister service-portal
+// (js/map/cluster-navigation.js): fitBounds over the leaves always shows
+// exactly the clustered objects, while expansion zoom only indicates when
+// THIS cluster splits (for co-located points that can be never).
+async function navigateCluster({ source, clusterId, feature, map, LngLatBounds, isCurrent = () => true, onFailure = () => {} }) {
+  let leavesError;
+  try {
+    const leaves = await Promise.resolve().then(() => source.getClusterLeaves(clusterId, Infinity, 0));
+    if (!leaves || !leaves.length) throw new Error('cluster has no leaves');
+    const bounds = new LngLatBounds();
+    leaves.forEach((leaf) => bounds.extend(leaf.geometry.coordinates));
+    map.fitBounds(bounds, { padding: 64, maxZoom: 15, duration: 600 });
+    return 'leaves';
+  } catch (error) {
+    leavesError = error;
+  }
+  try {
+    const zoom = await Promise.resolve().then(() => source.getClusterExpansionZoom(clusterId));
+    map.easeTo({ center: feature.geometry.coordinates, zoom });
+    return 'expansion';
+  } catch (expansionError) {
+    if (isCurrent()) onFailure({ clusterId, leavesError, expansionError });
+    return '';
+  }
+}
 let _swisstopoController = null;  // aborts the previous in-flight swisstopo request
 function renderMapLoading(label = 'Karte wird geladen') {
   return `
@@ -3459,6 +3567,7 @@ function initPropertiesMap(items) {
     if (!container) return;
     // Tear down previous instance if the user toggled views without leaving the route
     if (_propertiesMap) { try { _propertiesMap.remove(); } catch {} _propertiesMap = null; _propertiesMarkers = []; _locatorMarker = null; }
+    _propertiesMapApplyFilter = null;
     const map = new maplibregl.Map({
       container,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -3495,9 +3604,11 @@ function initPropertiesMap(items) {
         // a CTA to the detail page (the technical attributes live there).
         // Managed manually (NOT via marker.setPopup) so our click handler owns
         // open/close. `className` scopes the chrome + small-screen placement.
-        const popup = new maplibregl.Popup({ offset: 18, closeButton: true, maxWidth: '288px', className: 'property-map-popup' })
-          .setLngLat([t.lng, t.lat])
-          .setHTML(`
+        // Built LAZILY: eagerly constructing a Popup per marker parsed this
+        // HTML — including an <img> — for every property before any click
+        // (review P8). Only the html string is prepared here; the Popup is
+        // created on first focus (focusPropertyOnMap → entry.makePopup).
+        const popupHtml = `
           <div class="property-popup">
             <div class="property-popup__media">
               <img class="property-popup__image" src="${safeImageUrl(t.image)}" alt="Foto: ${P.escapeHtml(t.buildingName)}" loading="lazy" decoding="async" width="288" height="112">
@@ -3508,10 +3619,16 @@ function initPropertiesMap(items) {
               <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>
               <a class="btn btn--filled btn--sm property-popup__cta" href="#/properties/${t.id}">Details öffnen ${P.icon('arrowRight')}</a>
             </div>
-          </div>`);
-        // Clear the active-pin highlight when the panel is dismissed (X button
-        // or click on empty map).
-        popup.on('close', () => el.classList.remove('property-marker--active'));
+          </div>`;
+        const makePopup = () => {
+          const popup = new maplibregl.Popup({ offset: 18, closeButton: true, maxWidth: '288px', className: 'property-map-popup' })
+            .setLngLat([t.lng, t.lat])
+            .setHTML(popupHtml);
+          // Clear the active-pin highlight when the panel is dismissed (X
+          // button or click on empty map).
+          popup.on('close', () => el.classList.remove('property-marker--active'));
+          return popup;
+        };
         const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([t.lng, t.lat]).addTo(map);
         // Marker.addTo() stamps the generic locale string ('Marker.Title')
@@ -3519,12 +3636,88 @@ function initPropertiesMap(items) {
         // every pin would announce identically. Re-set AFTER addTo so each
         // pin keeps its distinguishing building name (A11Y-017).
         el.setAttribute('aria-label', t.buildingName);
-        _propertiesMarkers.push({ id: t.id, marker, el, popup });
+        // Born hidden — syncClusterMarkers below reveals exactly the pins
+        // whose points are currently unclustered (prevents a flash of the
+        // full marker set before the first cluster pass).
+        el.style.display = 'none';
+        // `popup: null` until first focus — every consumer null-checks before
+        // calling remove()/isOpen(); focusPropertyOnMap creates it (review P8).
+        _propertiesMarkers.push({ id: t.id, marker, el, popup: null, makePopup });
         bounds.extend([t.lng, t.lat]);
       });
       if (_propertiesMarkers.length > 0) {
         map.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 0 });
       }
+
+      // ── Marker clustering ──────────────────────────────────────────────
+      // Pattern ported from the sister service-portal (js/map/
+      // buildings-map.js): a clustered GeoJSON source drives navy cluster
+      // circles + count glyphs on the canvas, while the CD-styled DOM
+      // markers stay for UNclustered points and are shown/hidden in sync
+      // with the cluster state. Keeps the map legible AND cheap once the
+      // portfolio grows past a few dozen pins (BBL-wide roles).
+      const clusterFC = (list) => ({
+        type: 'FeatureCollection',
+        features: list
+          .filter(x => typeof x.lat === 'number' && typeof x.lng === 'number')
+          .map(x => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [x.lng, x.lat] }, properties: { id: x.id } })),
+      });
+      map.addSource('properties', { type: 'geojson', data: clusterFC(items), cluster: true, clusterMaxZoom: 10, clusterRadius: 46 });
+      map.addLayer({
+        id: 'clusters', type: 'circle', source: 'properties', filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': cdColor('--color-secondary-600'), 'circle-opacity': 0.85,
+          'circle-stroke-color': cdColor('--color-white'), 'circle-stroke-width': 2,
+          'circle-radius': ['step', ['get', 'point_count'], 16, 3, 20, 6, 26, 10, 32],
+        },
+      });
+      // Count glyphs must come from a font the basemap style's glyph endpoint
+      // actually serves — reuse the first font stack the loaded style declares
+      // instead of hardcoding one that may 404.
+      const styleFont = (map.getStyle().layers.find(l => l.layout && l.layout['text-font']) || { layout: {} })
+        .layout['text-font'] || ['Open Sans Regular'];
+      map.addLayer({
+        id: 'cluster-count', type: 'symbol', source: 'properties', filter: ['has', 'point_count'],
+        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': styleFont, 'text-size': 12, 'text-allow-overlap': true },
+        paint: { 'text-color': cdColor('--color-white') },
+      });
+      // DOM markers ↔ cluster sync: a pin is visible only while its point is
+      // currently unclustered in the (possibly filtered) source.
+      const syncClusterMarkers = () => {
+        if (!map.getSource('properties') || !map.isSourceLoaded('properties')) return;
+        const unclustered = new Set(
+          map.querySourceFeatures('properties', { filter: ['!', ['has', 'point_count']] })
+            .map(f => f.properties.id));
+        _propertiesMarkers.forEach(m => { m.el.style.display = unclustered.has(m.id) ? '' : 'none'; });
+      };
+      map.on('moveend', syncClusterMarkers);
+      map.on('zoomend', syncClusterMarkers);
+      map.on('sourcedata', (e) => { if (e.sourceId === 'properties' && map.isSourceLoaded('properties')) syncClusterMarkers(); });
+      // In-place filtering (live search / tree selection while on the map
+      // view) re-feeds the source, so clusters aggregate only the filtered
+      // set; pin visibility follows via the sourcedata sync above.
+      _propertiesMapApplyFilter = (list) => {
+        const src = map.getSource('properties');
+        if (!src) return;
+        const keep = new Set(list.map(x => x.id));
+        src.setData(clusterFC(list));
+        _propertiesMarkers.forEach(m => {
+          if (!keep.has(m.id)) { m.el.style.display = 'none'; if (m.popup) m.popup.remove(); }
+        });
+      };
+      // Cluster click → leaves-first navigation (see navigateCluster above).
+      map.on('click', 'clusters', (e) => {
+        const f = map.queryRenderedFeatures(e.point, { layers: ['clusters'] })[0];
+        if (!f) return;
+        navigateCluster({
+          source: map.getSource('properties'), clusterId: f.properties.cluster_id, feature: f, map,
+          LngLatBounds: maplibregl.LngLatBounds,
+          isCurrent: () => _propertiesMap === map,
+          onFailure: (details) => console.warn('MapLibre cluster navigation failed', details),
+        });
+      });
+      map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
       // The buildingId labels turn into overlapping noise at the
       // Switzerland-wide overview, so reveal them only once the user has
       // zoomed in past LABEL_MIN_ZOOM. A single class toggle on the
@@ -3564,10 +3757,12 @@ function initPropertiesMap(items) {
 function focusPropertyOnMap(id) {
   const entry = _propertiesMarkers.find(m => m.id === id);
   if (!entry || !_propertiesMap) return;
+  // First focus of this marker: create its popup now (lazy — review P8).
+  if (!entry.popup && entry.makePopup) entry.popup = entry.makePopup();
   // One active marker + one open info panel at a time: clear the others.
   _propertiesMarkers.forEach(m => {
     m.el.classList.remove('property-marker--active');
-    if (m !== entry) m.popup.remove();
+    if (m !== entry && m.popup) m.popup.remove();
   });
   entry.el.classList.add('property-marker--active');
   const lngLat = entry.marker.getLngLat();
@@ -3661,6 +3856,10 @@ function openImageGallery(t, startIndex = 0) {
   const list = t.gallery;
   if (!Array.isArray(list) || !list.length) return;
   const opener = document.activeElement;
+  // syncHeader() rebuilds the hero mosaic per upload/delete, detaching the
+  // opener — remember its tile index so close() can refocus the REBUILT
+  // equivalent instead of a dead node (review B15).
+  const openerIndex = opener && opener.getAttribute && opener.getAttribute('data-gallery-index');
   let idx = Math.max(0, Math.min(list.length - 1, startIndex));
 
   const backdrop = document.createElement('div');
@@ -3787,11 +3986,21 @@ function openImageGallery(t, startIndex = 0) {
   }
 
   function close() {
+    unregisterOverlay();
     document.removeEventListener('keydown', onKeydown, true);
     backdrop.remove();
     document.body.classList.remove('docviewer-open');
-    if (opener && typeof opener.focus === 'function') { try { opener.focus(); } catch {} }
+    // The original opener may have been detached by syncHeader()'s mosaic
+    // rebuild — fall back to the rebuilt tile at the same index, then to any
+    // gallery trigger (review B15).
+    const target = (opener && opener.isConnected)
+      ? opener
+      : document.querySelector(`[data-gallery-open][data-gallery-index="${openerIndex}"]`)
+        || document.querySelector('[data-gallery-open]');
+    if (target) try { target.focus(); } catch {}
   }
+  // Route changes close the gallery through the shared registry (review B3).
+  const unregisterOverlay = registerOverlay(close);
 
   function onKeydown(e) {
     const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('textarea, input');
@@ -3935,11 +4144,12 @@ function propertyDetailScaffold(t, ctx, activeTab, panelHtml) {
   `;
 }
 
-async function renderPropertyDetail({ id }) {
+async function renderPropertyDetail({ id }, gen) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
-  if (!t) { document.getElementById('page-body').innerHTML = `<div class="container section"><p>${P.t('prop.notFound')}</p></div>`; return; }
+  if (!t) { renderNotFound(P.t('prop.notFound'), { activeNav: 'properties' }); return; }
   await P.loadSpatialData('data/');
+  if (gen !== undefined && gen !== _routeGen) return;   // navigated away while loading
   shell({ activeNav: 'properties', breadcrumb: [
     { href: '#/properties', label: P.t('nav.properties') },
     { label: t.buildingName }
@@ -4100,10 +4310,10 @@ function propertyAside(t) {
       <div class="property-aside__card">
         <h2 class="property-aside__title">${P.t('prop.actions')}</h2>
         <div class="property-aside__actions">
-          <a href="#/repair?building=${t.buildingId}" class="btn btn--bare">${P.t('prop.actionRepair')}</a>
+          <a href="#/repair?building=${encodeURIComponent(t.buildingId)}" class="btn btn--bare">${P.t('prop.actionRepair')}</a>
           <a href="#/wizard/1" class="btn btn--bare">${P.t('prop.actionRequest')}</a>
-          <a href="#/moves?building=${t.buildingId}" class="btn btn--bare">${P.t('prop.actionMove')}</a>
-          <a href="#/cleaning?building=${t.buildingId}" class="btn btn--bare">${P.t('prop.actionCleaning')}</a>
+          <a href="#/moves?building=${encodeURIComponent(t.buildingId)}" class="btn btn--bare">${P.t('prop.actionMove')}</a>
+          <a href="#/cleaning?building=${encodeURIComponent(t.buildingId)}" class="btn btn--bare">${P.t('prop.actionCleaning')}</a>
         </div>
       </div>
       <div class="property-aside__card">
@@ -4253,9 +4463,11 @@ function propertyFloorsPanel(t, { floorKpis, userVe, userDep }) {
               </thead>
               <tbody>
                 ${floorKpis.map(f => `
-                  <tr onclick="location.hash='#/properties/${t.id}/floors/${f.slug}';">
+                  <!-- escapeJs/escapeHtml on the ids: interpolated into a JS
+                       string in an onclick and into an href (review m2). -->
+                  <tr onclick="location.hash='#/properties/${P.escapeJs(t.id)}/floors/${P.escapeJs(f.slug)}';">
                     <td>
-                      <a href="#/properties/${t.id}/floors/${f.slug}"><strong>${P.escapeHtml(f.name)}</strong></a>
+                      <a href="#/properties/${P.escapeHtml(t.id)}/floors/${P.escapeHtml(f.slug)}"><strong>${P.escapeHtml(f.name)}</strong></a>
                       ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
                     </td>
                     <td class="floor-list__num">${f.roomCount}</td>
@@ -4314,40 +4526,21 @@ function propertyDocumentsPanel(t, { linkedDocs }) {
     </div>`;
 }
 
-// Same roving-tabindex contract as the Vorgang detail tabs (A11Y-016): arrow
-// keys move between tabs, the panel is re-rendered in place, and the URL keeps
-// `?tab=` so the state survives a reload or a shared link.
+// Shared roving-tabindex wiring (lib.js wireTabs, A11Y-016 / review M-TABS):
+// arrow keys move between tabs, the panel is re-rendered in place, and the
+// URL keeps `?tab=` (+ `lang` — the router's source of truth for language,
+// see caseTabHash) so the state survives a reload or a shared link.
+function propertyTabHash(propertyId, key) {
+  const current = parseHashQuery(location.hash);
+  const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
+    .filter(Boolean).join('&');
+  return `#/properties/${propertyId}` + (qs ? '?' + qs : '');
+}
 function wirePropertyTabs(t, ctx) {
-  const tabs = Array.from(document.querySelectorAll('.property-tabs [role="tab"]'));
-  const panel = document.getElementById('detailTab');
-  if (!tabs.length || !panel) return;
-  const select = (next) => {
-    const key = next.getAttribute('data-tab');
-    tabs.forEach(x => {
-      const isActive = x === next;
-      x.classList.toggle('tab--active', isActive);
-      x.setAttribute('aria-selected', isActive ? 'true' : 'false');
-      x.setAttribute('tabindex', isActive ? '0' : '-1');
-    });
-    panel.setAttribute('aria-labelledby', 'tab-' + key);
-    panel.innerHTML = renderPropertyTab(t, key, ctx);
-    next.focus();
-    // Keep `lang` in the URL: the router treats it as the source of truth, so
-    // dropping it here would make a link copied off an inner tab resolve in
-    // whatever language the next reader has stored rather than the one shown.
-    const current = parseHashQuery(location.hash);
-    const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
-      .filter(Boolean).join('&');
-    history.replaceState(null, '', `#/properties/${t.id}` + (qs ? '?' + qs : ''));
-  };
-  tabs.forEach((tab, i) => {
-    tab.addEventListener('click', () => select(tab));
-    tab.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select(tabs[(i + 1) % tabs.length]); }
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select(tabs[(i - 1 + tabs.length) % tabs.length]); }
-      else if (e.key === 'Home') { e.preventDefault(); select(tabs[0]); }
-      else if (e.key === 'End') { e.preventDefault(); select(tabs[tabs.length - 1]); }
-    });
+  wireTabs({
+    rootSel: '.property-tabs',
+    render: (key) => renderPropertyTab(t, key, ctx),
+    hashFor: (key) => propertyTabHash(t.id, key),
   });
 }
 
@@ -4573,11 +4766,12 @@ const USETYPE_FILL = {
   Lab:           cdColor('--color-floor-special'),
 };
 
-async function renderFloorDetail({ id, floorSlug }) {
+async function renderFloorDetail({ id, floorSlug }, gen) {
   if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
-  if (!t) { document.getElementById('page-body').innerHTML = '<div class="container section"><p>Liegenschaft nicht gefunden.</p></div>'; return; }
+  if (!t) { renderNotFound('Liegenschaft nicht gefunden.', { activeNav: 'properties' }); return; }
   await P.loadSpatialData('data/');
+  if (gen !== undefined && gen !== _routeGen) return;   // navigated away while loading
 
   const buildingFloors = P.state.floors
     .filter(f => f.buildingId === t.buildingId)
@@ -4667,14 +4861,13 @@ async function renderFloorDetail({ id, floorSlug }) {
   // Tabs on this route navigate back to the property URL (the panel here is
   // the floor viewer, not an in-place-switchable table) — the Geschosse tab
   // itself included, which doubles as a second path back to the floor table.
-  document.querySelectorAll('.property-tabs [role="tab"]').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const key = tab.getAttribute('data-tab');
-      const lang = parseHashQuery(location.hash).lang;
-      const qs = [key === 'uebersicht' ? '' : `tab=${key}`, lang ? `lang=${lang}` : '']
-        .filter(Boolean).join('&');
-      P.navigate(`#/properties/${t.id}` + (qs ? '?' + qs : ''));
-    });
+  // Shared wiring in navigate mode (review M-TABS) also brings the roving
+  // Arrow/Home/End pattern here — the inactive tabindex="-1" tabs were
+  // keyboard-unreachable with the former click-only binding (review B16).
+  wireTabs({
+    rootSel: '.property-tabs',
+    navigate: true,
+    hashFor: (key) => propertyTabHash(t.id, key),
   });
 
   // Print scope: only while an actual floor plan is on screen may the print
@@ -5115,6 +5308,11 @@ function documentLinkedLabel(d) {
   return ref.entityId;
 }
 
+// Gallery preview memo: docPageHTML(d, 1, 1) is deterministic per document id
+// (docHash-seeded), yet the gallery re-built 25 full 760px sheet templates on
+// every filter keystroke / sort / page change (review P1b).
+const _docPreviewCache = new Map();
+
 function renderDownloads() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'downloads', breadcrumb: [{ label: P.t('nav.downloads') }] });
@@ -5129,7 +5327,8 @@ function renderDownloads() {
   docState.types     = (initial.get('type')     || '').split(',').filter(Boolean);
   docState.buildings = (initial.get('building') || '').split(',').filter(Boolean);
   docState.q        = initial.get('q')        || '';
-  docState.page     = parseInt(initial.get('page') || '1', 10);
+  // Clamp like every other page parse — `?page=abc` yielded NaN (review B11).
+  docState.page     = Math.max(1, parseInt(initial.get('page') || '1', 10) || 1);
   docState.sort     = ['date', 'title', 'doctype'].includes(initial.get('sort')) ? initial.get('sort') : 'date';
   docState.view     = initial.get('view') === 'gallery' ? 'gallery' : 'list';
   docState.sidebar  = initial.get('sb') !== '0';
@@ -5209,7 +5408,9 @@ function renderDownloads() {
             </fieldset>
           </aside>
           <div class="pf-main">
-            <div class="filter-pills" id="docFilterPills" aria-label="Aktive Filter" hidden></div>
+            <!-- Mount only — filterPills() (catalogue-bar.js) renders the
+                 .filter-pills row itself, review M-PILLS. -->
+            <div id="docFilterPills" hidden></div>
 
             <div class="docs-table-wrap" id="docsListWrap">
               <table class="table table--zebra table--documents">
@@ -5269,23 +5470,11 @@ function renderDownloads() {
     if (docState.q) {
       active.push({ key: 'q', label: 'Suche', value: docState.q });
     }
-    if (active.length === 0) {
-      pills.hidden = true;
-      pills.innerHTML = '';
-      return;
-    }
-    pills.hidden = false;
-    pills.innerHTML = active.map(f => `
-      <span class="filter-pill">
-        <span class="filter-pill__label">${f.label}:</span>
-        <span class="filter-pill__value">${P.escapeHtml(f.value)}</span>
-        <button class="filter-pill__remove" type="button"
-                aria-label="Filter „${P.escapeHtml(f.label)}: ${P.escapeHtml(f.value)}" entfernen"
-                data-clear="${f.key}">
-          ${P.icon('x', 'filter-pill__remove-icon')}
-        </button>
-      </span>
-    `).join('') + `<button class="filter-pills__clear-all" type="button" data-clear="all">Alle Filter zurücksetzen</button>`;
+    // Shared pill markup (catalogue-bar.js, review M-PILLS) in its in-page
+    // flavour: <button data-clear> controls, delegated below — clearing a
+    // pill writes docState, which only this page knows.
+    pills.hidden = active.length === 0;
+    pills.innerHTML = filterPills({ pills: active, clearAllLabel: 'Alle Filter zurücksetzen' });
     pills.querySelectorAll('[data-clear]').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.getAttribute('data-clear');
@@ -5332,27 +5521,28 @@ function renderDownloads() {
     const galleryWrap = document.getElementById('docsGalleryWrap');
     listWrap.hidden = docState.view !== 'list';
     galleryWrap.hidden = docState.view !== 'gallery';
-    document.querySelectorAll('.view-switch__btn').forEach(b => {
-      const on = b.dataset.view === docState.view;
-      b.setAttribute('aria-pressed', String(on));
-      b.classList.toggle('view-switch__btn--active', on);
-    });
+    setActiveView('docs', docState.view);
     if (docState.view === 'gallery') {
       galleryWrap.innerHTML = slice.length === 0
         ? `<p class="table-empty">Keine Treffer für die aktuellen Filter.</p>`
-        : slice.map(d => `
+        : slice.map(d => {
+          // The preview sheet is deterministic per document (docHash-seeded
+          // mock), so build it once and reuse across re-renders (review P1b).
+          let html = _docPreviewCache.get(d.id);
+          if (!html) { html = docPageHTML(d, 1, 1); _docPreviewCache.set(d.id, html); }
+          return `
           <button type="button" class="doc-card" data-doc-id="${P.escapeHtml(d.id)}">
-            <span class="doc-card__preview" aria-hidden="true">${docPageHTML(d, 1, 1)}</span>
+            <span class="doc-card__preview" aria-hidden="true">${html}</span>
             <span class="doc-card__body">
               <span class="badge badge--info">${P.escapeHtml(docTypeLabel(d.type))}</span>
               <span class="h4 card__title">${P.escapeHtml(d.title)}</span>
-              <span class="doc-card__meta">${P.escapeHtml([documentLinkedLabel(d), d.format, d.size, d.issuedAt]
+              <span class="doc-card__meta">${P.escapeHtml([documentLinkedLabel(d), d.format, d.size, d.issuedAt ? P.formatDate(d.issuedAt) : '']
                 .filter(Boolean).join(' · '))}</span>
             </span>
-          </button>`).join('');
-      galleryWrap.querySelectorAll('.doc-card').forEach(card => {
-        card.addEventListener('click', () => window.t3lite.openDocViewer(card.getAttribute('data-doc-id')));
-      });
+          </button>`;
+        }).join('');
+      // Card clicks are handled by ONE delegated listener on #docsGalleryWrap,
+      // bound once in renderDownloads (review P13).
       // The docpage template is a fixed 760px sheet; zoom to fit the card
       // width exactly (edge to edge, cropped by the preview's aspect box).
       const preview = galleryWrap.querySelector('.doc-card__preview');
@@ -5364,7 +5554,7 @@ function renderDownloads() {
     if (docState.view !== 'list') {
       tbody.innerHTML = '';
     } else if (slice.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Keine Treffer für die aktuellen Filter.</td></tr>`;
+      tbody.innerHTML = emptyRow(8, 'Keine Treffer für die aktuellen Filter.');
     } else {
       tbody.innerHTML = slice.map(d => `
         <tr>
@@ -5379,7 +5569,9 @@ function renderDownloads() {
           <td><code>${P.escapeHtml(d.format || '')}</code></td>
           <td>${P.escapeHtml(d.size || '')}</td>
           <td>${P.escapeHtml((d.languages || []).join(' · ').toUpperCase())}</td>
-          <td>${P.escapeHtml(d.issuedAt || '')}</td>
+          <!-- Render the ISO date through formatDate, matching the property
+               Dokumente panel (review B23). -->
+          <td>${d.issuedAt ? P.formatDate(d.issuedAt) : '—'}</td>
           <td class="docs-table__action">
             <a href="#" class="docs-table__download" aria-label="Herunterladen: ${P.escapeHtml(d.title)}"
                onclick="window.portal.toast('Download simuliert: ${P.escapeJs(d.title)}'); return false;">${P.icon('download')}</a>
@@ -5401,21 +5593,12 @@ function renderDownloads() {
       inputId: 'docPaginationInput',
       nav: { kind: 'button' },
     });
-    pag.querySelectorAll('button[data-step]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        docState.page = Math.max(1, Math.min(totalPages, docState.page + parseInt(btn.dataset.step, 10)));
-        applyDocState();
-      });
-    });
-    const docPageInput = document.getElementById('docPaginationInput');
-    const goPage = () => {
-      const v = Math.max(1, Math.min(totalPages, parseInt(docPageInput.value, 10) || 1));
-      docState.page = v;
-      applyDocState();
-    };
-    docPageInput.addEventListener('change', goPage);
-    docPageInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); goPage(); }
+    // Shared clamp + bind (review M-PAGING): in-place mode drives the input
+    // AND the data-step chevrons; the clamp comes from the input's max
+    // attribute, which the shell above just stamped with this render's
+    // totalPages.
+    wirePaginationInput('docPaginationInput', {
+      onPage: (p) => { docState.page = p; applyDocState(); },
     });
 
     // In-page filtering re-renders neither the bar nor its badge — sync it.
@@ -5433,26 +5616,24 @@ function renderDownloads() {
     if (location.hash !== newHash) history.replaceState(null, '', newHash);
   }
 
-  // This page filters/sorts/switches views IN PAGE (no hashFor): the bar's
-  // built-in bindings are hash-driven, so sort, view switch and the filter
-  // toggle are wired manually below.
-  wireCatalogueBar({ id: 'docs' });
+  // This page filters/sorts/switches views IN PAGE (no hashFor): the view
+  // switch goes through the bar's `onView` seam (review M-VIEWSWITCH), the
+  // remaining hash-driven bindings (sort, filter toggle) are wired manually
+  // below.
+  wireCatalogueBar({
+    id: 'docs',
+    onView: (view) => {
+      docState.view = view === 'gallery' ? 'gallery' : 'list';
+      docState.page = 1; applyDocState();
+    },
+  });
 
   // Filter button = disclosure of the filter sidebar (hidden by default).
-  const docsFilterBtn = document.getElementById('docs-filter');
-  if (docsFilterBtn) docsFilterBtn.addEventListener('click', () => {
-    const layout = document.querySelector('.pf-layout');
-    docState.sidebar = layout.classList.toggle('pf-layout--sidebar-hidden') === false;
-    docsFilterBtn.setAttribute('aria-expanded', String(docState.sidebar));
-    docsFilterBtn.classList.toggle('catbar__filter--open', docState.sidebar);
-    applyDocState();
-  });
-  // Sidebar-head X — delegates to the toggle (one code path), focus returns
-  // to the control that re-opens the panel.
-  const docsSidebarClose = document.querySelector('.pf-sidebar__close');
-  if (docsSidebarClose && docsFilterBtn) docsSidebarClose.addEventListener('click', () => {
-    docsFilterBtn.click();
-    docsFilterBtn.focus();
+  // Shared toggle + sidebar-X mechanics live in catalogue-bar.js (review
+  // M-SIDEBAR); the visibility persists through docState → the URL.
+  wireSidebarToggle({
+    buttonId: 'docs-filter',
+    onToggle: (open) => { docState.sidebar = open; applyDocState(); },
   });
 
   const docsSort = document.getElementById('docs-sort');
@@ -5460,21 +5641,11 @@ function renderDownloads() {
     docState.sort = docsSort.value; docState.page = 1; applyDocState();
   });
 
-  document.querySelectorAll('.view-switch__btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      docState.view = btn.dataset.view === 'gallery' ? 'gallery' : 'list';
-      docState.page = 1; applyDocState();
-    });
-  });
-
-  // Dokumenttyp checkbox group (multi-value).
-  document.querySelectorAll('input[name="docs-type"]').forEach(box => {
-    box.addEventListener('change', () => {
-      docState.types = box.checked
-        ? [...docState.types, box.value]
-        : docState.types.filter(v => v !== box.value);
-      docState.page = 1; applyDocState();
-    });
+  // Dokumenttyp checkbox group (multi-value) — shared facet wiring in
+  // catalogue-bar.js (review M-CHECKGROUP).
+  const typeGroup = wireCheckboxGroup('docs-type', {
+    get: () => docState.types,
+    set: (next) => { docState.types = next; docState.page = 1; applyDocState(); },
   });
 
   // Liegenschaften checkbox group (multi-value). The CD multiselect
@@ -5482,27 +5653,33 @@ function renderDownloads() {
   // and parked — a second search input inside the filter sidebar competed
   // with the bar's main search. Revisit when the building list outgrows a
   // checkbox column.
-  document.querySelectorAll('input[name="docs-building"]').forEach(box => {
-    box.addEventListener('change', () => {
-      docState.buildings = box.checked
-        ? [...docState.buildings, box.value]
-        : docState.buildings.filter(v => v !== box.value);
-      docState.page = 1; applyDocState();
-    });
+  const buildingGroup = wireCheckboxGroup('docs-building', {
+    get: () => docState.buildings,
+    set: (next) => { docState.buildings = next; docState.page = 1; applyDocState(); },
   });
 
   // Re-sync panel controls after a pill removal (they aren't re-rendered).
   function syncPanelControls() {
-    document.querySelectorAll('input[name="docs-type"]').forEach(box => {
-      box.checked = docState.types.includes(box.value);
-    });
-    document.querySelectorAll('input[name="docs-building"]').forEach(box => {
-      box.checked = docState.buildings.includes(box.value);
-    });
+    typeGroup.sync();
+    buildingGroup.sync();
   }
 
+  // 150 ms debounce — gallery view re-renders 25 full docpage templates per
+  // applyDocState() call, which stuttered when run synchronously on every
+  // keystroke (review P1a).
+  let docsQTimer = null;
   document.getElementById('docs-q').addEventListener('input', e => {
-    docState.q = e.target.value; docState.page = 1; applyDocState();
+    docState.q = e.target.value; docState.page = 1;
+    clearTimeout(docsQTimer);
+    docsQTimer = setTimeout(applyDocState, 150);
+  });
+
+  // ONE delegated click listener for the gallery cards, bound once per route
+  // render — applyDocState() used to re-attach a listener per card on every
+  // filter/sort/page change (review P13).
+  document.getElementById('docsGalleryWrap').addEventListener('click', (e) => {
+    const card = e.target.closest('.doc-card');
+    if (card) window.t3lite.openDocViewer(card.getAttribute('data-doc-id'));
   });
 
   applyDocState();
@@ -5510,7 +5687,12 @@ function renderDownloads() {
   if (sharedDocId && (P.state.documents || []).some(d => d.id === sharedDocId)) {
     // Defer so the table (with its `data-doc-id` triggers) exists — the bridge
     // builds the viewer's prev/next context from it.
-    setTimeout(() => window.t3lite.openDocViewer(sharedDocId), 0);
+    setTimeout(() => {
+      // The user may have navigated away within the same tick's queue —
+      // never pop the viewer over another route (review views-22).
+      if (!location.hash.startsWith('#/downloads')) return;
+      window.t3lite.openDocViewer(sharedDocId);
+    }, 0);
   }
 }
 
@@ -5555,10 +5737,6 @@ function renderRepairQuickForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'home', breadcrumb: [{ label: P.t('bc.repair') }] });
 
-  const params = new URLSearchParams((location.hash.split('?')[1] || ''));
-  const presetBuildingId = params.get('building');
-  const presetTenancy = P.state.tenancies.find(t => t.buildingId === presetBuildingId);
-
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -5570,7 +5748,7 @@ function renderRepairQuickForm() {
           <div class="form-field">
             <label class="form-field__label" for="repairBuilding">Liegenschaft <span class="form-field__required">*</span></label>
             <select class="form-field__select" id="repairBuilding" name="building">
-              ${tenancyOptions(presetTenancy?.id)}
+              ${tenancyOptions(presetTenancyId())}
             </select>
           </div>
           <div class="form-field">
@@ -5774,7 +5952,11 @@ function renderProfile() {
             <dt>E-Mail</dt><dd>${P.escapeHtml(u.email)}</dd>
             <dt>eIAM-Subjekt-ID</dt><dd><code>${u.id}</code></dd>
             <dt>Verwaltungs­einheit</dt><dd>${P.escapeHtml(u.ve)}${u.dep ? ' / ' + P.escapeHtml(u.dep) : ''}</dd>
-            <dt>Aktive Rolle</dt><dd><strong>${P.roleLabel(u.activeRole)}</strong></dd>
+            <!-- The role menu previously had no entry point in any view —
+                 openRoleMenu was only reachable from code (review views-18). -->
+            <dt>Aktive Rolle</dt><dd><strong>${P.roleLabel(u.activeRole)}</strong>${u.roles.length > 1
+              ? ` <button class="btn btn--outline btn--sm" type="button" onclick="window.portal.openRoleMenu()">Rolle wechseln</button>`
+              : ''}</dd>
             <dt>Weitere Rollen</dt><dd>${u.roles.filter(r => r !== u.activeRole).map(P.roleLabel).join(' · ') || '—'}</dd>
           </dl>
           <p class="profile-page__note">
@@ -6066,12 +6248,15 @@ function openDocumentViewer(doc, siblings) {
   }
 
   function close() {
+    unregisterOverlay();
     closeShare();
     document.removeEventListener('keydown', onKeydown, true);
     backdrop.remove();
     document.body.classList.remove('docviewer-open');
     if (opener && typeof opener.focus === 'function') { try { opener.focus(); } catch {} }
   }
+  // Route changes close the viewer through the shared registry (review B3).
+  const unregisterOverlay = registerOverlay(close);
 
   // ── Share popover (Confluence-style "share this document") ──────────────
   // A light popover anchored under the share button, offering a deep link
@@ -6265,21 +6450,6 @@ function openDocumentViewer(doc, siblings) {
     stage.addEventListener('pointerup', endPan);
     stage.addEventListener('pointercancel', endPan);
 
-    // Page indicator follows the page nearest the viewport centre. The viewer
-    // is the scroller now, so measure each page against the window.
-    let raf = null;
-    backdrop.addEventListener('scroll', () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = null;
-        const ps = backdrop.querySelectorAll('.docpage');
-        const mid = window.innerHeight / 2;
-        let idx = 0;
-        ps.forEach((p, i) => { if (p.getBoundingClientRect().top <= mid) idx = i; });
-        indicator.textContent = `Seite ${idx + 1} / ${total}`;
-      });
-    });
-
     backdrop.querySelector('[data-act="close"]').addEventListener('click', close);
     backdrop.querySelector('[data-act="share"]').addEventListener('click', () => {
       shareEl() ? closeShare() : openShare(backdrop.querySelector('[data-act="share"]'));
@@ -6300,6 +6470,25 @@ function openDocumentViewer(doc, siblings) {
     if (prevBtn) prevBtn.addEventListener('click', () => go(-1));
     if (nextBtn) nextBtn.addEventListener('click', () => go(1));
   }
+
+  // Page indicator follows the page nearest the viewport centre. The viewer
+  // is the scroller now, so measure each page against the window. Bound ONCE
+  // per viewer open — mount() re-runs per document switch and stacked a
+  // fresh listener each time (review B24); the handler re-queries `.docpage`
+  // and reads the mount-refreshed `indicator`/`total` refs each run anyway.
+  let raf = null;
+  backdrop.addEventListener('scroll', () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      if (!indicator) return;
+      const ps = backdrop.querySelectorAll('.docpage');
+      const mid = window.innerHeight / 2;
+      let idx = 0;
+      ps.forEach((p, i) => { if (p.getBoundingClientRect().top <= mid) idx = i; });
+      indicator.textContent = `Seite ${idx + 1} / ${total}`;
+    });
+  });
 
   document.addEventListener('keydown', onKeydown, true);
   mount();
