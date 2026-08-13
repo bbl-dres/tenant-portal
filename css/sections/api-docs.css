@@ -1,0 +1,53 @@
+/* ==========================================================================
+   API-DOKUMENTATION (#/api-docs) — host styles around the standard
+   swagger-ui-dist interface.
+
+   Sources: ported from the sister service-portal
+   (css/apps/dataportal.css, swagger block), retokenised for this project
+   (--space-*, --btn-min-h, --color-focus). Swagger's own stylesheet loads
+   lazily from the CDN together with the bundle; these rules only adapt the
+   library to the portal: duplicate chrome off, CD Bund touch targets and
+   the portal's focus ring on.
+   ========================================================================== */
+
+/* Page header — the service-portal composition (h1, badge pills, lead) with
+   compact rhythm: pills hug the title, the lead follows one step below.
+   Title size matches the info pages' display ramp. */
+.api-docs__title {
+  font-size: var(--text-display);
+  letter-spacing: var(--tracking-tighter);
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--space-2sm);
+}
+.api-docs__badges { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0 0 var(--space-2sm); }
+
+/* The lead above carries --space-lg below; --space-md here totals ~40px to
+   Swagger's Servers panel — the service-portal's gap. */
+.swagger-host { margin-top: var(--space-md); }
+
+/* Portal chrome owns title, version and description (rendered above the
+   host by renderApiDocs) — Swagger's information container would duplicate
+   them. */
+.swagger-host .swagger-ui .information-container { display: none; }
+
+/* Tag and operation descriptions are single short sentences (less is more)
+   — drop Swagger's paragraph margins so they sit compactly beside the tag
+   name instead of adding a second line of air. */
+.swagger-host .swagger-ui .renderedMarkdown p { margin: 0; }
+
+/* CD Bund touch-target minimum (--btn-min-h: 44px) for the library's own
+   controls: expand arrows, Authorize, clear buttons. */
+.swagger-host .swagger-ui button { min-width: var(--btn-min-h); min-height: var(--btn-min-h); }
+.swagger-host .swagger-ui input:not([type="hidden"]),
+.swagger-host .swagger-ui select,
+.swagger-host .swagger-ui textarea { min-height: var(--btn-min-h); }
+
+/* The portal's focus ring (tokens.css :focus-visible) instead of Swagger's
+   box-shadow, which disappears against the operation blocks' tinted
+   backgrounds. !important beats swagger-ui.css's own focus reset. */
+.swagger-host .swagger-ui :is(button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-focus) !important;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+.swagger-host .swagger-ui :is(button, input, select, textarea):disabled { cursor: not-allowed; opacity: .55; }

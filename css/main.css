@@ -47,3 +47,6 @@
 @import url('sections/media-viewer.css');
 @import url('sections/property-detail.css');
 @import url('foundations/print.css');
+/* Appended after the baseline-verified order above: api-docs.css styles only
+   the new .swagger-host namespace, so the pre-split cascade is untouched. */
+@import url('sections/api-docs.css');

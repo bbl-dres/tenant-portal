@@ -51,6 +51,10 @@ figcaption {
   margin: 0 0 var(--space-2xl);
 }
 .section-intro--tight { margin-bottom: var(--space-lg); }
+/* Full container width — for leads that must span the content column, like
+   the API description above the Swagger host (parity with the sister
+   service-portal, whose .lead carries no measure cap). */
+.section-intro--full { max-width: none; }
 
 /* ── Content rhythm inside #page-body (route-rendered main content) ──────
    DS base list rhythm (designsystem/css/components/list.postcss:13-25):

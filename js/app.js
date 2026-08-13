@@ -359,7 +359,9 @@ init();
 // the originally requested hash resolves, so shareable deep links still
 // land on the intended page — now with an explicit login step instead of
 // the former silent auto-login.
-const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info', '#/news']);
+// #/api-docs is public like its footer neighbours (GitHub source, Webauftritt):
+// developer documentation about the prototype, not tenant data.
+const PUBLIC_HASHES = new Set(['', '#', '#/', '#/login', '#/info', '#/news', '#/api-docs']);
 
 // «Wissen und Hilfsmittel» is public as a whole, so prefixes are tested
 // rather than each topic route being listed — the page list lives in
@@ -495,6 +497,9 @@ function registerRoutes() {
   P.registerRoute('#/info/vorgaben',       renderInfoVorgaben);
   P.registerRoute('#/info/schulungen',     renderInfoSchulungen);
   P.registerRoute('#/search',              renderSearchResults);
+  // Mock-Swagger docs for the portal's REST API (public, linked from the
+  // footer's Prototyp column — same entry point as the sister service-portal).
+  P.registerRoute('#/api-docs',            renderApiDocs);
 }
 
 // ── GLOBAL SEARCH RESULTS ────────────────────────────────────────────────
@@ -6711,3 +6716,273 @@ window.t3lite = {
   }
 };
 
+
+// ── API-DOKUMENTATION (#/api-docs) ───────────────────────────────────────
+// Mock-Swagger docs for the portal's REST API, ported from the sister
+// service-portal (js/apps/api-docs.js). The compact specification lives in
+// data/api-specs.json and is converted to OpenAPI 3 at render time; the
+// standard swagger-ui-dist interface renders below the portal chrome and
+// loads lazily from the CDN like MapLibre (loadMapLibre above). Deep linking
+// stays off because Swagger anchors would overwrite the portal hash route;
+// «Try it out» also stays off because there is no live backend. Endpoints
+// with a `live` key show actual portal data in their 200 response example.
+const SWAGGER_VER = '5.17.14';
+let _swaggerReady = null;
+function loadSwaggerUI() {
+  if (_swaggerReady) return _swaggerReady;
+  _swaggerReady = new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = `https://unpkg.com/swagger-ui-dist@${SWAGGER_VER}/swagger-ui.css`;
+    css.integrity = 'sha384-wxLW6kwyHktdDGr6Pv1zgm/VGJh99lfUbzSn6HNHBENZlCN7W602k9VkGdxuFvPn';
+    css.crossOrigin = 'anonymous';
+    document.head.appendChild(css);
+    const s = document.createElement('script');
+    s.src = `https://unpkg.com/swagger-ui-dist@${SWAGGER_VER}/swagger-ui-bundle.js`;
+    s.integrity = 'sha384-wmyclcVGX/WhUkdkATwhaK1X1JtiNrr2EoYJ+diV3vj4v6OC5yCeSu+yW13SYJep';
+    s.crossOrigin = 'anonymous';
+    s.onload = () => resolve(window.SwaggerUIBundle);
+    // Reset on failure so a page reload can retry instead of caching the error.
+    s.onerror = () => { _swaggerReady = null; reject(new Error('swagger-ui-bundle.js nicht erreichbar')); };
+    document.head.appendChild(s);
+  });
+  return _swaggerReady;
+}
+
+// RFC 9457 (Problem Details): one shape for every error in the API, built
+// from the status code and the specification's own wording, so 13 resources
+// do not each invent an error body. `type` is a documentation URL per code,
+// which is what the RFC intends it for.
+const API_PROBLEM_TITLES = {
+  400: 'Ungültige Anfrage', 401: 'Nicht angemeldet', 403: 'Fehlende Berechtigung',
+  404: 'Nicht gefunden', 409: 'Konflikt', 412: 'Vorbedingung fehlgeschlagen',
+  422: 'Fachliche Validierung fehlgeschlagen', 428: 'Vorbedingung erforderlich',
+  429: 'Zu viele Anfragen', 500: 'Interner Fehler', 503: 'Dienst nicht verfügbar',
+};
+function apiProblemFor(code, desc, ep) {
+  const status = Number(code);
+  const problem = {
+    type: `https://api.bbl.admin.ch/problems/${status}`,
+    title: API_PROBLEM_TITLES[status] || desc,
+    status,
+    detail: desc,
+    instance: ep.path,
+  };
+  // A validation failure without field-level errors cannot be shown in a
+  // form, so the one code that needs more than a sentence carries the
+  // extension. The field mirrors the wizard's own validation vocabulary.
+  if (status === 422) {
+    problem.errors = [{ field: 'fte', code: 'out_of_range', message: 'Wert muss zwischen 1 und 2000 liegen' }];
+  }
+  return problem;
+}
+
+// Live examples read the same records the portal renders, so covered
+// endpoints show this prototype's actual data instead of an invented list.
+// Keys follow '<tag>.<endpoint>' from the specification's `live` property.
+// floors/spaces guard on length: their geojson loads lazily on the
+// floor-plan route only (review P7) — before that, the static example in
+// data/api-specs.json (copied from the same files) answers instead.
+function apiLiveExamples() {
+  const S = P.state;
+  const pick = (o, keys) => { const r = {}; if (o) for (const k of keys) r[k] = o[k]; return r; };
+  return {
+    'space-requests.list': () => S.spaceRequests.slice(0, 3).map(a => pick(a, ['spaceRequestId', 'requestType', 'status', 'submitterVe', 'buildingId', 'submittedAt'])),
+    'space-requests.one': () => { const a = S.spaceRequests[0]; return a ? { ...pick(a, ['spaceRequestId', 'requestType', 'pipelineVariant', 'status', 'submitterId', 'submitterVe', 'submitterDep', 'buildingId', 'submittedAt', 'fte', 'workstations', 'hnf2', 'gf']), naw: pick(a.naw, ['class', 'confidence']) } : undefined; },
+    'space-requests.history': () => ((S.spaceRequests[0] || {}).history || []).slice(0, 3),
+    'process-instances.list': () => S.processInstances.slice(0, 3).map(i => pick(i, ['instanceId', 'defId', 'title', 'status', 'updatedAt'])),
+    'process-instances.one': () => pick(S.processInstances[0], ['instanceId', 'defId', 'variant', 'payloadRef', 'title', 'requesterId', 'requesterVe', 'buildingId', 'status', 'createdAt', 'updatedAt', 'assignee']),
+    'process-definitions.list': () => S.processDefs.slice(0, 5).map(d => ({ defId: d.defId, name: d.name, serviceId: d.serviceId, variants: Object.keys(d.variants || {}) })),
+    'process-definitions.one': () => { const d = S.processDefs[0]; return d ? { defId: d.defId, name: d.name, serviceId: d.serviceId, payload: d.payload, variants: { standard: ((d.variants || {}).standard || []).slice(0, 3).map(s => pick(s, ['status', 'label', 'role', 'kind'])) } } : undefined; },
+    'buildings.list': () => S.buildings.slice(0, 3).map(b => pick(b, ['buildingId', 'name', 'street', 'houseNumber', 'postalCode', 'city', 'egid'])),
+    'buildings.one': () => pick(S.buildings[0], ['buildingId', 'name', 'street', 'houseNumber', 'postalCode', 'city', 'country', 'assetKey', 'egid']),
+    'buildings.floors': () => S.floors.length ? S.floors.slice(0, 3).map(f => pick(f, ['floorId', 'buildingId', 'name', 'levelNumber', 'areaGross', 'floorPlanDocumentId'])) : undefined,
+    'buildings.spaces': () => S.spaces.length ? S.spaces.slice(0, 3).map(s => pick(s, ['spaceId', 'floorId', 'buildingId', 'name', 'useType', 'area', 'capacity', 'isBookable', 'occupierVe', 'siaCategory'])) : undefined,
+    'buildings.tenancies': () => S.tenancies.slice(0, 2).map(x => pick(x, ['tenancyId', 've', 'dep', 'buildingId', 'buildingName', 'floorLabel'])),
+    'buildings.documents': () => S.documents.filter(d => (d.linkedTo || []).some(l => l.entityType === 'Building')).slice(0, 3).map(d => pick(d, ['documentId', 'type', 'title', 'format'])),
+    'floors.one': () => S.floors.length ? pick(S.floors[0], ['floorId', 'buildingId', 'name', 'levelNumber', 'areaGross', 'floorPlanDocumentId']) : undefined,
+    'spaces.one': () => S.spaces.length ? pick(S.spaces[0], ['spaceId', 'floorId', 'buildingId', 'name', 'useType', 'area', 'capacity', 'isBookable', 'occupierVe', 'occupierDep', 'siaCategory']) : undefined,
+    'tenancies.list': () => S.tenancies.slice(0, 3).map(x => pick(x, ['tenancyId', 've', 'dep', 'buildingId', 'buildingName', 'city', 'hnf2', 'workstations'])),
+    'tenancies.one': () => { const x = S.tenancies[0]; return x ? { ...pick(x, ['tenancyId', 've', 'dep', 'buildingId', 'buildingName', 'street', 'houseNumber', 'postalCode', 'city', 'hnf2', 'gf', 'workstations', 'leaseStart', 'leaseEnd', 'yearlyCost', 'openIssues']), contacts: x.contacts } : undefined; },
+    'documents.list': () => S.documents.slice(0, 3).map(d => pick(d, ['documentId', 'type', 'title', 'format', 'size', 'issuedAt'])),
+    'documents.one': () => pick(S.documents[0], ['documentId', 'type', 'title', 'linkedTo', 'format', 'size', 'languages', 'issuedAt', 'scanStatus']),
+    'downloads.list': () => { const d = S.downloads || {}; const trim = arr => (arr || []).slice(0, 2).map(x => pick(x, ['title', 'subtitle', 'type', 'format', 'size', 'date'])); return { documents: trim(d.documents), regulations: trim(d.regulations), strategies: trim(d.strategies), training: trim(d.training) }; },
+    'news.list': () => S.news.slice(0, 3).map(n => pick(n, ['newsId', 'type', 'date', 'title', 'source'])),
+    'news.one': () => pick(S.news[0], ['newsId', 'type', 'date', 'title', 'lead', 'source', 'responsible']),
+    'services.list': () => S.services.slice(0, 5).map(s => pick(s, ['serviceId', 'type', 'inMenu', 'target'])),
+    'users.list': () => S.users.slice(0, 3).map(u => pick(u, ['userId', 'name', 'email', 've', 'dep', 'roles'])),
+    'users.me': () => pick(S.user || S.users[0], ['userId', 'name', 'email', 've', 'dep', 'roles']),
+    'reference-data.one': () => { const r = S.referenceData || {}; return { nawClasses: (r.nawClasses || []).slice(0, 2), deskSharingFactor: r.deskSharingFactor, furnitureBudgetPerSqm: r.furnitureBudgetPerSqm, operatingCostCeilingPerSqmGf: r.operatingCostCeilingPerSqmGf, currency: r.currency, portfolioCategories: (r.portfolioCategories || []).slice(0, 3) }; },
+  };
+}
+
+// Convert the maintainable shorthand in data/api-specs.json to OpenAPI 3 at
+// render time. The source file stays authoritative; live examples override
+// the static ones where the portal has the data in memory.
+function apiSpecToOpenApi(spec) {
+  const LIVE = apiLiveExamples();
+  const exampleFor = (ep) => {
+    if (ep.live && LIVE[ep.live]) {
+      try { const v = LIVE[ep.live](); if (v !== undefined) return v; } catch { /* fall back to the static example */ }
+    }
+    return ep.example;   // Undefined means the endpoint has a description only.
+  };
+  const paths = {};
+  for (const r of spec.resources) {
+    for (const ep of r.endpoints) {
+      const op = {
+        tags: [r.label],
+        summary: ep.summary,
+        parameters: (ep.params || []).map(p => ({
+          name: p.name, in: p.in, required: !!p.required,
+          description: p.desc || '',
+          schema: { type: p.type === 'integer' ? 'integer' : 'string' },
+        })),
+        responses: {},
+      };
+      // Per-operation scopes: a write names the scope it needs, so «read» and
+      // «write» are visibly different permissions on the same resource.
+      if (ep.scopes && spec.scopes) op.security = [{ portalAuth: ep.scopes }];
+      if (ep.body) op.requestBody = { required: true, content: { 'application/json': { example: ep.body } } };
+      const codes = Object.entries(ep.responses || { 200: 'OK' });
+      for (const [code, desc] of codes) {
+        op.responses[code] = { description: desc };
+        // 4xx/5xx carry RFC 9457 problem+json, so Swagger shows the shape a
+        // client actually has to handle rather than a bare status line.
+        if (Number(code) >= 400) {
+          op.responses[code].content = { 'application/problem+json': { example: apiProblemFor(code, desc, ep) } };
+        }
+      }
+      // `responseHeaders`: { code: { name: description } }. Location on a 201
+      // and ETag on a read are the two halves of the optimistic-locking
+      // contract, and neither is expressible as a parameter.
+      for (const [code, headers] of Object.entries(ep.responseHeaders || {})) {
+        if (!op.responses[code]) continue;
+        op.responses[code].headers = Object.fromEntries(Object.entries(headers).map(([name, desc]) =>
+          [name, { description: desc, schema: { type: 'string' } }]));
+      }
+      // Attach the example to the first successful response code.
+      const okCode = codes[0] ? codes[0][0] : '200';
+      const example = exampleFor(ep);
+      if (example !== undefined) {
+        op.responses[okCode] = { ...op.responses[okCode], content: { 'application/json': { example } } };
+      }
+      (paths[ep.path] = paths[ep.path] || {})[ep.method.toLowerCase()] = op;
+    }
+  }
+  return {
+    openapi: '3.0.3',
+    info: { title: spec.title, version: spec.version, description: spec.description },
+    servers: [{ url: spec.baseUrl }],
+    tags: spec.resources.map(r => ({ name: r.label, description: r.description })),
+    // The specification's authentication note becomes an OAuth 2 security
+    // scheme (what eIAM actually speaks), so a reader can see that reading
+    // the portal and changing it are not the same permission.
+    components: spec.auth ? { securitySchemes: {
+      portalAuth: spec.scopes
+        ? { type: 'oauth2', description: spec.auth, flows: { clientCredentials: {
+            tokenUrl: spec.tokenUrl || `${spec.baseUrl}/oauth2/token`, scopes: spec.scopes } } }
+        : { type: 'apiKey', in: 'header', name: 'Authorization', description: spec.auth },
+    } } : undefined,
+    security: spec.auth ? [{ portalAuth: spec.scopes ? [Object.keys(spec.scopes)[0]] : [] }] : undefined,
+    paths,
+  };
+}
+
+// Swagger adds parts of its tree after onComplete and creates more controls
+// when an operation expands. This adapter only supplies names and language;
+// structure and behaviour remain owned by the library.
+function enhanceSwagger(host) {
+  host.setAttribute('lang', 'en');
+  host.querySelectorAll('.authorization__btn').forEach(button => {
+    button.setAttribute('aria-label', 'Authorize API access');
+  });
+  host.querySelectorAll('.expand-operation').forEach(button => {
+    if (!button.getAttribute('aria-label')) button.setAttribute('aria-label', 'Expand or collapse all operations');
+  });
+  host.querySelectorAll('.opblock-control-arrow').forEach(button => {
+    if (!button.getAttribute('aria-label')) button.setAttribute('aria-label', 'Expand or collapse operation');
+  });
+}
+
+async function renderApiDocs(params, gen) {
+  shell({ breadcrumb: [{ label: 'API-Dokumentation' }] });
+  const body = document.getElementById('page-body');
+
+  let spec = null;
+  try {
+    const res = await fetch('data/api-specs.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    spec = (await res.json()).mieterportal;
+  } catch { /* rendered as error below */ }
+  if (gen !== _routeGen) return;   // superseded while awaiting
+
+  if (!spec) {
+    body.innerHTML = `<section class="section"><div class="container">
+      <h1 class="h1 section-heading">API-Dokumentation</h1>
+      <div class="notification notification--error" role="alert">
+        <p><strong>Die API-Spezifikation konnte nicht geladen werden.</strong> Bitte laden Sie die Seite neu.</p>
+      </div>
+    </div></section>`;
+    return;
+  }
+
+  // Portal chrome above (it owns title, version and description — Swagger's
+  // own information container stays hidden, see css/sections/api-docs.css);
+  // the standard Swagger UI below. Composition mirrors the sister
+  // service-portal's page: detail bar (back + share), h1, badge pills, lead.
+  body.innerHTML = `
+    ${P.renderShareBar({ backTo: '#/', backLabel: P.t('nav.start') })}
+    <section class="section">
+      <div class="container">
+        <h1 class="api-docs__title">${P.escapeHtml(spec.title)}</h1>
+        <p class="api-docs__badges">
+          <span class="badge badge--blue">v${P.escapeHtml(spec.version)}</span>
+          <span class="badge">${P.escapeHtml(spec.format || 'REST')}</span>
+        </p>
+        <p class="section-intro section-intro--tight section-intro--full">${P.escapeHtml(spec.description)}</p>
+        <h2 class="sr-only" id="apiResourcesTitle">API-Ressourcen</h2>
+        <div class="swagger-host" id="apiSwagger" aria-labelledby="apiResourcesTitle">
+          <p role="status">API-Dokumentation wird geladen…</p>
+        </div>
+      </div>
+    </section>`;
+
+  const host = document.getElementById('apiSwagger');
+  let SwaggerUIBundle;
+  try {
+    SwaggerUIBundle = await loadSwaggerUI();
+  } catch {
+    if (gen !== _routeGen) return;
+    host.innerHTML = `
+      <div class="notification notification--error" role="alert">
+        <p><strong>Die Swagger-Oberfläche konnte nicht geladen werden.</strong>
+          Sie kommt von unpkg.com und braucht Netzzugang.</p>
+        <p><button class="btn btn--outline btn--sm" type="button" onclick="window.location.reload()">Seite neu laden</button></p>
+      </div>`;
+    return;
+  }
+  if (gen !== _routeGen) return;
+
+  host.innerHTML = '';
+  // A11y pass re-runs as Swagger's React tree grows. Self-cleaning: the
+  // tenant router has no unmount hook, so the observer disconnects itself
+  // once the host has left the document (the next route re-renders #root).
+  const observer = new MutationObserver(() => {
+    if (!document.body.contains(host)) { observer.disconnect(); return; }
+    enhanceSwagger(host);
+  });
+  observer.observe(host, { childList: true, subtree: true });
+  SwaggerUIBundle({
+    spec: apiSpecToOpenApi(spec),
+    domNode: host,
+    presets: [SwaggerUIBundle.presets.apis],
+    layout: 'BaseLayout',
+    deepLinking: false,             // Swagger anchors would overwrite the portal hash route
+    docExpansion: 'list',
+    defaultModelsExpandDepth: -1,   // hide the models block — the compact spec has no schemas
+    supportedSubmitMethods: [],     // there is no backend for «Try it out»
+    validatorUrl: null,             // do not call Swagger's external validator
+    onComplete: () => enhanceSwagger(host),
+  });
+}

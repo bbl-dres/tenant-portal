@@ -1,0 +1,791 @@
+{
+  "mieterportal": {
+    "title": "BBL Mieterportal API",
+    "version": "1.0.0",
+    "format": "REST",
+    "description": "Backend-Schnittstellen des Mieterportals. Das Portal ist Oberfläche, kein Mastersystem: Den Golden Record hält je Geschäftsobjekt das führende System — SAP RE-FX (Gebäude, Geschosse, Räume, Mietkonditionen), eIAM (Identitäten), DMS (Dokumente). Portaleigen sind Bedarfsmeldungen bis zur Genehmigung (danach Übergabe an SAP ePPM), Vorgänge und der Dienstleistungskatalog; die Integrationsschicht übersetzt in das jeweilige Quellsystem. Prototyp: Endpunkte gemockt, Beispiele wo möglich aus echten Portaldaten.",
+    "baseUrl": "https://api.bbl.admin.ch/mieterportal/v1",
+    "tokenUrl": "https://api.bbl.admin.ch/oauth2/token",
+    "auth": "OAuth 2 / OIDC über eIAM (FED-LOGIN oder CH-LOGIN). Lesen erfordert mieterportal.read, Schreiben den passenden write-Scope. Schreibzugriffe auf Geschäftsobjekte verlangen If-Match (optimistisches Sperren via ETag) und akzeptieren Idempotency-Key; bestätigt wird die Übernahme durch das führende System, nicht eine Ablage im Portal.",
+    "scopes": {
+      "mieterportal.read": "Lesender Zugriff auf alle Ressourcen",
+      "bedarf.write": "Bedarfsmeldungen erstellen, bearbeiten, einreichen, zurückziehen (LBO)",
+      "pruefung.write": "Prüfentscheide erfassen (GS-Prüfung, BBL Portfolio-Management)",
+      "vorgaenge.write": "Vorgänge erstellen und aktualisieren",
+      "dokumente.write": "Dokumente hochladen, ändern, löschen",
+      "mietverhaeltnisse.write": "Mietverhältnisse und Flächenbelegung bewirtschaften",
+      "profil.write": "Eigenes Profil ändern"
+    },
+    "resources": [
+      {
+        "label": "space-requests",
+        "description": "Bedarfsmeldungen (Kleinantrag / Grossantrag) — vom Entwurf bis zur Genehmigung, danach Übergabe an SAP ePPM.",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/space-requests",
+            "summary": "Bedarfsmeldungen der eigenen Verwaltungseinheit auflisten",
+            "params": [
+              { "name": "status", "in": "query", "type": "string", "desc": "Status (draft, submitted, in_review_gs, clarification, in_review_pfm, in_project, approved, rejected, closed)" },
+              { "name": "requestType", "in": "query", "type": "string", "desc": "Kleinantrag oder Grossantrag" },
+              { "name": "ve", "in": "query", "type": "string", "desc": "Verwaltungseinheit, z. B. UVEK — über die eigene VE hinaus nur mit Prüf- oder Auditrolle" },
+              { "name": "buildingId", "in": "query", "type": "string", "desc": "Gebäude, z. B. BLD-2011" },
+              { "name": "page", "in": "query", "type": "integer", "desc": "Seite, ab 1" },
+              { "name": "perPage", "in": "query", "type": "integer", "desc": "Treffer pro Seite, max. 200" }
+            ],
+            "responses": { "200": "Liste von Bedarfsmeldungen", "401": "Nicht angemeldet" },
+            "responseHeaders": {
+              "200": { "X-Total-Count": "Gesamtzahl der Treffer" }
+            },
+            "live": "space-requests.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "POST",
+            "path": "/space-requests",
+            "summary": "Neue Bedarfsmeldung als Entwurf erstellen",
+            "params": [
+              { "name": "Idempotency-Key", "in": "header", "type": "string", "desc": "UUID; Wiederholung liefert die erste Antwort statt eines Duplikats" }
+            ],
+            "body": {
+              "requestType": "Kleinantrag",
+              "pipelineVariant": "standard",
+              "buildingId": "BLD-2011",
+              "fte": 8,
+              "naw": { "class": "Kollaborativ-Standard" },
+              "begruendung": "Zusätzliche Arbeitsplätze für befristetes Projektteam"
+            },
+            "responses": {
+              "201": "Entwurf erstellt",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "422": "Fachliche Validierung fehlgeschlagen"
+            },
+            "responseHeaders": {
+              "201": { "Location": "URL der neuen Bedarfsmeldung", "ETag": "Version des neuen Datensatzes" }
+            },
+            "example": {
+              "spaceRequestId": "BE-2026-021",
+              "requestType": "Kleinantrag",
+              "pipelineVariant": "standard",
+              "status": "draft",
+              "buildingId": "BLD-2011",
+              "fte": 8,
+              "workstations": 7,
+              "hnf2": 77,
+              "createdAt": "2026-08-13T09:12:00Z"
+            },
+            "scopes": ["bedarf.write"]
+          },
+          {
+            "method": "GET",
+            "path": "/space-requests/{id}",
+            "summary": "Eine Bedarfsmeldung mit Flächenkennzahlen (HNF2, GF) und NAW-Einstufung abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID, z. B. BE-2026-014" }
+            ],
+            "responses": { "200": "Bedarfsmeldung", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "responseHeaders": {
+              "200": { "ETag": "Version für If-Match bei Schreibzugriffen" }
+            },
+            "live": "space-requests.one",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "PATCH",
+            "path": "/space-requests/{id}",
+            "summary": "Entwurf oder Rückfrage aktualisieren (Teilupdate)",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "body": { "fte": 10, "workstations": 8, "begruendung": "Teamerweiterung bestätigt" },
+            "responses": {
+              "200": "Aktualisierte Bedarfsmeldung",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Statuskonflikt — nur Entwürfe und Rückfragen sind änderbar",
+              "412": "Vorbedingung fehlgeschlagen",
+              "422": "Fachliche Validierung fehlgeschlagen",
+              "428": "Vorbedingung erforderlich"
+            },
+            "scopes": ["bedarf.write"]
+          },
+          {
+            "method": "DELETE",
+            "path": "/space-requests/{id}",
+            "summary": "Entwurf zurückziehen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "responses": {
+              "204": "Zurückgezogen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Statuskonflikt — nur Entwürfe können zurückgezogen werden",
+              "412": "Vorbedingung fehlgeschlagen"
+            },
+            "scopes": ["bedarf.write"]
+          },
+          {
+            "method": "POST",
+            "path": "/space-requests/{id}/submit",
+            "summary": "Entwurf einreichen (Statusübergang draft → submitted)",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "responses": {
+              "200": "Eingereicht — der zugehörige Vorgang erscheint unter /process-instances",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Statuskonflikt — bereits eingereicht",
+              "412": "Vorbedingung fehlgeschlagen",
+              "422": "Fachliche Validierung fehlgeschlagen — Pflichtangaben oder Checkliste unvollständig"
+            },
+            "example": { "spaceRequestId": "BE-2026-021", "status": "submitted", "submittedAt": "2026-08-13T09:30:00Z" },
+            "scopes": ["bedarf.write"]
+          },
+          {
+            "method": "POST",
+            "path": "/space-requests/{id}/decision",
+            "summary": "Prüfentscheid erfassen: approved, clarification (mit Auflagen) oder rejected",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "body": {
+              "decision": "approved",
+              "comment": "Flächenbedarf plausibel, NAW-Einstufung bestätigt.",
+              "conditions": ["Desk-Sharing-Faktor 0.8 einhalten"]
+            },
+            "responses": {
+              "200": "Entscheid erfasst — Status und Historie aktualisiert",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung — Entscheid erfordert eine Prüfrolle",
+              "404": "Nicht gefunden",
+              "409": "Statuskonflikt — Meldung ist nicht in Prüfung",
+              "412": "Vorbedingung fehlgeschlagen",
+              "422": "Fachliche Validierung fehlgeschlagen"
+            },
+            "example": { "spaceRequestId": "BE-2026-014", "status": "approved", "decidedBy": "U.654.321", "decidedAt": "2026-08-13T10:02:00Z" },
+            "scopes": ["pruefung.write"]
+          },
+          {
+            "method": "GET",
+            "path": "/space-requests/{id}/history",
+            "summary": "Verlauf einer Bedarfsmeldung abrufen (Audit-Trail, nur lesend)",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" }
+            ],
+            "responses": { "200": "Chronologische Ereignisliste", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "space-requests.history",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "POST",
+            "path": "/space-requests/{id}/attachments",
+            "summary": "Anhang registrieren (Metadaten + Upload-Referenz)",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" },
+              { "name": "Idempotency-Key", "in": "header", "type": "string", "desc": "UUID; Wiederholung liefert die erste Antwort statt eines Duplikats" }
+            ],
+            "body": { "name": "WiBe.pdf", "size": "1.2 MB", "uploadRef": "upl_9f2c41" },
+            "responses": {
+              "201": "Anhang registriert; Virenprüfung läuft asynchron (scanStatus pending → ok)",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "422": "Fachliche Validierung fehlgeschlagen — Dateityp oder Grösse unzulässig"
+            },
+            "example": { "name": "WiBe.pdf", "size": "1.2 MB", "scanStatus": "pending" },
+            "scopes": ["bedarf.write"]
+          },
+          {
+            "method": "DELETE",
+            "path": "/space-requests/{id}/attachments/{name}",
+            "summary": "Anhang entfernen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Antrags-ID" },
+              { "name": "name", "in": "path", "type": "string", "required": true, "desc": "Dateiname des Anhangs, z. B. WiBe.pdf" }
+            ],
+            "responses": {
+              "204": "Entfernt",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Statuskonflikt — Anhänge eingereichter Meldungen sind unveränderlich"
+            },
+            "scopes": ["bedarf.write"]
+          }
+        ]
+      },
+      {
+        "label": "process-instances",
+        "description": "Geschäftsfälle, die das Portal auslöst und verfolgt (Bedarfsmeldung, Schadensmeldung, Umzug, Sonderreinigung, Möbelbestellung).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/process-instances",
+            "summary": "Vorgänge der angemeldeten Person auflisten",
+            "params": [
+              { "name": "status", "in": "query", "type": "string", "desc": "Status (submitted, scheduled, in_progress, in_review_gs, clarification, in_review_pfm, in_project, approved, rejected, closed, cancelled)" },
+              { "name": "defId", "in": "query", "type": "string", "desc": "Prozessdefinition (bedarfsmeldung, schadensmeldung, umzug, sonderreinigung, moebelbestellung)" },
+              { "name": "page", "in": "query", "type": "integer", "desc": "Seite, ab 1" },
+              { "name": "perPage", "in": "query", "type": "integer", "desc": "Treffer pro Seite, max. 200" }
+            ],
+            "responses": { "200": "Liste von Vorgängen", "401": "Nicht angemeldet" },
+            "responseHeaders": {
+              "200": { "X-Total-Count": "Gesamtzahl der Treffer" }
+            },
+            "live": "process-instances.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "POST",
+            "path": "/process-instances",
+            "summary": "Neuen Vorgang aus einer Dienstleistung erstellen",
+            "params": [
+              { "name": "Idempotency-Key", "in": "header", "type": "string", "desc": "UUID; Wiederholung liefert die erste Antwort statt eines Duplikats" }
+            ],
+            "body": {
+              "defId": "schadensmeldung",
+              "variant": "standard",
+              "buildingId": "BLD-2010",
+              "payload": { "description": "Wasserschaden im 2. OG, Sitzungszimmer 204", "urgency": "hoch" }
+            },
+            "responses": {
+              "201": "Vorgang erstellt",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "422": "Fachliche Validierung fehlgeschlagen"
+            },
+            "responseHeaders": {
+              "201": { "Location": "URL des neuen Vorgangs", "ETag": "Version des neuen Vorgangs" }
+            },
+            "example": {
+              "instanceId": "VG-2026-0198",
+              "defId": "schadensmeldung",
+              "variant": "standard",
+              "status": "submitted",
+              "buildingId": "BLD-2010",
+              "createdAt": "2026-08-13T08:47:00Z"
+            },
+            "scopes": ["vorgaenge.write"]
+          },
+          {
+            "method": "GET",
+            "path": "/process-instances/{id}",
+            "summary": "Einen Vorgang mit Status und Zuständigkeit abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Vorgangs-ID, z. B. VG-2026-0142" }
+            ],
+            "responses": { "200": "Vorgang", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "responseHeaders": {
+              "200": { "ETag": "Version für If-Match bei Schreibzugriffen" }
+            },
+            "live": "process-instances.one",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "PATCH",
+            "path": "/process-instances/{id}",
+            "summary": "Status oder Zuständigkeit aktualisieren (Sachbearbeitung); Abbruch = Statusübergang cancelled",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Vorgangs-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "body": { "status": "in_progress", "assignee": "BBL Objektmanagement" },
+            "responses": {
+              "200": "Aktualisierter Vorgang",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Unzulässiger Statusübergang",
+              "412": "Vorbedingung fehlgeschlagen",
+              "428": "Vorbedingung erforderlich"
+            },
+            "scopes": ["vorgaenge.write"]
+          }
+        ]
+      },
+      {
+        "label": "process-definitions",
+        "description": "Je Dienstleistung eine Prozessdefinition mit Varianten und Schritten (nur lesend).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/process-definitions",
+            "summary": "Alle Prozessdefinitionen auflisten",
+            "responses": { "200": "Liste von Prozessdefinitionen", "401": "Nicht angemeldet" },
+            "live": "process-definitions.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/process-definitions/{defId}",
+            "summary": "Eine Prozessdefinition mit Varianten abrufen",
+            "params": [
+              { "name": "defId", "in": "path", "type": "string", "required": true, "desc": "Definitions-ID, z. B. bedarfsmeldung" }
+            ],
+            "responses": { "200": "Prozessdefinition", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "process-definitions.one",
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      },
+      {
+        "label": "buildings",
+        "description": "Gebäudestammdaten aus SAP RE-FX (nur lesend); Unterressourcen: Geschosse, Räume, Mietverhältnisse, Dokumente. Identifikation über Anlagenschlüssel und EGID (GWR).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/buildings",
+            "summary": "Gebäude auflisten",
+            "params": [
+              { "name": "city", "in": "query", "type": "string", "desc": "Ort, z. B. Bern" },
+              { "name": "egid", "in": "query", "type": "string", "desc": "Eidg. Gebäudeidentifikator (GWR), z. B. 100123456" },
+              { "name": "q", "in": "query", "type": "string", "desc": "Volltextsuche über Name und Adresse" },
+              { "name": "page", "in": "query", "type": "integer", "desc": "Seite, ab 1" },
+              { "name": "perPage", "in": "query", "type": "integer", "desc": "Treffer pro Seite, max. 200" }
+            ],
+            "responses": { "200": "Liste von Gebäuden", "401": "Nicht angemeldet" },
+            "responseHeaders": {
+              "200": { "X-Total-Count": "Gesamtzahl der Treffer" }
+            },
+            "live": "buildings.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/buildings/{id}",
+            "summary": "Ein Gebäude mit Adresse, Anlagenschlüssel und EGID abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Gebäude-ID, z. B. BLD-2010" }
+            ],
+            "responses": { "200": "Gebäude", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "buildings.one",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/buildings/{id}/floors",
+            "summary": "Geschosse eines Gebäudes auflisten",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Gebäude-ID" }
+            ],
+            "responses": { "200": "Liste von Geschossen", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "buildings.floors",
+            "example": [
+              { "floorId": "BLD-2010-EG", "buildingId": "BLD-2010", "name": "EG", "levelNumber": 0, "areaGross": 2240, "floorPlanDocumentId": null },
+              { "floorId": "BLD-2010-OG1", "buildingId": "BLD-2010", "name": "1. OG", "levelNumber": 1, "areaGross": 2180, "floorPlanDocumentId": "DOC-0002" }
+            ],
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/buildings/{id}/spaces",
+            "summary": "Räume eines Gebäudes auflisten",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Gebäude-ID" },
+              { "name": "floorId", "in": "query", "type": "string", "desc": "Auf ein Geschoss einschränken, z. B. BLD-2010-EG" },
+              { "name": "useType", "in": "query", "type": "string", "desc": "Nutzungsart (Office, MeetingRoom, FocusRoom, TrainingRoom, Reception, Lounge, Cafeteria, Kitchenette, PrintRoom, Storage, Archive, TechnicalRoom, WC, Corridor)" }
+            ],
+            "responses": { "200": "Liste von Räumen", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "buildings.spaces",
+            "example": [
+              { "spaceId": "BLD-2010-EG-00", "floorId": "BLD-2010-EG", "buildingId": "BLD-2010", "name": "EG · 00", "useType": "Corridor", "area": 600, "capacity": 0, "isBookable": false, "occupierVe": null, "siaCategory": "VF" }
+            ],
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/buildings/{id}/tenancies",
+            "summary": "Mietverhältnisse eines Gebäudes auflisten",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Gebäude-ID" }
+            ],
+            "responses": { "200": "Liste von Mietverhältnissen", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "buildings.tenancies",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/buildings/{id}/documents",
+            "summary": "Mit einem Gebäude verknüpfte Dokumente auflisten",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Gebäude-ID" },
+              { "name": "type", "in": "query", "type": "string", "desc": "Dokumenttyp (FloorPlan, Permit, Certificate, Manual, Lease, WiBe, LegalBasis, Other)" }
+            ],
+            "responses": { "200": "Liste von Dokumenten", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "buildings.documents",
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      },
+      {
+        "label": "floors",
+        "description": "Geschosse mit Bruttogeschossfläche (SIA 416 GF) und Grundrissverweis (nur lesend).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/floors/{id}",
+            "summary": "Ein Geschoss abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Geschoss-ID, z. B. BLD-2010-EG" }
+            ],
+            "responses": { "200": "Geschoss", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "floors.one",
+            "example": { "floorId": "BLD-2010-EG", "buildingId": "BLD-2010", "name": "EG", "levelNumber": 0, "areaGross": 2240, "floorPlanDocumentId": null },
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      },
+      {
+        "label": "spaces",
+        "description": "Räume mit Nutzungsart, Fläche und SIA-416-Kategorie (HNF, NNF, VF, FF, TF); die Belegung (VE / Amt) bewirtschaftet das Portal.",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/spaces/{id}",
+            "summary": "Einen Raum abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Raum-ID, z. B. BLD-2010-EG-00" }
+            ],
+            "responses": { "200": "Raum", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "responseHeaders": {
+              "200": { "ETag": "Version für If-Match bei Schreibzugriffen" }
+            },
+            "live": "spaces.one",
+            "example": { "spaceId": "BLD-2010-EG-00", "floorId": "BLD-2010-EG", "buildingId": "BLD-2010", "name": "EG · 00", "useType": "Corridor", "area": 600, "capacity": 0, "isBookable": false, "occupierVe": null, "occupierDep": null, "siaCategory": "VF" },
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "PATCH",
+            "path": "/spaces/{id}",
+            "summary": "Belegung oder Buchbarkeit eines Raums ändern",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Raum-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "body": { "occupierVe": "UVEK", "occupierDep": "BAFU", "isBookable": true },
+            "responses": {
+              "200": "Aktualisierter Raum",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Konflikt — Raum ist einem laufenden Vorgang zugeordnet",
+              "412": "Vorbedingung fehlgeschlagen",
+              "428": "Vorbedingung erforderlich"
+            },
+            "scopes": ["mietverhaeltnisse.write"]
+          }
+        ]
+      },
+      {
+        "label": "tenancies",
+        "description": "Mietverhältnisse der Verwaltungseinheiten — Konditionen führt SAP RE-FX, Kontakte (PFM / IM / FLM) und Pendenzen das Portal.",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/tenancies",
+            "summary": "Mietverhältnisse der eigenen Verwaltungseinheit auflisten",
+            "params": [
+              { "name": "ve", "in": "query", "type": "string", "desc": "Verwaltungseinheit, z. B. UVEK" },
+              { "name": "buildingId", "in": "query", "type": "string", "desc": "Gebäude, z. B. BLD-2010" },
+              { "name": "page", "in": "query", "type": "integer", "desc": "Seite, ab 1" },
+              { "name": "perPage", "in": "query", "type": "integer", "desc": "Treffer pro Seite, max. 200" }
+            ],
+            "responses": { "200": "Liste von Mietverhältnissen", "401": "Nicht angemeldet" },
+            "responseHeaders": {
+              "200": { "X-Total-Count": "Gesamtzahl der Treffer" }
+            },
+            "live": "tenancies.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/tenancies/{id}",
+            "summary": "Ein Mietverhältnis mit Flächen, Konditionen und Kontakten abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Mietverhältnis-ID, z. B. T-2010-AA-01" }
+            ],
+            "responses": { "200": "Mietverhältnis", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "responseHeaders": {
+              "200": { "ETag": "Version für If-Match bei Schreibzugriffen" }
+            },
+            "live": "tenancies.one",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "PATCH",
+            "path": "/tenancies/{id}",
+            "summary": "Portalgeführte Felder aktualisieren (Ansprechpersonen, Pendenzen)",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Mietverhältnis-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "body": {
+              "contacts": { "pfm": "Lars Hofmann", "im": "Nadine Frey", "flm": "Tobias Spiess" },
+              "openIssues": 1
+            },
+            "responses": {
+              "200": "Aktualisiertes Mietverhältnis",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Konflikt — Konditionsfelder sind im führenden System zu ändern",
+              "412": "Vorbedingung fehlgeschlagen",
+              "428": "Vorbedingung erforderlich"
+            },
+            "scopes": ["mietverhaeltnisse.write"]
+          }
+        ]
+      },
+      {
+        "label": "documents",
+        "description": "Dokumentmetadaten zu Gebäuden, Mietverhältnissen und Bedarfsmeldungen; die Ablage führt das DMS.",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/documents",
+            "summary": "Dokumente auflisten und filtern",
+            "params": [
+              { "name": "type", "in": "query", "type": "string", "desc": "Dokumenttyp (FloorPlan, Permit, Certificate, Manual, Lease, WiBe, LegalBasis, Other)" },
+              { "name": "entityId", "in": "query", "type": "string", "desc": "Verknüpfte Entität (linkedTo), z. B. BLD-2010 oder BE-2026-014" },
+              { "name": "q", "in": "query", "type": "string", "desc": "Volltextsuche über den Titel" },
+              { "name": "page", "in": "query", "type": "integer", "desc": "Seite, ab 1" },
+              { "name": "perPage", "in": "query", "type": "integer", "desc": "Treffer pro Seite, max. 200" }
+            ],
+            "responses": { "200": "Liste von Dokumenten", "401": "Nicht angemeldet" },
+            "responseHeaders": {
+              "200": { "X-Total-Count": "Gesamtzahl der Treffer" }
+            },
+            "live": "documents.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "POST",
+            "path": "/documents",
+            "summary": "Dokument registrieren (Metadaten + Upload-Referenz)",
+            "params": [
+              { "name": "Idempotency-Key", "in": "header", "type": "string", "desc": "UUID; Wiederholung liefert die erste Antwort statt eines Duplikats" }
+            ],
+            "body": {
+              "type": "FloorPlan",
+              "title": "Grundriss 1. OG — Bundeshaus Nord",
+              "linkedTo": [{ "entityType": "Building", "entityId": "BLD-2010", "role": "floor-plan" }],
+              "format": "PDF",
+              "languages": ["de"],
+              "uploadRef": "upl_5d81aa"
+            },
+            "responses": {
+              "201": "Dokument registriert; Virenprüfung läuft asynchron (scanStatus pending → ok)",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "422": "Fachliche Validierung fehlgeschlagen"
+            },
+            "responseHeaders": {
+              "201": { "Location": "URL des neuen Dokuments", "ETag": "Version des neuen Dokuments" }
+            },
+            "example": { "documentId": "DOC-0118", "type": "FloorPlan", "title": "Grundriss 1. OG — Bundeshaus Nord", "scanStatus": "pending" },
+            "scopes": ["dokumente.write"]
+          },
+          {
+            "method": "GET",
+            "path": "/documents/{id}",
+            "summary": "Metadaten eines Dokuments abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Dokument-ID, z. B. DOC-0001" }
+            ],
+            "responses": { "200": "Dokument", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "responseHeaders": {
+              "200": { "ETag": "Version für If-Match bei Schreibzugriffen" }
+            },
+            "live": "documents.one",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/documents/{id}/content",
+            "summary": "Dateiinhalt herunterladen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Dokument-ID" }
+            ],
+            "responses": {
+              "200": "Binärantwort im Format des Dokuments (Content-Type gemäss format, z. B. application/pdf)",
+              "401": "Nicht angemeldet",
+              "404": "Nicht gefunden",
+              "409": "Konflikt — Virenprüfung noch nicht abgeschlossen"
+            },
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "PATCH",
+            "path": "/documents/{id}",
+            "summary": "Metadaten eines Dokuments aktualisieren",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Dokument-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "body": { "title": "Grundriss EG — Bundeshaus Nord (revidiert)", "linkedTo": [{ "entityType": "Building", "entityId": "BLD-2010", "role": "floor-plan" }] },
+            "responses": {
+              "200": "Aktualisiertes Dokument",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "412": "Vorbedingung fehlgeschlagen",
+              "428": "Vorbedingung erforderlich"
+            },
+            "scopes": ["dokumente.write"]
+          },
+          {
+            "method": "DELETE",
+            "path": "/documents/{id}",
+            "summary": "Dokument löschen (Referenz im Portal; Aufbewahrung regelt das DMS)",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "Dokument-ID" },
+              { "name": "If-Match", "in": "header", "type": "string", "required": true, "desc": "ETag der zuletzt gelesenen Version" }
+            ],
+            "responses": {
+              "204": "Gelöscht",
+              "401": "Nicht angemeldet",
+              "403": "Fehlende Berechtigung",
+              "404": "Nicht gefunden",
+              "409": "Konflikt — Dokument ist mit einem laufenden Vorgang verknüpft",
+              "412": "Vorbedingung fehlgeschlagen"
+            },
+            "scopes": ["dokumente.write"]
+          }
+        ]
+      },
+      {
+        "label": "downloads",
+        "description": "Download-Listen der Seite «Pläne & Dokumente» (nur lesend).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/downloads",
+            "summary": "Alle Download-Listen abrufen",
+            "responses": { "200": "Objekt mit den Listen documents, regulations, strategies, training", "401": "Nicht angemeldet" },
+            "live": "downloads.list",
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      },
+      {
+        "label": "news",
+        "description": "Mitteilungen des BBL an die Mieterschaft (nur lesend).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/news",
+            "summary": "Mitteilungen auflisten",
+            "params": [
+              { "name": "type", "in": "query", "type": "string", "desc": "Typ (Information, Maintenance, Training)" },
+              { "name": "page", "in": "query", "type": "integer", "desc": "Seite, ab 1" },
+              { "name": "perPage", "in": "query", "type": "integer", "desc": "Treffer pro Seite, max. 200" }
+            ],
+            "responses": { "200": "Liste von Mitteilungen", "401": "Nicht angemeldet" },
+            "responseHeaders": {
+              "200": { "X-Total-Count": "Gesamtzahl der Treffer" }
+            },
+            "live": "news.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/news/{id}",
+            "summary": "Eine Mitteilung abrufen",
+            "params": [
+              { "name": "id", "in": "path", "type": "string", "required": true, "desc": "News-ID (Slug), z. B. nachhaltigkeitsbericht-2025" }
+            ],
+            "responses": { "200": "Mitteilung", "401": "Nicht angemeldet", "404": "Nicht gefunden" },
+            "live": "news.one",
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      },
+      {
+        "label": "services",
+        "description": "Der Dienstleistungskatalog des Portals (nur lesend).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/services",
+            "summary": "Dienstleistungskatalog auflisten",
+            "responses": { "200": "Liste von Dienstleistungen", "401": "Nicht angemeldet" },
+            "live": "services.list",
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      },
+      {
+        "label": "users",
+        "description": "Benutzende und Rollen; Identität und Login führt eIAM.",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/users",
+            "summary": "Benutzende auflisten (erfordert Administrationsrolle)",
+            "params": [
+              { "name": "ve", "in": "query", "type": "string", "desc": "Verwaltungseinheit, z. B. UVEK" },
+              { "name": "role", "in": "query", "type": "string", "desc": "Rolle (LBO, GS-Reviewer, BBL-PFM, BBL-Campus, Auditor)" }
+            ],
+            "responses": { "200": "Liste von Benutzenden", "401": "Nicht angemeldet", "403": "Fehlende Berechtigung" },
+            "live": "users.list",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "GET",
+            "path": "/users/me",
+            "summary": "Profil der angemeldeten Person abrufen",
+            "responses": { "200": "Eigenes Profil", "401": "Nicht angemeldet" },
+            "live": "users.me",
+            "scopes": ["mieterportal.read"]
+          },
+          {
+            "method": "PATCH",
+            "path": "/users/me",
+            "summary": "Eigene Einstellungen ändern (z. B. Sprache)",
+            "body": { "lang": "fr" },
+            "responses": {
+              "200": "Aktualisiertes Profil",
+              "400": "Validierung fehlgeschlagen",
+              "401": "Nicht angemeldet"
+            },
+            "scopes": ["profil.write"]
+          }
+        ]
+      },
+      {
+        "label": "reference-data",
+        "description": "Referenzwerte der Flächenbemessung: NAW-Klassen (m² HNF2 und GF je FTE), Desk-Sharing-Faktor, Kostensätze (CHF).",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/reference-data",
+            "summary": "Alle Referenzwerte abrufen",
+            "responses": { "200": "Referenzwerte", "401": "Nicht angemeldet" },
+            "live": "reference-data.one",
+            "scopes": ["mieterportal.read"]
+          }
+        ]
+      }
+    ]
+  }
+}
