@@ -124,7 +124,10 @@ export function renderWizard({ step }) {
     window.portal.navigate('#/queue');
     return;
   }
-  shell({ activeNav: 'wizard', breadcrumb: [
+  // 'services' — the wizard (Bedarf anmelden) is a service; its nav home is
+  // the Dienstleistungen trigger (the former 'wizard' id matched no nav item,
+  // so nothing was ever marked).
+  shell({ activeNav: 'services', breadcrumb: [
     { href: '#/wizard/1', label: t('services.request') },
     { label: t('wizard.stepN', { n: stepNum }) }
   ]});

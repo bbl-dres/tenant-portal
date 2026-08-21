@@ -107,7 +107,9 @@
 .notification-banner {
   display: block;
   padding: var(--space-md) 0;                   /* DS py-4 */
-  border-radius: 0;
+  /* Radius inherits the notification's 3 px (DS composes the banner ON the
+     notification and never squares it; service-portal renders 3 px too).
+     Invisible on the full-bleed edges, honest to the DS box. */
   box-shadow: none;
   font-size: var(--text-body-sm);
 }
@@ -198,14 +200,18 @@ body.body--prototype-notice #root {
   padding-bottom: var(--prototype-notice-h, 0px);
 }
 body.body--prototype-notice .toast-host {
-  bottom: calc(var(--space-lg) + var(--prototype-notice-h, 0px));
+  /* At least the DS bottom-10% resting spot, and never behind the fixed
+     prototype notice. */
+  bottom: max(10%, calc(var(--space-lg) + var(--prototype-notice-h, 0px)));
 }
 /* Below lg the DS wrapper is a column (see the base rules above): the action
    becomes a full-width tap target under the copy. */
 @media (max-width: 1023px) {
   .prototype-notice .notification-banner__actions,
-  .prototype-notice .notification-banner__actions .btn { width: 100%; }
-  .prototype-notice .notification-banner__actions .btn { justify-content: center; }
+  /* The action keeps its natural width below lg — the DS column wrapper
+     leaves the .btn auto-wide and left-aligned, and the service-portal
+     renders the same; the former full-width centred bar was portal-only
+     (docs/design-alignment.md D31). */
   /* The disclaimer is the taller element on a phone; cap it so it can never
      swallow the viewport, and let the text scroll inside if it must. */
   .prototype-notice { max-height: 60vh; overflow-y: auto; }
@@ -313,9 +319,15 @@ body.body--prototype-notice .toast-host {
 }
 
 /* ── TOAST ──────────────────────────────────────────────────────────────── */
+/* DS toast-message.postcss:5-13 — the host is fixed at `bottom-[10%]`,
+   centred; the toast BODY is a `.notification` (max-w 500 px, mx-20px).
+   The service-portal renders exactly that; the former portal pill (24 px
+   from the bottom, 480 px, compact padding, 28 px icon) was re-based on the
+   same recipe (docs/design-alignment.md D38). Stacking of multiple toasts
+   (the column host) is a portal capability and stays. */
 .toast-host {
   position: fixed;
-  bottom: var(--space-lg);
+  bottom: 10%;
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-toast);
@@ -324,42 +336,45 @@ body.body--prototype-notice .toast-host {
   gap: var(--space-sm);
   pointer-events: none;
 }
-/* CD Bund models the transient toast on its floating Notification card:
-   a light, variant-TINTED surface (not a dark colour-only snackbar) with a
-   status ICON, so success vs error differ by shape, not hue alone
-   (WCAG 1.4.1). Colours come from the shared notification token set. */
 .toast {
   background: var(--color-notification-bg);
   color: var(--color-notification-hint-text);
-  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
+  /* DS notification padding ramp 8 / 16 @480 / 24 @1024 / 32 @1544
+     (notification.postcss:7). */
+  padding: var(--space-sm);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);
   pointer-events: auto;
-  animation: toast-in var(--transition);
+  animation: toast-in var(--transition-slow);
   display: inline-flex;
   align-items: center;
-  gap: var(--space-sm);
-  max-width: min(90vw, 480px);
+  gap: var(--space-2sm);                       /* DS icon mr-3 = 12 px */
+  max-width: min(calc(100vw - 2 * var(--gap-responsive)), 500px);  /* DS max-w-[500px] mx-[20px] */
 }
+@media (min-width: 480px)  { .toast { padding: var(--space-md); } }
+@media (min-width: 1024px) { .toast { padding: var(--space-lg); } }
+@media (min-width: 1544px) { .toast { padding: var(--space-xl); } }
 .toast--hiding {
   opacity: 0;
   transition: opacity var(--transition);
 }
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .toast--success { background: var(--color-notification-success-bg); color: var(--color-notification-success-text); }
 .toast--danger,
 .toast--error   { background: var(--color-notification-error-bg);   color: var(--color-notification-error-text); }
 .toast--warning { background: var(--color-notification-warning-bg); color: var(--color-notification-warning-text); }
 .toast--info    { background: var(--color-notification-info-bg);    color: var(--color-notification-info-text); }
-/* Status icon inherits the variant text colour (fill-current, DS pattern). */
+/* Status icon inherits the variant text colour (fill-current, DS pattern).
+   40 px — the DS notification icon (`h-10 w-10`, notification.postcss:60-65);
+   the toast IS a notification now. */
 .toast__icon {
   flex-shrink: 0;
-  width: var(--icon-md);
-  height: var(--icon-md);
+  width: var(--icon-xl);
+  height: var(--icon-xl);
   display: inline-flex;
   align-items: center;
   justify-content: center;

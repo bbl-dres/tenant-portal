@@ -460,7 +460,7 @@
   height: 100%;
   object-fit: cover;
 }
-.property-hero__cell:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.property-hero__cell:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .property-hero__cell--empty {
   cursor: default;
   color: var(--color-text-secondary);
@@ -550,7 +550,7 @@
    nor the individual blocks inside them need their own top margins. */
 .property-tabs { margin-top: var(--space-xl); }
 .property-tabpanel { padding-top: 0; }
-.property-tabpanel:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.property-tabpanel:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .property-facts-list { margin-top: 0; }
 .property-docs__more { margin: var(--space-md) 0 0; }
 .property-docs__more .inline-icon {

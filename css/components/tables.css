@@ -54,7 +54,7 @@
 /* DS caption (table.postcss:25-32): hidden by default, `.table--caption`
    opts into a bottom-side, left-aligned caption styled like `.legend`
    (`@apply hidden legend; caption-side: bottom` → `table-caption text-left`). */
-.table caption { display: none; caption-side: bottom; }
+.table caption { display: none; caption-side: bottom; white-space: pre-line; }   /* DS table-wrapper: caption pre-line (table.postcss:13-15) */
 .table--caption caption {
   display: table-caption;
   text-align: left;
@@ -70,8 +70,11 @@
 /* Zebra striping for long lists (DS `.table--zebra`: even rows tinted
    bg-secondary-50). Use on the <table> when there are roughly >12 rows
    and rows aren't grouped semantically. */
-.table--zebra tbody tr:nth-child(even) td { background: var(--color-secondary-50); }
-.table--zebra tbody tr:hover td { background: var(--color-bg-alt); }
+.table--zebra tbody tr:nth-child(even) td,
+.table--zebra tfoot tr:nth-child(even) td { background: var(--color-secondary-50); }   /* DS stripes tbody AND tfoot (table.postcss:102-109) */
+/* Zebra hover rides the clickable-rows rule above — striped static tables
+   don't hover (DS defines no row hover). */
+.table--rows-clickable.table--zebra tbody tr:hover td { background: var(--color-secondary-100); }
 /* On the tinted section bands the zebra tint IS the band colour — even rows
    read as holes punched through the white table (grey on grey). Inside those
    bands the rows stay white; the tbody border-top separators carry the
@@ -85,16 +88,14 @@
 .bg--secondary-50 .table thead th,
 .section--alt .table thead th { background: var(--color-secondary-100); }
 
-/* NOTE — intentional deviation (DESIGNGUIDE §5): CD Bund `table.postcss`
-   defaults `thead th` to UPPERCASE (regular weight, text-700). The portal
-   uses sentence-case + bold headers instead, a deliberate scannability
-   choice for dense reviewer queues where an all-caps eyebrow reads as
-   noise. `.table--caps` opts back into the DS uppercase look for
-   index-style tables. */
+/* Column headers are UPPERCASE — the DS default (`thead th { uppercase
+   text--sm text-text-700 }`, table.postcss:34-43) and what the
+   service-portal renders. The former sentence-case default (DESIGNGUIDE §5)
+   was retired in the 2026-08 cross-portal alignment
+   (docs/design-alignment.md D27) so the two apps' tables read identically.
+   Weight stays bold (the UA default the DS leaves in place). */
 .table th {
   font-weight: var(--font-weight-bold);
-  color: var(--color-gray-700);            /* DS th text-text-700 — 9.3:1 on secondary-50 */
-  font-size: var(--text-body-sm);
   letter-spacing: 0;
 }
 /* Header fill scoped to thead — a `<th scope="row">` in a tfoot total row
@@ -105,16 +106,31 @@
 .table thead th {
   background: var(--color-secondary-50);   /* DS thead bg-secondary-50 — federal blue-gray */
   vertical-align: top;
-}
-.table--caps th {
-  font-size: var(--text-body-xs);
+  color: var(--color-gray-700);            /* DS th text-text-700 — 9.3:1 on secondary-50 */
+  font-size: var(--text-body-sm);
   text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
 }
-/* Only show the pointer affordance when the row actually has an action.
-   `.table--rows-clickable` opts in to the row-hover-cursor + highlight. */
-.table tr:hover td { background: var(--color-bg-surface); }
-.table--rows-clickable tr:hover td { cursor: pointer; }
+/* Row headers (`<th scope="row">`) — DS body-th treatment: gray-800 bold at
+   the BODY size (`text-gray-800 font-bold text-left` + text--base,
+   table.postcss:59-62). They used to inherit the 14 px header size — one
+   type step small. */
+.table tbody th,
+.table tfoot th {
+  color: var(--color-gray-800);
+  font-size: var(--text-body);
+}
+/* `.table--caps` — retired opt-in (uppercase is the default again); kept as
+   an inert alias so existing markup keeps validating. */
+.table--caps th { text-transform: uppercase; }
+/* Row hover ONLY where rows are clickable — the DS defines no row hover at
+   all (table.postcss); the service-portal gates its hover behind
+   `.table--rows-clickable` with the secondary-100 tint. The former
+   every-table gray-50 hover implied interactivity static tables don't have
+   (docs/design-alignment.md D27). */
+.table--rows-clickable tbody tr:hover td {
+  background: var(--color-secondary-100);
+  cursor: pointer;
+}
 
 /* `.table--compact` — tighter cell padding for data-dense reviewer
    surfaces (queue, inbox). Mirrors CD Bund `.table--compact`: px-2 py-2
@@ -127,6 +143,15 @@
 /* DS `.table--compact { @apply border-0 shadow-none }` — dense surfaces
    drop the contained-object border + shadow. */
 .table--compact { font-size: var(--text-body-sm); border: 0; box-shadow: none; }
+
+/* Phone density — below md every table steps down to 8/12 px cells at the
+   sm type step. Not a DS rule; the service-portal introduced it so wide
+   tables survive 360 px screens, adopted here for parity
+   (docs/design-alignment.md D27). */
+@media (max-width: 767.98px) {
+  .table th,
+  .table td { padding: var(--space-sm) var(--space-2sm); font-size: var(--text-body-sm); }
+}
 
 /* Small helpers used alongside .table — kept here so future tables can
    share them without re-introducing inline styles in views. */
@@ -165,21 +190,35 @@
   margin: 0 0 var(--space-lg);
 }
 .filter-pills[hidden] { display: none; }
+/* Pill geometry = the DS `.tag-item` (tag-item.postcss): the 44/48 @1280/
+   52 @1920 control ramp, `px-4 2xl:px-5` inner inset, `text--base` type,
+   `leading-tight`, pill radius. Fill follows the service-portal's
+   active-filter tag-items (secondary-100, hover secondary-200 — their
+   documented tint for REMOVABLE filters, vs the DS's gray-200 browse
+   chips), so the two portals' filter rows render identically
+   (docs/design-alignment.md D30). Was a compact 14 px pill on
+   secondary-50 with a hairline border. */
 .filter-pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-md);
-  background: var(--color-secondary-50);
-  border: 1px solid var(--color-secondary-100);
+  min-height: var(--btn-min-h);
+  padding: 0 var(--space-sm) 0 var(--space-md);
+  background: var(--color-secondary-100);
+  border: 0;
   border-radius: var(--radius-full);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);
   color: var(--color-text-primary);
-  line-height: var(--line-height-snug);
+  line-height: var(--line-height-tight);
+  transition: background var(--transition-fast);
 }
+@media (min-width: 1280px) { .filter-pill { min-height: var(--btn-lg-min-h); } }
+@media (min-width: 1544px) { .filter-pill { padding-left: calc(var(--space-md) + var(--space-xs)); } }  /* DS 2xl:px-5 */
+@media (min-width: 1920px) { .filter-pill { min-height: 52px; } }
+.filter-pill:hover { background: var(--color-secondary-200); }
 .filter-pill__label {
-  /* A11Y-002: gray-500 on the secondary-50 pill is 4.37:1 (< 4.5). Tinted
-     surfaces take -700 foregrounds per the DS notification-hint pairing. */
+  /* Tinted surfaces take -700 foregrounds per the DS notification-hint
+     pairing (A11Y-002). */
   color: var(--color-gray-700);
 }
 .filter-pill__value {
@@ -274,10 +313,13 @@
   align-items: stretch;
   justify-content: flex-end;            /* CD Bund .pagination--right pattern */
   flex-wrap: wrap;
-  gap: var(--space-sm);
-  padding-block: var(--space-lg);
+  gap: var(--space-2sm);                /* DS space-x-3 = 12 px (pagination.postcss:6) — was 8 */
+  padding-block: var(--space-lg);       /* DS .pagination--right py-6 → 7 @1024 → 8 @1544 */
   font-size: var(--text-body);   /* DS pagination input btn--base → text--base; count/text inherit */
 }
+/* DS lg:py-7 = 28 px — composed md (16) + 2sm (12); no 28 px t-shirt step. */
+@media (min-width: 1024px) { .pagination { padding-block: calc(var(--space-md) + var(--space-2sm)); } }
+@media (min-width: 1544px) { .pagination { padding-block: var(--space-xl); } }
 /* Item-range label (e.g. "1–12 von 247 Liegenschaften"). Sits to the
    left of the controls — `margin-right: auto` pushes the chevron / page
    input / chevron cluster to the right. Not in the CD Bund component
@@ -289,49 +331,53 @@
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
+/* Page-jump field — DS `.pagination input` (pagination.postcss:8-11): 48 px
+   wide, `px-2`, and the BUTTON height ramp (`btn--base` 44/48 @1280/
+   52 @1920) on the standard input skin (1 px text-500 border, radius-xs,
+   `shadow`). Was: 3 px radius, no shadow, 44 px at every width, hover
+   darkening and a third focus geometry (docs/design-alignment.md D28). */
 .pagination__input {
   width: 48px;
   text-align: center;
-  padding: 0 var(--space-xs);
+  padding: 0 var(--space-sm);
   font-family: inherit;
   font-size: var(--text-body);   /* DS btn--base text--base */
   color: var(--color-text-primary);
   background: var(--color-white);
   border: 1px solid var(--color-border-input);
-  border-radius: var(--radius);
-  min-height: var(--btn-min-h);          /* WCAG 2.5.5 — audit M-C9 */
-  transition: border-color var(--transition-fast);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow);
+  min-height: var(--btn-min-h);
   /* Hide the spinner arrows — they make the field look noisy at this size */
   appearance: textfield;
   -moz-appearance: textfield;
 }
+@media (min-width: 1280px) { .pagination__input { min-height: var(--btn-lg-min-h); } }
+@media (min-width: 1920px) { .pagination__input { min-height: 52px; } }
 .pagination__input::-webkit-outer-spin-button,
 .pagination__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.pagination__input:hover:not(:focus) { border-color: var(--color-text-primary); }
-.pagination__input:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 1px;
-  border-color: var(--color-primary);
-}
 .pagination__text {
   display: inline-flex;
   align-items: center;
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
-/* Icon-only button variant for chevron-left / chevron-right.
-   Squared the .btn rule's text padding so the icon centers. */
+/* Icon-only buttons — DS `.btn--icon-only { px-[0.625em] }` with the
+   1.4em glyph (btn.postcss:160-166): width follows the min-height ramp
+   naturally (≈ square at every step). Was a hard 44/48 px square with a
+   28 px glyph (docs/design-alignment.md D28). */
 .btn--icon-only {
-  padding: 0;
-  width: var(--btn-min-h);
+  padding-inline: 0.625em;
+  justify-content: center;
 }
-@media (min-width: 1280px) { .btn--icon-only { width: var(--btn-lg-min-h); } }
-.btn--icon-only .inline-icon { width: var(--icon-md); height: var(--icon-md); }
 /* Anchor variant of the pagination buttons — properties pagination uses
-   <a href> so middle-click + back/forward + share links all work. */
+   <a href> so middle-click + back/forward + share links all work.
+   Disabled = the DS flat bare-button recipe (secondary-300 text, no
+   opacity — a translucent control reads broken, btn.postcss disabled
+   fills). */
 a.btn { text-decoration: none; }
 a.btn[aria-disabled="true"] {
-  opacity: 0.5;
+  color: var(--color-secondary-300);
   pointer-events: none;
   cursor: not-allowed;
 }

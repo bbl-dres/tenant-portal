@@ -197,13 +197,19 @@
   --color-success:             #047857;       /* green-700 — terminal "done" */
   --color-success-bright:      #10B981;       /* green-500 — active / confirmed */
   --color-success-light:       #D1FAE5;
-  --color-warning:             #F59E0B;
+  /* Warning + info accents ride the CD hue families (warning = orange,
+     info = blue — notification.postcss / badge.postcss both source those
+     families). The former amber #F59E0B / federal-teal #0F6B75 were portal
+     inventions and diverged from the sister service-portal, which already
+     uses the CD hues (service tokens.css --color-warning/--color-info).
+     Aligned 2026-08 (docs/design-alignment.md D37). */
+  --color-warning:             #F97316;       /* orange-500 */
   --color-warning-light:       #FEF3C7;
   /* Danger is an ERROR signal, not the brand — it rides --color-red-*, so a
      skin that retunes primary (intranet) leaves it red. */
   --color-danger:              var(--color-red-600);
   --color-danger-light:        var(--color-red-100);   /* CD red-100 */
-  --color-info:                #0F6B75;
+  --color-info:                #3B82F6;       /* blue-500 — matches service-portal */
 
   /* ── NOTIFICATION VARIANTS (CD Bund `notification.postcss`) ───────────
      The DS tints each notification variant with a `-50` stop and colours the
@@ -376,6 +382,11 @@
      tokens; breakpoint bumps below at 768/1024. */
   --text-badge:                0.75rem;    /* 12px — Tailwind fontSize.xs */
   --leading-badge:             1.25rem;    /* 20px — Tailwind leading-5 */
+  /* DS `.badge--sm` ramp (badge.postcss:79-82): `text-[10px] md:text-xs
+     lg:text-sm` + `leading-4 md:leading-[1.35rem]`. Same static-scale
+     convention as --text-badge; breakpoint bumps below at 768/1024. */
+  --text-badge-sm:             0.625rem;   /* 10px — DS text-[10px] */
+  --leading-badge-sm:          1rem;       /* 16px — Tailwind leading-4 */
 
   /* Letter-spacing — five named tracks consolidate the ad-hoc tunings
      scattered through the section files. Remaining literal values (1px on
@@ -678,8 +689,8 @@
    lg:text-base` + `leading-5 lg:leading-6` on the static Tailwind
    fontSize scale (12/14/16 px at base/768/1024; leading 20 → 24 px
    at 1024). ─────────────────────────────────────────────────────────── */
-@media (min-width: 768px)  { :root { --text-badge: 0.875rem; } }                          /* 14px */
-@media (min-width: 1024px) { :root { --text-badge: 1rem; --leading-badge: 1.5rem; } }     /* 16px / 24px */
+@media (min-width: 768px)  { :root { --text-badge: 0.875rem; --text-badge-sm: 0.75rem; --leading-badge-sm: 1.35rem; } }   /* 14px / 12px / 21.6px */
+@media (min-width: 1024px) { :root { --text-badge: 1rem; --leading-badge: 1.5rem; --text-badge-sm: 0.875rem; } }          /* 16px / 24px / 14px */
 
 /* ── RESPONSIVE CONTAINER PADDING — matches kbob-fdk / CD Bund ──────────
    Steps: 16 → 28 → 36 → 40 → 48 → 64 px across sm/md/lg/xl/2xl/3xl. */
@@ -774,7 +785,9 @@ mark {
   font-weight: var(--font-weight-regular);
   text-transform: uppercase;
   letter-spacing: var(--tracking-label);
-  color: var(--color-text-secondary);
+  /* gray-600 — the shared cross-portal kicker ink (service-portal .eyebrow).
+     Was gray-500; unified 2026-08 (docs/design-alignment.md D20). */
+  color: var(--color-gray-600);
   margin: 0 0 var(--space-sm);
 }
 
@@ -786,7 +799,12 @@ mark {
    fixed focusables — so on static elements this is inert, exactly as the
    DS `z-10` is. */
 :focus-visible {
-  outline: 3px solid var(--color-focus);
+  /* 2 px matches the DS ring-2 exactly (global.postcss:75) and the sister
+     service-portal. The former 3 px was a portal-only thickening; retired in
+     the 2026-08 cross-portal alignment (docs/design-alignment.md D17). The
+     2 px OFFSET stays — a shared, documented deviation from the DS's flush
+     ring (offset 0) so the ring reads against colored control fills. */
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
   z-index: 10;
 }
@@ -794,7 +812,7 @@ mark {
 /* Dark-chrome focus ring — DS `global.postcss:78-85` switches the ring to
    purple-300 wherever the ground is the dense secondary ramp (`.top-bar &,
    .bg--secondary-500…900 &`). purple-500 on secondary-600 is ≈2.4:1; the
-   purple-300 variant is ≈6.6:1. Same 3 px thickness as the global ring
+   purple-300 variant is ≈6.6:1. Same 2 px thickness as the global ring
    (DESIGNGUIDE §5.12: one-thickness rule; only the colour switches on
    dark ground). A11Y-004: the mobile drawer's meta zone + language bar
    are dark surfaces too. Components that draw their own on-dark rings
@@ -805,7 +823,7 @@ mark {
 .bg--secondary-700 :focus-visible,
 .main-navigation__mobile-meta :focus-visible,
 .main-navigation__mobile-lang :focus-visible {
-  outline: 3px solid var(--color-focus-dark);
+  outline: 2px solid var(--color-focus-dark);
   outline-offset: 2px;
   box-shadow: none;
 }
@@ -859,7 +877,11 @@ html { scroll-behavior: smooth; }
   border: 2px solid var(--color-white);
   box-shadow: var(--shadow-md);  /* DS global.postcss:67 skip-link shadow-md — TOK-002 */
   text-decoration: none;
-  transition: transform var(--transition);
+  /* 150 ms — Tailwind's `transition-transform` default, which the DS skip
+     link rides; also what the service-portal uses (--duration-fast). One-off
+     literal: the portal's motion tokens are 120/200/320 and none is the DS
+     value (docs/design-alignment.md D39). */
+  transition: transform 150ms ease;
 }
 .skip-to-content:focus,
 .skip-to-content:focus-visible {

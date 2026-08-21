@@ -17,8 +17,13 @@
 .h1 { font-size: var(--text-h1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }
 .h2 { font-size: var(--text-h2); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }
 .h3 { font-size: var(--text-h3); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); margin: 0 0 var(--space-md); }  /* DS `.text--xl` applies leading-tight (1.25) */
-.h4 { font-size: var(--text-h4); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
-.h5 { font-size: var(--text-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); margin: 0 0 var(--space-md); }
+/* h4/h5 keep the DS line-height: `.h4`/`.h5` size ramps (`text--lg` /
+   `text--base`) inherit the body's leading-normal 1.5 — the DS applies
+   leading-tight only from `text--xl` up (typography.postcss:18-49). The
+   former 1.375 was a portal-only tightening; service-portal renders 1.5
+   (docs/design-alignment.md D19). */
+.h4 { font-size: var(--text-h4); font-weight: var(--font-weight-bold); line-height: var(--line-height-normal); margin: 0 0 var(--space-md); }
+.h5 { font-size: var(--text-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-normal); margin: 0 0 var(--space-md); }
 
 /* Caption — DS .legend / figcaption pattern (typography.postcss:131-137).
    Light grey, body-xs sized, slight top padding to separate from the image. */
@@ -44,10 +49,15 @@ figcaption {
    landing + auth-home views. Mirrors DS pattern of a single utility class
    per layout responsibility. */
 .section-intro {
-  max-width: 60ch;
-  color: var(--color-text-secondary);
-  font-size: var(--text-body);
-  line-height: var(--line-height-relaxed);
+  /* Lead recipe unified with the hero lead and the sister service-portal's
+     `.lead` (docs/design-alignment.md D18): one ramp step above body
+     (DS `.hero__description` = text--lg 18/18/20/22), gray-600 ink, and no
+     measure cap — the DS caps leads via grid columns, not `ch`, and the
+     service-portal removed its caps deliberately. Was: 16-ramp, gray-500,
+     60ch. */
+  color: var(--color-gray-600);
+  font-size: var(--text-h4);
+  line-height: var(--line-height-snug);
   margin: 0 0 var(--space-2xl);
 }
 .section-intro--tight { margin-bottom: var(--space-lg); }

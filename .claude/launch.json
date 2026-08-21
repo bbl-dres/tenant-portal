@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "0.0.1",
   "configurations": [
     {
@@ -6,7 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8125"],
       "port": 8125
+    },
+    {
+      "name": "service-portal",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8126", "--directory", "C:/Users/david/Documents/GitHub/service-portal"],
+      "port": 8126
     }
   ]
 }
-

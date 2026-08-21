@@ -170,11 +170,23 @@
 
 /* DS rule (section.postcss:29-51): when two bands share a background the seam
    is invisible, so the second one drops its top padding instead of stacking a
-   double gap. Ported for the bands the portal actually uses. */
+   double gap. Ported for the bands the portal actually uses — INCLUDING the
+   hero pairs (`.hero + .section--default`, `.hero + .bg--white`): the hero is
+   white too, so a white section after it used to stack hero-bottom (56/80/128)
+   on section-top for a 112–256 px void. The service-portal ports the full
+   list; aligned 2026-08 (docs/design-alignment.md D22). */
 .bg--white + .bg--white,
 .bg--secondary-50 + .bg--secondary-50,
-.bg--secondary-600 + .bg--secondary-600 {
+.bg--secondary-600 + .bg--secondary-600,
+.hero + .section,
+.hero + .bg--white {
   padding-top: 0;
+}
+/* A tinted band after the white hero keeps its own top padding. */
+.hero + .bg--secondary-50,
+.hero + .section--alt,
+.hero + .bg--secondary-600 {
+  padding-top: var(--section-py);
 }
 
 .stack > * + * { margin-top: var(--space-md); }
@@ -194,27 +206,40 @@
 }
 .hero__inner { max-width: var(--container-max-width); margin: 0 auto; }
 /* Hero title — layout-only. Combine with `.h1` for the responsive size
-   (DS pattern: `class="h1 hero__title"`). Sets break behaviour + max-width
-   so titles wrap at ~3 lines max, mirroring kbob/bbl hero proportions. */
+   (DS pattern: `class="h1 hero__title"`). No `ch` measure cap: the DS caps
+   hero content via grid columns, never via character counts, and the
+   service-portal carries no cap either (docs/design-alignment.md D18). */
 .hero__title {
   color: var(--color-text-primary);
-  max-width: 18ch;
   overflow-wrap: break-word;
 }
-.hero--wide .hero__title { max-width: 26ch; }
+/* Hero content stack — DS `.hero__content { space-y-6 lg:space-y-8
+   3xl:space-y-10 }` (hero.postcss:14-16) = 24 / 32 @1024 / 40 @1920 between
+   title, lead and action slot. The margin lives on the following siblings so
+   plain hero markup (h1 + p + form) picks the rhythm up without a wrapper.
+   Was a flat 32 px on the lead only (docs/design-alignment.md D23). */
+.hero__title + *,
+.hero__lead + * { margin-top: var(--space-lg); }
+@media (min-width: 1024px) {
+  .hero__title + *,
+  .hero__lead + * { margin-top: var(--space-xl); }
+}
+@media (min-width: 1920px) {
+  .hero__title + *,
+  .hero__lead + * { margin-top: var(--space-2lg); }
+}
 .hero__lead {
   font-size: var(--text-h4);
-  color: var(--color-text-secondary);
-  max-width: 60ch;
-  margin: 0 0 var(--space-xl);
+  /* gray-600 — the shared lead ink (service-portal .lead; DS leaves default
+     ink, both portals agree on the muted step). Was gray-500. */
+  color: var(--color-gray-600);
+  margin: 0;
   line-height: var(--line-height-snug);
 }
 /* `.hero__cta` (the button row) is retired: the landing hero's action slot is
    the portal search — see `.home-search` in sections/secondary-pages.css,
    which shares the search-results hero's DS search--large composition. */
 
-/* No phone-size padding reduction: the DS hero keeps its full pt-12 /
-   container--pb rhythm at every width — only the lead steps down. */
-@media (max-width: 480px) {
-  .hero__lead { font-size: var(--text-body); }
-}
+/* No phone downstep: the DS `.hero__description` stays text--lg (18 px) at
+   every width; the former 16 px below 480 was portal-only
+   (docs/design-alignment.md D18). */

@@ -139,7 +139,7 @@ the top of the file. Each block follows BEM (`block__element--modifier`).
 | `.pipeline`          | (no DS equivalent)                        | portal-specific status sequence                                      |
 | `.form-field`        | `form.postcss`                            | layout shell for label / input / hint / error                        |
 | `.input`, `.input--{sm,lg,error,disabled}` | `input.postcss`             | standalone input visuals — reusable outside `.form-field`            |
-| `.table`, `.table--{zebra,rows-clickable,caps,compact}` | `table.postcss` | DS contained-object look (outer border + shadow); `--compact` drops both. Headers are sentence-case + bold (DS default is uppercase — see §5.10); `--caps` restores the DS uppercase look |
+| `.table`, `.table--{zebra,rows-clickable,caps,compact}` | `table.postcss` | DS contained-object look (outer border + shadow); `--compact` drops both. Headers are the DS default (uppercase `text--sm` `text-700`) since the 2026-08 alignment — see §5.10; `--caps` is an inert alias. Row hover only on `--rows-clickable` |
 | `.table-hint`, `.table-empty` | (layout helpers)                  | helper paragraph below a table / centred empty-row cell              |
 | `.filter-pill[__remove/__remove-icon]` | (block, DS badge-adjacent) | active-filter pill with 44 px hit-slop remove control (the former `.tag-item`/`.filter-row` chip system was removed in the 2026-08 re-audit — unreferenced) |
 | `.page-header[__title/__sub/__actions/__count]` | (layout-only)   | H1 + side-actions row used on inbox / queue / detail; replaces ad-hoc inline flex blocks |
@@ -296,29 +296,34 @@ size | date` metadata strip. Whole row is one clickable link.
    `css/skins/default.postcss`. When DS changes, [`css/tokens.css`](../css/tokens.css) must be
    reviewed.
 
-10. **Sentence-case, bold table headers** — DS `table.postcss` defaults
-    `thead th` to **uppercase**, regular weight, `text-700`. We use
-    sentence-case + bold for scannability in dense reviewer queues; the DS
-    uppercase look is available via `.table--caps`.
+10. ~~**Sentence-case, bold table headers**~~ **— RESOLVED (now DS-aligned).**
+    `thead th` renders the DS default again: **uppercase**, `text--sm`,
+    `text-700` (bold retained — the DS leaves the UA weight in place).
+    Retired in the 2026-08 cross-portal alignment so both prototypes'
+    tables read identically ([design-alignment.md](design-alignment.md) D27);
+    `.table--caps` remains as an inert alias.
 
 11. **Static-px icon scale** — `--icon-*` are fixed px, not the DS
     responsive `.icon--*` (which bump one step at `md`/`lg`). The portal's
     inline icons sit with body text and don't need to grow with the
     viewport; sizing stays predictable across breakpoints.
 
-12. **3 px focus outline on light surfaces** — DS uses a 2 px `ring`; we use
-    a 3 px `outline` + 2 px offset (WCAG 2.4.11-favourable, thicker target).
-    On dark chrome the ring switches **colour** (purple-300) at the same
-    thickness. Consistent one-thickness rule. **Exception: text fields** —
-    inputs (incl. the header search) take the DS-exact 2 px purple ring
-    hugging the field edge with the border staying `text-500`
-    (`input.postcss:17` + `global.postcss:75-76`); a 3 px offset outline
-    around a bordered field reads as a double frame.
+12. **2 px focus outline, 2 px offset** — the ring is the DS's 2 px
+    thickness everywhere (was 3 px until the 2026-08 cross-portal
+    alignment; [design-alignment.md](design-alignment.md) D17). The 2 px
+    OFFSET remains a deliberate, now *shared* deviation from the DS's
+    flush ring (offset 0) so the ring reads against coloured control
+    fills. On dark chrome the ring switches **colour** (purple-300) at the
+    same thickness — one-thickness rule unchanged. Text fields ride the
+    same global ring (the former field-local hugging box-shadow ring was
+    retired with it).
 
-13. **`.overtitle` restyle** — uppercase + `0.06em` tracking + `text-500`
+13. **`.overtitle` restyle** — uppercase + `0.06em` tracking + `text-600`
     recolour vs the DS `overtitle` (`secondary-100`, no transform). The
     recolour keeps the kicker legible on light card surfaces; the
-    transform/tracking is a deliberate eyebrow treatment.
+    transform/tracking is a deliberate eyebrow treatment. The exact recipe
+    (tracking, ink, 8 px margin) is the *shared* cross-portal kicker
+    ([design-alignment.md](design-alignment.md) D20).
 
 14. ~~**Neutral gray default badge**~~ **— RESOLVED (now DS-aligned).**
     The base `.badge` now uses the DS `.badge--gray` pair (blue-gray

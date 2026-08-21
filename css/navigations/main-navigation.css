@@ -425,28 +425,38 @@
 @media (min-width: 1280px) {
   .breadcrumb { padding-block: var(--space-2sm); }
 }
+/* Crumbs are PADDED items — DS breadcrumb.postcss:23-27: each link takes
+   `px-4 py-2 md:py-4` and the list pulls `-ml-4` so the first crumb's TEXT
+   sits on the container edge. The breadcrumb renders only ≥1024, so the
+   `md:py-4` (16 px) step is the one that applies. Matches the
+   service-portal's port exactly (docs/design-alignment.md D14). Previously
+   the crumbs were unpadded with 4 px chevron margins — a denser, portal-only
+   look. */
 .breadcrumb a { color: inherit; text-decoration: none; }
-.breadcrumb a:hover { color: var(--color-primary); text-decoration: underline; }
+.breadcrumb a:hover { color: var(--color-primary); text-decoration: none; }
+/* Current page keeps the same text-500 ink as the rest of the trail — DS
+   breadcrumb.postcss:8 colors the WHOLE bar text-500 with no current-page
+   emphasis; service-portal does the same. */
 .breadcrumb [aria-current="page"] {
-  color: var(--color-text-primary);
+  color: inherit;
   font-weight: var(--font-weight-regular);
 }
-/* Inline SVG chevron — replaces the previous `›` literal which
-   relied on the system font. Now scales with the breadcrumb font-size
-   and inherits text-muted via currentColor. */
-/* Breadcrumb separator — em-based so it scales with the surrounding
-   breadcrumb font-size. 0.75em ≈ 10-11 px at our breadcrumb font-size,
-   matching the subtle "›" you see on bbl.admin.ch / geo.admin.ch.
-   `align-items: center` on `.breadcrumb__item` handles centring (the
-   item is a flexbox, so the previous `vertical-align: middle` was
-   ignored — that's why the chevron looked off-axis).
-   Double-class selector: the separator rides `icon()`'s `.inline-icon`
-   base class, whose 24 px sizing block in components/status.css imports
-   LATER (css/main.css order) at equal specificity — same defence as
-   `.inline-icon.main-navigation__chevron` above. */
+.breadcrumb__item > a,
+.breadcrumb__item > [aria-current="page"] {
+  display: flex;
+  align-items: center;
+  padding: var(--space-md);            /* DS px-4 py-4 (md step) */
+  line-height: var(--line-height-tight);
+}
+/* Separator chevron — the DS include-icon geometry the service-portal uses
+   (`-ml-5 mr-3`, 16 px box): the glyph sits inside the two crumbs' shared
+   32 px padding gutter. */
 .inline-icon.breadcrumb__sep {
-  width: 0.75em; height: 0.75em;
-  margin: 0 var(--space-xs);
+  width: var(--space-md); height: var(--space-md);
+  /* DS -ml-5 = -20 px; composed from md (16) + xs (4) — no 20 px step on the
+     t-shirt scale. */
+  margin-left: calc(-1 * (var(--space-md) + var(--space-xs)));
+  margin-right: var(--space-2sm);
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
@@ -454,7 +464,7 @@
    The list itself stays inline so the chevron rhythm reads as one line. */
 .breadcrumb__list {
   list-style: none;
-  margin: 0;
+  margin: 0 0 0 calc(var(--space-md) * -1);   /* DS nav -ml-4 — first crumb text flush left */
   padding: 0;
   display: flex;
   flex-wrap: wrap;
@@ -577,7 +587,13 @@ body.body--mobile-menu-is-open {
     inset: 72px 0 0;
     z-index: calc(var(--z-modal) - 1);
     overflow-y: auto;
-    background: var(--color-secondary-500);   /* DS mobile-menu.postcss:39 bg-secondary-500 */
+    /* WHITE panel — DS mobile-menu (v1) is `bg-white shadow-2xl`
+       (mobile-menu.postcss:5-12); the zones inside carry their own tints
+       (white nav rows → grey meta rows → dark language strip). The former
+       secondary-500 ground was the v2 flavour; re-based on v1 for parity
+       with the service-portal (docs/design-alignment.md D15). */
+    background: var(--color-white);
+    box-shadow: var(--shadow-2xl);
     border: 0;
   }
   body.body--mobile-menu-is-open .navbar__inner {
@@ -668,44 +684,49 @@ body.body--mobile-menu-is-open {
 }
 
 @media (max-width: 1023.98px) {
-  /* Meta zone (Kontakt / Hilfe) — CD mobile pattern wraps utility links
-     in a dark-navy block at the foot of the menu, white text. Matches
-     designsystem/css/sections/mobile-menu.postcss `.top-bar-navigation--mobile
-     ul a { bg-secondary-500, text-white }`. */
+  /* Meta zone (account / Kontakt / Hilfe) — the DS mobile menu's GREY zone:
+     `.meta-navigation--mobile li > a { bg-secondary-50 hover:bg-secondary-100 }`
+     with dark text and secondary-100 rules (navy.postcss:34-36,
+     mobile-menu.postcss:126-134). The service-portal renders its meta rows
+     the same way. (Previously this zone was tinted secondary-500 like the
+     DS's *federal-links* zone — the wrong zone for site utilities;
+     docs/design-alignment.md D15.) */
   .main-navigation__mobile-meta {
     display: block;
     width: 100%;
-    background: var(--color-secondary-500);   /* DS mobile-menu.postcss:39 / navy.postcss:39 bg-secondary-500 */
+    background: var(--color-secondary-50);
   }
   .main-navigation__mobile-meta .main-navigation__link {
     min-height: 56px;
     padding: var(--space-md) var(--container-padding);
-    border-bottom: 1px solid var(--color-white-12);
+    border-bottom: 1px solid var(--color-secondary-100);
     font-weight: var(--font-weight-normal);
-    color: var(--color-white);
-    background: var(--color-secondary-500);   /* DS navy.postcss:39 bg-secondary-500 */
+    color: var(--color-text-primary);
+    background: var(--color-secondary-50);
   }
   body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link,
   body.body--mobile-menu-is-open .main-navigation__mobile-meta .main-navigation__link:hover {
-    color: var(--color-white);
+    color: var(--color-text-primary);
   }
   .main-navigation__mobile-meta .main-navigation__link:hover {
-    background: var(--color-white-06);
-    color: var(--color-white);
+    background: var(--color-secondary-100);
+    color: var(--color-text-primary);
   }
   /* Meta links are terminal — no drill-down. Hide their right-arrow. */
   .main-navigation__mobile-meta .main-navigation__arrow { display: none; }
-  /* Account row(s) — user/login/logout with a leading icon. The <button>
-     variants reset button chrome so login/logout read as meta rows. */
+  /* Account row(s) — user/login/logout with a leading icon, LEFT-aligned
+     like every other menu row (the base row's space-between would push the
+     label to the right edge). */
   .main-navigation__mobile-meta-account {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--space-sm);
   }
   button.main-navigation__mobile-meta-account {
     width: 100%;
     border: 0;
-    border-bottom: 1px solid var(--color-white-12);
+    border-bottom: 1px solid var(--color-secondary-100);
     text-align: left;
     font: inherit;
     cursor: pointer;

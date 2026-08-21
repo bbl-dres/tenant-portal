@@ -24,9 +24,12 @@
   padding: var(--space-2lg) var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);            /* DS card__body space-y-4 = 16 px (card.postcss:210-213) — was 8 */
   box-shadow: var(--shadow-card);
 }
+/* Inside the card the flex gap IS the DS space-y-4 rhythm — the title's own
+   bottom margin would double it. */
+.card > .card__title { margin-bottom: 0; }
 /* Canonical card title. DS `card.postcss:215-220` `.card__title` is
    `text-lg xl:text-xl 3xl:text-2xl` bold (18/20/24 px) — never below 18 px —
    with `leading-snug` and `break-words`. `--text-h4` (18/18/20/22) meets
@@ -104,7 +107,9 @@
   box-shadow: var(--shadow-card);
   min-height: 200px;
   cursor: pointer;
-  transition: box-shadow var(--transition-fast);
+  /* DS clickable-card elevation runs 300 ms ease-in-out
+     (card.postcss:15-17) — was the 120 ms fast step. */
+  transition: box-shadow var(--transition-slow);
 }
 .card--quick:hover {
   box-shadow: var(--shadow-card-hover);   /* CD cards lift via shadow only, no translate */
@@ -119,9 +124,12 @@
   color: var(--color-text-primary);
   margin: 0 0 var(--space-md);
   line-height: var(--line-height-snug);
-  transition: color var(--transition-fast);
+  transition: color var(--transition);
 }
-.card--quick:hover .card--quick__title { color: var(--color-primary); }
+/* Hover title = primary-700 — the DS clickable-card hover step
+   (card.postcss:31-33 `text-primary-700`); primary-600 was one step light
+   and diverged from the service-portal (docs/design-alignment.md D29). */
+.card--quick:hover .card--quick__title { color: var(--color-primary-700); }
 .card--quick__desc {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
@@ -163,7 +171,7 @@
   flex-direction: column;
   min-height: 360px;
   overflow: hidden;
-  transition: box-shadow var(--transition);
+  transition: box-shadow var(--transition-slow);   /* DS 300 ms shadow lift */
 }
 /* CD cards lift via shadow only — no translate (DS card.postcss:27-29,
    the sole transform in the DS card family is the --highlight backing
@@ -202,9 +210,9 @@
   font-weight: var(--font-weight-bold);
   margin: 0 0 var(--space-sm);
   color: var(--color-text-primary);
-  transition: color var(--transition-fast);
+  transition: color var(--transition);
 }
-.card--profile:hover .card--profile__title { color: var(--color-primary); }
+.card--profile:hover .card--profile__title { color: var(--color-primary-700); }
 .card--profile__desc {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);

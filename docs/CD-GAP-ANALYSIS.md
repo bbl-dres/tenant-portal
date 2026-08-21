@@ -1,5 +1,10 @@
 # CD-Bund Design Gap Analysis — BBL Mieterportal
 
+> **See also:** [design-alignment.md](design-alignment.md) (2026-08-21/22) —
+> the three-way cross-PORTAL alignment (Mieterportal ↔ Kundenportal ↔ CD),
+> shared with the sister service-portal repo, with the implemented decision
+> register D1–D40.
+
 > **SUPERSEDED (2026-08-12).** A fresh-eyes re-audit (four parallel reviews:
 > component fidelity, chrome/layout fidelity, hardcoded values, CSS
 > duplication) found most findings below resolved and the file/line

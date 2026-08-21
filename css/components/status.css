@@ -20,7 +20,10 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
+  /* NO flex gap — the DS badge separates an icon from the text purely via
+     the icon's own relative offsets (badge.postcss:85-97); the former
+     0.4em gap made icon badges visibly wider than the service-portal's
+     (docs/design-alignment.md D30). */
   /* CD Bund: padding proportional to font-size so any text-* variant scales */
   padding: 0.219em 1em;
   border-radius: var(--radius-full);
@@ -34,6 +37,19 @@
   color: var(--color-badge-gray-text);
   line-height: var(--leading-badge);
 }
+/* DS `.badge__icon(-left)` — 1.5em box nudged 0.4em INTO the 1em padding
+   (badge.postcss:85-97). The portal's `icon()` output carries .inline-icon,
+   so the double-class keeps priority over the base icon block below. */
+.badge .inline-icon {
+  width: 1.5em;
+  height: 1.5em;
+  margin-right: 0;
+  position: relative;
+  right: 0.4em;
+}
+/* DS `.badge--sm` (badge.postcss:79-82): 10 → 12 @768 → 14 @1024 on
+   leading-4 / 1.35rem — the responsive steps live on the tokens. */
+.badge--sm { font-size: var(--text-badge-sm); line-height: var(--leading-badge-sm); }
 .badge--success { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
 /* `.badge--blue` is the DS's own name for this variant (badge.postcss:46-49);
    `.badge--info` is the portal's semantic name for the same pair. Kept as
@@ -49,7 +65,13 @@
    status if one is ever needed (mirrors DS `.badge--yellow`). */
 .badge--warning,
 .badge--orange  { background: var(--color-badge-orange-bg); color: var(--color-badge-orange-text); }
-.badge--danger  { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
+/* `--error` / `--red` are the DS's own names for the red pair
+   (badge.postcss:23-27); `--danger` is the portal's original semantic name.
+   All three alias the same pair so DS markup and service-portal markup
+   style without translation (docs/design-alignment.md D30). */
+.badge--danger,
+.badge--error,
+.badge--red     { background: var(--color-badge-red-bg);   color: var(--color-badge-red-text); }
 .badge--yellow  { background: var(--color-badge-yellow-bg); color: var(--color-badge-yellow-text); }
 
 /* Data-quality glyph badge (from §0.3). DESIGNGUIDE §6 forbids emoji in
@@ -102,25 +124,25 @@
 }
 .pipeline__step + .pipeline__step { padding-left: var(--space-xl); }
 .pipeline__step:last-child::after { display: none; }
-/* Step-state colours follow the DS status language — a -100 tint with
-   -800 text (badge.postcss:23-50), never a saturated status fill. The
-   previous saturated treatment painted "active" federal red (identical
-   to "rejected" under the public skin) and used a third warning hue
-   (amber) for Rückfrage; audit S1. The ACTIVE step is the one deliberate
-   exception: it uses the filled-button chrome navy (secondary-500 +
-   bold white — same emphasis language as `.btn--filled`), because
-   "where the process is now" is emphasis, not a status hue. */
+/* Step-state colours — aligned with the service-portal's pipeline
+   (docs/design-alignment.md D30): DONE is the solid AA green
+   (green-800 #065F46, white text — 7.68:1, the service-portal's measured
+   choice), ACTIVE is the skin primary (primary-600 + bold white — ONE
+   "you are here" colour across both portals; follows the intranet skin to
+   blue exactly like the service-portal's). Rejected / Rückfrage keep the
+   DS badge tint pairs — states the sister portal doesn't render, so the
+   -100/-800 status language stays (audit S1). */
 .pipeline__step--done {
-  background: var(--color-badge-green-bg);
-  color: var(--color-badge-green-text);
+  background: var(--color-badge-green-text);   /* green-800 #065F46 — the service-portal's done fill (white 7.68:1) */
+  color: var(--color-white);
 }
-.pipeline__step--done::after { border-left-color: var(--color-badge-green-bg); }
+.pipeline__step--done::after { border-left-color: var(--color-badge-green-text); }
 .pipeline__step--active {
-  background: var(--color-secondary-500);
+  background: var(--color-primary-600);
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
 }
-.pipeline__step--active::after { border-left-color: var(--color-secondary-500); }
+.pipeline__step--active::after { border-left-color: var(--color-primary-600); }
 .pipeline__step--rejected {
   background: var(--color-badge-red-bg);
   color: var(--color-badge-red-text);
@@ -203,32 +225,36 @@
   gap: var(--space-sm);
   min-width: 0;
 }
+/* AA recolor — shared with the service-portal (their measured finding: the
+   DS template's gray-400 rings/fills sit at 2.54:1, below AA; docs/
+   design-alignment.md D30 + kept-deviations #7). Ring secondary-400 (5.65:1
+   red skin / 4.58:1 intranet), number text-600 regular; ACTIVE fills with
+   the skin primary + a primary-100 halo (state is not colour-only, WCAG
+   1.4.1); CONFIRMED fills green-800 (white 7.68:1) — the same terminal
+   green as the pipeline's done step. */
 .step-indicator__step {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--color-gray-400);
+  border: 2px solid var(--color-secondary-400);
   background: transparent;
-  color: var(--color-gray-400);
+  color: var(--color-gray-600);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-regular);
   font-size: var(--text-body-sm);
   flex-shrink: 0;
 }
 .step-indicator__step--active {
-  background: var(--color-gray-400);
-  border-color: var(--color-gray-400);
+  background: var(--color-primary-600);
+  border-color: var(--color-primary-600);
   color: var(--color-white);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
 }
-/* Confirmed step uses success-bright (green-500) — CD Bund pattern for
-   in-flight / just-completed states. The darker `--color-success`
-   (green-700) is reserved for terminal "done" badges where the
-   completion is archival rather than active. */
 .step-indicator__step--confirmed {
-  background: var(--color-success-bright);
-  border-color: var(--color-success-bright);
+  background: var(--color-badge-green-text);
+  border-color: var(--color-badge-green-text);
   color: var(--color-white);
 }
 .step-indicator__step--confirmed svg { width: var(--icon-base); height: var(--icon-base); }

@@ -299,14 +299,20 @@ export function authNavItems() {
 // ── FEDERAL SHELL ──────────────────────────────────────────────────────────
 export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], navItems = [] } = {}) {
   const sub = deptSub || t('org.portal');
-  // Anmelden lives in the top-bar (dark utility bar), not the brand bar.
-  // Plain white text per CD pattern — not a red filled button.
-  const authPill = state.user
-    ? `<a class="top-bar__link top-bar__link--user" href="#/profile" aria-label="${t('top.profileAria', { name: escapeHtml(state.user.name) })}">
+  // Sign-in / account lives in the WHITE meta bar — the DS TopHeader anatomy
+  // (MetaNavigation carries site utilities) and the sister service-portal's
+  // `.meta-navigation__user/__auth` slot. It used to be a pill in the dark
+  // top-bar; moved in the 2026-08 cross-portal alignment
+  // (docs/design-alignment.md D5). Signed in: icon+name as a plain label,
+  // a vertical rule, then Abmelden; signed out: one Anmelden entry.
+  const metaAuth = state.user
+    ? `<a class="top-header__meta-user" href="#/profile" aria-label="${t('top.profileAria', { name: escapeHtml(state.user.name) })}">
          ${icon('user')}
-         ${escapeHtml(state.user.name)}
-       </a>`
-    : `<button class="top-bar__link top-bar__link--user" type="button" onclick="window.portal.login()">
+         <span>${escapeHtml(state.user.name)}</span>
+       </a>
+       <span class="top-header__meta-divider" aria-hidden="true"></span>
+       <button class="top-header__meta-link" type="button" onclick="window.portal.logout()">${t('top.logout')}</button>`
+    : `<button class="top-header__meta-link" type="button" onclick="window.portal.login()">
          ${icon('user')}
          ${t('top.login')}
        </button>`;
@@ -487,7 +493,6 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
           </a>
           <div class="top-bar__actions">
             <span class="top-bar__demo-chip" role="status" aria-label="${t('top.demoAria')}">${t('top.demo')}</span>
-            ${authPill}
             <div class="language-switcher" id="langSwitch">
               <button class="top-bar__lang" aria-label="${t('lang.choose')}" aria-haspopup="listbox" aria-expanded="false"
                       onclick="window.portal.toggleLang()">
@@ -508,8 +513,12 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
         </div>
       </div>
 
+      <!-- Strip copy is «office — portal», the pattern the DS mobile-title
+           strip carries and the service-portal uses ("Bundesamt für Bauten
+           und Logistik — Kundenportal"). Below 480 the lockup shows only the
+           acronym, so this strip names both office and product. -->
       <div class="top-header__department-strip" aria-hidden="true">
-        <div class="top-header__department-strip-inner">${t('org.bbl')}</div>
+        <div class="top-header__department-strip-inner">${t('org.bblPlain')} — ${sub}</div>
       </div>
 
       <div class="top-header">
@@ -522,6 +531,10 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
             </span>
             <span class="top-header__divider" aria-hidden="true"></span>
             <span class="top-header__dept">
+              <!-- DS .logo__accronym — the short mark replaces the long
+                   office title below 480 (logo.postcss:84-86); CSS swaps
+                   visibility (header.css lockup-compact block). -->
+              <span class="top-header__dept-acronym" aria-hidden="true">${t('org.bblShort')}</span>
               <span class="top-header__dept-name"><strong>${t('org.bbl')}</strong></span>
               <span class="top-header__dept-sub">${sub}</span>
               <!-- Intranet marker. CD Bund appends it to the logo lockup in
@@ -540,13 +553,16 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
             <nav class="top-header__meta" aria-label="Meta-Navigation">
               <a class="top-header__meta-link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
               <a class="top-header__meta-link" href="#/info">${t('nav.help')}</a>
+              ${metaAuth}
             </nav>
             <div class="top-header__actions">
               <div class="header-search" id="headerSearch">
                 <button class="header-search__toggle" type="button"
                         aria-expanded="false" aria-controls="headerSearchForm"
                         onclick="window.portal.toggleSearch(true)">
-                  <span>${t('top.search')}</span>
+                  <!-- «Suche» (noun) — the DS/service-portal header label;
+                       «Suchen» (verb) stays on action buttons. -->
+                  <span>${t('top.searchToggle')}</span>
                   ${icon('search')}
                 </button>
                 <form class="header-search__form" id="headerSearchForm" role="search" aria-label="${t('top.search')}"
@@ -602,12 +618,27 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
 // brand column (motto), Weitere Informationen (link list with arrows),
 // Prototyp meta column, then a narrow darker strip with AGB / Rechtliches /
 // Barrierefreiheit, plus a back-to-top button anchored top-right.
+// Footer link row. External targets carry the External glyph, internal ones
+// the arrow — the DS footer's icon slot is semantic, and the service-portal
+// marks external targets the same way (docs/design-alignment.md D16).
+function footerLink(href, label, external) {
+  const attrs = external ? ' target="_blank" rel="noopener"' : '';
+  const glyph = icon(external ? 'external' : 'arrowRight', 'footer-information__arrow');
+  return `<li><a href="${href}"${attrs}>${label} ${glyph}</a></li>`;
+}
+
 export function renderFooter() {
   return `
     <footer class="app-footer" role="contentinfo">
       <div class="footer-information">
         <div class="footer-information__inner">
           <div class="footer-information__col footer-information__col--brand">
+            <!-- h2 SEMANTICS with the DS h3 LOOK (text--xl regular via the
+                 class): the DS/service-portal use literal h3 here, but pages
+                 whose content carries only an h1 (repair, queue) would then
+                 jump h1→h3 — the portal's a11y gate (check-a11y-responsive)
+                 forbids heading jumps. Rendered output is identical to the
+                 service-portal's. -->
             <h2 class="footer-information__brand">${t('footer.about')}</h2>
             <p class="footer-information__motto">
               Bundesamt für Bauten und Logistik — nachhaltig, partnerschaftlich und vorbildlich.
@@ -617,22 +648,33 @@ export function renderFooter() {
             </p>
           </div>
 
-          <div class="footer-information__col footer-information__col--links">
+          <!-- DS __entry--big: the links entry spans two columns at xl and
+               splits into two sub-columns — same weighting as the
+               service-portal footer. -->
+          <div class="footer-information__col footer-information__col--links footer-information__col--big">
             <h2 class="footer-information__heading">${t('footer.moreInfo')}</h2>
-            <ul class="footer-information__list">
-              <li><a href="https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html" target="_blank" rel="noopener">${t('footer.legal')} ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://www.bbl.admin.ch/de/e-rechnung" target="_blank" rel="noopener">E-Rechnung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')} ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-            </ul>
+            <div class="footer-information__links">
+              <div class="footer-information__links-column">
+                <ul class="footer-information__list">
+                  ${footerLink('https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html', t('footer.legal'), true)}
+                  ${footerLink('https://www.bbl.admin.ch/de/e-rechnung', 'E-Rechnung', true)}
+                </ul>
+              </div>
+              <div class="footer-information__links-column">
+                <ul class="footer-information__list">
+                  ${footerLink('https://www.bbl.admin.ch/de/kontakt', t('nav.contact'), true)}
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div class="footer-information__col footer-information__col--links">
             <h2 class="footer-information__heading">${t('footer.prototype')}</h2>
             <ul class="footer-information__list">
-              <li><a href="https://github.com/bbl-dres/tenant-portal" target="_blank" rel="noopener">Quellcode auf GitHub ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="#/api-docs">API-Dokumentation ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://www.bk.admin.ch/de/webauftritt-der-bundesverwaltung" target="_blank" rel="noopener">Webauftritt der Bundesverwaltung ${icon('arrowRight', 'footer-information__arrow')}</a></li>
-              <li><a href="https://bbl-dres.github.io/service-portal/" target="_blank" rel="noopener">Variante Service Portal ${icon('arrowRight', 'footer-information__arrow')}</a></li>
+              ${footerLink('https://github.com/bbl-dres/tenant-portal', 'Quellcode auf GitHub', true)}
+              ${footerLink('#/api-docs', 'API-Dokumentation', false)}
+              ${footerLink('https://www.bk.admin.ch/de/webauftritt-der-bundesverwaltung', 'Webauftritt der Bundesverwaltung', true)}
+              ${footerLink('https://bbl-dres.github.io/service-portal/', 'Variante Service Portal', true)}
             </ul>
           </div>
 
@@ -697,6 +739,32 @@ document.addEventListener('keydown', (e) => {
     toggleNavMenu(id, false);
   });
 });
+// DS Navy.js drawer placement (app/scripts/Navy.js:137-146): the drawer sits
+// under its trigger, pulled LEFT by the `.with-offset` step (-16 / -32 @1280 /
+// -80 @1920 — desktop-menu.postcss:36-38) so the drawer's own padding
+// (32/48/96) leaves its content flush with the trigger's text (net +16, the
+// trigger's px-4). When the drawer would overflow the bar, the DS right-aligns
+// it to the trigger's right edge instead. Mirrored verbatim here and in the
+// sister service-portal so both portals' menus land identically.
+function navMenuOffset() {
+  const w = window.innerWidth;
+  if (w >= 1920) return 80;
+  if (w >= 1280) return 32;
+  return 16;
+}
+function positionNavMenu(panel, trigger, navbar) {
+  const navRect = navbar.getBoundingClientRect();
+  const tRect = trigger.getBoundingClientRect();
+  const panelW = panel.offsetWidth;
+  let leftPx = tRect.left - navRect.left - navMenuOffset();
+  if (leftPx + panelW > navRect.width) {
+    // DS overflow branch: right edge of the drawer to the trigger's right
+    // edge, offset dropped (Navy.js:139-141).
+    leftPx = Math.max(0, tRect.right - navRect.left - panelW);
+  }
+  panel.style.left = leftPx + 'px';
+  panel.style.right = 'auto';
+}
 window.addEventListener('resize', () => {
   if (_navMenuRaf) return;
   _navMenuRaf = requestAnimationFrame(() => {
@@ -706,14 +774,7 @@ window.addEventListener('resize', () => {
       const trigger = document.querySelector(`[data-menu="${id}"]`);
       const navbar = trigger && trigger.closest('.navbar');
       if (!trigger || !navbar) return;
-      const navRect = navbar.getBoundingClientRect();
-      const tRect = trigger.getBoundingClientRect();
-      const panelW = m.offsetWidth;
-      let leftPx = tRect.left - navRect.left;
-      if (leftPx + panelW > navRect.width - 12) {
-        leftPx = Math.max(12, navRect.width - panelW - 12);
-      }
-      m.style.left = leftPx + 'px';
+      positionNavMenu(m, trigger, navbar);
     });
   });
 });
@@ -758,21 +819,11 @@ export function toggleNavMenu(id, force) {
     if (trigger) {
       trigger.setAttribute('aria-expanded', 'true');
       trigger.classList.add('main-navigation__link--clicked');
-      // Anchor the dropdown panel under the trigger word, like swisstopo.
-      // The .navbar is position:relative, so we offset from its left edge.
+      // Anchor under the trigger with the DS `.with-offset` pull — see
+      // positionNavMenu above. The .navbar is position:relative, so the
+      // offsets resolve from its left edge.
       const navbar = trigger.closest('.navbar');
-      if (navbar) {
-        const navRect = navbar.getBoundingClientRect();
-        const tRect = trigger.getBoundingClientRect();
-        const panelW = panel.offsetWidth;
-        let leftPx = tRect.left - navRect.left;
-        // Clamp so the panel never goes past the navbar right edge
-        if (leftPx + panelW > navRect.width - 12) {
-          leftPx = Math.max(12, navRect.width - panelW - 12);
-        }
-        panel.style.left = leftPx + 'px';
-        panel.style.right = 'auto';
-      }
+      if (navbar) positionNavMenu(panel, trigger, navbar);
     }
   } else if (isOpen && restoreFocus && trigger) {
     trigger.focus();
@@ -912,6 +963,10 @@ export function toggleSearch(open) {
   if (!el) return;
   if (open) {
     el.classList.add('open');
+    // DS `.body--search-is-open` (search.postcss:99-103): below lg the open
+    // search takes a full-width row under the header and the brand lockup
+    // fades out. The class only has CSS effects <1024 (header.css).
+    document.body.classList.add('body--search-is-open');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'true');
       toggle.setAttribute('tabindex', '-1');   // hide collapsed trigger from tab order while open
@@ -924,6 +979,7 @@ export function toggleSearch(open) {
     // land here with focus still inside the widget.
     const hadFocusInside = document.activeElement && el.contains(document.activeElement);
     el.classList.remove('open');
+    document.body.classList.remove('body--search-is-open');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'false');
       toggle.removeAttribute('tabindex');

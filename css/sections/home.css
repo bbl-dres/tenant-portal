@@ -48,19 +48,24 @@
    up while the image stayed put. Nothing should move because a panel below it
    opened. A stretched grid item flows its content from the top on its own, so
    no rule is needed here to say so. */
+/* Split from md (768) with the responsive gutter — the DS `.hero--main-image`
+   contract (hero.postcss:73-90: 6/6 columns `md:` up, `gap--responsive`) and
+   the service-portal's split point. Was lg (1024) with fixed 32/64 px gaps
+   (docs/design-alignment.md §3.4). */
 .hero__inner--split {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-xl);
+  gap: var(--gap-responsive);
 }
-@media (min-width: 1024px) {
-  .hero__inner--split { grid-template-columns: 1fr 1fr; gap: var(--space-3xl); }
+@media (min-width: 768px) {
+  .hero__inner--split { grid-template-columns: 1fr 1fr; }
   /* The margin is what the old centring supplied by accident. Flush against the
      image the title reads as fighting the photo edge — its cap already starts
      ~17px below its own line-box top, and 1rem more puts it just under the image
-     edge, paired with it rather than butted against it. Two columns only exist
-     from this breakpoint up; stacked, the title follows the header and the extra
-     space would be dead. */
+     edge, paired with it rather than butted against it. (The service-portal
+     documents the same optical fix on its hero--main-image title.) Two columns
+     only exist from this breakpoint up; stacked, the title follows the header
+     and the extra space would be dead. */
   .hero__inner--split > .hero__split-content .hero__title { margin-top: var(--space-md); }
 }
 .hero__figure {
@@ -126,7 +131,7 @@
   color: var(--color-white);
 }
 .video-thumb:focus-visible {
-  outline: 3px solid var(--color-focus);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
 }
 .video-thumb__image {

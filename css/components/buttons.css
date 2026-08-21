@@ -17,8 +17,12 @@
 .btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
+  /* LEFT-aligned label — the DS base `.btn` sets no justify-content
+     (btn.postcss:6-13); only `--icon-only` / full-width centre. The former
+     unconditional centring showed on stretched/full-width buttons; the
+     service-portal documents the same left default against a real
+     regression (docs/design-alignment.md D25). */
+  gap: 0.2em;                                 /* DS icon nudge mr-[0.2em] (btn.postcss:168-171) */
   min-height: var(--btn-min-h);
   padding: var(--space-sm) var(--space-md);   /* CD: px-4 (16px) horizontal */
   border-radius: var(--radius-sm);            /* CD buttons use rounded-sm (2px) */
@@ -31,12 +35,17 @@
   font-family: inherit;
   text-decoration: none;
   border: 1px solid transparent;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   cursor: pointer;
 }
 @media (min-width: 1024px) { .btn { line-height: 1.5rem; } }
 @media (min-width: 1280px) { .btn { min-height: var(--btn-lg-min-h); } }
 @media (min-width: 1920px) { .btn { min-height: 52px; } }
+/* DS button icons are `w-[1.4em]` (btn.postcss:147-152) — they scale with
+   the button's type step instead of sitting on the fixed 24 px inline-icon
+   default. `--link`'s 32 px icon below stays more specific. */
+.btn > .inline-icon { width: 1.4em; height: 1.4em; flex-shrink: 0; }
+.btn--full-width { width: 100%; justify-content: center; }   /* DS btn--full-width + __text-centered */
 /* CD Bund: filled action button = navy. Red is reserved for danger and
    brand-accent surfaces (active nav underline, card rails). Bold-only on
    filled to match DS — see header comment on `.btn`. */
@@ -83,11 +92,28 @@
 .btn--link:hover { color: var(--color-primary-700); }
 .btn--link .btn__icon { width: var(--icon-lg); height: var(--icon-lg); }
 .btn--sm { min-height: var(--btn-sm-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); line-height: 1rem; }
-.btn--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-xl); font-size: var(--text-h4); line-height: 1.5rem; }
+/* `--lg` keeps the base px-4 — DS `.btn--lg` changes ONLY min-height and
+   type (btn.postcss:125-129); the former 16/32 padding made large buttons
+   32 px wider and ~6 px taller than CD/service
+   (docs/design-alignment.md D25). */
+.btn--lg { min-height: var(--btn-lg-min-h); padding: var(--space-sm) var(--space-md); font-size: var(--text-h4); line-height: 1.5rem; }
 /* DS size ramps (btn.postcss:112-129): sm leading-4 lg:leading-5. */
 @media (min-width: 1024px) { .btn--sm { line-height: 1.25rem; } }
 @media (min-width: 1280px) { .btn--sm { min-height: 40px; } .btn--lg { min-height: 52px; } }
 @media (min-width: 1920px) { .btn--sm { min-height: 44px; } .btn--lg { min-height: 56px; } }
+/* Touch floor for small buttons — WCAG 2.5.5: on coarse pointers / phone
+   widths `--sm` may not drop below 44 px. Service-portal rule (their
+   button.css documents the deviation from DS's 34 px); adopted as a shared
+   deviation (docs/design-alignment.md, kept-deviations #6). */
+@media (max-width: 1023.98px), (pointer: coarse), (hover: none) {
+  .btn--sm { min-height: var(--btn-min-h); }
+}
+/* Pressed feedback — service-portal's `:active` contract (their
+   button.css:21-42); the DS defines none, both portals now share one. */
+.btn--outline:active { background: var(--color-primary-50); }
+.btn--filled:active { background: var(--color-secondary-600); }
+.btn--bare:active,
+.btn--link:active { color: var(--color-primary-800); }
 /* DS flat disabled fills (btn.postcss) instead of `opacity`, which makes a
    disabled navy button translucent (page bleeds through, shadow fades).
    Filled → solid secondary-200 / white text; outline & bare → muted
@@ -112,21 +138,16 @@
   background: transparent;
   color: var(--color-secondary-300);
 }
-/* Explicit focus ring on buttons. The global :focus-visible already covers
-   the keyboard-only case, but a 3 px purple outline on a navy filled
-   button needs extra offset to read against the button itself. */
+/* Focus ring — the shared 2 px purple ring at 2 px offset (global
+   convention; docs/design-alignment.md D17). Filled buttons switch to the
+   purple-300 dark-ground colour, the same rule the DS applies on dense
+   secondary fills (global.postcss:78-85) and the service-portal mirrors. */
 .btn:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
-/* Filled buttons (currently navy / secondary-600) get a defensive
-   white inner-ring + the lighter purple outline. This keeps the focus
-   target visible on saturated bg colours regardless of whether the
-   button is navy now or red in a future `--danger` variant. */
 .btn--filled:focus-visible {
   outline-color: var(--color-focus-dark);
-  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 5px var(--color-focus-dark);
-  outline: none;
 }
 /* Dark-surface focus rings live with the global focus rule in
    foundations/tokens.css (one thickness everywhere per DESIGNGUIDE §5.12,
@@ -199,7 +220,7 @@
   text-decoration: none;
 }
 .app-footer__top-btn:focus-visible {
-  outline: 3px solid var(--color-focus);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 .app-footer__top-btn svg {

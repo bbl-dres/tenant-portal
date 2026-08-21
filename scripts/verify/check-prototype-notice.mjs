@@ -218,8 +218,13 @@ await run(reporter, async () => {
   check('390 px: no horizontal overflow', m.overflow <= 0, `scrollWidth-clientWidth=${m.overflow}`);
   check('390 px: banner stays inside the viewport', m.within, JSON.stringify(m));
   check('390 px: leaves the page usable (< 60 % of the viewport)', m.heightShare < 0.6, m.heightShare.toFixed(2));
-  check('390 px: acknowledge button is a full-width, tappable target',
-    m.btnW > 250 && m.btnH >= 32, JSON.stringify({ btnW: m.btnW, btnH: m.btnH }));
+  // Auto-width — the DS banner keeps the action at its natural size below lg
+  // (column wrapper, no stretch; notification-banner.postcss:5-27) and the
+  // service-portal renders the same. The former full-width assertion pinned a
+  // portal-only stretch, retired in the 2026-08 cross-portal alignment
+  // (docs/design-alignment.md D32). The 44 px WCAG floor stays asserted.
+  check('390 px: acknowledge button is an auto-width, tappable target (CD column layout)',
+    m.btnW >= 100 && m.btnW < 250 && m.btnH >= 44, JSON.stringify({ btnW: m.btnW, btnH: m.btnH }));
   await mobile.page.screenshot({ path: join(OUT, 'prototype-notice-mobile.png') });
   await mobile.context.close();
 }, async () => {

@@ -25,7 +25,10 @@
 }
 .form-field__label {
   font-size: var(--text-body);
-  font-weight: var(--font-weight-bold);
+  /* Regular weight — the DS sets no label weight (labels ride the body
+     face) and the service-portal renders labels regular; bold labels were
+     a portal-only emphasis (docs/design-alignment.md D26). */
+  font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   display: flex;
   gap: var(--space-xs);
@@ -99,23 +102,13 @@
 .input::placeholder,
 .form-field__input::placeholder,
 .form-field__textarea::placeholder { color: var(--color-secondary-400); opacity: 1; }
-/* Focus: the DS input declares only `focus:outline-none` (input.postcss:17)
-   and lets the GLOBAL `*:focus-visible { ring-2 ring-purple-500 }`
-   (global.postcss:75-76) paint a 2 px purple ring hugging the field — the
-   border itself stays text-500. (No hover state either: the former portal
-   hover rule re-set the border to its own resting colour, a no-op.) The
-   previous portal focus additionally darkened the border to gray-800,
-   which the CD does not do — removed 2026-08. */
-.input:focus,
-.form-field__input:focus,
-.form-field__textarea:focus,
-.form-field__select:focus {
-  outline: none;
-  /* Ring + the resting drop shadow — Tailwind's ring and shadow utilities
-     compose on one box-shadow, so the DS field keeps its elevation while
-     focused. */
-  box-shadow: 0 0 0 2px var(--color-focus), var(--shadow);
-}
+/* Focus: no field-local ring — the GLOBAL `:focus-visible` outline (2 px
+   purple at 2 px offset, foundations/tokens.css) covers fields exactly like
+   every other control; browsers match `:focus-visible` on text fields for
+   mouse focus too, so the behaviour equals the DS's ring-on-focus. The
+   former field-local box-shadow ring hugged the border (0 offset) — a
+   second focus geometry the service-portal doesn't have
+   (docs/design-alignment.md D17/D26). */
 /* ── MULTISELECT — searchable multi-value select ─────────────────────────
    Portal-native implementation of the CD's multiselect
    (designsystem css/components/multiselect.postcss — a restyled vue-select):
@@ -140,8 +133,9 @@
   border: 1px solid var(--color-border-input);
   cursor: text;
 }
-/* Field focus convention (see .input above): ring hugs the box. */
-.multiselect__box:focus-within { box-shadow: 0 0 0 2px var(--color-focus), var(--shadow); }
+/* Focus ring on the composite box — the inner search input is outline:none,
+   so the box carries the shared 2 px ring on focus-within. */
+.multiselect__box:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .multiselect__pill {
   display: inline-flex;
   align-items: center;
@@ -192,12 +186,14 @@
 .multiselect__option[aria-selected="true"]::after { content: "✔"; margin-left: var(--space-sm); }
 .multiselect__empty { padding: var(--space-xs) var(--space-md); color: var(--color-text-secondary); }
 
-/* DS .input--sm = text--sm leading-6 (input.postcss:21-23). Live consumer:
-   the floor-plan view-mode select. */
-.input--sm { min-height: var(--btn-min-h); padding: var(--space-xs) var(--space-md); font-size: var(--text-body-sm); line-height: 1.5rem; }
-/* DS .input--lg = text--lg leading-7 (input.postcss:25-27). DS API parity;
-   unconsumed in portal markup. */
-.input--lg { min-height: var(--btn-lg-min-h); padding: var(--space-md) var(--space-md); font-size: var(--text-chrome-lg); line-height: 1.75rem; }
+/* DS input size variants change TYPE AND LEADING ONLY — padding and the
+   44 → 48 @1544 min-height ramp stay on the base rule (input.postcss:21-31).
+   The former overrides (44 px pinned `--sm`, 16 px-padded 62 px `--lg` on the
+   static chrome scale) broke both the CD contract and service-portal parity
+   (docs/design-alignment.md D26). */
+.input--sm   { font-size: var(--text-body-sm); line-height: 1.5rem; }   /* DS text--sm leading-6 */
+.input--base { line-height: 1.5rem; }                                   /* DS leading-6 */
+.input--lg   { font-size: var(--text-h4); line-height: 1.75rem; }       /* DS text--lg leading-7 */
 
 /* Native `<select>` chevron — replaces the browser default (jammed
    against the right edge) with `assets/icons/ChevronDown.svg`
@@ -249,8 +245,12 @@ select.input,
   max-height: 320px;
   overflow-y: auto;
   background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  /* ONE dropdown-surface recipe across both portals (docs/design-alignment.md
+     D26): SQUARE box on the text-500 field border — the DS multiselect's
+     dropdown skin (multiselect.postcss `--vs-border-radius: 0`,
+     `--vs-border-color: text.500`). Was 3 px radius on the light gray-200
+     border — a third recipe beside the portal's own multiselect. */
+  border: 1px solid var(--color-border-input);
   box-shadow: var(--shadow-lg);
   z-index: 20;
 }
@@ -265,8 +265,12 @@ select.input,
   transition: background var(--transition-fast);
 }
 .combobox__option:last-child { border-bottom: none; }
-.combobox__option:hover,
-.combobox__option--active { background: var(--color-bg-alt); }
+/* Hover = the DS menu-row tint (secondary-50, menu.postcss:20); the ACTIVE
+   (keyboard) row takes the DS multiselect's dark active pair. */
+.combobox__option:hover { background: var(--color-secondary-50); }
+.combobox__option--active { background: var(--color-gray-600); color: var(--color-white); }
+.combobox__option--active .combobox__option-primary,
+.combobox__option--active .combobox__option-secondary { color: var(--color-white); }
 .combobox__option-primary   { font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
 .combobox__option-secondary { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
 
@@ -291,6 +295,11 @@ select.input,
   color: var(--color-gray-400);
   border-color: var(--color-gray-300);
 }
+/* Disabled SELECTS additionally fade — DS select.postcss:28-35 applies
+   `opacity-40` to the disabled select (and its icon column) on top of the
+   flat fills; service-portal matches. */
+select.input:disabled,
+.form-field__select:disabled { opacity: 0.4; }
 /* Deliberate divergence: DS applies `leading-none` to the shared input rule
    with no textarea exception (input.postcss:6-19), but a leading-1
    multi-line control is unusable — textareas restore body leading. */
@@ -299,11 +308,25 @@ textarea.input { min-height: 90px; resize: vertical; line-height: var(--line-hei
 .form-field--invalid .form-field__input,
 .form-field--invalid .form-field__textarea,
 .form-field--invalid .input {
-  border-color: var(--color-danger);
+  /* red-500 — the DS invalid-field border (input.postcss:50-53
+     `border-red-500`); was red-600, one step darker than CD and than the
+     service-portal (docs/design-alignment.md D26). */
+  border-color: var(--color-red-500);
 }
+/* Validation message as the DS badge pill — the DS renders field errors as
+   `.badge--error.badge--sm` (Input.vue): red-800 on red-100, fully rounded.
+   Size follows the service-portal's documented bump of badge--sm to a fixed
+   14 px / 1.35rem for legibility. Was plain 12 px red text. */
 .form-field__error {
-  font-size: var(--text-body-xs);
-  color: var(--color-danger);
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0.219em 1em;
+  border-radius: var(--radius-full);
+  background: var(--color-red-100);
+  color: var(--color-red-800);
+  font-size: var(--text-chrome-sm);
+  line-height: 1.35rem;
   font-weight: var(--font-weight-regular);
 }
 
@@ -360,6 +383,10 @@ input[type="checkbox"] {
   margin: 0;
   background: var(--color-white);
   border: 1px solid var(--color-border-input);
+  /* DS checkboxes/radios inherit the base field `shadow` (input.postcss:12 —
+     the appearance-none control keeps the input skin); was flat here while
+     the service-portal rendered the shadow (docs/design-alignment.md D26). */
+  box-shadow: var(--shadow);
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
@@ -386,12 +413,9 @@ input[type="checkbox"]:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-/* Hover affordance on the unchecked box — darkens the border to preview
-   the checked state. Mirrors the row-level `.option-group__item:hover`. */
-input[type="radio"]:hover:not(:checked):not(:disabled),
-input[type="checkbox"]:hover:not(:checked):not(:disabled) {
-  border-color: var(--color-text-primary);
-}
+/* No hover recolor on the box — the DS defines no checkbox/radio hover
+   (input.postcss:80-152), and the service-portal's field-hover tint was
+   removed in the same alignment pass (docs/design-alignment.md D26). */
 /* Focus ring inherits the global `:focus-visible` purple — explicit
    here so the offset reads well against the small box. */
 input[type="radio"]:focus-visible,
@@ -431,6 +455,6 @@ input[type="checkbox"]:focus-visible {
    label-button at its content width like a real button. */
 .wizard__file-label { align-self: flex-start; }
 .wizard__file-picker:focus-visible + .wizard__file-label {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }

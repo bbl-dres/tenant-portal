@@ -402,20 +402,23 @@
   box-shadow: var(--shadow-card);
   text-decoration: none;
   color: inherit;
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  /* DS clickable cards lift via SHADOW ONLY over 300 ms (card.postcss:15-17
+     — no transform anywhere in the card family); the former translateY(-2px)
+     + 120 ms was a portal flourish (docs/design-alignment.md D29). */
+  transition: box-shadow var(--transition-slow);
 }
 .card--property:hover {
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
 }
-.card--property:hover .card--property__title { color: var(--color-primary); }
+.card--property:hover .card--property__title { color: var(--color-primary-700); }
 /* `.card--property__image` stays a `<div>` because it hosts the overlay
    status badge as a positioned child. The photo itself is a real `<img>`
    inside it (`object-fit: cover` fills the container) so it gets native
-   lazy-loading + CLS-safe dimensions. */
+   lazy-loading + CLS-safe dimensions. 16:9 ratio box — the DS card media
+   contract (card.postcss:165-170 `pb-[56.25%]`); was a fixed 180 px. */
 .card--property__image {
   position: relative;
-  height: 180px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background-color: var(--color-bg-alt);
 }

@@ -14,8 +14,11 @@
   "top.profileAria":    { "de": "Profil von {name}", "fr": "Profil de {name}", "it": "Profilo di {name}", "en": "Profile of {name}" },
   "top.allAuthorities": { "de": "Alle Schweizer Bundesbehörden", "fr": "Toutes les autorités fédérales suisses", "it": "Tutte le autorità federali svizzere", "en": "All Swiss federal authorities" },
   "top.search":         { "de": "Suchen", "fr": "Rechercher", "it": "Cerca", "en": "Search" },
+  "top.searchToggle":   { "de": "Suche", "fr": "Recherche", "it": "Ricerca", "en": "Search" },
   "top.searchPlaceholder": { "de": "Suchen …", "fr": "Rechercher …", "it": "Cerca …", "en": "Search …" },
   "org.bbl":            { "de": "Bundesamt für Bauten und Logistik BBL", "fr": "Office fédéral des constructions et de la logistique OFCL", "it": "Ufficio federale delle costruzioni e della logistica UFCL", "en": "Federal Office for Buildings and Logistics FOBL" },
+  "org.bblPlain":       { "de": "Bundesamt für Bauten und Logistik", "fr": "Office fédéral des constructions et de la logistique", "it": "Ufficio federale delle costruzioni e della logistica", "en": "Federal Office for Buildings and Logistics" },
+  "org.bblShort":       { "de": "BBL", "fr": "OFCL", "it": "UFCL", "en": "FOBL" },
   "org.portal":         { "de": "Mieterportal", "fr": "Portail des locataires", "it": "Portale dei locatari", "en": "Tenant Portal" },
 
   "nav.start":          { "de": "Start", "fr": "Accueil", "it": "Home", "en": "Home" },

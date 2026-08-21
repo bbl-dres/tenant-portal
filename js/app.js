@@ -36,6 +36,8 @@ wireTabs, emptyRow,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import { treeHTML, wireTree, restoreTreeSelection, syncTreeCounts } from './spatial-tree.js';
+import { paginationShell, renderPagination, wirePaginationInput } from './pagination.js';
+import { mountDataTable, facetOptions } from './data-table.js';
 import {
   catalogueBar, wireCatalogueBar, setFilterCount, setActiveView,
   filterPills, wireSidebarToggle, wireCheckboxGroup,
@@ -1683,9 +1685,13 @@ function renderNewsList() {
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--narrow">
+        <!-- Left page header (h1 + lead) — the shared overview pattern
+             (service-portal parity, docs/design-alignment.md D36). The
+             former centred title with a today-dated eyebrow was the
+             article pattern on a list page. -->
         <header class="news-list__header">
-          <p class="news-list__date">Veröffentlicht am ${P.formatDate(new Date().toISOString())}</p>
-          <h1 class="news-overview__title">News-Übersicht</h1>
+          <h1 class="h1">News</h1>
+          <p class="section-intro section-intro--tight">Aktuelle Mitteilungen rund um das BBL und das Mieterportal.</p>
         </header>
         <ul class="news-list">
           ${pageItems.map(newsListRow).join('')}
@@ -3728,103 +3734,6 @@ function renderMapView(/* items */) {
   `;
 }
 
-// CD Bund pagination — compact pattern from the federal design system
-// (designsystem css/components/pagination.postcss, app/components/ch/components/Pagination.vue):
-//   [count] [chevron-left] [page-input] von X Seiten [chevron-right]
-// Anchor-based chevrons so middle-click + share + back/forward all work;
-// the page-input is an editable number field — submit on Enter or blur
-// to jump directly to a page (the only scalable affordance at thousands
-// of pages, where a list of numbered buttons stops working).
-// Rendered unconditionally — federal data sets scale to thousands of
-// records, so a persistent pagination footer is a load-bearing
-// affordance even when the current filter happens to return ≤ 1 page.
-// Generic across routes: caller passes `hrefFor: (page) => string` to
-// build URLs, plus `entitySingular`/`entityPlural` for the count label
-// ("1 Antrag" / "1–12 von 247 Anträgen" / "Keine Anträge"). The de-CH
-// thousands separator keeps four-digit totals legible (e.g. "1'247").
-// The hrefFor closure is stashed in a module-level Map keyed by
-// `inputId` so `wirePaginationInput` can navigate without round-tripping
-// the URL through a fragile data-attribute template.
-const _paginationHrefBuilders = new Map();
-// ONE definition of the CD Bund compact pagination markup (count line ·
-// chevron-prev · page input · "von X Seiten" · chevron-next), shared by every
-// paginated surface so the look + pluralisation never diverge. `nav` selects
-// the control mechanism:
-//   { kind: 'link', hrefFor }  → <a href> prev/next  (hash-navigated lists)
-//   { kind: 'button' }         → <button data-step> prev/next (in-place lists)
-function paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, entityPluralDative, inputId, nav }) {
-  const fmt = (n) => n.toLocaleString('de-CH');
-  // German dative plural for the "von X …" count (e.g. Dokumente → Dokumenten);
-  // defaults to the nominative plural for nouns that don't decline (Liegenschaften).
-  const dative = entityPluralDative || entityPlural;
-  const countText = totalItems === 0
-    ? `Keine ${entityPlural}`
-    : totalItems === 1
-      ? `1 ${entitySingular}`
-      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} ${dative}`;
-  const ctrl = (step, disabled, label, iconName) => nav.kind === 'link'
-    ? `<a class="btn btn--outline btn--icon-only" href="${nav.hrefFor(step < 0 ? Math.max(1, current - 1) : Math.min(totalPages, current + 1))}" aria-label="${label}"
-         ${disabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${P.icon(iconName)}</a>`
-    : `<button class="btn btn--outline btn--icon-only" type="button" data-step="${step}" aria-label="${label}"
-              ${disabled ? 'disabled' : ''}>${P.icon(iconName)}</button>`;
-  return `
-    <nav class="pagination" role="navigation" aria-label="Seitennavigation">
-      <span class="pagination__count" aria-live="polite">${countText}</span>
-      ${ctrl(-1, current <= 1, 'Vorherige Seite', 'chevronLeft')}
-      <input class="pagination__input" type="number" inputmode="numeric"
-             id="${inputId}" min="1" max="${totalPages}" value="${current}"
-             aria-label="Seite auswählen">
-      <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
-      ${ctrl(1, current >= totalPages, 'Nächste Seite', 'chevronRight')}
-    </nav>
-  `;
-}
-
-// Hash-navigated pagination (properties, …): the shell with <a href> controls,
-// plus the hrefFor closure registered for `wirePaginationInput`.
-function renderPagination({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, hrefFor, inputId }) {
-  const id = inputId || 'paginationInput';
-  _paginationHrefBuilders.set(id, hrefFor);
-  return paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, inputId: id, nav: { kind: 'link', hrefFor } });
-}
-
-// Wire a paginationShell's page-input field, in one of two modes matching
-// the shell's `nav` kinds (review M-PAGING):
-//   hash mode (default)     — looks up the hrefFor closure from the Map
-//     populated by `renderPagination` and navigates on Enter / change.
-//   in-place mode (`onPage`) — reports the clamped page number to the caller
-//     instead, and also binds the <button data-step> chevrons inside the
-//     same <nav>. The clamp reads the input's `max` attribute, which
-//     paginationShell stamps with the totalPages of the CURRENT render —
-//     re-wired per render, so it never goes stale.
-function wirePaginationInput(inputId, { onPage } = {}) {
-  const id = inputId || 'paginationInput';
-  const el = document.getElementById(id);
-  if (!el) return;
-  const hrefFor = _paginationHrefBuilders.get(id);
-  if (!onPage && !hrefFor) return;
-  const clamp = (n) => {
-    const max = parseInt(el.getAttribute('max'), 10) || 1;
-    return Math.max(1, Math.min(max, n));
-  };
-  const commit = (page) => {
-    if (onPage) onPage(page);
-    else location.hash = hrefFor(page);
-  };
-  const go = () => commit(clamp(parseInt(el.value, 10) || 1));
-  el.addEventListener('change', go);
-  el.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); go(); }
-  });
-  if (onPage) {
-    el.closest('nav')?.querySelectorAll('button[data-step]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        commit(clamp((parseInt(el.value, 10) || 1) + parseInt(btn.dataset.step, 10)));
-      });
-    });
-  }
-}
-
 // MapLibre GL — loaded on demand only when the map view is active.
 let _maplibreReady = null;
 let _propertiesMap = null;
@@ -4549,7 +4458,7 @@ async function renderPropertyDetail({ id }, gen) {
 
   wirePropertyGallery(t);
   initPropertyDetailMap(t);
-  wirePropertyTabs(t, ctx);
+  wirePropertyTabs(t, ctx, activeTab);
 }
 
 // ── PROPERTY HERO ────────────────────────────────────────────────────────
@@ -4757,20 +4666,152 @@ function propertyOverviewPanel(t) {
 // foot of Übersicht, where it competed with the key figures for the same
 // glance. Same row markup as «Meine Vorgänge», so a case looks identical
 // wherever it is listed.
-function propertyCasesPanel(t, { related }) {
-  return `
-    <div>
-      ${related.length === 0
-        ? `<p class="text-secondary">${P.t('prop.noCases')}</p>`
-        : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.casesSection')}">
-             <thead>
-               <tr>
-                 <th scope="col">Vorgang</th><th scope="col">Objekt</th><th scope="col">Prozess</th><th scope="col">${P.t('prop.submitted')}</th><th scope="col">${P.t('prop.status')}</th>
-               </tr>
-             </thead>
-             <tbody>${related.map(caseRowHtml).join('')}</tbody>
-           </table></div>`}
-    </div>`;
+function propertyCasesPanel() {
+  return '<div id="propTable"></div>';
+}
+
+// Each tab's table, as a configuration rather than as markup. The four used to
+// be four hand-written <table> blocks with four slightly different treatments
+// of the same job; they are now four descriptions of WHAT is in the table, and
+// mountDataTable owns how one looks and behaves.
+function propertyTableConfig(t, tab, ctx) {
+  if (tab === 'vorgaenge') {
+    const rows = ctx.related;
+    return {
+      id: 'propCases', rows,
+      unit: { one: 'Vorgang', many: 'Vorgänge', dative: 'Vorgängen' },
+      label: P.t('prop.casesSection'), emptyMsg: P.t('prop.noCases'),
+      searchKeys: ['id', 'object', 'processName', 'title'],
+      sorts: [
+        { value: 'date', label: 'Eingereicht (neueste zuerst)',
+          cmp: (a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)) },
+        { value: 'id', label: 'Vorgang (A–Z)', cmp: (a, b) => String(a.id).localeCompare(String(b.id), 'de') },
+        { value: 'status', label: 'Status', cmp: (a, b) => String(a.status).localeCompare(String(b.status), 'de') },
+      ],
+      facets: [{ dim: 'status', legend: P.t('prop.status'),
+        options: facetOptions(rows, 'status', (v) => CASE_STATUS_LABELS[v] || v),
+        match: (r, v) => v.includes(String(r.status)) }],
+      columns: [
+        // A11Y-001: the row is pure navigation, so the primary cell carries a
+        // real <a href> — the only keyboard/AT-operable path into the detail
+        // view. The whole-row click below is the mouse affordance on top.
+        { key: 'id', label: 'Vorgang', render: (c) => `<a href="${P.escapeHtml(c.href)}"><strong>${P.escapeHtml(c.id)}</strong></a>` },
+        { key: 'object', label: 'Objekt', render: (c) => P.escapeHtml(c.object) },
+        { key: 'processName', label: 'Prozess', render: (c) => P.escapeHtml(c.processName) },
+        { key: 'submittedAt', label: P.t('prop.submitted'), render: (c) => P.formatDate(c.submittedAt) },
+        { key: 'status', label: P.t('prop.status'), render: (c) => P.statusBadge(c.status) },
+      ],
+      onRowClick: (c) => { location.hash = c.href; },
+    };
+  }
+
+  if (tab === 'vertraege') {
+    const today = new Date();
+    const months = (c) => Math.max(0, Math.round((new Date(c.leaseEnd) - today) / (30 * 86400000)));
+    const rows = (P.state.tenancies || []).filter((x) => x.buildingId === t.buildingId);
+    return {
+      id: 'propContracts', rows,
+      unit: { one: 'Vertrag', many: 'Verträge', dative: 'Verträgen' },
+      label: P.t('prop.contractSection'), emptyMsg: 'Keine Verträge erfasst.',
+      searchKeys: ['id', 've', 'dep'],
+      sorts: [
+        { value: 'ref', label: `${P.t('prop.contractRef')} (A–Z)`, cmp: (a, b) => String(a.id).localeCompare(String(b.id), 'de') },
+        { value: 'end', label: 'Laufzeitende (nächste zuerst)', cmp: (a, b) => String(a.leaseEnd).localeCompare(String(b.leaseEnd)) },
+        { value: 'area', label: 'HNF2 (grösste zuerst)', cmp: (a, b) => (b.hnf2 || 0) - (a.hnf2 || 0) },
+        { value: 'cost', label: `${P.t('prop.yearlyCost')} (grösste zuerst)`, cmp: (a, b) => (b.yearlyCost || 0) - (a.yearlyCost || 0) },
+      ],
+      facets: [{ dim: 'leaseAuto', legend: P.t('prop.leaseType'),
+        options: [{ value: 'auto', label: P.t('prop.autoRenew') }, { value: 'fest', label: P.t('prop.fixedTerm') }],
+        match: (r, v) => v.includes(r.leaseAuto ? 'auto' : 'fest') }],
+      columns: [
+        { key: 'id', label: P.t('prop.contractRef'), render: (c) => `<strong>${P.escapeHtml(c.id)}</strong>` },
+        { key: 've', label: P.t('prop.tenantVe'), render: (c) => `${P.escapeHtml(c.ve)}${c.dep && c.dep !== c.ve ? ' / ' + P.escapeHtml(c.dep) : ''}` },
+        { key: 'leaseStart', label: P.t('prop.term'), render: (c) => `${P.formatDate(c.leaseStart)} – ${P.formatDate(c.leaseEnd)}` },
+        { key: 'leaseAuto', label: P.t('prop.leaseType'), render: (c) => (c.leaseAuto
+          ? `<span class="badge badge--success">${P.t('prop.autoRenew')}</span>`
+          : `<span class="badge badge--warning">${P.t('prop.fixedTerm')}</span>`) },
+        { key: 'hnf2', label: 'HNF2', align: 'right', render: (c) => `${(c.hnf2 || 0).toLocaleString('de-CH')} m²` },
+        { key: 'yearlyCost', label: P.t('prop.yearlyCost'), align: 'right', render: (c) => P.formatChf(c.yearlyCost) },
+        { key: 'leaseEnd', label: P.t('prop.restTermShort'), align: 'right', render: (c) => P.t('prop.restTerm', { n: months(c) }) },
+      ],
+      // The tenancy the reader arrived through stays marked among its siblings.
+      rowClass: (c) => (c.id === t.id ? 'table__row--current' : ''),
+    };
+  }
+
+  if (tab === 'geschosse') {
+    const rows = ctx.floorKpis;
+    const veLabel = `${P.t('prop.ofWhich')} ${ctx.userVe}${ctx.userDep ? ' / ' + ctx.userDep : ''}`;
+    return {
+      id: 'propFloors', rows,
+      unit: { one: 'Geschoss', many: 'Geschosse', dative: 'Geschossen' },
+      label: P.t('prop.floorsSection'), emptyMsg: P.t('prop.noFloors'),
+      searchKeys: ['name'],
+      sorts: [
+        { value: 'level', label: 'Geschoss (unten nach oben)', cmp: (a, b) => a.levelNumber - b.levelNumber },
+        { value: 'rooms', label: `${P.t('prop.rooms')} (meiste zuerst)`, cmp: (a, b) => b.roomCount - a.roomCount },
+        { value: 'area', label: 'HNF2 (grösste zuerst)', cmp: (a, b) => b.totalArea - a.totalArea },
+        { value: 'ws', label: `${P.t('prop.workstations')} (meiste zuerst)`, cmp: (a, b) => b.workstations - a.workstations },
+      ],
+      facets: [{ dim: 'isYourFloor', legend: P.t('prop.yourLocation'),
+        options: [{ value: 'ja', label: `${P.t('prop.yourLocation')} — ${P.escapeHtml(ctx.userVe)}` }],
+        match: (r, v) => !v.includes('ja') || r.isYourFloor }],
+      columns: [
+        { key: 'name', label: P.t('prop.floor'), render: (f) => `<a href="#/properties/${P.escapeHtml(t.id)}/floors/${P.escapeHtml(f.slug)}"><strong>${P.escapeHtml(f.name)}</strong></a>${
+          f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}` },
+        { key: 'roomCount', label: P.t('prop.rooms'), align: 'right', render: (f) => String(f.roomCount) },
+        { key: 'totalArea', label: 'HNF2', align: 'right', render: (f) => `${f.totalArea.toLocaleString('de-CH')} m²` },
+        { key: 'workstations', label: P.t('prop.workstations'), align: 'right', render: (f) => String(f.workstations) },
+        { key: 'myVeCount', label: veLabel, align: 'right', render: (f) => String(f.myVeCount) },
+      ],
+      // Totals over the FILTERED set, not over all floors: a total that ignored
+      // the search would contradict the rows printed above it.
+      foot: (visible, filtered) => {
+        const sum = (fn) => filtered.reduce((acc, f) => acc + fn(f), 0);
+        return `<tr>
+          <th scope="row">Total (${filtered.length})</th>
+          <td class="text-right"><strong>${sum((f) => f.roomCount)}</strong></td>
+          <td class="text-right"><strong>${sum((f) => f.totalArea).toLocaleString('de-CH')} m²</strong></td>
+          <td class="text-right"><strong>${sum((f) => f.workstations)}</strong></td>
+          <td class="text-right"><strong>${sum((f) => f.myVeCount)}</strong></td>
+        </tr>`;
+      },
+      onRowClick: (f) => { location.hash = `#/properties/${t.id}/floors/${f.slug}`; },
+    };
+  }
+
+  const docs = ctx.linkedDocs;
+  const typeLabel = (type) => P.t('doctype.' + type);
+  return {
+    id: 'propDocs', rows: docs,
+    unit: { one: 'Dokument', many: 'Dokumente', dative: 'Dokumenten' },
+    label: P.t('prop.docsSection'), emptyMsg: P.t('prop.noDocs'),
+    // The TYPE is searched through its German label, which is what stands in
+    // the column — searching for «Grundriss» must find a `FloorPlan`.
+    search: (d, q) => [d.title, d.format, d.size, typeLabel(d.type), (d.languages || []).join(' ')]
+      .some((value) => String(value || '').toLowerCase().includes(q)),
+    sorts: [
+      { value: 'date', label: `${P.t('prop.date')} (neueste zuerst)`, cmp: (a, b) => String(b.issuedAt || '').localeCompare(String(a.issuedAt || '')) },
+      { value: 'title', label: `${P.t('prop.docTitle')} (A–Z)`, cmp: (a, b) => String(a.title).localeCompare(String(b.title), 'de') },
+      { value: 'type', label: P.t('prop.type'), cmp: (a, b) => typeLabel(a.type).localeCompare(typeLabel(b.type), 'de') },
+    ],
+    facets: [
+      { dim: 'type', legend: P.t('prop.type'), options: facetOptions(docs, 'type', typeLabel),
+        match: (d, v) => v.includes(String(d.type)) },
+      { dim: 'lang', legend: 'Sprache',
+        options: [...new Set(docs.flatMap((d) => d.languages || []))].sort()
+          .map((code) => ({ value: code, label: code.toUpperCase() })),
+        match: (d, v) => (d.languages || []).some((code) => v.includes(code)) },
+    ],
+    columns: [
+      { key: 'title', label: P.t('prop.docTitle'), render: (d) => `<a href="#/downloads?doc=${encodeURIComponent(d.id)}"
+          onclick="event.preventDefault(); event.stopPropagation(); window.t3lite.openDocViewer('${P.escapeJs(d.id)}');"><strong>${P.escapeHtml(d.title)}</strong></a>` },
+      { key: 'type', label: P.t('prop.type'), render: (d) => P.escapeHtml(typeLabel(d.type)) },
+      { key: 'format', label: P.t('prop.format'), render: (d) => P.escapeHtml([d.format, d.size].filter(Boolean).join(' · ')) },
+      { key: 'issuedAt', label: P.t('prop.date'), render: (d) => (d.issuedAt ? P.formatDate(d.issuedAt) : '—') },
+    ],
+    onRowClick: (d) => window.t3lite.openDocViewer(d.id),
+  };
 }
 
 // A contract LIST, one row per Mietverhältnis — a building can carry several
@@ -4778,132 +4819,32 @@ function propertyCasesPanel(t, { related }) {
 // this is a table that grows rather than a field/value sheet describing the
 // single tenancy the reader arrived through. Rows are scoped by building, so
 // a second tenancy in the data appears here with no code change.
-function propertyContractPanel(t) {
-  const contracts = (P.state.tenancies || []).filter(x => x.buildingId === t.buildingId);
-  const today = new Date();
-  return `
-    <div>
-      <div class="table-wrapper">
-        <table class="table table--zebra" aria-label="${P.t('prop.contractSection')}">
-          <thead>
-            <tr>
-              <th scope="col">${P.t('prop.contractRef')}</th>
-              <th scope="col">${P.t('prop.tenantVe')}</th>
-              <th scope="col">${P.t('prop.term')}</th>
-              <th scope="col">${P.t('prop.leaseType')}</th>
-              <th scope="col">HNF2</th>
-              <th scope="col">${P.t('prop.yearlyCost')}</th>
-              <th scope="col">${P.t('prop.restTermShort')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${contracts.map(c => {
-              const months = Math.max(0, Math.round((new Date(c.leaseEnd) - today) / (30 * 86400000)));
-              return `
-              <tr${c.id === t.id ? ' class="table__row--current"' : ''}>
-                <td><strong>${P.escapeHtml(c.id)}</strong></td>
-                <td>${P.escapeHtml(c.ve)}${c.dep && c.dep !== c.ve ? ' / ' + P.escapeHtml(c.dep) : ''}</td>
-                <td>${P.formatDate(c.leaseStart)} – ${P.formatDate(c.leaseEnd)}</td>
-                <td>${c.leaseAuto ? `<span class="badge badge--success">${P.t('prop.autoRenew')}</span>` : `<span class="badge badge--warning">${P.t('prop.fixedTerm')}</span>`}</td>
-                <td>${c.hnf2.toLocaleString('de-CH')} m²</td>
-                <td>${P.formatChf(c.yearlyCost)}</td>
-                <td>${P.t('prop.restTerm', { n: months })}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
+function propertyContractPanel() {
+  return '<div id="propTable"></div>';
 }
 
-function propertyFloorsPanel(t, { floorKpis, userVe, userDep }) {
-  // Column totals for the tfoot — DS `tfoot` treatment (2px rules) plus
-  // bold cells; mirrors the service-portal Geschosse table's "Total (n)".
-  const sum = (fn) => floorKpis.reduce((acc, f) => acc + fn(f), 0);
-  const totals = {
-    rooms: sum(f => f.roomCount),
-    area: sum(f => f.totalArea),
-    workstations: sum(f => f.workstations),
-    myVe: sum(f => f.myVeCount),
-  };
-  return `
-    <div>
-        ${floorKpis.length === 0
-          ? `<p class="text-secondary">${P.t('prop.noFloors')}</p>`
-          : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable floor-list" aria-label="${P.t('prop.floorsSection')}">
-              <thead>
-                <tr>
-                  <th scope="col">${P.t('prop.floor')}</th>
-                  <th scope="col" class="floor-list__num">${P.t('prop.rooms')}</th>
-                  <th scope="col" class="floor-list__num">HNF2</th>
-                  <th scope="col" class="floor-list__num">${P.t('prop.workstations')}</th>
-                  <th scope="col" class="floor-list__num">${P.t('prop.ofWhich')} ${P.escapeHtml(userVe)}${userDep ? ' / ' + P.escapeHtml(userDep) : ''}</th>
-                  <th scope="col" aria-hidden="true" class="floor-list__chevron-th"></th>
-                </tr>
-              </thead>
-              <tbody>
-                ${floorKpis.map(f => `
-                  <!-- escapeJs/escapeHtml on the ids: interpolated into a JS
-                       string in an onclick and into an href (review m2). -->
-                  <tr onclick="location.hash='#/properties/${P.escapeJs(t.id)}/floors/${P.escapeJs(f.slug)}';">
-                    <td>
-                      <a href="#/properties/${P.escapeHtml(t.id)}/floors/${P.escapeHtml(f.slug)}"><strong>${P.escapeHtml(f.name)}</strong></a>
-                      ${f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}
-                    </td>
-                    <td class="floor-list__num">${f.roomCount}</td>
-                    <td class="floor-list__num">${f.totalArea.toLocaleString('de-CH')} m²</td>
-                    <td class="floor-list__num">${f.workstations}</td>
-                    <td class="floor-list__num">${f.myVeCount}</td>
-                    <td class="floor-list__chevron">${P.icon('chevronRight')}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th scope="row">Total (${floorKpis.length})</th>
-                  <td class="floor-list__num"><strong>${totals.rooms}</strong></td>
-                  <td class="floor-list__num"><strong>${totals.area.toLocaleString('de-CH')} m²</strong></td>
-                  <td class="floor-list__num"><strong>${totals.workstations}</strong></td>
-                  <td class="floor-list__num"><strong>${totals.myVe}</strong></td>
-                  <td aria-hidden="true"></td>
-                </tr>
-              </tfoot>
-            </table></div>`}
-    </div>`;
+function propertyFloorsPanel() {
+  return '<div id="propTable"></div>';
 }
 
-// Documents as a CD table rather than the previous <details> accordion, so
-// they read the same way as Geschosse — one scannable list with a row per
-// record instead of collapsed groups the reader has to open to count.
-function propertyDocumentsPanel(t, { linkedDocs }) {
-  const docs = [...linkedDocs].sort((a, b) => (b.issuedAt || '').localeCompare(a.issuedAt || ''));
-  return `
-    <div>
-        ${docs.length === 0
-          ? `<p class="text-secondary">${P.t('prop.noDocs')}</p>`
-          : `<div class="table-wrapper"><table class="table table--zebra table--rows-clickable" aria-label="${P.t('prop.docsSection')}">
-              <thead>
-                <tr>
-                  <th scope="col">${P.t('prop.docTitle')}</th>
-                  <th scope="col">${P.t('prop.type')}</th>
-                  <th scope="col">${P.t('prop.format')}</th>
-                  <th scope="col">${P.t('prop.date')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${docs.map(d => `
-                  <tr onclick="window.t3lite.openDocViewer('${P.escapeJs(d.id)}');">
-                    <td><a href="#/downloads?doc=${encodeURIComponent(d.id)}"
-                           onclick="event.preventDefault(); event.stopPropagation(); window.t3lite.openDocViewer('${P.escapeJs(d.id)}');"><strong>${P.escapeHtml(d.title)}</strong></a></td>
-                    <td>${P.escapeHtml(P.t('doctype.' + d.type))}</td>
-                    <td>${P.escapeHtml([d.format, d.size].filter(Boolean).join(' · '))}</td>
-                    <td>${d.issuedAt ? P.formatDate(d.issuedAt) : '—'}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table></div>
-            <p class="property-docs__more"><a class="link" href="#/downloads?building=${encodeURIComponent(t.buildingId)}">${P.t('prop.allDocs')} ${P.icon('arrowRight')}</a></p>`}
-    </div>`;
+// Every document linked to this property — building-linked AND tenancy-linked.
+// There used to be an «Alle Dokumente dieser Liegenschaft» link under the
+// table pointing at `#/downloads?building=…`, which filtered by BUILDING only
+// and therefore showed FEWER rows than the table above it. A link out of a
+// complete list into a narrower one is worse than no link, so the list simply
+// is the complete one.
+function propertyDocumentsPanel() {
+  return '<div id="propTable"></div>';
+}
+
+// Mount the active tab's table. Called after every panel render — the initial
+// one and each tab switch — because the host element is replaced each time.
+let _propTableDispose = null;
+function mountPropertyTable(t, tab, ctx) {
+  if (_propTableDispose) { try { _propTableDispose(); } catch { /* host already gone */ } _propTableDispose = null; }
+  const host = document.getElementById('propTable');
+  if (!host || tab === 'uebersicht') return;
+  _propTableDispose = mountDataTable(host, propertyTableConfig(t, tab, ctx));
 }
 
 // Shared roving-tabindex wiring (lib.js wireTabs, A11Y-016 / review M-TABS):
@@ -4916,12 +4857,14 @@ function propertyTabHash(propertyId, key) {
     .filter(Boolean).join('&');
   return `#/properties/${propertyId}` + (qs ? '?' + qs : '');
 }
-function wirePropertyTabs(t, ctx) {
+function wirePropertyTabs(t, ctx, activeTab) {
   wireTabs({
     rootSel: '.property-tabs',
     render: (key) => renderPropertyTab(t, key, ctx),
     hashFor: (key) => propertyTabHash(t.id, key),
+    afterRender: (key) => mountPropertyTable(t, key, ctx),
   });
+  mountPropertyTable(t, activeTab, ctx);
 }
 
 
@@ -6115,7 +6058,7 @@ function downloadList(items) {
 // ── 12. SCHADENSMELDUNG (REQ-FA-005 stub) ────────────────────────────────
 function renderRepairQuickForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: 'home', breadcrumb: [{ label: P.t('bc.repair') }] });
+  shell({ activeNav: 'services', breadcrumb: [{ label: P.t('bc.repair') }] });
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -6195,7 +6138,7 @@ function presetTenancyId() {
 // confirms with a toast and routes back to the building.
 function renderMoveForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.move') }] });
+  shell({ activeNav: 'services', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.move') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -6258,7 +6201,7 @@ function renderMoveForm() {
 // ── 12c. SONDERREINIGUNG (REQ-FA-006 — special-cleaning service) ─────────
 function renderCleaningForm() {
   if (!P.state.user) { P.navigate('#/'); return; }
-  shell({ activeNav: '', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.cleaning') }] });
+  shell({ activeNav: 'services', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.cleaning') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">
@@ -6399,7 +6342,9 @@ function catalogueServices() {
 }
 
 function renderServicesOverview() {
-  shell({ breadcrumb: [{ label: P.t('nav.services') }] });
+  // `activeNav: 'services'` — the nav trigger marks its own overview route
+  // (service-portal parity; the rail was previously missing on #/services).
+  shell({ activeNav: 'services', breadcrumb: [{ label: P.t('nav.services') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container">
@@ -6425,7 +6370,7 @@ function renderServicesOverview() {
 // sites don't change, but the value is no longer surfaced to users —
 // it stays in code comments / commit history for traceability.
 function renderServiceStub(title, _reqId, lead, externalUrl) {
-  shell({ breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: title }] });
+  shell({ activeNav: 'services', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: title }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
       <div class="container container--reading">

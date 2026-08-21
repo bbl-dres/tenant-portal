@@ -136,9 +136,13 @@ await run(reporter, async () => {
   // ladder is 450/650/850 px at lg/xl/3xl (CMP-001, designsystem
   // css/sections/desktop-menu.postcss:13-15); this viewport (1440) sits
   // in the xl tier.
-  check('desktop dropdown floats anchored under trigger',
+  // dLeft: the drawer sits at the trigger's x PULLED LEFT by the DS
+  // `.with-offset` step — −32 px in the xl tier (desktop-menu.postcss:36-38
+  // + Navy.js:137-146; docs/design-alignment.md D12) — so the drawer's 48 px
+  // padding leaves its first row flush with the trigger text (net +16).
+  check('desktop dropdown floats anchored under trigger (CD −32px offset @xl)',
     !!desk && desk.position === 'absolute' && desk.width >= 400 && desk.width <= 900 &&
-    Math.abs(desk.dLeft) < 8 && Math.abs(desk.dTop) < 8,
+    Math.abs(desk.dLeft + 32) < 8 && Math.abs(desk.dTop) < 8,
     JSON.stringify(desk));
 }, async () => {
   await browser.close();

@@ -27,7 +27,10 @@
 .footer-information__inner {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-2xl);
+  /* DS separates stacked footer entries by 64 px (`__entry { mb-16 }`,
+     footer.postcss:41-47) — expressed as the grid gap here. Was 48 px on
+     mobile; service-portal renders 64 (docs/design-alignment.md D16). */
+  gap: var(--space-3xl);
   padding: var(--section-py) var(--container-padding);
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -42,10 +45,24 @@
   .footer-information__inner {
     grid-template-columns: repeat(4, 1fr);
   }
-  .footer-information__col--brand {
+  /* DS `__entry--big xl:col-span-2` (footer.postcss:62-64) sits on the LINKS
+     entry, not the brand text — same column weighting as the service-portal.
+     (The brand column used to span 2 here — mirror-image of CD.) */
+  .footer-information__col--big {
     grid-column: span 2;
   }
 }
+/* Two sub-columns inside the wide links entry — DS `.footer-information__links`
+   (footer.postcss:81-104): column on mobile, row from sm, column again at lg
+   (3-col grid), row from xl (4-col grid with the wide entry). */
+.footer-information__links {
+  display: flex;
+  flex-direction: column;
+}
+.footer-information__links .footer-information__links-column { flex: 1; }
+@media (min-width: 640px)  { .footer-information__links { flex-direction: row; gap: var(--space-3xl); } }
+@media (min-width: 1024px) { .footer-information__links { flex-direction: column; gap: 0; } }
+@media (min-width: 1280px) { .footer-information__links { flex-direction: row; gap: var(--space-3xl); } }
 
 /* Column heading shared by all three footer columns. CD Bund canonical
    per designsystem/css/sections/footer.postcss .footer-information__entry
@@ -70,20 +87,26 @@
   .footer-information__brand,
   .footer-information__heading { margin-bottom: var(--space-2lg); }
 }
+/* Brand-column paragraphs — DS entry rhythm `p { mb-3 xl:mb-4; :last-child
+   mb-0 }` (footer.postcss:54-60), plain white ink, no measure caps (the grid
+   column is the measure). Was: 24 px gap, 90 %/65 % white, 34/36ch. */
 .footer-information__motto {
-  margin: 0;
+  margin: 0 0 var(--space-2sm);
   font-size: var(--text-body);
   line-height: var(--line-height-relaxed);
-  color: var(--color-white-90);
-  max-width: 34ch;
+  color: var(--color-white);
+}
+@media (min-width: 1280px) {
+  .footer-information__motto { margin-bottom: var(--space-md); }
 }
 .footer-information__prototype-warning {
-  margin: var(--space-lg) 0 0;
+  margin: 0;
   font-size: var(--text-body-sm);
   line-height: var(--line-height-relaxed);
-  color: var(--color-white-65);
+  /* One step smaller and a shade quieter than the motto — same note recipe
+     as the service-portal (`__note`: text-sm, secondary-100 #DFE4E9). */
+  color: var(--color-secondary-100);
   font-weight: var(--font-weight-normal);
-  max-width: 36ch;
 }
 .footer-information__list {
   list-style: none;
@@ -121,14 +144,17 @@
   color: var(--color-white);
   background: var(--color-secondary-700);
 }
-.footer-information__list a:hover .footer-information__arrow {
-  transform: translateX(4px);
-}
+/* Row glyph — DS `.footer-information__icon` in link rows: `w-[1.4em]` wide,
+   `h-6` (24 px) tall, icon-right offset `ml-[0.2em] left-[0.1em]`
+   (footer.postcss:25-38, 100-102). No hover motion — the DS moves nothing;
+   the former 24 px box + 16 px gap + 4 px translate were portal inventions
+   (docs/design-alignment.md D16). */
 .footer-information__arrow {
-  width: var(--icon-base);
+  width: 1.4em;
   height: var(--icon-base);
-  transition: transform var(--transition-fast);
-  margin-left: var(--space-md);
+  position: relative;
+  left: 0.1em;
+  margin-left: 0.2em;
   flex-shrink: 0;
 }
 
@@ -152,7 +178,7 @@
   .app-footer__bottom-inner { gap: var(--space-md); }
 }
 .app-footer__bottom-link {
-  color: var(--color-white-75);
+  color: var(--color-white);   /* DS .footer__link is plain text-white (footer.postcss:22) — was 75 % white */
   text-decoration: none;
 }
 /* DS footer link hover is a colour-only step to text-300 (#D1D5DB gray-300,

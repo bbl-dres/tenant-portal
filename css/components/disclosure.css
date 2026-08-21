@@ -19,8 +19,10 @@
   padding: var(--space-2sm) var(--space-sm);   /* DS py-3 px-2 — accordion.postcss:26 */
   text-align: left;
   /* DS `.accordion__title` is static text-base (accordion.postcss:75-78). Its
-     pr-4→lg:pr-6→2xl:pr-8 right gutter is carried here by the flex `gap`
-     (held at 16px = pr-4) — equivalent separation between title and chevron. */
+     pr-4 → lg:pr-6 → 2xl:pr-8 right gutter (16 → 24 @1024 → 32 @1544) is
+     carried here by the flex `gap` — the full DS ramp, as the
+     service-portal renders it (docs/design-alignment.md D34; previously
+     held flat at 16 px). */
   font-size: var(--text-chrome-base);
   font-weight: var(--font-weight-bold);
   display: flex;
@@ -30,6 +32,8 @@
   cursor: pointer;
   transition: color var(--transition);         /* DS duration-200 — accordion.postcss:29 */
 }
+@media (min-width: 1024px) { .accordion__trigger { gap: var(--space-lg); } }
+@media (min-width: 1544px) { .accordion__trigger { gap: var(--space-xl); } }
 /* DS 2xl step: py-5 px-3 (accordion.postcss:26). 20px = 5×4px has no
    spacing token — composed from md (16) + xs (4). */
 @media (min-width: 1544px) {
@@ -97,7 +101,10 @@
   transition: max-height var(--transition-slow) ease-out,
               padding var(--transition-fast),
               visibility 0s;
-  padding: var(--space-md) var(--space-sm) var(--space-2xl);
+  /* pb-10 = 40 px — the DS panel bottom (accordion.postcss:70-73) and the
+     service-portal's; the former 48 px was a documented portal preference,
+     retired for cross-portal parity (docs/design-alignment.md D34). */
+  padding: var(--space-md) var(--space-sm) var(--space-2lg);
 }
 /* DS 2xl horizontal step: px-3 (accordion.postcss:71). Both selectors so the
    higher-specificity open rule above is also overridden. */
@@ -117,7 +124,7 @@
   position: relative;
   display: flex;
   border-bottom: 1px solid var(--color-border);
-  margin-bottom: var(--space-xl);          /* DS tab__container pt-8 */
+  margin-bottom: var(--space-xl);          /* DS tab__container pt-8 = 32 px bar→panel gap */
   overflow-x: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -129,7 +136,10 @@
   right: -1px;
   top: 0;
   width: 40px;                             /* DS fade w-10 */
-  height: 100%;
+  /* The fade stops 4 px above the strip's bottom edge (DS `bottom-1`,
+     tab.postcss:12-18) so it never paints over the active rail's last
+     pixels — a full-height fade dimmed the rail's tail. */
+  height: calc(100% - 4px);
   background: linear-gradient(90deg, transparent, var(--color-bg-default));
   pointer-events: none;
   margin-left: -40px;
@@ -138,6 +148,12 @@
 @media (min-width: 640px) {
   .tabs::after { width: 80px; margin-left: -80px; }   /* DS sm:w-20 */
 }
+/* Collapse guard for the 32 px bar→panel gap (the DS puts it on
+   `.tab__container { pt-8 }`; the service-portal guards the equivalent with
+   measured regressions — an opening section's own top margin stacked the
+   gap to 80 px). Zeroing the panel's leading margin keeps the strip's
+   margin-bottom the single source of the gap. */
+.tabs ~ [role="tabpanel"] > :first-child { margin-top: 0; }
 /* `.tab__control` is the DS-canonical class name for the same control — the
    search-results facet tabs (js/app.js) use it with a `--active` modifier.
    Aliased on every rule here so both spellings share one implementation
@@ -179,7 +195,9 @@
   right: var(--space-md);
   bottom: 0;
   height: 3px;
-  transition: background var(--transition);
+  /* 150 ms — Tailwind's bare `transition` default, which the DS rail rides
+     (tab.postcss:53-59); the service-portal uses its --duration-fast. */
+  transition: background 150ms ease;
 }
 .tab:first-child::after,
 .tab__control:first-child::after { left: 0; }
@@ -197,17 +215,17 @@
 .tab__control:hover:not(.tab__control--active):not([aria-selected="true"]) {
   color: var(--color-primary-600);
 }
-/* When the tab itself receives keyboard focus, lift the outline slightly
-   below the underline so both affordances are visible at once. */
+/* Inset focus ring on the tab — SQUARE (the DS tab is square; the former
+   3 px rounded ring was portal-only) at the shared 2 px thickness, inset so
+   the scrolling strip can't crop it (service-portal: offset −2). */
 .tab:focus-visible,
 .tab__control:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: -3px;
-  border-radius: var(--radius);
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
 }
 /* Tabpanel keyboard focus ring — the panel becomes focusable so a Tab
    from the active tab lands on the content first. */
 [role="tabpanel"]:focus-visible {
-  outline: 3px solid var(--color-focus);
+  outline: 2px solid var(--color-focus);
   outline-offset: 4px;
 }

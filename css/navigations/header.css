@@ -71,21 +71,19 @@
 .top-bar__demo-chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--space-sm);
+  /* DS badge geometry verbatim (badge.postcss:5-9): py-[0.219em] px-[1em],
+     pill, no uppercase, no tracking — the same recipe the service-portal's
+     .demo-chip uses, so the two portals' prototype markers are identical
+     (docs/design-alignment.md D1). */
+  padding: 0.219em 1em;
   font-size: var(--text-body-xs);
   font-weight: var(--font-weight-bold);
-  /* Fixed red, NOT the brand ramp. Under the intranet skin primary-700 is
-     blue — the chip would have dissolved into the blue-800 top bar it sits
-     on. The value is the same red the chip always had; it just no longer
-     travels with the brand. White on red-700 is 6.1:1. */
-  background: var(--color-red-700);
+  /* Fixed FEDERAL red (red-600 #D8232A), NOT the brand ramp. Under the
+     intranet skin primary-600 is blue — the chip would dissolve into the
+     blue top bar it sits on. White on red-600 is 5.01:1 (AA). */
+  background: var(--color-red-600);
   color: var(--color-white);
-  /* Pill, matching the Intranet marker in the lockup below
-     (.top-header__skin-badge / DS .badge) — the two status chips in the
-     chrome now read as one family. */
   border-radius: var(--radius-full);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 .top-bar__actions { margin-left: auto; display: flex; gap: var(--space-md); align-items: center; }
@@ -105,25 +103,10 @@
 .top-bar__action:hover { color: var(--color-gray-300); }
 .top-bar__action svg { width: var(--icon-lg); height: var(--icon-lg); }
 
-/* Utility links in the dark top bar */
-.top-bar__link {
-  color: var(--color-white);   /* DS top-bar text is plain `text-white` (top-bar.postcss:7) */
-  text-decoration: none;
-  font-size: inherit;        /* .top-bar owns the chrome size (14/16 @2xl) */
-  padding: var(--space-xs) var(--space-sm);
-  background: transparent;
-  border: none;
-  font-family: inherit;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2xs);
-  border-radius: var(--radius);
-  transition: background var(--transition-fast);
-  min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C3 */
-}
-.top-bar__link:hover { color: var(--color-gray-300); }
-.top-bar__link--user svg { width: var(--icon-lg); height: var(--icon-lg); }
+/* (The former `.top-bar__link` auth pill is gone: per the DS TopHeader
+   anatomy — and the sister service-portal — sign-in/account belongs to the
+   WHITE meta navigation, not the dark federal bar. See the
+   `.top-header__meta-user` block below; docs/design-alignment.md D5.) */
 
 /* CD pattern: short language codes, dark panel below the trigger. Active
    item marked per the DS localization list (top-bar.postcss:73-80): white
@@ -366,8 +349,22 @@
   line-height: var(--line-height-snug);
   margin-top: -0.16rem;
 }
+/* Full DS title ramp (logo.postcss:79): `text-sm xs:text-xs sm:text-sm
+   xl:text-base 3xl:text-lg` — 12 px in the narrow 480-639 band (below 480
+   the title yields to the acronym; see the lockup-compact block at the end
+   of this file), back to 14 from 640, then 16 @1280 / 18 @1920. */
+@media (min-width: 480px) and (max-width: 639.98px) { .top-header__dept { font-size: var(--text-chrome-xs); } }
 @media (min-width: 1280px) { .top-header__dept { font-size: var(--text-chrome-base); } }  /* 16 px @ xl */
 @media (min-width: 1920px) { .top-header__dept { font-size: var(--text-chrome-lg); } }    /* 18 px @ 3xl */
+/* Acronym — DS `.logo__accronym` (logo.postcss:84-86): below 480 the long
+   office title is replaced by the short mark ("BBL"); the grey mobile strip
+   below the top bar carries the full name instead. Mirrors the
+   service-portal exactly (docs/design-alignment.md D6). */
+.top-header__dept-acronym {
+  display: none;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
 
 /* Dept name + sub-line are now distinct block-level spans inside the anchor
    (replaced the previous `<br>`-inside-span construct). Both rules below
@@ -419,8 +416,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  /* DS meta-navigation--desktop separates the meta row from the icons row
+     with `lg:mb-3 xl:mb-4` (meta-navigation.postcss:27) — 12 px from 1024,
+     16 px from 1280. Expressed as the column gap here; base stays 8 px for
+     the compact <1024 row layout. */
   gap: var(--space-sm);
 }
+@media (min-width: 1024px) { .top-header__right { gap: var(--space-2sm); } }
+@media (min-width: 1280px) { .top-header__right { gap: var(--space-md); } }
 .top-header__meta {
   display: flex;
   align-items: center;
@@ -437,6 +440,40 @@
   transition: color var(--transition-fast);
 }
 .top-header__meta-link:hover { color: var(--color-primary); text-decoration: underline; }
+/* Sign-in / account cluster in the meta bar — DS TopHeader anatomy (the
+   meta navigation carries site utilities; service-portal
+   `.meta-navigation__user/__auth`). The <button> variants reset button
+   chrome so Anmelden/Abmelden read as meta links. */
+button.top-header__meta-link {
+  background: none;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+.top-header__meta-user {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-chrome-sm);
+  color: var(--color-text-muted);     /* name reads as a label (service-portal parity) */
+  text-decoration: none;              /* it IS a link (to #/profile) — quiet chrome styling */
+}
+.top-header__meta-user:hover { color: var(--color-primary); text-decoration: underline; }
+.top-header__meta-user .inline-icon {
+  width: var(--icon-base);
+  height: var(--icon-base);
+  color: var(--color-primary);        /* service-portal: the user icon carries the emphasis */
+}
+/* Vertical rule between the signed-in name and Abmelden — DS
+   .separator--vertical as used by the service-portal meta bar. */
+.top-header__meta-divider {
+  width: 1px;
+  height: var(--space-lg);
+  background: var(--color-border-strong);
+}
 .top-header__actions { display: flex; gap: var(--space-md); align-items: center; }
 /* Below lg (1024 px) — meta hides + burger menu surfaces it. Re-stated in
    the main RESPONSIVE block; here we only adjust right-column flow. */
@@ -468,7 +505,14 @@
   transition: color var(--transition-fast), opacity var(--transition);
 }
 .header-search__toggle:hover { color: var(--color-primary); }
-.header-search__toggle svg { width: var(--icon-md); height: var(--icon-md); }
+/* DS magnifier ramp (search.postcss:88-97): 36 px (`!h-9 !w-9`) below lg —
+   on phones the glyph is the only affordance — stepping DOWN to 28 px
+   (`lg:!h-7 !w-7`) once the "Suche" label joins it. 36 px sits between the
+   portal's --icon-lg (32) and --icon-xl (40); the DS value is kept literal. */
+.header-search__toggle svg { width: 2.25rem; height: 2.25rem; }
+@media (min-width: 1024px) {
+  .header-search__toggle svg { width: var(--icon-md); height: var(--icon-md); }
+}
 .header-search.open .header-search__toggle { opacity: 0; pointer-events: none; }
 
 /* `visibility: hidden` removes the collapsed input + submit button from the
@@ -506,25 +550,30 @@
   width: 100%;
   min-height: var(--btn-min-h);
   padding: var(--space-sm) calc(var(--space-xl) + var(--space-sm)) var(--space-sm) var(--space-md);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius);
+  /* DS open header field = the standard input skin on white with the flyout
+     elevation: 1 px text-500 border, radius-xs, white ground
+     (input.postcss:6-19 + search.postcss:113-146). Was 2 px gray-200 on a
+     grey fill — a portal invention; the service-portal already renders the
+     CD field (docs/design-alignment.md D10). */
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-xs);
   font-family: inherit;
   font-size: var(--text-chrome-sm);   /* static chrome scale, 3xl bump below */
-  background: var(--color-bg-surface);
-  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+  background: var(--color-white);
+  transition: box-shadow var(--transition-fast);
 }
-/* Text-field focus convention (matches `.input`, forms.css): the DS gives
-   fields `focus:outline-none` and lets the global `ring-2 ring-purple-500`
-   (global.postcss:75-76) hug the field edge — a 2 px purple ring with no
-   offset, composed with the open-state shadow-2xl so the flyout keeps its
-   elevation while focused. Text inputs are the one control family where
-   the portal's 3 px offset outline (§5.12) does NOT apply — the ring IS
-   the CD field-focus look. */
+/* DS search.postcss:120-123: from lg the open header field takes py-4. */
+@media (min-width: 1024px) {
+  .header-search__input { padding-block: var(--space-md); }
+}
+/* Field focus — the shared 2 px purple ring, INSET so the flyout's
+   overflow/shadow can't crop it (service-portal convention; the open form
+   clips at its edge). Fires from :focus on, as the DS styles the field from
+   focus onward (search.postcss:22). */
 .header-search__input:focus,
 .header-search__input:focus-visible {
-  outline: none;
-  background: var(--color-white);
-  box-shadow: 0 0 0 2px var(--color-focus), var(--shadow-2xl);
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
 }
 .header-search__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .header-search__submit {
@@ -565,16 +614,17 @@
    (top-header.postcss:8). 14 px everywhere below 1920, 16 px from 1920. */
 @media (min-width: 1920px) {
   .top-header__meta-link,
+  .top-header__meta-user,
   .header-search__toggle,
   .header-search__input,
   .top-header__action { font-size: var(--text-chrome-base); }
 }
 
 @media (max-width: 1023.98px) {
-  .top-bar__demo-chip,
-  .top-bar__link--user {
-    display: none;
-  }
+  /* The demo chip stays visible at every width — the DS keeps its one
+     top-bar badge on phones (top-bar.postcss:154-166) and so does the
+     service-portal. (It used to be hidden here together with the user
+     pill; the pill now lives in the white meta bar / burger drawer.) */
   .top-header__inner {
     min-height: 78px;
     /* Vertical padding stays on the DS tier ramp (12 base / 16 @768) —
@@ -599,15 +649,13 @@
   .top-header__dept {
     display: block;
     min-width: 0;
-    font-size: var(--text-chrome-sm);
     line-height: var(--line-height-snug);
     margin-top: 0;
   }
-  /* Compact chrome drops the sub-line to keep the lockup on one row. The
-     intranet marker stays: it is the shortest string in the lockup, it fits
-     at 320px, and "which portal am I in" is worth more on a phone than the
-     sub-line it replaces. */
-  .top-header__dept-sub { display: none; }
+  /* The sub-line ("Mieterportal") stays visible from 480 up — the DS lockup
+     keeps its product span at every width the title shows (logo.postcss:133,
+     service-portal parity). Below 480 the whole title yields to the acronym
+     (lockup-compact block at the end of this file). */
   .top-header__right {
     flex: 0 0 auto;
     width: auto;
@@ -628,13 +676,33 @@
   .header-search__toggle span {
     display: none;
   }
-  /* The open flyout is right-anchored to .header-search, so an
-     unconditional 288 px can start left of x=0 on narrow phones. Cap it
-     to the viewport minus the 2 x 16 px phone gutter; the input keeps its
-     base width:100 %, so the field fills the form and the absolutely
-     positioned submit magnifier stays attached at its right edge. */
+  /* Open mobile search — the DS `.search--mobile` pattern
+     (search.postcss:37-56): a dedicated FULL-WIDTH row right below the
+     header, `mt-2 px-3.5`, while the brand lockup fades out
+     (`.body--search-is-open .logo { opacity-0 }`, search.postcss:99-103).
+     The former inline flyout overlapped the federal lockup on phones —
+     the exact failure the service-portal documented and fixed the same
+     way (docs/design-alignment.md D10). `.header-search` unpositions so
+     the form anchors against .top-header. */
+  .header-search { position: static; }
+  .top-header { position: relative; }
   .header-search.open .header-search__form {
-    width: min(288px, 100vw - 2 * var(--space-md));
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    width: auto;
+    margin-top: var(--space-sm);
+    padding-inline: 0.875rem;            /* DS px-3.5 */
+    z-index: var(--z-navbar);
+  }
+  /* The submit magnifier is absolute inside the form — keep it inside the
+     14 px gutter instead of glued to the viewport edge. */
+  .header-search.open .header-search__submit { right: 0.875rem; }
+  body.body--search-is-open .top-header__left {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-slow);
   }
 }
 
@@ -642,6 +710,21 @@
   .top-header__meta { display: none; }
 }
 
-@media (max-width: 768px) {
-  .top-bar__authorities span { display: none; }
+/* DS top-bar.postcss:136-138 — `span { w-min sm:w-full }`: below 640 the
+   federal-authorities label becomes a min-content column and WRAPS instead of
+   disappearing. (Previously the span was display:none below 768, leaving an
+   unlabeled icon; the service-portal already wraps per CD.) */
+@media (max-width: 639.98px) {
+  .top-bar__authorities span { width: min-content; text-align: left; }
+}
+
+/* ── LOCKUP COMPACT (<480) — DS logo.postcss:76-86 ──────────────────────────
+   Below xs the long office title is `sr-only` and the bold ACRONYM shows in
+   its place; the grey department strip (top-header__department-strip, also
+   <480-only) carries the full name. Mirrors the service-portal lockup
+   exactly. Placed last so it wins over the <1024 dept rules above. */
+@media (max-width: 479.98px) {
+  .top-header__dept-acronym { display: block; }
+  .top-header__dept-name,
+  .top-header__dept-sub { display: none; }
 }

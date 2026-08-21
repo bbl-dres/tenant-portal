@@ -429,7 +429,7 @@ export function renderStepIndicator(currentStep, steps) {
 //             `window.portal.navigate(hashFor(key))` — no panel swap. The
 //             keyboard pattern still applies, which is what makes the
 //             inactive tabindex="-1" tabs reachable at all (review B16).
-export function wireTabs({ rootSel, panelId = 'detailTab', render = null, hashFor, navigate = false }) {
+export function wireTabs({ rootSel, panelId = 'detailTab', render = null, hashFor, navigate = false, afterRender = null }) {
   const tabs = Array.from(document.querySelectorAll(`${rootSel} [role="tab"]`));
   const panel = document.getElementById(panelId);
   if (!tabs.length || (!navigate && !panel)) return;
@@ -449,6 +449,10 @@ export function wireTabs({ rootSel, panelId = 'detailTab', render = null, hashFo
     });
     panel.setAttribute('aria-labelledby', 'tab-' + key);
     panel.innerHTML = render(key);
+    // Every host element in the panel is brand new after that assignment, so a
+    // component living inside one has to be mounted again. `render` returns a
+    // string and cannot do it itself.
+    if (afterRender) afterRender(key);
     next.focus();
     history.replaceState(null, '', hashFor(key));
   };

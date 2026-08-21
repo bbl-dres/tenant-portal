@@ -46,7 +46,7 @@
    box-shadow, which disappears against the operation blocks' tinted
    backgrounds. !important beats swagger-ui.css's own focus reset. */
 .swagger-host .swagger-ui :is(button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid var(--color-focus) !important;
+  outline: 2px solid var(--color-focus) !important;
   outline-offset: 2px;
   box-shadow: none;
 }

@@ -171,18 +171,25 @@
    right — the CD SearchResultsList row. Rows are separated by a rule
    rather than boxed, so the stream reads as one list. */
 .search-result {
-  border-bottom: 1px solid var(--color-secondary-100);
+  /* DS `.card--flat` rule tone: secondary-200 #ACB4BD (card.postcss:109-113)
+     — the service-portal's result rows use the same; secondary-100 was one
+     step light (docs/design-alignment.md D29). */
+  border-bottom: 1px solid var(--color-secondary-200);
 }
+/* Row padding rides the DS card--flat ramp `py-4 lg:py-6 2xl:py-8 px-1`
+   (16 → 24 @1024 → 32 @1544 block, 4 px inline) — service-portal parity. */
 .search-result__link {
   display: flex;
   align-items: flex-start;
   gap: var(--space-lg);
-  padding: var(--space-lg) 0;
+  padding: var(--space-md) var(--space-xs);
   text-decoration: none;
   color: var(--color-text-primary);
   transition: color var(--transition-fast);
 }
-.search-result__link:hover .search-result__title { color: var(--color-primary); }
+@media (min-width: 1024px) { .search-result__link { padding-block: var(--space-lg); } }
+@media (min-width: 1544px) { .search-result__link { padding-block: var(--space-xl); } }
+.search-result__link:hover .search-result__title { color: var(--color-primary-700); }
 .search-result__body { flex: 1; min-width: 0; }
 .search-result__meta { margin: 0 0 var(--space-xs); }
 .search-result__title {
@@ -226,10 +233,16 @@
 }
 @media (min-width: 640px)  { .search-results--grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { .search-results--grid { grid-template-columns: repeat(3, 1fr); } }
+/* Grid result card = the DS `.card--default` skin: white on shadow-lg,
+   hover to shadow-2xl over 300 ms, NO border (card.postcss:5-41). The
+   former 1 px gray-200 box was a portal-only outline
+   (docs/design-alignment.md D29). */
 .search-result-card {
-  border: 1px solid var(--color-border);
   background: var(--color-bg-default);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-slow);
 }
+.search-result-card:hover { box-shadow: var(--shadow-card-hover); }
 .search-result-card__link {
   display: flex;
   flex-direction: column;
@@ -238,7 +251,7 @@
   text-decoration: none;
   color: var(--color-text-primary);
 }
-.search-result-card__link:hover .search-result__title { color: var(--color-primary); }
+.search-result-card__link:hover .search-result__title { color: var(--color-primary-700); }
 .search-result-card__image {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -439,7 +452,7 @@
   transition: box-shadow var(--transition-fast);
 }
 .doc-card:hover { box-shadow: var(--shadow-card-hover); }
-.doc-card:hover .card__title { color: var(--color-primary); }
+.doc-card:hover .card__title { color: var(--color-primary-700); }
 .doc-card__preview {
   /* The sheet width normally comes from the viewer's `.docviewer__pages`
      container (media-viewer.css) — re-declare it here or `.docpage`'s
