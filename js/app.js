@@ -41,6 +41,13 @@ import {
   filterPills, wireSidebarToggle, wireCheckboxGroup,
 } from './catalogue-bar.js';
 import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
+import { isQuestion } from './search-query.js';
+import { build as buildAnswer } from './search-answer.js';
+import * as searchSources from './search-sources.js';
+import {
+  sourcesControl, answerBlock, setSourcesPanelOpen, sourcesPanelOpen,
+  EXAMPLE_QUESTIONS, searchHref,
+} from './search-ui.js';
 import {
   renderShell, renderFooter, renderShareBar, copyShareLink,
   toggleNavMenu, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice, submitSearch, toggleSearch, toggleBurger,
@@ -349,6 +356,35 @@ window.portal = {
 // (kept so the existing inline-handler call sites — window.portal.x —
 // keep working without rewriting every view).
 const P = window.portal;
+
+/* ── SEARCH SOURCE HANDLERS ───────────────────────────────────────────────
+   The source selection is rendered by search-ui.js and wired through inline
+   handlers, matching the rest of this app. Every one of them ends in a
+   re-render, because a changed selection changes what the page finds — and the
+   panel keeps its open state across that re-render, or it would close on every
+   tick and have to be reopened for each kind. */
+Object.assign(window.portal, {
+  toggleSearchSourcesPanel() {
+    setSourcesPanelOpen(!sourcesPanelOpen());
+    const panel = document.getElementById('searchSourcesPanel');
+    const toggle = document.getElementById('searchSourcesToggle');
+    if (panel) panel.hidden = !sourcesPanelOpen();
+    if (toggle) toggle.setAttribute('aria-expanded', String(sourcesPanelOpen()));
+  },
+  toggleSearchSource(key) { searchSources.toggle(key); rerenderSearchSurface(); },
+  selectAllSearchSources() { searchSources.selectAllKinds(); rerenderSearchSurface(); },
+  clearSearchSources() { searchSources.clearAllKinds(); rerenderSearchSurface(); },
+});
+
+/* Re-draw whichever surface is showing. `navigate()` to the SAME hash fires no
+   hashchange, so the route is re-dispatched directly through the router's own
+   entry point. The panel is forced open across the redraw: every caller here is
+   a click inside it, and it closing under the pointer is the one thing that
+   would make the selection unusable. */
+function rerenderSearchSurface() {
+  setSourcesPanelOpen(true);
+  P.handleHash();
+}
 const root = document.getElementById('root');
 
 // ── BOOTSTRAP ────────────────────────────────────────────────────────────
@@ -531,6 +567,27 @@ const SEARCH_BOOST = {
 
 // Build the index from state. Each entry declares its own display strings and
 // destination, so the renderer below stays uniform across content types.
+// `answerText` is the ONE field search-answer.js may turn into a cited
+// sentence. It is a separate field rather than a reuse of `lead` because the
+// two answer different questions: `lead` is the line under a result title and
+// is written to be scanned, while this is the sentence a citation stands
+// behind. Where an entry has no prose it stays empty, and the entry can then
+// appear as a result but never as a source — a source with nothing to say would
+// sit in the list with no citation pointing at it.
+/* Half the service descriptions are prose («Von Ihrer Verwaltungseinheit
+   belegte Liegenschaften — Galerie, Liste und Karte.») and half are keyword
+   strips («Reparaturen, Sanitär, Schliesssystem»). A strip pasted under a
+   citation READS as a sentence the system claims to have written, and it is
+   not one. The full stop is the author's own signal which of the two a
+   description is; a strip is framed into a sentence rather than passed off as
+   one. Composed from the record, so the citation behind it stays true. */
+function serviceSentence(label, desc) {
+  const text = String(desc || '').trim();
+  if (!text) return '';
+  if (/[.!?]$/.test(text)) return text;
+  return `«${label}» deckt ${text} ab.`;
+}
+
 function buildSearchIndex() {
   const idx = [];
 
@@ -539,6 +596,7 @@ function buildSearchIndex() {
       kind: 'Dienstleistungen',
       type: s.type === 'action' ? 'Dienstleistung' : 'Bereich',
       title: s.label, lead: s.desc, date: '',
+      answerText: serviceSentence(s.label, s.desc),
       href: s.href, external: s.external,
       boost: SEARCH_BOOST.services,
       fields: { title: s.label, type: 'Dienstleistung Service', lead: s.desc },
@@ -557,6 +615,7 @@ function buildSearchIndex() {
       kind: 'Liegenschaften',
       type: 'Liegenschaft',
       title: t.buildingName, lead: t.address, date: '',
+      answerText: t.address ? `${t.buildingName} liegt an der Adresse ${t.address}.` : '',
       href: `#/properties/${t.id}`, image: t.image,
       boost: SEARCH_BOOST.properties,
       fields: { title: t.buildingName, ref: formatAssetKey(t.assetKey), type: 'Liegenschaft Mietverhältnis', lead: t.address, extra: t.floorLabel },
@@ -573,6 +632,7 @@ function buildSearchIndex() {
       kind: 'Liegenschaften',
       type: 'Objekt im Portfolio',
       title: b.name, lead: b.address, date: '',
+      answerText: b.address ? `${b.name} liegt an der Adresse ${b.address}.` : '',
       // No tenancy of this user's → no detail page to open; the portfolio
       // list scoped by the query is the honest destination.
       href: `#/properties?q=${encodeURIComponent(b.name)}`,
@@ -591,6 +651,8 @@ function buildSearchIndex() {
       kind: 'Dokumente',
       type: typeLabel,
       title: d.title, lead: [typeLabel, d.format, d.size].filter(Boolean).join(' · '),
+      // No answerText: the lead here is a format strip, not prose. The document
+      // can be a result but never a cited sentence.
       date: d.issuedAt,
       href: `#/downloads?doc=${encodeURIComponent(d.id)}`,
       boost: SEARCH_BOOST.documents,
@@ -602,7 +664,7 @@ function buildSearchIndex() {
     idx.push({
       kind: 'Aktuell',
       type: n.type || 'Aktuell',
-      title: n.title, lead: n.lead, date: n.date,
+      title: n.title, lead: n.lead, date: n.date, answerText: n.lead,
       href: `#/news/${n.id}`, image: n.image,
       boost: SEARCH_BOOST.news,
       fields: { title: n.title, type: n.type, lead: n.lead },
@@ -620,7 +682,7 @@ function buildSearchIndex() {
     idx.push({
       kind: 'Informationen',
       type: 'Information',
-      title: it.title, lead: it.lead, date: '',
+      title: it.title, lead: it.lead, date: '', answerText: it.lead,
       href: it.href,
       boost: SEARCH_BOOST.info,
       fields: { title: it.title, type: 'Information Arbeitsinstrument Wissen Hilfsmittel', lead: it.lead },
@@ -714,6 +776,229 @@ function searchResultCard(r) {
   `;
 }
 
+/* ── HOME SEARCH SUGGESTIONS ──────────────────────────────────────────────
+   Grouped by content kind, following map.geo.admin.ch: section headings
+   separate the kinds instead of a filter control narrowing them. That is the
+   better answer to «I only want services» — the grouping is already there
+   before anyone looks for a control, and it costs no click.
+
+   It reuses the .combobox__* component the properties search already owns
+   (wirePropertiesSearchCombobox), so this is one more consumer of an existing
+   pattern rather than a second suggestion mechanism with its own keyboard
+   behaviour to keep in step.
+
+   THREE STATES, and the first is the one that teaches:
+     empty field  → four example QUESTIONS. Somebody who only ever types
+                    keywords never finds out that a whole question does
+                    something different; four of them standing there is the
+                    only place that says so.
+     typed        → grouped results with the match highlighted.
+     question or
+     no results   → an action row «… als Frage stellen». Today the list simply
+                    goes empty at the exact moment somebody typed a question.
+
+   Keyboard follows WAI-ARIA 1.2: ↓/↑ move, Enter takes the active option,
+   Escape closes, Tab leaves. aria-activedescendant announces the selection
+   while focus stays in the field, so the caret keeps its place.
+*/
+const HOME_SUGGEST_PER_GROUP = 4;
+const HOME_SUGGEST_MAX = 10;
+const HOME_SUGGEST_GROUPS = 4;
+
+/* Mark the matched part of a title. Deliberately on the RAW text and WITHOUT
+   folding: search-engine.js folds umlauts and collapses ae/oe/ue, which shifts
+   character positions, so mapping a match back onto the original title could
+   only guess. Better no highlight than one two characters off — that reads as a
+   rendering fault and undermines the list it is meant to help. */
+function highlightMatch(title, terms) {
+  const raw = String(title == null ? '' : title);
+  if (!terms.length) return P.escapeHtml(raw);
+  const hay = raw.toLowerCase();
+  const spans = [];
+  for (const term of terms) {
+    if (term.length < 2) continue;
+    for (let from = 0; ;) {
+      const at = hay.indexOf(term, from);
+      if (at < 0) break;
+      spans.push([at, at + term.length]);
+      from = at + term.length;
+    }
+  }
+  if (!spans.length) return P.escapeHtml(raw);
+  spans.sort((a, b) => a[0] - b[0]);
+  const merged = [];
+  for (const span of spans) {
+    const last = merged[merged.length - 1];
+    if (last && span[0] <= last[1]) last[1] = Math.max(last[1], span[1]);
+    else merged.push([...span]);
+  }
+  let out = '', cursor = 0;
+  for (const [start, end] of merged) {
+    out += P.escapeHtml(raw.slice(cursor, start)) + '<mark>' + P.escapeHtml(raw.slice(start, end)) + '</mark>';
+    cursor = end;
+  }
+  return out + P.escapeHtml(raw.slice(cursor));
+}
+
+/* The per-group cap is a starting BUDGET, not a ceiling. A fixed cap threw away
+   rows nothing else wanted: a query matching only documents showed four
+   suggestions where ten would have fitted. Every group gets up to
+   HOME_SUGGEST_PER_GROUP first, then the spare slots go round by round to
+   whichever groups still have rows. */
+function groupSuggestions(rows) {
+  const buckets = new Map();
+  for (const row of rows) {
+    if (!buckets.has(row.kind)) buckets.set(row.kind, []);
+    buckets.get(row.kind).push(row);
+  }
+  const groups = [...buckets.entries()]
+    .sort((a, b) => searchSources.byKind(a[0], b[0]))
+    .slice(0, HOME_SUGGEST_GROUPS)
+    .map(([kind, matches]) => ({ kind, matches, total: matches.length }));
+  const quota = groups.map(g => Math.min(g.matches.length, HOME_SUGGEST_PER_GROUP));
+  let used = quota.reduce((sum, v) => sum + v, 0);
+  for (let spare = true; spare && used < HOME_SUGGEST_MAX;) {
+    spare = false;
+    for (let i = 0; i < groups.length && used < HOME_SUGGEST_MAX; i++) {
+      if (quota[i] < groups[i].matches.length) { quota[i]++; used++; spare = true; }
+    }
+  }
+  return groups.map((g, i) => ({ kind: g.kind, rows: g.matches.slice(0, quota[i]), total: g.total }));
+}
+
+function wireHomeSearchSuggest() {
+  const input = document.getElementById('homeSearchInput');
+  const list = document.getElementById('homeSearchOptions');
+  if (!input || !list) return;
+  let items = [];
+  let activeIndex = -1;
+  let blurTimer = null;
+  /* Escape closed the list — keep it closed until the field is left or typed
+     into again. The flag exists because of a browser behaviour we should not
+     fight: Chrome CLEARS an `input[type=search]` on Escape and fires `input`
+     with an empty value, which is exactly the condition that opens the
+     examples. Without this the list closed and reopened in the same keystroke,
+     so Escape appeared to do nothing. */
+  let dismissed = false;
+
+  const optionEls = () => Array.from(list.querySelectorAll('.combobox__option'));
+  const close = () => {
+    clearTimeout(blurTimer);
+    list.hidden = true;
+    list.innerHTML = '';
+    items = [];
+    activeIndex = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+  };
+  const paint = () => {
+    optionEls().forEach((el, i) => {
+      const on = i === activeIndex;
+      el.classList.toggle('combobox__option--active', on);
+      el.setAttribute('aria-selected', String(on));
+      if (on) { input.setAttribute('aria-activedescendant', el.id); el.scrollIntoView({ block: 'nearest' }); }
+    });
+    if (activeIndex < 0) input.removeAttribute('aria-activedescendant');
+  };
+  const move = (delta) => {
+    if (!items.length) return;
+    activeIndex = (activeIndex + delta + items.length) % items.length;
+    paint();
+  };
+  const goto = (item) => {
+    close();
+    // An example is not a target but a query: it goes into the field and is
+    // searched, so the person sees where it leads and can edit it afterwards.
+    if (item.query != null) { input.value = item.query; P.navigate(searchHref(item.query)); return; }
+    if (item.external) { window.open(item.href, '_blank', 'noopener,noreferrer'); return; }
+    P.navigate(item.href);
+  };
+
+  /* The empty field offers EXAMPLES. It needs NO index, so focusing the field
+     does not build one; the four are static. */
+  function showExamples() {
+    items = EXAMPLE_QUESTIONS.map(q => ({ query: q }));
+    list.innerHTML = '<li class="combobox__group" role="presentation">Beispiele</li>'
+      + EXAMPLE_QUESTIONS.map((q, i) => `
+        <li class="combobox__option" role="option" id="homeSuggest-${i}" aria-selected="false">
+          <span class="combobox__option-primary">${P.escapeHtml(q)}</span>
+          <span class="combobox__option-secondary">Beispiel · als Frage stellen</span>
+        </li>`).join('');
+    activeIndex = -1;
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  function render(query) {
+    const terms = query.toLowerCase().split(/[^a-z0-9äöüß]+/i).filter(w => w.length > 1);
+    const hits = searchIndex(searchSources.filterEntries(getSearchIndex()), query);
+    const groups = groupSuggestions(hits);
+    items = [];
+    let html = '';
+    for (const group of groups) {
+      let options = '';
+      for (const row of group.rows) {
+        options += `
+          <li class="combobox__option" role="option" id="homeSuggest-${items.length}" aria-selected="false">
+            <span class="combobox__option-primary">${highlightMatch(row.title, terms)}</span>
+            <span class="combobox__option-secondary">${P.escapeHtml(row.type || row.kind)}${row.lead ? ' · ' + P.escapeHtml(row.lead) : ''}</span>
+          </li>`;
+        items.push(row);
+      }
+      html += `<li class="combobox__group" role="presentation">${P.escapeHtml(group.kind)}<span class="combobox__group-count">${group.total}</span></li>${options}`;
+    }
+
+    // The action row appears when the input looks like a question OR the
+    // keyword search found nothing — the second case is today's dead end.
+    const asking = isQuestion(query) || !items.length;
+    if (asking) {
+      html += `
+        <li class="combobox__option combobox__option--action" role="option"
+            id="homeSuggest-${items.length}" aria-selected="false">
+          <span class="combobox__option-primary">«${P.escapeHtml(query)}» als Frage stellen</span>
+        </li>`;
+      items.push({ query });
+    }
+
+    if (!items.length) return close();
+    list.innerHTML = html;
+    activeIndex = -1;
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    // An EMPTY field falls back to the examples; one character still shows
+    // nothing, because a single letter matches too much to be worth a list.
+    if (!q) { close(); if (!dismissed) showExamples(); return; }
+    dismissed = false;
+    if (q.length < 2) { close(); return; }
+    render(q);
+  });
+  input.addEventListener('focus', () => {
+    dismissed = false;
+    if (!input.value.trim()) showExamples();
+  });
+  input.addEventListener('blur', () => { blurTimer = setTimeout(close, 120); });
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { dismissed = true; close(); return; }
+    if (event.key === 'Tab') { close(); return; }
+    if (list.hidden || !items.length) return;
+    if (event.key === 'ArrowDown') { event.preventDefault(); move(1); }
+    else if (event.key === 'ArrowUp') { event.preventDefault(); move(-1); }
+    else if (event.key === 'Enter' && activeIndex >= 0) { event.preventDefault(); goto(items[activeIndex]); }
+  });
+  list.addEventListener('mousedown', (event) => {
+    if (event.target.closest('.combobox__option')) event.preventDefault();
+  });
+  list.addEventListener('click', (event) => {
+    const el = event.target.closest('.combobox__option');
+    if (!el) return;
+    goto(items[optionEls().indexOf(el)]);
+  });
+}
+
 function renderSearchResults() {
   shell({ breadcrumb: [{ label: P.t('bc.search') }] });
   // parseHashQuery splits on `&`, so it isolates `q` from the injected `lang`
@@ -725,12 +1010,46 @@ function renderSearchResults() {
   const kind = params.kind ? decodeURIComponent(params.kind) : '';
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
 
-  const ranked = query ? searchIndex(getSearchIndex(), query) : [];
+  const index = getSearchIndex();
+  // The source selection applies BEFORE the search, with the same call every
+  // other search path uses. Searching first and discarding afterwards would
+  // mean fetching the full set in order to shrink it — and on a real backend
+  // this is a WHERE clause, not a post-filter.
+  const pool = searchSources.filterEntries(index);
+  const literalHits = query ? searchIndex(pool, query) : [];
+
+  // TWO SEPARATE FUNCTIONS, and that is the decision behind these lines:
+  //   question resolution → improves the RESULTS
+  //   answer building     → produces the BLOCK
+  // While both hung off one condition, hiding the answers also emptied the
+  // result list, because a literal search finds nothing for a question.
+  const isAsking = !!query && isQuestion(query);
+  const answer = isAsking ? buildAnswer(query, index) : null;
+
+  // The relevance gate (search-answer.js) decides WHETHER the question was
+  // understood, not how much is shown afterwards. An answer may only rest on
+  // strong results, while a LIST offers rather than claims — related results
+  // are useful there. If nothing is strong the question was not understood and
+  // the list falls back to the literal search.
+  const resolved = !!(answer && answer.strong.length);
+  const ranked = resolved ? answer.hits : literalHits;
+
+  // Is the source selection to blame? ASKED ONLY when nothing was found, and as
+  // a yes/no. In the normal case nothing is counted at all — what is switched
+  // off is named beside the field, read from storage rather than computed from
+  // the index. On a real backend this is a LIMIT 1, not an aggregate. The empty
+  // case is also the only moment the answer changes anything: while results are
+  // on screen nobody looks for an explanation.
+  const activeKinds = searchSources.activeKinds();
+  const hiddenElsewhere = !!(query && !ranked.length && activeKinds
+    && searchIndex(index.filter(e => !activeKinds.has(e.kind)), query).length > 0);
 
   // Facet counts come from the FULL result set, so switching tabs never
-  // changes the other tabs' numbers.
+  // changes the other tabs' numbers. Because `pool` is already filtered, a
+  // switched-off kind cannot appear here either — the two controls cannot
+  // contradict each other without a special rule saying so.
   const kindCounts = ranked.reduce((o, r) => { o[r.kind] = (o[r.kind] || 0) + 1; return o; }, {});
-  const kinds = Object.keys(kindCounts);
+  const kinds = Object.keys(kindCounts).sort(searchSources.byKind);
   const activeKind = kinds.includes(kind) ? kind : '';
   const filtered = activeKind ? ranked.filter(r => r.kind === activeKind) : ranked;
   const sorted = sort === 'relevance' ? filtered : [...filtered].sort(compareSearchBy(sort));
@@ -768,12 +1087,31 @@ function renderSearchResults() {
             <button class="btn btn--bare search-hero__submit" type="submit" aria-label="${P.t('top.search')}">${P.icon('search')}</button>
           </div>
         </form>
+        ${sourcesControl()}
       </div>
     </section>
 
     <section class="section">
       <div class="container">
         <div class="search-results" aria-live="polite">
+          ${/* The answer block stands above the list for EVERY query, not only
+                for questions — its idle state is what makes the trigger
+                condition visible at all, and it keeps the list from jumping by
+                the block's height depending on the input. It disappears only
+                when somebody switches it off. */''}
+          ${query && searchSources.answersAllowed() ? answerBlock(answer, ranked.length) : ''}
+          ${hiddenElsewhere ? `
+            <div class="answer-slot answer-slot--warning">
+              ${P.icon('alertTriangle', 'answer__icon')}
+              <div class="answer__body">
+                <p class="answer__lead"><strong>Ihre Quellenauswahl blendet Treffer aus.</strong>
+                  Ohne ${P.escapeHtml(searchSources.offKinds().join(', '))} findet diese Suche nichts —
+                  mit allen Inhaltsarten gäbe es Treffer.</p>
+                <p><button type="button" class="btn btn--outline btn--sm"
+                        onclick="window.portal.selectAllSearchSources()">Alle Quellen einschalten</button></p>
+              </div>
+            </div>
+          ` : ''}
           ${!query ? `
             <p class="section-intro">Geben Sie einen Suchbegriff ein — zum Beispiel «Schaden», «Bundeshaus» oder «Grundriss». Durchsucht werden Dienstleistungen, Liegenschaften, Dokumente, News und die Informationsseite.</p>
           ` : total === 0 && !activeKind ? renderSearchNoResults(query) : `
@@ -1428,7 +1766,7 @@ function renderLanding() {
   document.getElementById('page-body').innerHTML = `
     <section class="hero hero--wide hero--split">
       <div class="hero__inner hero__inner--split">
-        <div>
+        <div class="hero__split-content">
           <h1 class="h1 hero__title">${P.t('landing.title')}</h1>
           <p class="hero__lead">
             ${P.t('landing.lead')}
@@ -1438,19 +1776,27 @@ function renderLanding() {
                for?" is the real first question. Field + labelled submit side
                by side (the sister portal's home-search row), NOT the
                results page's search--large field with the icon pinned inside
-               it: on an entry page the action deserves to be named. Submits
-               straight to #/search — no suggestion layer. Signing in stays
-               reachable from the top bar and the burger drawer. -->
-          <form class="home-search" role="search" aria-label="${P.t('landing.searchLabel')}"
-                onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); location.hash = v ? '#/search?q=' + encodeURIComponent(v) : '#/search';">
-            <label class="sr-only" for="homeSearchInput">${P.t('landing.searchLabel')}</label>
-            <input id="homeSearchInput" type="search" name="q" class="input home-search__input"
-                   placeholder="${P.t('landing.searchPlaceholder')}"
-                   autocomplete="off">
-            <button class="btn btn--filled btn--lg home-search__submit" type="submit">
-              ${P.icon('search')}${P.t('top.search')}
-            </button>
-          </form>
+               it: on an entry page the action deserves to be named. Signing in
+               stays reachable from the top bar and the burger drawer.
+               A suggestion layer now sits under the field (wireHomeSearchSuggest):
+               grouped by content kind, with four example questions in the empty
+               state and a way out when the keyword search finds nothing. -->
+          <div class="home-search-shell">
+            <form class="home-search" role="search" aria-label="${P.t('landing.searchLabel')}"
+                  onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); location.hash = v ? '#/search?q=' + encodeURIComponent(v) : '#/search';">
+              <label class="sr-only" for="homeSearchInput">${P.t('landing.searchLabel')}</label>
+              <input id="homeSearchInput" type="search" name="q" class="input home-search__input"
+                     placeholder="${P.t('landing.searchPlaceholder')}"
+                     autocomplete="off" role="combobox" aria-autocomplete="list"
+                     aria-controls="homeSearchOptions" aria-expanded="false">
+              <button class="btn btn--filled btn--lg home-search__submit" type="submit">
+                ${P.icon('search')}${P.t('top.search')}
+              </button>
+            </form>
+            <ul class="combobox__list home-search__suggest" id="homeSearchOptions"
+                role="listbox" aria-label="Suchvorschläge" hidden></ul>
+          </div>
+          ${sourcesControl()}
         </div>
         <figure class="hero__figure">
           <div class="hero__figure__media">
@@ -1507,6 +1853,7 @@ function renderLanding() {
 
     ${renderNewsSection()}
   `;
+  wireHomeSearchSuggest();
 }
 
 // ── 1a. OVERVIEW BAND (front page, signed in) ────────────────────────────
@@ -2669,12 +3016,18 @@ function wireReviewerSplit(a) {
 // Role-scoped tenancy list for the properties surface: BBL roles see the
 // whole portfolio; tenant roles see only their own VE's Mietverhältnisse.
 // Extracted so the live search preview can re-filter without re-deriving it.
+// The selection keys the tree hands back, in level order. `business-entity` as
+// a data attribute reaches `dataset` camelised, which is the name the URL and
+// the filter use too.
+const TREE_ATTRS = ['country', 'region', 'city', 'businessEntity'];
+
 function getScopedTenancies() {
   if (!P.state.user) return [];
   const ve = P.state.user.ve;
   const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
   return isBblView ? P.state.tenancies : P.state.tenancies.filter(t => t.ve === ve || t.dep === ve);
 }
+
 
 // Inner HTML for the #propertiesResults region (everything below the toolbar
 // + filter pills). Shared by the initial render and the live search preview
@@ -2728,6 +3081,7 @@ function parseTreeSel(params) {
   if (params.land)   sel.country = params.land;
   if (params.region) sel.region  = params.region;
   if (params.city)   sel.city    = params.city;
+  if (params.we)     sel.businessEntity = params.we;
   if (params.obj)    sel.id      = params.obj;
   return sel;
 }
@@ -2742,7 +3096,7 @@ function syncPropertiesTree(liveQuery) {
   const query = liveQuery !== undefined ? liveQuery : (p.q || '').toLowerCase().trim();
   syncTreeCounts(tree,
     filterTenancies(getScopedTenancies(), query, (p.ort || '').trim()),
-    (t) => [t.country, t.canton, t.city], (t) => t.id);
+    (t) => [t.country, t.canton, t.city, t.we], (t) => t.id);
 }
 // In-place refresh after a tree click (mirrors the sister portal's
 // renderMain): the URL is updated via replaceState so the tree DOM — and with
@@ -2841,12 +3195,29 @@ function renderProperties() {
               ${treeHTML(allTenancies, {
                 ariaLabel: 'Standorte',
                 levels: [
+                  // Icons distinguish the geographic levels; the levels below
+                  // them rely on indentation, which is why they name none — in
+                  // this component an icon also declares the icon COLUMN, so a
+                  // level without one indents by a plain step. Same
+                  // configuration as the sister portal's portfolio explorer.
                   { key: 'country', icon: 'globe', word: 'Land', label: v => COUNTRY_NAME[v] || v },
                   { key: 'canton', attr: 'region', icon: 'map', word: 'Kanton' },
-                  { key: 'city', icon: 'mapMarker', word: 'Ort' },
+                  { key: 'city', icon: 'map-pin', word: 'Ort' },
+                  // A Wirtschaftseinheit is named by its stable unit number,
+                  // never by a building inside it. The number already sits in
+                  // every tenancy's SAP asset key (flattened to `we` in
+                  // state.js), so this level costs no data.
+                  { key: 'we', attr: 'business-entity', word: 'Wirtschaftseinheit',
+                    label: v => `WE ${v}`, countWord: 'Objekte',
+                    sort: (a, b) => String(a).localeCompare(String(b), 'de') },
                 ],
                 leaf: {
-                  icon: () => 'building', word: 'Liegenschaft',
+                  word: 'Liegenschaft',
+                  // The object key («AA»), not the whole SAP key: the two
+                  // levels above already state the BK and the WE, so repeating
+                  // them on every leaf would only push the name out of view.
+                  idText: t => (t.assetKey && t.assetKey.obj) || '',
+
                   label: t => t.buildingName, objId: t => t.id,
                   sort: (a, b) => a.buildingName.localeCompare(b.buildingName, 'de'),
                 },
@@ -2869,6 +3240,7 @@ function renderProperties() {
   const sidebar = document.querySelector('.pf-sidebar');
   if (sidebar) {
     wireTree(sidebar, {
+      attrs: TREE_ATTRS,
       onSelect: (nextSel) => {
         const p = parseHashQuery(location.hash);
         // replaceState, not location.hash: the tree DOM (expanded branches)
@@ -2878,7 +3250,7 @@ function renderProperties() {
         refreshPropertiesResults(view);
       },
     });
-    restoreTreeSelection(sidebar, sel);
+    restoreTreeSelection(sidebar, sel, { attrs: TREE_ATTRS });
     syncPropertiesTree();
   }
 }
@@ -2892,10 +3264,16 @@ function parseHashQuery(hash) {
   hash.slice(qIdx + 1).split('&').forEach(pair => {
     if (!pair) return;
     const [k, v = ''] = pair.split('=');
+    // `+` IS a space here. handleHash rewrites every hash through
+    // `URLSearchParams.toString()` to re-inject `lang`, and that serialiser
+    // writes a space as `+` — which decodeURIComponent leaves alone. Every
+    // multi-word query therefore came back as «Wie+melde+ich+einen+Schaden?»
+    // in the field and in the echoed query. A `+` the user actually typed
+    // arrives as %2B, so this is lossless.
     // A malformed escape — `#/…?q=100%` — must not take down the route:
     // skip the broken pair, keep the rest (review B19).
     try {
-      out[decodeURIComponent(k)] = decodeURIComponent(v);
+      out[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, '%20'));
     } catch { /* skip malformed pair */ }
   });
   return out;
@@ -2914,6 +3292,7 @@ function buildPropertiesHash({ view, q, ort, sort, page, sel, sb }) {
   if (s.country)   parts.push('land='   + encodeURIComponent(s.country));
   if (s.region)    parts.push('region=' + encodeURIComponent(s.region));
   if (s.city)      parts.push('city='   + encodeURIComponent(s.city));
+  if (s.businessEntity) parts.push('we=' + encodeURIComponent(s.businessEntity));
   if (s.id)        parts.push('obj='    + encodeURIComponent(s.id));
   if (sbHidden)    parts.push('sb=0');
   if (sort && sort !== 'name') parts.push('sort=' + encodeURIComponent(sort));
@@ -2933,7 +3312,8 @@ function filterTenancies(list, q, ort, sel = {}) {
   out = out.filter(t => (!sel.id || t.id === sel.id)
     && (!sel.country || t.country === sel.country)
     && (!sel.region || t.canton === sel.region)
-    && (!sel.city || t.city === sel.city));
+    && (!sel.city || t.city === sel.city)
+    && (!sel.businessEntity || t.we === sel.businessEntity));
   if (ort) out = out.filter(t => t.city === ort);
   if (q) {
     out = out.filter(t => {
@@ -3006,7 +3386,8 @@ function renderPropertiesFilterPills({ view, query, ort, sort }) {
   if (Object.keys(sel).length) {
     const obj = sel.id ? getScopedTenancies().find(x => x.id === sel.id) : null;
     const value = sel.id ? ((obj && obj.buildingName) || sel.id)
-      : sel.city || sel.region || (COUNTRY_NAME[sel.country] || sel.country);
+      : sel.businessEntity ? `WE ${sel.businessEntity}`
+        : sel.city || sel.region || (COUNTRY_NAME[sel.country] || sel.country);
     active.push({ key: 'sel', label: 'Auswahl', value });
   }
   // Shared pill markup (catalogue-bar.js, review M-PILLS) in its

@@ -36,14 +36,32 @@
    figcaption. Image fills its column edge-to-edge of the column. The
    variant carries no padding override: the split hero keeps the base
    .hero rhythm (--hero-pt top, --section-py bottom). */
+/* NO `align-items` — the grid default `stretch` is CD's own arrangement
+   (designsystem hero.postcss:70-88): both columns take the row height, so the
+   figure keeps its 16:9 media at the TOP of its cell however tall the other
+   column grows. `align-items: center` centred the two BOXES against each other,
+   which is fine only while they stay the same height: opening the source panel
+   made the text column grow and the image drifted down with it.
+
+   Both columns start at the top, and the content does NOT centre inside its
+   own height either — that only moved the jump one step in, pulling the title
+   up while the image stayed put. Nothing should move because a panel below it
+   opened. A stretched grid item flows its content from the top on its own, so
+   no rule is needed here to say so. */
 .hero__inner--split {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-xl);
-  align-items: center;
 }
 @media (min-width: 1024px) {
   .hero__inner--split { grid-template-columns: 1fr 1fr; gap: var(--space-3xl); }
+  /* The margin is what the old centring supplied by accident. Flush against the
+     image the title reads as fighting the photo edge — its cap already starts
+     ~17px below its own line-box top, and 1rem more puts it just under the image
+     edge, paired with it rather than butted against it. Two columns only exist
+     from this breakpoint up; stacked, the title follows the header and the extra
+     space would be dead. */
+  .hero__inner--split > .hero__split-content .hero__title { margin-top: var(--space-md); }
 }
 .hero__figure {
   margin: 0;

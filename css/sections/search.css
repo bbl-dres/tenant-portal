@@ -1,0 +1,231 @@
+/* ==========================================================================
+   SEARCH.CSS — the surfaces added in front of and above the result list:
+   the source selection beside the field, the grouped home suggestions, and
+   the answer block.
+
+   Everything here builds on the existing components rather than beside them:
+   the suggestion list IS the `.combobox__*` popup the properties search owns
+   (components/forms.css), so there is one suggestion mechanism in the portal
+   with one keyboard behaviour, not two that have to be kept in step.
+   ========================================================================== */
+
+/* ── SOURCE SELECTION ─────────────────────────────────────────────────────
+   One component, one spacing, identical on the landing page and the results
+   page. Trigger and panel are ONE element so the surrounding layout applies
+   its rhythm once to the whole control instead of separately to each half. */
+.search-sources { margin-top: var(--space-sm); max-width: 720px; }
+.home-search-shell + .search-sources { max-width: 640px; }
+.search-sources__line { margin: 0; }
+/* `display:flex` with `width:100%`, NOT inline-flex: sized to its content the
+   button grew past the field it belongs under as soon as several kinds were
+   named. The parent sets the width and the sentence wraps inside it. */
+.search-sources__toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs) var(--space-sm);
+  width: 100%;
+  padding: var(--space-xs) 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+/* `min-width:0` lifts the minimum a flex child otherwise keeps; without it the
+   longest run of text pushes the button open again. */
+.search-sources__text { min-width: 0; overflow-wrap: anywhere; }
+.search-sources__toggle:hover { color: var(--color-text-primary); }
+.search-sources__toggle strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.search-sources__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 0 0 auto;
+  color: var(--color-link);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+/* Scoped to the trigger, or the rule would catch every chevron on the page. */
+.search-sources__chev { transition: transform var(--transition-fast); }
+.search-sources__toggle[aria-expanded="true"] .search-sources__chev { transform: rotate(180deg); }
+
+.search-sources__panel {
+  margin-top: var(--space-2sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+}
+.search-sources__panel[hidden] { display: none; }
+/* Column WIDTH rather than a column count, and no media query: the panel sits
+   in a half-width hero cell on one page and over the full field width on the
+   other, so the space it actually has decides how many columns fit. */
+.search-sources__group,
+.search-sources__extra { margin: 0; padding: 0; border: 0; }
+.search-sources__group { columns: 13rem; column-gap: var(--space-lg); }
+.search-sources__legend {
+  padding: 0;
+  margin-bottom: var(--space-sm);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+.search-sources__group .search-sources__legend { column-span: all; }
+.search-sources__check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+  break-inside: avoid;
+}
+.search-sources__check input { margin: 0; flex: 0 0 auto; }
+/* ONE divider, not two. The buttons hang off the list they act on without a
+   rule; the rule below separates the second group. Their scope is therefore
+   visible instead of needing to be explained. */
+.search-sources__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-sm);
+}
+.search-sources__extra {
+  margin-top: var(--space-2sm);
+  padding-top: var(--space-2sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* ── HOME SUGGESTIONS ─────────────────────────────────────────────────────
+   The list is the shared `.combobox__list`; only the group heading and the
+   action row are new. */
+/* The popup anchors to the FIELD, not to the field plus everything under it:
+   shell = form + list, and the source line is the shell's sibling. So the list
+   opens directly below the field and floats over that line, instead of being
+   pushed below it. Without the shell the absolutely positioned list found no
+   positioned ancestor at all and fell through to `.page-container`. */
+.home-search-shell { position: relative; max-width: 640px; }
+.home-search__suggest { max-height: 22rem; }
+.combobox__group {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2sm);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+}
+.combobox__group-count { font-weight: var(--font-weight-regular); }
+/* A group starts with a heading, not a divider: the option rule draws a line
+   under every row, which would double up directly below a heading. */
+.combobox__group + .combobox__option { border-top: 0; }
+.combobox__option mark {
+  background: var(--color-badge-blue-bg);
+  color: var(--color-badge-blue-text);
+  padding: 0 2px;
+  border-radius: var(--radius-xs);
+}
+/* Not a result but a way out — where the keyword search would otherwise go
+   quietly empty at the exact moment somebody typed a question. */
+.combobox__option--action {
+  background: var(--color-bg-alt);
+  color: var(--color-link);
+}
+.combobox__option--action .combobox__option-primary {
+  color: inherit;
+  font-weight: var(--font-weight-regular);
+}
+
+/* ── ANSWER BLOCK ─────────────────────────────────────────────────────────
+   The block owns its spacing; the call site does not. */
+.answer-slot {
+  display: flex;
+  gap: var(--space-2sm);
+  align-items: flex-start;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius);
+}
+.answer-slot--warning {
+  background: var(--color-badge-orange-bg);
+  color: var(--color-badge-orange-text);
+}
+.answer__icon { flex: 0 0 auto; width: var(--icon-lg); height: var(--icon-lg); }
+.answer__body { min-width: 0; flex: 1 1 auto; }
+.answer__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2sm);
+  flex-wrap: wrap;
+  margin: 0 0 var(--space-sm);
+}
+.answer__title { font-weight: var(--font-weight-bold); }
+.answer__lead { margin: 0; color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+.answer__sentence { margin: 0 0 var(--space-sm); }
+/* Numeric citation. Every sentence carries one — that is the property the whole
+   component exists to demonstrate, so it is styled to be seen, not hidden. */
+.answer__cite {
+  font-size: var(--text-body-xs);
+  font-weight: var(--font-weight-bold);
+  padding: 0 var(--space-xs);
+  margin-left: 2px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-xs);
+  text-decoration: none;
+  vertical-align: super;
+}
+.answer__sources {
+  margin-top: var(--space-md);
+  padding-top: var(--space-2sm);
+  border-top: 1px solid var(--color-border-light);
+}
+.answer__sources-label {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+}
+.answer__source {
+  display: grid;
+  grid-template-columns: var(--space-lg) 1fr;
+  gap: var(--space-sm);
+  font-size: var(--text-body-sm);
+  align-items: baseline;
+  margin-bottom: var(--space-2sm);
+}
+.answer__source:last-child { margin-bottom: 0; }
+.answer__source-n { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+.answer__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  align-items: center;
+  margin-top: var(--space-2sm);
+}
+.answer__note { flex: 1 1 18rem; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+/* The off switch sits ON the block: whoever sees an answer is the only person
+   who can decide whether they want it. */
+.answer__off {
+  background: none;
+  border: 0;
+  padding: var(--space-xs) 0;
+  font: inherit;
+  font-size: var(--text-body-xs);
+  color: currentColor;
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* Idle state: the same block, quieter. No change of frame and no other colour —
+   it is the same component at an earlier moment, not a second one. */
+.answer__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+  margin: var(--space-2sm) 0 0;
+  font-size: var(--text-body-sm);
+}

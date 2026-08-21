@@ -68,7 +68,12 @@ export async function loadData(basePath = 'data/') {
   const buildingImages = new Map(state.buildings.map(b => [b.buildingId, b.images || []]));
   state.tenancies = tenancies.map(t => {
     const images = buildingImages.get(t.buildingId) || [];
-    return { ...t, id: t.tenancyId, address: formatAddressLine(t), images, image: images[0] || '' };
+    // `we` is flattened out of the SAP asset key here, beside the other
+    // derived fields: the structure tree groups on a plain property, and a
+    // grouping level reaching two objects deep for its key would be the only
+    // one in the portal that did.
+    return { ...t, id: t.tenancyId, we: (t.assetKey && t.assetKey.we) || '',
+      address: formatAddressLine(t), images, image: images[0] || '' };
   });
   state.news = news.map(n => ({ ...n, id: n.newsId }));
   state.documents = documents.map(d => ({ ...d, id: d.documentId }));

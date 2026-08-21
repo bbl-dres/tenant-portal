@@ -1,17 +1,45 @@
-// Sidebar structure tree (`.pf-tree`) — ported from the sister service-portal
-// (js/ui/spatial-tree.js + css/sections/explorer.css, design variant H2 of its
-// «Standortbaum» wireframe study). One <li class="pf-tree__item"> per level,
-// whose button carries levels as `data-country` / `data-region` / `data-city`,
-// a count in `<span class="pf-tree__n">`, and leaves with `data-obj`.
+// Sidebar structure tree (`.pf-tree`) — the markup half of the port of the
+// sister service-portal's js/ui/components/sidebar-tree.js. Its CSS twin is
+// css/components/spatial-tree.css; between them the rendered tree is the same
+// component the service portal ships, so a future upstream diff stays
+// mechanical. Two things are deliberately NOT ported:
 //
-// The tree is rendered ONCE per route render; counts are synchronised rather
-// than regenerated so expanded branches and selection survive filter changes.
-// Adaptations from upstream: the portal's `escapeHtml`/`icon` helpers are
-// imported directly instead of arriving on a component context `C`, and icon
-// names use the portal's lowercase registry keys. The optional sub-leaf level
-// (Plan-Editor floors) is not ported — no portal surface needs it yet.
+//   · the component's own render loop. Upstream rebuilds the whole tree from
+//     data on every state change. Here the tree is rendered ONCE per route
+//     render and `syncTreeCounts` updates it in place, so expanded branches
+//     and the selection survive a filter change — which is what this portal's
+//     live search preview needs and upstream has no equivalent of.
+//   · split rows (`.pf-tree__fold` beside a link). This tree selects, it does
+//     not navigate, so every row is a plain button and the chevron is the
+//     muted `.pf-tree__chev-slot` — exactly the shape upstream renders for its
+//     own `mode: 'select'` explorers.
+//
+// What IS ported, and what the earlier iteration got wrong: indentation as a
+// cumulative running sum in `--pf-ind` (CSS cannot express it, which is why
+// upstream computes it in JS), the chevron sitting OUTSIDE the label flow so
+// rows align whether foldable or not, and Lucide icons instead of the CD glyph
+// set. Rows are one class, `.pf-tree__row`, as upstream — a group and a leaf
+// differ by what they carry, not by a second class name.
 
-import { escapeHtml as esc, icon } from './lib.js';
+import { escapeHtml as esc } from './lib.js';
+
+// CSS cannot express the per-level running sum used for indentation.
+// GUTTER is the chevron column; a level that shows icons reserves a wider step
+// than one that relies on indentation alone.
+const GUTTER = 20;
+const ICON_COLUMN = 24;
+const STEP = 16;
+
+// The Lucide roots carry width/height="24". lib.js's `icon()` emits a
+// viewBox-less <svg> wrapper, in which <use> clones them at that intrinsic size
+// and the box clips them — so this wrapper carries the same viewBox and the
+// clone scales with it instead. The files under assets/icons/lucide are
+// vendored verbatim from the service portal (same sha256 as upstream Lucide
+// 1.31.0), which is why they are not reformatted to suit `icon()`.
+const LUCIDE_NAME = /^[a-z][a-z-]*$/;
+const lucide = (name, cls) => (LUCIDE_NAME.test(String(name || ''))
+  ? `<svg class="inline-icon ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/icons/lucide/${name}.svg"/></svg>`
+  : '');
 
 // Synchronise counts and visibility with the current filters.
 //
@@ -19,9 +47,8 @@ import { escapeHtml as esc, icon } from './lib.js';
 // the tree selection itself. Otherwise a click would leave only the selected
 // branch showing «1», turning navigation into a dead end.
 //
-// `levelsOf(entry)` returns level values in country · region · city order
-// (shorter trees return fewer), and `idOf(entry)` returns the ID carried by
-// leaves in `data-obj`.
+// `levelsOf(entry)` returns level values outermost-first (shorter trees return
+// fewer), and `idOf(entry)` returns the ID carried by leaves in `data-obj`.
 export function syncTreeCounts(root, visible, levelsOf, idOf) {
   if (!root) return;
   // One count per path prefix: «CH», «CH▸BE», «CH▸BE▸Bern», …
@@ -35,35 +62,30 @@ export function syncTreeCounts(root, visible, levelsOf, idOf) {
   }
   const ids = new Set(visible.map(idOf));
 
-  root.querySelectorAll('.pf-tree__node').forEach((button) => {
-    const data = button.dataset;
-    const levels = [data.country, data.region, data.city].filter((value) => value !== undefined);
-    const count = counts.get(levels.join('▸')) || 0;
+  // A group row is one that can be opened; a leaf is one that names an object.
+  // Both are `.pf-tree__row` — the distinction is a property of the row, not a
+  // second class, which is what lets the CSS be the upstream file unchanged.
+  root.querySelectorAll('.pf-tree__row[aria-expanded]').forEach((button) => {
+    const count = counts.get(button.dataset.path || '') || 0;
     const field = button.querySelector('.pf-tree__n');
     if (field) field.textContent = String(count);
     // Hide empty branches instead of offering a «0» that leads nowhere.
     button.closest('.pf-tree__item').hidden = count === 0;
   });
-  root.querySelectorAll('.pf-tree__leaf').forEach((button) => {
+  root.querySelectorAll('.pf-tree__row[data-obj]').forEach((button) => {
     button.closest('.pf-tree__item').hidden = !ids.has(button.dataset.obj);
   });
   // Filtering can hide the row that currently holds the tree's single tab stop,
   // which would leave the whole tree unreachable by keyboard. Put it back on a
   // visible row — the selected one if it survived the filter, else the first.
-  const reachable = [...root.querySelectorAll('.pf-tree__node, .pf-tree__leaf')]
+  const reachable = [...root.querySelectorAll('.pf-tree__row')]
     .filter((button) => button.offsetParent !== null);
   if (!reachable.length) return;
-  // Row dividers are LEADING rules (css/components/spatial-tree.css), which
-  // leaves the column without a trailing line. CSS clears the rule on the first
-  // top-level row, but filtering can hide exactly that row — so mark whichever
-  // row is actually first now, otherwise a line hangs under the sidebar head.
-  root.querySelectorAll('.is-first-row').forEach((row) => row.classList.remove('is-first-row'));
-  reachable[0].classList.add('is-first-row');
   // Keep the roving tab stop where it is while its row is still visible —
   // this tail runs on every count sync (each keystroke of the live preview),
-  // and unconditionally moving the stop yanked keyboard users off the row
-  // they were on (review m7). Only reassign when the previous stop is hidden
-  // or absent.
+  // and unconditionally moving the stop yanked keyboard users off the row they
+  // were on (review m7). Only reassign when the previous stop is hidden or
+  // absent.
   if (reachable.some((button) => button.tabIndex === 0)) return;
   reachable.forEach((button) => { button.tabIndex = -1; });
   (reachable.find((button) => button.classList.contains('is-active')) || reachable[0]).tabIndex = 0;
@@ -75,39 +97,54 @@ export function syncTreeCounts(root, visible, levelsOf, idOf) {
 //     idText: (value, entries) => …, sort: (a, b) => …, word, countWord }
 // `attr` is the data-attribute name (default: key). The portal groups by
 // `canton` but exposes it as `data-region`, keeping selection keys consistent
-// with the sister portal's explorers. `leaf` describes the leaf:
-//   { icon: (o) => …, idText: (o) => …, label: (o) => …, objId: (o) => …, sort }
+// with the sister portal's explorers.
+//
+// `icon` does double duty, exactly as upstream: it names the glyph AND declares
+// that this DEPTH reserves an icon column. A level without one indents by a
+// plain step and shows no glyph — which is how the service portal renders its
+// business-entity level. The leaf sits one past the end of `levels`, so it has
+// no icon column at all and `leaf` therefore takes no icon:
+//
+//   leaf: { idText: (o) => …, label: (o) => …, objId: (o) => …, sort, word }
+//
 // Leaves automatically carry data attributes for ALL ancestor levels plus
 // `data-obj`, exactly the shape read by syncTreeCounts/wireTree/restore.
 const compareGerman = (a, b) => String(a).localeCompare(String(b), 'de');
 
 export function treeHTML(objects, { levels, leaf, ariaLabel = 'Struktur' }) {
-  // The count is a bare number in the DOM — the parentheses are drawn by CSS —
-  // and it gains a named figure for assistive technology, which would
-  // otherwise hear «Schweiz 7».
+  // Cumulative indentation: every level adds its own step, so a child can never
+  // start left of its parent however the levels are configured.
+  const rung = (depth) => {
+    let x = GUTTER;
+    for (let index = 0; index < depth; index++) {
+      x += (levels[index] && levels[index].icon) ? ICON_COLUMN : STEP;
+    }
+    return x;
+  };
+  // The count is a bare number in the DOM and reads as one on screen; it gains
+  // a named figure for assistive technology, which would otherwise hear
+  // «Schweiz 7».
   const countHTML = (count, unit) => `<span class="pf-tree__n">${count}</span>${
     unit ? `<span class="sr-only"> ${esc(unit)}</span>` : ''}`;
-  const rowContent = (iconName, idText, label, kindWord) => `${icon(iconName, 'pf-tree__ico')}${
+  const rowContent = (iconName, idText, label, kindWord) => `${
+    iconName ? lucide(iconName, 'pf-tree__ico') : ''}${
     kindWord ? `<span class="sr-only">${esc(kindWord)}: </span>` : ''}${
     idText ? `<span class="pf-tree__id">${esc(idText)}</span>` : ''}<span class="pf-tree__label">${esc(label)}</span>`;
-  const nodeHTML = (content, count, unit, attrs, children, level) => `<li class="pf-tree__item" role="none">
-      <button type="button" class="pf-tree__node" role="treeitem" tabindex="-1"
-        aria-level="${level}" aria-selected="false" aria-expanded="false" ${attrs}>
-        ${icon('chevronRight', 'pf-tree__chev')}${content}${countHTML(count, unit)}
-      </button>
-      <ul class="pf-tree__children" role="group" hidden>${children}</ul></li>`;
+  const chevron = `<span class="pf-tree__chev-slot" aria-hidden="true">${
+    lucide('chevron-right', 'pf-tree__chev')}</span>`;
 
   const attrPairs = (pairs) => pairs.map(([attribute, value]) => `data-${attribute}="${esc(value)}"`).join(' ');
 
-  const build = (items, depth, ancestors) => {
+  const build = (items, depth, ancestors, path) => {
     const level = depth + 1;
+    const indent = ` style="--pf-ind:${rung(depth)}px"`;
     if (depth === levels.length) {
       const sorted = leaf.sort ? items.slice().sort(leaf.sort) : items;
       return sorted.map((object) => {
         const pairs = [...ancestors, ['obj', leaf.objId(object)]];
-        return `<li class="pf-tree__item" role="none"><button type="button" class="pf-tree__leaf"
+        return `<li class="pf-tree__item" role="none"${indent}><button type="button" class="pf-tree__row"
           role="treeitem" tabindex="-1" aria-level="${level}" aria-selected="false" ${attrPairs(pairs)}>${
-          rowContent(leaf.icon(object), leaf.idText ? leaf.idText(object) : '', leaf.label(object), leaf.word)}</button></li>`;
+  rowContent('', leaf.idText ? leaf.idText(object) : '', leaf.label(object), leaf.word)}</button></li>`;
       }).join('');
     }
     const levelDef = levels[depth];
@@ -124,21 +161,32 @@ export function treeHTML(objects, { levels, leaf, ariaLabel = 'Struktur' }) {
     return keys.map((key) => {
       const entries = groups.get(key);
       const pairs = [...ancestors, [attribute, key]];
-      return nodeHTML(
-        rowContent(levelDef.icon, levelDef.idText ? levelDef.idText(key, entries) : '',
-          label(key, entries), levelDef.word),
-        entries.length, levelDef.countWord || 'Objekte', attrPairs(pairs),
-        build(entries, depth + 1, pairs), level);
+      // `data-path` is the count key this row answers to. syncTreeCounts used
+      // to rebuild it from data-country/region/city, which tied the counting to
+      // those three names and would silently report 0 for any level added
+      // later; the row now states its own key.
+      const here = [...path, key];
+      return `<li class="pf-tree__item" role="none"${indent}>
+      <button type="button" class="pf-tree__row" role="treeitem" tabindex="-1"
+        aria-level="${level}" aria-selected="false" aria-expanded="false"
+        data-path="${esc(here.join('▸'))}" ${attrPairs(pairs)}>
+        ${chevron}${rowContent(levelDef.icon, levelDef.idText ? levelDef.idText(key, entries) : '',
+    label(key, entries), levelDef.word)}${countHTML(entries.length, levelDef.countWord || 'Objekte')}
+      </button>
+      <ul class="pf-tree__children" role="group" hidden>${build(entries, depth + 1, pairs, here)}</ul></li>`;
     }).join('');
   };
-  return `<ul class="pf-tree" role="tree" aria-label="${esc(ariaLabel)}">${build(objects, 0, [])}</ul>`;
+  // `pf-tree__section` is the class the guide and the count rules are scoped to
+  // upstream, where one tree may hold several sections; here there is one.
+  return `<ul class="pf-tree pf-tree__section" role="tree" aria-label="${esc(ariaLabel)}">${
+    build(objects, 0, [], [])}</ul>`;
 }
 
-// Two-tone marking: the selected node is active (primary inner edge bar), while
-// its ancestor path (country › region › city) uses light grey. This keeps the
+// Two-tone marking: the selected row is active (darker fill, bold, a grey edge
+// bar), its ancestor path light grey with a lighter bar. This keeps the
 // drill-down chain visible despite shallow indentation.
 export function markTree(sidebar, activeNode) {
-  sidebar.querySelectorAll('.pf-tree__node, .pf-tree__leaf')
+  sidebar.querySelectorAll('.pf-tree__row')
     .forEach((node) => {
       node.classList.remove('is-active', 'is-path');
       if (node.hasAttribute('aria-selected')) node.setAttribute('aria-selected', 'false');
@@ -150,13 +198,13 @@ export function markTree(sidebar, activeNode) {
   while (item) {
     const list = item.parentElement;
     if (!list || !list.classList.contains('pf-tree__children')) break; // Reached the top-level list.
-    const parentNode = list.parentElement.querySelector(':scope > .pf-tree__node, :scope > .pf-tree__leaf');
+    const parentNode = list.parentElement.querySelector(':scope > .pf-tree__row');
     if (parentNode) parentNode.classList.add('is-path');
     item = list.parentElement;
   }
 }
 
-// Click wiring: nodes expand/collapse and select their level, while leaves
+// Click wiring: group rows expand/collapse and select their level, while leaves
 // select the object (`selection.id`). `onSelect(selection, node)` receives an
 // object keyed by `attrs`; this function maintains markTree.
 //
@@ -183,23 +231,21 @@ export function wireTree(sidebar, { attrs = ['country', 'region', 'city'], onSel
     if (children) children.hidden = expanded;
   };
   sidebar.addEventListener('click', (event) => {
-    const leafButton = event.target.closest('.pf-tree__leaf');
-    if (leafButton) { // Leaf: filter to the object, not a detail jump.
-      const selection = ancestry(leafButton);
-      selection.id = leafButton.dataset.obj;
-      select(selection, leafButton);
+    const row = event.target.closest('.pf-tree__row');
+    if (!row) return;
+    if (row.dataset.obj) { // Leaf: filter to the object, not a detail jump.
+      const selection = ancestry(row);
+      selection.id = row.dataset.obj;
+      select(selection, row);
       return;
     }
-    const node = event.target.closest('.pf-tree__node'); if (!node) return;
-    toggle(node);
-    const selection = {};
-    for (const key of attrs) if (node.dataset[key] != null) selection[key] = node.dataset[key];
-    select(selection, node);
+    toggle(row);
+    select(ancestry(row), row);
   });
   // --- Keyboard: the ARIA tree pattern ---------------------------------------
   // The whole tree is ONE tab stop with a roving tabindex — without it,
   // reaching the content past the tree means tabbing through every row.
-  const rows = () => [...sidebar.querySelectorAll('.pf-tree__node, .pf-tree__leaf')]
+  const rows = () => [...sidebar.querySelectorAll('.pf-tree__row')]
     .filter((row) => row.offsetParent !== null);
   const focusRow = (row) => {
     if (!row) return;
@@ -216,7 +262,7 @@ export function wireTree(sidebar, { attrs = ['country', 'region', 'city'], onSel
     (visible.find((row) => row.classList.contains('is-active')) || visible[0]).tabIndex = 0;
   };
   sidebar.addEventListener('keydown', (event) => {
-    const row = event.target.closest('.pf-tree__node, .pf-tree__leaf');
+    const row = event.target.closest('.pf-tree__row');
     if (!row || event.ctrlKey || event.metaKey || event.altKey) return;
     const visible = rows();
     const index = visible.indexOf(row);
@@ -238,7 +284,7 @@ export function wireTree(sidebar, { attrs = ['country', 'region', 'city'], onSel
       // Otherwise move to the parent row, which is the level above this list.
       const list = row.closest('.pf-tree__item')?.parentElement;
       const parent = list?.classList.contains('pf-tree__children')
-        ? list.parentElement.querySelector(':scope > .pf-tree__node, :scope > .pf-tree__leaf')
+        ? list.parentElement.querySelector(':scope > .pf-tree__row')
         : null;
       focusRow(parent);
     }
@@ -249,28 +295,28 @@ export function wireTree(sidebar, { attrs = ['country', 'region', 'city'], onSel
   return { syncTabStop };
 }
 
-// Restore tree selection from the URL: find its node, expand the path and mark
+// Restore tree selection from the URL: find its row, expand the path and mark
 // it. Filtering already happens through app state; this handles the visible
-// tree highlight. Compare via dataset rather than an attribute selector
-// because SAP IDs contain «/».
+// tree highlight. Compare via dataset rather than an attribute selector because
+// SAP IDs contain «/».
 export function restoreTreeSelection(sidebar, selection, { attrs = ['country', 'region', 'city'] } = {}) {
   if (!selection || !Object.keys(selection).length) return null;
   const button = selection.id
-    ? [...sidebar.querySelectorAll('.pf-tree__leaf')].find((node) => node.dataset.obj === selection.id)
-    : [...sidebar.querySelectorAll('.pf-tree__node')].find((n) =>
-        attrs.every((key) => (n.dataset[key] || '') === (selection[key] || '')));
+    ? [...sidebar.querySelectorAll('.pf-tree__row[data-obj]')].find((node) => node.dataset.obj === selection.id)
+    : [...sidebar.querySelectorAll('.pf-tree__row[aria-expanded]')].find((n) =>
+      attrs.every((key) => (n.dataset[key] || '') === (selection[key] || '')));
   if (!button) return null;
   let item = button.closest('.pf-tree__item');
   while (item) {
     const list = item.parentElement;
     if (!list || !list.classList.contains('pf-tree__children')) break;
     list.hidden = false;
-    const parentNode = list.parentElement.querySelector(':scope > .pf-tree__node, :scope > .pf-tree__leaf');
+    const parentNode = list.parentElement.querySelector(':scope > .pf-tree__row');
     if (parentNode) parentNode.setAttribute('aria-expanded', 'true');
     item = list.parentElement;
   }
-  // As on click, a restored node also reveals its children.
-  if (button.classList.contains('pf-tree__node')) {
+  // As on click, a restored group row also reveals its children.
+  if (button.hasAttribute('aria-expanded')) {
     const children = button.closest('.pf-tree__item').querySelector(':scope > .pf-tree__children');
     button.setAttribute('aria-expanded', 'true');
     if (children) children.hidden = false;
