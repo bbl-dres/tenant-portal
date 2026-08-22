@@ -1651,9 +1651,10 @@ function newsCard(n) {
 // ── NEWS LIST PAGE (swisstopo News-Übersicht) ──────────────────────────
 const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
-  // News sits inside the «Wissen und Hilfsmittel» drawer, so the parent row
-  // carries the active filterState while you are on it.
-  shell({ activeNav: 'info', breadcrumb: [{ label: P.t('bc.news') }] });
+  // News is its own L1 nav entry since the 2026-08 alignment (D58, user
+  // decision — same slot as the service portal), so it carries its own
+  // active state.
+  shell({ activeNav: 'news', breadcrumb: [{ label: P.t('bc.news') }] });
   // The CD's OWN news-list page, verified in the design-system source
   // (app/pages/newsList.vue + search.postcss «SEARCH RESULTS PAGE»;
   // docs/design-alignment.md D46): tinted header band with the h1 and a
@@ -1834,7 +1835,7 @@ function renderNewsList() {
 function renderNewsDetail({ id }) {
   const n = P.state.news.find(x => x.id === id);
   if (!n) { shell(); document.getElementById('page-body').innerHTML = '<div class="container section"><p>Nachricht nicht gefunden.</p></div>'; return; }
-  shell({ activeNav: 'info', breadcrumb: [{ href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
+  shell({ activeNav: 'news', breadcrumb: [{ href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
     <!-- CD press-release anatomy (designsystem app/pages/detailPressRelease.vue,

@@ -222,12 +222,12 @@ export const INFO_PAGES = [
 // Opened by an «Übersicht» row pointing at the parent page — the CD idiom for
 // a nav item that is both a drawer and a destination.
 //
-// News rides in this drawer instead of taking a top-level slot. The sister
-// portal keeps News at L1 on the reasoning that a news item is read once
-// while a tool is reused; that holds, but its nav row has no Liegenschaften
-// and no Pläne & Dokumente to pay for. Here a sixth L1 entry would push the
-// row past the CD's «limit to five» guidance, and News currently has no nav
-// home at all — reachable only from the landing page and from search.
+// News no longer rides in this drawer: it is a top-level nav entry, exactly
+// as in the sister service-portal (… Wissen und Hilfsmittel · News · Meine
+// Vorgänge). That makes six L1 entries against the CD's «limit to five»
+// guidance — accepted as a user decision (2026-08, alignment D58): the two
+// portals' navigation concepts matter more than the count, and News buried
+// in a drawer was effectively unreachable from the chrome.
 export function infoMenu() {
   return {
     id: 'info',
@@ -236,10 +236,12 @@ export function infoMenu() {
     items: [
       { href: '#/info', label: t('info.overview') },
       ...INFO_PAGES.map(p => ({ href: p.href, label: t(p.titleKey) })),
-      { href: '#/news', label: t('nav.news') },
     ],
   };
 }
+
+// News at L1 — one item, shared by every role's nav (alignment D58).
+const newsNavItem = () => ({ id: 'news', href: '#/news', label: t('nav.news') });
 
 // Nav items are built per render so labels follow the active language.
 // Arbeitsinstrumente / Pläne & Dokumente are inlined here for the same reason.
@@ -259,6 +261,7 @@ export function publicNavItems() {
     { id: 'properties', href: '#/properties', label: t('nav.properties') },
     { id: 'downloads', href: '#/downloads', label: t('nav.downloads') },
     infoMenu(),
+    newsNavItem(),
     { id: 'inbox', href: '#/inbox', label: t('nav.inbox') },
   ];
 }
@@ -273,6 +276,7 @@ export function authNavItems() {
       servicesMenu(),
       downloads,
       info,
+      newsNavItem(),
       { id: 'inbox', href: '#/inbox', label: t('nav.inboxVe') },
     ];
   }
@@ -285,6 +289,7 @@ export function authNavItems() {
       { id: 'properties', href: '#/properties', label: t('nav.properties') },
       downloads,
       info,
+      newsNavItem(),
       { id: 'inbox',      href: '#/inbox',      label: t('nav.inbox') },
     ];
   }
@@ -292,6 +297,7 @@ export function authNavItems() {
     servicesMenu(),
     downloads,
     info,
+    newsNavItem(),
   ];
 }
 
@@ -666,15 +672,21 @@ export function renderFooter() {
                service-portal footer. -->
           <div class="footer-information__col footer-information__col--links footer-information__col--big">
             <h2 class="footer-information__heading">${t('footer.moreInfo')}</h2>
+            <!-- Same concept as the service-portal's column (alignment D61,
+                 user decision): PORTAL destinations lead in the first
+                 sub-column (arrow glyph), the external bbl.admin.ch extras
+                 follow in the second (External glyph). -->
             <div class="footer-information__links">
               <div class="footer-information__links-column">
                 <ul class="footer-information__list">
-                  ${footerLink('https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html', t('footer.legal'), true)}
-                  ${footerLink('https://www.bbl.admin.ch/de/e-rechnung', 'E-Rechnung', true)}
+                  ${footerLink('#/services', t('nav.services'), false)}
+                  ${footerLink('#/properties', t('nav.properties'), false)}
                 </ul>
               </div>
               <div class="footer-information__links-column">
                 <ul class="footer-information__list">
+                  ${footerLink('https://www.bbl.admin.ch/bbl/de/home/das-bbl/rechtliche-grundlagen.html', t('footer.legal'), true)}
+                  ${footerLink('https://www.bbl.admin.ch/de/e-rechnung', 'E-Rechnung', true)}
                   ${footerLink('https://www.bbl.admin.ch/de/kontakt', t('nav.contact'), true)}
                 </ul>
               </div>

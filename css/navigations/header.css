@@ -44,7 +44,10 @@
   color: inherit;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
+  /* Label → External icon = CD's ml-2 on the bar-button icon
+     (top-bar.postcss:141-142), the 8 px the service-portal's .top-bar__btn
+     renders; this sat at 4 px (alignment D59). */
+  gap: var(--space-sm);
   padding: var(--space-xs) var(--space-sm);
   /* DS first-item flush: `pl-4 -ml-4` (top-bar.postcss:131) — the negative
      margin cancels the left padding so the TEXT sits on the container edge,
@@ -509,7 +512,10 @@ button.top-header__meta-link {
   align-items: center;
   gap: var(--space-2xs);
   font-size: var(--text-chrome-sm);
-  color: var(--color-text-muted);     /* name reads as a label (service-portal parity) */
+  /* gray-600, not the gray-500 muted token: the service-portal's name link
+     rests on ITS muted ink (--color-text-600 #4B5563), one step darker than
+     this portal's --color-text-muted — measured unequal at D59. */
+  color: var(--color-gray-600);       /* name reads as a label (service-portal parity) */
   text-decoration: none;              /* it IS a link (to #/profile) — quiet chrome styling */
 }
 .top-header__meta-user:hover { color: var(--color-primary); text-decoration: none; }   /* colour-only chrome hover (D53) */
@@ -518,12 +524,18 @@ button.top-header__meta-link {
   height: var(--icon-base);
   color: var(--color-primary);        /* service-portal: the user icon carries the emphasis */
 }
-/* Vertical rule between the signed-in name and Abmelden — DS
-   .separator--vertical as used by the service-portal meta bar. */
+/* Vertical rule between the signed-in name and Abmelden — the DS
+   .separator--vertical RECIPE, byte-matching the service-portal meta bar
+   (alignment D59): a 24 px border-right stroke in secondary-400 (the
+   intranet skin's blue-grey) — this was a gray-300 background fill, the one
+   visible style difference between the two bars. The 24 px slots either
+   side come from the row's flex gap and already equal the sister's
+   (measured 24 | rule | 24 in both). */
 .top-header__meta-divider {
-  width: 1px;
+  width: 0;
   height: var(--space-lg);
-  background: var(--color-border-strong);
+  align-self: center;
+  border-right: 1px solid var(--color-secondary-400);
 }
 .top-header__actions { display: flex; gap: var(--space-md); align-items: center; }
 /* Below lg (1024 px) — meta hides + burger menu surfaces it. Re-stated in
@@ -576,7 +588,12 @@ button.top-header__meta-link {
 .header-search__form {
   position: absolute;
   right: 0;
-  top: 0;
+  /* Vertically CENTRED on the collapsed control, like the service-portal's
+     .search__form (top 50% + translate): with top:0 the open form sat 4.5 px
+     below the toggle and the magnifier visibly jumped on expand — the icon
+     must remain in place (user finding, alignment D60). */
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   min-height: var(--btn-min-h);
@@ -600,7 +617,9 @@ button.top-header__meta-link {
 .header-search__input {
   width: 100%;
   min-height: var(--btn-min-h);
-  padding: var(--space-sm) calc(var(--space-xl) + var(--space-sm)) var(--space-sm) var(--space-md);
+  /* Right padding = the 48 px submit overlay (service sp-12, CD pr-12) —
+     it was 40, so text and the native clear ✕ ran under the magnifier. */
+  padding: var(--space-sm) var(--space-2xl) var(--space-sm) var(--space-md);
   /* DS open header field = the standard input skin on white with the flyout
      elevation: 1 px text-500 border, radius-xs, white ground
      (input.postcss:6-19 + search.postcss:113-146). Was 2 px gray-200 on a
@@ -626,10 +645,21 @@ button.top-header__meta-link {
   outline: 2px solid var(--color-focus);
   outline-offset: -2px;
 }
-.header-search__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+/* The native type=search clear ✕ STAYS (it was suppressed here): typing in
+   the open field shows the browser's cancel button, exactly as the
+   service-portal's header field behaves (user finding, alignment D60). */
 .header-search__submit {
   position: absolute;
   right: 0;
+  top: 0;
+  bottom: 0;
+  /* Above the FOCUSED field: the global :focus-visible rule lifts any
+     focused element to z-10 (tokens.css, the DS focus lift), and the open
+     field autofocuses — which painted the input OVER this button and made
+     the magnifier vanish on expand (user finding, alignment D60). One step
+     higher keeps the icon in place; the native clear ✕ lives inside the
+     input's own padding, left of this 48 px zone. */
+  z-index: 11;
   background: transparent;
   border: none;
   padding: var(--space-xs);
@@ -728,6 +758,9 @@ button.top-header__meta-link {
     left: 0;
     right: 0;
     top: 100%;
+    /* Undo the desktop flyout's vertical centring (top 50% + translate,
+       D60): this row anchors BELOW the header. */
+    transform: none;
     width: auto;
     margin-top: var(--space-sm);
     padding-inline: 0.875rem;            /* DS px-3.5 */
