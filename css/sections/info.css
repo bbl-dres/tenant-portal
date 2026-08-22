@@ -379,10 +379,14 @@
   align-items: center;
   gap: var(--space-sm);
   color: var(--color-primary);
-  text-decoration: none;
+  /* Underlined at rest — content links follow CD link.postcss:5-10; the
+     hover-only underline was a stray deviation (alignment D53). The flex
+     container draws the line under the text child only, never the icon. */
+  text-decoration: underline;
+  text-underline-offset: 2px;
   font-weight: var(--font-weight-regular);
 }
-.contact-block__link:hover { color: var(--color-link-hover); text-decoration: underline; }
+.contact-block__link:hover { color: var(--color-link-hover); }
 /* `.contact-block__icon` retired — icons now come from
    `icon('phone' | 'envelope' | 'globe')` (one file per glyph under
    `assets/icons/`) and inherit sizing from the

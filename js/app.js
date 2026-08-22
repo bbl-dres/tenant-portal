@@ -1144,13 +1144,13 @@ function renderSearchResults() {
                     <option value="${searchHash({ q: query, sort: value, view, kind: activeKind, page: 1 })}"${sort === value ? ' selected' : ''}>${label}</option>
                   `).join('')}
                 </select>
-                <div class="search-results__views" role="group" aria-label="Ansicht">
-                  <a class="search-results__view${view === 'list' ? ' search-results__view--active' : ''}"
+                <div class="view-switch search-results__views" role="group" aria-label="Ansicht">
+                  <a class="view-switch__btn${view === 'list' ? ' view-switch__btn--active' : ''}"
                      href="${searchHash({ q: query, sort, view: 'list', kind: activeKind, page: safePage })}"
-                     aria-label="Listenansicht" aria-current="${view === 'list'}">${P.icon('list')}</a>
-                  <a class="search-results__view${view === 'grid' ? ' search-results__view--active' : ''}"
+                     aria-label="Listenansicht"${view === 'list' ? ' aria-current="true"' : ''}>${P.icon('list')}</a>
+                  <a class="view-switch__btn${view === 'grid' ? ' view-switch__btn--active' : ''}"
                      href="${searchHash({ q: query, sort, view: 'grid', kind: activeKind, page: safePage })}"
-                     aria-label="Rasteransicht" aria-current="${view === 'grid'}">${P.icon('grid')}</a>
+                     aria-label="Rasteransicht"${view === 'grid' ? ' aria-current="true"' : ''}>${P.icon('grid')}</a>
                 </div>
               </div>
             </div>
@@ -1675,61 +1675,181 @@ function renderNewsList() {
   // News sits inside the «Wissen und Hilfsmittel» drawer, so the parent row
   // carries the active state while you are on it.
   shell({ activeNav: 'info', breadcrumb: [{ label: P.t('bc.news') }] });
-  const items = P.state.news || [];
+  // The CD's OWN news-list page, verified in the design-system source
+  // (app/pages/newsList.vue + search.postcss «SEARCH RESULTS PAGE»;
+  // docs/design-alignment.md D46): tinted header band with the h1 and a
+  // filter drawer (keyword, Inhalts-Typ, date range), active filters as
+  // removable pills, then the results section with count + sort +
+  // list/gallery toggle — LIST by default (bbl.admin.ch news ships
+  // `display=list`) — rows/cards reusing the search page's renderers, and
+  // pagination when a second page exists. State lives in the URL query. The
+  // service-portal renders the same anatomy.
+  // The CD collapses the drawer behind a «Filter anzeigen» toggle
+  // (newsList.vue:60-88); with four fields that indirection bought nothing,
+  // so the filters stay VISIBLE (user decision, 2026-08; kept-deviation
+  // under D46).
   const params = parseHashQuery(location.hash);
-  const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
-  const totalPages = Math.max(1, Math.ceil(items.length / NEWS_PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = items.slice((safePage - 1) * NEWS_PAGE_SIZE, safePage * NEWS_PAGE_SIZE);
+  const state = {
+    q: (params.q || '').trim(),
+    typ: params.typ || '',
+    von: params.von || '',
+    bis: params.bis || '',
+    sort: ['datum-auf', 'titel'].includes(params.sort) ? params.sort : 'datum-ab',
+    view: params.view === 'galerie' ? 'galerie' : 'liste',
+    page: Math.max(1, parseInt(params.page || '1', 10) || 1),
+  };
+  const hashFor = (overrides = {}) => {
+    const s = { ...state, ...overrides };
+    const parts = [];
+    if (s.q) parts.push('q=' + encodeURIComponent(s.q));
+    if (s.typ) parts.push('typ=' + encodeURIComponent(s.typ));
+    if (s.von) parts.push('von=' + encodeURIComponent(s.von));
+    if (s.bis) parts.push('bis=' + encodeURIComponent(s.bis));
+    if (s.sort !== 'datum-ab') parts.push('sort=' + s.sort);
+    if (s.view !== 'liste') parts.push('view=' + s.view);
+    if (s.page > 1) parts.push('page=' + s.page);
+    return '#/news' + (parts.length ? '?' + parts.join('&') : '');
+  };
+
+  const all = P.state.news || [];
+  let rows = all;
+  if (state.q) {
+    const needle = state.q.toLowerCase();
+    rows = rows.filter(n => [n.title, n.lead, n.type, n.source].join(' ').toLowerCase().includes(needle));
+  }
+  if (state.typ) rows = rows.filter(n => n.type === state.typ);
+  if (state.von) rows = rows.filter(n => String(n.date) >= state.von);
+  if (state.bis) rows = rows.filter(n => String(n.date) <= state.bis);
+  if (state.sort === 'titel') rows = [...rows].sort((a, b) => a.title.localeCompare(b.title, 'de'));
+  else if (state.sort === 'datum-auf') rows = [...rows].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  else rows = [...rows].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / NEWS_PAGE_SIZE));
+  const safePage = Math.min(state.page, totalPages);
+  const pageItems = rows.slice((safePage - 1) * NEWS_PAGE_SIZE, safePage * NEWS_PAGE_SIZE);
+  const types = [...new Set(all.map(n => n.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'de'));
+
+  // News rows/cards ARE the search result renderers — one anatomy for every
+  // result stream (CD SearchResultsList: the news page and the search page
+  // share the same item component).
+  const asResult = (n) => ({
+    kind: n.type, date: n.date, title: n.title, lead: n.lead,
+    image: n.image, href: `#/news/${n.id}`,
+  });
+
+  const pills = filterPills({
+    pills: [
+      state.q ? { key: 'q', label: 'Suche', value: `«${state.q}»` } : null,
+      state.typ ? { key: 'typ', label: 'Typ', value: state.typ } : null,
+      (state.von || state.bis) ? { key: 'zeitraum', label: 'Zeitraum', value: `${state.von ? P.formatDate(state.von) : '…'} – ${state.bis ? P.formatDate(state.bis) : '…'}` } : null,
+    ].filter(Boolean),
+    hrefFor: (key) => hashFor(key === 'zeitraum' ? { von: '', bis: '', page: 1 } : { [key]: '', page: 1 }),
+    clearAllHref: hashFor({ q: '', typ: '', von: '', bis: '', page: 1 }),
+    clearAllLabel: 'Alle zurücksetzen',
+  });
+
+  // The view toggle is the portal-wide `.view-switch` control (same classes
+  // as the catalogue bars), rendered as links because the state lives in the
+  // URL; links use aria-current, not aria-pressed (2026-08 view-toggle
+  // unification).
+  const viewLink = (view, iconName, label) => `
+    <a class="view-switch__btn${state.view === view ? ' view-switch__btn--active' : ''}"
+       href="${hashFor({ view })}" aria-label="${label}" ${state.view === view ? 'aria-current="true"' : ''}>
+      ${P.icon(iconName)}
+    </a>`;
 
   document.getElementById('page-body').innerHTML = `
+    <section class="section bg--secondary-50">
+      <div class="container">
+        <h1 class="h1">News</h1>
+        <div class="search__filters">
+          <!-- No show/hide toggle: the CD collapses this drawer behind a
+               «Filter anzeigen» button; filters stay visible here (user
+               decision, 2026-08; kept-deviation under D46). -->
+          <form class="search__filters__drawer" id="newsFilters">
+            <div class="form-field">
+              <label class="form-field__label" for="newsQ">Stichwortfilter</label>
+              <input class="input input--sm" id="newsQ" name="q" type="text" value="${P.escapeHtml(state.q)}" autocomplete="off">
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="newsTyp">Inhalts-Typ</label>
+              <select class="input input--sm" id="newsTyp" name="typ">
+                <option value=""${state.typ ? '' : ' selected'}>- Alle -</option>
+                ${types.map(t => `<option value="${P.escapeHtml(t)}"${state.typ === t ? ' selected' : ''}>${P.escapeHtml(t)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="newsVon">Zeitraum | Startdatum</label>
+              <input class="input input--sm" id="newsVon" name="von" type="date" value="${P.escapeHtml(state.von)}">
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="newsBis">Zeitraum | Enddatum</label>
+              <input class="input input--sm" id="newsBis" name="bis" type="date" value="${P.escapeHtml(state.bis)}">
+            </div>
+            <div class="search__filters__apply">
+              <button class="btn btn--outline btn--sm" type="submit">Filter anwenden</button>
+            </div>
+          </form>
+          ${pills ? `<div class="search__filters__tags">${pills}</div>` : ''}
+        </div>
+      </div>
+    </section>
     <section class="section">
-      <div class="container container--narrow">
-        <!-- Left page header (h1 + lead) — the shared overview pattern
-             (service-portal parity, docs/design-alignment.md D36). The
-             former centred title with a today-dated eyebrow was the
-             article pattern on a list page. -->
-        <header class="news-list__header">
-          <h1 class="h1">News</h1>
-          <p class="section-intro section-intro--tight">Aktuelle Mitteilungen rund um das BBL und das Mieterportal.</p>
-        </header>
-        <ul class="news-list">
-          ${pageItems.map(newsListRow).join('')}
-        </ul>
-
-        ${renderPagination({
-          current: safePage,
-          totalPages,
-          from: items.length === 0 ? 0 : (safePage - 1) * NEWS_PAGE_SIZE + 1,
-          to: Math.min(safePage * NEWS_PAGE_SIZE, items.length),
-          totalItems: items.length,
-          entitySingular: 'Nachricht',
-          entityPlural: 'Nachrichten',
-          hrefFor: (p) => '#/news' + (p > 1 ? '?page=' + p : ''),
-          inputId: 'newsPaginationInput',
-        })}
+      <div class="container">
+        <div class="search-results">
+          <div class="search-results__header">
+            <div class="search-results__header__left">
+              <div class="search-results__occurences"><strong>${rows.length}</strong>&nbsp;Treffer</div>
+            </div>
+            <div class="search-results__header__right">
+              <label class="sr-only" for="newsSort">Sortierung</label>
+              <select id="newsSort" class="input search-results__sort-select">
+                <option value="datum-ab"${state.sort === 'datum-ab' ? ' selected' : ''}>Datum absteigend</option>
+                <option value="datum-auf"${state.sort === 'datum-auf' ? ' selected' : ''}>Datum aufsteigend</option>
+                <option value="titel"${state.sort === 'titel' ? ' selected' : ''}>Titel A–Z</option>
+              </select>
+              <div class="view-switch search-results__views" role="group" aria-label="Ansicht">
+                ${viewLink('liste', 'list', 'Als Liste anzeigen')}
+                ${viewLink('galerie', 'grid', 'Als Galerie anzeigen')}
+              </div>
+            </div>
+          </div>
+          <h2 class="sr-only">News-Beiträge</h2>
+          ${pageItems.length
+            ? (state.view === 'galerie'
+              ? `<ul class="search-results-list search-results--grid">${pageItems.map(n => searchResultCard(asResult(n))).join('')}</ul>`
+              : `<ul class="search-results-list search-results--list">${pageItems.map(n => searchResultRow(asResult(n))).join('')}</ul>`)
+            : '<p class="empty-state">Keine Mitteilungen zu diesen Filtern.</p>'}
+          ${totalPages > 1 ? renderPagination({
+            current: safePage,
+            totalPages,
+            from: rows.length === 0 ? 0 : (safePage - 1) * NEWS_PAGE_SIZE + 1,
+            to: Math.min(safePage * NEWS_PAGE_SIZE, rows.length),
+            totalItems: rows.length,
+            entitySingular: 'Nachricht',
+            entityPlural: 'Nachrichten',
+            hrefFor: (p) => hashFor({ page: p }),
+            inputId: 'newsPaginationInput',
+          }) : ''}
+        </div>
       </div>
     </section>
   `;
   wirePaginationInput('newsPaginationInput');
-}
-
-function newsListRow(n) {
-  return `
-    <li class="news-list__item">
-      <a class="news-list__link" href="#/news/${n.id}">
-        <div class="news-list__body">
-          <p class="meta-info">
-            <span class="meta-info__item"><strong>${P.escapeHtml(n.type)}</strong></span>
-            <span class="meta-info__item">${P.formatDate(n.date)}</span>
-          </p>
-          <h2 class="news-list__title">${P.escapeHtml(n.title)}</h2>
-          <p class="news-list__lead">${P.escapeHtml(n.lead)}</p>
-        </div>
-        <img class="news-list__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="280" height="200">
-      </a>
-    </li>
-  `;
+  const drawer = document.getElementById('newsFilters');
+  drawer?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    P.navigate(hashFor({
+      q: document.getElementById('newsQ').value.trim(),
+      typ: document.getElementById('newsTyp').value,
+      von: document.getElementById('newsVon').value,
+      bis: document.getElementById('newsBis').value,
+      page: 1,
+    }));
+  });
+  document.getElementById('newsSort')?.addEventListener('change', (e) => {
+    P.navigate(hashFor({ sort: e.target.value, page: 1 }));
+  });
 }
 
 function renderNewsDetail({ id }) {
@@ -1738,15 +1858,23 @@ function renderNewsDetail({ id }) {
   shell({ activeNav: 'info', breadcrumb: [{ href: '#/news', label: P.t('bc.news') }, { label: n.title }] });
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/news', backLabel: 'News-Übersicht' })}
+    <!-- CD press-release anatomy (designsystem app/pages/detailPressRelease.vue,
+         docs/design-alignment.md D46): meta-info (type | date) ABOVE the title,
+         then title, then the LEAD, then the figure — the CD hero--default
+         renders the description before the image. The former order (eyebrow,
+         title, date, image, lead) interleaved these. Same order as the
+         service-portal's news detail. -->
     <article class="section">
       <div class="container container--reading">
-        <p class="overtitle">${P.escapeHtml(n.type)}</p>
-        <h1 class="news-detail__title">${P.escapeHtml(n.title)}</h1>
-        <p class="meta-info">
-          <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
-        </p>
-        <img class="news-detail__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="1200" height="675">
+        <header>
+          <p class="meta-info">
+            <span class="meta-info__item"><strong>${P.escapeHtml(n.type)}</strong></span>
+            <span class="meta-info__item">Veröffentlicht am ${P.formatDate(n.date)}</span>
+          </p>
+          <h1 class="news-detail__title">${P.escapeHtml(n.title)}</h1>
+        </header>
         <p class="news-detail__lead">${P.escapeHtml(n.lead)}</p>
+        <img class="news-detail__image" src="${safeImageUrl(n.image)}" alt="" loading="lazy" decoding="async" width="1200" height="675">
         <p class="news-detail__footer">
           Quelle: ${P.escapeHtml(n.source)} · Verantwortlich: ${P.escapeHtml(n.responsible)} · Stand: ${P.formatDate(n.date)} · DE
         </p>
@@ -1932,11 +2060,9 @@ function renderOverviewBand() {
               </tbody>
             </table>
           </div>
-          <p class="section-cta">
-            <a class="section-cta__link" href="${scope.moreHref}">
-              ${scope.moreLabel} ${P.icon('arrowRight', 'section-cta__icon')}
-            </a>
-          </p>
+          <div class="section__action">
+            <a class="btn btn--bare btn--icon-right" href="${scope.moreHref}">${P.icon('arrowRight', 'btn__icon')}<span>${scope.moreLabel}</span></a>
+          </div>
         ` : ''}
       </div>
     </section>
@@ -1965,11 +2091,11 @@ function renderQuickServicesBand() {
         <div class="card-grid">
           ${featured.map(serviceCard).join('')}
         </div>
-        <p class="section-cta">
-          <a class="section-cta__link" href="#/services">
-            ${P.t('home.allServices')} ${P.icon('arrowRight', 'section-cta__icon')}
-          </a>
-        </p>
+        <!-- DS .section__action + btn--bare btn--icon-right — the CD's own
+             section CTA anatomy, as the service-portal renders it (D41). -->
+        <div class="section__action">
+          <a class="btn btn--bare btn--icon-right" href="#/services">${P.icon('arrowRight', 'btn__icon')}<span>${P.t('home.allServices')}</span></a>
+        </div>
       </div>
     </section>
   `;
@@ -5643,9 +5769,11 @@ function renderDownloads() {
   // Filter + page state persisted in URL hash query (back/forward + shareable).
   // Both filter dimensions are MULTI-value (csv in the URL): Dokumenttyp as a
   // checkbox group, Liegenschaft through the searchable multiselect — both
-  // living in the filter SIDEBAR (visible by default, ?sb=0 hides it — same
-  // contract as #/properties).
-  const docState = { types: [], buildings: [], q: '', page: 1, sort: 'date', view: 'list', sidebar: true };
+  // living in the filter SIDEBAR. HIDDEN by default (?sb=1 shows it — user
+  // decision 2026-08-22): the page opens on the full-width document list and
+  // the Filter toggle reveals the rail on demand. This deliberately diverges
+  // from #/properties, whose sidebar stays visible by default (?sb=0 hides).
+  const docState = { types: [], buildings: [], q: '', page: 1, sort: 'date', view: 'list', sidebar: false };
   const initial = new URLSearchParams((location.hash.split('?')[1] || ''));
   docState.types     = (initial.get('type')     || '').split(',').filter(Boolean);
   docState.buildings = (initial.get('building') || '').split(',').filter(Boolean);
@@ -5654,7 +5782,7 @@ function renderDownloads() {
   docState.page     = Math.max(1, parseInt(initial.get('page') || '1', 10) || 1);
   docState.sort     = ['date', 'title', 'doctype'].includes(initial.get('sort')) ? initial.get('sort') : 'date';
   docState.view     = initial.get('view') === 'gallery' ? 'gallery' : 'list';
-  docState.sidebar  = initial.get('sb') !== '0';
+  docState.sidebar  = initial.get('sb') === '1';
   // Deep link from the viewer's share popover (`?doc=<id>`): open that
   // document once the table is rendered. Captured before applyDocState()
   // rewrites the hash (which drops the one-shot `doc` param).
@@ -5932,7 +6060,7 @@ function renderDownloads() {
     if (docState.q)        qp.set('q', docState.q);
     if (docState.sort !== 'date')      qp.set('sort', docState.sort);
     if (docState.view === 'gallery')   qp.set('view', 'gallery');
-    if (!docState.sidebar)             qp.set('sb', '0');
+    if (docState.sidebar)              qp.set('sb', '1');   // hidden is the default (user decision 2026-08-22)
     if (docState.page > 1) qp.set('page', docState.page);
     qp.set('lang', state.lang);   // keep the active language in shareable URLs
     const newHash = '#/downloads?' + qp.toString();
@@ -6270,17 +6398,17 @@ function renderProfile() {
 
         <div class="card profile-page__card">
           <h2 class="card__title">Identität (über eIAM)</h2>
+          <!-- No role rows (Aktive Rolle / Weitere Rollen) — removed in the
+               2026-08 cross-portal alignment (user decision, D43): the roles
+               are demo machinery, not identity, and the sister service-portal
+               deliberately models no roles at all. Role switching stays
+               reachable programmatically (window.portal.openRoleMenu) for the
+               demo flows and tests. -->
           <dl class="profile-dl">
             <dt>Name</dt><dd>${P.escapeHtml(u.name)}</dd>
             <dt>E-Mail</dt><dd>${P.escapeHtml(u.email)}</dd>
             <dt>eIAM-Subjekt-ID</dt><dd><code>${u.id}</code></dd>
             <dt>Verwaltungs­einheit</dt><dd>${P.escapeHtml(u.ve)}${u.dep ? ' / ' + P.escapeHtml(u.dep) : ''}</dd>
-            <!-- The role menu previously had no entry point in any view —
-                 openRoleMenu was only reachable from code (review views-18). -->
-            <dt>Aktive Rolle</dt><dd><strong>${P.roleLabel(u.activeRole)}</strong>${u.roles.length > 1
-              ? ` <button class="btn btn--outline btn--sm" type="button" onclick="window.portal.openRoleMenu()">Rolle wechseln</button>`
-              : ''}</dd>
-            <dt>Weitere Rollen</dt><dd>${u.roles.filter(r => r !== u.activeRole).map(P.roleLabel).join(' · ') || '—'}</dd>
           </dl>
           <p class="profile-page__note">
             Diese Daten kommen aus dem föderalen eIAM-Verzeichnis und können hier nicht geändert werden. Änderungen über Ihre VE-Administration.

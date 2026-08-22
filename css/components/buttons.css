@@ -46,6 +46,13 @@
    default. `--link`'s 32 px icon below stays more specific. */
 .btn > .inline-icon { width: 1.4em; height: 1.4em; flex-shrink: 0; }
 .btn--full-width { width: 100%; justify-content: center; }   /* DS btn--full-width + __text-centered */
+/* DS icon-position modifiers (btn.postcss:168-180): `--icon-right` reverses
+   the row so markup stays icon-then-text (the service-portal's order), and
+   the 0.1em nudges pull the glyph to the line edge. The base gap already
+   carries the DS mr/ml-[0.2em]. */
+.btn--icon-right { flex-direction: row-reverse; }
+.btn--icon-right > .inline-icon { position: relative; left: 0.1em; }
+.btn--icon-left  > .inline-icon { position: relative; right: 0.1em; }
 /* CD Bund: filled action button = navy. Red is reserved for danger and
    brand-accent surfaces (active nav underline, card rails). Bold-only on
    filled to match DS — see header comment on `.btn`. */

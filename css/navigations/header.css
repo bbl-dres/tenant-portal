@@ -108,6 +108,35 @@
    WHITE meta navigation, not the dark federal bar. See the
    `.top-header__meta-user` block below; docs/design-alignment.md D5.) */
 
+/* Confederation-wide offers (eGate) — CD `.top-bar-navigation`
+   (top-bar-navigation.postcss:5-26): flex items filling the bar height,
+   label + External icon, colour-only hover (text-300). Values are the
+   service-portal's ≥1024 rendering, byte-for-byte (alignment D49). Hidden
+   below 1024 exactly as the service-portal hides its copy: at those widths
+   the link lives in the burger drawer, and an icon-only bar copy would be a
+   second, unlabelled route (the sister portal's documented deviation from
+   CD's icon-only mobile bar). */
+.top-bar-navigation { display: none; height: 100%; }
+.top-bar-navigation ul { list-style: none; display: flex; margin: 0; padding: 0; }
+.top-bar-navigation a {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-height: var(--btn-min-h);
+  padding-inline: var(--space-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.top-bar-navigation a:hover,
+.top-bar-navigation a:focus { color: var(--color-gray-300); text-decoration: none; }
+/* Label spacing per CD: `pl-2 lg:pl-4` / `pr-1 lg:pr-2` — the bar renders
+   only at lg+, so only the lg values apply. */
+.top-bar-navigation a > span { padding-left: var(--space-md); padding-right: var(--space-sm); }
+@media (min-width: 1024px) {
+  .top-bar-navigation { display: flex; }
+}
+
 /* CD pattern: short language codes, dark panel below the trigger. Active
    item marked per the DS localization list (top-bar.postcss:73-80): white
    bold text + a 2px primary-600 left border on transparent ground.
@@ -307,7 +336,11 @@
 .top-header__bundmark {
   display: inline-flex;
   align-items: flex-start;   /* CD: flag top-aligns with the name SVG (DS .logo items-start), not centred against it */
-  gap: var(--space-sm);
+  /* NO gap between flag and wordmark — CD sets none (logo.postcss:50-67):
+     the name SVG's viewBox starts at x=0 but its first glyph sits at x≈15.3
+     of 244, so the ~11px optical gap is INSIDE the asset. An extra flex gap
+     here doubled it against the CD and the sister portal (alignment D50). */
+  gap: 0;
   flex-shrink: 0;
 }
 .top-header__bundmark-flag {
@@ -386,7 +419,10 @@
   display: block;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-normal);
-  margin-top: 2px;
+  /* No extra top margin: CD's product line is a bare block child of
+     .logo__title (logo.postcss:76-82 sets no gap between the two lines),
+     and the service-portal renders it flush. The former 2px pushed this
+     line out of step with the sister lockup (alignment D50). */
 }
 /* Intranet marker pill under the dept lockup — the DS intranet skin's logo
    suffix (css/skins/intranet.postcss:32-37):
@@ -439,7 +475,11 @@
   padding: var(--space-xs) 0;
   transition: color var(--transition-fast);
 }
-.top-header__meta-link:hover { color: var(--color-primary); text-decoration: underline; }
+/* Colour-only hover — chrome links never underline in the CD
+   (meta-navigation.postcss / top-bar-navigation.postcss carry colour shifts
+   only; underlines belong to content links in main, link.postcss:5-10). The
+   sister portal's meta navigation behaves identically (alignment D53). */
+.top-header__meta-link:hover { color: var(--color-primary); text-decoration: none; }
 /* Sign-in / account cluster in the meta bar — DS TopHeader anatomy (the
    meta navigation carries site utilities; service-portal
    `.meta-navigation__user/__auth`). The <button> variants reset button
@@ -461,7 +501,7 @@ button.top-header__meta-link {
   color: var(--color-text-muted);     /* name reads as a label (service-portal parity) */
   text-decoration: none;              /* it IS a link (to #/profile) — quiet chrome styling */
 }
-.top-header__meta-user:hover { color: var(--color-primary); text-decoration: underline; }
+.top-header__meta-user:hover { color: var(--color-primary); text-decoration: none; }   /* colour-only chrome hover (D53) */
 .top-header__meta-user .inline-icon {
   width: var(--icon-base);
   height: var(--icon-base);
@@ -626,9 +666,10 @@ button.top-header__meta-link {
      service-portal. (It used to be hidden here together with the user
      pill; the pill now lives in the white meta bar / burger drawer.) */
   .top-header__inner {
-    min-height: 78px;
-    /* Vertical padding stays on the DS tier ramp (12 base / 16 @768) —
-       min-height carries the compact-chrome height. */
+    /* No min-height: the band's height is its content plus the DS padding
+       ramp (12 base / 16 @768), exactly as the CD and the sister portal
+       render it — the former 78px floor made the compact band ~3px taller
+       than the service-portal's (alignment D50). */
     flex-wrap: nowrap;
     gap: var(--space-sm);
   }
@@ -641,16 +682,16 @@ button.top-header__meta-link {
     width: 30px;
     height: 33px;
   }
-  .top-header__divider {
-    display: block;
-    height: 48px;
-    align-self: center;
-  }
+  /* Divider height rides the DS ramp from the base rules above (40 base /
+     56 @768 — logo.postcss:70); the former fixed 48px + align-self:center
+     sat between the CD tiers and off the sister portal (alignment D50). */
   .top-header__dept {
     display: block;
     min-width: 0;
     line-height: var(--line-height-snug);
-    margin-top: 0;
+    /* margin-top stays on the base rule's -0.16rem optical correction
+       (logo.postcss:81) — zeroing it here dropped the title 2.5px below
+       the service-portal's between 768 and 1023 (alignment D50). */
   }
   /* The sub-line ("Mieterportal") stays visible from 480 up — the DS lockup
      keeps its product span at every width the title shows (logo.postcss:133,

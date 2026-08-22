@@ -693,9 +693,12 @@ select.catbar__sort {
   padding-left: var(--space-md);
   border-left: 1px solid var(--color-secondary-300);
 }
-/* Bare icon glyphs, per the CD reference (real admin.ch search header):
-   no visible labels, no active rail — the active view is the darker glyph,
-   hover recolours to primary. A centred square keeps the 44px target. */
+/* Bare icon glyphs — the CD toggle anatomy (newsList.vue:167-182: two
+   icon-only bare buttons, List / Apps). A centred square keeps the 44px
+   target. `text-decoration:none` because the results pages render these as
+   LINKS (state lives in the URL) and the global content-link rule would
+   otherwise underline them — the CD opts its components out the same way
+   (card.postcss:336 no-underline). */
 .view-switch__btn {
   display: inline-flex;
   align-items: center;
@@ -706,15 +709,29 @@ select.catbar__sort {
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
+  text-decoration: none;
   cursor: pointer;
 }
-.view-switch__btn:hover { color: var(--color-primary); }
-/* Active view = the same DS fill-change pressed state as the open filter
-   toggle (selection tint + gray-900 glyph) — one pressed vocabulary across
-   the toolbar. */
-.view-switch__btn--active {
+.view-switch__btn:hover { color: var(--color-primary); text-decoration: none; }
+/* Active view — the ONE pressed style for every view toggle in both portals
+   (2026-08 view-toggle unification): selection tint + ink glyph + a bottom
+   rail. The rail keeps the state visible without color (WCAG 1.4.1) and in
+   forced-colors mode, where the tint disappears — same recipe as the sister
+   portal's `.view-switch__btn[aria-pressed="true"]`. Both markers are
+   styled: catalogue bars set aria-pressed on their buttons, the results
+   pages set the class on their links. */
+.view-switch__btn--active,
+.view-switch__btn[aria-pressed="true"] {
   background: var(--color-secondary-100);
   color: var(--color-gray-900);
+  box-shadow: inset 0 -3px 0 var(--color-text-secondary);
+}
+@media (forced-colors: active) {
+  .view-switch__btn--active,
+  .view-switch__btn[aria-pressed="true"] {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
+  }
 }
 .view-switch__btn .inline-icon { width: var(--icon-base); height: var(--icon-base); margin-right: 0; }
 /* Labels stay for assistive tech only (the buttons also carry title=). */

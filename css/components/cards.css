@@ -49,7 +49,10 @@
 .card-grid {
   display: grid;
   gap: var(--gap-responsive);   /* CD `.gap--responsive` cascade — was an ad-hoc 24→32→48 jump */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  /* min() guard: below a 320 px viewport a fixed 280 px floor would force the
+     column wider than the screen (service-portal convention; the two portals'
+     card-grids are byte-identical — alignment D41). */
+  grid-template-columns: repeat(auto-fit, minmax(min(17.5rem, 100%), 1fr));
 }
 
 /* CD `.grid--responsive-cols-3` (designsystem/css/layouts/grids.postcss:50):
@@ -60,37 +63,22 @@
 @media (min-width: 768px)  { .card-grid--cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .card-grid--cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-/* "Alle X ansehen →" CTA placed below a preview card-grid (e.g. /home
-   shows 4 services + this link to /services). Right-aligned like DS
-   `.section__action`; spacing mirrors DS `pt-4 + relative top-6
-   lg:top-8 3xl:top-12` ≈ 40 / 48 / 64 px from the grid above.
-   Regular weight, NOT bold — DS reserves bold for `.btn` + titles. */
-.section-cta {
+/* Section action ("Alle X anzeigen") — the DS's OWN anatomy, verbatim
+   (section.postcss:89-93): `.section__action { flex justify-end; pt-4;
+   relative top-6 lg:top-8 3xl:top-12 }` holding a `.btn--bare .btn--icon-right`
+   — bare secondary-800 ink, regular weight, arrow at the line edge, no hover
+   motion. The service-portal renders exactly this; the former `.section-cta`
+   (BOLD primary link with a 4 px hover slide) was a portal invention and is
+   retired with its markup (2026-08 alignment D41). */
+.section__action {
   display: flex;
   justify-content: flex-end;
-  margin: var(--space-2lg) 0 0;
+  padding-top: var(--space-md);
+  position: relative;
+  top: var(--space-lg);
 }
-@media (min-width: 1024px) { .section-cta { margin-top: var(--space-2xl); } }
-@media (min-width: 1920px) { .section-cta { margin-top: var(--space-3xl); } }
-.section-cta__link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-bold);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-.section-cta__link:hover { color: var(--color-primary-700); }
-/* Double-class selector: the arrow rides `icon()`'s `.inline-icon` base
-   class, whose `margin-right: var(--space-xs)` in components/status.css
-   imports LATER (css/main.css order) at equal specificity — without the
-   double class the arrow carries a stray trailing gap. */
-.inline-icon.section-cta__icon {
-  transition: transform var(--transition-fast);
-  margin-right: 0;
-}
-.section-cta__link:hover .section-cta__icon { transform: translateX(4px); }
+@media (min-width: 1024px) { .section__action { top: var(--space-xl); } }
+@media (min-width: 1920px) { .section__action { top: var(--space-2xl); } }
 
 /* ── QUICK-CARD (kbob-fdk pattern) — link-style card with arrow button ── */
 /* Square corners per the base card rule — DS cards carry no radius. */
@@ -132,7 +120,9 @@
 .card--quick:hover .card--quick__title { color: var(--color-primary-700); }
 .card--quick__desc {
   font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
+  /* gray-600 — the shared supporting-text ink (D18/D41); the service-portal's
+     quick cards read the same step. Was gray-500. */
+  color: var(--color-gray-600);
   margin: 0;
   line-height: var(--line-height-relaxed);
 }

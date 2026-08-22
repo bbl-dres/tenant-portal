@@ -12,8 +12,7 @@
    carries `.inline-icon`, so a single-class hook in an earlier file
    ties with this base block and loses on order. Per-icon hooks must be
    double-class selectors (`.inline-icon.main-navigation__chevron`,
-   `.inline-icon.breadcrumb__sep`, `.inline-icon.section-cta__icon`) to
-   keep their sizing/margins.
+   `.inline-icon.breadcrumb__sep`) to keep their sizing/margins.
    ========================================================================== */
 
 /* ── BADGES ─────────────────────────────────────────────────────────────── */

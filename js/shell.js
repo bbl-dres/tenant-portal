@@ -433,6 +433,10 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
       ${mobileAccountHtml}
       <a class="main-navigation__link" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">${t('nav.contact')}</a>
       <a class="main-navigation__link" href="#/info">${t('nav.help')}</a>
+      <!-- eGate rides the drawer below 1024, where the top-bar entry is
+           hidden — the service-portal's top-bar-navigation--mobile pattern
+           (alignment D49). -->
+      <a class="main-navigation__link" href="https://www.egate.admin.ch/" target="_blank" rel="noopener">eGate</a>
       ${mobileLangHtml}
     </div>
   `;
@@ -493,6 +497,15 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
           </a>
           <div class="top-bar__actions">
             <span class="top-bar__demo-chip" role="status" aria-label="${t('top.demoAria')}">${t('top.demo')}</span>
+            <!-- Confederation-wide offers, CD .top-bar-navigation
+                 (top-bar-navigation.postcss) — same single eGate entry as the
+                 service-portal's TOP_BAR_LINKS (alignment D49). Hidden below
+                 1024 (header.css); the burger drawer carries the link there. -->
+            <nav class="top-bar-navigation" aria-label="${t('top.federalOffers')}">
+              <ul>
+                <li><a href="https://www.egate.admin.ch/" target="_blank" rel="noopener"><span>eGate</span>${icon('external')}</a></li>
+              </ul>
+            </nav>
             <div class="language-switcher" id="langSwitch">
               <button class="top-bar__lang" aria-label="${t('lang.choose')}" aria-haspopup="listbox" aria-expanded="false"
                       onclick="window.portal.toggleLang()">

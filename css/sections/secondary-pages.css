@@ -147,24 +147,38 @@
   text-align: right;
 }
 /* `.search-results__views` container geometry is merged into the
-   `.view-switch` rule (sections/properties.css) — byte-identical pair.
-   The per-button `.search-results__view` rules below stay local: their
-   geometry (fixed square, centred) and active treatment (no rail) differ
-   from `.view-switch__btn`. The phone-width hide for the container moved
-   to properties.css next to the merged rule to keep its cascade position
-   after the base rule. */
-.search-results__view {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--btn-sm-min-h);
-  height: var(--btn-sm-min-h);
-  color: var(--color-text-secondary);
-  text-decoration: none;
+   `.view-switch` rule (sections/properties.css) — byte-identical pair; since
+   the 2026-08 view-toggle unification, the BUTTONS in the results headers are
+   plain `.view-switch__btn` links too (one active style everywhere), so no
+   per-button rules remain here. The phone-width hide for the container lives
+   in properties.css next to the merged rule. */
+
+/* ── FILTER DRAWER (news + results pages) — DS `.search__filters`
+   (search.postcss:249-269, composed on the DS's own news page
+   app/pages/newsList.vue): small outline fields in an md:2 / lg:3 column
+   grid, the active filters as removable chips below. The CD collapses the
+   grid behind a «Filter anzeigen» toggle; here the filters are ALWAYS
+   visible (user decision, 2026-08 — kept-deviation under D46), so the
+   toggle-row and [hidden]/top-rule machinery is deliberately absent. The
+   service-portal renders the same classes (docs/design-alignment.md D46). */
+.search__filters { margin-top: var(--space-md); }
+.search__filters__drawer {
+  display: grid;
+  gap: var(--space-2sm);
+  padding: var(--space-sm) 0;
 }
-.search-results__view:hover { color: var(--color-primary); }
-.search-results__view--active { color: var(--color-text-primary); }
-.search-results__view .inline-icon { width: var(--icon-base); height: var(--icon-base); }
+@media (min-width: 640px)  { .search__filters__drawer { padding: var(--space-2sm) 0; } }
+@media (min-width: 768px)  { .search__filters__drawer { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .search__filters__drawer { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-md); } }
+@media (min-width: 1544px) { .search__filters__drawer { padding: var(--space-md) 0; } }
+/* The apply action closes the field grid, bottom-aligned with the fields. */
+.search__filters__apply { display: flex; align-items: flex-end; }
+.search__filters__tags { padding-top: var(--space-md); }
+@media (min-width: 640px)  { .search__filters__tags { padding-top: var(--space-lg); } }
+@media (min-width: 1544px) { .search__filters__tags { padding-top: var(--space-xl); } }
+/* The tags row REUSES .filter-pills (already the DS tag-item geometry) —
+   only the drawer's spacing wrapper differs. */
+.search__filters__tags .filter-pills { margin-bottom: 0; }
 
 /* ── RESULT ROW (list view) ─────────────────────────────────────────────
    Meta line (type · date) above the title, lead below, optional thumbnail

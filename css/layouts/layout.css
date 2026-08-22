@@ -204,7 +204,26 @@
   padding: var(--hero-pt) var(--container-padding) var(--section-py);
   background: var(--color-bg-default);
 }
-.hero__inner { max-width: var(--container-max-width); margin: 0 auto; }
+/* CD gives the SPLIT (main-image) variant symmetric container--py instead —
+   56/80@1024/128@1920, 5rem at lg exactly as bbl.admin.ch renders it
+   (hero.postcss:73-74 `.hero--main-image { @apply container--py }` overrides
+   the base pt ramp). Verified in CD source; alignment D54 (user finding
+   2026-08-22). Same rule in the service-portal. */
+.hero--split {
+  padding-top: var(--section-py);
+}
+/* Width = the .container CONTENT box, not the .container border box:
+   .container is border-box (max-width 1544/1676 INCLUDING its inline
+   padding), while this inner div carries no padding of its own — the hero
+   section's padding sits outside it. With the raw max-width the hero ran
+   one padding step (up to 64 px) wider than every other band at viewports
+   above ~1670 px, so title and image sat left/right of the header, nav and
+   section edges (user finding 2026-08-22, alignment D55; the service-portal
+   composes its hero inside .container and never had the offset). */
+.hero__inner {
+  max-width: calc(var(--container-max-width) - 2 * var(--container-padding));
+  margin: 0 auto;
+}
 /* Hero title — layout-only. Combine with `.h1` for the responsive size
    (DS pattern: `class="h1 hero__title"`). No `ch` measure cap: the DS caps
    hero content via grid columns, never via character counts, and the

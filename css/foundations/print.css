@@ -40,7 +40,7 @@
   audio,
   object,
   iframe,
-  .section-cta,
+  .section__action,
   .card--profile__image { display: none !important; }
   .top-header { border: 0 !important; }
   .top-header__bundmark-name { display: block !important; }

@@ -4,6 +4,7 @@
 
   "top.demo":           { "de": "Prototyp", "fr": "Prototype", "it": "Prototipo", "en": "Prototype" },
   "top.demoAria":       { "de": "Prototyp — nur zur Demonstration", "fr": "Prototype — à des fins de démonstration uniquement", "it": "Prototipo — solo a scopo dimostrativo", "en": "Prototype — for demonstration only" },
+  "top.federalOffers":  { "de": "Bundesangebote", "fr": "Offres fédérales", "it": "Offerte federali", "en": "Federal services" },
 
   "proto.title":        { "de": "Diese Anwendung ist ein Prototyp.", "fr": "Cette application est un prototype.", "it": "Questa applicazione è un prototipo.", "en": "This application is a prototype." },
   "proto.text":         { "de": "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.", "fr": "La présentation, les fonctionnalités et les contenus servent exclusivement à des fins de démonstration; les données utilisées sont fictives ou accessibles au public.", "it": "La presentazione, le funzionalità e i contenuti servono esclusivamente a scopo dimostrativo; i dati utilizzati sono fittizi o accessibili al pubblico.", "en": "Layout, functionality and content serve demonstration purposes only; the data used is fictional or publicly available." },
@@ -114,8 +115,8 @@
   "overview.allApplications": { "de": "Alle Vorgänge anzeigen", "fr": "Afficher toutes les affaires", "it": "Mostrare tutte le pratiche", "en": "View all cases" },
   "overview.allPending":      { "de": "Alle Pendenzen anzeigen", "fr": "Afficher toutes les affaires en suspens", "it": "Mostrare tutte le pendenze", "en": "View all pending items" },
   "overview.tableCaption":    { "de": "Offene Vorgänge mit Objekt, Prozess, Eingangsdatum und Status", "fr": "Affaires ouvertes avec objet, processus, date de dépôt et statut", "it": "Pratiche aperte con oggetto, processo, data di presentazione e stato", "en": "Open cases with property, process, submission date and status" },
-  "home.services":    { "de": "Häufig genutzte Dienste", "fr": "Services fréquemment utilisés", "it": "Servizi utilizzati di frequente", "en": "Frequently used services" },
-  "home.allServices": { "de": "Alle Dienstleistungen ansehen", "fr": "Voir toutes les prestations", "it": "Vedere tutte le prestazioni", "en": "View all services" },
+  "home.services":    { "de": "Häufig genutzte Dienstleistungen", "fr": "Prestations fréquemment utilisées", "it": "Prestazioni utilizzate di frequente", "en": "Frequently used services" },
+  "home.allServices": { "de": "Alle Dienstleistungen anzeigen", "fr": "Afficher toutes les prestations", "it": "Mostrare tutte le prestazioni", "en": "Show all services" },
   "home.greeting.morning":  { "de": "Guten Morgen", "fr": "Bonjour", "it": "Buongiorno", "en": "Good morning" },
   "home.greeting.day":      { "de": "Guten Tag", "fr": "Bonjour", "it": "Buongiorno", "en": "Good afternoon" },
   "home.greeting.evening":  { "de": "Guten Abend", "fr": "Bonsoir", "it": "Buonasera", "en": "Good evening" },
@@ -259,7 +260,7 @@
 
   "bc.search":   { "de": "Suchergebnisse", "fr": "Résultats de recherche", "it": "Risultati della ricerca", "en": "Search results" },
   "bc.home":     { "de": "Startseite", "fr": "Page d'accueil", "it": "Pagina iniziale", "en": "Home" },
-  "bc.news":     { "de": "News-Übersicht", "fr": "Actualités", "it": "Notizie", "en": "News" },
+  "bc.news":     { "de": "News", "fr": "Actualités", "it": "Notizie", "en": "News" },
   "bc.repair":   { "de": "Schadensmeldung", "fr": "Signalement de dommage", "it": "Segnalazione di danno", "en": "Damage report" },
   "bc.profile":  { "de": "Profil", "fr": "Profil", "it": "Profilo", "en": "Profile" },
 

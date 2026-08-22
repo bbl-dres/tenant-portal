@@ -214,12 +214,13 @@ try {
   await page.waitForTimeout(300);
 
   /* The margin is what the old centring supplied by accident: flush against the
-     photo the title reads as fighting its edge. It belongs to the two-column
-     layout and to nothing else, so the check is tied to the column count rather
-     than to a pixel width that could drift apart from the breakpoint. */
-  section('Landing page: the title margin belongs to the two-column hero');
+     photo the title reads as fighting its edge. Since the 2026-08 alignment
+     (docs/design-alignment.md D45, user decision) it belongs to the WIDEST
+     tier only (≥1280): the compact two-column hero between 768 and 1279 sets
+     none, so the title tops the search column flush with the photo there. */
+  section('Landing page: the title margin belongs to the widest hero tier');
   check(twoColumns(heroClosed) && parseFloat(heroClosed.titleMargin) > 0,
-    'two columns: the title clears the image edge',
+    'wide two columns (≥1280): the title clears the image edge',
     `${heroClosed.columns} / ${heroClosed.titleMargin}`);
   check(heroClosed.title > heroClosed.image,
     'so it starts below the top of the photo',
@@ -227,8 +228,8 @@ try {
   await page.setViewportSize({ width: 900, height: 1000 });
   await page.waitForTimeout(400);
   const heroNarrow = await heroRead();
-  check(!twoColumns(heroNarrow) && parseFloat(heroNarrow.titleMargin) === 0,
-    'one column: no margin, because the title follows the header',
+  check(parseFloat(heroNarrow.titleMargin) === 0,
+    'compact tier (<1280): no margin, whatever the column count (D45)',
     `${heroNarrow.columns} / ${heroNarrow.titleMargin}`);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.waitForTimeout(400);
