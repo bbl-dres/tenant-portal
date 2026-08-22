@@ -7,25 +7,11 @@
    DS counterparts: components/carousel.postcss, components/card.postcss.
    ========================================================================== */
 
-/* ── NEWS LIST PAGE (overview header + list) ─────────────────────────────
-   LEFT-aligned page header (h1 + lead) — the shared cross-portal overview
-   pattern (service-portal news page; docs/design-alignment.md D36). The
-   former centred display title with a dated eyebrow was the ARTICLE
-   pattern applied to a list page. Title size comes from the `.h1` utility
-   in the markup; the header block only spaces. */
-.news-list__header {
-  margin-bottom: var(--space-2xl);
-}
-
 /* ── NEWS DETAIL (long-form article) ─────────────────────────────────────
    Replaces ~6 inline style= blocks in renderNewsDetail. Sits inside a
    .container--reading (780 px); meta line above the title, big image
    below the title, lead paragraph, then a footer "source / responsible"
    stripe. */
-/* `.news-detail__meta` retired — markup now uses `.meta-info` /
-   `.meta-info__item` per CD canonical pattern. The kept-empty rule
-   shell is here only as a breadcrumb; safe to delete in a follow-up
-   sweep once no .news-detail__meta references remain. */
 .news-detail__title {
   margin: 0 0 var(--space-lg);
   font-size: var(--text-display);
@@ -179,52 +165,6 @@
 /* News card variant: minor tweaks to .card--profile to fit the news context */
 .news-card .card--profile__date strong { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
 
-/* ── NEWS-ÜBERSICHT LIST PAGE (swisstopo News-Übersicht pattern) ────────── */
-.news-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.news-list__item {
-  border-top: 1px solid var(--color-border);
-}
-.news-list__item:last-child {
-  border-bottom: 1px solid var(--color-border);
-}
-.news-list__link {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-lg);
-  padding: var(--space-xl) 0;
-  text-decoration: none;
-  color: inherit;
-  transition: color var(--transition-fast);
-}
-@media (min-width: 768px) {
-  .news-list__link { grid-template-columns: 1fr 280px; align-items: center; }
-}
-.news-list__link:hover .news-list__title { color: var(--color-primary); }
-.news-list__body { min-width: 0; }
-/* `.news-list__meta` retired — markup now uses `.meta-info` /
-   `.meta-info__item` per CD canonical pattern. */
-.news-list__title {
-  margin: 0 0 var(--space-md);
-  font-size: var(--text-h3);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-tight);
-  transition: color var(--transition-fast);
-}
-.news-list__lead {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--text-body);
-  line-height: var(--line-height-relaxed);
-}
-.news-list__image {
-  display: block;
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background-color: var(--color-gray-200);
-  border-radius: var(--radius);
-}
+/* (The .news-list* component was removed in the 2026-08 code review,
+   F-T25: the news list page was rebuilt on the shared .search-result*
+   renderers with D46 and nothing emitted these classes any more.) */

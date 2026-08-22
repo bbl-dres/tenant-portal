@@ -209,7 +209,7 @@ export const ICONS = {
   // content / actions
   document: 'File', attachment: 'File', video: 'Video',
   image: 'Image', trash: 'Trash', link: 'Link',
-  grid: 'Apps', list: 'List',
+  grid: 'Apps', list: 'List', filter: 'Filter',
   map: 'Map', mapMarker: 'MapMarker', building: 'Building',
   tool: 'Wrench', truck: 'Truck',
   commentDots: 'SpeechBubble', return: 'Reply',

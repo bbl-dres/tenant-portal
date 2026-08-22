@@ -60,7 +60,13 @@
   min-height: var(--btn-min-h);   /* WCAG 2.5.5 touch-target — audit M-C3 */
 }
 .top-bar__authorities:hover { text-decoration: none; color: var(--color-gray-300); }
+/* Icon box on the CD icon--md ramp (icons.postcss:27-29 `h-5 md:h-6` =
+   20 → 24 from 768) — the size the service-portal's authorities link uses,
+   so the two bars' External glyph boxes match (alignment D56). */
 .top-bar__authorities svg { width: var(--icon-sm); height: var(--icon-sm); }
+@media (min-width: 768px) {
+  .top-bar__authorities svg { width: var(--icon-base); height: var(--icon-base); }
+}
 /* Demo / Prototype chip — sits in the top-bar right cluster beside the
    language switcher + user pill. Replaces a centred-red "Prototyp — nur
    zur Demonstration" line that competed visually with the language and
@@ -86,7 +92,12 @@
   border-radius: var(--radius-full);
   white-space: nowrap;
 }
-.top-bar__actions { margin-left: auto; display: flex; gap: var(--space-md); align-items: center; }
+/* No flex gap: the right cluster spaces itself like the CD/service bar —
+   the chip carries the CD badge's mr-2 (top-bar.postcss:163), and the nav
+   entry + language switcher are flush full-height cells whose own paddings
+   set the rhythm (alignment D56; measured 8 / 0 in the service-portal). */
+.top-bar__actions { margin-left: auto; display: flex; gap: 0; align-items: center; }
+.top-bar__actions > .top-bar__demo-chip { margin-right: var(--space-sm); }
 .top-bar__action {
   background: transparent;
   border: none;
@@ -633,22 +644,8 @@ button.top-header__meta-link {
 .header-search__submit:hover { color: var(--color-primary); }
 .header-search__submit svg { width: var(--icon-base); height: var(--icon-base); }
 
-.top-header__action {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius);
-  font-size: var(--text-chrome-sm);   /* static chrome scale, 3xl bump below */
-  display: inline-flex; gap: var(--space-xs); align-items: center;
-  color: inherit;
-}
-.top-header__action:hover { background: var(--color-bg-alt); }
-.top-header__action--primary {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-.top-header__action--primary:hover { background: var(--color-primary-hover); }
+/* (.top-header__action singular removed — only the plural actions
+   container has markup; 2026-08 code review, F-T26.) */
 
 /* Brand-bar chrome type — the single DS 3xl bump: `text-sm 3xl:text-base`
    (top-header.postcss:8). 14 px everywhere below 1920, 16 px from 1920. */
@@ -656,8 +653,7 @@ button.top-header__meta-link {
   .top-header__meta-link,
   .top-header__meta-user,
   .header-search__toggle,
-  .header-search__input,
-  .top-header__action { font-size: var(--text-chrome-base); }
+  .header-search__input { font-size: var(--text-chrome-base); }
 }
 
 @media (max-width: 1023.98px) {

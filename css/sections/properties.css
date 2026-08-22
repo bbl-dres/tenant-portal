@@ -66,7 +66,10 @@
 .map-loading__icon {
   width: var(--icon-2xl);
   height: var(--icon-2xl);
-  color: var(--color-black);
+  /* Grey, not black: the service-portal's spinner ink (text-600 — the
+     pattern the user singled out) is the shared loading colour across both
+     portals (code review 2026-08, loading-UX alignment). */
+  color: var(--color-gray-600);
   animation: map-loading-spin var(--transition-slow) linear infinite,
              map-loading-fade-in var(--transition) ease-out;
 }
@@ -77,6 +80,13 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+/* The same busy state serves PAGE-LEVEL waits — boot, the spatial-data
+   fetch, viewer builds (code review 2026-08, F-T2/F-T3): `.map-loading` is
+   absolutely positioned, so page callers wrap it in one of these positioned
+   holds instead of a map canvas. */
+.boot-loading,
+.busy-hold { position: relative; min-height: 50vh; }
+.boot-loading { min-height: 100vh; }
 .property-map__error {
   padding: var(--space-lg);
   color: var(--color-text-secondary);

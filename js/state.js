@@ -43,19 +43,33 @@ export const state = {
 };
 
 export async function loadData(basePath = 'data/') {
+  // `fetch` resolves on HTTP errors, so a 404 only failed here because
+  // r.json() choked on the error page — correct by accident. The explicit
+  // res.ok check makes the required files fail with a real reason, and the
+  // optional files now WARN instead of silently rendering their fallback
+  // (a malformed i18n.json used to blank every label with no console trace)
+  // — code review 2026-08, F-T12.
+  const json = (file) => fetch(basePath + file).then(r => {
+    if (!r.ok) throw new Error(`${file}: HTTP ${r.status}`);
+    return r.json();
+  });
+  const optional = (file, fallback) => json(file).catch(err => {
+    console.warn(`[loadData] optional ${file} failed — using fallback`, err);
+    return fallback;
+  });
   const [apps, reference, users, buildingsFc, tenancies, news, documents, downloads, services, processDefs, processInstances, i18n] = await Promise.all([
-    fetch(basePath + 'space-requests.json').then(r => r.json()),
-    fetch(basePath + 'reference-data.json').then(r => r.json()),
-    fetch(basePath + 'users.json').then(r => r.json()),
-    fetch(basePath + 'buildings.geojson').then(r => r.json()),
-    fetch(basePath + 'tenancies.json').then(r => r.json()).catch(() => []),
-    fetch(basePath + 'news.json').then(r => r.json()).catch(() => []),
-    fetch(basePath + 'documents.json').then(r => r.json()).catch(() => []),
-    fetch(basePath + 'downloads.json').then(r => r.json()).catch(() => ({ regulations: [], strategies: [], training: [] })),
-    fetch(basePath + 'services.json').then(r => r.json()).catch(() => []),
-    fetch(basePath + 'process-definitions.json').then(r => r.json()).catch(() => []),
-    fetch(basePath + 'process-instances.json').then(r => r.json()).catch(() => []),
-    fetch(basePath + 'i18n.json').then(r => r.json()).catch(() => ({})),
+    json('space-requests.json'),
+    json('reference-data.json'),
+    json('users.json'),
+    json('buildings.geojson'),
+    optional('tenancies.json', []),
+    optional('news.json', []),
+    optional('documents.json', []),
+    optional('downloads.json', { regulations: [], strategies: [], training: [] }),
+    optional('services.json', []),
+    optional('process-definitions.json', []),
+    optional('process-instances.json', []),
+    optional('i18n.json', {}),
   ]);
   state.spaceRequests = apps.map(a => ({ ...a, id: a.spaceRequestId, type: a.requestType, address: formatAddressLine(a) }));
   state.referenceData = reference;

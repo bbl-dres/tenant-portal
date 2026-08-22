@@ -2,7 +2,7 @@
    components/feedback.css — BBL Mieterportal
 
    Transient + overlay surfaces: notifications, notification banner,
-   prototype notice, modal, toast, keyboard-shortcut overlay, role-switch
+   prototype notice, modal, toast, keyboard-shortcut overlay,
    button (modal content), batch-approve modal fields.
    Sources: styles.css 2150-2356, 2642-2771, 3275-3308, 3564-3584,
    4735-4746, shortcut-grid mobile override 3873.
@@ -465,26 +465,8 @@ body.body--prototype-notice .toast-host {
   .shortcut-overlay__grid { grid-template-columns: 1fr; }
 }
 
-/* ── ROLE SWITCH BUTTON (modal stack) ────────────────────────────────────
-   Full-width outlined button used inside the "Rolle wechseln" modal. The
-   active role's button gets a primary-tinted background + checkmark icon
-   instead of the previous inline `style="width:100%;..."` block. */
-.role-switch-btn {
-  width: 100%;
-  justify-content: flex-start;
-  gap: var(--space-sm);
-}
-.role-switch-btn--active {
-  background: var(--color-badge-red-bg);
-  border-color: var(--color-primary);
-  color: var(--color-primary-700);
-}
-.role-switch-btn--active strong { color: var(--color-primary-700); }
-.role-switch-btn__spacer {
-  display: inline-block;
-  width: 18px;
-  flex-shrink: 0;
-}
+/* (Role-switch modal styles removed with the role chooser — 2026-08 code
+   review, F-T24.) */
 
 /* ── BATCH-APPROVE MODAL ─────────────────────────────────────────────────
    The "Bulk genehmigen" modal: an optional template textarea, a copy

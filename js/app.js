@@ -29,7 +29,6 @@ DOC_TYPE_LABEL,
 // UI primitives
 toast, modal, icon, statusBadge, attachmentLi, setFieldError,
 registerOverlay, closeAllOverlays,
-PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
 wireTabs, emptyRow,
@@ -113,14 +112,24 @@ function scrollContext(path) {
 function markRouteRendered(route) {
   const body = document.getElementById('page-body');
   if (body) body.dataset.route = route;
-  // Per-route document.title (WCAG 2.4.2): «<Seitentitel> — BBL Mieterportal»,
-  // derived from the rendered view's own h1 — no separate string table that
-  // could drift from the visible page. Views without an h1 (or pre-shell
-  // error paths) fall back to the bare product name. Runs on every render,
-  // so query-driven re-renders (e.g. ?lang) refresh the title too.
+  // Per-route document.title (WCAG 2.4.2): «<Seitenname> · BBL Mieterportal» —
+  // the SAME concept and separator as the sister portal («<Name> ·
+  // BBL Kundenportal», router.js setTitle; cross-portal alignment 2026-08,
+  // user decision). The name is the current BREADCRUMB label: short, curated
+  // and translated, where the previous h1 derivation put whole hero
+  // sentences into the tab («Bedarf anmelden, Status verfolgen, … — BBL
+  // Mieterportal»). Home has no trail and names itself «Startseite» like the
+  // sister portal; the h1 stays as the fallback for crumb-less interior
+  // views, and error paths fall back to the bare product name. Runs on every
+  // render, so query-driven re-renders (e.g. ?lang) refresh the title too.
+  const crumbEl = document.querySelector('.breadcrumb [aria-current="page"]');
+  const crumbLabel = (crumbEl ? crumbEl.textContent : '').replace(/\s+/g, ' ').trim();
+  const isHome = /^#\/(home)?(\?|$)/.test(route || '');
   const h1 = body ? body.querySelector('h1') : null;
-  const pageTitle = (h1 ? h1.textContent : '').replace(/\s+/g, ' ').trim();
-  document.title = pageTitle ? pageTitle + ' — BBL Mieterportal' : 'BBL Mieterportal';
+  const pageTitle = isHome
+    ? P.t('bc.home')
+    : (crumbLabel || (h1 ? h1.textContent : '').replace(/\s+/g, ' ').trim());
+  document.title = pageTitle ? pageTitle + ' · BBL Mieterportal' : 'BBL Mieterportal';
   // A new page (the scroll CONTEXT changed, not just a ?query / lang /
   // filter update or a facet sibling — see SCROLL_CONTEXTS) starts at the
   // top, like a real navigation — hash routing doesn't reset scroll on its
@@ -208,6 +217,13 @@ async function handleHash() {
   // map route leaked the context until the next visit. Routes that need a
   // map re-create it in their own render.
   teardownMaps();
+  // The info scroll-spy observer must not outlive its route either: it used
+  // to disconnect only when ANOTHER info page rendered, so navigating
+  // info → properties left a live IntersectionObserver bound to detached
+  // nodes for the rest of the session (code review 2026-08, F-T14). The
+  // in-flight swisstopo lookup follows the same rule (F-T15).
+  teardownInfoSpy();
+  if (_swisstopoController) { _swisstopoController.abort(); _swisstopoController = null; }
   // Scope hook for the floor-plan print sheet (css/foundations/print.css):
   // body.route-floor must never outlive the floor view — printing any other
   // route has to keep the federal chrome (CSS-002). Cleared on every
@@ -258,49 +274,10 @@ async function handleHash() {
 
 // ── TOAST ────────────────────────────────────────────────────────────────
 
-// ── ROLE CHOOSER (§2.1) ──────────────────────────────────────────────────
-function openRoleMenu() {
-  if (!state.user || state.user.roles.length < 2) {
-    toast('Sie haben nur eine Rolle in diesem Profil.');
-    return;
-  }
-  const body = `
-    <p>Wechseln Sie zwischen Ihren Rollen. Die Inhaltsbereiche und Standard-Startseite passen sich an.</p>
-    <div class="stack">
-      ${state.user.roles.map(r => {
-        const isActive = r === state.user.activeRole;
-        return `
-        <button class="btn btn--outline btn--lg role-switch-btn ${isActive ? 'role-switch-btn--active' : ''}"
-                type="button" data-role="${r}" aria-pressed="${isActive}">
-          ${isActive
-            ? P.icon('check')
-            : '<span class="role-switch-btn__spacer" aria-hidden="true"></span>'}
-          <strong>${roleLabel(r)}</strong>
-        </button>
-        `;
-      }).join('')}
-    </div>
-  `;
-  const m = modal({
-    title: 'Rolle wechseln',
-    body,
-    actions: [{ label: P.t('btn.cancel'), variant: 'btn--outline' }]
-  });
-  // Scope to the modal just appended (last .modal-backdrop) — a document-wide
-  // [data-role] query could also catch unrelated markup (review views-18).
-  const menuEl = [...document.querySelectorAll('.modal-backdrop')].pop() || document;
-  menuEl.querySelectorAll('[data-role]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const role = btn.getAttribute('data-role');
-      state.user.activeRole = role;
-      persistRole(role);
-      m.close();
-      toast('Rolle gewechselt: ' + roleLabel(role), 'success');
-      // Re-render current page
-      handleHash();
-    });
-  });
-}
+// (Role chooser removed in the 2026-08 code review, F-T24: the profile
+// role rows were deleted with D43 and no UI or script called the
+// programmatic hook afterwards. Demo persona switching lives in
+// window.t3lite.demoRole. Retrieve from git history if roles return.)
 
 // ── LOGIN STUB ───────────────────────────────────────────────────────────
 // `target` (optional) — hash to land on after login. The login gate passes
@@ -346,12 +323,11 @@ window.portal = {
   renderPipeline, renderStepIndicator,
   calcWizard, deriveNawClass,
   toast, modal, toggleSearch, toggleNavMenu, toggleBurger, renderShareBar, copyShareLink, submitSearch, toggleLang, pickLang, acceptCookieConsent, dismissPrototypeNotice,
-  openRoleMenu, login, logout,
+  login, logout,
   statusBadge,
   formatChf, formatDate, escapeHtml, escapeJs, roleLabel, icon,
   t, setLang, LANGS,
-  PIPELINE_STANDARD, PIPELINE_BK, PIPELINE_GREENFIELD,
-};
+  };
 
 // ── VIEWS ───────────────────────────────────────────────────────────────
 // Per-route renderers. They use the helpers above via local alias `P`
@@ -477,6 +453,11 @@ function renderLoginGate(h) {
 }
 
 async function init() {
+  // The boot fetch (12 JSON files, ~184 KB) used to run against a blank
+  // white page — the single worst loading gap in the app (code review
+  // 2026-08, F-T2). The portal-wide busy state paints first; i18n is not
+  // loaded yet, so the label is hardcoded German like the failure path.
+  if (root) root.innerHTML = `<div class="boot-loading">${renderMapLoading('Anwendung wird geladen')}</div>`;
   try {
     await P.loadData('data/');
   } catch (err) {
@@ -730,53 +711,47 @@ function searchHash({ q, sort, view, kind, page }) {
   return '#/search' + (parts.length ? '?' + parts.join('&') : '');
 }
 
-// One hit, list variant — meta line (type · date), title, lead, optional
-// thumbnail on the right. Mirrors the CD SearchResultsList row.
-function searchResultRow(r) {
+// One hit, two variants — list row (body div + right-hand thumbnail; the CD
+// SearchResultsList row) and grid card (image below the text, corner arrow).
+// ONE builder for the shared core (meta line · title · lead) so the two
+// views cannot drift — they were ~25 duplicated lines apart (code review
+// 2026-08, F-T32).
+function searchResultItem(r, variant) {
   const attrs = r.external ? ' target="_blank" rel="noopener"' : '';
   const onclick = r.onclick ? ` onclick="${r.onclick}"` : '';
-  return `
-    <li class="search-result">
-      <a class="search-result__link" href="${r.href}"${attrs}${onclick}>
-        <div class="search-result__body">
-          <p class="meta-info search-result__meta">
-            <!-- The label is the result's CATEGORY — the same vocabulary as
-                 the facet tabs above (kind), not the specific sub-type: a
-                 WiBe template labels as «Dokumente», not «WiBe» (the
-                 sub-type already leads the description line). -->
-            <span class="meta-info__item">${P.escapeHtml(r.kind || r.type)}</span>
-            ${r.date ? `<span class="meta-info__item">${P.formatDate(r.date)}</span>` : ''}
-          </p>
-          <h3 class="search-result__title">${P.escapeHtml(r.title)}</h3>
-          ${r.lead ? `<p class="search-result__lead">${P.escapeHtml(r.lead)}</p>` : ''}
-        </div>
-        ${r.image ? `<img class="search-result__image" src="${safeImageUrl(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
-      </a>
-    </li>
-  `;
-}
-
-// Grid variant — the CD's second view: same content as a card, with the
-// arrow affordance the portal already uses on its card grids.
-function searchResultCard(r) {
-  const attrs = r.external ? ' target="_blank" rel="noopener"' : '';
-  const onclick = r.onclick ? ` onclick="${r.onclick}"` : '';
-  return `
-    <li class="search-result-card">
-      <a class="search-result-card__link" href="${r.href}"${attrs}${onclick}>
+  // The label is the result's CATEGORY — the same vocabulary as the facet
+  // tabs above (kind), not the specific sub-type: a WiBe template labels as
+  // «Dokumente», not «WiBe» (the sub-type already leads the description).
+  const core = `
         <p class="meta-info search-result__meta">
-          <!-- Category = tab vocabulary (kind), matching the list row. -->
           <span class="meta-info__item">${P.escapeHtml(r.kind || r.type)}</span>
           ${r.date ? `<span class="meta-info__item">${P.formatDate(r.date)}</span>` : ''}
         </p>
         <h3 class="search-result__title">${P.escapeHtml(r.title)}</h3>
-        ${r.lead ? `<p class="search-result__lead">${P.escapeHtml(r.lead)}</p>` : ''}
-        ${r.image ? `<img class="search-result-card__image" src="${safeImageUrl(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
+        ${r.lead ? `<p class="search-result__lead">${P.escapeHtml(r.lead)}</p>` : ''}`;
+  const img = (cls) => (r.image ? `<img class="${cls}" src="${safeImageUrl(r.image)}" alt="" loading="lazy" decoding="async">` : '');
+  if (variant === 'card') {
+    return `
+    <li class="search-result-card">
+      <a class="search-result-card__link" href="${P.escapeHtml(r.href)}"${attrs}${onclick}>
+        ${core}
+        ${img('search-result-card__image')}
         ${arrowBtn('search-result-card__arrow')}
       </a>
     </li>
   `;
+  }
+  return `
+    <li class="search-result">
+      <a class="search-result__link" href="${P.escapeHtml(r.href)}"${attrs}${onclick}>
+        <div class="search-result__body">${core}</div>
+        ${img('search-result__image')}
+      </a>
+    </li>
+  `;
 }
+const searchResultRow = (r) => searchResultItem(r, 'row');
+const searchResultCard = (r) => searchResultItem(r, 'card');
 
 /* ── HOME SEARCH SUGGESTIONS ──────────────────────────────────────────────
    Grouped by content kind, following map.geo.admin.ch: section headings
@@ -1584,8 +1559,12 @@ function faqItem(question, answer) {
 // the previous one must be disconnected or observers pile up across
 // navigations, each firing on detached toc items (review B21).
 let _infoObserver = null;
-function wireInfoScrollSpy(toc) {
+// Route-teardown hook — called from handleHash on every navigation.
+function teardownInfoSpy() {
   if (_infoObserver) { _infoObserver.disconnect(); _infoObserver = null; }
+}
+function wireInfoScrollSpy(toc) {
+  teardownInfoSpy();
   const targets = (toc || [])
     .map(it => document.getElementById(it.id))
     .filter(Boolean);
@@ -1673,7 +1652,7 @@ function newsCard(n) {
 const NEWS_PAGE_SIZE = 10;
 function renderNewsList() {
   // News sits inside the «Wissen und Hilfsmittel» drawer, so the parent row
-  // carries the active state while you are on it.
+  // carries the active filterState while you are on it.
   shell({ activeNav: 'info', breadcrumb: [{ label: P.t('bc.news') }] });
   // The CD's OWN news-list page, verified in the design-system source
   // (app/pages/newsList.vue + search.postcss «SEARCH RESULTS PAGE»;
@@ -1689,7 +1668,7 @@ function renderNewsList() {
   // so the filters stay VISIBLE (user decision, 2026-08; kept-deviation
   // under D46).
   const params = parseHashQuery(location.hash);
-  const state = {
+  const filterState = {
     q: (params.q || '').trim(),
     typ: params.typ || '',
     von: params.von || '',
@@ -1699,7 +1678,7 @@ function renderNewsList() {
     page: Math.max(1, parseInt(params.page || '1', 10) || 1),
   };
   const hashFor = (overrides = {}) => {
-    const s = { ...state, ...overrides };
+    const s = { ...filterState, ...overrides };
     const parts = [];
     if (s.q) parts.push('q=' + encodeURIComponent(s.q));
     if (s.typ) parts.push('typ=' + encodeURIComponent(s.typ));
@@ -1713,19 +1692,19 @@ function renderNewsList() {
 
   const all = P.state.news || [];
   let rows = all;
-  if (state.q) {
-    const needle = state.q.toLowerCase();
+  if (filterState.q) {
+    const needle = filterState.q.toLowerCase();
     rows = rows.filter(n => [n.title, n.lead, n.type, n.source].join(' ').toLowerCase().includes(needle));
   }
-  if (state.typ) rows = rows.filter(n => n.type === state.typ);
-  if (state.von) rows = rows.filter(n => String(n.date) >= state.von);
-  if (state.bis) rows = rows.filter(n => String(n.date) <= state.bis);
-  if (state.sort === 'titel') rows = [...rows].sort((a, b) => a.title.localeCompare(b.title, 'de'));
-  else if (state.sort === 'datum-auf') rows = [...rows].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (filterState.typ) rows = rows.filter(n => n.type === filterState.typ);
+  if (filterState.von) rows = rows.filter(n => String(n.date) >= filterState.von);
+  if (filterState.bis) rows = rows.filter(n => String(n.date) <= filterState.bis);
+  if (filterState.sort === 'titel') rows = [...rows].sort((a, b) => a.title.localeCompare(b.title, 'de'));
+  else if (filterState.sort === 'datum-auf') rows = [...rows].sort((a, b) => String(a.date).localeCompare(String(b.date)));
   else rows = [...rows].sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
   const totalPages = Math.max(1, Math.ceil(rows.length / NEWS_PAGE_SIZE));
-  const safePage = Math.min(state.page, totalPages);
+  const safePage = Math.min(filterState.page, totalPages);
   const pageItems = rows.slice((safePage - 1) * NEWS_PAGE_SIZE, safePage * NEWS_PAGE_SIZE);
   const types = [...new Set(all.map(n => n.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'de'));
 
@@ -1739,9 +1718,9 @@ function renderNewsList() {
 
   const pills = filterPills({
     pills: [
-      state.q ? { key: 'q', label: 'Suche', value: `«${state.q}»` } : null,
-      state.typ ? { key: 'typ', label: 'Typ', value: state.typ } : null,
-      (state.von || state.bis) ? { key: 'zeitraum', label: 'Zeitraum', value: `${state.von ? P.formatDate(state.von) : '…'} – ${state.bis ? P.formatDate(state.bis) : '…'}` } : null,
+      filterState.q ? { key: 'q', label: 'Suche', value: `«${filterState.q}»` } : null,
+      filterState.typ ? { key: 'typ', label: 'Typ', value: filterState.typ } : null,
+      (filterState.von || filterState.bis) ? { key: 'zeitraum', label: 'Zeitraum', value: `${filterState.von ? P.formatDate(filterState.von) : '…'} – ${filterState.bis ? P.formatDate(filterState.bis) : '…'}` } : null,
     ].filter(Boolean),
     hrefFor: (key) => hashFor(key === 'zeitraum' ? { von: '', bis: '', page: 1 } : { [key]: '', page: 1 }),
     clearAllHref: hashFor({ q: '', typ: '', von: '', bis: '', page: 1 }),
@@ -1749,12 +1728,12 @@ function renderNewsList() {
   });
 
   // The view toggle is the portal-wide `.view-switch` control (same classes
-  // as the catalogue bars), rendered as links because the state lives in the
+  // as the catalogue bars), rendered as links because the filterState lives in the
   // URL; links use aria-current, not aria-pressed (2026-08 view-toggle
   // unification).
   const viewLink = (view, iconName, label) => `
-    <a class="view-switch__btn${state.view === view ? ' view-switch__btn--active' : ''}"
-       href="${hashFor({ view })}" aria-label="${label}" ${state.view === view ? 'aria-current="true"' : ''}>
+    <a class="view-switch__btn${filterState.view === view ? ' view-switch__btn--active' : ''}"
+       href="${hashFor({ view })}" aria-label="${label}" ${filterState.view === view ? 'aria-current="true"' : ''}>
       ${P.icon(iconName)}
     </a>`;
 
@@ -1769,22 +1748,22 @@ function renderNewsList() {
           <form class="search__filters__drawer" id="newsFilters">
             <div class="form-field">
               <label class="form-field__label" for="newsQ">Stichwortfilter</label>
-              <input class="input input--sm" id="newsQ" name="q" type="text" value="${P.escapeHtml(state.q)}" autocomplete="off">
+              <input class="input input--sm" id="newsQ" name="q" type="text" value="${P.escapeHtml(filterState.q)}" autocomplete="off">
             </div>
             <div class="form-field">
               <label class="form-field__label" for="newsTyp">Inhalts-Typ</label>
               <select class="input input--sm" id="newsTyp" name="typ">
-                <option value=""${state.typ ? '' : ' selected'}>- Alle -</option>
-                ${types.map(t => `<option value="${P.escapeHtml(t)}"${state.typ === t ? ' selected' : ''}>${P.escapeHtml(t)}</option>`).join('')}
+                <option value=""${filterState.typ ? '' : ' selected'}>- Alle -</option>
+                ${types.map(t => `<option value="${P.escapeHtml(t)}"${filterState.typ === t ? ' selected' : ''}>${P.escapeHtml(t)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field">
               <label class="form-field__label" for="newsVon">Zeitraum | Startdatum</label>
-              <input class="input input--sm" id="newsVon" name="von" type="date" value="${P.escapeHtml(state.von)}">
+              <input class="input input--sm" id="newsVon" name="von" type="date" value="${P.escapeHtml(filterState.von)}">
             </div>
             <div class="form-field">
               <label class="form-field__label" for="newsBis">Zeitraum | Enddatum</label>
-              <input class="input input--sm" id="newsBis" name="bis" type="date" value="${P.escapeHtml(state.bis)}">
+              <input class="input input--sm" id="newsBis" name="bis" type="date" value="${P.escapeHtml(filterState.bis)}">
             </div>
             <div class="search__filters__apply">
               <button class="btn btn--outline btn--sm" type="submit">Filter anwenden</button>
@@ -1804,9 +1783,9 @@ function renderNewsList() {
             <div class="search-results__header__right">
               <label class="sr-only" for="newsSort">Sortierung</label>
               <select id="newsSort" class="input search-results__sort-select">
-                <option value="datum-ab"${state.sort === 'datum-ab' ? ' selected' : ''}>Datum absteigend</option>
-                <option value="datum-auf"${state.sort === 'datum-auf' ? ' selected' : ''}>Datum aufsteigend</option>
-                <option value="titel"${state.sort === 'titel' ? ' selected' : ''}>Titel A–Z</option>
+                <option value="datum-ab"${filterState.sort === 'datum-ab' ? ' selected' : ''}>Datum absteigend</option>
+                <option value="datum-auf"${filterState.sort === 'datum-auf' ? ' selected' : ''}>Datum aufsteigend</option>
+                <option value="titel"${filterState.sort === 'titel' ? ' selected' : ''}>Titel A–Z</option>
               </select>
               <div class="view-switch search-results__views" role="group" aria-label="Ansicht">
                 ${viewLink('liste', 'list', 'Als Liste anzeigen')}
@@ -1816,10 +1795,10 @@ function renderNewsList() {
           </div>
           <h2 class="sr-only">News-Beiträge</h2>
           ${pageItems.length
-            ? (state.view === 'galerie'
+            ? (filterState.view === 'galerie'
               ? `<ul class="search-results-list search-results--grid">${pageItems.map(n => searchResultCard(asResult(n))).join('')}</ul>`
               : `<ul class="search-results-list search-results--list">${pageItems.map(n => searchResultRow(asResult(n))).join('')}</ul>`)
-            : '<p class="empty-state">Keine Mitteilungen zu diesen Filtern.</p>'}
+            : '<p class="empty-filterState">Keine Mitteilungen zu diesen Filtern.</p>'}
           ${totalPages > 1 ? renderPagination({
             current: safePage,
             totalPages,
@@ -2278,7 +2257,9 @@ function startCase(form, spec) {
   const payload = {};
   for (const label in spec.fields) {
     const v = (data.get(spec.fields[label]) || '').toString().trim();
-    if (v) payload[label] = v;
+    // Checkbox values arrive as 'on' — render them as a readable «Ja» on
+    // the case detail (code review 2026-08, F-T6).
+    if (v) payload[label] = v === 'on' ? 'Ja' : v;
   }
   const firstStep = def && def.variants && def.variants.standard ? def.variants.standard[0] : null;
   P.state.processInstances.unshift({
@@ -2306,8 +2287,8 @@ function caseRowHtml(c) {
   // <a href> — the only keyboard/AT-operable path into the detail view. The
   // tr onclick stays for the mouse "whole row is a target" affordance.
   return `
-    <tr data-case-id="${c.id}" onclick="location.hash='${c.href}';">
-      <td><a href="${c.href}"><strong>${P.escapeHtml(c.id)}</strong></a></td>
+    <tr data-case-id="${P.escapeHtml(c.id)}" onclick="location.hash='${P.escapeJs(c.href)}';">
+      <td><a href="${P.escapeHtml(c.href)}"><strong>${P.escapeHtml(c.id)}</strong></a></td>
       <td>${P.escapeHtml(c.object)}</td>
       <td>${P.escapeHtml(c.processName)}</td>
       <td>${P.formatDate(c.submittedAt)}</td>
@@ -2318,7 +2299,6 @@ function caseRowHtml(c) {
 
 const INBOX_PAGE_SIZE = 25;
 function renderInbox() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'inbox', breadcrumb: [{ label: P.t('nav.inbox') }] });
   const role = P.state.user.activeRole;
   const apps = myCases(role === 'GS-Reviewer' ? 've' : 'own');
@@ -2429,36 +2409,60 @@ function renderInbox() {
 // resolved cases (not raw records) so the same row markup is reused, and
 // matches the title too — the only thing that tells two Schadensmeldungen on
 // one building apart.
-function wireInboxFilters(cases) {
-  const radios = Array.from(document.querySelectorAll('input[name="inbox-status"]'));
-  const filterText = document.getElementById('inbox-q');
-  const tbody = document.getElementById('inboxTbody');
+// ONE wiring for the in-page status+text filters of the inbox and the
+// reviewer queue — the two copies were near-identical twins (code review
+// 2026-08, F-T30). It also reconciles the filter with URL pagination
+// (F-T4): the route renders a 25-row SLICE, but the old apply() wrote
+// EVERY match into the tbody while the pagination footer below kept
+// claiming «26–50 von 60». Now, while any filter is active, the table
+// deliberately shows ALL matches and the pagination chrome hides (a page
+// selector over a filtered set it doesn't describe would lie); clearing
+// the filter restores the original page slice and its footer.
+//
+// Status filtering stays IN PAGE rather than routing through the hash: the
+// list re-renders its own tbody, and a navigation would close the filter
+// panel the reader just opened. The bar's filter badge tracks the choice so
+// an active filter is visible with the panel collapsed.
+function wireStatusFilter({ prefix, tbodyId, rows, rowHtml, colspan, matchText, afterDraw }) {
+  const radios = Array.from(document.querySelectorAll(`input[name="${prefix}-status"]`));
+  const filterText = document.getElementById(`${prefix}-q`);
+  const tbody = document.getElementById(tbodyId);
   if (!tbody) return;
+  const initialRows = tbody.innerHTML;
+  const pagination = document.querySelector('#page-body .pagination-wrap');
   let activeStatus = '';
 
   const apply = () => {
     const t = (filterText?.value || '').toLowerCase();
-    const filtered = cases.filter(c =>
-      (!activeStatus || c.status === activeStatus) &&
-      (!t || c.id.toLowerCase().includes(t)
-          || (c.object || '').toLowerCase().includes(t)
-          || (c.title || '').toLowerCase().includes(t))
-    );
-    tbody.innerHTML = filtered.map(caseRowHtml).join('')
-      || emptyRow(5, 'Keine Treffer.');
+    if (!activeStatus && !t) {
+      tbody.innerHTML = initialRows;
+      if (pagination) pagination.hidden = false;
+      afterDraw?.();
+      return;
+    }
+    const filtered = rows.filter(r =>
+      (!activeStatus || r.status === activeStatus) && (!t || matchText(r, t)));
+    tbody.innerHTML = filtered.map(rowHtml).join('')
+      || emptyRow(colspan, 'Keine Treffer.');
+    if (pagination) pagination.hidden = true;
+    afterDraw?.();
   };
 
-  // Status filtering stays IN PAGE rather than routing through the hash: the
-  // list re-renders its own tbody, and a navigation would close the filter
-  // panel the reader just opened. The bar's filter badge tracks the choice so
-  // an active filter is visible with the panel collapsed.
   radios.forEach(radio => radio.addEventListener('change', () => {
     activeStatus = radio.value || '';
-    setFilterCount('inbox', activeStatus ? 1 : 0);
+    setFilterCount(prefix, activeStatus ? 1 : 0);
     apply();
   }));
-
   filterText?.addEventListener('input', apply);
+}
+
+function wireInboxFilters(cases) {
+  wireStatusFilter({
+    prefix: 'inbox', tbodyId: 'inboxTbody', rows: cases, rowHtml: caseRowHtml, colspan: 5,
+    matchText: (c, t) => c.id.toLowerCase().includes(t)
+      || (c.object || '').toLowerCase().includes(t)
+      || (c.title || '').toLowerCase().includes(t),
+  });
 }
 
 function renderInboxEmptyState() {
@@ -2513,7 +2517,6 @@ function findCase(id) {
 }
 
 function renderApplicationDetail({ id }) {
-  if (!P.state.user) { P.navigate('#/'); return; }
   const inst = findCase(id);
   if (!inst) {
     renderNotFound('Vorgang nicht gefunden.', { activeNav: 'inbox' });
@@ -2647,7 +2650,7 @@ function caseOverviewPanel(inst, { a }) {
         ${caseSection('Standort', [
           caseRow('Adresse', P.escapeHtml(a.address)),
           a.assetKey
-            ? caseRow('Wirtschaftseinheit (WE)', `<code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code>`)
+            ? caseRow('Wirtschaftseinheit (WE)', `<code>${P.escapeHtml(`${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}`)}</code>`)
             : caseRow('Objekt', '<span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben'),
           a.assetKey ? caseRow('EGID', `<code>${P.escapeHtml(String(a.egid))}</code>`) : '',
         ])}
@@ -2752,17 +2755,19 @@ function caseCommentsPanel({ comments }) {
     </ul>`;
 }
 
-// Shared roving-tabindex wiring (lib.js wireTabs, A11Y-016 / review M-TABS),
-// with the active tab in `?tab=` so a link into a case opens where it was
-// shared from. Keep `lang` in the URL: the router treats it as the source of
-// truth, so dropping it would make a copied link resolve in whatever language
-// the next reader has stored rather than the one shown.
-function caseTabHash(instanceId, key) {
+// Tab hash for detail views: the active tab in `?tab=` so a shared link
+// opens where it was shared from. Keep `lang` in the URL: the router treats
+// it as the source of truth, so dropping it would make a copied link resolve
+// in whatever language the next reader has stored rather than the one shown.
+// ONE builder — case and property detail carried byte-identical copies
+// (code review 2026-08, F-T31).
+function tabHash(base, key) {
   const current = parseHashQuery(location.hash);
   const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
     .filter(Boolean).join('&');
-  return `#/inbox/${instanceId}` + (qs ? '?' + qs : '');
+  return base + (qs ? '?' + qs : '');
 }
+const caseTabHash = (instanceId, key) => tabHash(`#/inbox/${instanceId}`, key);
 function wireCaseTabs(inst, ctx) {
   wireTabs({
     rootSel: '.case-tabs',
@@ -2787,7 +2792,6 @@ function tabBtn(key, label, active) {
 // ── 7. REVIEWER QUEUE (when activeRole = GS-Prüfer/in) ───────────────────
 const QUEUE_PAGE_SIZE = 25;
 function renderQueue() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   // GS-Reviewer's landing page — no breadcrumb (same reasoning as the
   // LBO home: a single-item breadcrumb just restates the page title).
   shell({ activeNav: 'queue', breadcrumb: [], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
@@ -2917,14 +2921,18 @@ function teardownQueueShortcuts() {
 // One queue row. Extracted so the catalogue bar's status filter can re-render
 // the body in place, the same way the Vorgänge list does.
 function queueRowHtml(a) {
+  // id/VE through escapeHtml, the inline handlers through escapeJs — the
+  // aria-labels were escaped while the visible copies of the SAME values
+  // were not (code review 2026-08, F-T10; same recipe as renderListView).
+  const open = `location.hash='#/review/${P.escapeJs(a.id)}';`;
   return `
-    <tr data-app-id="${a.id}" tabindex="0" aria-label="Antrag ${P.escapeHtml(a.id)} öffnen">
-      <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${a.id}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
-      <td onclick="location.hash='#/review/${a.id}';"><strong>${a.id}</strong></td>
-      <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe})</td>
-      <td onclick="location.hash='#/review/${a.id}';">${P.escapeHtml(a.address)}</td>
-      <td onclick="location.hash='#/review/${a.id}';">${P.formatDate(a.submittedAt)}</td>
-      <td onclick="location.hash='#/review/${a.id}';">${P.statusBadge(a.status)}</td>
+    <tr data-app-id="${P.escapeHtml(a.id)}" tabindex="0" aria-label="Antrag ${P.escapeHtml(a.id)} öffnen">
+      <td onclick="event.stopPropagation();"><input type="checkbox" class="rowSel" value="${P.escapeHtml(a.id)}" aria-label="Antrag ${P.escapeHtml(a.id)} auswählen"></td>
+      <td onclick="${open}"><strong>${P.escapeHtml(a.id)}</strong></td>
+      <td onclick="${open}">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${P.escapeHtml(a.submitterVe)})</td>
+      <td onclick="${open}">${P.escapeHtml(a.address)}</td>
+      <td onclick="${open}">${P.formatDate(a.submittedAt)}</td>
+      <td onclick="${open}">${P.statusBadge(a.status)}</td>
     </tr>
   `;
 }
@@ -2933,28 +2941,12 @@ function queueRowHtml(a) {
 // through the hash: the reviewer keeps their row selection and the filter
 // panel stays open while they triage.
 function wireQueueFilters(rows) {
-  const radios = Array.from(document.querySelectorAll('input[name="queue-status"]'));
-  const filterText = document.getElementById('queue-q');
-  const tbody = document.getElementById('queueTbody');
-  if (!tbody) return;
-  let activeStatus = '';
-  const apply = () => {
-    const t = (filterText?.value || '').toLowerCase();
-    const filtered = rows.filter(a =>
-      (!activeStatus || a.status === activeStatus) &&
-      (!t || a.id.toLowerCase().includes(t) || (a.address || '').toLowerCase().includes(t))
-    );
-    tbody.innerHTML = filtered.map(queueRowHtml).join('')
-      || emptyRow(6, 'Keine Treffer.');
+  wireStatusFilter({
+    prefix: 'queue', tbodyId: 'queueTbody', rows, rowHtml: queueRowHtml, colspan: 6,
+    matchText: (a, t) => a.id.toLowerCase().includes(t) || (a.address || '').toLowerCase().includes(t),
     // Re-rendered rows lose their keyboard/selection handlers.
-    wireQueueShortcuts();
-  };
-  radios.forEach(r => r.addEventListener('change', () => {
-    activeStatus = r.value || '';
-    setFilterCount('queue', activeStatus ? 1 : 0);
-    apply();
-  }));
-  filterText?.addEventListener('input', apply);
+    afterDraw: wireQueueShortcuts,
+  });
 }
 
 function wireQueueShortcuts() {
@@ -2998,7 +2990,6 @@ function wireQueueShortcuts() {
 
 // ── 8. REVIEWER SPLIT-PANE (§9.1 / §2.5) ─────────────────────────────────
 function renderReviewerSplit({ id }) {
-  if (!P.state.user) { P.navigate('#/'); return; }
   const a = P.state.spaceRequests.find(x => x.id === id);
   if (!a) { renderNotFound('Antrag nicht gefunden.', { activeNav: 'queue' }); return; }
   shell({ activeNav: 'queue', breadcrumb: [{ href: '#/queue', label: P.t('nav.queue') }, { label: a.id }], deptSub: P.t('org.portal') + ' · GS-Prüfer/in' });
@@ -3011,8 +3002,8 @@ function renderReviewerSplit({ id }) {
       <div class="container">
         <header class="page-header">
           <div>
-            <h1 class="h1 page-header__title">${a.id} — Prüfung</h1>
-            <p class="page-header__sub">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${a.submitterVe}) · ${P.escapeHtml(a.address)}</p>
+            <h1 class="h1 page-header__title">${P.escapeHtml(a.id)} — Prüfung</h1>
+            <p class="page-header__sub">${P.escapeHtml(P.state.users.find(u => u.id === a.submitterId)?.name || '')} (${P.escapeHtml(a.submitterVe)}) · ${P.escapeHtml(a.address)}</p>
           </div>
         </header>
         ${P.renderPipeline(a)}
@@ -3023,16 +3014,19 @@ function renderReviewerSplit({ id }) {
               <h2 class="card__title">Formular (schreibgeschützt)</h2>
               <div class="table-wrapper">
                 <table class="table">
-                  <tr><th>Antragstyp</th><td>${a.type}</td></tr>
-                  <tr><th>VE / DEP</th><td>${a.submitterVe} ${a.submitterDep ? '/ ' + a.submitterDep : ''}</td></tr>
+                  <!-- Every record field goes through escapeHtml — half of
+                       these rows skipped it while their siblings did not
+                       (code review 2026-08, F-T8). -->
+                  <tr><th>Antragstyp</th><td>${P.escapeHtml(a.type)}</td></tr>
+                  <tr><th>VE / DEP</th><td>${P.escapeHtml(a.submitterVe)} ${a.submitterDep ? '/ ' + P.escapeHtml(a.submitterDep) : ''}</td></tr>
                   <tr><th>Adresse</th><td>${P.escapeHtml(a.address)}</td></tr>
-                  ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}</code> · ${a.egid}</td></tr>` : ''}
-                  ${a.naw ? `<tr><th>NAW-Klasse</th><td>${a.naw.class} (Konfidenz ${Math.round((a.naw.confidence || 0) * 100)} %)</td></tr>` : ''}
+                  ${a.assetKey ? `<tr><th>SAP / EGID</th><td><code>${P.escapeHtml(`${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}`)}</code> · ${P.escapeHtml(String(a.egid ?? ''))}</td></tr>` : ''}
+                  ${a.naw ? `<tr><th>NAW-Klasse</th><td>${P.escapeHtml(a.naw.class)} (Konfidenz ${Math.round((a.naw.confidence || 0) * 100)} %)</td></tr>` : ''}
                   ${a.fte ? `<tr><th>FTE / AP</th><td>${a.fte} / ${a.workstations}</td></tr>` : ''}
                   ${a.hnf2 ? `<tr><th>HNF2 / GF</th><td>${a.hnf2} m² / ${a.gf} m²</td></tr>` : ''}
                   ${a.operatingCosts ? `<tr><th>UK-Kosten</th><td>${P.formatChf(a.operatingCosts)}</td></tr>` : ''}
                   ${a.extensionData?.berths ? `<tr><th>SEM Schlafplätze</th><td>${a.extensionData.berths} (Pauschale ${P.formatChf(a.extensionData.investmentLumpSum)})</td></tr>` : ''}
-                  <tr><th>Anhänge</th><td>${(a.attachments || []).map(x => x.name).join(' · ') || 'keine'}</td></tr>
+                  <tr><th>Anhänge</th><td>${(a.attachments || []).map(x => P.escapeHtml(x.name)).join(' · ') || 'keine'}</td></tr>
                 </table>
               </div>
             </div>
@@ -3260,7 +3254,6 @@ function refreshPropertiesResults(view) {
 }
 
 function renderProperties() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'properties', breadcrumb: [{ label: P.t('nav.properties') }] });
   const ve = P.state.user.ve;
   const isBblView = ['BBL-PFM', 'BBL-Campus', 'Auditor'].includes(P.state.user.activeRole);
@@ -3703,6 +3696,9 @@ function wirePropertiesSearchCombobox(view) {
     const q = input.value.trim();
     if (q.length < 2) { locItems = []; remotePending = false; render(); return; }
     const results = await fetchSwisstopo(q);
+    // The route may be gone by the time the lookup lands (handleHash also
+    // aborts the controller, F-T15) — the detached input has no .value.
+    if (!input.isConnected) return;
     if (input.value.trim() !== q) return;   // a newer keystroke superseded this
     locItems = results;
     remotePending = false;
@@ -4032,7 +4028,7 @@ function initPropertiesMap(items) {
             <div class="property-popup__body">
               <p class="property-popup__title">${P.escapeHtml(t.buildingName)}</p>
               <p class="property-popup__meta">${P.escapeHtml(t.address)}</p>
-              <a class="btn btn--filled btn--sm property-popup__cta" href="#/properties/${t.id}">Details öffnen ${P.icon('arrowRight')}</a>
+              <a class="btn btn--filled btn--sm property-popup__cta" href="#/properties/${encodeURIComponent(t.id)}">Details öffnen ${P.icon('arrowRight')}</a>
             </div>
           </div>`;
         const makePopup = () => {
@@ -4198,7 +4194,7 @@ function propertyCard(t, index = 99) {
   // load for faster LCP. Cards 4+ stay lazy.
   const imgLoading = index < 3 ? 'eager' : 'lazy';
   return `
-    <a href="#/properties/${t.id}" class="card--property">
+    <a href="#/properties/${encodeURIComponent(t.id)}" class="card--property">
       <div class="card--property__image">
         <img src="${safeImageUrl(t.image)}" alt="" loading="${imgLoading}" decoding="async" width="320" height="180">
         ${issuesBadge}
@@ -4369,7 +4365,16 @@ function openImageGallery(t, startIndex = 0) {
     deleteBtn.disabled = false; downloadBtn.disabled = false;
     emptyEl.hidden = true;
     mainImg.hidden = false;
+    // Busy ring while a cold image decodes — assigning src empties the dark
+    // stage, which used to snap with no feedback (code review 2026-08,
+    // F-T20; the service portal's lightbox carries the same state).
+    const stage = mainImg.closest('.gallery__stage');
+    stage?.setAttribute('aria-busy', 'true');
+    const settle = () => stage?.removeAttribute('aria-busy');
+    mainImg.addEventListener('load', settle, { once: true });
+    mainImg.addEventListener('error', settle, { once: true });
     mainImg.src = galleryImgSrc(entry.src);
+    if (mainImg.complete) settle();
     mainImg.alt = entry.name || '';
     nameEl.textContent = entry.name || '';
     counterEl.textContent = `${idx + 1} / ${list.length}`;
@@ -4560,9 +4565,19 @@ function propertyDetailScaffold(t, ctx, activeTab, panelHtml) {
 }
 
 async function renderPropertyDetail({ id }, gen) {
-  if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
   if (!t) { renderNotFound(P.t('prop.notFound'), { activeNav: 'properties' }); return; }
+  // The spatial fetch (~470 KB of floor/space geometry, cold cache) used to
+  // run BEFORE anything painted — and handleHash had already torn down the
+  // previous page's maps, so clicking a property looked like a dead click.
+  // Paint the chrome and the portal-wide busy state first (code review
+  // 2026-08, F-T3); the geometry only feeds the plans/maps further down.
+  shell({ activeNav: 'properties', breadcrumb: [
+    { href: '#/properties', label: P.t('nav.properties') },
+    { label: t.buildingName },
+  ] });
+  document.getElementById('page-body').innerHTML =
+    `<div class="container section busy-hold">${renderMapLoading('Gebäudedaten werden geladen')}</div>`;
   await P.loadSpatialData('data/');
   if (gen !== undefined && gen !== _routeGen) return;   // navigated away while loading
   shell({ activeNav: 'properties', breadcrumb: [
@@ -4706,12 +4721,14 @@ function propertyHeroMosaic(t) {
 }
 
 // ── PROPERTY TAB PANELS ──────────────────────────────────────────────────
-function renderPropertyTab(t, tab, ctx) {
-  if (tab === 'vertraege')  return propertyContractPanel(t);
-  if (tab === 'geschosse')  return propertyFloorsPanel(t, ctx);
-  if (tab === 'dokumente')  return propertyDocumentsPanel(t, ctx);
-  if (tab === 'vorgaenge')  return propertyCasesPanel(t, ctx);
-  return propertyOverviewPanel(t);
+// Every non-overview tab renders the same empty host that mountPropertyTable
+// fills from propertyTableConfig — there used to be four identical
+// zero-argument functions returning the same string, called with arguments
+// none of them declared (code review 2026-08, F-T22). The per-tab rationale
+// comments live on propertyTableConfig, where the tables are actually
+// defined.
+function renderPropertyTab(t, tab) {
+  return tab === 'uebersicht' ? propertyOverviewPanel(t) : '<div id="propTable"></div>';
 }
 
 // Aside: actions and contacts on the grey surface. Rendered by the ÜBERSICHT
@@ -4734,14 +4751,17 @@ function propertyAside(t) {
       <div class="property-aside__card">
         <h2 class="property-aside__title">${P.t('prop.contactsTitle')}</h2>
         <dl class="contact-dl">
+          <!-- contacts is optional on a tenancy record — startCase already
+               guards it; an unguarded read here blanked the whole panel with
+               a TypeError (code review 2026-08, F-T7). -->
           <div class="contact-dl__row">
-            <dt>${P.t('prop.contactPfm')}</dt><dd>${staffLink(t.contacts.pfm)}</dd>
+            <dt>${P.t('prop.contactPfm')}</dt><dd>${staffLink(t.contacts?.pfm)}</dd>
           </div>
           <div class="contact-dl__row">
-            <dt>${P.t('prop.contactIm')}</dt><dd>${staffLink(t.contacts.im)}</dd>
+            <dt>${P.t('prop.contactIm')}</dt><dd>${staffLink(t.contacts?.im)}</dd>
           </div>
           <div class="contact-dl__row">
-            <dt>${P.t('prop.contactFlm')}</dt><dd>${staffLink(t.contacts.flm)}</dd>
+            <dt>${P.t('prop.contactFlm')}</dt><dd>${staffLink(t.contacts?.flm)}</dd>
           </div>
         </dl>
       </div>
@@ -4792,9 +4812,7 @@ function propertyOverviewPanel(t) {
 // foot of Übersicht, where it competed with the key figures for the same
 // glance. Same row markup as «Meine Vorgänge», so a case looks identical
 // wherever it is listed.
-function propertyCasesPanel() {
-  return '<div id="propTable"></div>';
-}
+// (panel body lives in renderPropertyTab — one shared host div, F-T22)
 
 // Each tab's table, as a configuration rather than as markup. The four used to
 // be four hand-written <table> blocks with four slightly different treatments
@@ -4945,13 +4963,9 @@ function propertyTableConfig(t, tab, ctx) {
 // this is a table that grows rather than a field/value sheet describing the
 // single tenancy the reader arrived through. Rows are scoped by building, so
 // a second tenancy in the data appears here with no code change.
-function propertyContractPanel() {
-  return '<div id="propTable"></div>';
-}
+// (panel body lives in renderPropertyTab — one shared host div, F-T22)
 
-function propertyFloorsPanel() {
-  return '<div id="propTable"></div>';
-}
+// (panel body lives in renderPropertyTab — one shared host div, F-T22)
 
 // Every document linked to this property — building-linked AND tenancy-linked.
 // There used to be an «Alle Dokumente dieser Liegenschaft» link under the
@@ -4959,9 +4973,7 @@ function propertyFloorsPanel() {
 // and therefore showed FEWER rows than the table above it. A link out of a
 // complete list into a narrower one is worse than no link, so the list simply
 // is the complete one.
-function propertyDocumentsPanel() {
-  return '<div id="propTable"></div>';
-}
+// (panel body lives in renderPropertyTab — one shared host div, F-T22)
 
 // Mount the active tab's table. Called after every panel render — the initial
 // one and each tab switch — because the host element is replaced each time.
@@ -4973,16 +4985,8 @@ function mountPropertyTable(t, tab, ctx) {
   _propTableDispose = mountDataTable(host, propertyTableConfig(t, tab, ctx));
 }
 
-// Shared roving-tabindex wiring (lib.js wireTabs, A11Y-016 / review M-TABS):
-// arrow keys move between tabs, the panel is re-rendered in place, and the
-// URL keeps `?tab=` (+ `lang` — the router's source of truth for language,
-// see caseTabHash) so the state survives a reload or a shared link.
-function propertyTabHash(propertyId, key) {
-  const current = parseHashQuery(location.hash);
-  const qs = [key === 'uebersicht' ? '' : `tab=${key}`, current.lang ? `lang=${current.lang}` : '']
-    .filter(Boolean).join('&');
-  return `#/properties/${propertyId}` + (qs ? '?' + qs : '');
-}
+// Same `?tab=` contract as the case detail — one builder (tabHash, F-T31).
+const propertyTabHash = (propertyId, key) => tabHash(`#/properties/${propertyId}`, key);
 function wirePropertyTabs(t, ctx, activeTab) {
   wireTabs({
     rootSel: '.property-tabs',
@@ -5216,9 +5220,16 @@ const USETYPE_FILL = {
 };
 
 async function renderFloorDetail({ id, floorSlug }, gen) {
-  if (!P.state.user) { P.navigate('#/'); return; }
   const t = P.state.tenancies.find(x => x.id === id);
   if (!t) { renderNotFound('Liegenschaft nicht gefunden.', { activeNav: 'properties' }); return; }
+  // Same busy-first order as renderPropertyDetail (code review 2026-08, F-T3).
+  shell({ activeNav: 'properties', breadcrumb: [
+    { href: '#/properties', label: P.t('nav.properties') },
+    { href: `#/properties/${t.id}`, label: t.buildingName },
+    { label: 'Geschoss' },
+  ] });
+  document.getElementById('page-body').innerHTML =
+    `<div class="container section busy-hold">${renderMapLoading('Gebäudedaten werden geladen')}</div>`;
   await P.loadSpatialData('data/');
   if (gen !== undefined && gen !== _routeGen) return;   // navigated away while loading
 
@@ -5763,7 +5774,6 @@ function documentLinkedLabel(d) {
 const _docPreviewCache = new Map();
 
 function renderDownloads() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'downloads', breadcrumb: [{ label: P.t('nav.downloads') }] });
 
   // Filter + page state persisted in URL hash query (back/forward + shareable).
@@ -6185,7 +6195,6 @@ function downloadList(items) {
 
 // ── 12. SCHADENSMELDUNG (REQ-FA-005 stub) ────────────────────────────────
 function renderRepairQuickForm() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'services', breadcrumb: [{ label: P.t('bc.repair') }] });
 
   document.getElementById('page-body').innerHTML = `
@@ -6265,7 +6274,6 @@ function presetTenancyId() {
 // so each gets its own form + dropdown entry. Mockup only — submit just
 // confirms with a toast and routes back to the building.
 function renderMoveForm() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'services', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.move') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -6328,7 +6336,6 @@ function renderMoveForm() {
 
 // ── 12c. SONDERREINIGUNG (REQ-FA-006 — special-cleaning service) ─────────
 function renderCleaningForm() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: 'services', breadcrumb: [{ href: '#/services', label: P.t('nav.services') }, { label: P.t('services.cleaning') }] });
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -6388,7 +6395,6 @@ function renderCleaningForm() {
 
 // ── 13. PROFILE / EINSTELLUNGEN ──────────────────────────────────────────
 function renderProfile() {
-  if (!P.state.user) { P.navigate('#/'); return; }
   shell({ activeNav: '', breadcrumb: [{ label: P.t('bc.profile') }] });
   const u = P.state.user;
   document.getElementById('page-body').innerHTML = `
@@ -6401,9 +6407,9 @@ function renderProfile() {
           <!-- No role rows (Aktive Rolle / Weitere Rollen) — removed in the
                2026-08 cross-portal alignment (user decision, D43): the roles
                are demo machinery, not identity, and the sister service-portal
-               deliberately models no roles at all. Role switching stays
-               reachable programmatically (window.portal.openRoleMenu) for the
-               demo flows and tests. -->
+               deliberately models no roles at all. Demo persona switching
+               lives in window.t3lite.demoRole (the role-chooser modal was
+               removed with it in the 2026-08 code review, F-T24). -->
           <dl class="profile-dl">
             <dt>Name</dt><dd>${P.escapeHtml(u.name)}</dd>
             <dt>E-Mail</dt><dd>${P.escapeHtml(u.email)}</dd>
@@ -6830,7 +6836,6 @@ function openDocumentViewer(doc, siblings) {
     const doc = list[pos];
     const hasSiblings = list.length > 1;
     total = mockPageCount(doc);
-    const pages = Array.from({ length: total }, (_, i) => docPageHTML(doc, i + 1, total)).join('');
     backdrop.setAttribute('aria-label', 'Dokumentvorschau: ' + (doc.title || ''));
     backdrop.innerHTML = `
     <div class="docviewer__bar">
@@ -6852,7 +6857,11 @@ function openDocumentViewer(doc, siblings) {
     <div class="docviewer__main">
       ${hasSiblings ? `<button class="docviewer__nav docviewer__nav--prev" type="button" data-act="prev" aria-label="Vorheriges Dokument" title="Vorheriges Dokument">${P.icon('chevronLeft')}</button>` : ''}
       <div class="docviewer__stage" tabindex="0" aria-label="Dokumentseiten">
-        <div class="docviewer__pages">${pages}</div>
+        ${/* Pages fill in AFTER the chrome paints (below): up to ten sheet
+              templates used to be built synchronously into a black overlay
+              with no feedback, on open and on every prev/next switch
+              (code review 2026-08, F-T21). */''}
+        <div class="docviewer__pages busy-hold">${renderMapLoading('Dokument wird aufgebaut')}</div>
       </div>
       ${hasSiblings ? `<button class="docviewer__nav docviewer__nav--next" type="button" data-act="next" aria-label="Nächstes Dokument" title="Nächstes Dokument">${P.icon('chevronRight')}</button>` : ''}
       <aside class="docviewer__comments" aria-label="Kommentare" hidden>
@@ -6884,6 +6893,15 @@ function openDocumentViewer(doc, siblings) {
     baseW = Math.max(280, Math.min(840, backdrop.clientWidth - 56));
     zoom = 1;
     applyZoom();
+
+    // Deferred sheet build (F-T21): the busy state above is on screen for
+    // one frame minimum; the heavy template work happens after the paint.
+    requestAnimationFrame(() => {
+      if (!pagesEl.isConnected) return;   // viewer closed in the meantime
+      pagesEl.classList.remove('busy-hold');
+      pagesEl.innerHTML = Array.from({ length: total }, (_, i) => docPageHTML(doc, i + 1, total)).join('');
+      applyZoom();
+    });
 
     // Drag-to-pan scrolls the viewer itself (handy when zoomed wider than the
     // viewport); the wheel and the page-level scrollbar work as usual too.
@@ -6979,6 +6997,12 @@ window.t3lite = {
     const seen = new Set();
     const siblings = [];
     document.querySelectorAll('[data-doc-id]').forEach(el => {
+      // Skip triggers in hidden view surfaces: the downloads page keeps the
+      // OTHER view's markup in the DOM under [hidden] (list ↔ gallery), and
+      // the gallery may still hold a previous filter's cards — the chevrons
+      // then paged through documents no longer in the visible result set
+      // (code review 2026-08, F-T5).
+      if (el.closest('[hidden]')) return;
       const did = el.getAttribute('data-doc-id');
       if (!did || seen.has(did)) return;
       const d = docs.find(dd => dd.id === did);
@@ -6991,23 +7015,28 @@ window.t3lite = {
       defId: 'schadensmeldung', contact: 'im',
       title: (d, t) => `Schadensmeldung ${t.buildingName}`,
       fields: { 'Kategorie': 'category', 'Dringlichkeit': 'urgency', 'Beschreibung': 'desc', 'Telefon': 'phone' },
-      sent: (id, t) => `Schadensmeldung ${id} an BBL Objektmanagement gesendet (${t.contacts.im}).`,
+      sent: (id, t) => `Schadensmeldung ${id} an BBL Objektmanagement gesendet (${t.contacts?.im || 'BBL'}).`,
     });
   },
   submitMove(form) {
     startCase(form, {
       defId: 'umzug', contact: 'flm',
       title: (d, t) => `Umzug ${t.buildingName}`,
-      fields: { 'Art': 'moveType', 'Von': 'from', 'Nach': 'to', 'Arbeitsplätze': 'count', 'Wunschtermin': 'date' },
-      sent: (id, t) => `Umzugsanfrage ${id} an BBL Flächenmanagement gesendet (${t.contacts.flm}).`,
+      // EVERY control the form renders — half the inputs (extras, notes,
+      // phone) used to vanish silently on submit because they were missing
+      // from this map (code review 2026-08, F-T6).
+      fields: { 'Art': 'moveType', 'Von': 'from', 'Nach': 'to', 'Arbeitsplätze': 'count', 'Wunschtermin': 'date',
+        'IT- und Telefonie-Umzug': 'it', 'Möbeltransport': 'furniture', 'Entsorgung': 'disposal',
+        'Bemerkungen': 'notes', 'Telefon': 'phone' },
+      sent: (id, t) => `Umzugsanfrage ${id} an BBL Flächenmanagement gesendet (${t.contacts?.flm || 'BBL'}).`,
     });
   },
   submitCleaning(form) {
     startCase(form, {
       defId: 'sonderreinigung', contact: 'im',
       title: (d, t) => `Sonderreinigung ${t.buildingName}`,
-      fields: { 'Art': 'type', 'Bereich': 'area', 'Fläche (m²)': 'size', 'Wunschtermin': 'date', 'Beschreibung': 'desc' },
-      sent: (id, t) => `Reinigungsanfrage ${id} an BBL Objektmanagement gesendet (${t.contacts.im}).`,
+      fields: { 'Art': 'type', 'Bereich': 'area', 'Fläche (m²)': 'size', 'Wunschtermin': 'date', 'Beschreibung': 'desc', 'Telefon': 'phone' },
+      sent: (id, t) => `Reinigungsanfrage ${id} an BBL Objektmanagement gesendet (${t.contacts?.im || 'BBL'}).`,
     });
   },
   demoRole(role) {
