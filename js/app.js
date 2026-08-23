@@ -27,7 +27,7 @@ formatChf, formatDate, escapeHtml, escapeJs, safeImageUrl,
 formatAssetKey, roleLabel,
 DOC_TYPE_LABEL,
 // UI primitives
-toast, modal, icon, statusBadge, attachmentLi, setFieldError,
+toast, modal, icon, statusBadge, setFieldError, actionCard, contactCard,
 registerOverlay, closeAllOverlays,
 renderPipeline, renderStepIndicator,
 renderShortcutOverlay, wireGlobalShortcuts, toggleShortcutOverlay,
@@ -35,10 +35,14 @@ wireTabs, emptyRow,
 } from './lib.js';
 import { state, loadData, loadSpatialData, t, setLang, LANGS } from './state.js';
 import { treeHTML, wireTree, restoreTreeSelection, syncTreeCounts } from './spatial-tree.js';
-import { paginationShell, renderPagination, wirePaginationInput } from './pagination.js';
+import { paginationShell, renderPagination, wirePaginationInput, countText } from './pagination.js';
 import { mountDataTable, facetOptions } from './data-table.js';
 import {
-  catalogueBar, wireCatalogueBar, setFilterCount, setActiveView,
+  caseHeader, caseOverview, caseAside, caseSection, caseRow, sectionsFromData,
+  attachmentColumns, attachmentType, caseActions, caseCommentForm, mergeSections,
+} from './case-view.js';
+import {
+  catalogueBar, wireCatalogueBar, setFilterCount, setCount, setActiveView,
   filterPills, wireSidebarToggle, wireCheckboxGroup,
 } from './catalogue-bar.js';
 import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
@@ -511,7 +515,11 @@ function registerRoutes() {
   P.registerRoute('#/mobiliar',    () => renderServiceStub('Möbel bestellen', 'REQ-FA-007', 'Der föderale Mobiliar-Shop läuft im Schwesterprojekt „Arbeitsplatz-Management" — Sie werden in der Produktivversion direkt dorthin verknüpft.', 'https://bbl-dres.github.io/workspace-management/'));
   // Arbeitsinstrumente und Informationen — single long-scroll page (public)
   P.registerRoute('#/info',                renderInfoOverview);
-  P.registerRoute('#/info/ablauf',         renderInfoAblauf);
+  // `#/info/ablauf` was retired (2026-08): its process walkthrough is what the
+  // Vorgang view now shows live, in a pipeline the reader can follow on their
+  // own case. The link was distributed, so the route survives as a redirect to
+  // the area overview rather than as a «not found» for anyone holding it.
+  P.registerRoute('#/info/ablauf',         () => P.navigate('#/info'));
   P.registerRoute('#/info/faq',            renderInfoFaq);
   P.registerRoute('#/info/vorgaben',       renderInfoVorgaben);
   P.registerRoute('#/info/schulungen',     renderInfoSchulungen);
@@ -1078,9 +1086,9 @@ function renderSearchResults() {
                 when somebody switches it off. */''}
           ${query && searchSources.answersAllowed() ? answerBlock(answer, ranked.length) : ''}
           ${hiddenElsewhere ? `
-            <div class="answer-slot answer-slot--warning">
-              ${P.icon('alertTriangle', 'answer__icon')}
-              <div class="answer__body">
+            <div class="notification notification--warning answer-slot">
+              ${P.icon('alertTriangle', 'notification__icon')}
+              <div class="notification__content">
                 <p class="answer__lead"><strong>Ihre Quellenauswahl blendet Treffer aus.</strong>
                   Ohne ${P.escapeHtml(searchSources.offKinds().join(', '))} findet diese Suche nichts —
                   mit allen Inhaltsarten gäbe es Treffer.</p>
@@ -1137,11 +1145,6 @@ function renderSearchResults() {
             ${totalPages > 1 ? renderPagination({
               current: safePage,
               totalPages,
-              from: (safePage - 1) * SEARCH_PAGE_SIZE + 1,
-              to: Math.min(safePage * SEARCH_PAGE_SIZE, total),
-              totalItems: total,
-              entitySingular: 'Treffer',
-              entityPlural: 'Treffer',
               hrefFor: (p) => searchHash({ q: query, sort, view, kind: activeKind, page: p }),
               inputId: 'searchPaginationInput',
             }) : ''}
@@ -1358,61 +1361,6 @@ function renderInfoOverview() {
 // Workflow, special paths and the NAW reference table on one page: the class
 // table is the input to step one of the workflow, and readers move between
 // the two constantly. Three sections, so it keeps the TOC.
-function renderInfoAblauf() {
-  renderInfoShell({
-    titleKey: 'info.ablauf',
-    leadKey: 'info.ablauf.desc',
-    toc: [
-      { id: 'workflow',      label: 'Ablauf einer Bedarfsmeldung' },
-      { id: 'spezialfaelle', label: 'Spezialfälle' },
-      { id: 'naw',           label: 'NAW und Flächenstandards' },
-    ],
-    body: `
-      <article id="workflow">
-        <h2>Ablauf einer Bedarfsmeldung</h2>
-        <p>Eine Bedarfsmeldung durchläuft vier Hauptphasen, die im Mieterportal als Statuspipeline sichtbar sind:</p>
-        <ol>
-          <li><strong>Entwurf</strong> — Sie erfassen den Bedarf im fünfstufigen Wizard. Eingaben werden automatisch zwischengespeichert.</li>
-          <li><strong>Eingereicht → in GS-Prüfung</strong> — Das Generalsekretariat prüft die Angaben feldweise. Bei Rückfragen erhalten Sie einen kommentierten Auflagenkatalog zur Nachbearbeitung.</li>
-          <li><strong>Genehmigt → in ePPM</strong> — Die freigegebene Meldung wird automatisch an SAP ePPM übergeben. BBL-PFM eröffnet die Projektakte und vergibt eine Bedarfsmeldungs-Nummer.</li>
-          <li><strong>Abgeschlossen</strong> — Nach Umsetzung gilt die Akte als abgeschlossen. Die Historie bleibt im Mieterportal abrufbar.</li>
-        </ol>
-      </article>
-
-      <article id="spezialfaelle">
-        <h2>Spezialfälle</h2>
-        <p>Zwei Konstellationen weichen vom Standardablauf ab:</p>
-        <ul>
-          <li><strong>Bundeskanzlei-Pfad</strong> — Anträge der BK werden ohne GS-Prüfung direkt dem BBL Portfolio-Management vorgelegt.</li>
-          <li><strong>Greenfield-Pfad</strong> — Wenn das Objekt noch keinen SAP RE-FX-Eintrag hat, ergänzt BBL vor der ePPM-Übergabe einen Schritt „Wirtschaftseinheit anlegen".</li>
-        </ul>
-      </article>
-
-      <article id="naw">
-        <h2>NAW und Flächenstandards</h2>
-        <p>Die NAW-Klassen sind die föderale Vorgabe für die Flächenberechnung von Büroarbeitsplätzen. Jede Klasse hat eine eigene m²/FTE-Basis; multipliziert mit dem fixen Belegungsfaktor 0.8 (Desk-Sharing) ergibt sie HNF2 und GF.</p>
-        <div class="table-wrapper">
-          <table class="table">
-            <thead>
-              <tr><th>NAW-Klasse</th><th>m²/FTE HNF2</th><th>m²/FTE GF</th><th>Beschreibung</th></tr>
-            </thead>
-            <tbody>
-              ${(P.state.referenceData?.nawClasses || []).map(nc => `
-                <tr><td>${P.escapeHtml(nc.name)}</td><td>${nc.hnf2PerFte.toFixed(1)}</td><td>${nc.gfPerFte.toFixed(1)}</td><td>${P.escapeHtml(nc.description)}</td></tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </article>`,
-  });
-}
-
-// ── Häufige Fragen ───────────────────────────────────────────────────────
-// Grouped along the reader's timeline — before, during and after an
-// application — rather than kept as one undifferentiated list of seven. The
-// grouping is what gives this page the same three-section shape as its
-// siblings, and it also answers the question a flat FAQ never does: which of
-// these apply to me right now.
 function renderInfoFaq() {
   renderInfoShell({
     titleKey: 'info.faq',
@@ -1450,7 +1398,7 @@ function renderInfoFaq() {
   });
 }
 
-// ── Vorgaben und Strategien ──────────────────────────────────────────────
+// ── Vorgaben und Standards ──────────────────────────────────────────────
 // Verordnungen and Strategien were two separate anchors that differ only by
 // publisher; both are documents that govern the work, so they share a page.
 function renderInfoVorgaben() {
@@ -1803,11 +1751,6 @@ function renderNewsList() {
           ${totalPages > 1 ? renderPagination({
             current: safePage,
             totalPages,
-            from: rows.length === 0 ? 0 : (safePage - 1) * NEWS_PAGE_SIZE + 1,
-            to: Math.min(safePage * NEWS_PAGE_SIZE, rows.length),
-            totalItems: rows.length,
-            entitySingular: 'Nachricht',
-            entityPlural: 'Nachrichten',
             hrefFor: (p) => hashFor({ page: p }),
             inputId: 'newsPaginationInput',
           }) : ''}
@@ -2298,27 +2241,45 @@ function caseRowHtml(c) {
   `;
 }
 
-const INBOX_PAGE_SIZE = 25;
+// The case LIST, described once. Column set and sort order are an alignment
+// decision shared with the service-portal's «Meine Vorgänge»
+// (docs/case-view-alignment.md L4): Referenz · Titel · Objekt · Prozess ·
+// Eingereicht · Status.
+//
+// «Titel» is new here. The list showed the object but not the title, so two
+// Schadensmeldungen on the same building were two identical rows — the very
+// thing the search already matched on and the table could not show.
+const INBOX_SORTS = [
+  { value: 'submitted', label: 'Eingereicht (neueste zuerst)', cmp: (a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)) },
+  { value: 'ref', label: 'Referenz', cmp: (a, b) => String(a.id).localeCompare(String(b.id), 'de') },
+  { value: 'title', label: 'Titel (A–Z)', cmp: (a, b) => String(a.title).localeCompare(String(b.title), 'de') },
+  { value: 'object', label: 'Objekt (A–Z)', cmp: (a, b) => String(a.object).localeCompare(String(b.object), 'de') },
+];
+const INBOX_COLUMNS = [
+  // No <strong>: the reference is a link in the first column, and the link
+  // colour already marks it. The service-portal's equivalent column is regular
+  // weight, and bold on top of a link makes the column shout at the rest.
+  { key: 'id', label: 'Referenz', render: (c) => `<a href="${P.escapeHtml(c.href)}">${P.escapeHtml(c.id)}</a>` },
+  { key: 'title', label: 'Titel', render: (c) => P.escapeHtml(c.title) },
+  { key: 'object', label: 'Objekt', render: (c) => P.escapeHtml(c.object) },
+  { key: 'processName', label: 'Prozess', render: (c) => P.escapeHtml(c.processName) },
+  { key: 'submittedAt', label: 'Eingereicht', render: (c) => P.formatDate(c.submittedAt) },
+  { key: 'status', label: 'Status', render: (c) => P.statusBadge(c.status) },
+];
+
 function renderInbox() {
   shell({ activeNav: 'inbox', breadcrumb: [{ label: P.t('nav.inbox') }] });
   const role = P.state.user.activeRole;
   const apps = myCases(role === 'GS-Reviewer' ? 've' : 'own');
+  const openCount = apps.filter(a => !['closed', 'rejected'].includes(a.status)).length;
 
-  // URL state: ?page=N (status filtering is in-page, see wireInboxFilters)
-  const params = parseHashQuery(location.hash);
-  const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
-  const totalPages = Math.max(1, Math.ceil(apps.length / INBOX_PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = apps.slice((safePage - 1) * INBOX_PAGE_SIZE, safePage * INBOX_PAGE_SIZE);
-
-  // Filter options are built from what's actually in the
-  // user's set, so we never show "Rückfrage" when there are no
-  // clarification items. Counts on each chip give an at-a-glance
-  // distribution (DS tag-item pattern). Counts are derived from the
-  // full apps array, not the paginated slice.
+  // Status options come from what is actually in THIS set, so «Rückfrage»
+  // never appears as a filter that can only return nothing.
   const STATUS_LABELS = CASE_STATUS_LABELS;
   const counts = apps.reduce((o, a) => { o[a.status] = (o[a.status] || 0) + 1; return o; }, {});
-  const presentStatuses = Object.keys(STATUS_LABELS).filter(s => counts[s]);
+  const statusOptions = Object.keys(STATUS_LABELS)
+    .filter(x => counts[x])
+    .map(x => ({ value: x, label: `${STATUS_LABELS[x]} (${counts[x]})` }));
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -2326,7 +2287,7 @@ function renderInbox() {
         <header class="page-header">
           <div>
             <h1 class="h1 page-header__title">${role === 'GS-Reviewer' ? P.t('nav.inboxVe') : P.t('inbox.title')}</h1>
-            <p class="page-header__sub">${apps.length} ${apps.length === 1 ? 'Vorgang' : 'Vorgänge'} insgesamt</p>
+            <p class="page-header__sub">${P.t('inbox.lead')}</p>
           </div>
           <div class="page-header__actions">
             <!-- The button opens the SERVICE CATALOGUE, not the Bedarfsmeldung
@@ -2337,73 +2298,44 @@ function renderInbox() {
         </header>
 
         ${apps.length === 0 ? renderInboxEmptyState() : `
-          ${catalogueBar({
-            id: 'inbox',
-            search: true,
-            q: '',
-            searchLabel: P.t('inbox.searchLabel'),
-            placeholder: P.t('inbox.searchPlaceholder'),
-        
-            count: `${apps.length} ${apps.length === 1 ? 'Vorgang' : 'Vorgänge'}`,
-            filterLabel: P.t('props.filter'),
-            filterCount: 0,
-            // Status is this list's filter dimension. The counts that used to
-            // sit on the chip row move onto the options, so nothing is lost by
-            // folding them into the shared bar.
-            panel: `
-              <fieldset class="catbar__fieldset">
-                <legend class="catbar__legend">Status</legend>
-                <div class="catbar__options">
-                  <label class="catbar__option">
-                    <input type="radio" name="inbox-status" value="" checked>
-                    <span>Alle (${apps.length})</span>
-                  </label>
-                  ${presentStatuses.map(s => `
-                    <label class="catbar__option">
-                      <input type="radio" name="inbox-status" value="${s}">
-                      <span>${STATUS_LABELS[s]} (${counts[s]})</span>
-                    </label>`).join('')}
-                </div>
-              </fieldset>`,
-          })}
-
-          <div class="table-wrapper">
-          <table class="table table--zebra table--rows-clickable">
-            <caption class="sr-only">Vorgänge mit Objekt, Prozess, Eingangsdatum und Status</caption>
-            <thead>
-              <tr>
-                <th scope="col">Vorgang</th><th scope="col">Objekt</th><th scope="col">Prozess</th><th scope="col">Eingereicht</th><th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody id="inboxTbody">
-              ${pageItems.map(caseRowHtml).join('')}
-            </tbody>
-          </table>
+          <!-- The key-figure strip, ported from the sister portal (alignment
+               L2): the two numbers a person asks a case list for before
+               reading any row. -->
+          <h2 class="sr-only">Kennzahlen</h2>
+          <div class="stats">
+            <div class="stat"><div class="stat__num">${apps.length}</div><div class="stat__label">Vorgänge total</div></div>
+            <div class="stat"><div class="stat__num">${openCount}</div><div class="stat__label">offen / in Arbeit</div></div>
           </div>
-          <p class="table-hint">Klicken Sie eine Zeile, um Details zu öffnen.</p>
-
-          ${renderPagination({
-            current: safePage,
-            totalPages,
-            from: apps.length === 0 ? 0 : (safePage - 1) * INBOX_PAGE_SIZE + 1,
-            to: Math.min(safePage * INBOX_PAGE_SIZE, apps.length),
-            totalItems: apps.length,
-            entitySingular: 'Vorgang',
-            entityPlural: 'Vorgänge',
-            hrefFor: (p) => '#/inbox' + (p > 1 ? '?page=' + p : ''),
-            inputId: 'inboxPaginationInput',
-          })}
+          <h2 class="sr-only">Vorgänge</h2>
+          <div id="inbox-table"></div>
         `}
       </div>
     </section>
   `;
-  if (apps.length > 0) {
-    // The shared bar owns its filter-panel toggle; no `hashFor` here because
-    // this list filters in page rather than through the URL.
-    wireCatalogueBar({ id: 'inbox' });
-    wireInboxFilters(apps);
-    wirePaginationInput('inboxPaginationInput');
-  }
+
+  if (apps.length === 0) return;
+  // ONE machine for this table, the same one the detail tabs and the sister
+  // portal's case list use: search, sort, status facet and pagination, with the
+  // header and the bar surviving an empty result (js/data-table.js). It
+  // replaces a hand-built catalogueBar + table + paginationShell + the
+  // in-page `wireInboxFilters`, which paginated and filtered separately and
+  // had to hide the footer whenever a filter was active to stop the two
+  // disagreeing.
+  mountDataTable(document.getElementById('inbox-table'), {
+    id: 'inbox',
+    rows: apps,
+    columns: INBOX_COLUMNS,
+    unit: { one: 'Vorgang', many: 'Vorgänge', dative: 'Vorgängen' },
+    caption: 'Vorgänge mit Titel, Objekt, Prozess, Eingangsdatum und Status',
+    searchKeys: ['id', 'title', 'object', 'processName'],
+    sorts: INBOX_SORTS,
+    facets: [{ dim: 'status', legend: 'Status', options: statusOptions,
+      match: (c, vals) => vals.includes(c.status) }],
+    perPage: 25,
+    onRowClick: (c) => P.navigate(c.href),
+    hint: 'Klicken Sie eine Zeile, um Details zu öffnen.',
+    emptyMsg: 'Keine Vorgänge erfasst.',
+  });
 }
 
 // Text + status filtering over the rendered case rows. Operates on the
@@ -2457,15 +2389,6 @@ function wireStatusFilter({ prefix, tbodyId, rows, rowHtml, colspan, matchText, 
   filterText?.addEventListener('input', apply);
 }
 
-function wireInboxFilters(cases) {
-  wireStatusFilter({
-    prefix: 'inbox', tbodyId: 'inboxTbody', rows: cases, rowHtml: caseRowHtml, colspan: 5,
-    matchText: (c, t) => c.id.toLowerCase().includes(t)
-      || (c.object || '').toLowerCase().includes(t)
-      || (c.title || '').toLowerCase().includes(t),
-  });
-}
-
 function renderInboxEmptyState() {
   return `
     <div class="empty-state">
@@ -2476,7 +2399,6 @@ function renderInboxEmptyState() {
       <p class="empty-state__lead">Sie haben derzeit keine laufenden Vorgänge. Beginnen Sie mit einer Bedarfsanmeldung, um Bürofläche, Übernachtungsplätze oder eine Auslandvertretung zu beantragen.</p>
       <div class="empty-state__cta">
         <a href="#/wizard/1" class="btn btn--filled">Bedarf anmelden</a>
-        <a href="#/info/ablauf" class="btn btn--bare">Wie funktioniert das Portal?</a>
       </div>
     </div>
   `;
@@ -2541,7 +2463,7 @@ function renderCaseDetail(inst) {
 
   const requested = parseHashQuery(location.hash).tab;
   const tab = CASE_TABS.includes(requested) ? requested : 'uebersicht';
-  const ctx = { a, attachments, comments, history };
+  const ctx = { a, attachments, comments, history };   // `tabLabels` is added below.
 
   const tabs = [
     ['uebersicht', P.t('case.tabOverview')],
@@ -2549,6 +2471,13 @@ function renderCaseDetail(inst) {
     ['verlauf',    P.t('case.tabHistory')],
     ['kommentare', `${P.t('case.tabComments')} (${comments.length})`],
   ];
+  // The panel names itself with an sr-only <h2>. Two reasons, and they are the
+  // same reason: the section titles inside a panel are <h3>, so without this the
+  // outline jumps h1 → h3 (caught by scripts/verify/check-a11y-responsive), and
+  // a tab panel that carries no heading of its own is announced only as
+  // «tabpanel». The service-portal's C.tabPanels({ heading: true }) does exactly
+  // this, which is why both portals can use <h3> for a section title.
+  ctx.tabLabels = Object.fromEntries(tabs);
 
   document.getElementById('page-body').innerHTML = `
     ${P.renderShareBar({ backTo: '#/inbox', backLabel: 'Vorgänge' })}
@@ -2566,19 +2495,24 @@ function renderCaseDetail(inst) {
           </div>
         ` : ''}
 
-        <header class="page-header">
-          <div>
-            <p class="overtitle">${P.escapeHtml(c.processName)}</p>
-            <h1 class="h1 page-header__title">${P.escapeHtml(inst.title)}</h1>
-            <p class="page-header__sub">
-              ${P.escapeHtml(inst.instanceId)} · ${P.escapeHtml(c.object)} · ${P.t('case.submittedOn')} ${P.formatDate(inst.createdAt)}
-            </p>
-          </div>
-          <div class="page-header__actions">
-            ${P.statusBadge(inst.status)}
-            ${a && a.status === 'clarification' ? `<button class="btn btn--filled btn--sm" type="button" onclick="window.t3lite.startResubmit('${P.escapeJs(a.id)}')">${P.icon('refresh')} Auflagen erfüllen — Erneut einreichen</button>` : ''}
-          </div>
-        </header>
+        ${/* CD Hero anatomy (Hero.vue:9-27): the meta strip sits ABOVE the h1.
+              It replaces the `.overtitle` kicker and the `.page-header__sub`
+              line with ONE design-system component, so process, reference,
+              object and date read as a single line of provenance
+              (docs/case-view-alignment.md V1). */''}
+        ${caseHeader({
+          metaItems: [
+            c.processName,
+            inst.instanceId,
+            c.object,
+            `${P.t('case.submittedOn')} ${P.formatDate(inst.createdAt)}`,
+          ],
+          title: inst.title,
+          actions: P.statusBadge(inst.status)
+            + (a && a.status === 'clarification'
+              ? `<button class="btn btn--filled btn--sm" type="button" onclick="window.t3lite.startResubmit('${P.escapeJs(a.id)}')">${P.icon('refresh')} Auflagen erfüllen — Erneut einreichen</button>`
+              : ''),
+        })}
 
         ${P.renderPipeline(a || inst, steps)}
 
@@ -2591,16 +2525,19 @@ function renderCaseDetail(inst) {
   `;
 
   wireCaseTabs(inst, ctx);
+  mountCaseAttachments(ctx);
   // Clear the "fresh submission" flag after first paint so a reload doesn't
   // re-show the banner.
   if (a && a._isNew) setTimeout(() => { delete a._isNew; }, 500);
 }
 
 function renderCaseTab(inst, tab, ctx) {
-  if (tab === 'anhaenge')   return caseAttachmentsPanel(ctx);
-  if (tab === 'verlauf')    return caseHistoryPanel(ctx);
-  if (tab === 'kommentare') return caseCommentsPanel(ctx);
-  return caseOverviewPanel(inst, ctx);
+  const body = tab === 'anhaenge' ? caseAttachmentsPanel(ctx)
+    : tab === 'verlauf' ? caseHistoryPanel(ctx)
+      : tab === 'kommentare' ? caseCommentsPanel(ctx)
+        : caseOverviewPanel(inst, ctx);
+  const label = (ctx.tabLabels || {})[tab] || '';
+  return (label ? `<h2 class="sr-only">${P.escapeHtml(label)}</h2>` : '') + body;
 }
 
 // Shared empty state — every tab renders one rather than disappearing, so the
@@ -2610,108 +2547,194 @@ function caseEmpty(text) {
   return `<p class="case-empty text-secondary">${P.escapeHtml(text)}</p>`;
 }
 
-// Übersicht as a VERTICAL stack of titled sections, each a definition list —
-// the same `.detail-list` anatomy the property page uses. The previous
-// four-across card grid forced every value into a ~300px column, so an
-// address or a NAW line wrapped three times while the card next to it sat
-// half empty; and the cards implied four peer objects where there is really
-// one record described from several angles.
-function caseSection(title, rows) {
-  const body = rows.filter(Boolean);
-  if (!body.length) return '';
-  return `
-    <section class="case-section">
-      <h2 class="case-section__title">${P.escapeHtml(title)}</h2>
-      <dl class="detail-list">${body.join('')}</dl>
-    </section>`;
+// Übersicht — sections in the CD two-column grid. The shape of a section and
+// the shape of the grid live in js/case-view.js; this file only says WHICH
+// sections a Vorgang has. That is the whole point: the content is
+// process-dependent, the layout is not (docs/case-view-alignment.md § 2).
+
+// Labels and grouping for the flat `data` map every non-Bedarfsmeldung process
+// submits. DECLARATIVE AND INCOMPLETE ON PURPOSE: a key no group claims still
+// appears, under «Angaben», so a process that gains a field shows it without an
+// edit here.
+const CASE_DATA_LABELS = {
+  Ort: 'Ort', Kategorie: 'Kategorie', Dringlichkeit: 'Dringlichkeit', Beschreibung: 'Beschreibung',
+  Von: 'Von', Nach: 'Nach', Arbeitsplätze: 'Arbeitsplätze', Wunschtermin: 'Wunschtermin',
+  Art: 'Art', Fläche: 'Fläche', Artikel: 'Artikel', Menge: 'Menge', Kostenstelle: 'Kostenstelle',
+};
+// THREE SECTIONS, and the same three for every process
+// (docs/case-view-alignment.md):
+//
+//   Vorgangsdaten  — the case ABOUT itself: reference, process, assignee,
+//                    dates. Every process has it, it always leads.
+//   Standort       — where it happens. Most processes have one; those that do
+//                    not simply omit the section.
+//   Angaben        — what the requester supplied. Everything else, whatever the
+//                    process, under one neutral heading.
+//
+// Earlier this grew a group per subject (Ort · Bedarf · Termin · Einordnung),
+// which meant a new process either fitted someone else's grouping or added a
+// fifth heading — the per-process layout this module exists to remove, arriving
+// through the back door. Only the LOCATION keys are claimed, because a location
+// is also derivable from the linked building and the two have to merge.
+const CASE_DATA_GROUPS = [
+  { title: 'Standort', keys: ['Ort', 'Von', 'Nach', 'Fläche'] },
+];
+
+// The rail: who, what you can do, where this Vorgang points. Identical in
+// composition to the service-portal's (docs/case-view-alignment.md).
+function caseAsideFor(inst, a) {
+  const submitter = a ? P.state.users.find(u => u.id === a.submitterId) : null;
+  const building = inst.buildingId ? (P.state.buildings || []).find(b => b.id === inst.buildingId) : null;
+  return caseAside([
+    // ACTIONS LEAD. The rail's job is «what can I do with this», and that is the
+    // question a case page is opened to answer; who filed it and where it points
+    // are context for the answer, not ahead of it.
+    actionCard({ title: 'Aktionen', titleTag: 'h3', items: caseActions(a || inst, {
+      resubmitId: a && a.status === 'clarification' ? a.id : '',
+      serviceHref: serviceHrefForProcess(inst.defId),
+    }) }),
+    // Antragsteller is a CONTACT, not a fact: the same card the property view
+    // uses for its Ansprechpersonen, so a person reads the same wherever they
+    // appear.
+    contactCard({
+      title: 'Antragsteller',
+      titleTag: 'h3',
+      contacts: [{
+        label: a ? (a.submitterVe || 'Verwaltungseinheit') : (inst.requesterVe || 'Verwaltungseinheit'),
+        name: submitter?.name || P.state.user?.name || inst.requesterId || '—',
+        email: submitter?.email || '',
+      }],
+    }),
+    // Where this Vorgang points. Separate from «Aktionen» because following a
+    // link is not doing something TO the case.
+    actionCard({ title: 'Verknüpfungen', titleTag: 'h3', items: [
+      building ? { type: 'link', label: 'Liegenschaft ansehen', description: building.address || building.name,
+        href: `#/properties/${encodeURIComponent(inst.tenancyId || building.id)}` } : null,
+      a && a.projectNumber ? { type: 'disabled', label: `ePPM ${a.projectNumber}`,
+        description: 'Im Prototyp nicht verlinkt.' } : null,
+    ].filter(Boolean) }),
+  ]);
 }
-const caseRow = (label, value) => (value === null || value === undefined || value === '')
-  ? '' : `<dt>${P.escapeHtml(label)}</dt><dd>${value}</dd>`;
+
+// The service whose form starts THIS process. Without a match the row simply
+// does not appear, which is better than a link to the wrong form.
+function serviceHrefForProcess(defId) {
+  const hit = (P.state.services || []).find(x => x.processDefId === defId || x.id === defId);
+  return hit ? `#/services/${encodeURIComponent(hit.id || hit.serviceId)}` : '';
+}
 
 function caseOverviewPanel(inst, { a }) {
   const c = resolveCase(inst);
+  // The invariant tail — true of every Vorgang whatever its process, so it
+  // reads last and identically everywhere.
   const facts = caseSection(P.t('case.caseFacts'), [
-    caseRow(P.t('case.reference'), P.escapeHtml(inst.instanceId)),
-    caseRow(P.t('case.process'), P.escapeHtml(c.processName)),
-    caseRow(P.t('case.assignee'), P.escapeHtml(inst.assignee || '—')),
+    caseRow(P.t('case.reference'), inst.instanceId),
+    caseRow(P.t('case.process'), c.processName),
+    caseRow(P.t('case.assignee'), inst.assignee || '—'),
     caseRow(P.t('case.submittedOn'), P.formatDate(inst.createdAt)),
     caseRow(P.t('case.updatedOn'), P.formatDate(inst.updatedAt || inst.createdAt)),
-    a && a.projectNumber ? caseRow('ePPM', `<strong>${P.escapeHtml(a.projectNumber)}</strong>`) : '',
+    a && a.projectNumber ? caseRow('ePPM', `<strong>${P.escapeHtml(a.projectNumber)}</strong>`, { html: true }) : null,
   ]);
 
-  // Bedarfsmeldung: the typed record, one section per group of fields.
+  // Bedarfsmeldung: the typed record. Its sections are named here rather than
+  // derived, because its fields ARE a model — but they go through the same
+  // renderer as everything else.
   if (a) {
-    const submitter = P.state.users.find(u => u.id === a.submitterId);
-    return `
-      <div class="case-overview">
-        ${caseSection('Antragsteller', [
-          caseRow('Name', P.escapeHtml(submitter?.name || a.submitterId)),
-          caseRow('Verwaltungseinheit', P.escapeHtml(a.submitterVe) + (a.submitterDep ? ' · ' + P.escapeHtml(a.submitterDep) : '')),
-        ])}
-        ${caseSection('Standort', [
-          caseRow('Adresse', P.escapeHtml(a.address)),
-          a.assetKey
-            ? caseRow('Wirtschaftseinheit (WE)', `<code>${P.escapeHtml(`${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}`)}</code>`)
-            : caseRow('Objekt', '<span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben'),
-          a.assetKey ? caseRow('EGID', `<code>${P.escapeHtml(String(a.egid))}</code>`) : '',
-        ])}
-        ${a.naw ? caseSection('Flächenbedarf', [
-          caseRow('NAW-Klasse', `<strong>${P.escapeHtml(a.naw.class)}</strong>`),
-          caseRow('FTE', a.fte),
-          caseRow('Arbeitsplätze', a.workstations),
-          caseRow('HNF2', `${a.hnf2} m²`),
-          caseRow('Geschossfläche (GF)', `${a.gf} m²`),
-          caseRow('Unterhaltskosten', P.formatChf(a.operatingCosts)),
-          caseRow('Möblierung', P.formatChf(a.furnitureBudget)),
-        ]) : ''}
-        ${a.extensionData?.berths ? caseSection('SEM-Variante', [
-          caseRow('Schlafplätze', `<strong>${a.extensionData.berths}</strong>`),
-          caseRow('davon Familie', a.extensionData.berthsFamily),
-          caseRow('davon Einzel', a.extensionData.berthsSingle),
-          caseRow('davon Mehrbett', a.extensionData.berthsShared),
-          caseRow('Investitionspauschale', P.formatChf(a.extensionData.investmentLumpSum)),
-        ]) : ''}
-        ${facts}
-        ${a.status === 'clarification' && a.conditions ? `
-          <section class="case-section">
-            <h2 class="case-section__title">${P.icon('refresh')} Rückfrage / Offene Auflagen</h2>
-            <p class="case-section__note"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
-            <ul class="auflagen-list">
-              ${a.conditions.map((x, i) => `
-                <li class="${x.done ? 'done' : ''}">
-                  <input type="checkbox" ${x.done ? 'checked' : ''} aria-label="Auflage erledigt: ${P.escapeHtml(x.comment)}" onclick="window.t3lite.toggleAuflage('${P.escapeJs(a.id)}', ${i})">
-                  <span>${P.escapeHtml(x.comment)}</span>
-                  <span class="badge">${P.escapeHtml(x.field)}</span>
-                </li>
-              `).join('')}
-            </ul>
-          </section>` : ''}
-      </div>`;
+    const conditions = a.status === 'clarification' && a.conditions ? caseSection(
+      'Rückfrage / Offene Auflagen', [], {
+        wide: true,
+        iconName: 'refresh',
+        body: `
+          <p class="case-section__note"><strong>Begründung GS:</strong> ${P.escapeHtml(a.reviewerJustification)}</p>
+          <ul class="auflagen-list">
+            ${a.conditions.map((x, i) => `
+              <li class="${x.done ? 'done' : ''}">
+                <input type="checkbox" ${x.done ? 'checked' : ''} aria-label="Auflage erledigt: ${P.escapeHtml(x.comment)}" onclick="window.t3lite.toggleAuflage('${P.escapeJs(a.id)}', ${i})">
+                <span>${P.escapeHtml(x.comment)}</span>
+                <span class="badge">${P.escapeHtml(x.field)}</span>
+              </li>`).join('')}
+          </ul>`,
+      }) : null;
+
+    return caseOverview(mergeSections([
+      facts,
+      caseSection('Standort', [
+        caseRow('Adresse', a.address),
+        a.assetKey
+          ? caseRow('Wirtschaftseinheit (WE)', `<code>${P.escapeHtml(`${a.assetKey.bk}/${a.assetKey.we}/${a.assetKey.obj}`)}</code>`, { html: true })
+          : caseRow('Objekt', '<span class="badge badge--greenfield">Greenfield</span> — WE/Obj noch nicht vergeben', { html: true }),
+        a.assetKey ? caseRow('EGID', `<code>${P.escapeHtml(String(a.egid))}</code>`, { html: true }) : null,
+      ]),
+      // The Bedarfsmeldung's typed fields ARE its Angaben. They used to sit in
+      // «Flächenbedarf» and «SEM-Variante», which named this one process's
+      // vocabulary in a frame every process shares.
+      caseSection(P.t('case.submittedData'), [
+        a.naw ? caseRow('NAW-Klasse', `<strong>${P.escapeHtml(a.naw.class)}</strong>`, { html: true }) : null,
+        caseRow('FTE', a.fte),
+        caseRow('Arbeitsplätze', a.workstations),
+        a.hnf2 ? caseRow('HNF2', `${a.hnf2} m²`) : null,
+        a.gf ? caseRow('Geschossfläche (GF)', `${a.gf} m²`) : null,
+        a.operatingCosts ? caseRow('Unterhaltskosten', P.formatChf(a.operatingCosts)) : null,
+        a.furnitureBudget ? caseRow('Möblierung', P.formatChf(a.furnitureBudget)) : null,
+        a.extensionData?.berths ? caseRow('Schlafplätze', `<strong>${a.extensionData.berths}</strong>`, { html: true }) : null,
+        a.extensionData?.berthsFamily ? caseRow('davon Familie', a.extensionData.berthsFamily) : null,
+        a.extensionData?.berthsSingle ? caseRow('davon Einzel', a.extensionData.berthsSingle) : null,
+        a.extensionData?.berthsShared ? caseRow('davon Mehrbett', a.extensionData.berthsShared) : null,
+        a.extensionData?.investmentLumpSum ? caseRow('Investitionspauschale', P.formatChf(a.extensionData.investmentLumpSum)) : null,
+      ]),
+      conditions,
+    ]), caseAsideFor(inst, a));
   }
 
-  // Every other process: its own submitted fields, in the same anatomy.
-  const data = inst.data || {};
-  const keys = Object.keys(data);
-  return `
-    <div class="case-overview">
-      ${keys.length
-        ? caseSection(P.t('case.submittedData'), keys.map(k => caseRow(k, P.escapeHtml(String(data[k])))))
-        : `<section class="case-section">
-             <h2 class="case-section__title">${P.t('case.submittedData')}</h2>
-             ${caseEmpty(P.t('case.noData'))}
-           </section>`}
-      ${facts}
-    </div>`;
+  // Every other process: its submitted fields, through the SAME renderer.
+  const derived = sectionsFromData(inst.data, CASE_DATA_LABELS, { groups: CASE_DATA_GROUPS, restTitle: P.t('case.submittedData') });
+  // «Vorgangsdaten» leads: it is true of every process and is what a reader
+  // checks first (docs/case-view-alignment.md).
+  // `mergeSections` folds a «Standort» the form submitted into the one derived
+  // from the linked building — one heading over one subject (js/case-view.js).
+  const sections = derived.length
+    ? [facts, ...derived]
+    : [facts, caseSection(P.t('case.submittedData'), [], { body: caseEmpty(P.t('case.noData')) })];
+  return caseOverview(mergeSections(sections), caseAsideFor(inst, a));
 }
 
 
-function caseAttachmentsPanel({ attachments }) {
-  if (!attachments.length) return caseEmpty(P.t('case.noAttachments'));
-  return `
-    <ul class="attachment-list" aria-label="${P.t('case.tabAttachments')}">
-      ${attachments.map(x => attachmentLi(x)).join('')}
-    </ul>
-    <p class="table-hint">Klicken Sie ein Dokument, um es herunterzuladen. Anhänge bleiben für die Dauer der Aktenführung verfügbar.</p>`;
+// The attachment tab is a TABLE and stays one when it is empty: bar, column
+// headers and footer included, with the reason inside the table body. It is a
+// host here, filled by `mountCaseAttachments` after the panel is in the DOM —
+// mountDataTable owns its own subtree (docs/case-view-alignment.md § 3).
+function caseAttachmentsPanel() {
+  return '<div id="case-attachments"></div>';
+}
+
+// Called after the detail view paints AND after every tab switch, because
+// wireTabs rebuilds the panel's markup and the previous mount goes with it.
+let disposeCaseAttachments = null;
+function mountCaseAttachments({ attachments }) {
+  if (disposeCaseAttachments) { disposeCaseAttachments(); disposeCaseAttachments = null; }
+  const host = document.getElementById('case-attachments');
+  if (!host) return;
+  const rows = (attachments || []).map(a => ({ ...a, type: attachmentType(a) }));
+  const types = [...new Set(rows.map(r => r.type).filter(x => x && x !== '—'))].sort();
+  disposeCaseAttachments = mountDataTable(host, {
+    id: 'case-att',
+    rows,
+    unit: { one: 'Anhang', many: 'Anhänge', dative: 'Anhängen' },
+    caption: 'Anhänge zu diesem Vorgang mit Typ, Grösse und Prüfstatus',
+    label: P.t('case.tabAttachments'),
+    searchKeys: ['name', 'type'],
+    sorts: [
+      { value: 'name', label: 'Dateiname (A–Z)', cmp: (x, y) => String(x.name).localeCompare(String(y.name), 'de') },
+      { value: 'type', label: 'Dateityp', cmp: (x, y) => String(x.type).localeCompare(String(y.type), 'de') },
+    ],
+    // A dimension with no values in THIS set is not a filter but an empty
+    // drawer behind a button that promises one; mountDataTable drops it and
+    // hides the control, while the table, its header and its bar remain.
+    facets: [{ dim: 'type', legend: 'Dateityp', options: types.map(t => ({ value: t, label: t })),
+      match: (r, vals) => vals.includes(r.type) }],
+    columns: attachmentColumns(),
+    emptyMsg: P.t('case.noAttachments'),
+  });
 }
 
 function caseHistoryPanel({ history }) {
@@ -2741,7 +2764,7 @@ function caseHistoryPanel({ history }) {
 }
 
 function caseCommentsPanel({ comments }) {
-  if (!comments.length) return caseEmpty(P.t('case.noComments'));
+  if (!comments.length) return caseEmpty(P.t('case.noComments')) + caseCommentForm();
   return `
     <ul class="case-comments" aria-label="${P.t('case.tabComments')}">
       ${comments.map(k => `
@@ -2753,7 +2776,7 @@ function caseCommentsPanel({ comments }) {
           <p class="case-comment__text">${P.escapeHtml(k.text)}</p>
         </li>
       `).join('')}
-    </ul>`;
+    </ul>` + caseCommentForm();
 }
 
 // Tab hash for detail views: the active tab in `?tab=` so a shared link
@@ -2774,6 +2797,10 @@ function wireCaseTabs(inst, ctx) {
     rootSel: '.case-tabs',
     render: (key) => renderCaseTab(inst, key, ctx),
     hashFor: (key) => caseTabHash(inst.instanceId, key),
+    // The Anhänge panel is a mount host, so it has to be filled again every
+    // time wireTabs rewrites the panel — and the previous table disposed, or
+    // its delegated listeners would accumulate one set per visit.
+    afterRender: () => mountCaseAttachments(ctx),
   });
 }
 
@@ -2867,11 +2894,6 @@ function renderQueue() {
         ${renderPagination({
           current: safePage,
           totalPages,
-          from: queue.length === 0 ? 0 : (safePage - 1) * QUEUE_PAGE_SIZE + 1,
-          to: Math.min(safePage * QUEUE_PAGE_SIZE, queue.length),
-          totalItems: queue.length,
-          entitySingular: 'Pendenz',
-          entityPlural: 'Pendenzen',
           hrefFor: (p) => '#/queue' + (p > 1 ? '?page=' + p : ''),
           inputId: 'queuePaginationInput',
         })}
@@ -3185,11 +3207,6 @@ function propertiesResultsHTML(view, filtered, page, query, ort, sort) {
     ${renderPagination({
       current: safePage,
       totalPages,
-      from: (safePage - 1) * perPage + 1,
-      to: Math.min(safePage * perPage, filtered.length),
-      totalItems: filtered.length,
-      entitySingular: 'Liegenschaft',
-      entityPlural: 'Liegenschaften',
       hrefFor: (p) => buildPropertiesHash({ view, q: query, ort, sort, page: p }),
     })}`;
 }
@@ -3276,8 +3293,9 @@ function renderProperties() {
   const perPage = view === 'gallery' ? 12 : view === 'list' ? 25 : Infinity;
   const totalPages = view === 'map' ? 1 : Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
-  // No count in the bar — the pagination footer below the results already
-  // carries the «N von M» sentence, and stating it twice read as noise.
+  // The count goes in the BAR, which is where CD states it
+  // (`.search-results__header`, searchResults.vue:83-87). It used to sit in the
+  // pagination footer instead; CD's Pagination carries no count at all.
 
   document.getElementById('page-body').innerHTML = `
     <section class="section">
@@ -3305,6 +3323,8 @@ function renderProperties() {
           </div>
         ` : `
           ${propertiesToolbar({ view, query, sort, sidebarVisible,
+            count: countText({ total: allTenancies.length, shown: filtered.length,
+              one: 'Liegenschaft', many: 'Liegenschaften', dative: 'Liegenschaften' }),
             locFilterCount: (Object.keys(sel).length ? 1 : 0) + (ort ? 1 : 0) })}
           <div id="propsActivePills">${renderPropertiesFilterPills({ view, query, ort, sort })}</div>
 
@@ -3466,7 +3486,7 @@ function sortTenancies(list, sort) {
 // place combobox — passed through as extra input attributes plus the listbox
 // slot, so the shared component keeps owning the row while this page keeps
 // owning its suggestions.
-function propertiesToolbar({ view, query, sort, sidebarVisible, locFilterCount }) {
+function propertiesToolbar({ view, query, sort, sidebarVisible, locFilterCount, count = '' }) {
   return catalogueBar({
     id: 'props',
     search: true,
@@ -3474,6 +3494,7 @@ function propertiesToolbar({ view, query, sort, sidebarVisible, locFilterCount }
     searchLabel: P.t('props.searchLabel'),
     placeholder: P.t('props.searchPlaceholder'),
     inputAttrs: 'role="combobox" aria-autocomplete="list" aria-controls="propertiesSearchOptions" aria-expanded="false"',
+    count,
     searchSlot: `<ul class="combobox__list" id="propertiesSearchOptions" role="listbox" aria-label="Vorschläge" hidden></ul>`,
     sort: {
       value: sort,
@@ -4226,10 +4247,6 @@ function propertyCard(t, index = 99) {
 // each person would resolve to their own Staatskalender id — possibly looked
 // up via the federal IAM directory. https://www.staatskalender.admin.ch
 const STAATSKALENDER_ORG_URL = 'https://www.staatskalender.admin.ch/organization/20010028';
-function staffLink(name) {
-  return `<a class="link link--external" href="${STAATSKALENDER_ORG_URL}" target="_blank" rel="noopener">${P.escapeHtml(name || '')}</a>`;
-}
-
 // ── PROPERTY IMAGE GALLERY ────────────────────────────────────────────────
 // Resolves a gallery image source. Static building photos go through the
 // shared `safeImageUrl` allow-list (assets/ or http[s]); session uploads are
@@ -4736,66 +4753,64 @@ function renderPropertyTab(t, tab) {
 // panel only — the same rule the sister portal follows. The other tabs are
 // full-width tables, and a 320px column of unrelated links beside them would
 // squeeze the data without adding anything to it.
+// The rail: the same two cards, drawn by the same components as the Vorgang
+// view and the service-portal's detail pages (actionCard / contactCard in
+// lib.js). The hand-built `.property-aside__card` with a row of `.btn--bare`
+// links was the same idea at slightly different values — the drift this
+// removes (docs/case-view-alignment.md).
 function propertyAside(t) {
+  const building = encodeURIComponent(t.buildingId);
+  // `contacts` is optional on a tenancy record — startCase already guards it;
+  // an unguarded read here blanked the whole panel with a TypeError (code
+  // review 2026-08, F-T7).
+  const c = t.contacts || {};
   return `
-    <aside class="property-aside" aria-label="${P.t('prop.actions')}">
-     <div class="property-aside__inner">
-      <div class="property-aside__card">
-        <h2 class="property-aside__title">${P.t('prop.actions')}</h2>
-        <div class="property-aside__actions">
-          <a href="#/repair?building=${encodeURIComponent(t.buildingId)}" class="btn btn--bare">${P.t('prop.actionRepair')}</a>
-          <a href="#/wizard/1" class="btn btn--bare">${P.t('prop.actionRequest')}</a>
-          <a href="#/moves?building=${encodeURIComponent(t.buildingId)}" class="btn btn--bare">${P.t('prop.actionMove')}</a>
-          <a href="#/cleaning?building=${encodeURIComponent(t.buildingId)}" class="btn btn--bare">${P.t('prop.actionCleaning')}</a>
-        </div>
-      </div>
-      <div class="property-aside__card">
-        <h2 class="property-aside__title">${P.t('prop.contactsTitle')}</h2>
-        <dl class="contact-dl">
-          <!-- contacts is optional on a tenancy record — startCase already
-               guards it; an unguarded read here blanked the whole panel with
-               a TypeError (code review 2026-08, F-T7). -->
-          <div class="contact-dl__row">
-            <dt>${P.t('prop.contactPfm')}</dt><dd>${staffLink(t.contacts?.pfm)}</dd>
-          </div>
-          <div class="contact-dl__row">
-            <dt>${P.t('prop.contactIm')}</dt><dd>${staffLink(t.contacts?.im)}</dd>
-          </div>
-          <div class="contact-dl__row">
-            <dt>${P.t('prop.contactFlm')}</dt><dd>${staffLink(t.contacts?.flm)}</dd>
-          </div>
-        </dl>
-      </div>
+    <aside class="detail-layout__aside" aria-label="${P.t('prop.actions')}">
+     <div class="detail-layout__aside-inner">
+      ${actionCard({ title: P.t('prop.actions'), titleTag: 'h2', items: [
+    { type: 'link', label: P.t('prop.actionRepair'), href: `#/repair?building=${building}` },
+    { type: 'link', label: P.t('prop.actionRequest'), href: '#/wizard/1' },
+    { type: 'link', label: P.t('prop.actionMove'), href: `#/moves?building=${building}` },
+    { type: 'link', label: P.t('prop.actionCleaning'), href: `#/cleaning?building=${building}` },
+  ] })}
+      ${contactCard({ title: P.t('prop.contactsTitle'), titleTag: 'h2', contacts: [
+    { label: P.t('prop.contactPfm'), name: c.pfm, href: STAATSKALENDER_ORG_URL, external: true },
+    { label: P.t('prop.contactIm'), name: c.im, href: STAATSKALENDER_ORG_URL, external: true },
+    { label: P.t('prop.contactFlm'), name: c.flm, href: STAATSKALENDER_ORG_URL, external: true },
+  ].filter((x) => x.name) })}
      </div>
     </aside>`;
 }
 
 function propertyOverviewPanel(t) {
   return `
-    <div class="property-layout">
+    <div class="detail-layout">
       <div>
         <!-- No «Eckdaten» heading: the tab is already labelled Übersicht and
              the panel opens with the figures themselves, so the heading only
              restated its own container. -->
-        <div class="property-stats">
-          <div class="property-stats__item">
-            <span class="property-stats__label">HNF2</span>
-            <span class="property-stats__value">${t.hnf2.toLocaleString('de-CH')}<small> m²</small></span>
+        <div class="kpi-strip">
+          <div class="kpi-strip__item">
+            <span class="kpi-strip__label">HNF2</span>
+            <span class="kpi-strip__value">${t.hnf2.toLocaleString('de-CH')}<small> m²</small></span>
           </div>
-          <div class="property-stats__item">
-            <span class="property-stats__label">GF</span>
-            <span class="property-stats__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
+          <div class="kpi-strip__item">
+            <span class="kpi-strip__label">GF</span>
+            <span class="kpi-strip__value">${t.gf.toLocaleString('de-CH')}<small> m²</small></span>
           </div>
-          <div class="property-stats__item">
-            <span class="property-stats__label">${P.t('prop.workstations')}</span>
-            <span class="property-stats__value">${t.workstations}</span>
+          <div class="kpi-strip__item">
+            <span class="kpi-strip__label">${P.t('prop.workstations')}</span>
+            <span class="kpi-strip__value">${t.workstations}</span>
           </div>
-          <div class="property-stats__item">
-            <span class="property-stats__label">${P.t('prop.yearlyCost')}</span>
-            <span class="property-stats__value">${P.formatChf(t.yearlyCost)}</span>
+          <div class="kpi-strip__item">
+            <span class="kpi-strip__label">${P.t('prop.yearlyCost')}</span>
+            <span class="kpi-strip__value">${P.formatChf(t.yearlyCost)}</span>
           </div>
         </div>
 
+        <!-- ONE label column, as on the Vorgang view: a detail-list sizes its
+             own by default, which starts the values at a different x in every
+             list on the page. -->
         <dl class="detail-list property-facts-list">
           <dt>${P.t('prop.assetKeyLabel')}</dt><dd>${formatAssetKey(t.assetKey)}</dd>
           <dt>EGID</dt><dd>${P.escapeHtml(String(t.egid))}</dd>
@@ -4840,7 +4855,7 @@ function propertyTableConfig(t, tab, ctx) {
         // A11Y-001: the row is pure navigation, so the primary cell carries a
         // real <a href> — the only keyboard/AT-operable path into the detail
         // view. The whole-row click below is the mouse affordance on top.
-        { key: 'id', label: 'Vorgang', render: (c) => `<a href="${P.escapeHtml(c.href)}"><strong>${P.escapeHtml(c.id)}</strong></a>` },
+        { key: 'id', label: 'Referenz', render: (c) => `<a href="${P.escapeHtml(c.href)}">${P.escapeHtml(c.id)}</a>` },
         { key: 'object', label: 'Objekt', render: (c) => P.escapeHtml(c.object) },
         { key: 'processName', label: 'Prozess', render: (c) => P.escapeHtml(c.processName) },
         { key: 'submittedAt', label: P.t('prop.submitted'), render: (c) => P.formatDate(c.submittedAt) },
@@ -4869,7 +4884,7 @@ function propertyTableConfig(t, tab, ctx) {
         options: [{ value: 'auto', label: P.t('prop.autoRenew') }, { value: 'fest', label: P.t('prop.fixedTerm') }],
         match: (r, v) => v.includes(r.leaseAuto ? 'auto' : 'fest') }],
       columns: [
-        { key: 'id', label: P.t('prop.contractRef'), render: (c) => `<strong>${P.escapeHtml(c.id)}</strong>` },
+        { key: 'id', label: P.t('prop.contractRef'), render: (c) => P.escapeHtml(c.id) },
         { key: 've', label: P.t('prop.tenantVe'), render: (c) => `${P.escapeHtml(c.ve)}${c.dep && c.dep !== c.ve ? ' / ' + P.escapeHtml(c.dep) : ''}` },
         { key: 'leaseStart', label: P.t('prop.term'), render: (c) => `${P.formatDate(c.leaseStart)} – ${P.formatDate(c.leaseEnd)}` },
         { key: 'leaseAuto', label: P.t('prop.leaseType'), render: (c) => (c.leaseAuto
@@ -4902,7 +4917,7 @@ function propertyTableConfig(t, tab, ctx) {
         options: [{ value: 'ja', label: `${P.t('prop.yourLocation')} — ${P.escapeHtml(ctx.userVe)}` }],
         match: (r, v) => !v.includes('ja') || r.isYourFloor }],
       columns: [
-        { key: 'name', label: P.t('prop.floor'), render: (f) => `<a href="#/properties/${P.escapeHtml(t.id)}/floors/${P.escapeHtml(f.slug)}"><strong>${P.escapeHtml(f.name)}</strong></a>${
+        { key: 'name', label: P.t('prop.floor'), render: (f) => `<a href="#/properties/${P.escapeHtml(t.id)}/floors/${P.escapeHtml(f.slug)}">${P.escapeHtml(f.name)}</a>${
           f.isYourFloor ? ` <span class="badge badge--success">${P.t('prop.yourLocation')}</span>` : ''}` },
         { key: 'roomCount', label: P.t('prop.rooms'), align: 'right', render: (f) => String(f.roomCount) },
         { key: 'totalArea', label: 'HNF2', align: 'right', render: (f) => `${f.totalArea.toLocaleString('de-CH')} m²` },
@@ -4950,7 +4965,7 @@ function propertyTableConfig(t, tab, ctx) {
     ],
     columns: [
       { key: 'title', label: P.t('prop.docTitle'), render: (d) => `<a href="#/downloads?doc=${encodeURIComponent(d.id)}"
-          onclick="event.preventDefault(); event.stopPropagation(); window.t3lite.openDocViewer('${P.escapeJs(d.id)}');"><strong>${P.escapeHtml(d.title)}</strong></a>` },
+          onclick="event.preventDefault(); event.stopPropagation(); window.t3lite.openDocViewer('${P.escapeJs(d.id)}');">${P.escapeHtml(d.title)}</a>` },
       { key: 'type', label: P.t('prop.type'), render: (d) => P.escapeHtml(typeLabel(d.type)) },
       { key: 'format', label: P.t('prop.format'), render: (d) => P.escapeHtml([d.format, d.size].filter(Boolean).join(' · ')) },
       { key: 'issuedAt', label: P.t('prop.date'), render: (d) => (d.issuedAt ? P.formatDate(d.issuedAt) : '—') },
@@ -5822,7 +5837,7 @@ function renderDownloads() {
           searchLabel: P.t('downloads.searchLabel'),
           placeholder: P.t('downloads.searchPlaceholder'),
       
-          count: '',
+          count: countText({ total: (P.state.documents || []).length, one: 'Dokument', many: 'Dokumente', dative: 'Dokumenten' }),
           sort: {
             value: docState.sort,
             options: [
@@ -6023,7 +6038,7 @@ function renderDownloads() {
           <td>
             <a href="#" class="docs-table__title-link" data-doc-id="${P.escapeHtml(d.id)}"
                onclick="window.t3lite.openDocViewer('${P.escapeJs(d.id)}'); return false;">
-              ${P.icon('document')}<span>${P.escapeHtml(d.title)}</span>
+              ${P.icon('document', 'table__icon')}<span>${P.escapeHtml(d.title)}</span>
             </a>
           </td>
           <td><span class="badge badge--info">${P.escapeHtml(docTypeLabel(d.type))}</span></td>
@@ -6046,15 +6061,15 @@ function renderDownloads() {
     // keystroke) — same shared markup as #/properties via paginationShell,
     // wired to re-render the table rather than hash-navigate.
     const pag = document.getElementById('docPagination');
-    const from = total === 0 ? 0 : start + 1;
-    const to   = Math.min(start + DOCUMENT_PAGE_SIZE, total);
     pag.innerHTML = paginationShell({
       current: docState.page, totalPages,
-      from, to, totalItems: total,
-      entitySingular: 'Dokument', entityPlural: 'Dokumente', entityPluralDative: 'Dokumenten',
       inputId: 'docPaginationInput',
       nav: { kind: 'button' },
     });
+    // The count is stated ONCE, in the bar above the results — CD's
+    // `.search-results__header` position. The pagination names the page.
+    setCount('docs', countText({ total: (P.state.documents || []).length, shown: total,
+      one: 'Dokument', many: 'Dokumente', dative: 'Dokumenten' }));
     // Shared clamp + bind (review M-PAGING): in-place mode drives the input
     // AND the data-step chevrons; the clamp comes from the input's max
     // attribute, which the shell above just stamped with this render's

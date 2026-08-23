@@ -213,7 +213,6 @@ export function servicesMenu() {
 // MainNavigation.vue), and eight sections of very unequal weight on one
 // scroll is a document, not an information architecture.
 export const INFO_PAGES = [
-  { href: '#/info/ablauf',     titleKey: 'info.ablauf',     descKey: 'info.ablauf.desc' },
   { href: '#/info/faq',        titleKey: 'info.faq',        descKey: 'info.faq.desc' },
   { href: '#/info/vorgaben',   titleKey: 'info.vorgaben',   descKey: 'info.vorgaben.desc' },
   { href: '#/info/schulungen', titleKey: 'info.schulungen', descKey: 'info.schulungen.desc' },
@@ -472,12 +471,20 @@ export function renderShell({ deptSub = '', activeNav = '', breadcrumb = [], nav
          <ol class="breadcrumb__list" itemscope itemtype="https://schema.org/BreadcrumbList">
            ${crumbs.map((b, i, a) => {
              const isLast = i === a.length - 1;
+             // The chevron belongs to the crumb it PRECEDES and sits INSIDE
+             // that crumb's link as its first child — CD's
+             // `.breadcrumb__include-icon` (BreadcrumbNavigation.vue:41-56).
+             // Emitted after the link instead, its `-ml-5` pulled it back into
+             // the PREVIOUS crumb's right padding, so the trail read
+             // «Startseite›      Meine Vorgänge›      VG-2026-0211» — glued
+             // left, gaping right. The service-portal's router has always
+             // placed it this way (routing/router.js).
+             const sep = i > 0 ? icon('chevronRight', 'breadcrumb__include-icon') : '';
              return `
              <li class="breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                ${isLast
-                 ? `<span aria-current="page" itemprop="name">${escapeHtml(b.label)}</span>`
-                 : `<a href="${b.href}" itemprop="item"><span itemprop="name">${escapeHtml(b.label)}</span></a>`}
-               ${!isLast ? icon('chevronRight', 'breadcrumb__sep') : ''}
+                 ? `<span aria-current="page">${sep}<span itemprop="name">${escapeHtml(b.label)}</span></span>`
+                 : `<a href="${b.href}" itemprop="item">${sep}<span itemprop="name">${escapeHtml(b.label)}</span></a>`}
                <meta itemprop="position" content="${i + 1}">
              </li>
            `;

@@ -142,22 +142,20 @@
 }
 
 /* ── ANSWER BLOCK ─────────────────────────────────────────────────────────
+   The block IS a CD Notification in its hint variant — `notification
+   notification--hint answer-slot`, with `notification__icon` and
+   `notification__content` inside. Surface, padding ramp, radius, shadow and
+   icon size all come from that component, exactly as in the service-portal;
+   this file adds only what is particular to an ANSWER.
+
+   It previously re-declared its own flex row, its own gray-100 surface, a flat
+   24px padding and no shadow — a second notification, four values away from
+   the real one. `.answer-slot--warning` is gone with it: the warning variant is
+   `notification--warning`, which is what it was imitating.
+
    The block owns its spacing; the call site does not. */
-.answer-slot {
-  display: flex;
-  gap: var(--space-2sm);
-  align-items: flex-start;
-  margin-bottom: var(--space-lg);
-  padding: var(--space-lg);
-  background: var(--color-bg-alt);
-  border-radius: var(--radius);
-}
-.answer-slot--warning {
-  background: var(--color-badge-orange-bg);
-  color: var(--color-badge-orange-text);
-}
-.answer__icon { flex: 0 0 auto; width: var(--icon-lg); height: var(--icon-lg); }
-.answer__body { min-width: 0; flex: 1 1 auto; }
+.answer-slot { margin-bottom: var(--space-lg); }
+@media (min-width: 1024px) { .answer-slot { margin-bottom: var(--space-xl); } }
 .answer__head {
   display: flex;
   align-items: center;
@@ -178,17 +176,20 @@
   border: 1px solid currentColor;
   border-radius: var(--radius-xs);
   text-decoration: none;
-  vertical-align: super;
+  vertical-align: .12em;
 }
 .answer__sources {
   margin-top: var(--space-md);
   padding-top: var(--space-2sm);
-  border-top: 1px solid var(--color-border-light);
+  /* secondary-200, not `--color-border-light`: the block now sits on the
+     notification's secondary-50 surface, where a gray-100 rule is the same
+     colour as the ground it is drawn on. */
+  border-top: 1px solid var(--color-secondary-200);
 }
 .answer__sources-label {
   margin: 0 0 var(--space-sm);
   font-size: var(--text-body-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-gray-600);
 }
 .answer__source {
   display: grid;
@@ -199,7 +200,19 @@
   margin-bottom: var(--space-2sm);
 }
 .answer__source:last-child { margin-bottom: 0; }
-.answer__source-n { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+/* Inside a source entry the strip is an INLINE run followed by `<br>`, not the
+   block above an h1 it usually is. Left at its base `display: flex` it becomes
+   its own line box — so the `<br>` adds a SECOND break — and its 8px bottom
+   margin adds a third: measured 33px between the type and the title, against
+   the service-portal's 2px. CD's own `.meta-info` sets neither property
+   (meta-info.postcss:5-7 is colour and size only); both are this portal's
+   additions for the heading case, and this is not that case. */
+.answer__source .meta-info {
+  display: inline;
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+.answer__source-n { font-size: var(--text-body-xs); color: var(--color-gray-600); }
 .answer__foot {
   display: flex;
   flex-wrap: wrap;
@@ -207,7 +220,7 @@
   align-items: center;
   margin-top: var(--space-2sm);
 }
-.answer__note { flex: 1 1 18rem; font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+.answer__note { flex: 1 1 20rem; font-size: var(--text-body-xs); color: currentColor; }
 /* The off switch sits ON the block: whoever sees an answer is the only person
    who can decide whether they want it. */
 .answer__off {

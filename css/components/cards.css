@@ -268,3 +268,137 @@
   .detail-list { grid-template-columns: 1fr; gap: var(--space-xs) 0; }
   .detail-list dd { margin-bottom: var(--space-sm); }
 }
+
+/* ── KENNZAHLEN-STREIFEN ──────────────────────────────────────────────────
+   The two numbers a case list is asked for before any row is read. Ported
+   from the service-portal, value for value, with the Vorgangs-Angleichung
+   (docs/case-view-alignment.md L2).
+
+   `auto-fit` on a 150 px floor rather than a fixed column count: two tiles
+   sit side by side from the narrowest width the portal supports and never
+   stretch across a desktop row, which a `repeat(2, 1fr)` would do. The gutter
+   is the CD `.gap--responsive` cascade, as everywhere else. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--gap-responsive);
+  /* Capped at the sister portal's `.measure-sm` (34rem). Uncapped, two tiles
+     stretch the full 1344 px container and a two-digit figure floats in the
+     middle of a 620 px box; the strip is a summary, not a layout band. */
+  max-width: 34rem;
+  margin-bottom: var(--space-xl);
+}
+.stat {
+  padding: var(--space-md);
+  background: var(--color-secondary-50);
+}
+@media (min-width: 480px)  { .stat { padding: var(--space-lg); } }
+@media (min-width: 1024px) { .stat { padding: var(--space-xl); } }
+/* The portal's large-number typography: bold, tight, secondary ink, tabular
+   figures so two tiles' digits line up. */
+.stat__num {
+  font-size: var(--text-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-secondary-600);
+  font-variant-numeric: tabular-nums;
+}
+.stat__label {
+  margin-top: var(--space-xs);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ── DETAIL RAIL: BOX + ACTION ROWS ───────────────────────────────────────
+   The card surface and the action row of a `.detail-layout__aside`, ported
+   value for value from the service-portal so a rail card is the same object in
+   both portals (docs/case-view-alignment.md). `.box` is CD's own
+   (box.postcss:5-11): a tinted surface with a padding ramp and no border.
+   The portal previously had `.property-aside__card`, which was the same idea
+   at slightly different values — which is exactly the drift this removes. */
+.box {
+  padding: var(--space-md);
+  background: var(--color-secondary-50);
+  border: 0;
+  border-radius: 0;
+}
+@media (min-width: 480px)  { .box { padding: var(--space-lg); } }
+@media (min-width: 1024px) { .box { padding: var(--space-xl); } }
+/* Adjacent rail cards are separate offerings, not sections of one surface. */
+.detail-layout__aside .box + .box { margin-top: var(--space-xl); }
+.box > h2, .box > h3 {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-bold);
+}
+
+/* One action per row, separated by hairlines, with a trailing glyph that says
+   where the row leads: an arrow for a link, an external mark for another
+   system, a lock for something this prototype cannot do. */
+.fp-svc-list { display: flex; flex-direction: column; }
+.fp-svc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1rem;
+  align-items: center;
+  width: 100%;
+  /* WCAG 2.5.5 touch floor: a row carrying only a label (no description)
+     measured ~36px. These rows are the primary controls of a detail page, so
+     they take the same floor the buttons do. */
+  min-height: var(--btn-min-h);
+  column-gap: var(--space-2sm);
+  padding: var(--space-sm) var(--space-xxs, 2px);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-secondary-100);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+  line-height: inherit;
+  text-decoration: none;
+}
+.fp-svc:last-child { border-bottom: 0; }
+.fp-svc:hover { color: var(--color-primary-700); text-decoration: none; }
+.fp-svc:is(button) { cursor: pointer; }
+.fp-svc__content { display: block; min-width: 0; }
+.fp-svc__label,
+.fp-svc__description { display: block; }
+.fp-svc__description {
+  margin-top: 2px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-xs);
+  line-height: 1.4;
+}
+.fp-svc__go { justify-self: end; color: var(--color-text-secondary); flex-shrink: 0; }
+.fp-svc--disabled,
+.fp-svc--disabled:hover { color: var(--color-text-secondary); cursor: not-allowed; }
+
+/* ── DETAIL LAYOUT ────────────────────────────────────────────────────────
+   The shared two-column detail frame: reading column left, 22rem rail right.
+   Same class names and same measurements as the service-portal's
+   `utilities.css`, so the two portals' detail pages are one layout. */
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--gap-responsive);
+}
+.detail-layout > * { min-width: 0; }
+@media (min-width: 1024px) {
+  .detail-layout { grid-template-columns: minmax(0, 1fr) 22rem; }
+  /* NOT `align-items: start`: a start-aligned grid item is only as tall as its
+     own content and is therefore its own sticky containing block, leaving the
+     rail zero travel. The item stretches to the row height and the sticky sits
+     on the inner wrapper. */
+  .detail-layout__aside-inner { position: sticky; top: var(--space-md); }
+}
+/* The row glyph is a Lucide stroke icon at the small step. `stroke-width: 2`
+   at 24px scales down to a visible hairline at 16px, which the filled CD
+   silhouettes do not — that is why these rows use Lucide (see the folder's
+   README for provenance). `fill: none` is on the source SVG's root; the size
+   and colour come from here. */
+.fp-svc__go.inline-icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  margin-right: 0;
+  vertical-align: middle;
+}

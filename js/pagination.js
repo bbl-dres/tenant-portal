@@ -33,40 +33,59 @@ const _paginationHrefBuilders = new Map();
 // the control mechanism:
 //   { kind: 'link', hrefFor }  → <a href> prev/next  (hash-navigated lists)
 //   { kind: 'button' }         → <button data-step> prev/next (in-place lists)
-export function paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, entityPluralDative, inputId, nav }) {
-  const fmt = (n) => n.toLocaleString('de-CH');
-  // German dative plural for the "von X …" count (e.g. Dokumente → Dokumenten);
-  // defaults to the nominative plural for nouns that don't decline (Liegenschaften).
-  const dative = entityPluralDative || entityPlural;
-  const countText = totalItems === 0
-    ? `Keine ${entityPlural}`
-    : totalItems === 1
-      ? `1 ${entitySingular}`
-      : `${fmt(from)}–${fmt(to)} von ${fmt(totalItems)} ${dative}`;
+export function paginationShell({ current, totalPages, inputId, nav }) {
   const ctrl = (step, disabled, label, iconName) => nav.kind === 'link'
-    ? `<a class="btn btn--outline btn--icon-only" href="${nav.hrefFor(step < 0 ? Math.max(1, current - 1) : Math.min(totalPages, current + 1))}" aria-label="${label}"
-         ${disabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${icon(iconName)}</a>`
-    : `<button class="btn btn--outline btn--icon-only" type="button" data-step="${step}" aria-label="${label}"
-              ${disabled ? 'disabled' : ''}>${icon(iconName)}</button>`;
+    ? `<li><a class="btn btn--outline btn--icon-only" href="${nav.hrefFor(step < 0 ? Math.max(1, current - 1) : Math.min(totalPages, current + 1))}" aria-label="${label}"
+         ${disabled ? 'aria-disabled="true" tabindex="-1"' : ''}>${icon(iconName)}</a></li>`
+    : `<li><button class="btn btn--outline btn--icon-only" type="button" data-step="${step}" aria-label="${label}"
+              ${disabled ? 'disabled' : ''}>${icon(iconName)}</button></li>`;
+  /* CD's anatomy and CD's ORDER (Pagination.vue:2-24): the page field first,
+     then `.pagination__text` naming the total, then the prev/next controls in a
+     `<ul>`. This used to open with a `.pagination__count` and put «previous»
+     between the count and the field.
+
+     NO count here. CD's Pagination has none: the RESULT COUNT belongs above the
+     results, beside the sort, which is where CD puts it
+     (`.search-results__header`: «<strong>127</strong>Suchergebnisse»). Stating
+     it here as well said the same number twice on one screen. Callers that
+     paginate expose it through their catalogue bar; `countText` below is the
+     one sentence they all use. */
   return `
     <nav class="pagination" role="navigation" aria-label="Seitennavigation">
-      <span class="pagination__count" aria-live="polite">${countText}</span>
-      ${ctrl(-1, current <= 1, 'Vorherige Seite', 'chevronLeft')}
       <input class="pagination__input" type="number" inputmode="numeric"
              id="${inputId}" min="1" max="${totalPages}" value="${current}"
              aria-label="Seite auswählen">
       <span class="pagination__text">von ${totalPages} Seite${totalPages === 1 ? '' : 'n'}</span>
-      ${ctrl(1, current >= totalPages, 'Nächste Seite', 'chevronRight')}
+      <ul class="pagination__items">
+        ${ctrl(-1, current <= 1, 'Vorherige Seite', 'chevronLeft')}
+        ${ctrl(1, current >= totalPages, 'Nächste Seite', 'chevronRight')}
+      </ul>
     </nav>
   `;
 }
 
+/**
+ * THE result-count sentence, and the only place a count is stated: above the
+ * results, beside the sort. Shared word for word with the service-portal.
+ *
+ * Unfiltered it is a plain total; filtered it says what the filter left, which
+ * is the question a reader has after touching a control.
+ */
+export function countText({ total, shown = total, one, many, dative }) {
+  const fmt = (n) => n.toLocaleString('de-CH');
+  const dat = dative || many;
+  if (!total) return `Keine ${many}`;
+  if (shown === total) return `<strong>${fmt(total)}</strong> ${total === 1 ? one : many}`;
+  if (!shown) return `Keine ${many} für diese Auswahl`;
+  return `<strong>${fmt(shown)}</strong> von ${fmt(total)} ${dat}`;
+}
+
 // Hash-navigated pagination (properties, …): the shell with <a href> controls,
 // plus the hrefFor closure registered for `wirePaginationInput`.
-export function renderPagination({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, hrefFor, inputId }) {
+export function renderPagination({ current, totalPages, hrefFor, inputId }) {
   const id = inputId || 'paginationInput';
   _paginationHrefBuilders.set(id, hrefFor);
-  return paginationShell({ current, totalPages, from, to, totalItems, entitySingular, entityPlural, inputId: id, nav: { kind: 'link', hrefFor } });
+  return paginationShell({ current, totalPages, inputId: id, nav: { kind: 'link', hrefFor } });
 }
 
 // Wire a paginationShell's page-input field, in one of two modes matching

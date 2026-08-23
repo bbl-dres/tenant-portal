@@ -50,7 +50,13 @@ try {
       panelHidden: panel.querySelector('.catbar__panel')?.hidden,
       count: text('.catbar__count'),
       pagination: !!panel.querySelector('.pagination'),
-      pageCount: text('.pagination__count'),
+      // The footer names the PAGE; the bar names the COUNT
+      // (docs/pagination-alignment.md). `.pagination__count` is gone: CD's
+      // Pagination carries no count, and stating it in both places said the
+      // same number twice.
+      pageText: text('.pagination__text'),
+      pageValue: panel.querySelector('.pagination__input')?.value || '',
+      firstCell: panel.querySelector('tbody tr td')?.textContent.replace(/\s+/g, ' ').trim() || '',
       rows: panel.querySelectorAll('tbody tr').length,
       headers: [...panel.querySelectorAll('thead th')].map((th) => th.textContent.trim()),
     };
@@ -101,11 +107,16 @@ try {
 
   section('Pagination is real, not decoration');
   check(docs.rows <= 10, 'a page holds at most ten rows', `${docs.rows} rows`);
-  check(/1–10 von \d+ Dokumenten/.test(docs.pageCount), 'the footer names the window', docs.pageCount);
+  check(/^von \d+ Seiten$/.test(docs.pageText) && docs.pageValue === '1',
+    'the footer names the page', `${docs.pageValue} ${docs.pageText}`);
   await page.click('#detailTab .pagination button[data-step="1"]');
   await page.waitForTimeout(350);
   const second = await read();
-  check(second.pageCount !== docs.pageCount, 'the next-page control moves the window', second.pageCount);
+  // The window moved if the page field advanced AND the rows changed — the
+  // range sentence that used to prove it lives in the bar now, and the bar
+  // states the FILTER result, which paging does not alter.
+  check(second.pageValue === '2' && second.firstCell !== docs.firstCell,
+    'the next-page control moves the window', `Seite ${second.pageValue}, erste Zeile «${second.firstCell}»`);
 
   section('Search narrows the table and says so');
   await page.fill('#detailTab .catbar__search input[type=search]', 'grundriss');

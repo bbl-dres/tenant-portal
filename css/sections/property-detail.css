@@ -40,34 +40,47 @@
    immediately under the tab strip's own border and above the facts list, so
    the eye met three horizontal lines in ~120px; a tinted panel separates the
    block just as clearly without adding another line to that stack. */
-.property-stats {
+/* ── KPI-STRIP ────────────────────────────────────────────────────────────
+   The key-figure row above a detail record. Ported from the service-portal
+   (`utilities.css`), where the same strip opens a Mietverhältnis
+   (#/app/tenancies/…): four large figures with small labels, a hairline above
+   and below, and NO card surface. Type scale alone carries the contrast — the
+   tinted box this replaces made the figures read as a widget sitting on the
+   page rather than as the page's opening statement, and it was the one
+   remaining difference between two otherwise identical detail headers.
+
+   The former `.property-stats` block is gone with its only consumer. */
+.kpi-strip {
   display: grid;
-  /* minmax(0, 1fr) — not bare 1fr — so a long value (CHF 1'140'000)
-     wraps inside its cell instead of widening the track past the card. */
+  /* minmax(0, 1fr) — not bare 1fr — so a long value (CHF 1'140'000) wraps
+     inside its cell instead of widening the track past the column. */
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md);
   margin: 0 0 var(--space-xl);
-  padding: var(--space-lg);
-  background: var(--color-bg-surface);
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--color-secondary-100);
+  border-bottom: 1px solid var(--color-secondary-100);
+  background: transparent;
 }
 @media (min-width: 768px) {
-  .property-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
+  .kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
 }
-.property-stats__item {
+.kpi-strip__item {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.property-stats__label {
+.kpi-strip__label {
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
-.property-stats__value {
+.kpi-strip__value {
   font-size: var(--text-h3);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
+  font-variant-numeric: tabular-nums;
 }
-.property-stats__value small {
+.kpi-strip__value small {
   font-size: var(--text-body-sm);
   font-weight: var(--font-weight-normal);
   color: var(--color-text-secondary);
@@ -144,27 +157,11 @@
    states inside the property-detail page. */
 .text-secondary { color: var(--color-text-secondary); }
 
-/* Property detail layout (sidebar) */
-.property-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-xl);
-}
-/* Grid items default to min-width:auto, so a wide table inside the main
-   column would force the track — and every card sharing it — past the
-   viewport (then clipped by `.container`). min-width:0 keeps the columns
-   at track size; overflowing tables scroll via `.table-wrapper` instead. */
-.property-layout > * { min-width: 0; }
-@media (min-width: 1024px) {
-  /* NOT `align-items: start`: a start-aligned grid item is only as tall as its
-     own content, which makes it its own sticky containing block — the aside
-     then has zero travel and scrolls away with the page despite
-     `position: sticky` computing correctly. The item stretches to the row
-     height instead and the sticky sits on an inner wrapper, which is what
-     gives it room to pin. */
-  .property-layout { grid-template-columns: 1fr 320px; }
-  .property-aside__inner { position: sticky; top: var(--space-md); }
-}
+/* The property detail frame is `.detail-layout` (components/cards.css) — the
+   same frame the Vorgang view and the service-portal's detail pages use. The
+   portal-only `.property-layout` / `.property-aside*` block is gone with its
+   markup; only the sticky wrapper's name survives, and that is
+   `.detail-layout__aside-inner`, declared with the layout. */
 
 /* Attachments list — shared by the wizard upload step (badge shows
    scan status) and the application-detail Anhänge tab (read-only).

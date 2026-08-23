@@ -41,7 +41,7 @@ const INDEX = [
     fields: { title: 'Schaden melden', type: 'Dienstleistung Service', lead: 'Defekte an Gebäude und Technik melden.' } },
   { kind: 'Informationen', type: 'Information', title: 'Ablauf einer Schadenmeldung',
     lead: 'Wie eine Meldung bearbeitet wird.', answerText: 'Wie eine Meldung bearbeitet wird.',
-    href: '#/info/ablauf', boost: 1,
+    href: '#/info/vorgaben', boost: 1,
     fields: { title: 'Ablauf einer Schadenmeldung', type: 'Information', lead: 'Wie eine Meldung bearbeitet wird.' } },
   { kind: 'Dokumente', type: 'Grundriss', title: 'Grundriss Bundeshaus West',
     lead: 'Grundriss · PDF · 2 MB', answerText: '',

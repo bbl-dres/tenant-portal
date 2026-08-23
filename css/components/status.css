@@ -12,7 +12,7 @@
    carries `.inline-icon`, so a single-class hook in an earlier file
    ties with this base block and loses on order. Per-icon hooks must be
    double-class selectors (`.inline-icon.main-navigation__chevron`,
-   `.inline-icon.breadcrumb__sep`) to keep their sizing/margins.
+   `.inline-icon.breadcrumb__include-icon`) to keep their sizing/margins.
    ========================================================================== */
 
 /* ── BADGES ─────────────────────────────────────────────────────────────── */
@@ -90,74 +90,102 @@
 }
 
 /* ── STATUS PIPELINE (§0.3) ─────────────────────────────────────────────── */
+/* ── PIPELINE ─────────────────────────────────────────────────────────────
+   Chevron segments cut with `clip-path`, so the arrows interlock without
+   z-index tricks and without a border-triangle per step. Ported from the
+   service-portal (docs/case-view-alignment.md V8–V10); the state colours below
+   stay this portal's, including the two states the sister portal did not have.
+
+   IT WRAPS, IT DOES NOT SCROLL SIDEWAYS. A six-step Bedarfsmeldung never fits
+   one row on a phone, and the old `overflow-x: auto` put the final steps —
+   «genehmigt», «abgeschlossen» — behind a scrollbar. A process is precisely
+   the thing a reader needs to see IN FULL, so segments wrap to a second row and
+   keep the chevron treatment per row.
+
+   `padding-left: var(--arrow)` offsets the negative margin that interlocks the
+   segments; without it the first tile of every FOLLOWING row would stick one
+   arrow-width out to the left. `--seg-gap` is the sliver of background left
+   visible between segments — with a perfect interlock the chain reads as one
+   bar and the individual arrowheads disappear. */
 .pipeline {
+  --arrow: var(--space-2sm);
+  --seg-gap: var(--space-xs);
+  position: relative;
   display: flex;
-  gap: 0;
-  align-items: stretch;
-  margin-block: var(--space-md);
-  overflow-x: auto;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: var(--space-md) 0;
+  padding: 0 0 0 calc(var(--arrow) - var(--seg-gap));
+  row-gap: var(--seg-gap);
 }
+.pipeline-wrap { position: relative; }
 .pipeline__step {
+  /* `1 1 auto`: the chain stays continuous to the right edge rather than
+     ending in a gap. */
+  flex: 1 1 auto;
+  max-width: 100%;
   display: flex;
   align-items: center;
-  padding: var(--space-sm) var(--space-md);
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: var(--btn-min-h);
+  padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) + var(--arrow));
+  margin-left: calc(var(--seg-gap) - var(--arrow));
   background: var(--color-gray-100);
   /* A11Y-002: text-secondary (gray-500) only clears 4.5:1 on white; on the
      gray-100 tint it lands at 4.39:1. DS pairs tinted surfaces with -700
      foregrounds (notification-hint pattern), so use gray-700 here. */
   color: var(--color-gray-700);
   font-size: var(--text-body-sm);
-  position: relative;
-  white-space: nowrap;
-  flex: 1 1 auto;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  /* No `nowrap`: a long step title wraps inside its own segment instead of
+     breaking the row. */
+  text-align: center;
+  hyphens: auto;
+  clip-path: polygon(0 0, calc(100% - var(--arrow)) 0, 100% 50%, calc(100% - var(--arrow)) 100%, 0 100%, var(--arrow) 50%);
 }
-.pipeline__step::after {
-  content: "";
-  position: absolute;
-  top: 50%; right: -10px;
-  border-top: 18px solid transparent;
-  border-bottom: 18px solid transparent;
-  border-left: 10px solid var(--color-gray-100);
-  transform: translateY(-50%);
-  z-index: 1;
+/* Only the list's FIRST segment gets a straight left edge. The first segment of
+   a following row keeps its notch, so it reads as a continuation of the row
+   above rather than as a new chain. */
+.pipeline__step:first-child {
+  clip-path: polygon(0 0, calc(100% - var(--arrow)) 0, 100% 50%, calc(100% - var(--arrow)) 100%, 0 100%);
 }
-.pipeline__step + .pipeline__step { padding-left: var(--space-xl); }
-.pipeline__step:last-child::after { display: none; }
+.pipeline__step:last-child {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--arrow) 50%);
+}
 /* Step-state colours — aligned with the service-portal's pipeline
    (docs/design-alignment.md D30): DONE is the solid AA green
    (green-800 #065F46, white text — 7.68:1, the service-portal's measured
-   choice), ACTIVE is the skin primary (primary-600 + bold white — ONE
+   choice), ACTIVE is the skin primary (primary-600 + white — ONE
    "you are here" colour across both portals; follows the intranet skin to
    blue exactly like the service-portal's). Rejected / Rückfrage keep the
-   DS badge tint pairs — states the sister portal doesn't render, so the
-   -100/-800 status language stays (audit S1). */
+   DS badge tint pairs; the service-portal adopted the same two states with
+   this wave (audit S1, case-view-alignment V10). */
 .pipeline__step--done {
-  background: var(--color-badge-green-text);   /* green-800 #065F46 — the service-portal's done fill (white 7.68:1) */
+  background: var(--color-badge-green-text);   /* green-800 #065F46 — white 7.68:1 */
   color: var(--color-white);
 }
-.pipeline__step--done::after { border-left-color: var(--color-badge-green-text); }
 .pipeline__step--active {
   background: var(--color-primary-600);
   color: var(--color-white);
-  font-weight: var(--font-weight-bold);
 }
-.pipeline__step--active::after { border-left-color: var(--color-primary-600); }
 .pipeline__step--rejected {
   background: var(--color-badge-red-bg);
   color: var(--color-badge-red-text);
 }
-.pipeline__step--rejected::after { border-left-color: var(--color-badge-red-bg); }
 .pipeline__step--rueckfrage {
   background: var(--color-badge-orange-bg);
   color: var(--color-badge-orange-text);
 }
-.pipeline__step--rueckfrage::after { border-left-color: var(--color-badge-orange-bg); }
 /* Pending / faded step ("… genehmigt" on a Rückfrage pipeline). Replaces
    the previous inline `style="opacity:0.5"` so the styling lives with
    the rest of the pipeline rules. */
 .pipeline__step--pending {
   opacity: 0.5;
 }
+.pipeline__glyph { flex: none; }
+
 /* Reserve a thin gap between the pipeline icon and the label so the
    inline-icon doesn't bump into the text on smaller pills. */
 .pipeline__step .inline-icon { margin-right: var(--space-xs); }

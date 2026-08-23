@@ -255,17 +255,40 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-md) var(--container-padding);
+  /* No block padding of its own. CD's `.back-bar` / `.share-bar` are margins
+     only (share-bar.postcss:5-13); the 16px top/bottom padding here stacked
+     with the following section's 80px to put 112px between the bar and the
+     title, while the service-portal had 40px. */
+  padding: 0 var(--container-padding);
   max-width: var(--container-max-width);
-  margin: 0 auto;
-  border-bottom: 1px solid var(--color-border-light);
-  margin-bottom: var(--space-xl);
+  /* CD `mt-5 lg:mt-4` — the bar sits just under the breadcrumb. */
+  margin: var(--space-lg) auto 0;
+  /* NO bottom border. CD's `.share-bar` (share-bar.postcss:5-8) is flex plus
+     margins and nothing else — the rule was portal-only and drew a line across
+     the full page width directly under the breadcrumb, which read as a second
+     header edge. The gap below is the separation; `margin-bottom` keeps it.
+     The service-portal's `.share-bar` never had one (2026-08 case-view wave). */
+  margin-bottom: var(--space-lg);
 }
+@media (min-width: 1024px) {
+  /* CD `lg:mt-4`; the bottom step matches the service-portal's `.detail-bar`
+     (--sp-10 = 40px), which is close to CD's hero `pt-12` opening gap. */
+  .share-bar { margin-top: var(--space-md); margin-bottom: 40px; }
+}
+/* The bar owns the gap to the content that follows. Without this the section's
+   own 80px top padding is added on top of it, which is where the 112px came
+   from. Mirrors the service-portal's `.detail-bar + .hero { padding-top: 0 }`. */
+.share-bar + .section { padding-top: 0; }
 .share-bar__actions {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
   margin-left: auto;             /* keeps actions right-aligned even if back is absent */
+  /* CD `-mr-3` (share-bar.postcss:7): the buttons' own padding is pulled back
+     over the container edge so the ICON — not the invisible hit area — lines up
+     with the text column. Without it the trailing button sat 12px short and the
+     bar read as inset against every other row on the page. */
+  margin-right: calc(-1 * var(--space-2sm));
 }
 /* `.btn--back` — DS layout-only modifier (btn.postcss:188-191: float +
    a small top-margin nudge; it carries NO colour, size or border). The
@@ -297,11 +320,24 @@
   min-height: var(--btn-min-h);          /* WCAG 2.5.5 touch-target — audit M-C4 */
   min-width: var(--btn-min-h);
 }
+/* CD's ShareBar buttons are `<Btn variant="bare">` and therefore ride the
+   button ramp, which steps to 48px from 1280 (btn.postcss). Held at a flat 44
+   the bar measured 4px shorter than the service-portal's and pushed everything
+   below it 3px out of register. */
+@media (min-width: 1280px) {
+  .share-bar__btn { min-height: 48px; min-width: 48px; }
+}
 /* CD .btn--bare hover: text → primary-600 only, no background fill. */
 .share-bar__btn:hover { color: var(--color-primary); }
 /* CD share/print are icon-only buttons (accessible name = the button's
    aria-label). Fixed square — never width:auto, since the inline-icon <svg>
    has no intrinsic aspect ratio and auto blows up to the 300px default-object
-   width. Sized at 32px: above the too-small 24px, below bbl.admin.ch's
-   oversized treatment; the DS ShareBar `xl` ramp is 28–36px. */
-.share-bar__btn svg { width: var(--icon-lg); height: var(--icon-lg); }
+   width.
+   The size now RIDES the CD ramp instead of resting at its midpoint: CD's
+   ShareBar renders `SvgIcon size="xl"` → `h-7 md:h-8 lg:h-9` = 28 / 32 / 36.
+   A fixed 32 was a documented compromise; it left the two portals 4px apart on
+   desktop, which is exactly what «the share bar should look the same in both»
+   rules out. The service-portal has ridden this ramp all along. */
+.share-bar__btn svg { width: var(--icon-md); height: var(--icon-md); }
+@media (min-width: 768px)  { .share-bar__btn svg { width: var(--icon-lg); height: var(--icon-lg); } }
+@media (min-width: 1024px) { .share-bar__btn svg { width: 36px; height: 36px; } }

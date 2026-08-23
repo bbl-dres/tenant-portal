@@ -29,7 +29,7 @@
 
 import { escapeHtml as esc } from './lib.js';
 import { catalogueBar, wireCatalogueBar, setFilterCount } from './catalogue-bar.js';
-import { paginationShell, wirePaginationInput } from './pagination.js';
+import { paginationShell, wirePaginationInput, countText } from './pagination.js';
 
 // Same page size as the sister service-portal's detail tables, so a reader
 // moving between the two prototypes meets one rhythm.
@@ -48,6 +48,7 @@ const PER_PAGE = 10;
  * @param {Array}    [cfg.facets]      [{ dim, legend, options:[{value,label}], match(row, values) }]
  * @param {number}   [cfg.perPage]
  * @param {Function} [cfg.foot]        (visible, filtered) => <tr> markup
+ * @param {string}   [cfg.hint]        footnote below the table (interaction)
  * @param {string}   [cfg.emptyMsg]    shown when there is no data at all
  * @param {string}   [cfg.caption]     table caption (sr-only)
  * @param {string}   [cfg.label]       accessible name of the table
@@ -59,7 +60,7 @@ export function mountDataTable(host, cfg = {}) {
   const {
     id = 'dt', rows: allRows = [], columns = [], unit = {},
     searchKeys = [], search, sorts = [], facets: declaredFacets = [], perPage = PER_PAGE,
-    foot, emptyMsg, caption, label, rowClass, onRowClick,
+    foot, emptyMsg, caption, label, rowClass, onRowClick, hint,
   } = cfg;
   /* A dimension with no values in THIS row set is not a filter — it is an
      empty drawer behind a button that promises one. Facets are usually derived
@@ -76,12 +77,7 @@ export function mountDataTable(host, cfg = {}) {
   // The bar's count answers «how much did my search and filters remove»; the
   // pagination footer below answers «where am I in the result». They overlap
   // only while nothing is filtered, which is the case where neither is needed.
-  const countText = (shown) => {
-    if (!allRows.length) return `Keine ${many}`;
-    if (shown === allRows.length) return `${allRows.length} ${allRows.length === 1 ? one : many}`;
-    if (shown === 0) return `Keine ${many} für diese Auswahl`;
-    return `${shown} von ${allRows.length} ${dative}`;
-  };
+  const count = (shown) => countText({ total: allRows.length, shown, one, many, dative });
 
   const state = { q: '', sort: sorts.length ? sorts[0].value : '', page: 1, sel: {} };
   facets.forEach((facet) => { state.sel[facet.dim] = []; });
@@ -118,7 +114,7 @@ export function mountDataTable(host, cfg = {}) {
     placeholder: `${many} durchsuchen …`,
     // A count has to be present in the first render or catalogueBar omits the
     // element, and every later update would have nothing to write into.
-    count: countText(allRows.length),
+    count: count(allRows.length),
     sort: sorts.length ? { value: state.sort, options: sorts.map((s) => [s.value, s.label]) } : null,
     filterLabel: facets.length ? 'Filter' : '',   // no facets → no control
     panel: panelHTML,
@@ -171,19 +167,25 @@ export function mountDataTable(host, cfg = {}) {
           ${visible.length && foot ? `<tfoot>${foot(visible, sorted)}</tfoot>` : ''}
         </table>
       </div>
+      ${/* A footnote BELOW the table, for what the table DOES rather than what
+            it holds — «click a row to open it» is an interaction, and there is
+            nowhere else the reader would learn it. Only while there is
+            something to interact with. */''}
+      ${hint && visible.length ? `<p class="table-hint">${esc(hint)}</p>` : ''}
+      ${/* The footer stays over an empty result, like the bar and the header
+            above it: this portal's footer is a RANGE STATEMENT first («1–11 von
+            11 Vorgängen») and a page selector second, and «Keine Anhänge» is a
+            true statement about the range. scripts/verify/check-detail-tables
+            asserts it on every detail tab. */''}
       ${paginationShell({
     current: state.page, totalPages,
-    from: sorted.length === 0 ? 0 : start + 1,
-    to: Math.min(start + perPage, sorted.length),
-    totalItems: sorted.length,
-    entitySingular: one, entityPlural: many, entityPluralDative: dative,
     inputId: `${id}-page`,
     nav: { kind: 'button' },
   })}`;
 
     // The row set the delegated click handler below resolves against.
     draw.sorted = sorted;
-    if (countEl) countEl.textContent = countText(sorted.length);
+    if (countEl) countEl.innerHTML = count(sorted.length);
     setFilterCount(id, facets.reduce((n, facet) => n + (state.sel[facet.dim] || []).length, 0));
     // Re-bound per draw against the freshly written controls; the clamp reads
     // the input's `max`, which the shell just stamped with this page count.

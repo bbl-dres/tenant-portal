@@ -190,20 +190,57 @@
   line-height: var(--line-height-relaxed);
 }
 
-/* Übersicht of a Vorgang: a vertical stack of titled sections, each a
-   definition list. The earlier four-across card grid squeezed every value
-   into a ~300px column — an address or the NAW line wrapped three times
-   while its neighbour sat half empty — and four cards implied four peer
-   objects where there is one record seen from several angles. */
-.case-overview {
+/* Übersicht of a Vorgang: titled sections in the CD two-column grid.
+   `.case-overview` carries `grid gap--responsive grid--responsive-cols-2` in
+   the markup (layouts/layout.css), so the layout IS the design system's and
+   this block only adds what the sections need.
+
+   Two earlier attempts are worth keeping in view. A four-across card grid
+   squeezed every value into a ~300 px column, so an address wrapped three
+   times beside a half-empty neighbour. The vertical stack that replaced it
+   fixed the wrapping and created the opposite fault: measured at 1440 px, the
+   values ended at ~35 % of a 1344 px panel and four sections stacked to a
+   2336 px page whose right two thirds were blank. Two columns is the widest
+   arrangement in which a label/value pair still reads as one line — three
+   would leave ~430 px, of which the label column alone claims half.
+
+   `align-items: start` keeps a two-row section from stretching its one-row
+   neighbour, which would drop that section's rule far below its last value. */
+.case-overview { align-items: start; }
+/* Sections stack in the reading column and carry their own rhythm — the grid's
+   gap separates the two COLUMNS, not the sections inside one. Without this
+   «Angaben» sat directly under the last value of «Vorgangsdaten». */
+.case-overview__main {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xl);
+  min-width: 0;
 }
+@media (min-width: 1024px) {
+  /* NOT `align-items: start`: a start-aligned grid item is only as tall as its
+     own content and is therefore its own sticky containing block, leaving the
+     rail zero travel. */
+  .case-overview { align-items: stretch; }
+}
+@media (max-width: 1023.98px) {
+  /* The rail carries the actions, so on one column it leads. A property is a
+     thing you read about; a Vorgang is a thing you ACT on, and burying
+     «Auflagen erfüllen» under the sections would hide the reason the page was
+     opened. */
+  .case-overview > .detail-layout__aside { order: -1; }
+}
+/* Prose spans the width. A Begründung set in a half-width column wraps to six
+   lines beside a section of four short values; the renderer marks such a
+   section itself (LONG_VALUE in js/case-view.js), so no call site decides it.
+   `1 / -1` is correct in the one-column state too, hence no media query. */
+.case-section--wide { grid-column: 1 / -1; }
+/* NO bottom rule. It separated a title from its values while two sections sat
+   side by side; stacked in one reading column the rules read as page-wide
+   dividers and chop the panel into slices. The reference this layout follows —
+   «Eckdaten» on the property view — has none either, and the section gap plus
+   the bold title already do the separating. */
 .case-section__title {
-  margin: 0;
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--color-border-light);
+  margin: 0 0 var(--space-2sm);
   font-size: var(--text-h4);
   font-weight: var(--font-weight-bold);
 }
@@ -215,11 +252,87 @@
 }
 .case-section__note { margin: var(--space-md) 0 0; }
 .case-section .auflagen-list { margin-top: var(--space-md); }
-/* ONE label column across every section of a Vorgang, so the values line up
-   down the whole page. Each `.detail-list` sizes its own label column by
-   default, which made «Name :» and «Wirtschaftseinheit (WE) :» start their
-   values at different x positions two sections apart. Pinned via the
-   `--dl-label-col` hook (components/cards.css) instead of re-declaring the
-   grid; below 640px cards.css collapses the list to one column regardless,
-   so no media query is needed here. */
-.case-overview .detail-list { --dl-label-col: 220px; }
+/* The pinned 220 px label column is GONE. It existed so that four stacked
+   lists lined up down the page; side by side, two lists whose labels have
+   nothing to do with each other only get their short labels pushed apart
+   («FTE :» started its value 220 px in). `fit-content(18rem)` — the
+   `.detail-list` default — is what both portals now use
+   (docs/case-view-alignment.md § 2.2). */
+/* ONE label column across every section, so the values line up down the whole
+   panel. Each `.detail-list` sizes its own by default, which put «Referenz :»
+   and «Wirtschaftseinheit (WE) :» at different x positions two sections apart.
+   14rem clears the longest label the case view carries at the body size, and
+   matches the service-portal's `--kv-label-col`. Below 480px cards.css
+   collapses the list to one column, so the pin is released there. */
+.case-overview .detail-list { margin-top: 0; --dl-label-col: 14rem; }
+@media (max-width: 479.98px) { .case-overview .detail-list { --dl-label-col: auto; } }
+/* A stacked pair is a label ABOVE its value — the colon belongs to the inline
+   form only. */
+.detail-list--stack { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.detail-list--stack dt::after { content: none; }
+.detail-list--stack dt { margin-top: var(--space-sm); }
+.detail-list--stack dt:first-of-type { margin-top: 0; }
+.case-section__actions { margin: var(--space-md) 0 0; }
+
+
+/* ── VORGANGSKOPF — CD Hero anatomy ───────────────────────────────────────
+   `designsystem/app/components/ch/sections/Hero.vue:9-27` puts MetaInfo ABOVE
+   the h1. That replaces the portal's own `.overtitle` kicker plus
+   `.page-header__sub` line with ONE design-system component carrying process,
+   reference, object and date. `.overtitle` itself stays — other surfaces use
+   it — but the Vorgang header no longer does
+   (docs/case-view-alignment.md V1). Shared class for class with the
+   service-portal's `.case-header`. */
+.case-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.case-header__main { min-width: 0; flex: 1 1 28rem; }
+.case-header__meta { margin: 0 0 var(--space-sm); }
+.case-header__title { margin: 0; overflow-wrap: anywhere; }
+/* The actions column centres its own contents so the badge sits against the
+   title's first line; centring the whole header would drag it to the middle
+   of a title that wraps to three lines. */
+.case-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-xs);
+}
+
+/* ── ANHÄNGE IN DER TABELLE ───────────────────────────────────────────────
+   The icon shares the name's cell, so the column keeps ONE accessible name
+   and the file type is legible before the «Typ» column is read. */
+.attachment__icon {
+  width: var(--icon-base);
+  height: var(--icon-base);
+  margin-right: var(--space-sm);
+  vertical-align: -4px;
+  color: var(--color-primary);
+}
+.attachment__name { overflow-wrap: anywhere; }
+
+/* ── KOMMENTAR ERFASSEN ───────────────────────────────────────────────────
+   The compose box under the comment list. Shared, value for value, with the
+   service-portal: a labelled full-width textarea and one primary button, with
+   the gap above it coming from the list it follows. The textarea previously
+   carried no class at all and fell back to the browser's default box — a
+   ~160px monospace field beside the service-portal's full-width control. */
+.case-comment-form { margin-top: var(--space-xl); max-width: 42rem; }
+.case-comment-form > label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: var(--font-weight-bold);
+}
+.case-comment-form textarea { display: block; width: 100%; resize: vertical; }
+.case-comment-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-md) 0 0;
+}

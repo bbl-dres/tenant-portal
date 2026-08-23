@@ -108,7 +108,12 @@ export function catalogueBar({
   return `
     <div class="catbar${search ? '' : ' catbar--no-search'}">
       ${searchHtml}
-      ${count ? `<p class="catbar__count" id="${id}-count">${escapeHtml(count)}</p>` : ''}
+      ${/* READY HTML, not a plain string: CD emphasises the number itself
+             («<strong>127</strong>Suchergebnisse», searchResults.vue:83-87), so
+             the sentence arrives already marked up. `countText` in
+             js/pagination.js is the one builder every caller uses, and it
+             escapes its own interpolations. */''}
+      ${count ? `<p class="catbar__count" id="${id}-count" aria-live="polite">${count}</p>` : ''}
       ${controls ? `<div class="catbar__controls">${controls}</div>` : ''}
     </div>
     ${panel ? `<div class="catbar__panel" id="${id}-panel"${panelOpen ? '' : ' hidden'}>${panel}</div>` : ''}`;
@@ -203,6 +208,12 @@ export function setActiveView(id, view) {
  * it; when it was conditional the badge simply never appeared and an active
  * filter was invisible once the panel was collapsed.
  */
+/** Refresh the count of an already-rendered bar. `html` comes from countText. */
+export function setCount(id, html) {
+  const el = document.getElementById(`${id}-count`);
+  if (el) el.innerHTML = html;
+}
+
 export function setFilterCount(id, n) {
   const badge = document.querySelector(`#${id}-filter .catbar__filter-count`);
   if (!badge) return;

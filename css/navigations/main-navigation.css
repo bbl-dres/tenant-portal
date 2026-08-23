@@ -448,10 +448,12 @@
   padding: var(--space-md);            /* DS px-4 py-4 (md step) */
   line-height: var(--line-height-tight);
 }
-/* Separator chevron — the DS include-icon geometry the service-portal uses
-   (`-ml-5 mr-3`, 16 px box): the glyph sits inside the two crumbs' shared
-   32 px padding gutter. */
-.inline-icon.breadcrumb__sep {
+/* Separator chevron — CD's `.breadcrumb__include-icon` (`-ml-5 mr-3`, 16 px
+   box). It is the FIRST CHILD of the crumb it precedes, so the glyph sits in
+   the two crumbs' shared 32 px padding gutter; as a trailing sibling the
+   negative margin pulled it into the previous crumb's text instead. Same class
+   name as the service-portal and as the design system. */
+.inline-icon.breadcrumb__include-icon {
   width: var(--space-md); height: var(--space-md);
   /* DS -ml-5 = -20 px; composed from md (16) + xs (4) — no 20 px step on the
      t-shirt scale. */

@@ -161,9 +161,9 @@ const answerFoot = `
  */
 function answerIdle() {
   return `
-    <div class="answer-slot answer-slot--idle">
-      ${icon('commentDots', 'answer__icon')}
-      <div class="answer__body">
+    <div class="notification notification--hint answer-slot answer-slot--idle">
+      ${icon('commentDots', 'notification__icon')}
+      <div class="notification__content">
         ${answerHead('KI-Antwort')}
         <p class="answer__lead">Stellen Sie eine ganze Frage, und hier steht eine Antwort —
           jeder Satz mit Beleg aus den Treffern.</p>
@@ -191,9 +191,9 @@ export function answerBlock(result, resultCount) {
       ? 'Die Treffer unten stammen aus der Stichwortsuche.'
       : 'Auch die Stichwortsuche findet dazu nichts im Portal.';
     return `
-      <div class="answer-slot">
-        ${icon('commentDots', 'answer__icon')}
-        <div class="answer__body">
+      <div class="notification notification--hint answer-slot">
+        ${icon('commentDots', 'notification__icon')}
+        <div class="notification__content">
           ${answerHead('Keine KI-Antwort')}
           <p class="answer__lead">Zu dieser Frage wurde im Portal nichts Passendes gefunden. ${line}</p>
           ${answerFoot}
@@ -227,9 +227,9 @@ export function answerBlock(result, resultCount) {
     </div>`;
 
   return `
-    <div class="answer-slot">
-      ${icon('commentDots', 'answer__icon')}
-      <div class="answer__body">
+    <div class="notification notification--hint answer-slot">
+      ${icon('commentDots', 'notification__icon')}
+      <div class="notification__content">
         ${answerHead('KI-Antwort')}
         ${sentences}
         ${sourceList}

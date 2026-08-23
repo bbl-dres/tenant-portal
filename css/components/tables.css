@@ -324,13 +324,7 @@
    left of the controls — `margin-right: auto` pushes the chevron / page
    input / chevron cluster to the right. Not in the CD Bund component
    itself, but matches the swisstopo / kbob-fdk federal pattern. */
-.pagination__count {
-  margin-right: auto;
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
+
 /* Page-jump field — DS `.pagination input` (pagination.postcss:8-11): 48 px
    wide, `px-2`, and the BUTTON height ramp (`btn--base` 44/48 @1280/
    52 @1920) on the standard input skin (1 px text-500 border, radius-xs,
@@ -419,3 +413,65 @@ a.btn[aria-disabled="true"] {
 .table__row--current > td:first-child {
    box-shadow: inset 3px 0 0 0 var(--color-primary);
 }
+
+/* Click hint at the end of a clickable row. A pointer reveals a clickable row
+   only DURING hover; the angle says so beforehand, and the hint line below the
+   table says it in words. Purely decorative — `::after` is absent from the
+   accessibility tree, and the real link in the first cell still carries the
+   interaction. Ported from the service-portal so a row behaves and READS the
+   same in both portals (docs/case-view-alignment.md L5). */
+.table--rows-clickable tbody td:last-child,
+.table--rows-clickable tbody th:last-child {
+  position: relative;
+  /* 36 px — the service-portal's --sp-9, expressed on this portal's scale
+     so the token check stays green. */
+  padding-right: calc(var(--space-xl) + var(--space-xs));
+}
+.table--rows-clickable tbody tr > :last-child::after {
+  content: '';
+  position: absolute;
+  right: calc(var(--space-md) - 2px);   /* 14 px — service-portal --sp-3-5 */
+  top: 50%;
+  transform: translateY(-50%);
+  /* 16 px, not the 24 px `--icon-base`: the service-portal draws this glyph at
+     --sp-4 and a chevron a third larger reads as a different control. */
+  width: var(--space-md);
+  height: var(--space-md);
+  background-color: var(--color-text-secondary);
+  -webkit-mask: url('../../assets/icons/ChevronRight.svg') no-repeat center / contain;
+  mask: url('../../assets/icons/ChevronRight.svg') no-repeat center / contain;
+}
+.table--rows-clickable tbody tr:hover > :last-child::after { background-color: var(--color-primary-700); }
+/* A total row in tfoot is not clickable. */
+.table--rows-clickable tfoot tr > :last-child::after { content: none; }
+/* The empty-state row spans every column and is not a target either. */
+.table--rows-clickable tbody tr > .table__empty::after { content: none; }
+
+/* ── ONE TABLE STYLE ──────────────────────────────────────────────────────
+   Two rules that every table in the portal obeys, with no per-surface
+   exceptions (docs/table-consistency.md). Shared, rule for rule, with the
+   service-portal.
+
+   1 · ICON SIZE. A glyph in a cell is the body text's own size, so a row reads
+   as one line rather than as an icon with a caption. The box is 24px because
+   the CD icons carry viewBox padding — the INK is 16px, which is what has to
+   match the service-portal's 16px mask icons. A Lucide glyph in a cell has no
+   padding and therefore takes the 16px box directly. */
+.table__icon {
+  width: var(--icon-base);
+  height: var(--icon-base);
+  flex-shrink: 0;
+  vertical-align: -6px;
+  margin-right: var(--space-sm);
+}
+.table__icon.lucide,
+svg.table__icon[data-lucide] { width: var(--space-md); height: var(--space-md); }
+
+/* 2 · NO BOLD. Weight is not a column property: a bold first cell made every
+   list look ranked, and different tables bolded different columns. The one
+   exception is the TOTAL row in <tfoot>, where bold marks a different KIND of
+   row rather than a more important one. */
+.table tbody td, .table tbody th,
+.table tbody td *, .table tbody th * { font-weight: var(--font-weight-regular); }
+.table tfoot td, .table tfoot th,
+.table tfoot td *, .table tfoot th * { font-weight: var(--font-weight-bold); }

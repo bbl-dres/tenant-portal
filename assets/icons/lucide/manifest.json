@@ -1,5 +1,5 @@
 {
-  "name": "tenant-portal Lucide subset",
+  "name": "service-portal Lucide subset",
   "version": "1.31.0",
   "source": "https://cdn.jsdelivr.net/npm/lucide-static@1.31.0/icons/",
   "release": "https://github.com/lucide-icons/lucide/tree/1.31.0",
@@ -8,8 +8,7 @@
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/1.31.0/LICENSE",
     "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
   },
-  "vendoredFrom": "service-portal/assets/icons/lucide (same files, same hashes)",
-  "note": "Sidebar structure tree only. sha256 is over the LF form of each file, as fetched and normalised upstream.",
+  "generatedBy": "scripts/fetch-lucide-icons.mjs",
   "icons": [
     {
       "name": "chevron-right",
@@ -40,6 +39,26 @@
       "name": "building",
       "purpose": "Building",
       "sha256": "ef4c82b1470d1f3080871d0fc1bb3bee61e3de28fa4c9217104d02be42e132e0"
+    },
+    {
+      "name": "arrow-right",
+      "purpose": "Action row — does something on this page",
+      "sha256": "e84261e838e5f81b97864b6bb68939072e56a8ae096a9cffd241d9d68d90e58a"
+    },
+    {
+      "name": "link",
+      "purpose": "Action row — leads to another page in the portal",
+      "sha256": "e1c78e15569cdcfdb2c6b574c54e49aaafa57c949217de1f046313b3837b0985"
+    },
+    {
+      "name": "external-link",
+      "purpose": "Action row — leads to another system",
+      "sha256": "8b6e300ef1fda463e579fa48f0dee9d05afabe8af8671cf59433da6d0f7dd00a"
+    },
+    {
+      "name": "lock",
+      "purpose": "Action row — not available in the prototype",
+      "sha256": "93f5c9a12e6146ff5a745c223030bfccf0eb7d2b92b07257e619860691f75577"
     }
   ]
 }

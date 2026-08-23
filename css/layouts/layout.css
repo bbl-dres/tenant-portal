@@ -262,3 +262,25 @@
 /* No phone downstep: the DS `.hero__description` stays text--lg (18 px) at
    every width; the former 16 px below 480 was portal-only
    (docs/design-alignment.md D18). */
+
+/* ── CD GRID UTILITIES ────────────────────────────────────────────────────
+   `designsystem/css/layouts/grids.postcss:25-54`. The portal had the CD gap
+   cascade as a token (`--gap-responsive`) and the column rules baked into
+   individual components (`.card-grid`, `.property-grid`); these are the CD
+   classes themselves, so a surface can compose a grid the way the design
+   system does instead of growing another one-off. Introduced with the
+   Vorgangs-Übersicht (docs/case-view-alignment.md § 2.1), which needs exactly
+   the CD two-column arrangement and nothing else. */
+.grid { display: grid; gap: var(--gap-responsive); }
+.gap--responsive { gap: var(--gap-responsive); }
+/* CD: `md:grid-cols-2` / `md:grid-cols-2 lg:grid-cols-3` — one column below
+   768 px in both cases, which is the phone behaviour the portal already has. */
+.grid--responsive-cols-2,
+.grid--responsive-cols-3 { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) {
+  .grid--responsive-cols-2,
+  .grid--responsive-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .grid--responsive-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

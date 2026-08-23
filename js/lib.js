@@ -193,7 +193,7 @@ export const ICONS = {
   // chrome / interactive
   search: 'Search', user: 'User', help: 'Help', info: 'Info',
   login: 'Login', logout: 'Logout', lock: 'Lock',
-  share: 'Share', printer: 'Printer', external: 'External',
+  share: 'Share', printer: 'Printer', external: 'External', paperPlane: 'PaperPlane',
   download: 'Download', upload: 'Upload', maximize: 'Expand', refresh: 'Refresh',
   home: 'Home', plus: 'Plus', minus: 'Minus', compress: 'Compress',
   spinner: 'Spinner',
@@ -228,6 +228,86 @@ export function icon(name, extraClass = '') {
 }
 
 
+
+
+/* ── DETAIL-RAIL CARDS ─────────────────────────────────────────────────────
+   The two cards a `.detail-layout__aside` is made of. Ported from the
+   service-portal (`js/ui/components/content.js`) so a rail card is the same
+   object in both portals — same markup, same class names, same row anatomy
+   (docs/case-view-alignment.md). The property view's hand-built
+   `.property-aside__card` was the same idea at slightly different values.
+
+   HONESTY RULE for an action row: it either works or says that it does not.
+   `type: 'disabled'` renders with a lock and its own explanation, which is a
+   truthful statement about a prototype; a row that looked live and did
+   nothing would not be. */
+// Lucide, vendored under assets/icons/lucide (see that folder's README): these
+// render at 16px, where a stroked outline stays legible and a filled silhouette
+// closes up into a blob. Same mechanism the spatial tree already uses.
+const lucide = (name, cls = '') =>
+  `<svg class="inline-icon ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="assets/icons/lucide/${name}.svg"/></svg>`;
+
+function actionCardRow(item = {}) {
+  let type = ['link', 'button', 'disabled'].includes(item.type) ? item.type : 'disabled';
+  if (type === 'link' && !item.href) type = 'disabled';
+  const description = item.description || '';
+  const content = `<span class="fp-svc__content"><span class="fp-svc__label">${escapeHtml(item.label)}</span>${
+    description ? `<small class="fp-svc__description">${escapeHtml(description)}</small>` : ''}</span>`;
+  // THREE glyphs, and the ROW TYPE picks them — a row leads somewhere, does
+  // something here, or cannot be used yet. No per-item override: a card of rows
+  // each carrying its own picture is a card you have to read twice, and the
+  // label already says what the row is.
+  const glyph = lucide(type === 'disabled' || item.disabled ? 'lock'
+    : type === 'link' ? (item.newWindow ? 'external-link' : 'link')
+      : 'arrow-right', 'fp-svc__go');
+  const id = item.id ? ` id="${escapeHtml(item.id)}"` : '';
+
+  if (type === 'link') {
+    const ext = item.newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';
+    return `<a class="fp-svc" href="${escapeHtml(item.href)}"${id}${ext}>${content}${glyph}</a>`;
+  }
+  if (type === 'button') {
+    return `<button type="button" class="fp-svc"${id}${item.disabled ? ' disabled' : ''}>${content}${glyph}</button>`;
+  }
+  return `<span class="fp-svc fp-svc--disabled"${id} aria-disabled="true">${content}${glyph}</span>`;
+}
+
+/** `items` = [{ type, label, description?, href?, icon?, id?, newWindow? }]. */
+export function actionCard({ title = 'Aktionen', lead = '', items = [], titleTag = 'h2' } = {}) {
+  const rows = (items || []).filter(Boolean);
+  if (!rows.length) return '';
+  const h = /^h[1-6]$/.test(titleTag) ? titleTag : 'h2';
+  return `<div class="box">
+    <${h}>${escapeHtml(title)}</${h}>
+    ${lead ? `<p class="small text-secondary">${escapeHtml(lead)}</p>` : ''}
+    <div class="fp-svc-list">${rows.map(actionCardRow).join('')}</div>
+  </div>`;
+}
+
+/** `contacts` = [{ label, name, email, phone, href?, external? }]. `name` is
+    omitted where it merely repeats the role — «Portfoliomanagement /
+    Portfoliomanagement» read as a display error. `href` links the NAME (the
+    property contacts resolve to the Staatskalender, which is where a federal
+    staff record actually lives); `email` and `phone` are shown where the record
+    carries them. */
+export function contactCard({ title = 'Ansprechpersonen', contacts = [], titleTag = 'h2' } = {}) {
+  const rows = (contacts || []).filter(Boolean);
+  if (!rows.length) return '';
+  const h = /^h[1-6]$/.test(titleTag) ? titleTag : 'h2';
+  const mail = (a) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(a || '')) ? String(a) : '');
+  return `<div class="box">
+    <${h}>${escapeHtml(title)}</${h}>
+    <dl class="detail-list detail-list--stack">${rows.map((c) => `
+      <dt>${escapeHtml(c.label)}</dt>
+      <dd>${c.name && c.name !== c.label ? `${c.href
+    ? `<a class="link${c.external ? ' link--external' : ''}" href="${escapeHtml(c.href)}"${
+      c.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(c.name)}</a>`
+    : escapeHtml(c.name)}<br>` : ''}${
+  mail(c.email) ? `<a href="mailto:${escapeHtml(mail(c.email))}">${escapeHtml(c.email)}</a>` : ''}${
+  c.phone ? `<br>${escapeHtml(c.phone)}` : ''}</dd>`).join('')}
+    </dl>
+  </div>`;
+}
 
 // ── STATUS BADGE ───────────────────────────────────────────────────────────
 // Attachment list-item renderer — shared by the wizard step 3 (upload
@@ -322,6 +402,19 @@ export const PIPELINE_GREENFIELD = [
   { status: 'closed',             label: 'abgeschlossen' },
 ];
 
+// Glyph and spoken prefix per step state. The prefix is what makes a pipeline
+// legible without colour: «Erledigt: Eingereicht» rather than a green box a
+// screen reader announces as «Eingereicht» like every other step.
+// Shared vocabulary with the service-portal's PIPELINE_MARK.
+const PIPELINE_MARK = {
+  done:       { icon: 'check',      sr: 'Erledigt: ' },
+  active:     { icon: 'halfCircle', sr: 'Aktueller Schritt: ' },
+  rueckfrage: { icon: 'refresh',    sr: 'Rückfrage: ' },
+  rejected:   { icon: 'xMark',      sr: 'Abgelehnt: ' },
+  todo:       { icon: '',           sr: '' },
+  pending:    { icon: '',           sr: '' },
+};
+
 export function renderPipeline(application, explicitSteps) {
   // `explicitSteps` — the step list from data/process-definitions.json, which is
   // the source of truth now that every process (not just the Bedarfsmeldung)
@@ -341,40 +434,41 @@ export function renderPipeline(application, explicitSteps) {
   // Pipeline glyphs are inline SVGs (see ICONS map). The previous text
   // characters (✓ ✕ ◐ ↻) leaned on the system font and looked inconsistent
   // across OSes. inline-icon inherits currentColor so each glyph picks up
-  // the pill's text colour (white on done/active/rejected/rueckfrage, gray
-  // on pending).
+  // the pill's text colour.
+  // A real <ol>, not `role="list"` on a <div>: the chain IS an ordered list,
+  // and `aria-current="step"` names where the reader is. The wrapper carries
+  // the accessible name so the <ol> keeps pure list semantics. Aligned with the
+  // service-portal's C.pipeline (docs/case-view-alignment.md V8).
+  const seg = (label, state) => {
+    const mark = PIPELINE_MARK[state] || PIPELINE_MARK.todo;
+    const glyph = mark.icon ? icon(mark.icon, 'pipeline__glyph') : '';
+    const sr = mark.sr ? `<span class="sr-only">${escapeHtml(mark.sr)}</span>` : '';
+    // A returned or refused case is still the step the process stands on.
+    const current = state === 'active' || state === 'rueckfrage' || state === 'rejected';
+    return `<li class="pipeline__step pipeline__step--${state}"${current ? ' aria-current="step"' : ''}>`
+      + `${glyph}<span>${sr}${escapeHtml(label)}</span></li>`;
+  };
+  const chain = (items) => `<div class="pipeline-wrap" role="group" aria-label="Statusverlauf">`
+    + `<ol class="pipeline">${items.join('')}</ol></div>`;
+
   if (isRueckfrage) {
-    return `
-      <div class="pipeline" role="list" aria-label="Statusverlauf">
-        ${steps.slice(0, 3).map((s, i) => `
-          <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rueckfrage'}" role="listitem">${i < 2 ? icon('check') : icon('refresh')}${s.status === 'in_review_gs' ? 'Rückfrage' : s.label}</div>
-        `).join('')}
-        <div class="pipeline__step pipeline__step--pending" role="listitem">… genehmigt</div>
-      </div>
-      <p class="form-field__hint">Rückfrage offen — bitte Auflagen erfüllen und erneut einreichen.</p>
-    `;
+    return chain([
+      ...steps.slice(0, 3).map((x, i) => seg(
+        i < 2 ? x.label : (x.status === 'in_review_gs' ? 'Rückfrage' : x.label),
+        i < 2 ? 'done' : 'rueckfrage')),
+      seg('… genehmigt', 'pending'),
+    ]) + '<p class="form-field__hint">Rückfrage offen — bitte Auflagen erfüllen und erneut einreichen.</p>';
   }
   if (isRejected) {
-    return `
-      <div class="pipeline" role="list" aria-label="Statusverlauf">
-        ${steps.slice(0, 3).map((s, i) => `
-          <div class="pipeline__step ${i < 2 ? 'pipeline__step--done' : 'pipeline__step--rejected'}" role="listitem">${i < 2 ? icon('check') : icon('xMark')}${s.label}</div>
-        `).join('')}
-        <div class="pipeline__step pipeline__step--rejected" role="listitem">abgelehnt</div>
-      </div>
-    `;
+    return chain([
+      ...steps.slice(0, 3).map((x, i) => seg(x.label, i < 2 ? 'done' : 'rejected')),
+      seg('abgelehnt', 'rejected'),
+    ]);
   }
 
-  return `
-    <div class="pipeline" role="list" aria-label="Statusverlauf">
-      ${steps.map((s, i) => {
-        const cls = i < currentIdx ? 'pipeline__step--done' :
-                    i === currentIdx ? 'pipeline__step--active' : '';
-        const glyph = i < currentIdx ? icon('check') : i === currentIdx ? icon('halfCircle') : '';
-        return `<div class="pipeline__step ${cls}" role="listitem">${glyph}${s.label}</div>`;
-      }).join('')}
-    </div>
-  `;
+  return chain(steps.map((x, i) => seg(
+    x.label,
+    i < currentIdx ? 'done' : i === currentIdx ? 'active' : 'todo')));
 }
 
 // Step indicator — mirrors designsystem css/components/step-indicator.postcss:

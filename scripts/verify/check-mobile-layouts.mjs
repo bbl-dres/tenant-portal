@@ -29,7 +29,9 @@ const ROUTES = [
   { label: 'queue', hash: '#/queue', role: 'GS-Reviewer' },
   // The TOC aside stacks above the content below 1024 px; the NAW table and
   // the download lists inside it are the widest content in the area.
-  { label: 'info-topic', hash: '#/info/ablauf' },
+  // `#/info/ablauf` was retired (2026-08) and now redirects to the area
+  // overview; «Vorgaben und Standards» is the topic page with the same anatomy.
+  { label: 'info-topic', hash: '#/info/vorgaben' },
 ];
 
 const { server, baseUrl } = await startServer();
@@ -79,7 +81,7 @@ await run(reporter, async () => {
       if (route.label === 'property-detail') {
         const statsOk = await page.evaluate(() => {
           const vw = document.documentElement.clientWidth;
-          const vals = [...document.querySelectorAll('.property-stats__value')];
+          const vals = [...document.querySelectorAll('.kpi-strip__value')];
           return vals.length === 4 && vals.every(v => v.getBoundingClientRect().right <= vw);
         });
         check(`property-detail@${width}: all 4 stat values fully visible`, statsOk);
