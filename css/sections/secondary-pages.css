@@ -40,7 +40,11 @@
   font-size: var(--text-chrome-xl);       /* DS text-xl (static 20px) */
   font-weight: var(--font-weight-bold);   /* DS font-bold — placeholder inherits */
   box-shadow: none;                       /* DS shadow-none */
-  padding-right: var(--space-2xl);        /* DS .search__group input pr-12 */
+  /* DS pr-12 covers the pinned submit alone. The clear ✕ sits at the inner
+     edge of this padding, so with the DS value it landed 2px from the submit
+     and the two read as one control; the extra step is the gap between them.
+     The sister service-portal reserves the same 8px (48px submit, 56px pad). */
+  padding-right: calc(var(--space-2xl) + var(--space-sm));
 }
 .search-hero__submit {
   position: absolute;
@@ -55,11 +59,17 @@
   height: var(--icon-md);
   margin-right: 0;
 }
-/* DS hides the WebKit cancel/decoration chrome inside a .search__group
-   (designsystem/css/components/input.postcss:166-171) — the group's own
-   submit control is the only affordance in the field. */
-.search__group input[type="search"]::-webkit-search-cancel-button,
-.search__group input[type="search"]::-webkit-search-decoration,
+/* THE CLEAR CONTROL STAYS. The DS hides the WebKit cancel chrome inside a
+   `.search__group` (designsystem/css/components/input.postcss:166-171) on the
+   grounds that the group's submit is the only affordance the field needs.
+   Measured against the rest of the portal, that made this ONE field the odd one
+   out: the landing search, the catalogue bar and the header search all show a
+   clear ✕ once something is typed, and the search page — the field somebody
+   arrives at with a query already in it, and the one most likely to be edited
+   — was the only place without a way to empty it in one click.
+   DELIBERATE DEVIATION from the DS, matching the sister service-portal, which
+   makes the same one (css/components/form.css). Only the history chrome stays
+   hidden; nothing in this portal uses `results`. */
 .search__group input[type="search"]::-webkit-search-results-button,
 .search__group input[type="search"]::-webkit-search-results-decoration {
   display: none;

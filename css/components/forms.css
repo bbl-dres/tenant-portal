@@ -458,3 +458,34 @@ input[type="checkbox"]:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+/* ── SEARCH FIELD CLEAR CONTROL ──────────────────────────────────────────
+   One ✕, the same object in both portals. Left to the browser it is drawn as
+   the engine's own default — in Chromium a heavy glyph that picks up the skin
+   accent, so the tenant portal's fields showed a bold blue ✕ where the
+   service-portal's showed the thin CD cancel mark. Same control, two different
+   objects, and the difference was visible on any screen showing both.
+   Mirrors css/components/form.css in the service-portal, token for token.
+
+   WEBKIT ONLY. Firefox does not implement this pseudo-element and shows no ✕;
+   that gap is accepted here exactly as it is there, because the alternative is
+   an injected button in every search field in the portal for one engine. The
+   field is still clearable by selecting the text.
+
+   `appearance:none` is what allows the mask to replace the default glyph;
+   without it the engine keeps drawing its own on top. */
+input[type='search']::-webkit-search-decoration { display: none; }
+input[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--space-md);
+  height: var(--space-md);
+  margin-left: var(--space-sm);
+  cursor: pointer;
+  background-color: var(--color-text-secondary);
+  -webkit-mask: url('../../assets/icons/Cancel.svg') center/contain no-repeat;
+  mask: url('../../assets/icons/Cancel.svg') center/contain no-repeat;
+}
+input[type='search']::-webkit-search-cancel-button:hover {
+  background-color: var(--color-primary-600);
+}
