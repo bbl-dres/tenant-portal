@@ -144,17 +144,22 @@
 /* ── ANSWER BLOCK ─────────────────────────────────────────────────────────
    The block IS a CD Notification in its hint variant — `notification
    notification--hint answer-slot`, with `notification__icon` and
-   `notification__content` inside. Surface, padding ramp, radius, shadow and
-   icon size all come from that component, exactly as in the service-portal;
-   this file adds only what is particular to an ANSWER.
+   `notification__content` inside. Padding ramp, radius, shadow and icon size
+   come from that component; this file adds only what is particular to an
+   ANSWER, including its quieter white content surface.
 
    It previously re-declared its own flex row, its own gray-100 surface, a flat
    24px padding and no shadow — a second notification, four values away from
    the real one. `.answer-slot--warning` is gone with it: the warning variant is
    `notification--warning`, which is what it was imitating.
 
-   The block owns its spacing; the call site does not. */
-.answer-slot { margin-bottom: var(--space-lg); }
+   The block owns its spacing; the call site does not. Its top margin matches
+   the shared catalogue bar so answer-first and header-first result states start
+   with the same compact offset. */
+.notification--hint.answer-slot {
+  background: var(--color-bg-default);
+}
+.answer-slot { margin-top: var(--space-lg); margin-bottom: var(--space-lg); }
 @media (min-width: 1024px) { .answer-slot { margin-bottom: var(--space-xl); } }
 .answer__head {
   display: flex;

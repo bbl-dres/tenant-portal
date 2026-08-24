@@ -179,7 +179,19 @@
 .bg--secondary-50 + .bg--secondary-50,
 .bg--secondary-600 + .bg--secondary-600,
 .hero + .section,
-.hero + .bg--white {
+.hero + .bg--white,
+/* Suchfeld-Band und Trefferliste sind EIN Block, nicht zwei Bänder. Die CD
+   drückt das über die Klassen aus, nicht über die Farbe: auf
+   www.bbl.admin.ch/de/search trägt das getönte Band zusätzlich
+   `section--default`, wodurch `.section--default + .section--default`
+   (section.postcss:31-51) greift und der Ergebnisabschnitt bündig anschliesst —
+   gemessen bei 1440 px: `padding-top: 0` statt der vollen Bandpolsterung. Auf
+   der Startseite trägt ein getöntes Band dieses `section--default` NICHT, und
+   dort bleibt der Abstand deshalb stehen.
+   Dieses Portal kennt kein `.section--default` (das nackte `.section` spielt
+   die Rolle, layout.css:107), also wird das Paar über die Bandklasse benannt
+   statt über eine Regel, die alle 22 `.section` träfe. */
+.search-hero + .section {
   padding-top: 0;
 }
 /* A tinted band after the white hero keeps its own top padding. */
@@ -188,6 +200,15 @@
 .hero + .bg--secondary-600 {
   padding-top: var(--section-py);
 }
+
+/* KEIN oberer Abstand auf `.search-results` selbst: die Referenz misst zwischen
+   Bandunterkante und `.search-results`-Oberkante 0 px. Den Abstand trägt das
+   erste Kind innen — CD: `.search-results__header { pt-4 sm:pt-6 2xl:pt-8 }`
+   (designsystem css/components/search.postcss:208-217). Dieses Portal führt
+   diesen Kopf bereits CD-konform. */
+.search-results__header { padding-top: 1rem; }
+@media (min-width: 640px)  { .search-results__header { padding-top: 1.5rem; } }
+@media (min-width: 1544px) { .search-results__header { padding-top: 2rem; } }
 
 .stack > * + * { margin-top: var(--space-md); }
 
