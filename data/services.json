@@ -5,74 +5,163 @@
     "shortKey": "services.overview.desc",
     "type": "view",
     "inMenu": true,
-    "target": { "kind": "route", "href": "#/services" }
+    "target": {
+      "kind": "route",
+      "href": "#/services"
+    }
   },
   {
     "serviceId": "bedarf-anmelden",
     "titleKey": "services.request",
     "shortKey": "services.request.desc",
+    "keywords": [
+      "Raumbedarf",
+      "Raumbedarf melden",
+      "Flächenbedarf",
+      "zusätzliche Flächen",
+      "Bedarfsmeldung",
+      "Unterbringung",
+      "Arbeitsplätze",
+      "Umzug",
+      "Neubau"
+    ],
     "type": "action",
     "inMenu": true,
     "popular": 1,
-    "target": { "kind": "route", "href": "#/wizard/1" }
+    "target": {
+      "kind": "route",
+      "href": "#/wizard/1"
+    }
   },
   {
     "serviceId": "liegenschaften-inventar",
     "titleKey": "services.properties",
     "shortKey": "services.properties.desc",
+    "keywords": [
+      "Liegenschaft",
+      "Liegenschaften",
+      "Gebäude",
+      "Standort",
+      "Flächen",
+      "Mietverhältnis"
+    ],
     "type": "view",
     "inMenu": false,
     "popular": 2,
-    "target": { "kind": "route", "href": "#/properties" }
+    "target": {
+      "kind": "route",
+      "href": "#/properties"
+    }
   },
   {
     "serviceId": "schaden-melden",
     "titleKey": "services.repair",
     "shortKey": "services.repair.desc",
+    "keywords": [
+      "Schaden",
+      "Störung",
+      "Defekt",
+      "Reparatur",
+      "Mangel",
+      "Reinigung"
+    ],
     "type": "action",
     "inMenu": true,
     "popular": 3,
-    "target": { "kind": "route", "href": "#/repair" }
+    "target": {
+      "kind": "route",
+      "href": "#/repair"
+    }
   },
   {
     "serviceId": "plaene-dokumente",
     "titleKey": "nav.downloads",
     "shortKey": "services.downloads.desc",
+    "keywords": [
+      "Grundriss",
+      "Grundrisse",
+      "Plan",
+      "Pläne",
+      "Dokumentation",
+      "Mietvertrag",
+      "Fläche",
+      "Flächen",
+      "Raum",
+      "Geschoss"
+    ],
     "type": "view",
     "inMenu": false,
     "popular": 4,
-    "target": { "kind": "route", "href": "#/downloads" }
+    "target": {
+      "kind": "route",
+      "href": "#/downloads"
+    }
   },
   {
     "serviceId": "umzug",
     "titleKey": "services.move",
     "shortKey": "services.move.desc",
+    "keywords": [
+      "Umzug",
+      "Umzüge",
+      "Zügeln",
+      "Rochade"
+    ],
     "type": "action",
     "inMenu": true,
-    "target": { "kind": "route", "href": "#/moves" }
+    "target": {
+      "kind": "route",
+      "href": "#/moves"
+    }
   },
   {
     "serviceId": "sonderreinigung",
     "titleKey": "services.cleaning",
     "shortKey": "services.cleaning.desc",
+    "keywords": [
+      "Reinigung",
+      "Sonderreinigung",
+      "Unterhaltsreinigung"
+    ],
     "type": "action",
     "inMenu": true,
-    "target": { "kind": "route", "href": "#/cleaning" }
+    "target": {
+      "kind": "route",
+      "href": "#/cleaning"
+    }
   },
   {
     "serviceId": "moebel-bestellen",
     "titleKey": "services.furniture",
     "shortKey": "services.furniture.desc",
+    "keywords": [
+      "Möbel",
+      "Mobiliar",
+      "Arbeitsplatz",
+      "Büroausstattung"
+    ],
     "type": "action",
     "inMenu": true,
-    "target": { "kind": "external", "href": "https://bbl-dres.github.io/workspace-management/" }
+    "target": {
+      "kind": "external",
+      "href": "https://bbl-dres.github.io/workspace-management/"
+    }
   },
   {
     "serviceId": "schulungen",
     "titleKey": "services.training",
     "shortKey": "services.training.desc",
+    "keywords": [
+      "Schulung",
+      "Schulungen",
+      "Kurs",
+      "Weiterbildung"
+    ],
     "type": "view",
     "inMenu": false,
-    "target": { "kind": "route", "href": "#/info/schulungen" }
+    "target": {
+      "kind": "route",
+      "href": "#/info/schulungen"
+    }
   }
 ]

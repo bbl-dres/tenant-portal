@@ -121,8 +121,14 @@ try {
   await page.click('#homeSearchInput');
   await page.waitForTimeout(300);
   const examples = await page.$$eval('#homeSearchOptions .combobox__option-primary', (els) => els.map((e) => e.textContent.trim()));
-  check(examples.length === 4, 'four examples appear on focus', `${examples.length}`);
-  check(examples[0].startsWith('Wie melde ich'), 'they are real questions', examples[0] || '');
+  check(examples.length === 6, 'six examples appear on focus', `${examples.length}`);
+  check(examples[0].startsWith('Wie kann ich'), 'they are real questions', examples[0] || '');
+  // The list teaches the three ANSWER SHAPES, not just that examples exist:
+  // a link into a case, a computed dashboard and a map (search-insights.js).
+  const shapes = await page.$$eval('#homeSearchOptions .combobox__option-secondary',
+    (els) => [...new Set(els.map((e) => e.textContent.trim().split('als ').pop()))]);
+  check(shapes.includes('Dashboard') && shapes.includes('Karte'),
+    'and they cover more than one answer shape', shapes.join(', '));
   const groupLabel = await page.$eval('#homeSearchOptions .combobox__group', (e) => e.textContent.trim()).catch(() => '');
   check(groupLabel.startsWith('Beispiele'), 'under a heading that says what they are', groupLabel);
 
@@ -239,7 +245,7 @@ try {
   await page.waitForTimeout(700);
   check(await page.$('.answer-slot--idle') !== null, 'a keyword query gets the idle state');
   const idleExamples = await page.$$eval('.answer__examples a', (els) => els.length).catch(() => 0);
-  check(idleExamples === 4, 'with the four example questions as links', `${idleExamples}`);
+  check(idleExamples === 6, 'with the six example questions as links', `${idleExamples}`);
 
   await page.goto(`${baseUrl}/#/search?q=${encodeURIComponent('Wie melde ich einen Schaden?')}`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(700);

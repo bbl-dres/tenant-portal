@@ -283,6 +283,12 @@
      not the neutral gray ramp. Realigned in the 2026-08 re-audit; the
      former gray-200/gray-700 pair was a documented deviation
      (DESIGNGUIDE §5.14) that made the most-used badge read off-ramp. */
+  /* Chart ink. ONE value, because this portal draws exactly one kind of mark:
+     the bars in a search answer's skill result (css/sections/search.css). The
+     teal is the sister service-portal's first categorical series step
+     (`--chart-series-1`), so a bar means the same thing in both portals; the
+     primary red stays reserved for the row a question was actually about. */
+  --color-chart-bar:           #0F6B75;
   --color-badge-gray-bg:       var(--color-secondary-100);
   --color-badge-gray-text:     var(--color-gray-800);
 

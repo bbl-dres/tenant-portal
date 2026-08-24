@@ -210,7 +210,7 @@ export const ICONS = {
   document: 'File', attachment: 'File', video: 'Video',
   image: 'Image', trash: 'Trash', link: 'Link',
   grid: 'Apps', list: 'List', filter: 'Filter',
-  map: 'Map', mapMarker: 'MapMarker', building: 'Building',
+  map: 'Map', mapMarker: 'MapMarker', building: 'Building', chart: 'ChartBar',
   tool: 'Wrench', truck: 'Truck',
   commentDots: 'SpeechBubble', return: 'Reply',
   // portal-drawn (CD doesn't ship these)

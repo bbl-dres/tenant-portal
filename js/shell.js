@@ -186,6 +186,15 @@ export function resolveService(s) {
     external: target.kind === 'external',
     type: s.type,
     popular: s.popular,
+    // Domain vocabulary FROM THE DATA (data/services.json `keywords`), searchable
+    // but never displayed. Measured: «Wie kann ich Raumbedarf melden?» found
+    // NOTHING, because the service is called «Bedarf anmelden» and the engine
+    // ANDs its tokens — neither «raumbedarf» nor «melden» is in the title or
+    // the description. The word people use for the thing is not always the word
+    // on the button, and a hand-maintained synonym table beside the code would
+    // be the copy that goes stale; on the record it stays with the service it
+    // describes.
+    keywords: Array.isArray(s.keywords) ? s.keywords.join(' ') : '',
   };
 }
 

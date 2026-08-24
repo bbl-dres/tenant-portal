@@ -48,6 +48,7 @@ import {
 import { search as searchIndex, compareBy as compareSearchBy } from './search-engine.js';
 import { isQuestion } from './search-query.js';
 import { build as buildAnswer } from './search-answer.js';
+import { buildInsight } from './search-insights.js';
 import * as searchSources from './search-sources.js';
 import {
   sourcesControl, answerBlock, setSourcesPanelOpen, sourcesPanelOpen,
@@ -590,7 +591,7 @@ function buildSearchIndex() {
       answerText: serviceSentence(s.label, s.desc),
       href: s.href, external: s.external,
       boost: SEARCH_BOOST.services,
-      fields: { title: s.label, type: 'Dienstleistung Service', lead: s.desc },
+      fields: { title: s.label, type: 'Dienstleistung Service', lead: s.desc, extra: s.keywords },
     });
   }
 
@@ -900,14 +901,20 @@ function wireHomeSearchSuggest() {
   };
 
   /* The empty field offers EXAMPLES. It needs NO index, so focusing the field
-     does not build one; the four are static. */
+     does not build one; they are static.
+
+     The secondary line names the ANSWER SHAPE rather than repeating
+     «Beispiel» six times. What a person learns from this list is not that
+     examples exist — it is that a question can come back as a dashboard, a map
+     or a link, which is the one thing the field cannot say by itself. */
   function showExamples() {
-    items = EXAMPLE_QUESTIONS.map(q => ({ query: q }));
+    items = EXAMPLE_QUESTIONS.map(example => ({ query: example.text }));
     list.innerHTML = '<li class="combobox__group" role="presentation">Beispiele</li>'
-      + EXAMPLE_QUESTIONS.map((q, i) => `
+      + EXAMPLE_QUESTIONS.map((example, i) => `
         <li class="combobox__option" role="option" id="homeSuggest-${i}" aria-selected="false">
-          <span class="combobox__option-primary">${P.escapeHtml(q)}</span>
-          <span class="combobox__option-secondary">Beispiel · als Frage stellen</span>
+          <span class="combobox__option-primary">${P.escapeHtml(example.text)}</span>
+          <span class="combobox__option-secondary">Beispiel · Antwort als ${
+  P.escapeHtml(example.skill)}</span>
         </li>`).join('');
     activeIndex = -1;
     list.hidden = false;
@@ -984,7 +991,7 @@ function wireHomeSearchSuggest() {
   });
 }
 
-function renderSearchResults() {
+async function renderSearchResults(routeParams, gen) {
   shell({ breadcrumb: [{ label: P.t('bc.search') }] });
   // parseHashQuery splits on `&`, so it isolates `q` from the injected `lang`
   // param (a naive split('?q=') would capture "eichweg&lang=de").
@@ -1010,6 +1017,19 @@ function renderSearchResults() {
   // result list, because a literal search finds nothing for a question.
   const isAsking = !!query && isQuestion(query);
   const answer = isAsking ? buildAnswer(query, index) : null;
+
+  // THE SKILL LAYER (search-insights.js). It runs only for a question, only
+  // when answers are switched on at all, and it loads what it needs itself --
+  // spaces.geojson stays off the search route for every other query. Awaited
+  // BEFORE the markup is written: a block that appears empty and fills in half
+  // a second later would move the result list twice, which is the jump the idle
+  // state exists to prevent. `gen` is the router's staleness ticket (review
+  // B6) -- a slow spatial fetch must not paint over a route the visitor has
+  // since left.
+  const insight = isAsking && searchSources.answersAllowed()
+    ? await buildInsight(query)
+    : null;
+  if (gen !== undefined && gen !== _routeGen) return;
 
   // The relevance gate (search-answer.js) decides WHETHER the question was
   // understood, not how much is shown afterwards. An answer may only rest on
@@ -1057,6 +1077,8 @@ function renderSearchResults() {
     </button>
   `;
 
+  // The answer map needs MapLibre, so it is mounted after the markup is in the
+  // document -- see initAnswerMap below.
   document.getElementById('page-body').innerHTML = `
     <section class="section bg--secondary-50 search-hero">
       <div class="container">
@@ -1084,7 +1106,7 @@ function renderSearchResults() {
                 condition visible at all, and it keeps the list from jumping by
                 the block's height depending on the input. It disappears only
                 when somebody switches it off. */''}
-          ${query && searchSources.answersAllowed() ? answerBlock(answer, ranked.length) : ''}
+          ${query && searchSources.answersAllowed() ? answerBlock(answer, ranked.length, insight) : ''}
           ${hiddenElsewhere ? `
             <div class="notification notification--warning answer-slot">
               ${P.icon('alertTriangle', 'notification__icon')}
@@ -1166,23 +1188,51 @@ function renderSearchResults() {
       input.setSelectionRange(len, len);
     }
   }, 0);
+
+  // The map is the one part of a skill result that cannot be written as
+  // markup. Mounted here, after the block is in the document.
+  if (insight && insight.points && insight.points.length) initAnswerMap(insight.points);
 }
 
-// CD `.search-results__no-results` — states what was searched, then offers
-// ways forward rather than a dead end.
+// THE CD'S OWN EMPTY STATE, word for word (admin.ch search) and identical to
+// the sister service-portal's. Three things in it are deliberate:
+//
+//   * The heading names WHERE it was searched — this PORTAL, by name. «ergab
+//     keine Treffer» alone invites the reading that the thing does not exist.
+//     The Hinweis below then widens the frame by one step, from the portal to
+//     the agency website it belongs to; heading and notice therefore name two
+//     different scopes on purpose and must not be made to match.
+//   * The tips are the CD's phrasing, not a paraphrase of it. This block appears
+//     on every admin.ch site, and a person who has read it once should not have
+//     to read a variant of it here.
+//   * The Hinweis states the actual boundary of this search and that the
+//     cross-agency one is being built — which is the answer to «then where do I
+//     look?», the question the tips leave open. It is PLAIN TEXT, not a
+//     notification: on the live site it is a heading and a paragraph, and as a
+//     tinted info box it read as a status about the failed search rather than as
+//     a standing statement about the search's scope.
+//   * The heading is REGULAR weight and bolds only the two names in it — the
+//     query and the site. Bolding the whole sentence made the page shout its one
+//     piece of bad news; bolding the two variables makes it scannable.
+//
+// The typographic quotes are guillemets, not „…", matching every other quoted
+// string in both portals.
 function renderSearchNoResults(query) {
   return `
     <div class="search-results__no-results">
-      <h2 class="h3">Die Suche nach <strong>„${P.escapeHtml(query)}"</strong> ergab keine Treffer.</h2>
+      <h2 class="h3 search-results__no-results-title">Die Suche nach
+        <strong>«${P.escapeHtml(query)}»</strong> ergab keine Treffer auf dem Mieterportal
+        <strong>«Bundesamt für Bauten und Logistik BBL»</strong></h2>
+      <h3 class="h4">Tipps zur Suche</h3>
       <ul class="search-no-results__list">
-        <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffs.</li>
-        <li>Verwenden Sie einen anderen oder allgemeineren Begriff.</li>
-        <li>Versuchen Sie es mit weniger Suchbegriffen.</li>
-        <li>Durchsuchen Sie die <a href="#/info">Arbeitsinstrumente und Informationen</a>.</li>
+        <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffes</li>
+        <li>Verwenden Sie einen anderen bzw. allgemeineren Begriff</li>
+        <li>Verwenden Sie ggf. weniger Suchbegriffe</li>
       </ul>
-      <p class="search-no-results__hint">
-        Durchsucht werden Dienstleistungen, Liegenschaften des Portfolios, Dokumente, News und die Informationsseite.
-      </p>
+      <h3 class="h4">Hinweis</h3>
+      <p class="search-no-results__hint">Die Suche ist momentan auf die Behördenwebsite
+        «Bundesamt für Bauten und Logistik BBL» beschränkt. Eine behördenübergreifende
+        Suche über die Domain *.admin.ch ist erst in Erarbeitung.</p>
     </div>
   `;
 }
@@ -3936,6 +3986,71 @@ function renderMapLoading(label = 'Karte wird geladen') {
     </div>
   `;
 }
+/**
+ * The map inside a search answer (search-insights.js `propertyMap`).
+ *
+ * Its own function rather than a reuse of `initPropertiesMap`: that one owns
+ * the catalogue's marker/popup machinery, its filter callback and its module
+ * state, all of which exist to keep the property list and the map in step. The
+ * answer map has no list to stay in step with -- it shows the points a question
+ * resolved to and nothing else, so it is a dozen lines instead of a fourth
+ * caller threaded through that state.
+ *
+ * The previous instance is removed first: the router replaces `#page-body`
+ * wholesale, so without this a second search would leave a WebGL context
+ * attached to a node that is no longer in the document.
+ */
+let _answerMap = null;
+function initAnswerMap(points) {
+  if (_answerMap) { try { _answerMap.remove(); } catch {} _answerMap = null; }
+  loadMapLibre().then(maplibregl => {
+    const container = document.getElementById('answerMap');
+    if (!container) return;
+    const map = new maplibregl.Map({
+      container,
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [8.2275, 46.8182], zoom: 7,
+      attributionControl: { compact: true },
+      // The block sits above a scrolling result list, so the wheel-zoom guard
+      // earns its keep here exactly as it does on the property-detail map.
+      cooperativeGestures: true,
+      locale: MAP_COOP_LOCALE,
+    });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    _answerMap = map;
+    map.on('load', () => {
+      clearMapLoading(container);
+      const bounds = new maplibregl.LngLatBounds();
+      points.forEach(point => {
+        if (typeof point.lat !== 'number' || typeof point.lng !== 'number') return;
+        const el = document.createElement('a');
+        el.className = 'property-marker property-marker--bare';
+        el.href = point.href;
+        el.title = point.label;
+        el.setAttribute('aria-label', point.label);
+        // NO `__label` span. The catalogue map labels its pins with the short SAP
+        // asset key (1086/2010/AA); labelling these with the building NAME was
+        // unreadable at the extent a question produces — measured, the ten UVEK
+        // properties sit in Bern and Ittigen and six name plates overlapped into
+        // one grey block. The names are one row below in the answer's own list,
+        // where they are readable and clickable; here the pin carries them as a
+        // title and an accessible name.
+        el.innerHTML = '<span class="property-marker__pin"></span>';
+        new maplibregl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([point.lng, point.lat]).addTo(map);
+        bounds.extend([point.lng, point.lat]);
+      });
+      if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 64, maxZoom: 12, duration: 0 });
+    });
+    map.on('error', () => clearMapLoading(container));
+  }).catch(() => {
+    const container = document.getElementById('answerMap');
+    if (!container) return;
+    container.innerHTML = '<p class="answer-map__error">Die Karte konnte nicht geladen '
+      + 'werden. Im Bundesnetz ist der Kartendienst ggf. gesperrt.</p>';
+  });
+}
+
 function clearMapLoading(container) {
   container?.querySelector('.map-loading')?.remove();
 }

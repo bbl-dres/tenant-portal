@@ -247,3 +247,215 @@
   margin: var(--space-2sm) 0 0;
   font-size: var(--text-body-sm);
 }
+
+
+/* REGULAR weight, with `<strong>` on the query and the site name only — the
+   live agency search sets the sentence in body weight and bolds the two names
+   inside it. A fully bold heading made the page shout its one piece of bad
+   news; this way the two variable parts are what the eye lands on. */
+.search-results__no-results-title { font-weight: var(--font-weight-regular); }
+.search-results__no-results-title strong { font-weight: var(--font-weight-bold); }
+
+/* ── Skill results (js/search-insights.js) ─────────────────────────────────
+   The block that stands where a computed answer replaces a cited paragraph:
+   a tool trace, key figures, bar charts or a map, and the line that says which
+   records the numbers were summed over.
+
+   NO CHART LIBRARY. This portal has none, and adding one for four bars would be
+   the largest dependency in a no-build project — so a bar is an element with a
+   percentage width. It also stays legible when the stylesheet does not load and
+   prints without a canvas. */
+
+/* ONE RHYTHM FOR THE WHOLE BLOCK. The parts each carry the spacing of the
+   component they were modelled on, and four different distances in one block
+   read as carelessness rather than as rhythm. The container owns the gap and
+   every child's own margin is switched off; `--answer-gap` is the single value
+   to change. */
+.answer__insight {
+  --answer-gap: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--answer-gap);
+}
+.answer-slot--insight .answer__insight > * { margin: 0; }
+/* `.notification__content` is shrink-to-fit (css/components/feedback.css) —
+   right for a one-line status, wrong for a dashboard, which then stops short of
+   the block's own right edge while the white surface runs on past it. */
+.answer-slot--insight .notification__content { flex: 1 1 auto; }
+
+/* The trace and the sentence under it are one unit, so they sit closer to each
+   other than the block gap. */
+.answer__intro { display: flex; flex-direction: column; gap: var(--space-xs); }
+.answer-slot--insight .answer__lead { margin: 0; font-size: var(--text-body); color: inherit; }
+
+/* THE TOOL TRACE. The line that says a skill ran and which one. It is the point
+   of the whole block: a model that answers in prose and a model that picks a
+   tool are different products, and the difference is invisible unless the
+   choice is shown. */
+.answer__skill {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.answer__skill-icon { flex: none; margin-top: 0.15em; color: var(--color-primary-600); }
+.answer__skill-name { font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+/* An em dash rather than a middle dot: the two halves are a name and a
+   description, not two items of a list. */
+/* A literal em dash, NOT the `\2014` escape: a CSS escape swallows the space
+   that terminates it, so the content came out as " —" and the block read
+   «Dashboard —Flächenauswertung». */
+.answer__skill-detail::before { content: " — "; }
+
+/* Key figures. Tiles rather than the property view's `.kpi-strip`: that one is
+   a ruled band between two borders, which reads as part of a page header — here
+   they sit inside a notification and need their own edge. */
+.answer__kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--answer-gap);
+}
+@media (min-width: 768px) {
+  .answer__kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.answer-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-md);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius-2xl);
+  background: var(--color-secondary-50);
+}
+.answer-kpi__label { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+.answer-kpi__value {
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.answer-kpi__value small {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  margin-left: 2px;
+}
+.answer-kpi__hint { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+
+/* Charts. One column below 1024px — two bar charts side by side at phone width
+   would leave the labels no room, and a truncated category label is worse than
+   a taller block. */
+/* `auto-fit`, not `repeat(2, ...)`: with ONE chart a fixed two-column track left
+   the right half of the block empty, so a single comparison sat in a column
+   half the width it had room for. auto-fit collapses the empty track and the
+   lone chart spans the block; two charts still sit side by side wherever
+   22rem each fits. */
+.answer__charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--answer-gap);
+  align-items: start;
+}
+.answer-chart {
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius-2xl);
+  background: var(--color-white);
+}
+.answer-chart--map { padding: var(--space-md); }
+.answer-chart__title {
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-2sm);
+}
+.answer-chart__note {
+  margin: var(--space-2sm) 0 0;
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+}
+
+/* The bars. A row is a three-column grid so every label ends at the same x and
+   every track starts there — ragged starts make lengths incomparable, which is
+   the only thing a bar chart is for. */
+.answer-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
+.answer-bars__row {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 9rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-body-sm);
+}
+.answer-bars__label {
+  color: var(--color-text-secondary);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.answer-bars__track { display: block; height: 14px; background: transparent; }
+.answer-bars__fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  background: var(--color-chart-bar);
+}
+.answer-bars__value { font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* The row the question was about. Weight, not a second hue: a chart whose
+   categorical colour also carries emphasis has two meanings for one channel. */
+.answer-bars__row--mark .answer-bars__label,
+.answer-bars__row--mark .answer-bars__value { color: var(--color-text-primary); font-weight: var(--font-weight-bold); }
+.answer-bars__row--mark .answer-bars__fill { background: var(--color-primary-600); }
+
+/* The map inside the block. Shorter than the catalogue's full-page map: it is
+   one element of an answer, not the view itself. */
+.answer-map {
+  width: 100%;
+  height: clamp(14rem, 42vw, 22rem);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-secondary-50);
+  position: relative;
+}
+.answer-map__error { padding: var(--space-md); font-size: var(--text-body-sm); }
+/* A pin without its name plate (js/app.js `initAnswerMap`). The catalogue's
+   marker reserves width for a label; without one the wrapper would still claim
+   it and the pin would sit off-centre over its own coordinate. */
+.property-marker--bare { width: auto; min-width: 0; }
+.property-marker--bare .property-marker__pin { margin: 0; }
+
+/* Collapsed by default — the table repeats the chart, so it is the second
+   reading of the same fact, not the first. It stays reachable because a number
+   somebody intends to use has to be readable as a number. */
+.answer__data-summary {
+  cursor: pointer;
+  font-size: var(--text-body-sm);
+  padding: var(--space-sm) 0;
+  color: var(--color-link);
+}
+.answer__data-summary:hover { text-decoration: underline; }
+.answer__data[open] .answer__data-summary { margin-bottom: var(--space-sm); }
+
+/* Where the numbers came from. A cited sentence points at the entry it came
+   from; an aggregate cannot, because it came from hundreds — so it names them.
+   Same size and colour as the disclaimer in the foot: both are statements about
+   the answer, not part of it. */
+.answer__basis { font-size: var(--text-body-xs); color: var(--color-text-secondary); }
+
+/* The skill label beside an example in the idle block. It is the only thing
+   there that says a question can come back as something other than a paragraph,
+   so it sits ON the link rather than in a legend nobody reads. */
+.answer__example-skill {
+  margin-left: var(--space-sm);
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--color-secondary-100);
+  border-radius: var(--radius);
+  font-size: var(--text-body-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  vertical-align: 0.08em;
+  white-space: nowrap;
+}

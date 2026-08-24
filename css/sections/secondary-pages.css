@@ -293,9 +293,14 @@
   line-height: var(--line-height-relaxed);
 }
 .search-no-results__list li + li { margin-top: var(--space-xs); }
+/* Body colour, not the muted step. This paragraph used to be a trailing note
+   about what the index covers; it now carries the Hinweis itself — the same
+   standing statement the live agency search sets in body text under its own
+   «Hinweis» heading. A greyed-out paragraph under a bold heading reads as a
+   footnote to the heading rather than as its content. */
 .search-no-results__hint {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   line-height: var(--line-height-relaxed);
 }
 
