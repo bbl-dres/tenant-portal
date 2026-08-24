@@ -37,9 +37,17 @@
 
    TEXT BY DEFAULT: everything interpolated is escaped through `escapeHtml`, and
    the only hrefs are route hashes built from ids this file read out of the data.
-   ========================================================================== */
 
-import { state, loadSpatialData } from './state.js';
+   PARTLY TRANSLATED, deliberately. The LABELS of a result — the tool trace, the
+   key figures, the chart titles, the table headers — go through `t()`, because
+   they are fixed phrases and they are what a reader scans first. The two
+   GENERATED SENTENCES (`lead` and `basis`) stay German: they are assembled from
+   counts with number agreement («ist ein Amt» / «sind 9 Ämter»), and doing that
+   correctly in four languages is a plural-rules problem, not a translation
+   problem. Prototype scope — the gap is visible and intentional, and the keys
+   for it would be `search.insight.*Lead`. */
+
+import { state, loadSpatialData, t } from './state.js';
 import { escapeHtml, formatChf, icon } from './lib.js';
 
 /* ============================================================ VOCABULARY == */
@@ -217,14 +225,13 @@ function officeArea(raw) {
     .reduce((sum, t) => sum + (Number(t.workstations) || 0), 0);
 
   const charts = [{
-    title: scope && scope.type === 'agency'
-      ? `Bürofläche je Amt — ${scope.key} im Vergleich`
-      : `Bürofläche je Amt im ${scopeLabel}`,
+    title: t('search.chart.areaByAgency', { scope: scope && scope.type === 'agency'
+      ? departments()[0] || scopeLabel : scopeLabel }),
     unit: 'm²', rows: agencyRows, format: area,
     note: `Erfasste Büroräume — ${OFFICE_USES.join(', ')} — aus dem Raumbestand des Portals.`,
   }];
   if (buildingRows.length > 1) {
-    charts.push({ title: 'Bürofläche je Liegenschaft', unit: 'm²', format: area,
+    charts.push({ title: t('search.chart.areaByProperty'), unit: 'm²', format: area,
       rows: buildingRows.map(row => ({ label: row.label, value: row.value })) });
   }
 
@@ -234,8 +241,8 @@ function officeArea(raw) {
     : `${names.slice(0, 3).join(', ')} und ${names.length - 3} weitere`;
 
   return {
-    id: 'office-area', skill: 'dashboard', skillLabel: 'Dashboard',
-    title: 'Flächenauswertung',
+    id: 'office-area', skill: 'dashboard', skillLabel: t('search.skill.dashboard'),
+    title: t('search.insight.areaTitle'),
     lead: scope && scope.type === 'agency'
       ? `${scope.key} belegt ${area(scopeValue)} Bürofläche in `
         + `${buildingRows.length} ${buildingRows.length === 1 ? 'Liegenschaft' : 'Liegenschaften'} — `
@@ -243,18 +250,20 @@ function officeArea(raw) {
       : `Im ${scopeLabel} belegen ${names.length} Ämter zusammen ${area(scopeValue)} Bürofläche `
         + `in ${buildingRows.length} Liegenschaften: ${namesText}.`,
     kpis: [
-      { label: `Bürofläche ${scope && scope.type === 'agency' ? scope.key : scopeLabel}`,
-        value: num(round(scopeValue)), unit: 'm²' },
-      { label: 'Ämter', value: num(names.length) },
-      { label: 'Liegenschaften', value: num(buildingRows.length) },
-      ...(workstations ? [{ label: 'Fläche je Arbeitsplatz',
+      { label: t('search.kpi.officeArea',
+        { scope: scope && scope.type === 'agency' ? scope.key : scopeLabel }),
+      value: num(round(scopeValue)), unit: 'm²' },
+      { label: t('search.kpi.agencies'), value: num(names.length) },
+      { label: t('search.kpi.properties'), value: num(buildingRows.length) },
+      ...(workstations ? [{ label: t('search.kpi.areaPerDesk'),
         value: num(Math.round((scopeValue / workstations) * 10) / 10), unit: 'm²',
-        hint: `${num(workstations)} Arbeitsplätze` }] : []),
+        hint: t('search.kpi.workstationsHint', { n: num(workstations) }) }] : []),
     ],
     charts,
     table: {
-      caption: 'Bürofläche je Amt und Liegenschaft',
-      columns: ['Amt', 'Liegenschaft', 'Räume', 'Bürofläche'],
+      caption: t('search.table.areaCaption'),
+      columns: [t('search.col.agency'), t('search.col.property'),
+        t('search.col.rooms'), t('search.col.officeArea')],
       rows: buildingRows.map(row => [row.agency, row.label, num(row.rooms), area(row.value)]),
     },
     basis: `Aggregiert aus ${num(rooms.length)} Raumdatensätzen (${OFFICE_USES.join(', ')}) `
@@ -302,8 +311,8 @@ function rentCosts(raw) {
     : null;
 
   return {
-    id: 'rent-costs', skill: 'dashboard', skillLabel: 'Dashboard',
-    title: 'Kostenauswertung',
+    id: 'rent-costs', skill: 'dashboard', skillLabel: t('search.skill.dashboard'),
+    title: t('search.insight.costTitle'),
     lead: `Für ${tenancy.buildingName} (${tenancy.address}) sind ${formatChf(cost)} Mietkosten `
       + `pro Jahr erfasst`
       + `${perArea ? `, das sind ${formatChf(Math.round(perArea))} je m² HNF2` : ''}`
@@ -311,21 +320,23 @@ function rentCosts(raw) {
       + `${median && perArea ? `Der Median über alle ${comparable.length} Mietverhältnisse liegt bei `
         + `${formatChf(median)} je m².` : ''}`,
     kpis: [
-      { label: 'Mietkosten pro Jahr', value: formatChf(cost) },
-      ...(perArea ? [{ label: 'Kosten je m²', value: formatChf(Math.round(perArea)),
+      { label: t('search.kpi.rentPerYear'), value: formatChf(cost) },
+      ...(perArea ? [{ label: t('search.kpi.costPerSqm'), value: formatChf(Math.round(perArea)),
         hint: `HNF2 ${area(tenancy.hnf2)}` }] : []),
-      ...(perStation ? [{ label: 'Kosten je Arbeitsplatz', value: formatChf(Math.round(perStation)),
-        hint: `${num(tenancy.workstations)} Arbeitsplätze` }] : []),
-      { label: 'Fläche', value: num(tenancy.hnf2), unit: 'm² HNF2', hint: `GF ${area(tenancy.gf)}` },
+      ...(perStation ? [{ label: t('search.kpi.costPerDesk'), value: formatChf(Math.round(perStation)),
+        hint: t('search.kpi.workstationsHint', { n: num(tenancy.workstations) }) }] : []),
+      { label: t('search.kpi.area'), value: num(tenancy.hnf2), unit: 'm² HNF2',
+        hint: `GF ${area(tenancy.gf)}` },
     ],
     charts: [
-      { title: 'Mietkosten je m² HNF2 im Vergleich', unit: 'CHF/m²', rows: comparable,
+      { title: t('search.chart.rentComparison'), unit: 'CHF/m²', rows: comparable,
         format: value => formatChf(value),
         note: 'Alle Mietverhältnisse des Portals; die angefragte Liegenschaft ist hervorgehoben.' },
     ],
     table: {
-      caption: 'Mietverhältnisse im Vergleich',
-      columns: ['Liegenschaft', 'Amt', 'HNF2', 'Mietkosten / Jahr', 'CHF je m²'],
+      caption: t('search.table.rentCaption'),
+      columns: [t('search.col.property'), t('search.col.agency'), 'HNF2',
+        t('search.col.rentPerYear'), t('search.col.perSqm')],
       rows: state.tenancies.filter(t => Number(t.yearlyCost))
         .sort((a, b) => b.yearlyCost - a.yearlyCost)
         .map(t => [t.buildingName, t.dep, area(t.hnf2), formatChf(t.yearlyCost),
@@ -355,25 +366,26 @@ function propertyMap(raw) {
   const label = named ? named.buildingName : scope ? scope.key : departments()[0] || 'das Portfolio';
 
   return {
-    id: 'property-map', skill: 'map', skillLabel: 'Karte',
-    title: 'Standortkarte',
-    mapTitle: `Standorte ${label}`,
+    id: 'property-map', skill: 'map', skillLabel: t('search.skill.map'),
+    title: t('search.insight.mapTitle'),
+    mapTitle: t('search.chart.locations', { scope: label }),
     lead: `${matches.length} ${matches.length === 1 ? 'Liegenschaft' : 'Liegenschaften'} für ${label}`
       + `${cities.size > 1 ? ` an ${cities.size} Orten` : ''} — `
       + `${matches.slice(0, 3).map(t => t.buildingName).join(', ')}`
       + `${matches.length > 3 ? ` und ${matches.length - 3} weitere` : ''}.`,
     kpis: [
-      { label: 'Liegenschaften', value: num(matches.length) },
-      { label: 'Orte', value: num(cities.size) },
-      { label: 'Fläche total', value: num(matches.reduce((sum, t) => sum + (Number(t.hnf2) || 0), 0)),
+      { label: t('search.kpi.properties'), value: num(matches.length) },
+      { label: t('search.kpi.places'), value: num(cities.size) },
+      { label: t('search.kpi.areaTotal'),
+        value: num(matches.reduce((sum, item) => sum + (Number(item.hnf2) || 0), 0)),
         unit: 'm² HNF2' },
     ],
     charts: [],
     points: matches.map(t => ({ lat: t.lat, lng: t.lng, label: t.buildingName,
       sub: t.address, href: `#/properties/${encodeURIComponent(t.id)}` })),
     table: {
-      caption: 'Gefundene Liegenschaften',
-      columns: ['Liegenschaft', 'Amt', 'Adresse'],
+      caption: t('search.table.foundProperties'),
+      columns: [t('search.col.property'), t('search.col.agency'), t('search.col.address')],
       rows: matches.map(t => [t.buildingName, t.dep, t.address]),
     },
     basis: `Gefiltert über ${num(all.length)} Mietverhältnisse des Portals; die Koordinaten `
@@ -486,7 +498,8 @@ const mapFigure = insight => `
    readable as a number. */
 const dataTable = table => (table && table.rows && table.rows.length ? `
   <details class="answer__data">
-    <summary class="answer__data-summary">${escapeHtml(table.caption)} — Werte anzeigen</summary>
+    <summary class="answer__data-summary">${
+  escapeHtml(t('search.insight.showValues', { caption: table.caption }))}</summary>
     <div class="table-wrapper">
       <table class="table table--compact">
         <caption class="sr-only">${escapeHtml(table.caption)}</caption>

@@ -36,13 +36,36 @@
    ========================================================================== */
 
 import { safeGet, safeSet } from './lib.js';
+import { t } from './state.js';
 
 const LS_KEY = 'mp-search-sources';
 
 /* The kind vocabulary of buildSearchIndex(), in the order the tabs and the
    panel show it: what people come to do first, reference material last. One
    list, because the tabs, the suggestions and this panel must not drift. */
+/* THE GERMAN STRING IS THE ID, not the label. It is what `entry.kind` carries
+   in the index, what `RANK` orders by, and — the reason it must not change —
+   what the source selection writes into localStorage. Translating this array in
+   place would silently invalidate every stored selection the moment somebody
+   switched language, and would reorder the facets by whatever the translated
+   strings happened to sort as.
+
+   `kindLabel()` is the display side. One line, added rather than substituted,
+   so an id keeps meaning the same thing in storage forever while the label
+   follows the active language. */
 export const KINDS = ['Dienstleistungen', 'Liegenschaften', 'Dokumente', 'Aktuell', 'Informationen'];
+
+const KIND_KEY = {
+  'Dienstleistungen': 'search.kind.services',
+  'Liegenschaften': 'search.kind.properties',
+  'Dokumente': 'search.kind.documents',
+  'Aktuell': 'search.kind.news',
+  'Informationen': 'search.kind.info',
+};
+
+/** The display name of a content kind in the active language. An unknown kind
+ *  falls back to its own id, which is German and therefore still readable. */
+export const kindLabel = (kind) => (KIND_KEY[kind] ? t(KIND_KEY[kind]) : kind);
 
 const RANK = new Map(KINDS.map((kind, index) => [kind, index]));
 export const byKind = (a, b) =>

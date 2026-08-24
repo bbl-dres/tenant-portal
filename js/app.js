@@ -1111,11 +1111,12 @@ async function renderSearchResults(routeParams, gen) {
             <div class="notification notification--warning answer-slot">
               ${P.icon('alertTriangle', 'notification__icon')}
               <div class="notification__content">
-                <p class="answer__lead"><strong>Ihre Quellenauswahl blendet Treffer aus.</strong>
-                  Ohne ${P.escapeHtml(searchSources.offKinds().join(', '))} findet diese Suche nichts —
-                  mit allen Inhaltsarten gäbe es Treffer.</p>
+                <p class="answer__lead"><strong>${P.escapeHtml(P.t('search.hiddenElsewhere'))}</strong>
+                  ${P.escapeHtml(P.t('search.hiddenElsewhereBody',
+    { list: searchSources.offKinds().map(searchSources.kindLabel).join(', ') }))}</p>
                 <p><button type="button" class="btn btn--outline btn--sm"
-                        onclick="window.portal.selectAllSearchSources()">Alle Quellen einschalten</button></p>
+                        onclick="window.portal.selectAllSearchSources()">${
+  P.escapeHtml(P.t('search.enableAllSources'))}</button></p>
               </div>
             </div>
           ` : ''}
@@ -1125,8 +1126,8 @@ async function renderSearchResults(routeParams, gen) {
             ${kinds.length > 1 ? `
               <div class="tabs search-results__tabs">
                 <div class="tab__controls" role="tablist" aria-label="Trefferarten">
-                  ${tab('Alle', '', ranked.length)}
-                  ${kinds.map(k => tab(k, k, kindCounts[k])).join('')}
+                  ${tab(P.t('search.results.allTab'), '', ranked.length)}
+                  ${kinds.map(k => tab(searchSources.kindLabel(k), k, kindCounts[k])).join('')}
                 </div>
               </div>
             ` : ''}
@@ -1134,18 +1135,19 @@ async function renderSearchResults(routeParams, gen) {
             <div class="search-results__header">
               <div class="search-results__header__left">
                 <p class="search-results__occurences">
-                  <strong>${total}</strong>${total === 1 ? 'Suchergebnis' : 'Suchergebnisse'}
+                  <strong>${total}</strong>${
+  P.t(total === 1 ? 'search.results.one' : 'search.results.many')}
                 </p>
               </div>
               <div class="search-results__header__right">
-                <label class="sr-only" for="searchSort">Sortierung</label>
+                <label class="sr-only" for="searchSort">${P.t('search.sort.label')}</label>
                 <!-- Each option carries its own destination, so the handler is
                      a plain assignment instead of hash string-surgery. -->
                 <select id="searchSort" class="input search-results__sort-select"
                         onchange="location.hash = this.value">
-                  ${[['relevance', 'Nach Relevanz sortieren'],
-                     ['date', 'Nach Datum sortieren (Absteigend)'],
-                     ['title', 'Nach Titel sortieren (A–Z)']].map(([value, label]) => `
+                  ${[['relevance', P.t('search.sort.relevance')],
+                     ['date', P.t('search.sort.date')],
+                     ['title', P.t('search.sort.title')]].map(([value, label]) => `
                     <option value="${searchHash({ q: query, sort: value, view, kind: activeKind, page: 1 })}"${sort === value ? ' selected' : ''}>${label}</option>
                   `).join('')}
                 </select>
@@ -1160,7 +1162,7 @@ async function renderSearchResults(routeParams, gen) {
               </div>
             </div>
 
-            ${total === 0 ? `<p class="section-intro">Keine Treffer in diesem Bereich.</p>` : view === 'grid'
+            ${total === 0 ? `<p class="section-intro">${P.t('search.results.emptyFacet')}</p>` : view === 'grid'
               ? `<ul class="search-results-list search-results--grid">${visible.map(searchResultCard).join('')}</ul>`
               : `<ul class="search-results-list search-results--list">${visible.map(searchResultRow).join('')}</ul>`}
 
@@ -1217,22 +1219,29 @@ async function renderSearchResults(routeParams, gen) {
 //
 // The typographic quotes are guillemets, not „…", matching every other quoted
 // string in both portals.
+/* The agency this portal belongs to. Named once: it appears in the empty
+   state's heading AND in its Hinweis, and the two must not drift apart. */
+const SEARCH_SITE = 'Bundesamt für Bauten und Logistik BBL';
+
 function renderSearchNoResults(query) {
   return `
     <div class="search-results__no-results">
-      <h2 class="h3 search-results__no-results-title">Die Suche nach
-        <strong>«${P.escapeHtml(query)}»</strong> ergab keine Treffer auf dem Mieterportal
-        <strong>«Bundesamt für Bauten und Logistik BBL»</strong></h2>
-      <h3 class="h4">Tipps zur Suche</h3>
+      ${/* The two names inside the sentence are the only bold parts, so the
+            key carries the sentence and the names are spliced in after
+            escaping — `escapeJs`/`escapeHtml` cannot wrap markup. */''}
+      <h2 class="h3 search-results__no-results-title">${
+  P.escapeHtml(P.t('search.empty.title', { q: '\u0001', site: '\u0002' }))
+    .replace('\u0001', `<strong>${P.escapeHtml(query)}</strong>`)
+    .replace('\u0002', `<strong>${P.escapeHtml(SEARCH_SITE)}</strong>`)}</h2>
+      <h3 class="h4">${P.t('search.empty.tipsTitle')}</h3>
       <ul class="search-no-results__list">
-        <li>Überprüfen Sie die Schreibweise Ihres Suchbegriffes</li>
-        <li>Verwenden Sie einen anderen bzw. allgemeineren Begriff</li>
-        <li>Verwenden Sie ggf. weniger Suchbegriffe</li>
+        <li>${P.t('search.empty.tip1')}</li>
+        <li>${P.t('search.empty.tip2')}</li>
+        <li>${P.t('search.empty.tip3')}</li>
       </ul>
-      <h3 class="h4">Hinweis</h3>
-      <p class="search-no-results__hint">Die Suche ist momentan auf die Behördenwebsite
-        «Bundesamt für Bauten und Logistik BBL» beschränkt. Eine behördenübergreifende
-        Suche über die Domain *.admin.ch ist erst in Erarbeitung.</p>
+      <h3 class="h4">${P.t('search.empty.noticeTitle')}</h3>
+      <p class="search-no-results__hint">${
+  P.escapeHtml(P.t('search.empty.notice', { site: SEARCH_SITE }))}</p>
     </div>
   `;
 }

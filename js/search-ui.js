@@ -18,7 +18,8 @@
    ========================================================================== */
 
 import { escapeHtml, escapeJs, icon } from './lib.js';
-import { KINDS, ANSWERS, isOn, offKinds, onKinds, noneSelected, allSelected, answersAllowed } from './search-sources.js';
+import { KINDS, ANSWERS, isOn, kindLabel, offKinds, onKinds, noneSelected, allSelected, answersAllowed } from './search-sources.js';
+import { t } from './state.js';
 import { insightBody } from './search-insights.js';
 
 /* Example questions offered where somebody has not asked one yet. REAL ones:
@@ -55,6 +56,15 @@ export const EXAMPLE_QUESTIONS = [
 
 export const searchHref = (query) => `#/search?q=${encodeURIComponent(query)}`;
 
+/* The `skill` on an example is the German shape name; the chip shows it in the
+   active language. Kept as a map rather than as a key ON the example so the
+   list above stays readable as a list of questions. */
+const SKILL_KEY = {
+  'Direktlink': 'search.skill.link',
+  'Dashboard': 'search.skill.dashboard',
+  'Karte': 'search.skill.map',
+};
+
 /* ============================================================== SOURCES == */
 
 // The panel keeps its open state across a re-render: the router redraws the
@@ -66,9 +76,20 @@ export function setSourcesPanelOpen(open) { panelOpen = !!open; }
 export function sourcesPanelOpen() { return panelOpen; }
 
 const MAX_NAMED = 3;
-const nameList = (list) => (list.length <= MAX_NAMED
-  ? escapeHtml(list.join(', '))
-  : `${escapeHtml(list.slice(0, MAX_NAMED).join(', '))} und ${list.length - MAX_NAMED} weitere`);
+/* PLAIN TEXT, not markup. It used to escape its own output, which meant the
+   sentence it lands in could not be escaped as a whole — the list would have
+   been escaped twice. Returning text lets every caller build its sentence
+   through `t()` and escape once, at the end.
+
+   `list` holds kind IDs; what is named are their labels in the active language
+   (search-sources.js `kindLabel`). */
+const nameList = (list) => {
+  const names = list.map(kindLabel);
+  return names.length <= MAX_NAMED
+    ? names.join(', ')
+    : `${names.slice(0, MAX_NAMED).join(', ')} ${
+      t('search.sources.more', { n: names.length - MAX_NAMED })}`;
+};
 
 /**
  * The line under the field. It CHANGES DIRECTION, and that is the point: below
@@ -84,19 +105,26 @@ function sourcesTrigger() {
   const on = onKinds();
   const withoutAnswers = !answersAllowed();
   let text;
-  if (noneSelected()) text = 'Keine Inhaltsart gewählt — es wird alles durchsucht.';
-  else if (!off.length) text = 'Durchsucht alle Inhaltsarten.';
-  else if (on.length <= off.length) text = `<strong>Nur ${nameList(on)}.</strong>`;
-  else text = `<strong>${on.length} von ${KINDS.length} Inhaltsarten</strong> · ohne ${nameList(off)}.`;
+  if (noneSelected()) text = escapeHtml(t('search.sources.none'));
+  else if (!off.length) text = escapeHtml(t('search.sources.all'));
+  else if (on.length <= off.length) {
+    text = `<strong>${escapeHtml(t('search.sources.only', { list: nameList(on) }))}</strong>`;
+  } else {
+    text = `<strong>${escapeHtml(t('search.sources.someOf',
+      { n: on.length, total: KINDS.length }))}</strong> · ${
+      escapeHtml(t('search.sources.without', { list: nameList(off) }))}`;
+  }
   return `
     <p class="search-sources__line">
       <button type="button" class="search-sources__toggle" id="searchSourcesToggle"
               aria-expanded="${panelOpen}" aria-controls="searchSourcesPanel"
               onclick="window.portal.toggleSearchSourcesPanel()">
-        <span class="search-sources__text">${text}${withoutAnswers ? ' Ohne KI-Antworten.' : ''}</span>
+        <span class="search-sources__text">${text}${
+  withoutAnswers ? ' ' + escapeHtml(t('search.sources.noAnswers')) : ''}</span>
         ${/* Action and chevron in ONE element: as siblings the arrow wrapped to
               the next line on its own as soon as the sentence ran over. */''}
-        <span class="search-sources__action">${off.length || withoutAnswers ? 'Ändern' : 'Auswählen'}${icon('chevronDown', 'search-sources__chev')}</span>
+        <span class="search-sources__action">${escapeHtml(off.length || withoutAnswers
+    ? t('search.sources.change') : t('search.sources.select'))}${icon('chevronDown', 'search-sources__chev')}</span>
       </button>
     </p>`;
 }
@@ -106,7 +134,7 @@ function sourcesPanel() {
     <label class="search-sources__check">
       <input type="checkbox" id="searchSource${index}"${isOn(kind) ? ' checked' : ''}
              onchange="window.portal.toggleSearchSource('${escapeJs(kind)}')">
-      <span>${escapeHtml(kind)}</span>
+      <span>${escapeHtml(kindLabel(kind))}</span>
     </label>`).join('');
   // BOTH jumps, side by side, each disabled when it would do nothing. One
   // switching button would have to guess which end a partial selection meant.
@@ -114,9 +142,9 @@ function sourcesPanel() {
   const actions = `
     <div class="search-sources__actions">
       <button type="button" class="btn btn--bare btn--sm"${noneSelected() ? ' disabled' : ''}
-              onclick="window.portal.clearSearchSources()">Alle abwählen</button>
+              onclick="window.portal.clearSearchSources()">${escapeHtml(t('search.sources.clearAll'))}</button>
       <button type="button" class="btn btn--bare btn--sm"${allSelected() ? ' disabled' : ''}
-              onclick="window.portal.selectAllSearchSources()">Alle einschalten</button>
+              onclick="window.portal.selectAllSearchSources()">${escapeHtml(t('search.sources.selectAll'))}</button>
     </div>`;
   // A SECOND GROUP, not an afterthought. The answer does not belong in the list
   // above, because «unticked» means something else there: for content kinds it
@@ -127,17 +155,17 @@ function sourcesPanel() {
   // it (and look like a bug).
   const answers = `
     <fieldset class="search-sources__extra">
-      <legend class="search-sources__legend">Zusätzlich</legend>
+      <legend class="search-sources__legend">${escapeHtml(t('search.sources.extra'))}</legend>
       <label class="search-sources__check">
         <input type="checkbox" id="searchSourceAnswers"${answersAllowed() ? ' checked' : ''}
                onchange="window.portal.toggleSearchSource('${escapeJs(ANSWERS)}')">
-        <span>KI-Antworten anzeigen</span>
+        <span>${escapeHtml(t('search.sources.showAnswers'))}</span>
       </label>
     </fieldset>`;
   return `
     <div class="search-sources__panel" id="searchSourcesPanel"${panelOpen ? '' : ' hidden'}>
       <fieldset class="search-sources__group">
-        <legend class="search-sources__legend">Welche Inhaltsarten durchsucht werden</legend>
+        <legend class="search-sources__legend">${escapeHtml(t('search.sources.legend'))}</legend>
         ${boxes}
       </fieldset>
       ${actions}${answers}
@@ -157,15 +185,20 @@ export const sourcesControl = () =>
 const answerHead = (title) => `
   <p class="answer__head">
     <span class="answer__title">${escapeHtml(title)}</span>
-    <span class="badge badge--info">Simuliert</span>
+    <span class="badge badge--info">${escapeHtml(t('search.answer.simulated'))}</span>
   </p>`;
 
-const answerFoot = `
+/* A FUNCTION, not a constant. As a module-level template literal it was
+   evaluated once at import time — before state.js has loaded data/i18n.json —
+   so `t()` had nothing to look up and the disclaimer froze as the literal key
+   «search.answer.disclaimer» in every language. Anything here that reads a
+   translation has to be evaluated per render. */
+const answerFoot = () => `
   <div class="answer__foot">
-    <span class="answer__note">Automatisch erstellt und kann Fehler enthalten.
-      Massgebend sind die verlinkten Quellen.</span>
+    <span class="answer__note">${escapeHtml(t('search.answer.disclaimer'))}</span>
     <button type="button" class="answer__off"
-            onclick="window.portal.toggleSearchSource('${escapeJs(ANSWERS)}')">KI-Antworten ausblenden</button>
+            onclick="window.portal.toggleSearchSource('${escapeJs(ANSWERS)}')">${
+  escapeHtml(t('search.answer.hide'))}</button>
   </div>`;
 
 /**
@@ -187,21 +220,19 @@ function answerIdle() {
     <div class="notification notification--hint answer-slot answer-slot--idle">
       ${icon('commentDots', 'notification__icon')}
       <div class="notification__content">
-        ${answerHead('KI-Antwort')}
+        ${answerHead(t('search.answer.title'))}
         ${/* The copy names all THREE shapes. It used to promise «jeder Satz mit
               Beleg», which describes only the cited paragraph — somebody reading
               that had no reason to expect a dashboard, and the two data examples
               below would have looked like they were going to return prose. */''}
-        <p class="answer__lead">Stellen Sie eine ganze Frage. Je nachdem steht hier ein
-          belegter Satz, ein direkter Link zum Vorgang, eine Auswertung aus den Daten
-          des Portals oder eine Karte.</p>
+        <p class="answer__lead">${escapeHtml(t('search.answer.idleLead'))}</p>
         ${/* Quotation marks INSIDE the link: several underlined questions in a
               row read as one long stroke, and where one ended and the next began
               was not visible. */''}
         <p class="answer__examples">${EXAMPLE_QUESTIONS.map((example) =>
           `<a href="${escapeHtml(searchHref(example.text))}">«${escapeHtml(example.text)}»<span
-            class="answer__example-skill">${escapeHtml(example.skill)}</span></a>`).join('')}</p>
-        ${answerFoot}
+            class="answer__example-skill">${escapeHtml(SKILL_KEY[example.skill] ? t(SKILL_KEY[example.skill]) : example.skill)}</span></a>`).join('')}</p>
+        ${answerFoot()}
       </div>
     </div>`;
 }
@@ -212,7 +243,7 @@ function answerIdle() {
    cases, so it is one function. */
 const sourceList = sources => (sources && sources.length ? `
     <div class="answer__sources">
-      <p class="answer__sources-label">Quellen</p>
+      <p class="answer__sources-label">${escapeHtml(t('search.answer.sources'))}</p>
       ${sources.map((source, index) => `
         <span class="answer__source">
           <span class="answer__source-n">${source.n || index + 1}</span>
@@ -245,10 +276,10 @@ export function answerBlock(result, resultCount, insight = null) {
       <div class="notification notification--hint answer-slot answer-slot--insight">
         ${icon('commentDots', 'notification__icon')}
         <div class="notification__content">
-          ${answerHead('KI-Antwort')}
+          ${answerHead(t('search.answer.title'))}
           ${insightBody(insight)}
           ${sourceList(insight.sources)}
-          ${answerFoot}
+          ${answerFoot()}
         </div>
       </div>`;
   }
@@ -258,15 +289,15 @@ export function answerBlock(result, resultCount, insight = null) {
     // «No answer» is a SUCCESS state, not a failure — and the text must not
     // point at results that do not exist.
     const line = resultCount > 0
-      ? 'Die Treffer unten stammen aus der Stichwortsuche.'
-      : 'Auch die Stichwortsuche findet dazu nichts im Portal.';
+      ? t('search.answer.fromKeywords')
+      : t('search.answer.nothingEither');
     return `
       <div class="notification notification--hint answer-slot">
         ${icon('commentDots', 'notification__icon')}
         <div class="notification__content">
-          ${answerHead('Keine KI-Antwort')}
-          <p class="answer__lead">Zu dieser Frage wurde im Portal nichts Passendes gefunden. ${line}</p>
-          ${answerFoot}
+          ${answerHead(t('search.answer.none'))}
+          <p class="answer__lead">${escapeHtml(t('search.answer.notFound'))} ${escapeHtml(line)}</p>
+          ${answerFoot()}
         </div>
       </div>`;
   }
@@ -287,10 +318,10 @@ export function answerBlock(result, resultCount, insight = null) {
     <div class="notification notification--hint answer-slot">
       ${icon('commentDots', 'notification__icon')}
       <div class="notification__content">
-        ${answerHead('KI-Antwort')}
+        ${answerHead(t('search.answer.title'))}
         ${sentences}
         ${sourceList(result.sources)}
-        ${answerFoot}
+        ${answerFoot()}
       </div>
     </div>`;
 }
