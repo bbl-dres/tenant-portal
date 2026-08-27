@@ -1901,16 +1901,24 @@ function renderLanding() {
             <form class="home-search" role="search" aria-label="${P.t('landing.searchLabel')}"
                   onsubmit="event.preventDefault(); const v = this.elements.q.value.trim(); location.hash = v ? '#/search?q=' + encodeURIComponent(v) : '#/search';">
               <label class="sr-only" for="homeSearchInput">${P.t('landing.searchLabel')}</label>
-              <input id="homeSearchInput" type="search" name="q" class="input home-search__input"
-                     placeholder="${P.t('landing.searchPlaceholder')}"
-                     autocomplete="off" role="combobox" aria-autocomplete="list"
-                     aria-controls="homeSearchOptions" aria-expanded="false">
+              <!-- The field carries a box of its own so the popup anchors to IT.
+                   As a child of the shell the list resolved against field PLUS
+                   button, which reads correctly only while the two sit on one
+                   row: below sm they stack, and the list then opened underneath
+                   the «Suchen» button, a full control away from the field it
+                   belongs to. The sister service portal anchors the same way. -->
+              <div class="home-search__field">
+                <input id="homeSearchInput" type="search" name="q" class="input home-search__input"
+                       placeholder="${P.t('landing.searchPlaceholder')}"
+                       autocomplete="off" role="combobox" aria-autocomplete="list"
+                       aria-controls="homeSearchOptions" aria-expanded="false">
+                <ul class="combobox__list home-search__suggest" id="homeSearchOptions"
+                    role="listbox" aria-label="Suchvorschläge" hidden></ul>
+              </div>
               <button class="btn btn--filled btn--lg home-search__submit" type="submit">
                 ${P.icon('search')}${P.t('top.search')}
               </button>
             </form>
-            <ul class="combobox__list home-search__suggest" id="homeSearchOptions"
-                role="listbox" aria-label="Suchvorschläge" hidden></ul>
           </div>
           ${sourcesControl()}
         </div>
@@ -4050,6 +4058,12 @@ function initAnswerMap(points) {
         bounds.extend([point.lng, point.lat]);
       });
       if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 64, maxZoom: 12, duration: 0 });
+      // Same «home» as every other map in the portal: back to the framing this
+      // one opened with — here the extent of the answer's own points.
+      map.addControl(makeMapHomeControl(() => {
+        if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 64, maxZoom: 12, duration: 600 });
+        else map.flyTo({ center: [8.2275, 46.8182], zoom: 7, duration: 600 });
+      }), 'top-right');
     });
     map.on('error', () => clearMapLoading(container));
   }).catch(() => {
@@ -5181,6 +5195,11 @@ function initPropertyDetailMap(t) {
       // Marker.addTo() overwrites the element's aria-label with the generic
       // locale string — re-set the building name afterwards (A11Y-017).
       el.setAttribute('aria-label', t.buildingName);
+      // This map frames ONE building, so its home is simply the camera it
+      // opened with rather than a fitted extent.
+      map.addControl(makeMapHomeControl(
+        () => map.flyTo({ center: [t.lng, t.lat], zoom: 17.5, duration: 600 }),
+      ), 'top-right');
     });
   }).catch(err => {
     console.error('[property location map]', err);
@@ -5833,10 +5852,17 @@ function initFloorCanvas(t, floor, spaces, userVe, initialSpaceId, initialColor)
       // Fit the floor outline into the visible canvas after every layer is
       // in place. maxZoom 20 keeps us below the level where MapLibre's
       // internal vector tile gets fussy with small fill polygons.
-      map.fitBounds(
-        [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-        { padding: 40, maxZoom: 20, animate: false }
-      );
+      const floorExtent = [
+        [Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)],
+      ];
+      map.fitBounds(floorExtent, { padding: 40, maxZoom: 20, animate: false });
+      // The reset this surface needs most: a reader who has zoomed into one room
+      // among dozens has no other way back to the whole floor. Same maxZoom as
+      // the first fit, so home cannot land in the range the comment above keeps
+      // the viewer out of.
+      map.addControl(makeMapHomeControl(
+        () => map.fitBounds(floorExtent, { padding: 40, maxZoom: 20, duration: 600 }),
+      ), 'top-right');
 
       if (initialSpaceId) {
         const initial = spaces.find(s => s.spaceId === initialSpaceId);

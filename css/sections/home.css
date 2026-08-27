@@ -19,6 +19,16 @@
   gap: var(--space-sm);
   max-width: 640px;
 }
+/* The field's own box. It takes the growing share of the row AND is what the
+   suggestion popup is positioned against (sections/search.css) — anchored to
+   the shell instead, the list resolved against field plus button, so below sm,
+   where the two stack, it opened underneath «Suchen». */
+.home-search__field {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
 .home-search__input {
   flex: 1 1 auto;
   min-width: 0;                        /* lets the field shrink instead of pushing the button out */

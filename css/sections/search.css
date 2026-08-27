@@ -103,13 +103,23 @@
 /* ── HOME SUGGESTIONS ─────────────────────────────────────────────────────
    The list is the shared `.combobox__list`; only the group heading and the
    action row are new. */
-/* The popup anchors to the FIELD, not to the field plus everything under it:
-   shell = form + list, and the source line is the shell's sibling. So the list
-   opens directly below the field and floats over that line, instead of being
-   pushed below it. Without the shell the absolutely positioned list found no
-   positioned ancestor at all and fell through to `.page-container`. */
+/* The popup anchors to the FIELD, not to the field plus everything under it.
+   The list lives inside `.home-search__field` (sections/home.css), which is the
+   positioned ancestor; the shell around form and source line only caps the
+   width. Anchoring to the shell was close enough while field and «Suchen» sat
+   on one row, and wrong as soon as they stack: measured at 390 px the list
+   opened 56 px lower, below the button rather than below the field. Without
+   either box the absolutely positioned list finds no positioned ancestor at all
+   and falls through to `.page-container`. */
 .home-search-shell { position: relative; max-width: 640px; }
-.home-search__suggest { max-height: 22rem; }
+/* The cap is bound to the VIEWPORT, not to a width breakpoint: what makes
+   22 rem too much list is a SHORT window, and that arrives on a landscape phone
+   as readily as on a narrow one — an absolutely positioned popup cannot push
+   the page open to make room, so it scrolls inside itself instead. `dvh`
+   follows the collapsing browser chrome; the plain `vh` line is the fallback
+   where it is unsupported (components/feedback.css uses the same pair). On any
+   normal desktop window 22 rem still wins, so nothing there changes. */
+.home-search__suggest { max-height: min(22rem, 60vh); max-height: min(22rem, 60dvh); }
 .combobox__group {
   display: flex;
   justify-content: space-between;
@@ -158,6 +168,21 @@
    with the same compact offset. */
 .notification--hint.answer-slot {
   background: var(--color-bg-default);
+}
+/* NO speech-bubble glyph on a phone. The icon column costs 52 px — a 40 px
+   glyph plus the DS `mr-3` — out of the 358 px a 390 px screen leaves the
+   block, so a seventh of the measure went to decoration. It is exactly that:
+   the glyph is aria-hidden (components/feedback.css) and the block says
+   «KI-Antwort» in words, so nothing is lost by dropping it where the space is
+   scarce. It returns at 640. Deliberately every HINT answer-slot and not the
+   dashboard variant alone: the idle block and the answer that replaces it are
+   the same component at two moments, and an icon appearing in one but not the
+   other would read as a rendering fault. The `notification--warning`
+   answer-slot — «diese Inhaltsart ist ausgeschaltet» — keeps its glyph: there
+   the icon IS the warning, not decoration around it. The service portal hides
+   the same column at the same breakpoint. */
+@media (max-width: 639.98px) {
+  .notification--hint.answer-slot > .notification__icon { display: none; }
 }
 .answer-slot { margin-top: var(--space-lg); margin-bottom: var(--space-lg); }
 @media (min-width: 1024px) { .answer-slot { margin-bottom: var(--space-xl); } }

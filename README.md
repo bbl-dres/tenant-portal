@@ -141,4 +141,11 @@ tenant-portal/
 
 ## License
 
-Licensed under [MIT](https://opensource.org/licenses/MIT)
+Original tenant-portal code is licensed under
+[MIT](https://opensource.org/licenses/MIT). Bundled and loaded third-party
+material — the design-system icons, Lucide, Noto Sans, MapLibre GL JS, Swagger
+UI, the CARTO basemap, the photographs and the research corpus under
+`assets/operators/` — remains under its own terms, and the MIT licence grants no
+rights in Swiss Government branding or any other organisation's trademarks.
+Review [Third-party notices](THIRD_PARTY_NOTICES.md), including its open items,
+before copying, deploying or distributing this repository.
