@@ -16,12 +16,10 @@ Prototype of the BBL tenant portal for administrative units to register space ne
 
 **Live demo:** https://bbl-dres.github.io/tenant-portal/
 
-<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
-  <tr>
-    <td width="50%" valign="top"><img src="assets/preview-1.jpg" alt="Federal Tenant Portal landing page" width="100%"/></td>
-    <td width="50%" valign="top"><img src="assets/preview-2.jpg" alt="Federal Tenant Portal property gallery" width="100%"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="assets/preview-1.jpg" alt="Federal Tenant Portal landing page" width="49%"/>
+  <img src="assets/preview-2.jpg" alt="Federal Tenant Portal property gallery" width="49%"/>
+</p>
 
 ## Features
 
