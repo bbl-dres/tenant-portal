@@ -1,8 +1,11 @@
 # Federal Tenant Portal (Mieterportal des Bundes)
 
 <p align="center">
-  <img src="assets/Social.jpg" width="100%" alt="BBL Federal Tenant Portal"/>
+  <img src="assets/social-preview.jpg" width="100%" alt="BBL Federal Tenant Portal"/>
 </p>
+
+[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/tenant-portal/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Prototype of the BBL tenant portal for administrative units to register space needs, track applications, manage tenancies, report damage, and access property plans and documents.
 
@@ -12,6 +15,13 @@ Prototype of the BBL tenant portal for administrative units to register space ne
 ## Demo
 
 **Live demo:** https://bbl-dres.github.io/tenant-portal/
+
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+  <tr>
+    <td width="50%" valign="top"><img src="assets/preview-1.jpg" alt="Federal Tenant Portal landing page" width="100%"/></td>
+    <td width="50%" valign="top"><img src="assets/preview-2.jpg" alt="Federal Tenant Portal property gallery" width="100%"/></td>
+  </tr>
+</table>
 
 ## Features
 

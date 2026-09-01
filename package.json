@@ -2,7 +2,7 @@
   "name": "tenant-portal",
   "version": "1.0.0",
   "type": "module",
-  "description": "<p align=\"center\">   <img src=\"assets/Social.jpg\" width=\"100%\" alt=\"BBL Federal Tenant Portal\"/> </p>",
+  "description": "<p align=\"center\">   <img src=\"assets/social-preview.jpg\" width=\"100%\" alt=\"BBL Federal Tenant Portal\"/> </p>",
   "directories": {
     "doc": "docs"
   },
