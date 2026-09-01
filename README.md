@@ -7,10 +7,10 @@
 [![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/tenant-portal/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Prototype of the BBL tenant portal for administrative units to register space needs, track applications, manage tenancies, report damage, and access property plans and documents.
-
 > [!CAUTION]
 > This is an unofficial demonstration prototype. Demo records are fictional or public reference material, not every function is implemented, and it is not intended for production use.
+
+Prototype of the BBL tenant portal for administrative units to register space needs, track applications, manage tenancies, report damage, and access property plans and documents.
 
 ## Demo
 
